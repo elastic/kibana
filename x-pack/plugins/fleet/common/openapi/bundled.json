@@ -211,7 +211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/fleet_settings_response"
+                  "$ref": "#/components/schemas/fleet_settings_enrollment_response"
                 }
               }
             }
@@ -6088,6 +6088,166 @@
           "item"
         ]
       },
+      "fleet_server_host": {
+        "title": "Fleet Server Host",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_internal": {
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "type": "boolean"
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "host_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id",
+          "is_default",
+          "is_preconfigured",
+          "host_urls"
+        ]
+      },
+      "proxies": {
+        "title": "Fleet Proxy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "proxy_headers": {
+            "type": "object"
+          },
+          "certificate_authorities": {
+            "type": "string"
+          },
+          "certificate": {
+            "type": "string"
+          },
+          "certificate_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
+      },
+      "download_sources": {
+        "title": "Download Source",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "proxy_id": {
+            "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "is_default",
+          "name",
+          "host"
+        ]
+      },
+      "fleet_settings_enrollment_response": {
+        "title": "Fleet settings response",
+        "type": "object",
+        "properties": {
+          "fleet_server": {
+            "type": "object",
+            "properties": {
+              "agent_policies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "is_managed": {
+                      "type": "boolean"
+                    },
+                    "is_default_fleet_server": {
+                      "type": "boolean"
+                    },
+                    "has_fleet_server": {
+                      "type": "boolean"
+                    },
+                    "fleet_server_host_id": {
+                      "type": "string"
+                    },
+                    "download_source_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "is_managed"
+                  ]
+                }
+              },
+              "has_active": {
+                "type": "boolean"
+              },
+              "host": {
+                "$ref": "#/components/schemas/fleet_server_host"
+              },
+              "host_proxy": {
+                "$ref": "#/components/schemas/proxies"
+              }
+            },
+            "required": [
+              "agent_policies",
+              "has_active"
+            ]
+          },
+          "download_source": {
+            "$ref": "#/components/schemas/download_sources"
+          }
+        },
+        "required": [
+          "fleet_server"
+        ]
+      },
       "saved_object_type": {
         "title": "Saved Object type",
         "oneOf": [
@@ -9117,102 +9277,6 @@
             "logstash": "#/components/schemas/output_update_request_logstash"
           }
         }
-      },
-      "download_sources": {
-        "title": "Download Source",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "is_default": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "host": {
-            "type": "string"
-          },
-          "proxy_id": {
-            "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "is_default",
-          "name",
-          "host"
-        ]
-      },
-      "fleet_server_host": {
-        "title": "Fleet Server Host",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "is_default": {
-            "type": "boolean"
-          },
-          "is_internal": {
-            "type": "boolean"
-          },
-          "is_preconfigured": {
-            "type": "boolean"
-          },
-          "proxy_id": {
-            "type": "string"
-          },
-          "host_urls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "fleet_server_hosts",
-          "id",
-          "is_default",
-          "is_preconfigured",
-          "host_urls"
-        ]
-      },
-      "proxies": {
-        "title": "Fleet Proxy",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "proxy_headers": {
-            "type": "object"
-          },
-          "certificate_authorities": {
-            "type": "string"
-          },
-          "certificate": {
-            "type": "string"
-          },
-          "certificate_key": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "url"
-        ]
       }
     }
   },
