@@ -12,7 +12,8 @@ import type {
 
 export const ENTITY_COMPOSITES_TRANSFORM_ID = 'entity-composites-host-transform';
 
-export const SOURCE_INDEX_PATTERN = 'logs-*';
+export const SOURCE_INDEX_PATTERN =
+  'logs-*,metrics-*,traces-*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*';
 
 export const DESTINATION_INDEX_MAPPING: MappingTypeMapping = {
   _meta: {
@@ -173,7 +174,7 @@ export const getEntityStoreTransform = (opts: {
         '@timestamp': {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: '15m',
+            fixed_interval: '2m',
           },
         },
         'host.name': {
