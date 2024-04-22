@@ -27,7 +27,7 @@ export const RESERVED_PRIVILEGES_APPLICATION_WILDCARD = 'kibana-*';
 /**
  * The wildcard identifier for all application privileges.
  */
-export const RESERVED_PRIVILEGES_ALL_WILDCARD = '*';
+export const PRIVILEGES_ALL_WILDCARD = '*';
 
 /**
  * This is the key of a query parameter that contains the name of the authentication provider that should be used to

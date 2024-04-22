@@ -11,7 +11,7 @@ import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { Role, RoleKibanaPrivilege } from '../../../common';
 import {
-  RESERVED_PRIVILEGES_ALL_WILDCARD,
+  PRIVILEGES_ALL_WILDCARD,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
 } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
@@ -70,7 +70,7 @@ function transformRoleApplicationsToKibanaPrivileges(
 ) {
   const isReservedPrivilege = (app: string): boolean => {
     return (
-      app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD || app === RESERVED_PRIVILEGES_ALL_WILDCARD
+      app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD || app === PRIVILEGES_ALL_WILDCARD
     );
   };
 
@@ -94,7 +94,7 @@ function transformRoleApplicationsToKibanaPrivileges(
         !entry.privileges.every(
           (privilege) =>
             PrivilegeSerializer.isSerializedReservedPrivilege(privilege) ||
-            privilege === RESERVED_PRIVILEGES_ALL_WILDCARD
+            privilege === PRIVILEGES_ALL_WILDCARD
         )
     )
   ) {
