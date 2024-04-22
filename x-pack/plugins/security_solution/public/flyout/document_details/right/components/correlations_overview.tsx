@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -84,6 +87,8 @@ export const CorrelationsOverview: React.FC = () => {
     showCases ||
     showSuppressedAlerts;
 
+  const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
+
   return (
     <ExpandablePanel
       header={{
@@ -109,7 +114,7 @@ export const CorrelationsOverview: React.FC = () => {
       {canShowAtLeastOneInsight ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           {showSuppressedAlerts && (
-            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType={ruleType} />
           )}
           {showCases && <RelatedCases eventId={eventId} />}
           {showSameSourceAlerts && originalEventId && (

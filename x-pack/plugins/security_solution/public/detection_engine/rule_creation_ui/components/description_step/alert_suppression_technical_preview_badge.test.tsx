@@ -31,6 +31,6 @@ describe('component: AlertSuppressionTechnicalPreviewBadge', () => {
 
     render(<AlertSuppressionTechnicalPreviewBadge label="Test label" ruleType="eql" />);
 
-    expect(screen.queryByText('Technical Preview')).toBe(null);
+    expect(screen.queryByText('Technical Preview')).not.toBeInTheDocument();
   });
 });
