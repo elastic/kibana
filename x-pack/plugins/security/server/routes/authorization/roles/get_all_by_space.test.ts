@@ -165,7 +165,7 @@ describe('GET all roles by space id', () => {
   });
 
   describe('success', () => {
-    getRolesTest(`do not return roles if there is no space match`, {
+    getRolesTest(`return empty roles list if there is no space match`, {
       apiResponse: () => ({
         first_role: {
           cluster: ['manage_watcher'],
