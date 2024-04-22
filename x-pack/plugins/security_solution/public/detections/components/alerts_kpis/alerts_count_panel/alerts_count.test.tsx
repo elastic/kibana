@@ -89,7 +89,7 @@ describe('AlertsCount', () => {
 
         expect(
           wrapper
-            .find(`[data-test-subj="stackByField0Key"] > div.euiTableCellContent`)
+            .find(`[data-test-subj="stackByField0Key"] div.euiTableCellContent`)
             .hostNodes()
             .at(i)
             .text()
@@ -114,7 +114,7 @@ describe('AlertsCount', () => {
 
         expect(
           wrapper
-            .find(`[data-test-subj="doc_count"] > div.euiTableCellContent`)
+            .find(`[data-test-subj="doc_count"] div.euiTableCellContent`)
             .hostNodes()
             .at(i)
             .text()
@@ -144,7 +144,7 @@ describe('AlertsCount', () => {
 
           expect(
             wrapper
-              .find(`[data-test-subj="stackByField0Key"] > div.euiTableCellContent`)
+              .find(`[data-test-subj="stackByField0Key"] div.euiTableCellContent`)
               .hostNodes()
               .at(resultRow++)
               .text()
@@ -175,7 +175,7 @@ describe('AlertsCount', () => {
 
           expect(
             wrapper
-              .find(`[data-test-subj="stackByField1Key"] > div.euiTableCellContent`)
+              .find(`[data-test-subj="stackByField1Key"] div.euiTableCellContent`)
               .hostNodes()
               .at(resultRow++)
               .text()
@@ -206,7 +206,7 @@ describe('AlertsCount', () => {
 
           expect(
             wrapper
-              .find(`[data-test-subj="stackByField1DocCount"] > div.euiTableCellContent`)
+              .find(`[data-test-subj="stackByField1DocCount"] div.euiTableCellContent`)
               .hostNodes()
               .at(resultRow++)
               .text()

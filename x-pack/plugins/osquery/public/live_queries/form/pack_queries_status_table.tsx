@@ -419,7 +419,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         columns={columns}
         sorting={sorting}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable
       />
       {queryDetailsFlyoutOpen ? (
         <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
