@@ -15,6 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../common/discover/embeddable'),
       require.resolve('../../common/discover/x_pack'),
+      require.resolve('../../common/discover/esql'),
       require.resolve('../../common/discover_ml_uptime/discover'),
       require.resolve('../../common/context'),
     ],
