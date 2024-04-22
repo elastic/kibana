@@ -15,6 +15,9 @@
   set_fact:
     node_version: "{{ node_ver_file['content'] | b64decode | first }}"
 
+- debug:
+    msg: "{{ node_version }}"
+
 - name: install and setup nvm
   block:
     - name: install nvm
