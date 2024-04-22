@@ -108,7 +108,6 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
                 }}
-                isSelectable
                 selection={{
                   selectable: () => true,
                   onSelectionChange: selectRules,
