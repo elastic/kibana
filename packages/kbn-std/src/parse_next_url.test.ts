@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { parseNext } from './parse_next';
+import { parseNextURL } from './parse_next_url';
 
-describe('parseNext', () => {
+describe('parseNextURL', () => {
   it('should return a function', () => {
-    expect(parseNext).toBeInstanceOf(Function);
+    expect(parseNextURL).toBeInstanceOf(Function);
   });
 
   describe('with basePath defined', () => {
@@ -17,14 +18,14 @@ describe('parseNext', () => {
     it('should return basePath with a trailing slash when next is not specified', () => {
       const basePath = '/iqf';
       const href = `${basePath}/login`;
-      expect(parseNext(href, basePath)).toEqual(`${basePath}/`);
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
     it('should properly handle next without hash', () => {
       const basePath = '/iqf';
       const next = `${basePath}/app/kibana`;
       const href = `${basePath}/login?next=${next}`;
-      expect(parseNext(href, basePath)).toEqual(next);
+      expect(parseNextURL(href, basePath)).toEqual(next);
     });
 
     it('should properly handle next with hash', () => {
@@ -32,7 +33,7 @@ describe('parseNext', () => {
       const next = `${basePath}/app/kibana`;
       const hash = '/discover/New-Saved-Search';
       const href = `${basePath}/login?next=${next}#${hash}`;
-      expect(parseNext(href, basePath)).toEqual(`${next}#${hash}`);
+      expect(parseNextURL(href, basePath)).toEqual(`${next}#${hash}`);
     });
 
     it('should properly handle multiple next with hash', () => {
@@ -41,7 +42,7 @@ describe('parseNext', () => {
       const next2 = `${basePath}/app/ml`;
       const hash = '/discover/New-Saved-Search';
       const href = `${basePath}/login?next=${next1}&next=${next2}#${hash}`;
-      expect(parseNext(href, basePath)).toEqual(`${next1}#${hash}`);
+      expect(parseNextURL(href, basePath)).toEqual(`${next1}#${hash}`);
     });
 
     it('should properly decode special characters', () => {
@@ -49,7 +50,7 @@ describe('parseNext', () => {
       const next = `${encodeURIComponent(basePath)}%2Fapp%2Fkibana`;
       const hash = '/discover/New-Saved-Search';
       const href = `${basePath}/login?next=${next}#${hash}`;
-      expect(parseNext(href, basePath)).toEqual(decodeURIComponent(`${next}#${hash}`));
+      expect(parseNextURL(href, basePath)).toEqual(decodeURIComponent(`${next}#${hash}`));
     });
 
     // to help prevent open redirect to a different url
@@ -57,7 +58,7 @@ describe('parseNext', () => {
       const basePath = '/iqf';
       const next = `https://example.com${basePath}/app/kibana`;
       const href = `${basePath}/login?next=${next}`;
-      expect(parseNext(href, basePath)).toEqual(`${basePath}/`);
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
     // to help prevent open redirect to a different url by abusing encodings
@@ -67,7 +68,7 @@ describe('parseNext', () => {
       const next = `${encodeURIComponent(baseUrl)}%2Fapp%2Fkibana`;
       const hash = '/discover/New-Saved-Search';
       const href = `${basePath}/login?next=${next}#${hash}`;
-      expect(parseNext(href, basePath)).toEqual(`${basePath}/`);
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
     // to help prevent open redirect to a different port
@@ -75,7 +76,7 @@ describe('parseNext', () => {
       const basePath = '/iqf';
       const next = `http://localhost:5601${basePath}/app/kibana`;
       const href = `${basePath}/login?next=${next}`;
-      expect(parseNext(href, basePath)).toEqual(`${basePath}/`);
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
     // to help prevent open redirect to a different port by abusing encodings
@@ -85,7 +86,7 @@ describe('parseNext', () => {
       const next = `${encodeURIComponent(baseUrl)}%2Fapp%2Fkibana`;
       const hash = '/discover/New-Saved-Search';
       const href = `${basePath}/login?next=${next}#${hash}`;
-      expect(parseNext(href, basePath)).toEqual(`${basePath}/`);
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
     // to help prevent open redirect to a different base path
@@ -93,18 +94,18 @@ describe('parseNext', () => {
       const basePath = '/iqf';
       const next = '/notbasepath/app/kibana';
       const href = `${basePath}/login?next=${next}`;
-      expect(parseNext(href, basePath)).toEqual(`${basePath}/`);
+      expect(parseNextURL(href, basePath)).toEqual(`${basePath}/`);
     });
 
     // disallow network-path references
     it('should return / if next is url without protocol', () => {
       const nextWithTwoSlashes = '//example.com';
       const hrefWithTwoSlashes = `/login?next=${nextWithTwoSlashes}`;
-      expect(parseNext(hrefWithTwoSlashes)).toEqual('/');
+      expect(parseNextURL(hrefWithTwoSlashes)).toEqual('/');
 
       const nextWithThreeSlashes = '///example.com';
       const hrefWithThreeSlashes = `/login?next=${nextWithThreeSlashes}`;
-      expect(parseNext(hrefWithThreeSlashes)).toEqual('/');
+      expect(parseNextURL(hrefWithThreeSlashes)).toEqual('/');
     });
   });
 
@@ -112,20 +113,20 @@ describe('parseNext', () => {
     // trailing slash is important since it must match the cookie path exactly
     it('should return / with a trailing slash when next is not specified', () => {
       const href = '/login';
-      expect(parseNext(href)).toEqual('/');
+      expect(parseNextURL(href)).toEqual('/');
     });
 
     it('should properly handle next without hash', () => {
       const next = '/app/kibana';
       const href = `/login?next=${next}`;
-      expect(parseNext(href)).toEqual(next);
+      expect(parseNextURL(href)).toEqual(next);
     });
 
     it('should properly handle next with hash', () => {
       const next = '/app/kibana';
       const hash = '/discover/New-Saved-Search';
       const href = `/login?next=${next}#${hash}`;
-      expect(parseNext(href)).toEqual(`${next}#${hash}`);
+      expect(parseNextURL(href)).toEqual(`${next}#${hash}`);
     });
 
     it('should properly handle multiple next with hash', () => {
@@ -133,21 +134,21 @@ describe('parseNext', () => {
       const next2 = '/app/ml';
       const hash = '/discover/New-Saved-Search';
       const href = `/login?next=${next1}&next=${next2}#${hash}`;
-      expect(parseNext(href)).toEqual(`${next1}#${hash}`);
+      expect(parseNextURL(href)).toEqual(`${next1}#${hash}`);
     });
 
     it('should properly decode special characters', () => {
       const next = '%2Fapp%2Fkibana';
       const hash = '/discover/New-Saved-Search';
       const href = `/login?next=${next}#${hash}`;
-      expect(parseNext(href)).toEqual(decodeURIComponent(`${next}#${hash}`));
+      expect(parseNextURL(href)).toEqual(decodeURIComponent(`${next}#${hash}`));
     });
 
     // to help prevent open redirect to a different url
     it('should return / if next includes a protocol/hostname', () => {
       const next = 'https://example.com/app/kibana';
       const href = `/login?next=${next}`;
-      expect(parseNext(href)).toEqual('/');
+      expect(parseNextURL(href)).toEqual('/');
     });
 
     // to help prevent open redirect to a different url by abusing encodings
@@ -156,14 +157,14 @@ describe('parseNext', () => {
       const next = `${encodeURIComponent(baseUrl)}%2Fapp%2Fkibana`;
       const hash = '/discover/New-Saved-Search';
       const href = `/login?next=${next}#${hash}`;
-      expect(parseNext(href)).toEqual('/');
+      expect(parseNextURL(href)).toEqual('/');
     });
 
     // to help prevent open redirect to a different port
     it('should return / if next includes a port', () => {
       const next = 'http://localhost:5601/app/kibana';
       const href = `/login?next=${next}`;
-      expect(parseNext(href)).toEqual('/');
+      expect(parseNextURL(href)).toEqual('/');
     });
 
     // to help prevent open redirect to a different port by abusing encodings
@@ -172,18 +173,18 @@ describe('parseNext', () => {
       const next = `${encodeURIComponent(baseUrl)}%2Fapp%2Fkibana`;
       const hash = '/discover/New-Saved-Search';
       const href = `/login?next=${next}#${hash}`;
-      expect(parseNext(href)).toEqual('/');
+      expect(parseNextURL(href)).toEqual('/');
     });
 
     // disallow network-path references
     it('should return / if next is url without protocol', () => {
       const nextWithTwoSlashes = '//example.com';
       const hrefWithTwoSlashes = `/login?next=${nextWithTwoSlashes}`;
-      expect(parseNext(hrefWithTwoSlashes)).toEqual('/');
+      expect(parseNextURL(hrefWithTwoSlashes)).toEqual('/');
 
       const nextWithThreeSlashes = '///example.com';
       const hrefWithThreeSlashes = `/login?next=${nextWithThreeSlashes}`;
-      expect(parseNext(hrefWithThreeSlashes)).toEqual('/');
+      expect(parseNextURL(hrefWithThreeSlashes)).toEqual('/');
     });
   });
 });

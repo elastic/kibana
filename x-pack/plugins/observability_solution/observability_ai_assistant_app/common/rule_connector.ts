@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const fieldCapsLargeArraysMock = {
-  indices: ['large_array'],
-  fields: {
-    items: {
-      keyword: { type: 'keyword', metadata_field: false, searchable: true, aggregatable: true },
-    },
-  },
-};
+export const OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID = '.observability-ai-assistant';
