@@ -116,7 +116,7 @@ export class HomePublicPlugin
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, params.theme$, coreStart, params.history);
+        return await renderApp(params.element, coreStart, params.history);
       },
     });
     urlForwarding.forwardApp('home', 'home');

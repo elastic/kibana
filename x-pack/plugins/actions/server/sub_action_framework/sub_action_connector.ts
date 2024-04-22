@@ -22,6 +22,7 @@ import { finished } from 'stream/promises';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { inspect } from 'util';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -87,14 +88,16 @@ export abstract class SubActionConnector<Config, Secrets> {
   }
 
   private getHeaders(headers?: AxiosRequestHeaders): Record<string, AxiosHeaderValue> {
-    return { ...headers, 'Content-Type': 'application/json' };
+    return { 'Content-Type': 'application/json', ...headers };
   }
 
   private validateResponse(responseSchema: Type<unknown>, data: unknown) {
     try {
       responseSchema.validate(data);
     } catch (resValidationError) {
-      throw new Error(`Response validation failed (${resValidationError})`);
+      const err = new Error(`Response validation failed (${resValidationError})`);
+      this.logger.debug(`${err.message}:\n${inspect(data, { depth: 10 })}`);
+      throw err;
     }
   }
 

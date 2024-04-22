@@ -24,7 +24,7 @@ export async function mountManagementSection(
   config: ClientConfigType,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs, history, theme$ } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
   const {
     chrome: { docTitle },
@@ -45,7 +45,6 @@ export async function mountManagementSection(
       i18n,
       history,
     },
-    theme$,
   };
 
   const unmountAppCallback = renderApp(element, appDependencies);

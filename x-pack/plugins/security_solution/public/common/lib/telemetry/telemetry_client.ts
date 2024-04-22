@@ -29,9 +29,15 @@ import type {
   ReportToggleRiskSummaryClickedParams,
   ReportDetailsFlyoutOpenedParams,
   ReportDetailsFlyoutTabClickedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
+  ReportAssetCriticalityCsvImportedParams,
+  ReportAddRiskInputToTimelineClickedParams,
+  OnboardingHubStepLinkClickedParams,
+  OnboardingHubStepOpenParams,
+  OnboardingHubStepFinishedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
-import type { ReportAddRiskInputToTimelineClickedParams } from './events/entity_analytics/types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions
@@ -94,6 +100,22 @@ export class TelemetryClient implements TelemetryClientStart {
     });
   };
 
+  public reportAssetCriticalityCsvPreviewGenerated = (
+    params: ReportAssetCriticalityCsvPreviewGeneratedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated, params);
+  };
+
+  public reportAssetCriticalityFileSelected = (
+    params: ReportAssetCriticalityFileSelectedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityFileSelected, params);
+  };
+
+  public reportAssetCriticalityCsvImported = (params: ReportAssetCriticalityCsvImportedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityCsvImported, params);
+  };
+
   public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.MLJobUpdate, params);
   };
@@ -138,5 +160,17 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportDetailsFlyoutTabClicked = (params: ReportDetailsFlyoutTabClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, params);
+  };
+
+  public reportOnboardingHubStepOpen = (params: OnboardingHubStepOpenParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepOpen, params);
+  };
+
+  public reportOnboardingHubStepFinished = (params: OnboardingHubStepFinishedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepFinished, params);
+  };
+
+  public reportOnboardingHubStepLinkClicked = (params: OnboardingHubStepLinkClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepLinkClicked, params);
   };
 }

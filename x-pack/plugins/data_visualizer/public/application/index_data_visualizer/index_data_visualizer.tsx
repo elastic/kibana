@@ -7,7 +7,7 @@
 import '../_index.scss';
 import { pick } from 'lodash';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
@@ -30,6 +30,9 @@ import {
   UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -85,6 +88,22 @@ export const getLocatorParams = (params: {
 };
 
 const DataVisualizerESQLStateContextProvider = () => {
+  const { services } = useDataVisualizerKibana();
+  const isEsqlEnabled = useMemo(() => services.uiSettings.get(ENABLE_ESQL), [services.uiSettings]);
+
+  if (!isEsqlEnabled) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.dataVisualizer.esqlNotEnabledCalloutTitle"
+            defaultMessage="ES|QL is not enabled"
+          />
+        }
+      />
+    );
+  }
+
   return (
     <UrlStateProvider>
       <IndexDataVisualizerESQL />
@@ -273,7 +292,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   );
 };
 
-interface Props {
+export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
@@ -314,6 +333,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     charts,
     unifiedSearch,
   };
+
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
