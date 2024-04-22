@@ -68,7 +68,7 @@ describe('useFleetServerHostsForPolicy', () => {
   });
   it('should return default hosts if used without agent policy', () => {
     const { result } = renderHook(() => useFleetServerHostsForPolicy());
-    expect(result.current.fleetServerHosts).toEqual(['https://defaultfleetserver:8220']);
+    expect(result.current.fleetServerHost).toEqual('https://defaultfleetserver:8220');
   });
 
   it('should return default hosts if used with agent policy that do not override fleet server host', () => {
@@ -77,7 +77,7 @@ describe('useFleetServerHostsForPolicy', () => {
         id: 'testpolicy1',
       } as any)
     );
-    expect(result.current.fleetServerHosts).toEqual(['https://defaultfleetserver:8220']);
+    expect(result.current.fleetServerHost).toEqual('https://defaultfleetserver:8220');
   });
 
   it('should return custom hosts if used with agent policy that override fleet server hosts', () => {
@@ -87,7 +87,7 @@ describe('useFleetServerHostsForPolicy', () => {
         fleet_server_host_id: 'custom1',
       } as any)
     );
-    expect(result.current.fleetServerHosts).toEqual(['https://custom1:8220']);
+    expect(result.current.fleetServerHost).toEqual('https://custom1:8220');
   });
 
   it('should return default download source if used with a policy not overriding download source', () => {
