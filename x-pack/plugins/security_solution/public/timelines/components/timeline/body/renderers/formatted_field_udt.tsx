@@ -32,9 +32,9 @@ export const getFormattedFields = ({
             {...props}
             isDraggable={false}
             isTimeline={true}
-            isDetails={false}
-            isExpanded={false}
-            isExpandable={true}
+            isDetails={props.isDetails}
+            isExpanded={props.isExpanded}
+            isExpandable={props.isExpandable}
             data={dataTableRows[props.rowIndex].data}
             eventId={dataTableRows[props.rowIndex]._id}
             scopeId={scopeId}

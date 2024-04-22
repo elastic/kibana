@@ -82,62 +82,62 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   //
 
   useEffect(() => {
-    console.log('columnsActions', columnsActions);
+    console.log('changed cellActions columnsActions', columnsActions);
   }, [columnsActions]);
 
   useEffect(() => {
-    console.log('fields', fields);
+    console.log('changed cellActions fields', fields);
   }, [fields]);
 
   useEffect(() => {
-    console.log('getCellValue', getCellValue);
+    console.log('changed cellActions getCellValue', getCellValue);
   }, [getCellValue]);
 
   useEffect(() => {
-    console.log('loading', loading);
+    console.log('changed cellActions loading', loading);
   }, [loading]);
 
   useEffect(() => {
-    console.log('metadata', metadata);
+    console.log('changed cellActions metadata', metadata);
   }, [metadata]);
 
   useEffect(() => {
-    console.log('triggerId', triggerId);
+    console.log('changed cellActions triggerId', triggerId);
   }, [triggerId]);
 
   useEffect(() => {
-    console.log('dataGridRef', dataGridRef);
+    console.log('changed cellActions dataGridRef', dataGridRef);
   }, [dataGridRef]);
 
-  // const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
-  //   if (loading) {
-  //     return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
-  //   }
-  //   if (!triggerId || !columnsActions?.length || !fields?.length) {
-  //     return emptyActions;
-  //   }
-  //
-  //   // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
-  //   // It will eventually update to a consistent state
-  //   if (columnsActions.length !== fields.length) {
-  //     return emptyActions;
-  //   }
-  //
-  //   return columnsActions.map((actions, columnIndex) =>
-  //     actions.map((action) =>
-  //       createColumnCellAction({
-  //         action,
-  //         field: fields[columnIndex],
-  //         getCellValue,
-  //         metadata,
-  //         triggerId,
-  //         dataGridRef,
-  //       })
-  //     )
-  //   );
-  // }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
+  const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
+    if (loading) {
+      return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
+    }
+    if (!triggerId || !columnsActions?.length || !fields?.length) {
+      return emptyActions;
+    }
 
-  return useMemo(() => (fields ?? []).map(() => loadingColumnActions), [fields]);
+    // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
+    // It will eventually update to a consistent state
+    if (columnsActions.length !== fields.length) {
+      return emptyActions;
+    }
+
+    return columnsActions.map((actions, columnIndex) =>
+      actions.map((action) =>
+        createColumnCellAction({
+          action,
+          field: fields[columnIndex],
+          getCellValue,
+          metadata,
+          triggerId,
+          dataGridRef,
+        })
+      )
+    );
+  }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
+
+  return columnsCellActions;
 };
 
 interface CreateColumnCellActionParams

@@ -17,7 +17,7 @@ import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 
-const IS_INTERSECTION_OBSERVER_ENABLED = true;
+const IS_ROW_RENDERER_LAZY_LOADING_ENABLED = true;
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -108,7 +108,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   const [intersectionEntry, setIntersectionEntry] = useState<IntersectionObserverEntry>({
     isIntersecting: false,
     intersectionRatio: 0,
-  });
+  } as IntersectionObserverEntry);
 
   const intersectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -156,17 +156,15 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   const isRowIntersecting =
     intersectionEntry.isIntersecting && intersectionEntry.intersectionRatio > 0;
 
+  const isRowLoading = IS_ROW_RENDERER_LAZY_LOADING_ENABLED && !isRowIntersecting;
+
   return (
     <CustomGridRow
-      className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      className={`${rowIndex % 2 === 0 && !isRowLoading ? 'euiDataGridRow--striped' : ''}`}
       key={rowIndex}
       ref={intersectionRef}
     >
-      <EuiSkeletonText
-        lines={2}
-        size="m"
-        isLoading={IS_INTERSECTION_OBSERVER_ENABLED && !isRowIntersecting}
-      >
+      <EuiSkeletonText lines={3} isLoading={isRowLoading}>
         <CustomGridRowCellWrapper>
           {visibleColumns.map((column, colIndex) => {
             // Skip the expanded row cell - we'll render it manually outside of the flex wrapper

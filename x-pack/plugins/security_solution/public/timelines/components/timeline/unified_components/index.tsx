@@ -31,7 +31,6 @@ import { EventDetailsWidthProvider } from '../../../../common/components/events_
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { defaultHeaders } from '../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
@@ -228,7 +227,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       if (newSort) {
         const isSortUnchanged =
           newSort.length === sortingColumns.length && isEqual(newSort, sortingColumns);
-        console.log({ isSortUnchanged });
 
         if (!isSortUnchanged) {
           onSort(newSort);
@@ -293,19 +291,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      dispatch(
-        timelineActions.upsertColumn({
-          column: getColumnHeader(columnId, defaultHeaders),
-          id: timelineId,
-          index: 1,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
-
   const isDropAllowed = useMemo(() => {
     if (!draggingFieldName || columnIds.includes(draggingFieldName)) {
       return false;
@@ -316,14 +301,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const onDropFieldToTable = useCallback(() => {
     if (draggingFieldName) {
       onAddColumn(draggingFieldName);
-      // onToggleColumn(draggingFieldName);
     }
   }, [draggingFieldName, onAddColumn]);
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
       onAddColumn(field.name);
-      // onToggleColumn(field.name);
     },
     [onAddColumn]
   );
