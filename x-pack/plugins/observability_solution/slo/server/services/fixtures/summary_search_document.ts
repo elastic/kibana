@@ -13,15 +13,13 @@ import {
   EsSummaryDocument,
 } from '../summary_transform_generator/helpers/create_temp_summary';
 
-type Props = {
-  slo: SLODefinition;
-  isTempDoc?: boolean;
-};
-
-export const aSummaryDocument = ({ slo, isTempDoc = false }: Props): EsSummaryDocument => {
+export const aSummaryDocument = (
+  slo: SLODefinition,
+  params: Partial<EsSummaryDocument> = {}
+): EsSummaryDocument => {
   return {
     ...createTempSummaryDocument(slo, 'default', { publicBaseUrl: '' } as IBasePath),
-    isTempDoc: isTempDoc,
+    ...params,
   };
 };
 

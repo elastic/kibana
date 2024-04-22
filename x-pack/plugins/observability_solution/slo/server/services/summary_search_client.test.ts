@@ -102,14 +102,14 @@ describe('Summary Search Client', () => {
         },
         max_score: 1,
         hits: [
-          aHitFromSummaryIndex(aSummaryDocument({ slo: SLO_ID1 })),
-          aHitFromSummaryIndex(aSummaryDocument({ slo: SLO_ID2 })),
-          aHitFromSummaryIndex(aSummaryDocument({ slo: SLO_ID3 })),
-          aHitFromSummaryIndex(aSummaryDocument({ slo: SLO_ID5 })), // no related temp doc
-          aHitFromTempSummaryIndex(aSummaryDocument({ slo: SLO_ID1, isTempDoc: true })), // removed as dup
-          aHitFromTempSummaryIndex(aSummaryDocument({ slo: SLO_ID2, isTempDoc: true })), // removed as dup
-          aHitFromTempSummaryIndex(aSummaryDocument({ slo: SLO_ID3, isTempDoc: true })), // removed as dup
-          aHitFromTempSummaryIndex(aSummaryDocument({ slo: SLO_ID4, isTempDoc: true })), // kept
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID1)),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID2)),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID3)),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID5)), // no related temp doc
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID1, { isTempDoc: true })), // removed as dup
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID2, { isTempDoc: true })), // removed as dup
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID3, { isTempDoc: true })), // removed as dup
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID4, { isTempDoc: true })), // kept
         ],
       },
     });
