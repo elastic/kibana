@@ -42,6 +42,7 @@ export const CopyInput: React.FC<CopyInputProps> = ({ value }) => {
                   selection.addRange(range);
                 }
               }}
+              data-test-subj="copyText"
             >
               {value}
             </span>

@@ -25,7 +25,7 @@ export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({ url }) => {
         defaultMessage: 'The most common method for establishing an Elasticsearch connection.',
       })}
       fullWidth
-      data-test-subj="connectionDetailsEsEndpoint"
+      data-test-subj="connectionDetailsEsUrl"
     >
       <CopyInput value={url} />
     </EuiFormRow>

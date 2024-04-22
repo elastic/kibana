@@ -53,23 +53,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           null
         );
 
-        // Open the modal
+        // Open connection details overlay.
         await PageObjects.common.clickAndValidate(
           'connectionDetailsHelpLink',
           'deploymentDetailsModal'
         );
 
-        const esEndpointInput = await find.byCssSelector(
-          '[data-test-subj="deploymentDetailsEsEndpoint"]'
-        );
-        const esEndpointValue = await esEndpointInput.getAttribute('value');
-        expect(esEndpointValue).to.be('https://ES123abc.hello.com:443');
+        const esUrlRow = await find.byCssSelector('[data-test-subj="connectionDetailsEsUrl"]');
+        const esUrlText = await esUrlRow.findByTestSubject('copyText');
+        const esUrlTextValue = await esUrlText.getVisibleText();
+        expect(esUrlTextValue).to.be('https://ES123abc.hello.com:443');
 
-        const cloudIdInput = await find.byCssSelector(
-          '[data-test-subj="deploymentDetailsCloudID"]'
+        // Show Cloud ID text row.
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsCloudIdSwitch',
+          'connectionDetailsCloudId'
         );
-        const cloudIdInputValue = await cloudIdInput.getAttribute('value');
-        expect(cloudIdInputValue).to.be(
+
+        const cloudIdRow = await find.byCssSelector('[data-test-subj="connectionDetailsCloudId"]');
+        const cloudIdText = await cloudIdRow.findByTestSubject('copyText');
+        const cloudIdTextValue = await cloudIdText.getVisibleText();
+        expect(cloudIdTextValue).to.be(
           'ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM='
         );
       });

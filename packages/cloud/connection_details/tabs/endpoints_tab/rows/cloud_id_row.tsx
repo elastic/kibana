@@ -31,6 +31,7 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
         })}
         checked={showCloudId}
         onChange={service.toggleShowCloudId}
+        data-test-subj="connectionDetailsCloudIdSwitch"
       />
 
       {showCloudId && <EuiSpacer size="l" />}
@@ -45,7 +46,7 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
               'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
           })}
           fullWidth
-          data-test-subj="connectionDetailsEsEndpoint"
+          data-test-subj="connectionDetailsCloudId"
         >
           <CopyInput value={value} />
         </EuiFormRow>
