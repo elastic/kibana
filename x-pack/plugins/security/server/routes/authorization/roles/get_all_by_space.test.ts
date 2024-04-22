@@ -33,7 +33,7 @@ describe('GET all roles by space id', () => {
     mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue([]);
 
     defineGetAllRolesBySpaceRoutes(mockRouteDefinitionParams);
-    const [[config, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
+    const [[config]] = mockRouteDefinitionParams.router.get.mock.calls;
 
     const paramsSchema = (config.validate as any).params;
 
