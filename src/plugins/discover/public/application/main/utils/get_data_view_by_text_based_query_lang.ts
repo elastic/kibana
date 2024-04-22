@@ -24,7 +24,7 @@ export async function getDataViewByTextBasedQueryLang(
     indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
   }
   if ('esql' in query) {
-    indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
+    indexPatternFromQuery = await getIndexPatternFromESQLQuery(query.esql);
   }
 
   if (

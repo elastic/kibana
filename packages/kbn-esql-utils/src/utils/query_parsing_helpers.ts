@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { getAstAndSyntaxErrors, type ESQLSource } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
@@ -25,8 +26,18 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   return '';
 }
 
+// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
+export async function getIndexPatternFromESQLQuery(esql?: string) {
+  const { ast } = await getAstAndSyntaxErrors(esql);
+  const fromCommand = ast.find(({ name }) => name === 'from');
+  const args = fromCommand?.args as ESQLSource[];
+  const indices = args.filter((arg) => arg.sourceType === 'index');
+  return indices?.map((index) => index.text).join(',');
+}
+
 // retrieves the index pattern from the aggregate query for ES|QL
-export function getIndexPatternFromESQLQuery(esql?: string): string {
+// this can fail if from is mentioned in comments etc
+export function getIndexPatternFromESQLQueryDeprecated(esql?: string): string {
   let fromPipe = (esql || '').split('|')[0];
   const splitFroms = fromPipe?.split(new RegExp(/FROM\s/, 'ig'));
   const fromsLength = splitFroms?.length ?? 0;

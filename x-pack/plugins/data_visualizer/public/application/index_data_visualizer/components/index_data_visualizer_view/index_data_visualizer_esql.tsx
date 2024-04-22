@@ -95,27 +95,17 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   // Query that has been typed, but has not submitted with cmd + enter
   const [localQuery, setLocalQuery] = useState<ESQLQuery>({ esql: '' });
 
-  const indexPattern = useMemo(() => {
-    let indexPatternFromQuery = '';
-    if (isESQLQuery(query)) {
-      indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
-    }
-    // we should find a better way to work with ESQL queries which dont need a dataview
-    if (indexPatternFromQuery === '') {
-      return undefined;
-    }
-    return indexPatternFromQuery;
-  }, [query]);
-
   useEffect(
     function updateAdhocDataViewFromQuery() {
       let unmounted = false;
 
       const update = async () => {
-        if (!indexPattern) return;
+        if (!isESQLQuery(query)) return;
+        const indexPatternFromQuery = await getIndexPatternFromESQLQuery(query.esql);
+        if (!indexPatternFromQuery) return;
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
-          indexPattern,
+          indexPatternFromQuery,
           currentDataView
         );
 
@@ -133,7 +123,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       };
     },
 
-    [indexPattern, data.dataViews, currentDataView]
+    [data.dataViews, currentDataView]
   );
 
   const input: DataVisualizerGridInput<ESQLQuery> = useMemo(() => {
@@ -145,7 +135,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       visibleFieldNames: undefined,
       allowEditDataView: true,
       id: 'esql_data_visualizer',
-      indexPattern,
+      indexPattern: currentDataView?.name,
     };
   }, [currentDataView, query?.esql]);
 

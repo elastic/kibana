@@ -51,7 +51,7 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
 
 export async function getESQLMeta(esql: string) {
   const adhocDataView = await getESQLAdHocDataview(
-    getIndexPatternFromESQLQuery(esql),
+    await getIndexPatternFromESQLQuery(esql),
     getIndexPatternService()
   );
   return {

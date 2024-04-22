@@ -16,7 +16,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataviewFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -113,15 +113,13 @@ export function VisualizeESQL({
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
 }: VisualizeESQLProps) {
-  // fetch the pattern from the query
-  const indexPattern = getIndexPatternFromESQLQuery(query);
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(indexPattern, dataViews);
-  }, [indexPattern]);
+    return getESQLAdHocDataviewFromESQLQuery(query, dataViews);
+  }, [query]);
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);

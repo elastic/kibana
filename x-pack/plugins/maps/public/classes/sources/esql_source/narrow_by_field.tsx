@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useMemo } from 'react';
+import React, { ChangeEvent, useMemo, useState, useEffect } from 'react';
 import { EuiFormRow, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -47,6 +47,7 @@ interface NarrowByFieldProps {
 }
 
 function NarrowByField(props: NarrowByFieldProps) {
+  const [pattern, setPattern] = useState('');
   const options = useMemo(() => {
     return props.fields.map((field) => {
       return {
@@ -68,6 +69,17 @@ function NarrowByField(props: NarrowByFieldProps) {
     />
   );
 
+  useEffect(() => {
+    const setIndexPatternFromQuery = async () => {
+      const indexPattern = await getIndexPatternFromESQLQuery(props.esql);
+      if (indexPattern) {
+        setPattern(indexPattern);
+      }
+    };
+
+    setIndexPatternFromQuery();
+  }, [props.esql]);
+
   return (
     <>
       <EuiFormRow>
@@ -82,7 +94,7 @@ function NarrowByField(props: NarrowByFieldProps) {
                     return `'${type}'`;
                   })
                   .join(', '),
-                pattern: getIndexPatternFromESQLQuery(props.esql),
+                pattern,
               },
             })}
           >

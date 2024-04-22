@@ -11,9 +11,50 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  getIndexPatternFromESQLQueryDeprecated,
 } from './query_parsing_helpers';
 
 describe('sql/esql query helpers', () => {
+  describe('getIndexPatternFromESQLQueryDeprecated', () => {
+    it('should return the index pattern string from esql queries - no ast parsing', async () => {
+      const idxPattern1 = getIndexPatternFromESQLQueryDeprecated('FROM foo');
+      expect(idxPattern1).toBe('foo');
+
+      const idxPattern3 = getIndexPatternFromESQLQueryDeprecated('from foo | project abc, def');
+      expect(idxPattern3).toBe('foo');
+
+      const idxPattern4 = getIndexPatternFromESQLQueryDeprecated('from foo | project a | limit 2');
+      expect(idxPattern4).toBe('foo');
+
+      const idxPattern5 = getIndexPatternFromESQLQueryDeprecated('from foo | limit 2');
+      expect(idxPattern5).toBe('foo');
+
+      const idxPattern6 = getIndexPatternFromESQLQueryDeprecated('from foo-1,foo-2 | limit 2');
+      expect(idxPattern6).toBe('foo-1,foo-2');
+
+      const idxPattern7 = getIndexPatternFromESQLQueryDeprecated('from foo-1, foo-2 | limit 2');
+      expect(idxPattern7).toBe('foo-1, foo-2');
+
+      const idxPattern8 = getIndexPatternFromESQLQueryDeprecated('FROM foo-1, foo-2');
+      expect(idxPattern8).toBe('foo-1, foo-2');
+
+      const idxPattern9 = getIndexPatternFromESQLQueryDeprecated(
+        'FROM foo-1, foo-2 [metadata _id]'
+      );
+      expect(idxPattern9).toBe('foo-1, foo-2');
+
+      const idxPattern10 = getIndexPatternFromESQLQueryDeprecated(
+        'FROM foo-1, remote_cluster:foo-2, foo-3'
+      );
+      expect(idxPattern10).toBe('foo-1, remote_cluster:foo-2, foo-3');
+
+      const idxPattern11 = getIndexPatternFromESQLQueryDeprecated(
+        'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
+      );
+      expect(idxPattern11).toBe('foo-1, foo-2');
+    });
+  });
+
   describe('getIndexPatternFromSQLQuery', () => {
     it('should return the index pattern string from sql queries', () => {
       const idxPattern1 = getIndexPatternFromSQLQuery('SELECT * FROM foo');
@@ -52,38 +93,45 @@ describe('sql/esql query helpers', () => {
   });
 
   describe('getIndexPatternFromESQLQuery', () => {
-    it('should return the index pattern string from esql queries', () => {
-      const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
+    it('should return the index pattern string from esql queries', async () => {
+      const idxPattern1 = await getIndexPatternFromESQLQuery('FROM foo');
       expect(idxPattern1).toBe('foo');
 
-      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
+      const idxPattern3 = await getIndexPatternFromESQLQuery('from foo | project abc, def');
       expect(idxPattern3).toBe('foo');
 
-      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
+      const idxPattern4 = await getIndexPatternFromESQLQuery('from foo | project a | limit 2');
       expect(idxPattern4).toBe('foo');
 
-      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
+      const idxPattern5 = await getIndexPatternFromESQLQuery('from foo | limit 2');
       expect(idxPattern5).toBe('foo');
 
-      const idxPattern6 = getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
+      const idxPattern6 = await getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
       expect(idxPattern6).toBe('foo-1,foo-2');
 
-      const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
-      expect(idxPattern7).toBe('foo-1, foo-2');
+      const idxPattern7 = await getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
+      expect(idxPattern7).toBe('foo-1,foo-2');
 
-      const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
-      expect(idxPattern8).toBe('foo-1,  foo-2');
+      const idxPattern8 = await getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
+      expect(idxPattern8).toBe('foo-1,foo-2');
 
-      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
-      expect(idxPattern9).toBe('foo-1, foo-2');
+      const idxPattern9 = await getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
+      expect(idxPattern9).toBe('foo-1,foo-2');
 
-      const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
-      expect(idxPattern10).toBe('foo-1, remote_cluster:foo-2, foo-3');
+      const idxPattern10 = await getIndexPatternFromESQLQuery(
+        'FROM foo-1, remote_cluster:foo-2, foo-3'
+      );
+      expect(idxPattern10).toBe('foo-1,remote_cluster:foo-2,foo-3');
 
-      const idxPattern11 = getIndexPatternFromESQLQuery(
+      const idxPattern11 = await getIndexPatternFromESQLQuery(
         'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
       );
-      expect(idxPattern11).toBe('foo-1, foo-2');
+      expect(idxPattern11).toBe('foo-1,foo-2');
+
+      const idxPattern12 = await getIndexPatternFromESQLQuery(
+        'FROM foo-1, foo-2 // from command used'
+      );
+      expect(idxPattern12).toBe('foo-1,foo-2');
     });
   });
 

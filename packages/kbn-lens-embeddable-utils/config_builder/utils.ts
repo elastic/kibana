@@ -143,7 +143,7 @@ export async function getDataView(
   return dataView;
 }
 
-export function getDatasetIndex(dataset?: LensDataset) {
+export async function getDatasetIndex(dataset?: LensDataset) {
   if (!dataset) return undefined;
 
   let index: string;
@@ -153,7 +153,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
     index = dataset.index;
     timeFieldName = dataset.timeFieldName || '@timestamp';
   } else if ('esql' in dataset) {
-    index = getIndexPatternFromESQLQuery(dataset.esql); // parseIndexFromQuery(config.dataset.query);
+    index = await getIndexPatternFromESQLQuery(dataset.esql); // parseIndexFromQuery(config.dataset.query);
   } else {
     return undefined;
   }
@@ -241,7 +241,7 @@ export const buildDatasourceStates = async (
       throw Error('dataset must be defined');
     }
 
-    const index = getDatasetIndex(dataset);
+    const index = await getDatasetIndex(dataset);
     const dataView = index
       ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
       : undefined;

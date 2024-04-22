@@ -134,7 +134,7 @@ export const getAlertUtils = (
       'esql' in alert.params.esqlQuery
     ) {
       query = alert.params.esqlQuery;
-      const indexPattern: string = getIndexPatternFromESQLQuery(alert.params.esqlQuery.esql);
+      const indexPattern: string = await getIndexPatternFromESQLQuery(alert.params.esqlQuery.esql);
       dataView = await dataViews.create({
         title: indexPattern,
         timeFieldName: alert.params.timeField,
