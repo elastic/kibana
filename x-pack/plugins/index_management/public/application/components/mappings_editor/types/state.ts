@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InferenceToModelIdMap } from '../components/document_fields/fields';
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
 import {
   Field,
@@ -98,10 +99,15 @@ export interface State {
     result: SearchResult[];
   };
   templates: TemplatesFormState;
+  inferenceToModelIdMap?: InferenceToModelIdMap;
 }
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
+  | {
+      type: 'inferenceToModelIdMap.update';
+      value: { inferenceToModelIdMap?: InferenceToModelIdMap };
+    }
   | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
   | { type: 'configuration.save'; value: MappingsConfiguration }
   | { type: 'templates.update'; value: Partial<State['templates']> }

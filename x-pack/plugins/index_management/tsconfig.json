@@ -27,6 +27,7 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/analytics",
     "@kbn/i18n-react",
+    "@kbn/ml-plugin",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/config-schema",

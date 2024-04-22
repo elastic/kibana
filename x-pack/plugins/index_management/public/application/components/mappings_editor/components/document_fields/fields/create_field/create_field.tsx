@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,11 +13,17 @@ import {
   EuiOutsideClickDetector,
   EuiSpacer,
 } from '@elastic/eui';
-import { FieldWithSemanticTextInfo } from '../../../../types';
+import { NotificationsSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
+import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+import { getApi } from '../../../../../component_templates/lib';
+import { Field } from '../../../../types';
 
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { useDispatch } from '../../../../mappings_state_context';
+import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import {
   Form,
   FormDataProvider,
@@ -38,7 +40,23 @@ import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
+export interface InferenceToModelIdMap {
+  [key: string]: {
+    trainedModelId?: string;
+    isDeployed: boolean;
+    isDeployable: boolean;
+    defaultInferenceEndpoint: boolean;
+  };
+}
 
+export interface SemanticTextInfo {
+  isSemanticTextEnabled?: boolean;
+  indexName?: string;
+  ml?: MlPluginStart;
+  api?: ReturnType<typeof getApi>;
+  toasts?: NotificationsSetup['toasts'];
+  setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>>;
+}
 interface Props {
   allFields: NormalizedFields['byId'];
   isRootLevelField: boolean;
@@ -48,8 +66,7 @@ interface Props {
   maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
-  isSemanticTextEnabled?: boolean;
-  indexName?: string;
+  semanticTextInfo?: SemanticTextInfo;
 }
 
 const useFieldEffect = (
@@ -57,9 +74,9 @@ const useFieldEffect = (
   fieldName: string,
   setState: React.Dispatch<React.SetStateAction<string | undefined>>
 ) => {
-  const fieldValue = form.getFields()?.[fieldName]?.value as string;
+  const fieldValue = form.getFields()?.[fieldName]?.value;
   useEffect(() => {
-    if (fieldValue !== undefined) {
+    if (typeof fieldValue === 'string') {
       setState(fieldValue);
     }
   }, [form, fieldValue, setState]);
@@ -74,12 +91,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
   maxNestedDepth,
   onCancelAddingNewFields,
   isAddingFields,
-  isSemanticTextEnabled,
-  indexName,
+  semanticTextInfo,
 }: Props) {
+  const { isSemanticTextEnabled, indexName, api, ml, toasts, setErrorsInTrainedModelDeployment } =
+    semanticTextInfo ?? {};
+  const { inferenceToModelIdMap } = useMappingsState();
+
   const dispatch = useDispatch();
 
-  const { form } = useForm<FieldWithSemanticTextInfo>({
+  const { form } = useForm<Field>({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
   });
@@ -110,12 +130,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
 
   useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
-  useFieldEffect(form, 'inferenceId', setInferenceIdComboValue);
   useFieldEffect(form, 'name', setNameValue);
 
-  const fieldTypeValue = form.getFields()?.type?.value as Array<{ value: string }>;
+  const fieldTypeValue = form.getFields()?.type?.value;
   useEffect(() => {
-    if (fieldTypeValue === undefined || fieldTypeValue.length === 0) {
+    if (!Array.isArray(fieldTypeValue) || fieldTypeValue.length === 0) {
       return;
     }
     setSemanticTextFieldType(
@@ -123,7 +142,68 @@ export const CreateField = React.memo(function CreateFieldComponent({
     );
   }, [form, fieldTypeValue]);
 
-  const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
+  const inferenceId = form.getFields()?.inferenceId?.value;
+  useEffect(() => {
+    if (typeof inferenceId === 'string') {
+      setInferenceIdComboValue(inferenceId);
+    }
+  }, [form, inferenceId, inferenceToModelIdMap]);
+
+  const handleSemanticText = (data: Field) => {
+    if (data.inferenceId === undefined) {
+      return;
+    }
+
+    const inferenceData = inferenceToModelIdMap?.[data.inferenceId];
+
+    if (!inferenceData) {
+      return;
+    }
+
+    const { trainedModelId, defaultInferenceEndpoint, isDeployed, isDeployable } = inferenceData;
+
+    if (trainedModelId && defaultInferenceEndpoint) {
+      api?.createTextEmbeddingInference(data.inferenceId, trainedModelId);
+    }
+
+    if (isDeployable && trainedModelId && !isDeployed) {
+      try {
+        ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId);
+        toasts?.addSuccess({
+          title: i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
+            {
+              defaultMessage: 'Model deployment started',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentNotification',
+            {
+              defaultMessage: '1 model is being deployed on your ml_node.',
+            }
+          ),
+        });
+      } catch (error) {
+        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
+        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+          title: i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle',
+            {
+              defaultMessage: 'Model deployment failed',
+            }
+          ),
+        });
+      }
+    }
+
+    dispatch({ type: 'field.addSemanticText', value: data });
+  };
+
+  const submitForm = async (
+    e?: React.FormEvent,
+    exitAfter: boolean = false,
+    clickOutside: boolean = false
+  ) => {
     if (e) {
       e.preventDefault();
     }
@@ -132,8 +212,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (isValid) {
       form.reset();
-      if (data.type === 'semantic_text') {
-        dispatch({ type: 'field.addSemanticText', value: data });
+
+      if (data.type === 'semantic_text' && !clickOutside) {
+        handleSemanticText(data);
       } else {
         dispatch({ type: 'field.add', value: data });
       }
@@ -152,7 +233,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         cancel();
       }
     } else {
-      submitForm(undefined, true);
+      submitForm(undefined, true, true);
     }
   };
 
@@ -238,70 +319,66 @@ export const CreateField = React.memo(function CreateFieldComponent({
   );
 
   return (
-    <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
-      <Form
-        form={form}
-        FormWrapper={formWrapper}
-        onSubmit={submitForm}
-        data-test-subj="createFieldForm"
-      >
-        <div
-          className={classNames('mappingsEditor__createFieldWrapper', {
-            'mappingsEditor__createFieldWrapper--toggle':
-              Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-            'mappingsEditor__createFieldWrapper--multiField': isMultiField,
-          })}
-          style={{
-            paddingLeft: `${
-              isMultiField
-                ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-                : paddingLeft
-            }px`,
-          }}
+    <>
+      <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
+        <Form
+          form={form}
+          FormWrapper={formWrapper}
+          onSubmit={submitForm}
+          data-test-subj="createFieldForm"
         >
-          <div className="mappingsEditor__createFieldContent">
-            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem>{renderFormFields()}</EuiFlexItem>
-            </EuiFlexGroup>
+          <div
+            className={classNames('mappingsEditor__createFieldWrapper', {
+              'mappingsEditor__createFieldWrapper--toggle':
+                Boolean(maxNestedDepth) && maxNestedDepth! > 0,
+              'mappingsEditor__createFieldWrapper--multiField': isMultiField,
+            })}
+            style={{
+              paddingLeft: `${
+                isMultiField
+                  ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
+                  : paddingLeft
+              }px`,
+            }}
+          >
+            <div className="mappingsEditor__createFieldContent">
+              {renderFormFields()}
 
-            <FormDataProvider pathsToWatch={['type', 'subType']}>
-              {({ type, subType }) => {
-                const RequiredParametersForm = getRequiredParametersFormForType(
-                  type?.[0]?.value,
-                  subType?.[0]?.value
-                );
+              <FormDataProvider pathsToWatch={['type', 'subType']}>
+                {({ type, subType }) => {
+                  const RequiredParametersForm = getRequiredParametersFormForType(
+                    type?.[0]?.value,
+                    subType?.[0]?.value
+                  );
 
-                if (!RequiredParametersForm) {
-                  return null;
-                }
+                  if (!RequiredParametersForm) {
+                    return null;
+                  }
 
-                const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
+                  const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
 
-                return (
-                  <div className="mappingsEditor__createFieldRequiredProps">
-                    {typeDefinition.isBeta ? (
-                      <>
-                        <FieldBetaBadge />
-                        <EuiSpacer size="m" />
-                      </>
-                    ) : null}
+                  return (
+                    <div className="mappingsEditor__createFieldRequiredProps">
+                      {typeDefinition.isBeta ? (
+                        <>
+                          <FieldBetaBadge />
+                          <EuiSpacer size="m" />
+                        </>
+                      ) : null}
 
-                    <RequiredParametersForm key={subType ?? type} allFields={allFields} />
-                  </div>
-                );
-              }}
-            </FormDataProvider>
-            {/* Field inference_id for semantic_text field type */}
-            <InferenceIdCombo />
-
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={true} />
-              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
-            </EuiFlexGroup>
+                      <RequiredParametersForm key={subType ?? type} allFields={allFields} />
+                    </div>
+                  );
+                }}
+              </FormDataProvider>
+              {/* Field inference_id for semantic_text field type */}
+              <InferenceIdCombo inferenceToModelIdMap={inferenceToModelIdMap} />
+              {renderFormActions()}
+            </div>
           </div>
-        </div>
-      </Form>
-    </EuiOutsideClickDetector>
+        </Form>
+      </EuiOutsideClickDetector>
+    </>
   );
 });
 
@@ -321,7 +398,11 @@ function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
   );
 }
 
-function InferenceIdCombo() {
+function InferenceIdCombo({
+  inferenceToModelIdMap,
+}: {
+  inferenceToModelIdMap?: InferenceToModelIdMap;
+}) {
   const [{ type }] = useFormData({ watch: 'type' });
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
