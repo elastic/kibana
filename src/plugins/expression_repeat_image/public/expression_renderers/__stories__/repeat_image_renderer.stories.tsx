@@ -9,9 +9,12 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRepeatImageRenderer } from '../repeat_image_renderer';
+
+const { theme } = coreMock.createStart();
 
 const Renderer = ({
   elasticLogo,
@@ -28,7 +31,7 @@ const Renderer = ({
     emptyImage: elasticOutline,
   };
 
-  return <Render renderer={getRepeatImageRenderer()} config={config} width="400px" />;
+  return <Render renderer={getRepeatImageRenderer(theme)} config={config} width="400px" />;
 };
 
 storiesOf('enderers/repeatImage', module).add(

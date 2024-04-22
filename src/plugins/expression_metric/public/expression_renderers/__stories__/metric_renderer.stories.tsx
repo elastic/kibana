@@ -10,6 +10,7 @@ import React, { CSSProperties } from 'react';
 import { storiesOf } from '@storybook/react';
 import { Style } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getMetricRenderer } from '../metric_renderer';
 import { MetricRendererConfig } from '../../../common';
 
@@ -36,6 +37,8 @@ const metricFontSpec: CSSProperties = {
   color: '#b83c6f',
 };
 
+const { theme } = coreMock.createStart();
+
 storiesOf('renderers/Metric', module)
   .add('with null metric', () => {
     const config: MetricRendererConfig = {
@@ -45,7 +48,7 @@ storiesOf('renderers/Metric', module)
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   })
   .add('with number metric', () => {
     const config: MetricRendererConfig = {
@@ -55,7 +58,7 @@ storiesOf('renderers/Metric', module)
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   })
   .add('with string metric', () => {
     const config: MetricRendererConfig = {
@@ -65,7 +68,7 @@ storiesOf('renderers/Metric', module)
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   })
   .add('with label', () => {
     const config: MetricRendererConfig = {
@@ -75,7 +78,7 @@ storiesOf('renderers/Metric', module)
       label: 'Average price',
       metricFormat: '',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   })
   .add('with number metric and a specified format', () => {
     const config: MetricRendererConfig = {
@@ -85,7 +88,7 @@ storiesOf('renderers/Metric', module)
       label: 'Average price',
       metricFormat: '0.00%',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   })
   .add('with formatted string metric and a specified format', () => {
     const config: MetricRendererConfig = {
@@ -95,7 +98,7 @@ storiesOf('renderers/Metric', module)
       label: 'Total Revenue',
       metricFormat: '$0a',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   })
   .add('with invalid metricFont', () => {
     const config: MetricRendererConfig = {
@@ -105,5 +108,5 @@ storiesOf('renderers/Metric', module)
       label: 'Total Revenue',
       metricFormat: '$0a',
     };
-    return <Render renderer={getMetricRenderer()} config={config} />;
+    return <Render renderer={getMetricRenderer(theme)} config={config} />;
   });

@@ -10,8 +10,11 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
+
+const { theme } = coreMock.createStart();
 
 const Renderer = ({
   elasticLogo,
@@ -26,7 +29,7 @@ const Renderer = ({
     origin: Origin.LEFT,
     percent: 0.45,
   };
-  return <Render renderer={getRevealImageRenderer()} config={config} />;
+  return <Render renderer={getRevealImageRenderer(theme)} config={config} />;
 };
 
 storiesOf('renderers/revealImage', module).add(
