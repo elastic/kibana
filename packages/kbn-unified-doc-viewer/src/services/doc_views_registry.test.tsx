@@ -103,6 +103,24 @@ describe('DocViewerRegistry', () => {
       expect(docViews[0]).toHaveProperty('id', 'function-doc-view');
       expect(docViews[1]).toHaveProperty('id', 'component-doc-view');
       expect(registry).not.toBe(clonedRegistry);
+
+      // Test against shared references between clones
+      expect(clonedRegistry).not.toBe(registry);
+
+      // Mutating a cloned registry should not affect the original registry
+      registry.disableById('function-doc-view');
+      expect(registry.getAll()[0]).toHaveProperty('enabled', false);
+      expect(clonedRegistry.getAll()[0]).toHaveProperty('enabled', true);
+
+      clonedRegistry.add({
+        id: 'additional-doc-view',
+        order: 20,
+        title: 'Render function',
+        render: jest.fn(),
+      });
+
+      expect(registry.getAll().length).toBe(2);
+      expect(clonedRegistry.getAll().length).toBe(3);
     });
   });
 });
