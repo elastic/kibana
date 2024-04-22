@@ -19,6 +19,7 @@ import { createModifyRequiredProcessor } from './document_processors/modify_requ
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
 import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { createFlattenFoldedAllOfProcessor } from './document_processors/flatten_folded_all_of';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -73,6 +74,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
     createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED]),
+    createFlattenFoldedAllOfProcessor(),
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
