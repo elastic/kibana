@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import { useGetSentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useAgentStatusHook } from '../../../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
 import { SentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
@@ -24,7 +24,8 @@ export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
     const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
       'sentinelOneManualHostActionsEnabled'
     );
-    const { data } = useGetSentinelOneAgentStatus([agentId], { enabled: isSentinelOneV1Enabled });
+    const getAgentStatus = useAgentStatusHook();
+    const { data } = getAgentStatus([agentId], 'sentinel_one', { enabled: isSentinelOneV1Enabled });
     const agentStatus = data?.[agentId];
     const lastCheckin = agentStatus ? agentStatus.lastSeen : '';
 

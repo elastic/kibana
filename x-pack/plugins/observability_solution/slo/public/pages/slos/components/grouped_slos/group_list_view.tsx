@@ -30,8 +30,8 @@ import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 import { SlosView } from '../slos_view';
-import type { SortDirection } from '../slo_list_search_bar';
 import { SLOView } from '../toggle_slo_view';
+import type { SortDirection } from '../../hooks/use_url_search_state';
 
 interface Props {
   group: string;
@@ -54,10 +54,27 @@ export function GroupListView({
   summary,
   filters,
 }: Props) {
-  const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
+  const groupQuery = `"${groupBy}": "${group}"`;
+  const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
+  }
+  if (groupBy === '_index') {
+    // get remote cluster name from index name
+    if (groupName.includes(':.')) {
+      const [remoteClusterName] = groupName.split(':.');
+      groupName = i18n.translate('xpack.slo.group.remoteCluster', {
+        defaultMessage: 'Remote Cluster: {remoteClusterName}',
+        values: {
+          remoteClusterName,
+        },
+      });
+    } else {
+      groupName = i18n.translate('xpack.slo.group.remoteCluster.localKibana', {
+        defaultMessage: 'Local Kibana',
+      });
+    }
   }
 
   const [page, setPage] = useState(0);
