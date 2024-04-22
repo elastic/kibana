@@ -112,13 +112,15 @@ export interface AlertFieldsTableProps {
 export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) => {
   const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
   const items = useMemo(() => {
-    let _items = Object.entries(alert).map(
-      ([key, value]) =>
-        ({
-          key,
-          value,
-        } as AlertField)
-    );
+    let _items = Object.entries(alert)
+      .map(
+        ([key, value]) =>
+          ({
+            key,
+            value,
+          } as AlertField)
+      )
+      .filter((item) => item.key !== '_index');
     if (fields?.length) {
       _items = _items.filter((f) => fields.includes(f.key));
     }
