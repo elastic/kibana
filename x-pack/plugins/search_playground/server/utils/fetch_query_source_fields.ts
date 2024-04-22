@@ -87,6 +87,11 @@ export const parseFieldsCapabilities = (
     return acc;
   }, {});
 
+  // metadata fields that are ignored
+  const shouldIgnoreField = (field: string) => {
+    return !field.endsWith('.model_id');
+  };
+
   const querySourceFields = Object.keys(fields).reduce<IndicesQuerySourceFields>(
     (acc: IndicesQuerySourceFields, fieldKey) => {
       const field = fields[fieldKey];
@@ -105,6 +110,7 @@ export const parseFieldsCapabilities = (
             field: fieldKey,
             model_id: getModelField(fieldKey, indexDoc, nestedField),
             nested: !!isFieldNested(fieldKey, fieldCapsResponse),
+            indices: indicesPresentIn,
           };
           acc[index].elser_query_fields.push(elserModelField);
         } else if ('dense_vector' in field) {
@@ -113,9 +119,10 @@ export const parseFieldsCapabilities = (
             field: fieldKey,
             model_id: getModelField(fieldKey, indexDoc, nestedField),
             nested: !!nestedField,
+            indices: indicesPresentIn,
           };
           acc[index].dense_vector_query_fields.push(denseVectorField);
-        } else if ('text' in field && field.text.searchable) {
+        } else if ('text' in field && field.text.searchable && shouldIgnoreField(fieldKey)) {
           acc[index].bm25_query_fields.push(fieldKey);
           acc[index].source_fields.push(fieldKey);
         }

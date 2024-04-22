@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-export * from '../common/types/data_recognizer';
-export * from '../common/types/capabilities';
-export * from '../common/types/anomaly_detection_jobs';
-export * from '../common/types/modules';
-export * from '../common/types/audit_message';
-
-export * from '../common/util/validators';
-
-export * from '../common/util/metric_change_description';
-export * from './application/components/field_stats_flyout';
-export * from './application/data_frame_analytics/common';
-
+export { FieldStatsInfoButton } from './application/components/field_stats_flyout/field_stats_info_button';
+export { useFieldStatsTrigger } from './application/components/field_stats_flyout/use_field_stats_trigger';
+export { FieldStatsFlyoutProvider } from './application/components/field_stats_flyout/field_stats_flyout_provider';
 export { useFieldStatsFlyoutContext } from './application/components/field_stats_flyout/use_field_stats_flytout_context';

@@ -19,7 +19,17 @@ import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
 
-const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
+const fieldTypes = [
+  'number',
+  'date',
+  'boolean',
+  'ip',
+  'string',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+];
 const fields = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'number' },
@@ -163,8 +173,9 @@ function getFieldMapping(
   const literalValues = {
     string: `"a"`,
     number: '5',
+    date: 'now()',
   };
-  return params.map(({ name: _name, type, literalOnly, literalOptions, ...rest }) => {
+  return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
     if (fieldTypes.includes(typeString)) {
       if (useLiterals && literalOptions) {
@@ -176,7 +187,7 @@ function getFieldMapping(
       }
 
       const fieldName =
-        literalOnly && typeString in literalValues
+        constantOnly && typeString in literalValues
           ? literalValues[typeString as keyof typeof literalValues]!
           : getFieldName(typeString, {
               useNestedFunction,
@@ -217,10 +228,15 @@ function generateIncorrectlyTypedParameters(
     number: '5',
   };
   const wrongFieldMapping = currentParams.map(
-    ({ name: _name, literalOnly, literalOptions, type, ...rest }, i) => {
+    ({ name: _name, constantOnly, literalOptions, type, ...rest }, i) => {
       // this thing is complex enough, let's not make it harder for constants
-      if (literalOnly) {
-        return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
+      if (constantOnly) {
+        return {
+          name: literalValues[type as keyof typeof literalValues],
+          type,
+          wrong: false,
+          ...rest,
+        };
       }
       const canBeFieldButNotString = Boolean(
         fieldTypes.filter((t) => t !== 'string').includes(type) &&
@@ -237,7 +253,7 @@ function generateIncorrectlyTypedParameters(
           : canBeFieldButNotNumber
           ? values.numberField
           : values.booleanField;
-      return { name: nameValue, type, ...rest };
+      return { name: nameValue, type, wrong: true, ...rest };
     }
   );
 
@@ -247,8 +263,28 @@ function generateIncorrectlyTypedParameters(
     [values.booleanField]: 'boolean',
   };
 
-  const expectedErrors = signatures[0].params
-    .filter(({ literalOnly }) => !literalOnly)
+  // Try to predict which signature will be used to generate the errors
+  // in the validation engine. The validator currently uses the signature
+  // which generates the fewest errors.
+  //
+  // Approximate this by finding the signature that best matches the INCORRECT field mapping
+  //
+  // This is not future-proof...
+  const misMatchesBySignature = signatures.map(({ params: fnParams }) => {
+    const typeMatches = fnParams.map(({ type }, i) => {
+      if (wrongFieldMapping[i].wrong) {
+        const typeFromIncorrectMapping = generatedFieldTypes[wrongFieldMapping[i].name];
+        return type === typeFromIncorrectMapping;
+      }
+      return type === wrongFieldMapping[i].type;
+    });
+    return typeMatches.filter((t) => !t).length;
+  })!;
+  const signatureToUse =
+    signatures[misMatchesBySignature.indexOf(Math.min(...misMatchesBySignature))]!;
+
+  const expectedErrors = signatureToUse.params
+    .filter(({ constantOnly }) => !constantOnly)
     .map(({ type }, i) => {
       const fieldName = wrongFieldMapping[i].name;
       if (
@@ -538,7 +574,11 @@ describe('validation logic', () => {
           .replace(/stringField/g, '"a"')
           .replace(/dateField/g, 'now()')
           .replace(/booleanField/g, 'true')
-          .replace(/ipField/g, 'to_ip("127.0.0.1")');
+          .replace(/ipField/g, 'to_ip("127.0.0.1")')
+          .replace(/geoPointField/g, 'to_geopoint("POINT (30 10)")')
+          .replace(/geoShapeField/g, 'to_geoshape("POINT (30 10)")')
+          .replace(/cartesianPointField/g, 'to_cartesianpoint("POINT (30 10)")')
+          .replace(/cartesianShapeField/g, 'to_cartesianshape("POINT (30 10)")');
       }
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
@@ -572,11 +612,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1186,16 +1226,12 @@ describe('validation logic', () => {
       });
       for (const { name, signatures, ...rest } of numericOrStringFunctions) {
         const supportedSignatures = signatures.filter(({ returnType }) =>
+          // TODO — not sure why the tests have this limitation... seems like any type
+          // that can be part of a boolean expression should be allowed in a where clause
           ['number', 'string'].includes(returnType)
         );
         for (const { params, returnType, ...restSign } of supportedSignatures) {
-          const correctMapping = params
-            .filter(({ optional }) => !optional)
-            .map(({ type }) =>
-              ['number', 'string'].includes(Array.isArray(type) ? type.join(', ') : type)
-                ? { name: `${type}Field`, type }
-                : { name: `numberField`, type }
-            );
+          const correctMapping = getFieldMapping(params);
           testErrorsAndWarnings(
             `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
               // hijacking a bit this function to produce a function call
@@ -1412,15 +1448,15 @@ describe('validation logic', () => {
             }`,
             []
           );
-          if (params.some(({ literalOnly }) => literalOnly)) {
+          if (params.some(({ constantOnly }) => constantOnly)) {
             const fieldReplacedType = params
-              .filter(({ literalOnly }) => literalOnly)
+              .filter(({ constantOnly }) => constantOnly)
               .map(({ type }) => type);
             // create the mapping without the literal flag
             // this will make the signature wrong on purpose where in place on constants
             // the arg will be a column of the same type
             const fieldMappingWithoutLiterals = getFieldMapping(
-              params.map(({ literalOnly, ...rest }) => rest)
+              params.map(({ constantOnly, ...rest }) => rest)
             );
             testErrorsAndWarnings(
               `from a_index | eval ${
@@ -1455,11 +1491,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1753,6 +1789,30 @@ describe('validation logic', () => {
           }
         }
       });
+
+      describe('constant-only parameters', () => {
+        testErrorsAndWarnings('from index | eval bucket(dateField, abs(numberField), "", "")', [
+          'Argument of [bucket] must be a constant, received [abs(numberField)]',
+        ]);
+        testErrorsAndWarnings(
+          'from index | eval bucket(dateField, abs(length(numberField)), "", "")',
+          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
+        );
+        testErrorsAndWarnings('from index | eval bucket(dateField, pi(), "", "")', []);
+        testErrorsAndWarnings('from index | eval bucket(dateField, 1 + 30 / 10, "", "")', []);
+        testErrorsAndWarnings(
+          'from index | eval bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+          []
+        );
+        testErrorsAndWarnings(
+          'from index | eval bucket(dateField, numberField, stringField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+          ]
+        );
+      });
     });
 
     describe('stats', () => {
@@ -1963,15 +2023,15 @@ describe('validation logic', () => {
             );
           }
 
-          if (params.some(({ literalOnly }) => literalOnly)) {
+          if (params.some(({ constantOnly }) => constantOnly)) {
             const fieldReplacedType = params
-              .filter(({ literalOnly }) => literalOnly)
+              .filter(({ constantOnly }) => constantOnly)
               .map(({ type }) => type);
             // create the mapping without the literal flag
             // this will make the signature wrong on purpose where in place on constants
             // the arg will be a column of the same type
             const fieldMappingWithoutLiterals = getFieldMapping(
-              params.map(({ literalOnly, ...rest }) => rest)
+              params.map(({ constantOnly, ...rest }) => rest)
             );
             testErrorsAndWarnings(
               `from a_index | stats ${
@@ -2093,11 +2153,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
@@ -2105,7 +2165,7 @@ describe('validation logic', () => {
               useLiterals: false,
             });
             const nestedAggsExpectedErrors = params
-              .filter(({ literalOnly }) => !literalOnly)
+              .filter(({ constantOnly }) => !constantOnly)
               .map(
                 (_) =>
                   `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`

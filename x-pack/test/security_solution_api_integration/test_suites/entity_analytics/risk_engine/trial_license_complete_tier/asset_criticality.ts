@@ -12,6 +12,7 @@ import {
   assetCriticalityRouteHelpersFactory,
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
+  enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -26,6 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await cleanAssetCriticality({ log, es });
+      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     afterEach(async () => {
