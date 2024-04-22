@@ -7,9 +7,16 @@
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { MEMORY_USAGE_LABEL } from '../../../shared/charts/constants';
 
-export const memoryUsage: LensBaseLayer = {
+export const containerMemoryUsage: LensBaseLayer = {
   label: MEMORY_USAGE_LABEL,
   value: 'average(docker.memory.usage.pct)',
+  format: 'percent',
+  decimals: 1,
+};
+
+export const containerK8sMemoryUsage: LensBaseLayer = {
+  label: MEMORY_USAGE_LABEL,
+  value: 'average(kubernetes.container.memory.usage.limit.pct)',
   format: 'percent',
   decimals: 1,
 };

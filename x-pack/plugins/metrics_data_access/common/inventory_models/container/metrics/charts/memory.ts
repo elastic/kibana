@@ -15,7 +15,7 @@ import {
 } from '../../../shared/charts/constants';
 import { formulas } from '../formulas';
 
-const memoryUsageXY: LensConfigWithId = {
+const containerMemoryUsageXY: LensConfigWithId = {
   id: 'memoryUsage',
   chartType: 'xy',
   title: MEMORY_USAGE_LABEL,
@@ -24,7 +24,7 @@ const memoryUsageXY: LensConfigWithId = {
       seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
-      yAxis: [formulas.memoryUsage],
+      yAxis: [formulas.containerMemoryUsage],
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
@@ -33,15 +33,47 @@ const memoryUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-const memoryUsageMetric: LensConfigWithId = {
+const containerK8sMemoryUsageXY: LensConfigWithId = {
+  id: 'k8sMemoryUsage',
+  chartType: 'xy',
+  title: MEMORY_USAGE_LABEL,
+  layers: [
+    {
+      seriesType: 'line',
+      type: 'series',
+      xAxis: '@timestamp',
+      yAxis: [formulas.containerK8sMemoryUsage],
+    },
+  ],
+  ...DEFAULT_XY_FITTING_FUNCTION,
+  ...DEFAULT_XY_HIDDEN_LEGEND,
+  ...DEFAULT_XY_YBOUNDS,
+  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+};
+
+const containerMemoryUsageMetric: LensConfigWithId = {
   id: 'memoryUsage',
   chartType: 'metric',
   title: MEMORY_USAGE_LABEL,
   trendLine: true,
-  ...formulas.memoryUsage,
+  ...formulas.containerMemoryUsage,
+};
+
+const containerK8sMemoryUsageMetric: LensConfigWithId = {
+  id: 'k8sMemoryUsage',
+  chartType: 'metric',
+  title: MEMORY_USAGE_LABEL,
+  trendLine: true,
+  ...formulas.containerK8sMemoryUsage,
 };
 
 export const memory = {
-  xy: { memoryUsage: memoryUsageXY },
-  metric: { memoryUsageMetric },
+  xy: {
+    containerMemoryUsage: containerMemoryUsageXY,
+    containerK8sMemoryUsage: containerK8sMemoryUsageXY,
+  },
+  metric: {
+    containerMemoryUsage: containerMemoryUsageMetric,
+    containerK8sMemoryUsage: containerK8sMemoryUsageMetric,
+  },
 };

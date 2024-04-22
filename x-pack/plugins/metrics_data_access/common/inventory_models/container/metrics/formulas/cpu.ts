@@ -8,9 +8,16 @@
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { CPU_USAGE_LABEL } from '../../../shared/charts/constants';
 
-export const cpuUsage: LensBaseLayer = {
+export const containerCpuUsage: LensBaseLayer = {
   label: CPU_USAGE_LABEL,
   value: 'average(docker.cpu.total.pct)',
+  format: 'percent',
+  decimals: 1,
+};
+
+export const containerK8sCpuUsage: LensBaseLayer = {
+  label: CPU_USAGE_LABEL,
+  value: 'average(kubernetes.container.cpu.usage.limit.pct)',
   format: 'percent',
   decimals: 1,
 };

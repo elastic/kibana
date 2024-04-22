@@ -164,7 +164,32 @@ export const useContainerPageViewMetricsCharts = ({
   const { value: charts = [] } = useAsync(async () => {
     const { cpu, memory } = await model.metrics.getCharts();
 
-    return [cpu.xy.cpuUsage, memory.xy.memoryUsage].map((chart) => {
+    return [cpu.xy.containerCpuUsage, memory.xy.containerMemoryUsage].map((chart) => {
+      return {
+        ...chart,
+        ...(metricsDataViewId && {
+          dataset: {
+            index: metricsDataViewId,
+          },
+        }),
+      };
+    });
+  }, [metricsDataViewId]);
+
+  return charts;
+};
+
+export const useContainerK8sPageViewMetricsCharts = ({
+  metricsDataViewId,
+}: {
+  metricsDataViewId?: string;
+}) => {
+  const model = findInventoryModel('container');
+
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpu, memory } = await model.metrics.getCharts();
+
+    return [cpu.xy.containerK8sCpuUsage, memory.xy.containerK8sMemoryUsage].map((chart) => {
       return {
         ...chart,
         ...(metricsDataViewId && {

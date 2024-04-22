@@ -15,7 +15,7 @@ import {
 import { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 
-const cpuUsageXY: LensConfigWithId = {
+const containerCpuUsageXY: LensConfigWithId = {
   id: 'cpuUsage',
   chartType: 'xy',
   title: CPU_USAGE_LABEL,
@@ -24,7 +24,7 @@ const cpuUsageXY: LensConfigWithId = {
       seriesType: 'line',
       type: 'series',
       xAxis: '@timestamp',
-      yAxis: [formulas.cpuUsage],
+      yAxis: [formulas.containerCpuUsage],
     },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
@@ -33,15 +33,44 @@ const cpuUsageXY: LensConfigWithId = {
   ...DEFAULT_XY_YBOUNDS,
 };
 
-const cpuUsageMetric: LensConfigWithId = {
+const containerK8sCpuUsageXY: LensConfigWithId = {
+  id: 'k8sCpuUsage',
+  chartType: 'xy',
+  title: CPU_USAGE_LABEL,
+  layers: [
+    {
+      seriesType: 'line',
+      type: 'series',
+      xAxis: '@timestamp',
+      yAxis: [formulas.containerK8sCpuUsage],
+    },
+  ],
+  ...DEFAULT_XY_FITTING_FUNCTION,
+  ...DEFAULT_XY_HIDDEN_LEGEND,
+  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  ...DEFAULT_XY_YBOUNDS,
+};
+
+const containerCpuUsageMetric: LensConfigWithId = {
   id: 'cpuUsage',
   chartType: 'metric',
   title: CPU_USAGE_LABEL,
   trendLine: true,
-  ...formulas.cpuUsage,
+  ...formulas.containerCpuUsage,
+};
+
+const containerK8sCpuUsageMetric: LensConfigWithId = {
+  id: 'k8sCpuUsage',
+  chartType: 'metric',
+  title: CPU_USAGE_LABEL,
+  trendLine: true,
+  ...formulas.containerK8sCpuUsage,
 };
 
 export const cpu = {
-  xy: { cpuUsage: cpuUsageXY },
-  metric: { cpuUsage: cpuUsageMetric },
+  xy: { containerCpuUsage: containerCpuUsageXY, containerK8sCpuUsage: containerK8sCpuUsageXY },
+  metric: {
+    containerCpuUsage: containerCpuUsageMetric,
+    containerK8sCpuUsage: containerK8sCpuUsageMetric,
+  },
 } as const;

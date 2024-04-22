@@ -18,6 +18,7 @@ import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
 import { CollapsibleSection } from '../section/collapsible_section';
 import {
+  useContainerK8sPageViewMetricsCharts,
   useContainerPageViewMetricsCharts,
   useHostFlyoutViewMetricsCharts,
   useHostPageViewMetricsCharts,
@@ -34,7 +35,12 @@ interface Props {
 
 export const MetricsSection = (props: Props) => {
   if (props.assetType === 'container') {
-    return <ContainerMetricsSection {...props} />;
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <ContainerMetricsSection {...props} />
+        <ContainerK8sMetricsSection {...props} />
+      </EuiFlexGroup>
+    );
   }
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -117,6 +123,29 @@ const ContainerMetricsSection = ({
 }: Omit<Props, 'logsDataView'>) => {
   const model = findInventoryModel('container');
   const charts = useContainerPageViewMetricsCharts({
+    metricsDataViewId: metricsDataView?.id,
+  });
+
+  return (
+    <Section title={MetricsSectionTitle} collapsible>
+      <MetricsGrid
+        assetId={assetId}
+        dateRange={dateRange}
+        data-test-subj="infraAssetDetailsContainerMetricsChart"
+        charts={charts}
+        queryField={model.fields.name}
+      />
+    </Section>
+  );
+};
+
+const ContainerK8sMetricsSection = ({
+  assetId,
+  metricsDataView,
+  dateRange,
+}: Omit<Props, 'logsDataView'>) => {
+  const model = findInventoryModel('container');
+  const charts = useContainerK8sPageViewMetricsCharts({
     metricsDataViewId: metricsDataView?.id,
   });
 
