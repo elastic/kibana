@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { BurnRateAlert } from '../../alert_details_app_section';
 import { InstanceHistoryRecord } from '../../../../../../../common/types';
 import {
@@ -30,6 +31,16 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../../../../../common/constants';
+
+const IMPROVING_LABEL = i18n.translate(
+  'xpack.slo.burnRateRule.alertDetailsAppSection.severityHistory.improvingLabel',
+  { defaultMessage: 'Improving' }
+);
+
+const DEGRADING_LABEL = i18n.translate(
+  'xpack.slo.burnRateRule.alertDetailsAppSection.severityHistory.degradingLabel',
+  { defaultMessage: 'Degrading' }
+);
 
 interface SeverityHistoryProps {
   alert: BurnRateAlert;
@@ -43,6 +54,7 @@ interface HistoryItem {
   endedAt: Date | null;
   status: string;
   durationInMs: number;
+  suppressed?: boolean;
 }
 
 export function SeverityHistory({ alert, slo, isLoading }: SeverityHistoryProps) {
@@ -85,9 +97,12 @@ export function SeverityHistory({ alert, slo, isLoading }: SeverityHistoryProps)
       if (endedAt == null) {
         return (
           <EuiBadge color="danger">
-            {i18n.translate('xpack.slo.burnRateRule.alertDetails.activeBadgeLabel', {
-              defaultMessage: 'Active',
-            })}
+            {i18n.translate(
+              'xpack.slo.burnRateRule.alertDetailsAppSection.severityHistory.activeBadgeLabel',
+              {
+                defaultMessage: 'Active',
+              }
+            )}
           </EuiBadge>
         );
       }
@@ -115,8 +130,9 @@ export function SeverityHistory({ alert, slo, isLoading }: SeverityHistoryProps)
       severity: event.actionGroup,
       startedAt: new Date(from),
       endedAt: to !== Date.now() ? new Date(to) : null,
-      status: isImproving ? 'Improving' : 'Degrading',
+      status: isImproving ? IMPROVING_LABEL : DEGRADING_LABEL,
       durationInMs: to - from,
+      suppressed: event.suppressed,
     };
   });
 
@@ -124,8 +140,20 @@ export function SeverityHistory({ alert, slo, isLoading }: SeverityHistoryProps)
     {
       field: 'status',
       name: 'Status',
-      render: (status: string) => {
-        return <EuiBadge color={status === 'Degrading' ? 'warning' : 'success'}>{status}</EuiBadge>;
+      render: (status: string, record: HistoryItem) => {
+        if (record.suppressed) {
+          return (
+            <EuiBadge>
+              <FormattedMessage
+                id="xpack.slo.burnRateRule.alertDetailsAppSection.severityHistory.suppressedLabel"
+                defaultMessage="Suppressed"
+              />
+            </EuiBadge>
+          );
+        }
+        return (
+          <EuiBadge color={status === DEGRADING_LABEL ? 'warning' : 'success'}>{status}</EuiBadge>
+        );
       },
     },
     {

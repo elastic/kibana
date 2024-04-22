@@ -75,8 +75,8 @@ export default function AlertDetailsAppSection({
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <ErrorRatePanel alert={alert} slo={slo} isLoading={isLoading} />
-      <CustomAlertDetailsPanel alert={alert} slo={slo} rule={rule} />
       <SeverityHistory alert={alert} slo={slo} isLoading={isLoading} />
+      <CustomAlertDetailsPanel alert={alert} slo={slo} rule={rule} />
       <AlertsHistoryPanel alert={alert} rule={rule} slo={slo} isLoading={isLoading} />
     </EuiFlexGroup>
   );
