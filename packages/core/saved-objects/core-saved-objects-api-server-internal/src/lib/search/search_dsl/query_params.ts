@@ -218,6 +218,7 @@ export function getQueryParams({
 
   if (search) {
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
+    // TODO: I would guess mappings are always present except in test. Check this.
     if (mappings) {
       const searchStringQuery = getSearchStringQuery({
         search,
@@ -396,6 +397,7 @@ const getSearchStringQuery = ({
     }
   }
 
+  // TODO: what if nestedFields is empty?
   const nestedQuery = getNestedQueryStringClause({
     path: nestedFields[0], // `${types[0]}`, // TODO: the path would be cases.customFields. We need to create one per nestedFields value
     search,

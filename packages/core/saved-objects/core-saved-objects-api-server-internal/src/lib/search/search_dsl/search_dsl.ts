@@ -85,6 +85,7 @@ export function getSearchDsl(
       hasNoReference,
       hasNoReferenceOperator,
       kueryNode,
+      mappings,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
     ...(pit ? getPitParams(pit) : {}),
