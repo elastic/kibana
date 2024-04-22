@@ -47,7 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
       return {};
     }
   };
-  describe('delete_slo', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/180982
+  describe.skip('delete_slo', () => {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
