@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
@@ -25,7 +25,7 @@ export interface DiscoverContainerInternalProps {
    *  already consumes.
    */
   overrideServices: Partial<DiscoverServices>;
-  getDiscoverServices: () => Promise<DiscoverServices>;
+  getDiscoverServices: () => DiscoverServices;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
@@ -59,23 +59,17 @@ export const DiscoverContainerInternal = ({
   stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
-  const [discoverServices, setDiscoverServices] = useState<DiscoverServices>();
+  const [discoverServices] = useState<DiscoverServices>(() => getDiscoverServices());
 
-  useEffect(() => {
-    getDiscoverServices().then(setDiscoverServices);
-  }, [getDiscoverServices]);
-
-  const services = useMemo<DiscoverServices | undefined>(() => {
-    return discoverServices
-      ? {
-          ...discoverServices,
-          ...overrideServices,
-          getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
-        }
-      : undefined;
+  const services = useMemo<DiscoverServices>(() => {
+    return {
+      ...discoverServices,
+      ...overrideServices,
+      getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
+    };
   }, [discoverServices, overrideServices, scopedHistory]);
 
-  if (!services || isLoading) {
+  if (isLoading) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
         <LoadingIndicator type="spinner" />
