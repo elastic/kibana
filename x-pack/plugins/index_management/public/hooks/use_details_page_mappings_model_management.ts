@@ -9,11 +9,11 @@ import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/servic
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useCallback, useMemo } from 'react';
 import { useAppContext } from '../application/app_context';
-import { useComponentTemplatesContext } from '../application/components/component_templates/component_templates_context';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
 import { deNormalize } from '../application/components/mappings_editor/lib';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
 import { NormalizedFields } from '../application/components/mappings_editor/types';
+import { getInferenceModels } from '../application/services/api';
 
 interface InferenceModel {
   data: InferenceAPIConfigResponse[];
@@ -77,16 +77,15 @@ export const useDetailsPageMappingsModelManagement = (
     plugins: { ml },
   } = useAppContext();
 
-  const { api } = useComponentTemplatesContext();
   const dispatch = useDispatch();
 
   const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
-    const inferenceModels = await api.getInferenceModels();
+    const inferenceModels = await getInferenceModels();
 
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
 
     return { inferenceModels, trainedModelStats };
-  }, [api, ml]);
+  }, [ml]);
 
   const fetchInferenceToModelIdMap = useCallback(async () => {
     const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();

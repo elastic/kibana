@@ -442,6 +442,13 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
   });
 }
 
+export function getInferenceModels() {
+  return sendRequest({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
+  });
+}
+
 export function createTextEmbeddingInference(inferenceId: string, trainedModelId: string) {
   return sendRequest({
     path: `${API_BASE_PATH}/inference/text_embedding/${encodeURIComponent(inferenceId)}`,

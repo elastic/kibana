@@ -35,25 +35,21 @@ jest.mock('../application/app_context', () => ({
   }),
 }));
 
-jest.mock('../application/components/component_templates/component_templates_context', () => ({
-  useComponentTemplatesContext: () => ({
-    api: {
-      getInferenceModels: jest.fn().mockResolvedValue({
-        data: [
-          {
-            model_id: 'e5',
-            task_type: 'text_embedding',
-            service: 'elasticsearch',
-            service_settings: {
-              num_allocations: 1,
-              num_threads: 1,
-              model_id: '.multilingual-e5-small',
-            },
-            task_settings: {},
-          },
-        ],
-      }),
-    },
+jest.mock('../application/services/api', () => ({
+  getInferenceModels: jest.fn().mockResolvedValue({
+    data: [
+      {
+        model_id: 'e5',
+        task_type: 'text_embedding',
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: '.multilingual-e5-small',
+        },
+        task_settings: {},
+      },
+    ],
   }),
 }));
 
