@@ -17,23 +17,14 @@ export async function getLatestApmPackage({
   request: KibanaRequest;
 }) {
   const packageClient = fleetPluginStart.packageService.asScoped(request);
-  const latestPackage = await packageClient.fetchFindLatestPackage(
-    APM_PACKAGE_NAME
-  );
+  const latestPackage = await packageClient.fetchFindLatestPackage(APM_PACKAGE_NAME);
   const packageInfo =
     'getBuffer' in latestPackage
       ? (await packageClient.readBundledPackage(latestPackage)).packageInfo
       : latestPackage;
-  const {
-    name,
-    version,
-    title,
-    policy_templates: policyTemplates,
-  } = packageInfo;
+  const { name, version, title, policy_templates: policyTemplates } = packageInfo;
   const firstTemplate = policyTemplates?.[0];
   const policyTemplateInputVars =
-    firstTemplate && 'inputs' in firstTemplate
-      ? firstTemplate.inputs?.[0].vars || []
-      : [];
+    firstTemplate && 'inputs' in firstTemplate ? firstTemplate.inputs?.[0].vars || [] : [];
   return { package: { name, version, title }, policyTemplateInputVars };
 }

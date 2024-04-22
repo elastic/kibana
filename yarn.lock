@@ -1752,10 +1752,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.6.0":
-  version "93.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.6.0.tgz#9a5892164a4457ba0382a76b63731eeed10dfb89"
-  integrity sha512-o6TEgSE+mOJmZYtMm+xYMeFQoOcoGTQOMWwRBCkP1efEPAlqjeBnUeahco8jKM3kqTeah+jMLm/A02ZjRwU+GA==
+"@elastic/eui@94.1.0-backport.0":
+  version "94.1.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.1.0-backport.0.tgz#93ad707b12785a7e0198af333cdee8d1acdcf35e"
+  integrity sha512-WFUpYBUgbJfcJInjhyQpOYGFs7JGpBMwpgmbRbKmyf3bJb0yqZeaiL5Qwyk6hOl8j1CSRvcaWOT/P33JxdrV3w==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.202"
@@ -4964,6 +4964,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
   version "0.0.0"
   uid ""
@@ -6249,10 +6253,6 @@
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
-  version "0.0.0"
-  uid ""
-
-"@kbn/solution-nav-analytics@link:packages/solution-nav/analytics":
   version "0.0.0"
   uid ""
 

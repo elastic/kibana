@@ -6,11 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  asRelativeDateTimeRange,
-  asAbsoluteDateTime,
-  getDateDifference,
-} from './datetime';
+import { asRelativeDateTimeRange, asAbsoluteDateTime, getDateDifference } from './datetime';
 
 describe('date time formatters', () => {
   beforeAll(() => {
@@ -18,8 +14,7 @@ describe('date time formatters', () => {
   });
   afterAll(() => moment.tz.setDefault(''));
   describe('asRelativeDateTimeRange', () => {
-    const formatDateToTimezone = (dateTimeString: string) =>
-      moment(dateTimeString).valueOf();
+    const formatDateToTimezone = (dateTimeString: string) => moment(dateTimeString).valueOf();
     describe('YYYY - YYYY', () => {
       it('range: 10 years', () => {
         const start = formatDateToTimezone('2000-01-01 10:01:01');
@@ -113,17 +108,13 @@ describe('date time formatters', () => {
         const start = formatDateToTimezone('2019-10-29 10:01:01.001');
         const end = formatDateToTimezone('2019-10-29 10:01:10.002');
         const dateRange = asRelativeDateTimeRange(start, end);
-        expect(dateRange).toEqual(
-          'Oct 29, 2019, 10:01:01.001 - 10:01:10.002 (UTC+1)'
-        );
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01.001 - 10:01:10.002 (UTC+1)');
       });
       it('range: 1 second', () => {
         const start = formatDateToTimezone('2019-10-29 10:01:01.001');
         const end = formatDateToTimezone('2019-10-29 10:01:02.002');
         const dateRange = asRelativeDateTimeRange(start, end);
-        expect(dateRange).toEqual(
-          'Oct 29, 2019, 10:01:01.001 - 10:01:02.002 (UTC+1)'
-        );
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01.001 - 10:01:02.002 (UTC+1)');
       });
     });
   });
@@ -133,23 +124,17 @@ describe('date time formatters', () => {
 
     it('should add a leading plus for timezones with positive UTC offset', () => {
       moment.tz.setDefault('Europe/Copenhagen');
-      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe(
-        'Jun 1, 2019, 14:00 (UTC+2)'
-      );
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 14:00 (UTC+2)');
     });
 
     it('should add a leading minus for timezones with negative UTC offset', () => {
       moment.tz.setDefault('America/Los_Angeles');
-      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe(
-        'Jun 1, 2019, 05:00 (UTC-7)'
-      );
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 05:00 (UTC-7)');
     });
 
     it('should use default UTC offset formatting when offset contains minutes', () => {
       moment.tz.setDefault('Canada/Newfoundland');
-      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe(
-        'Jun 1, 2019, 09:30 (UTC-02:30)'
-      );
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 09:30 (UTC-02:30)');
     });
 
     it('should respect DST', () => {
@@ -157,13 +142,9 @@ describe('date time formatters', () => {
       const timeWithDST = 1559390400000; //  Jun 1, 2019
       const timeWithoutDST = 1575201600000; //  Dec 1, 2019
 
-      expect(asAbsoluteDateTime(timeWithDST)).toBe(
-        'Jun 1, 2019, 14:00:00.000 (UTC+2)'
-      );
+      expect(asAbsoluteDateTime(timeWithDST)).toBe('Jun 1, 2019, 14:00:00.000 (UTC+2)');
 
-      expect(asAbsoluteDateTime(timeWithoutDST)).toBe(
-        'Dec 1, 2019, 13:00:00.000 (UTC+1)'
-      );
+      expect(asAbsoluteDateTime(timeWithoutDST)).toBe('Dec 1, 2019, 13:00:00.000 (UTC+1)');
     });
 
     it('milliseconds', () => {
@@ -175,46 +156,34 @@ describe('date time formatters', () => {
 
     it('seconds', () => {
       moment.tz.setDefault('Europe/Copenhagen');
-      expect(asAbsoluteDateTime(1559390400000, 'seconds')).toBe(
-        'Jun 1, 2019, 14:00:00 (UTC+2)'
-      );
+      expect(asAbsoluteDateTime(1559390400000, 'seconds')).toBe('Jun 1, 2019, 14:00:00 (UTC+2)');
     });
 
     it('minutes', () => {
       moment.tz.setDefault('Europe/Copenhagen');
-      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe(
-        'Jun 1, 2019, 14:00 (UTC+2)'
-      );
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 14:00 (UTC+2)');
     });
 
     it('hours', () => {
       moment.tz.setDefault('Europe/Copenhagen');
-      expect(asAbsoluteDateTime(1559390400000, 'hours')).toBe(
-        'Jun 1, 2019, 14 (UTC+2)'
-      );
+      expect(asAbsoluteDateTime(1559390400000, 'hours')).toBe('Jun 1, 2019, 14 (UTC+2)');
     });
   });
   describe('getDateDifference', () => {
     it('milliseconds', () => {
       const start = moment('2019-10-29 08:00:00.001');
       const end = moment('2019-10-29 08:00:00.005');
-      expect(
-        getDateDifference({ start, end, unitOfTime: 'milliseconds' })
-      ).toEqual(4);
+      expect(getDateDifference({ start, end, unitOfTime: 'milliseconds' })).toEqual(4);
     });
     it('seconds', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 08:00:10');
-      expect(getDateDifference({ start, end, unitOfTime: 'seconds' })).toEqual(
-        10
-      );
+      expect(getDateDifference({ start, end, unitOfTime: 'seconds' })).toEqual(10);
     });
     it('minutes', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 08:15:00');
-      expect(getDateDifference({ start, end, unitOfTime: 'minutes' })).toEqual(
-        15
-      );
+      expect(getDateDifference({ start, end, unitOfTime: 'minutes' })).toEqual(15);
     });
     it('hours', () => {
       const start = moment('2019-10-29 08:00:00');
@@ -229,9 +198,7 @@ describe('date time formatters', () => {
     it('months', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-12-29 08:00:00');
-      expect(getDateDifference({ start, end, unitOfTime: 'months' })).toEqual(
-        2
-      );
+      expect(getDateDifference({ start, end, unitOfTime: 'months' })).toEqual(2);
     });
     it('years', () => {
       const start = moment('2019-10-29 08:00:00');
@@ -241,9 +208,9 @@ describe('date time formatters', () => {
     it('precise days', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-30 10:00:00');
-      expect(
-        getDateDifference({ start, end, unitOfTime: 'days', precise: true })
-      ).toEqual(1.0833333333333333);
+      expect(getDateDifference({ start, end, unitOfTime: 'days', precise: true })).toEqual(
+        1.0833333333333333
+      );
     });
   });
 });
