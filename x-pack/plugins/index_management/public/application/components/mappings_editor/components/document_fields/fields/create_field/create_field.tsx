@@ -13,13 +13,12 @@ import {
   EuiOutsideClickDetector,
   EuiSpacer,
 } from '@elastic/eui';
-import { NotificationsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import { Field } from '../../../../types';
 import { createTextEmbeddingInference } from '../../../../../../services/api';
+import { useComponentTemplatesContext } from '../../../../../component_templates/component_templates_context';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
@@ -31,7 +30,7 @@ import {
   useForm,
   useFormData,
 } from '../../../../shared_imports';
-import { MainType, NormalizedFields } from '../../../../types';
+import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
@@ -52,7 +51,6 @@ export interface SemanticTextInfo {
   isSemanticTextEnabled?: boolean;
   indexName?: string;
   ml?: MlPluginStart;
-  toasts?: NotificationsSetup['toasts'];
   setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>>;
 }
 interface Props {
@@ -91,9 +89,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   isAddingFields,
   semanticTextInfo,
 }: Props) {
-  const { isSemanticTextEnabled, indexName, ml, toasts, setErrorsInTrainedModelDeployment } =
+  const { isSemanticTextEnabled, indexName, ml, setErrorsInTrainedModelDeployment } =
     semanticTextInfo ?? {};
   const { inferenceToModelIdMap } = useMappingsState();
+
+  const { toasts } = useComponentTemplatesContext();
 
   const dispatch = useDispatch();
 

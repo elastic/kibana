@@ -30,7 +30,6 @@ import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } f
 import { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
-import { useComponentTemplatesContext } from '../../../../components/component_templates/component_templates_context';
 import { DocumentFields } from '../../../../components/mappings_editor/components';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
 import { FieldsList } from '../../../../components/mappings_editor/components/document_fields/fields';
@@ -89,7 +88,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     plugins: { ml },
     url,
   } = useAppContext();
-  const { toasts } = useComponentTemplatesContext();
 
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
@@ -98,7 +96,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     isSemanticTextEnabled,
     indexName: index.name,
     ml,
-    toasts,
     setErrorsInTrainedModelDeployment,
   };
 
