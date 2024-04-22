@@ -40,6 +40,8 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
 
+import { useLogRateAnalysisStateContext } from '../log_rate_analysis_state_provider';
+
 import { BrushBadge } from './brush_badge';
 
 declare global {
@@ -88,6 +90,11 @@ export type BrushSelectionUpdateHandler = (
 ) => void;
 
 /**
+ * Callback to set the autoRunAnalysis flag
+ */
+type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
+
+/**
  * Props for document count chart
  */
 export interface DocumentCountChartProps {
@@ -118,9 +125,11 @@ export interface DocumentCountChartProps {
   chartPointsSplitLabel: string;
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
+  /** Callback to set the autoRunAnalysis flag */
+  setAutoRunAnalysis?: SetAutoRunAnalysisFn;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
-  /** Optional style to override bar chart  */
+  /** Optional style to override bar chart */
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
@@ -181,6 +190,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     interval,
     chartPointsSplitLabel,
     isBrushCleared,
+    setAutoRunAnalysis,
     autoAnalysisStart,
     barColorOverride,
     barStyleAccessor,
@@ -305,6 +315,17 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
+          if (setAutoRunAnalysis) {
+            const autoRun =
+              typeof startRange !== 'number' ||
+              (typeof startRange === 'number' &&
+                changePoint !== undefined &&
+                startRange >= changePoint.startTs &&
+                startRange <= changePoint.endTs);
+
+            setAutoRunAnalysis(autoRun);
+          }
+
           const wp = getWindowParametersForTrigger(
             startRange,
             interval,
@@ -333,6 +354,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       timeRangeLatest,
       snapTimestamps,
       originalWindowParameters,
+      setAutoRunAnalysis,
       setWindowParameters,
       brushSelectionUpdateHandler,
       adjustedChartPoints,
@@ -533,5 +555,26 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         </Chart>
       </div>
     </>
+  );
+};
+
+/**
+ * Functional component that renders a `DocumentCountChart` with additional properties
+ * managed by the log rate analysis state. It leverages the `useLogRateAnalysisStateContext`
+ * to acquire state variables like `initialAnalysisStart` and functions such as
+ * `setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.
+ *
+ * @param props - The properties passed to the DocumentCountChart component.
+ * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
+ */
+export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
+  const { initialAnalysisStart, setAutoRunAnalysis } = useLogRateAnalysisStateContext();
+
+  return (
+    <DocumentCountChart
+      {...props}
+      autoAnalysisStart={initialAnalysisStart}
+      setAutoRunAnalysis={setAutoRunAnalysis}
+    />
   );
 };
