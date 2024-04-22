@@ -11,6 +11,9 @@ import { getCypressBaseConfig } from './cypress_base.config';
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig(
   getCypressBaseConfig({
+    e2e: {
+      experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
+    },
     env: {
       // Uncomment to enable logging
       // TOOLING_LOG_LEVEL: 'verbose',
