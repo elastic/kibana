@@ -11,7 +11,6 @@ import { CONNECTORS_LABEL } from '../common/i18n_string';
 
 export const navigationTree: NavigationTreeDefinition = {
   body: [
-    { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'search_project_nav',
