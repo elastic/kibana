@@ -64,10 +64,18 @@ export class EntityStoreDataClient {
   public async init({
     taskManager,
     config,
+    logger,
   }: {
     taskManager: TaskManagerStartContract;
     config: EntityAnalyticsConfig['entityStore'];
+    logger: Logger;
   }) {
+    const demoMode = config.demoMode;
+
+    if (demoMode) {
+      logger.warn('Initializing entity store in demo mode');
+    }
+
     await createOrUpdateIndex({
       esClient: this.options.esClient,
       logger: this.options.logger,
@@ -77,7 +85,7 @@ export class EntityStoreDataClient {
       },
     });
 
-    const taskInterval = config.demoMode ? '30s' : '2m';
+    const taskInterval = demoMode ? '30s' : '2m';
 
     await startEntityStoreTask({
       logger: this.options.logger,
@@ -86,7 +94,7 @@ export class EntityStoreDataClient {
       interval: taskInterval,
     });
 
-    const transformInterval = config.demoMode ? '1m' : '15m';
+    const transformInterval = demoMode ? '1m' : '15m';
 
     await maybeCreateAndStartEntityTransform({
       client: this.options.esClient,
