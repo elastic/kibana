@@ -16,7 +16,7 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-export const FleetServerMissingPrivileges = () => {
+export const FleetServerMissingKbnPrivileges = () => {
   return (
     <Panel data-test-subj="fleetServerMissingPrivilegesPrompt">
       <EuiEmptyPrompt
@@ -32,10 +32,11 @@ export const FleetServerMissingPrivileges = () => {
         body={
           <p data-test-subj="fleetServerMissingPrivilegesMessage">
             <FormattedMessage
-              id="xpack.fleet.fleetServerSetupPermissionDeniedErrorMessage"
-              defaultMessage="Fleet Server needs to be set up. This requires the {roleName} cluster privilege. Contact your administrator."
+              id="xpack.fleet.fleetServerSetupKbnPermissionDeniedErrorMessage"
+              defaultMessage="Fleet Server needs to be set up. This requires the Kibana Fleet {agentPrivilegeName} and {settingsPrivilegeName} privileges. Contact your administrator."
               values={{
-                roleName: <EuiCode>&quot;manage_service_account&quot;</EuiCode>,
+                agentPrivilegeName: <EuiCode>&quot;agents: all&quot;</EuiCode>,
+                settingsPrivilegeName: <EuiCode>&quot;settings: all&quot;</EuiCode>,
               }}
             />
           </p>
