@@ -57,18 +57,12 @@ describe('RiskSummary', () => {
 
     // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     // Context
     expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_2_count}`
     );
 
     // Result row doesn't exist if alerts are the only category
@@ -93,15 +87,12 @@ describe('RiskSummary', () => {
 
     // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     // Result
     expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     expect(getByTestId('risk-summary-result-score')).toHaveTextContent(

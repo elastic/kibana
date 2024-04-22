@@ -11,7 +11,7 @@ import { TelemetryEventTypes } from '../../constants';
 export const DocumentDetailsFlyoutOpenedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.DetailsFlyoutOpened,
   schema: {
-    tableId: {
+    location: {
       type: 'text',
       _meta: {
         description: 'Table ID',
@@ -31,7 +31,7 @@ export const DocumentDetailsFlyoutOpenedEvent: TelemetryEvent = {
 export const DocumentDetailsTabClickedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.DetailsFlyoutTabClicked,
   schema: {
-    tableId: {
+    location: {
       type: 'text',
       _meta: {
         description: 'Table ID',
