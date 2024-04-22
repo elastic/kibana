@@ -102,7 +102,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
           label: String(annotation.doc_count),
           key: {
             type: 'point_in_time',
-            timestamp: moment(new Date(annotation.key_as_string!)).toISOString(),
+            timestamp: moment(new Date(annotation.key_as_string!)).add(10, 'h').toISOString(),
           },
           lineWidth: 2,
           color: euiTheme.colors.danger,
