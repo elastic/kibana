@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
     const dataStreamName = 'test-data-stream-1';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       ({
         helpers: {
