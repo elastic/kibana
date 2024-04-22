@@ -8,7 +8,9 @@ import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const fixedQueryByOneAction = async (queryString: string) => {
-  const { errors } = await validateQuery(queryString, getAstAndSyntaxErrors);
+  const { errors } = await validateQuery(queryString, getAstAndSyntaxErrors, {
+    ignoreOnMissingCallbacks: true,
+  });
 
   const actions = await getActions(queryString, errors, getAstAndSyntaxErrors, {
     relaxOnMissingCallbacks: true,
