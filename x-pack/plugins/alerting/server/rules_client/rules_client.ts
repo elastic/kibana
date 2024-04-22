@@ -15,7 +15,7 @@ import { createRule, CreateRuleParams } from '../application/rule/methods/create
 import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
-import { get, GetParams } from './methods/get';
+import { getRule, GetRuleParams } from '../application/rule/methods/get';
 import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
 import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
@@ -128,8 +128,8 @@ export class RulesClient {
   public delete = (params: { id: string }) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
     find<Params>(this.context, params);
-  public get = <Params extends RuleTypeParams = never>(params: GetParams) =>
-    get<Params>(this.context, params);
+  public get = <Params extends RuleTypeParams = never>(params: GetRuleParams) =>
+    getRule<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
     resolveRule<Params>(this.context, params);
   public update = <Params extends RuleTypeParams = never>(params: UpdateRuleParams<Params>) =>

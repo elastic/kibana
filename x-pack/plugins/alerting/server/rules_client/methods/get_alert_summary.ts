@@ -12,7 +12,7 @@ import { alertSummaryFromEventLog } from '../../lib/alert_summary_from_event_log
 import { parseDuration } from '../../../common/parse_duration';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetAlertSummaryParams {
@@ -26,7 +26,7 @@ export async function getAlertSummary(
   { id, dateStart, numberOfExecutions }: GetAlertSummaryParams
 ): Promise<AlertSummary> {
   context.logger.debug(`getAlertSummary(): getting alert ${id}`);
-  const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   await context.authorization.ensureAuthorized({
     ruleTypeId: rule.alertTypeId,
