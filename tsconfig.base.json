@@ -956,6 +956,8 @@
       "@kbn/index-management-plugin/*": ["x-pack/plugins/index_management/*"],
       "@kbn/index-patterns-test-plugin": ["test/plugin_functional/plugins/index_patterns"],
       "@kbn/index-patterns-test-plugin/*": ["test/plugin_functional/plugins/index_patterns/*"],
+      "@kbn/inference_integration_flyout": ["x-pack/packages/ml/inference_integration_flyout"],
+      "@kbn/inference_integration_flyout/*": ["x-pack/packages/ml/inference_integration_flyout/*"],
       "@kbn/infra-forge": ["x-pack/packages/kbn-infra-forge"],
       "@kbn/infra-forge/*": ["x-pack/packages/kbn-infra-forge/*"],
       "@kbn/infra-plugin": ["x-pack/plugins/observability_solution/infra"],
