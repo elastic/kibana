@@ -29,8 +29,7 @@ export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
-export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(
-  ({ children }: { children?: React.ReactNode }) => {
+export const MlCapabilitiesProvider = React.memo<{ children: React.ReactNode }>(({ children }) => {
     const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
       emptyMlCapabilitiesProvider
     );
