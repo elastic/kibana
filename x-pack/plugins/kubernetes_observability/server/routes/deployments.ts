@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue} from '../lib/utils';
+import {extractFieldValue, phaseToState} from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     DEPLOYMENT_STATUS_ROUTE,
@@ -71,22 +71,81 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
         const replicasAvailable = extractFieldValue(fields['metrics.k8s.deployment.available']);
         const replicasdesired = extractFieldValue(fields['metrics.k8s.deployment.desired']);
         var message = '';
+        var reason = '';
+        const time = extractFieldValue(fields['@timestamp']);
         if (replicasAvailable == replicasdesired) {
              message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has as many replicas available as desired`;
+             return response.ok({
+                body: {
+                  time: time,
+                  message: message,
+                  replicasAvailable: replicasAvailable,
+                  replicasDesired:replicasdesired,
+                  name: request.query.deployment_name,
+                  namespace: request.query.namespace,
+                  reason: reason,
+                },
+              });
         } else {
-            message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has ${replicasdesired} replicas but ${replicasAvailable} are available`;
+            const musts = [
+                {
+                    term: {
+                      'resource.attributes.k8s.deployment.name': request.query.deployment_name,
+                    },
+                  },
+                  {
+                    term: {
+                      'resource.attributes.k8s.namespace.name': request.query.namespace,
+                    },
+                  },
+                  { exists: { field: 'metrics.k8s.pod.phase' } }
+              ];
+            var size: number = +replicasdesired;
+            const dslPods: estypes.SearchRequest = {
+                index: ["metrics-otel.*"],
+                size: size,
+                sort: [{ '@timestamp': 'desc' }],
+                _source: false,
+                fields: [
+                  '@timestamp',
+                  'metrics.k8s.pod.phase',
+                  'resource.attributes.k8s.*',
+                ],
+                query: {
+                  bool: {
+                    must: musts,
+                  },
+                },
+                aggs: {
+                    unique_values: {
+                        terms: { field: 'resource.attributes.k8s.pod.name' },
+                    },
+                  },
+            };
+            const esResponsePods = await client.search(dslPods);
+            const hits = esResponsePods.hits.hits;
+            for (const hit of hits) {
+                const { fields = {} } = hit;
+                const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
+                const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
+                message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has ${replicasdesired} replicas but ${replicasAvailable} are available`;
+                if (podPhase !== 2 && podPhase !== 3) {
+                    const state = phaseToState(podPhase);
+                    reason = `Pod ${request.query.namespace}/${podName} is in ${state} state`;
+                    return response.ok({
+                        body: {
+                          time: time,
+                          message: message,
+                          replicasAvailable: replicasAvailable,
+                          replicasDesired:replicasdesired,
+                          name: request.query.deployment_name,
+                          namespace: request.query.namespace,
+                          reason: reason,
+                        },
+                      });
+                }
+            }
         }
-        const time = extractFieldValue(fields['@timestamp']);
-        return response.ok({
-          body: {
-            time: time,
-            message: message,
-            replicasAvailable: replicasAvailable,
-            replicasDesired:replicasdesired,
-            name: request.query.deployment_name,
-            namespace: request.query.namespace,
-          },
-        });
       }
     );
 };
