@@ -104,7 +104,7 @@ function isValidColumnName(column: string) {
 }
 
 function escapeColumns(line: string) {
-  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/) ?? ['', '', ''];
+  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/s) ?? ['', '', ''];
 
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {

@@ -1327,7 +1327,7 @@ describe('Observability AI Assistant client', () => {
 
       await nextTick();
 
-      for (let i = 0; i <= maxFunctionCalls; i++) {
+      for (let i = 0; i <= maxFunctionCalls + 1; i++) {
         await requestAlertsFunctionCall();
       }
 

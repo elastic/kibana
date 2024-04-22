@@ -23,8 +23,10 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
+import { ESQLSearchReponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+import { validateEsqlQuery } from './validate_esql_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -105,18 +107,33 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       } as const,
     },
     async ({ arguments: { query } }) => {
-      const response = await (
-        await resources.context.core
-      ).elasticsearch.client.asCurrentUser.transport.request({
+      const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
+      const { error, errorMessages } = await validateEsqlQuery({
+        query,
+        client,
+      });
+
+      if (!!error) {
+        return {
+          content: {
+            message: 'The query failed to execute',
+            error,
+            errorMessages,
+          },
+        };
+      }
+      const response = (await client.transport.request({
         method: 'POST',
         path: '_query',
         body: {
           query,
           version: ESQL_LATEST_VERSION,
         },
-      });
+      })) as ESQLSearchReponse;
 
-      return { content: response };
+      return {
+        content: response,
+      };
     }
   );
   functions.registerFunction(
@@ -153,10 +170,16 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
               Extract data? Request \`DISSECT\` AND \`GROK\`.
               Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
 
+              ONLY use ${VisualizeESQLUserIntention.executeAndReturnResults} if you are absolutely sure
+              it is executable. If one of the get_dataset_info functions were not called before, OR if
+              one of the get_dataset_info functions returned no data, opt for an explanation only and
+              mention that there is no data for these indices. You can still use
+              ${VisualizeESQLUserIntention.generateQueryOnly} and generate an example ES|QL query.
+
               For determining the intention of the user, the following options are available:
 
               ${VisualizeESQLUserIntention.generateQueryOnly}: the user only wants to generate the query,
-              but not run it.
+              but not run it, or they ask a general question about ES|QL.
 
               ${VisualizeESQLUserIntention.executeAndReturnResults}: the user wants to execute the query,
               and have the assistant return/analyze/summarize the results. they don't need a

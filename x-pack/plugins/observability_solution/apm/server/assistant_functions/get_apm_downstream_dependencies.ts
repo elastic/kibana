@@ -38,7 +38,8 @@ export function registerGetApmDownstreamDependenciesFunction({
           },
           'service.environment': {
             type: 'string',
-            description: 'The environment that the service is running in',
+            description:
+              'The environment that the service is running in. Leave empty to query for all environments.',
           },
           start: {
             type: 'string',

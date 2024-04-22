@@ -14,11 +14,12 @@ import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { findLastIndex, last, merge, noop, omit, pick, take } from 'lodash';
 import {
-  catchError,
   filter,
+  identity,
   isObservable,
   last as lastOperator,
   lastValueFrom,
+  map,
   Observable,
   shareReplay,
   tap,
@@ -31,9 +32,7 @@ import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
   createConversationNotFoundError,
-  createFunctionLimitExceededError,
   createTokenLimitReachedError,
-  isFunctionNotFoundError,
   MessageAddEvent,
   StreamingChatResponseEventType,
   TokenCountEvent,
@@ -63,14 +62,15 @@ import {
   RecalledEntry,
 } from '../knowledge_base_service';
 import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
+import { catchFunctionLimitExceededError } from '../util/catch_function_limit_exceeded_error';
 import { getAccessQuery } from '../util/get_access_query';
+import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { rejectTokenCountEvents } from '../util/reject_token_count_events';
+import { replaceSystemMessage } from '../util/replace_system_message';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
+import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
-import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
-import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
-import { replaceSystemMessage } from '../util/replace_system_message';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -292,7 +292,7 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages.concat(contextFunctionRequest));
           } else if (isUserMessage) {
-            const functionCallsExceeded = numFunctionsCalled >= MAX_FUNCTION_CALLS;
+            const functionCallsExceeded = numFunctionsCalled > MAX_FUNCTION_CALLS;
             const functions = functionCallsExceeded ? [] : allFunctions.concat(allActions);
 
             const spanName =
@@ -317,12 +317,7 @@ export class ObservabilityAIAssistantClient {
             ).pipe(
               emitWithConcatenatedMessage(),
               shareReplay(),
-              catchError((error) => {
-                if (isFunctionNotFoundError(error) && functions.length === 0) {
-                  throw createFunctionLimitExceededError();
-                }
-                throw error;
-              })
+              Boolean(functions.length) ? identity : catchFunctionLimitExceededError()
             );
 
             response$.subscribe({
@@ -337,6 +332,18 @@ export class ObservabilityAIAssistantClient {
                   (event): event is MessageAddEvent =>
                     event.type === StreamingChatResponseEventType.MessageAdd
                 ),
+                // LLMs like to hallucinate parameters if the function does not define
+                // them, and it can lead to other hallicunations down the line
+                map((messageEvent) => {
+                  const fnName = messageEvent.message.message.function_call?.name;
+
+                  if (fnName && !functions.find((fn) => fn.name === fnName)?.parameters) {
+                    const clone = { ...messageEvent };
+                    clone.message.message.function_call!.arguments = '';
+                    return clone;
+                  }
+                  return messageEvent;
+                }),
                 toArray()
               )
             );

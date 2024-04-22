@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { isArray, pick, remove } from 'lodash';
-import { concatMap, filter, lastValueFrom, toArray } from 'rxjs';
-import { format, parse, UrlObject } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
+import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
+import { isArray, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
-import { Message, MessageRole } from '../../common';
+import {
+  concatMap,
+  defer,
+  filter,
+  from,
+  lastValueFrom,
+  of,
+  OperatorFunction,
+  retry,
+  switchMap,
+  timer,
+  toArray,
+} from 'rxjs';
+import { format, parse, UrlObject } from 'url';
+import { inspect } from 'util';
+import { ChatCompletionErrorCode, isChatCompletionError, Message, MessageRole } from '../../common';
 import { isSupportedConnectorType } from '../../common/connectors';
 import {
   BufferFlushEvent,
@@ -21,15 +34,14 @@ import {
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
-  TokenCountEvent,
 } from '../../common/conversation_complete';
+import { FunctionDefinition } from '../../common/functions/types';
 import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
 import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
 import { EvaluationResult } from './types';
-import { FunctionDefinition } from '../../common/functions/types';
 
 // eslint-disable-next-line spaced-comment
 /// <reference types="@kbn/ambient-ftr-types"/>
@@ -201,6 +213,61 @@ export class KibanaClient {
       unregister: () => void;
     }> = [];
 
+    function serializeAndHandleRetryableErrors<
+      T extends StreamingChatResponseEvent
+    >(): OperatorFunction<Buffer, Exclude<T, ChatCompletionErrorEvent>> {
+      return (source$) => {
+        const processed$ = source$.pipe(
+          concatMap((buffer: Buffer) =>
+            buffer
+              .toString('utf-8')
+              .split('\n')
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((line) => JSON.parse(line) as T | BufferFlushEvent)
+          ),
+          throwSerializedChatCompletionErrors(),
+          retry({
+            count: 1,
+            delay: (error) => {
+              that.log.error('Error in stream');
+
+              if (isAxiosError(error)) {
+                that.log.error(
+                  inspect(
+                    {
+                      message: error.message,
+                      status: error.status,
+                      response: error.response?.data,
+                    },
+                    { depth: 10 }
+                  )
+                );
+              } else {
+                that.log.error(inspect(error, { depth: 10 }));
+              }
+
+              if (
+                isChatCompletionError(error) &&
+                error.code !== ChatCompletionErrorCode.InternalError
+              ) {
+                that.log.info(`Not retrying error ${error.code}`);
+                return of();
+              }
+              that.log.info(`Retrying in 5s`);
+              return timer(5000);
+            },
+          }),
+          filter(
+            (event): event is Exclude<T, ChatCompletionErrorEvent> =>
+              event.type !== StreamingChatResponseEventType.BufferFlush
+          )
+        );
+
+        return processed$;
+      };
+    }
+
     async function chat(
       name: string,
       {
@@ -215,46 +282,37 @@ export class KibanaClient {
         connectorIdOverride?: string;
       }
     ) {
-      const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
-        {
-          name,
-          messages,
-          connectorId: connectorIdOverride || connectorId,
-          functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
-          functionCall,
-        };
-      const stream$ = streamIntoObservable(
-        (
-          await that.axios.post(
-            that.getUrl({
-              pathname: '/internal/observability_ai_assistant/chat',
-            }),
-            params,
-            { responseType: 'stream', timeout: NaN }
-          )
-        ).data
-      ).pipe(
-        concatMap((buffer: Buffer) =>
-          buffer
-            .toString('utf-8')
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean)
-            .map(
-              (line) =>
-                JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent | TokenCountEvent
-            )
-        ),
+      that.log.info('Chat', name);
+
+      const chat$ = defer(() => {
+        that.log.debug(`Calling chat API`);
+        const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
+          {
+            name,
+            messages,
+            connectorId: connectorIdOverride || connectorId,
+            functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
+            functionCall,
+          };
+
+        return that.axios.post(
+          that.getUrl({
+            pathname: '/internal/observability_ai_assistant/chat',
+          }),
+          params,
+          { responseType: 'stream', timeout: NaN }
+        );
+      }).pipe(
+        switchMap((response) => streamIntoObservable(response.data)),
+        serializeAndHandleRetryableErrors(),
         filter(
-          (line): line is ChatCompletionChunkEvent | ChatCompletionErrorEvent =>
-            line.type === StreamingChatResponseEventType.ChatCompletionChunk ||
-            line.type === StreamingChatResponseEventType.ChatCompletionError
+          (line): line is ChatCompletionChunkEvent =>
+            line.type === StreamingChatResponseEventType.ChatCompletionChunk
         ),
-        throwSerializedChatCompletionErrors(),
         concatenateChatCompletionChunks()
       );
 
-      const message = await lastValueFrom(stream$);
+      const message = await lastValueFrom(chat$);
 
       return message.message;
     }
@@ -273,6 +331,7 @@ export class KibanaClient {
         return chat('chat', { messages, functions: functionDefinitions });
       },
       complete: async (...args) => {
+        that.log.info(`Complete`);
         let messagesArg: StringOrMessageList;
         let conversationId: string | undefined;
         let options: Options = {};
@@ -306,9 +365,10 @@ export class KibanaClient {
           })),
         ];
 
-        const stream$ = streamIntoObservable(
-          (
-            await that.axios.post(
+        const stream$ = defer(() => {
+          that.log.debug(`Calling /chat/complete API`);
+          return from(
+            that.axios.post(
               that.getUrl({
                 pathname: '/internal/observability_ai_assistant/chat/complete',
               }),
@@ -322,28 +382,17 @@ export class KibanaClient {
               },
               { responseType: 'stream', timeout: NaN }
             )
-          ).data
-        ).pipe(
-          concatMap((buffer: Buffer) =>
-            buffer
-              .toString('utf-8')
-              .split('\n')
-              .map((line) => line.trim())
-              .filter(Boolean)
-              .map(
-                (line) =>
-                  JSON.parse(line) as
-                    | StreamingChatResponseEvent
-                    | BufferFlushEvent
-                    | TokenCountEvent
-              )
-          ),
+          );
+        }).pipe(
+          switchMap((response) => {
+            return streamIntoObservable(response.data);
+          }),
+          serializeAndHandleRetryableErrors(),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
               event.type === StreamingChatResponseEventType.ConversationCreate
           ),
-          throwSerializedChatCompletionErrors(),
           toArray()
         );
 
@@ -397,7 +446,9 @@ export class KibanaClient {
                 
                 This is the conversation:
                 
-                ${JSON.stringify(messages)}`,
+                ${JSON.stringify(
+                  messages.map((msg) => pick(msg, 'content', 'name', 'function_call', 'role'))
+                )}`,
               },
             },
           ],

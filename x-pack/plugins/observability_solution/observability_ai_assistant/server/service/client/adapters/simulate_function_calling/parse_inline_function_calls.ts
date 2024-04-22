@@ -43,13 +43,15 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
       function parseFunctionCall(id: string, buffer: string) {
         logger.debug('Parsing function call:\n' + buffer);
 
-        const functionCallBody = buffer
-          .replace(TOOL_USE_START, '')
-          .replace(TOOL_USE_END, '')
-          .trim()
-          .replace(/^```(json?)/, '')
-          .replace(/```$/, '')
-          .trim();
+        const match = buffer.match(
+          /<\|tool_use_start\|>\s*```json\n?(.*?)(\n```\s*).*<\|tool_use_end\|>/s
+        );
+
+        const functionCallBody = match?.[1];
+
+        if (!functionCallBody) {
+          throw createInternalServerError(`Invalid function call syntax`);
+        }
 
         const parsedFunctionCall = JSON.parse(functionCallBody) as {
           name?: string;

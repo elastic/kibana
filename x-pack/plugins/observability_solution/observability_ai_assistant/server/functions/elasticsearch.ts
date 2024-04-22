@@ -46,7 +46,7 @@ export function registerElasticsearchFunction({
         body,
       });
 
-      return { content: response };
+      return { content: { response } };
     }
   );
 }
