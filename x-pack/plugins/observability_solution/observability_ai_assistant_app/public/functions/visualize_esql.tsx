@@ -16,7 +16,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { getESQLAdHocDataviewFromESQLQuery } from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -84,6 +84,8 @@ interface VisualizeESQLProps {
   columns: DatatableColumn[];
   /** The ES|QL query */
   query: string;
+  // indexPattern parsed from query
+  indexPattern: string;
   /** Actions handler */
   onActionClick: ChatActionClickHandler;
   /** Optional, overwritten ES|QL Lens chart attributes
@@ -112,14 +114,17 @@ export function VisualizeESQL({
   preferredChartType,
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
+  indexPattern,
 }: VisualizeESQLProps) {
+  // fetch the pattern from the query
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataviewFromESQLQuery(query, dataViews);
-  }, [query]);
+    return getESQLAdHocDataview(indexPattern, dataViews);
+  }, [indexPattern]);
+
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -409,6 +414,10 @@ export function registerVisualizeQueryRenderFunction({
 
       const trimmedQuery = query.trim();
 
+      const indexPatternAsync = useAsync(() => {
+        return getIndexPatternFromESQLQuery(query);
+      }, [query]);
+
       return (
         <VisualizeESQL
           ObservabilityAIAssistantMultipaneFlyoutContext={
@@ -423,6 +432,7 @@ export function registerVisualizeQueryRenderFunction({
           userOverrides={userOverrides}
           preferredChartType={preferredChartType}
           errorMessages={errorMessages}
+          indexPattern={indexPatternAsync?.value ?? ''}
         />
       );
     }

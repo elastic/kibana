@@ -7,11 +7,7 @@
  */
 
 export { TextBasedLanguages } from './types';
-export {
-  getESQLAdHocDataview,
-  getIndexForESQLQuery,
-  getESQLAdHocDataviewFromESQLQuery,
-} from './utils/get_esql_adhoc_dataview';
+export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {

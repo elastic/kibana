@@ -7,7 +7,6 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { getIndexPatternFromESQLQuery } from './query_parsing_helpers';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -32,18 +31,6 @@ export async function getESQLAdHocDataview(
   indexPattern: string,
   dataViewsService: DataViewsPublicPluginStart
 ) {
-  return await dataViewsService.create({
-    title: indexPattern,
-    type: ESQL_TYPE,
-    id: await sha256(`esql-${indexPattern}`),
-  });
-}
-
-export async function getESQLAdHocDataviewFromESQLQuery(
-  queryString: string,
-  dataViewsService: DataViewsPublicPluginStart
-) {
-  const indexPattern = await getIndexPatternFromESQLQuery(queryString);
   return await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
