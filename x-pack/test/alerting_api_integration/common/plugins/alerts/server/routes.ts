@@ -398,6 +398,26 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: `/api/alerts_fixture/api_key_invalidation/_run_soon`,
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = `Alerts-alerts_invalidate_api_keys`;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
   router.get(
     {
       path: '/api/alerts_fixture/rule/{id}/_get_api_key',

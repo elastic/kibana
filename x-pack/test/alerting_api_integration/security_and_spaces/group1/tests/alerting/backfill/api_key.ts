@@ -30,6 +30,10 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
   describe('backfill api key invalidation', () => {
     const objectRemover = new ObjectRemover(supertest);
 
+    beforeEach(async () => {
+      await runInvalidateTask();
+    });
+
     after(() => objectRemover.removeAll());
 
     async function getAdHocRunSO(id: string) {
@@ -38,6 +42,14 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         id: `ad_hoc_run_params:${id}`,
       });
       return result._source;
+    }
+
+    async function runInvalidateTask() {
+      // Invoke the invalidate API key task
+      await supertest
+        .post('/api/alerts_fixture/api_key_invalidation/_run_soon')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
     }
 
     async function getApiKeysPendingInvalidation() {
@@ -208,6 +220,9 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         return results;
       });
 
+      // invoke the invalidate task
+      await runInvalidateTask();
+
       // wait until one of the api_key_pending_invalidation SOs is deleted
       await retry.try(async () => {
         const results = await getApiKeysPendingInvalidation();
@@ -231,6 +246,9 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       for (const e of executeBackfillEvents) {
         expect(e?.event?.outcome).to.eql('success');
       }
+
+      // invoke the invalidate task
+      await runInvalidateTask();
 
       // pending API key should now be deleted because backfill is done
       await retry.try(async () => {

@@ -20,6 +20,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
+      loadTestFile(require.resolve('./backfill'));
       loadTestFile(require.resolve('./find'));
       loadTestFile(require.resolve('./find_with_post'));
       loadTestFile(require.resolve('./create'));
@@ -34,7 +35,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./retain_api_key'));
       loadTestFile(require.resolve('./bulk_untrack'));
       loadTestFile(require.resolve('./bulk_untrack_by_query'));
-      loadTestFile(require.resolve('./backfill'));
     });
   });
 }
