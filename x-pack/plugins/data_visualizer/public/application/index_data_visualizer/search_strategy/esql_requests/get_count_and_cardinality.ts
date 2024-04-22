@@ -102,6 +102,7 @@ const getESQLOverallStatsInChunk = async ({
     countQuery += fieldsToFetch.map((field) => field.query).join(',');
 
     const query = esqlBaseQueryWithLimit + (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery;
+
     const request = {
       params: {
         query,

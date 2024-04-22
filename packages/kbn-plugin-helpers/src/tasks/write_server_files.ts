@@ -53,6 +53,7 @@ export async function writeServerFiles({
           '**/*.{test,test.mocks,mock,mocks}.*',
         ],
         allowEmpty: true,
+        encoding: false,
       }
     ),
 

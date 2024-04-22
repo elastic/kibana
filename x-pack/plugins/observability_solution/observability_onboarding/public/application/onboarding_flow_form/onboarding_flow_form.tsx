@@ -44,8 +44,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
-          defaultMessage:
-            'Detect patterns, troubleshoot in real time, gain insights from logs.',
+          defaultMessage: 'Detect patterns, troubleshoot in real time, gain insights from logs.',
         }
       ),
     },
@@ -58,8 +57,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
-          defaultMessage:
-            'Collect distributed traces and catch application performance problems.',
+          defaultMessage: 'Collect distributed traces and catch application performance problems.',
         }
       ),
     },
@@ -136,9 +134,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() =>
-                setSearchParams({ category: option.id }, { replace: true })
-              }
+              onChange={() => setSearchParams({ category: option.id }, { replace: true })}
             />
           </EuiFlexItem>
         ))}
@@ -157,9 +153,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {Array.isArray(customCards) && (
-            <OnboardingFlowPackageList customCards={customCards} />
-          )}
+          {Array.isArray(customCards) && <OnboardingFlowPackageList customCards={customCards} />}
 
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
@@ -184,10 +178,7 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
-  title,
-  iconType,
-}) => (
+const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />

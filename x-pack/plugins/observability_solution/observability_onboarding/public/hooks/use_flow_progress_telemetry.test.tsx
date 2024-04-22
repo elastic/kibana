@@ -43,9 +43,7 @@ describe('useFlowProgressTelemetry', () => {
       ),
     }));
 
-    expect(render.result.current.analytics.reportEvent).toHaveBeenCalledTimes(
-      1
-    );
+    expect(render.result.current.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(render.result.current.analytics.reportEvent).toHaveBeenCalledWith(
       'observability_onboarding',
       {
@@ -60,10 +58,7 @@ describe('useFlowProgressTelemetry', () => {
   it('does not trigger an event for unsupported steps', () => {
     const render = renderHook(() => ({
       analytics: useKibana().services.analytics,
-      flowProgress: useFlowProgressTelemetry(
-        { 'ea-extract': { status: 'complete' } },
-        'test-flow'
-      ),
+      flowProgress: useFlowProgressTelemetry({ 'ea-extract': { status: 'complete' } }, 'test-flow'),
     }));
 
     expect(render.result.current.analytics.reportEvent).not.toHaveBeenCalled();
@@ -80,8 +75,6 @@ describe('useFlowProgressTelemetry', () => {
 
     render.rerender();
 
-    expect(render.result.current.analytics.reportEvent).toHaveBeenCalledTimes(
-      1
-    );
+    expect(render.result.current.analytics.reportEvent).toHaveBeenCalledTimes(1);
   });
 });

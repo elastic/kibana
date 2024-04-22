@@ -90,9 +90,7 @@ export const fetchDurationRanges = async ({
         key: d.from,
         doc_count: d.doc_count,
       }))
-      .filter(
-        (d): d is { key: number; doc_count: number } => d.key !== undefined
-      ) ?? [];
+      .filter((d): d is { key: number; doc_count: number } => d.key !== undefined) ?? [];
 
   return {
     totalDocCount: sumBy(durationRanges, 'doc_count'),

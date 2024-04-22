@@ -8,10 +8,7 @@
 import { EuiPopover, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../../../common/es_fields/apm';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../../hooks/use_theme';
@@ -77,16 +74,13 @@ export function ErrorMarker({ mark }: Props) {
   const query = {
     kuery: [
       ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
-      ...(error.transaction?.id
-        ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`]
-        : []),
+      ...(error.transaction?.id ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`] : []),
     ].join(' and '),
     rangeFrom,
     rangeTo,
   };
 
-  const errorMessage =
-    error.error.log?.message || error.error.exception?.[0]?.message;
+  const errorMessage = error.error.log?.message || error.error.exception?.[0]?.message;
   const truncatedErrorMessage = truncateMessage(errorMessage);
 
   return (
