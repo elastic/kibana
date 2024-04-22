@@ -6,16 +6,81 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from '@kbn/apm-synthtrace-client';
+import { appendHash, Fields } from '@kbn/apm-synthtrace-client';
+import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/oam/service_assets';
+import { Duplex, PassThrough } from 'stream';
 
 export function createAssetsAggregatorFactory<TFields extends Fields>() {
-  return function <TAsset extends Record<string, any>, TOutput extends Record<string, any>>({
-    filter,
-    getAggregateKey,
-    init,
-  }: {
-    filter: (event: TFields) => boolean;
-    getAggregateKey: (event: TFields) => string;
-    init: (event: TFields) => TAsset;
-  }) {};
+  return function <TAsset extends Record<string, any>, TOutput extends Record<string, any>>(
+    {
+      filter,
+      getAggregateKey,
+      init,
+    }: {
+      filter: (event: TFields) => boolean;
+      getAggregateKey: (event: TFields) => string;
+      init: (event: TFields) => ServiceAssetDocument;
+    },
+    reduce: (asset: ServiceAssetDocument, event: TFields) => void,
+    serialize: (asset: ServiceAssetDocument) => TOutput
+  ) {
+    const assets: Map<string, ServiceAssetDocument> = new Map();
+
+    let toFlush: TAsset[] = [];
+    let cb: (() => void) | undefined;
+
+    function flush(stream: Duplex, callback?: () => void) {
+      const allItems = [...assets.values()];
+
+      toFlush = [];
+
+      while (allItems.length) {
+        const next = allItems.shift()!;
+        const serialized = serialize(next);
+        const shouldWriteNext = stream.push(serialized);
+        if (!shouldWriteNext) {
+          // toFlush = allItems;
+          cb = callback;
+          return;
+        }
+      }
+
+      const next = cb;
+      cb = undefined;
+      next?.();
+      callback?.();
+    }
+
+    return new PassThrough({
+      objectMode: true,
+      read() {
+        flush(this, cb);
+      },
+      final(callback) {
+        flush(this, callback);
+      },
+      write(event: TFields, encoding, callback) {
+        if (!filter(event)) {
+          callback();
+          return;
+        }
+
+        function createAssetAggregator() {
+          const key = appendHash(getAggregateKey(event), '');
+
+          let asset = assets.get(key);
+
+          if (!asset) {
+            asset = init({ ...event });
+            assets.set(key, asset);
+          }
+
+          reduce(asset, event);
+          callback();
+        }
+
+        createAssetAggregator();
+      },
+    });
+  };
 }

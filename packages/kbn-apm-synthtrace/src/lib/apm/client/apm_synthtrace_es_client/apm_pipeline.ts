@@ -11,6 +11,7 @@ import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
 import { Logger } from '../../../utils/create_logger';
 import { fork } from '../../../utils/stream_utils';
+import { createAPMAssetsAggregator } from '../../aggregators/create_assets_aggregator';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createServiceMetricsAggregator } from '../../aggregators/create_service_metrics_aggregator';
 import { createServiceSummaryMetricsAggregator } from '../../aggregators/create_service_summary_metrics_aggregator';
@@ -35,6 +36,7 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
       createSpanMetricsAggregator('1m'),
       createSpanMetricsAggregator('10m'),
       createSpanMetricsAggregator('60m'),
+      createAPMAssetsAggregator(),
     ];
 
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
