@@ -178,6 +178,7 @@ const RequiredFieldRowInner = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow>
           <EuiComboBox
+            data-test-subj={`requiredFieldNameSelect-${field.value.name || 'empty'}`}
             aria-label="Field name"
             placeholder="Field name"
             singleSelection={{ asPlainText: true }}
@@ -199,6 +200,7 @@ const RequiredFieldRowInner = ({
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiComboBox
+            data-test-subj={`requiredFieldTypeSelect-${field.value.type || 'empty'}`}
             isDisabled={
               !selectedTypeOption ||
               selectedTypeOption.label === '' ||
@@ -229,6 +231,7 @@ const RequiredFieldRowInner = ({
             iconType="trash"
             onClick={onRemove}
             aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+            data-test-subj={`removeRequiredFieldButton-${field.value.name}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
