@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { skip, take } from 'rxjs/operators';
+import { skip, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';

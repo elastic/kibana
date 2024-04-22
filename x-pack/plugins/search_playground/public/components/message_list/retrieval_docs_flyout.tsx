@@ -32,7 +32,7 @@ interface RetrievalDocsFlyoutProps {
 
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 const truncateFields = (doc: Doc) =>
-  Object.entries(doc)
+  Object.entries({ context: doc.content, score: doc.metadata._score })
     .slice(0, RESULT_FIELDS_TRUNCATE_AT)
     .map(([field, value]) => ({ field, value }));
 
@@ -71,7 +71,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
       ),
       render: (value: unknown) => (
         <EuiCodeBlock paddingSize="none" transparentBackground fontSize="m">
-          {(typeof value === 'string' ? value : JSON.stringify(value)).slice(0, 255)}
+          {value}
         </EuiCodeBlock>
       ),
     },
@@ -92,7 +92,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
           <p>
             {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDoc.subtitle', {
               defaultMessage:
-                'The documents that were referenced in order to create an answer to your query',
+                'The documents that were referenced in order to create an answer to your query. You can change the context field using the Edit Context button.',
             })}
           </p>
         </EuiText>
@@ -100,7 +100,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
           {retrievalDocs.map((doc) => (
-            <EuiPanel key={doc.id} paddingSize="m">
+            <EuiPanel key={doc.metadata._id} paddingSize="m">
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <code>
@@ -108,7 +108,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                       'xpack.searchPlayground.chat.message.assistant.retrievalDoc.result.id',
                       {
                         defaultMessage: 'ID: {id}',
-                        values: { id: doc.id },
+                        values: { id: doc.metadata._id },
                       }
                     )}
                   </code>
@@ -122,7 +122,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                           }
                         )}
                       </code>
-                      <EuiBadge color="primary">workplace_index</EuiBadge>
+                      <EuiBadge color="primary">{doc.metadata._index}</EuiBadge>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>

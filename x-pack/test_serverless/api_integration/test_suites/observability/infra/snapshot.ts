@@ -36,8 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('API /metrics/snapshot', () => {
     describe('Snapshot nodes', () => {
       const { min, max } = DATES.serverlessTestingHost;
-      before(() => esArchiver.load(ARCHIVE_NAME));
-      after(() => esArchiver.unload(ARCHIVE_NAME));
+      before(async () => esArchiver.load(ARCHIVE_NAME));
+      after(async () => esArchiver.unload(ARCHIVE_NAME));
 
       it('should work', async () => {
         const snapshot = await fetchSnapshot({

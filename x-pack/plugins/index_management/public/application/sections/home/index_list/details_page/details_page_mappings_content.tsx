@@ -70,12 +70,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
+  isSemanticTextEnabled?: boolean;
+}> = ({
+  index,
+  data,
+  jsonData,
+  refetchMapping,
+  showAboutMappings,
+  isSemanticTextEnabled = false,
+}) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
   } = useAppContext();
-
   const state = useMappingsState();
   const dispatch = useDispatch();
 
@@ -445,7 +452,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           {errorSavingMappings}
           {isAddingFields && (
             <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder>
+              <EuiPanel hasBorder paddingSize="s">
                 <EuiAccordion
                   id={pendingFieldListId}
                   initialIsOpen
@@ -476,14 +483,20 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     </EuiPanel>
                   }
                 >
-                  <EuiPanel hasShadow={false}>
+                  <EuiPanel hasShadow={false} paddingSize="s">
                     {newFieldsLength <= 0 ? (
                       <DocumentFields
                         onCancelAddingNewFields={onCancelAddingNewFields}
                         isAddingFields={isAddingFields}
+                        isSemanticTextEnabled={isSemanticTextEnabled}
+                        indexName={indexName}
                       />
                     ) : (
-                      <DocumentFields isAddingFields={isAddingFields} />
+                      <DocumentFields
+                        isAddingFields={isAddingFields}
+                        isSemanticTextEnabled={isSemanticTextEnabled}
+                        indexName={indexName}
+                      />
                     )}
                   </EuiPanel>
                 </EuiAccordion>

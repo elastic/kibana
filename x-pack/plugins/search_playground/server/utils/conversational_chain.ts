@@ -7,7 +7,6 @@
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Document } from '@langchain/core/documents';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
@@ -16,6 +15,7 @@ import {
   experimental_StreamData,
   Message as VercelChatMessage,
 } from 'ai';
+import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from './render_template';
 
@@ -27,11 +27,12 @@ interface RAGOptions {
   retriever: (question: string) => object;
   doc_context?: string;
   hit_doc_mapper?: (hit: SearchHit) => Document;
-  content_field?: string;
+  content_field: string | Record<string, string>;
+  size?: number;
 }
 
 interface ConversationalChainOptions {
-  model: BaseChatModel;
+  model: BaseLanguageModel;
   prompt: string;
   rag?: RAGOptions;
 }
@@ -74,16 +75,16 @@ class ConversationalChainFn {
     const question = messages[messages.length - 1]!.content;
     const retrievedDocs: Document[] = [];
 
-    let retrievalChain: Runnable = RunnableLambda.from((input) => '');
+    let retrievalChain: Runnable = RunnableLambda.from(() => '');
 
     if (this.options.rag) {
       const retriever = new ElasticsearchRetriever({
         retriever: this.options.rag.retriever,
         index: this.options.rag.index,
         client: client.getClient(),
-        content_field: this.options.rag.content_field ?? 'text',
+        content_field: this.options.rag.content_field,
         hit_doc_mapper: this.options.rag.hit_doc_mapper ?? undefined,
-        k: 3,
+        k: this.options.rag.size ?? 3,
       });
 
       const buildContext = (docs: Document[]) => {
@@ -106,11 +107,15 @@ class ConversationalChainFn {
       retrievalChain = retriever.pipe(buildContext);
     }
 
-    const standaloneQuestionChain = RunnableSequence.from([
-      condenseQuestionPrompt,
-      this.options.model,
-      new StringOutputParser(),
-    ]);
+    let standaloneQuestionChain: Runnable = RunnableLambda.from((input) => input.question);
+
+    if (previousMessages.length > 0) {
+      standaloneQuestionChain = RunnableSequence.from([
+        condenseQuestionPrompt,
+        this.options.model,
+        new StringOutputParser(),
+      ]);
+    }
 
     const prompt = ChatPromptTemplate.fromTemplate(this.options.prompt);
 

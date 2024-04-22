@@ -196,10 +196,11 @@ export class SecurityPlugin
 
     const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
+    this.sessionTimeout = new SessionTimeout(core, notifications, sessionExpired, http, tenant);
 
     this.sessionTimeout.start();
     this.securityCheckupService.start({ http, notifications, docLinks });
+    this.securityApiClients.userProfiles.start();
 
     if (management) {
       this.managementService.start({
@@ -231,7 +232,12 @@ export class SecurityPlugin
         update: this.securityApiClients.userProfiles.update.bind(
           this.securityApiClients.userProfiles
         ),
+        partialUpdate: this.securityApiClients.userProfiles.partialUpdate.bind(
+          this.securityApiClients.userProfiles
+        ),
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
+        userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
+        enabled$: this.securityApiClients.userProfiles.enabled$,
       },
     };
   }

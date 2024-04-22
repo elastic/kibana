@@ -19,7 +19,7 @@ These files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
     These can be found in the `SHASUMS256.txt` file inside the public `kibana-custom-node-artifacts` GCP bucket.
-    Example for Node.js v20.11.1: https://storage.googleapis.com/kibana-custom-node-artifacts/node-glibc-217/dist/v20.11.1/SHASUMS256.txt[kibana-custom-node-artifacts/node-glibc-217/dist/v20.11.1/SHASUMS256.txt]
+    Example for Node.js v20.12.2: https://storage.googleapis.com/kibana-custom-node-artifacts/node-glibc-217/dist/v20.12.2/SHASUMS256.txt[kibana-custom-node-artifacts/node-glibc-217/dist/v20.12.2/SHASUMS256.txt]
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
@@ -43,7 +43,7 @@ The only difference between the offical Node.js build and our custom build, is t
 ==== How to start a new build
 
 To generate a new custom Node.js build, https://buildkite.com/elastic/kibana-custom-node-dot-js-builds#new[start a new build] on our dedicated Buildkite pipeline (requires Elastic employee permissions).
-Give it a clear name (e.g. `Node 20.11.1`) and remember so set the custom `OVERRIDE_TARGET_VERSION` environment variable to the desired Node.js version - e.g. `OVERRIDE_TARGET_VERSION=20.11.1`.
+Give it a clear name (e.g. `Node 20.12.2`) and remember so set the custom `OVERRIDE_TARGET_VERSION` environment variable to the desired Node.js version - e.g. `OVERRIDE_TARGET_VERSION=20.12.2`.
 You find the "Environment Variables" field by expanding "Options >" in the "New Build" dialog.
 
 === Backporting

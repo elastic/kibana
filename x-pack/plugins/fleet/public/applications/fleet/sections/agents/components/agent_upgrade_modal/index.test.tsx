@@ -169,6 +169,46 @@ describe('AgentUpgradeAgentModal', () => {
       });
     });
 
+    it('should display invalid input if version is not a valid semver', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        fireEvent.input(input, { target: { value: '8.14' } });
+        expect(
+          utils.getByText('Invalid version, please use a valid semver version, e.g. 8.14.0')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should not display invalid input if version is a valid semver', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        fireEvent.input(input, { target: { value: '8.14.0+build123456789' } });
+        expect(
+          utils.queryByText('Invalid version, please use a valid semver version, e.g. 8.14.0')
+        ).toBeNull();
+      });
+    });
+
     it('should display available version options', async () => {
       mockSendGetAgentsAvailableVersions.mockClear();
       mockSendGetAgentsAvailableVersions.mockResolvedValue({

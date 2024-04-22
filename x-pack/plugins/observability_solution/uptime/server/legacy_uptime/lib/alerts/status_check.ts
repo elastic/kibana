@@ -160,6 +160,7 @@ export const getMonitorSummary = (
     checkedAt,
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
+    configId: monitorInfo.config_id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
     monitorType: monitorInfo.monitor?.type,
     latestErrorMessage: monitorInfo.error?.message,
@@ -204,6 +205,7 @@ export const getReasonMessage = ({
 
 export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
   'monitor.id': monitorSummary.monitorId,
+  configId: monitorSummary.configId,
   'monitor.type': monitorSummary.monitorType,
   'monitor.name': monitorSummary.monitorName,
   'url.full': monitorSummary.monitorUrl,

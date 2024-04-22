@@ -15,7 +15,7 @@ import { promisify } from 'util';
 import Tar from 'tar';
 import Yauzl, { ZipFile, Entry } from 'yauzl';
 import * as Rx from 'rxjs';
-import { map, mergeMap, takeUntil } from 'rxjs/operators';
+import { map, mergeMap, takeUntil } from 'rxjs';
 
 const strComplete = (obs: Rx.Observable<unknown>) =>
   new Promise<void>((resolve, reject) => {

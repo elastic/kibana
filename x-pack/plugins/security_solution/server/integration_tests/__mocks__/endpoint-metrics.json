@@ -1,0 +1,2534 @@
+[
+  {
+    "agent": {
+      "build": {
+        "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+      },
+      "id": "123",
+      "type": "endpoint",
+      "version": "8.6.0"
+    },
+    "@timestamp": "2024-01-26T14:38:30.628421712Z",
+    "Endpoint": {
+      "metrics": {
+        "system_impact": [
+          {
+            "process": {
+              "executable": "/usr/bin/amazon-ssm-agent"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 36
+            },
+            "process_events": {
+              "week_idle_ms": 5,
+              "week_ms": 12487
+            },
+            "overall": {
+              "week_idle_ms": 5,
+              "week_ms": 12523
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/ps"
+            },
+            "process_events": {
+              "week_idle_ms": 8692,
+              "week_ms": 10288
+            },
+            "overall": {
+              "week_idle_ms": 8692,
+              "week_ms": 10288
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/sshd"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 116
+            },
+            "process_events": {
+              "week_idle_ms": 3621,
+              "week_ms": 7204
+            },
+            "network_events": {
+              "week_idle_ms": 97,
+              "week_ms": 0
+            },
+            "overall": {
+              "week_idle_ms": 3718,
+              "week_ms": 7320
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/dhclient-script"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 430
+            },
+            "process_events": {
+              "week_idle_ms": 152054,
+              "week_ms": 6229
+            },
+            "overall": {
+              "week_idle_ms": 152054,
+              "week_ms": 6659
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/crond"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 73
+            },
+            "process_events": {
+              "week_idle_ms": 9491,
+              "week_ms": 2060
+            },
+            "overall": {
+              "week_idle_ms": 9491,
+              "week_ms": 2133
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 80958,
+              "week_ms": 1963
+            },
+            "process": {
+              "executable": "/usr/lib/systemd/systemd"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 23
+            },
+            "process_events": {
+              "week_idle_ms": 6,
+              "week_ms": 7
+            },
+            "overall": {
+              "week_idle_ms": 80964,
+              "week_ms": 1993
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/logger"
+            },
+            "process_events": {
+              "week_idle_ms": 25156,
+              "week_ms": 1097
+            },
+            "overall": {
+              "week_idle_ms": 25156,
+              "week_ms": 1097
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 12,
+              "week_ms": 0
+            },
+            "process": {
+              "executable": "/usr/lib64/sa/sadc"
+            },
+            "process_events": {
+              "week_idle_ms": 4182,
+              "week_ms": 1005
+            },
+            "overall": {
+              "week_idle_ms": 4194,
+              "week_ms": 1005
+            }
+          },
+          {
+            "process": {
+              "executable": "unknown"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 981
+            },
+            "overall": {
+              "week_idle_ms": 0,
+              "week_ms": 981
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/date"
+            },
+            "process_events": {
+              "week_idle_ms": 8682,
+              "week_ms": 856
+            },
+            "overall": {
+              "week_idle_ms": 8682,
+              "week_ms": 856
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 89949,
+              "week_ms": 835
+            },
+            "process": {
+              "executable": "/usr/lib/systemd/systemd-logind (deleted)"
+            },
+            "overall": {
+              "week_idle_ms": 89949,
+              "week_ms": 835
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/cat"
+            },
+            "process_events": {
+              "week_idle_ms": 28801,
+              "week_ms": 754
+            },
+            "overall": {
+              "week_idle_ms": 28801,
+              "week_ms": 754
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/lib64/sa/sa1"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 69
+            },
+            "process_events": {
+              "week_idle_ms": 7188,
+              "week_ms": 637
+            },
+            "overall": {
+              "week_idle_ms": 7188,
+              "week_ms": 706
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/cut"
+            },
+            "process_events": {
+              "week_idle_ms": 7258,
+              "week_ms": 660
+            },
+            "overall": {
+              "week_idle_ms": 7258,
+              "week_ms": 660
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/ipcalc"
+            },
+            "process_events": {
+              "week_idle_ms": 6603,
+              "week_ms": 477
+            },
+            "overall": {
+              "week_idle_ms": 6603,
+              "week_ms": 477
+            }
+          },
+          {
+            "process": {
+              "executable": "/sbin/ip"
+            },
+            "process_events": {
+              "week_idle_ms": 14654,
+              "week_ms": 470
+            },
+            "overall": {
+              "week_idle_ms": 14654,
+              "week_ms": 470
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/curl"
+            },
+            "process_events": {
+              "week_idle_ms": 4696,
+              "week_ms": 432
+            },
+            "network_events": {
+              "week_idle_ms": 3120,
+              "week_ms": 20
+            },
+            "overall": {
+              "week_idle_ms": 7816,
+              "week_ms": 452
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/run-parts"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 66
+            },
+            "process_events": {
+              "week_idle_ms": 4219,
+              "week_ms": 354
+            },
+            "overall": {
+              "week_idle_ms": 4219,
+              "week_ms": 420
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/dhclient"
+            },
+            "process_events": {
+              "week_idle_ms": 3,
+              "week_ms": 326
+            },
+            "overall": {
+              "week_idle_ms": 3,
+              "week_ms": 326
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/sh"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 51
+            },
+            "process_events": {
+              "week_idle_ms": 2569,
+              "week_ms": 239
+            },
+            "overall": {
+              "week_idle_ms": 2569,
+              "week_ms": 290
+            }
+          }
+        ],
+        "memory": {
+          "endpoint": {
+            "private": {
+              "mean": 119318921,
+              "latest": 136073216
+            }
+          }
+        },
+        "disks": [
+          {
+            "total": 0,
+            "free": 0,
+            "device": "sysfs",
+            "mount": "/sys",
+            "fstype": "sysfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "proc",
+            "mount": "/proc",
+            "fstype": "proc"
+          },
+          {
+            "total": 4157120512,
+            "free": 4157120512,
+            "device": "devtmpfs",
+            "mount": "/dev",
+            "fstype": "devtmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "securityfs",
+            "mount": "/sys/kernel/security",
+            "fstype": "securityfs"
+          },
+          {
+            "total": 4166328320,
+            "free": 4166328320,
+            "device": "tmpfs",
+            "mount": "/dev/shm",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "devpts",
+            "mount": "/dev/pts",
+            "fstype": "devpts"
+          },
+          {
+            "total": 4166328320,
+            "free": 4165955584,
+            "device": "tmpfs",
+            "mount": "/run",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 4166328320,
+            "free": 4166328320,
+            "device": "tmpfs",
+            "mount": "/sys/fs/cgroup",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/systemd",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "pstore",
+            "mount": "/sys/fs/pstore",
+            "fstype": "pstore"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/devices",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/cpu,cpuacct",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/perf_event",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/pids",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/blkio",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/net_cls,net_prio",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/freezer",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/memory",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/cpuset",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/hugetlb",
+            "fstype": "cgroup"
+          },
+          {
+            "endpoint_drive": true,
+            "total": 8577331200,
+            "free": 1841799168,
+            "device": "/dev/xvda1",
+            "mount": "/",
+            "fstype": "xfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "mqueue",
+            "mount": "/dev/mqueue",
+            "fstype": "mqueue"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "hugetlbfs",
+            "mount": "/dev/hugepages",
+            "fstype": "hugetlbfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "debugfs",
+            "mount": "/sys/kernel/debug",
+            "fstype": "debugfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "sunrpc",
+            "mount": "/var/lib/nfs/rpc_pipefs",
+            "fstype": "rpc_pipefs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "systemd-1",
+            "mount": "/proc/sys/fs/binfmt_misc",
+            "fstype": "autofs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "binfmt_misc",
+            "mount": "/proc/sys/fs/binfmt_misc",
+            "fstype": "binfmt_misc"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "tracefs",
+            "mount": "/sys/kernel/debug/tracing",
+            "fstype": "tracefs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "none",
+            "mount": "/sys/fs/bpf",
+            "fstype": "bpf"
+          }
+        ],
+        "documents_volume": {
+          "file_events": {
+            "suppressed_count": 3928398,
+            "suppressed_bytes": 0,
+            "sent_count": 0,
+            "sent_bytes": 0
+          },
+          "process_events": {
+            "suppressed_count": 0,
+            "suppressed_bytes": 0,
+            "sent_count": 5689500,
+            "sent_bytes": 12905842838
+          },
+          "network_events": {
+            "suppressed_count": 23529207,
+            "suppressed_bytes": 0,
+            "sent_count": 0,
+            "sent_bytes": 0
+          },
+          "overall": {
+            "suppressed_count": 27457605,
+            "suppressed_bytes": 0,
+            "sent_count": 5689500,
+            "sent_bytes": 12905842838
+          }
+        },
+        "malicious_behavior_rules": [
+          {
+            "id": "123",
+            "endpoint_uptime_percent": 0
+          }
+        ],
+        "cpu": {
+          "endpoint": {
+            "histogram": {
+              "counts": [3439059, 129, 15, 0, 5, 6, 4, 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              "values": [
+                5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
+              ]
+            },
+            "mean": 0.2374646952923115,
+            "latest": 0.1
+          }
+        },
+        "threads": [
+          {
+            "name": "Cron",
+            "cpu": {
+              "mean": 0.00252963994365742
+            }
+          },
+          {
+            "name": "FileLogThread",
+            "cpu": {
+              "mean": 0.0006221101490102125
+            }
+          },
+          {
+            "name": "LoggingLimitThread",
+            "cpu": {
+              "mean": 0.0003625542590258192
+            }
+          },
+          {
+            "name": "DocumentLoggingThread",
+            "cpu": {
+              "mean": 0.001359578471346822
+            }
+          },
+          {
+            "name": "DocumentLoggingMaintenance",
+            "cpu": {
+              "mean": 0.0001029983690414259
+            }
+          },
+          {
+            "name": "BulkConsumerThread",
+            "cpu": {
+              "mean": 0.009533529038474382
+            }
+          },
+          {
+            "name": "DocumentLoggingConsumerThread",
+            "cpu": {
+              "mean": 0.1315907162873257
+            }
+          },
+          {
+            "name": "DocumentLoggingLimitThread",
+            "cpu": {
+              "mean": 0.0002471960856994222
+            }
+          },
+          {
+            "name": "ArtifactManifestDownload",
+            "cpu": {
+              "mean": 0.001561455274668017
+            }
+          },
+          {
+            "name": "PolicyReloadThread",
+            "cpu": {
+              "mean": 0.00001235980428497111
+            }
+          },
+          {
+            "name": "PerformanceMonitorWorkerThread",
+            "cpu": {
+              "mean": 0.004639046541625823
+            }
+          },
+          {
+            "name": "MetadataThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "EventsQueueThread",
+            "cpu": {
+              "mean": 0.05644722616946305
+            }
+          },
+          {
+            "name": "DelayedAlertEnrichment",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "MaintainProcessMap",
+            "cpu": {
+              "mean": 0.002167085684631601
+            }
+          },
+          {
+            "name": "FileScoreThread",
+            "cpu": {
+              "mean": 0.002241244510341427
+            }
+          },
+          {
+            "name": "DiagnosticMalwareThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "QuarantineManagerWorkerThread",
+            "cpu": {
+              "mean": 0.002014648098450291
+            }
+          },
+          {
+            "name": "EventProcessingThread",
+            "cpu": {
+              "mean": 0.00583794755726802
+            }
+          },
+          {
+            "name": "HostIsolationMonitorThread",
+            "cpu": {
+              "mean": 0.0008281068870930642
+            }
+          },
+          {
+            "name": "MountMonitor",
+            "cpu": {
+              "mean": 0.003407186047890369
+            }
+          },
+          {
+            "name": "responseActionsUploadThread",
+            "cpu": {
+              "mean": 0.00208468698939846
+            }
+          },
+          {
+            "name": "responseActionsProcessThread",
+            "cpu": {
+              "mean": 0.002105286663206745
+            }
+          },
+          {
+            "name": "serviceCommsThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "grpcConnectionManagerThread",
+            "cpu": {
+              "mean": 0.002344242879382854
+            }
+          },
+          {
+            "name": "checkinAPIThread",
+            "cpu": {
+              "mean": 0.0002513162482505196
+            }
+          },
+          {
+            "name": "actionsAPIThread",
+            "cpu": {
+              "mean": 0.0004985125580051291
+            }
+          },
+          {
+            "name": "stateReportThread",
+            "cpu": {
+              "mean": 0.004400094313632049
+            }
+          },
+          {
+            "name": "EventsLoopThread",
+            "cpu": {
+              "mean": 0.008866112391817567
+            }
+          },
+          {
+            "name": "FanotifyWatchdog",
+            "cpu": {
+              "mean": 0.0002142369165309078
+            }
+          },
+          {
+            "name": "FanotifySyncConsumer",
+            "cpu": {
+              "mean": 0.001042344997736917
+            }
+          },
+          {
+            "name": "FanotifyAsyncConsumer",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "FanotifyConsumer",
+            "cpu": {
+              "mean": 0.03632551717409642
+            }
+          },
+          {
+            "name": "RulesEngineThread",
+            "cpu": {
+              "mean": 0.03752853985923151
+            }
+          }
+        ],
+        "event_filter": {
+          "active_global_count": 0,
+          "active_user_count": 0
+        },
+        "uptime": {
+          "endpoint": 24272228,
+          "system": 29719735
+        }
+      }
+    },
+    "ecs": {
+      "version": "1.11.0"
+    },
+    "data_stream": {
+      "namespace": "default",
+      "type": "metrics",
+      "dataset": "endpoint.metrics"
+    },
+    "elastic": {
+      "agent": {
+        "id": "123"
+      }
+    },
+    "host": {
+      "hostname": "123",
+      "os": {
+        "Ext": {
+          "variant": "Amazon Linux"
+        },
+        "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+        "name": "Linux",
+        "family": "amazon linux",
+        "type": "linux",
+        "version": "2",
+        "platform": "amazon linux",
+        "full": "Amazon Linux 2"
+      },
+      "ip": ["127.0.0.1", "::1"],
+      "name": "123",
+      "id": "123",
+      "mac": ["aa:aa:aa:aa:aa:aa"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "sequence": 33235745,
+      "ingested": "2024-01-26T14:38:32Z",
+      "created": "2024-01-26T14:38:30.628421712Z",
+      "kind": "metric",
+      "module": "endpoint",
+      "action": "endpoint_metrics",
+      "id": "123",
+      "category": ["host"],
+      "type": ["info"],
+      "dataset": "endpoint.metrics"
+    },
+    "message": "Endpoint metrics"
+  },
+  {
+    "agent": {
+      "build": {
+        "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+      },
+      "id": "123",
+      "type": "endpoint",
+      "version": "8.6.0"
+    },
+    "@timestamp": "2024-01-26T14:35:43.564911752Z",
+    "Endpoint": {
+      "metrics": {
+        "system_impact": [
+          {
+            "process": {
+              "executable": "/usr/bin/amazon-ssm-agent"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 51
+            },
+            "process_events": {
+              "week_idle_ms": 2,
+              "week_ms": 8914
+            },
+            "overall": {
+              "week_idle_ms": 2,
+              "week_ms": 8965
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/ps"
+            },
+            "process_events": {
+              "week_idle_ms": 7543,
+              "week_ms": 6667
+            },
+            "overall": {
+              "week_idle_ms": 7543,
+              "week_ms": 6667
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/sshd"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 51
+            },
+            "process_events": {
+              "week_idle_ms": 3596,
+              "week_ms": 4596
+            },
+            "network_events": {
+              "week_idle_ms": 85,
+              "week_ms": 5
+            },
+            "overall": {
+              "week_idle_ms": 3681,
+              "week_ms": 4652
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/dhclient-script"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 380
+            },
+            "process_events": {
+              "week_idle_ms": 105790,
+              "week_ms": 3877
+            },
+            "overall": {
+              "week_idle_ms": 105790,
+              "week_ms": 4257
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/crond"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 129
+            },
+            "process_events": {
+              "week_idle_ms": 8062,
+              "week_ms": 1903
+            },
+            "overall": {
+              "week_idle_ms": 8062,
+              "week_ms": 2032
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 69051,
+              "week_ms": 1544
+            },
+            "process": {
+              "executable": "/usr/lib/systemd/systemd"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 15
+            },
+            "process_events": {
+              "week_idle_ms": 31,
+              "week_ms": 9
+            },
+            "overall": {
+              "week_idle_ms": 69082,
+              "week_ms": 1568
+            }
+          },
+          {
+            "process": {
+              "executable": "unknown"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 979
+            },
+            "overall": {
+              "week_idle_ms": 0,
+              "week_ms": 979
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 29,
+              "week_ms": 0
+            },
+            "process": {
+              "executable": "/usr/lib64/sa/sadc"
+            },
+            "process_events": {
+              "week_idle_ms": 5107,
+              "week_ms": 917
+            },
+            "overall": {
+              "week_idle_ms": 5136,
+              "week_ms": 917
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/logger"
+            },
+            "process_events": {
+              "week_idle_ms": 20585,
+              "week_ms": 880
+            },
+            "overall": {
+              "week_idle_ms": 20585,
+              "week_ms": 880
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 72520,
+              "week_ms": 852
+            },
+            "process": {
+              "executable": "/usr/lib/systemd/systemd-logind (deleted)"
+            },
+            "overall": {
+              "week_idle_ms": 72520,
+              "week_ms": 852
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/date"
+            },
+            "process_events": {
+              "week_idle_ms": 9862,
+              "week_ms": 808
+            },
+            "overall": {
+              "week_idle_ms": 9862,
+              "week_ms": 808
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/cat"
+            },
+            "process_events": {
+              "week_idle_ms": 17468,
+              "week_ms": 701
+            },
+            "overall": {
+              "week_idle_ms": 17468,
+              "week_ms": 701
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/lib64/sa/sa1"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 67
+            },
+            "process_events": {
+              "week_idle_ms": 7451,
+              "week_ms": 618
+            },
+            "overall": {
+              "week_idle_ms": 7451,
+              "week_ms": 685
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/curl"
+            },
+            "process_events": {
+              "week_idle_ms": 5615,
+              "week_ms": 403
+            },
+            "network_events": {
+              "week_idle_ms": 4128,
+              "week_ms": 6
+            },
+            "overall": {
+              "week_idle_ms": 9743,
+              "week_ms": 409
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/run-parts"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 116
+            },
+            "process_events": {
+              "week_idle_ms": 3770,
+              "week_ms": 260
+            },
+            "overall": {
+              "week_idle_ms": 3770,
+              "week_ms": 376
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/dhclient"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 36
+            },
+            "process_events": {
+              "week_idle_ms": 1,
+              "week_ms": 278
+            },
+            "overall": {
+              "week_idle_ms": 1,
+              "week_ms": 314
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/cut"
+            },
+            "process_events": {
+              "week_idle_ms": 5067,
+              "week_ms": 313
+            },
+            "overall": {
+              "week_idle_ms": 5067,
+              "week_ms": 313
+            }
+          },
+          {
+            "process": {
+              "executable": "/sbin/ip"
+            },
+            "process_events": {
+              "week_idle_ms": 10369,
+              "week_ms": 286
+            },
+            "overall": {
+              "week_idle_ms": 10369,
+              "week_ms": 286
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/sh"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 20
+            },
+            "process_events": {
+              "week_idle_ms": 2397,
+              "week_ms": 208
+            },
+            "overall": {
+              "week_idle_ms": 2397,
+              "week_ms": 228
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/ipcalc"
+            },
+            "process_events": {
+              "week_idle_ms": 4827,
+              "week_ms": 201
+            },
+            "overall": {
+              "week_idle_ms": 4827,
+              "week_ms": 201
+            }
+          }
+        ],
+        "memory": {
+          "endpoint": {
+            "private": {
+              "mean": 118266395,
+              "latest": 135163904
+            }
+          }
+        },
+        "disks": [
+          {
+            "total": 0,
+            "free": 0,
+            "device": "sysfs",
+            "mount": "/sys",
+            "fstype": "sysfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "proc",
+            "mount": "/proc",
+            "fstype": "proc"
+          },
+          {
+            "total": 4157120512,
+            "free": 4157120512,
+            "device": "devtmpfs",
+            "mount": "/dev",
+            "fstype": "devtmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "securityfs",
+            "mount": "/sys/kernel/security",
+            "fstype": "securityfs"
+          },
+          {
+            "total": 4166328320,
+            "free": 4166328320,
+            "device": "tmpfs",
+            "mount": "/dev/shm",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "devpts",
+            "mount": "/dev/pts",
+            "fstype": "devpts"
+          },
+          {
+            "total": 4166328320,
+            "free": 4165955584,
+            "device": "tmpfs",
+            "mount": "/run",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 4166328320,
+            "free": 4166328320,
+            "device": "tmpfs",
+            "mount": "/sys/fs/cgroup",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/systemd",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "pstore",
+            "mount": "/sys/fs/pstore",
+            "fstype": "pstore"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/blkio",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/cpu,cpuacct",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/net_cls,net_prio",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/devices",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/cpuset",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/hugetlb",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/pids",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/freezer",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/memory",
+            "fstype": "cgroup"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup",
+            "mount": "/sys/fs/cgroup/perf_event",
+            "fstype": "cgroup"
+          },
+          {
+            "endpoint_drive": true,
+            "total": 8577331200,
+            "free": 1908756480,
+            "device": "/dev/xvda1",
+            "mount": "/",
+            "fstype": "xfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "hugetlbfs",
+            "mount": "/dev/hugepages",
+            "fstype": "hugetlbfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "mqueue",
+            "mount": "/dev/mqueue",
+            "fstype": "mqueue"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "debugfs",
+            "mount": "/sys/kernel/debug",
+            "fstype": "debugfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "sunrpc",
+            "mount": "/var/lib/nfs/rpc_pipefs",
+            "fstype": "rpc_pipefs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "systemd-1",
+            "mount": "/proc/sys/fs/binfmt_misc",
+            "fstype": "autofs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "binfmt_misc",
+            "mount": "/proc/sys/fs/binfmt_misc",
+            "fstype": "binfmt_misc"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "tracefs",
+            "mount": "/sys/kernel/debug/tracing",
+            "fstype": "tracefs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "none",
+            "mount": "/sys/fs/bpf",
+            "fstype": "bpf"
+          }
+        ],
+        "documents_volume": {
+          "file_events": {
+            "suppressed_count": 3926292,
+            "suppressed_bytes": 0,
+            "sent_count": 0,
+            "sent_bytes": 0
+          },
+          "process_events": {
+            "suppressed_count": 0,
+            "suppressed_bytes": 0,
+            "sent_count": 5737776,
+            "sent_bytes": 12992145486
+          },
+          "network_events": {
+            "suppressed_count": 24813200,
+            "suppressed_bytes": 0,
+            "sent_count": 0,
+            "sent_bytes": 0
+          },
+          "overall": {
+            "suppressed_count": 28739492,
+            "suppressed_bytes": 0,
+            "sent_count": 5737776,
+            "sent_bytes": 12992145486
+          }
+        },
+        "malicious_behavior_rules": [
+          {
+            "id": "123",
+            "endpoint_uptime_percent": 0
+          }
+        ],
+        "cpu": {
+          "endpoint": {
+            "histogram": {
+              "counts": [3147842, 87, 11, 10, 9, 5, 10, 6, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              "values": [
+                5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
+              ]
+            },
+            "mean": 0.2338436071605115,
+            "latest": 0.9000000000000001
+          }
+        },
+        "threads": [
+          {
+            "name": "Cron",
+            "cpu": {
+              "mean": 0.002129690752013577
+            }
+          },
+          {
+            "name": "FileLogThread",
+            "cpu": {
+              "mean": 0.0004778416387496615
+            }
+          },
+          {
+            "name": "LoggingLimitThread",
+            "cpu": {
+              "mean": 0.0002965913619825484
+            }
+          },
+          {
+            "name": "DocumentLoggingThread",
+            "cpu": {
+              "mean": 0.001116336931906537
+            }
+          },
+          {
+            "name": "DocumentLoggingMaintenance",
+            "cpu": {
+              "mean": 0.00009062513838355648
+            }
+          },
+          {
+            "name": "BulkConsumerThread",
+            "cpu": {
+              "mean": 0.008971888699972091
+            }
+          },
+          {
+            "name": "DocumentLoggingConsumerThread",
+            "cpu": {
+              "mean": 0.1281974968924846
+            }
+          },
+          {
+            "name": "DocumentLoggingLimitThread",
+            "cpu": {
+              "mean": 0.000205966223598992
+            }
+          },
+          {
+            "name": "ArtifactManifestDownload",
+            "cpu": {
+              "mean": 0.001515911405688581
+            }
+          },
+          {
+            "name": "PolicyReloadThread",
+            "cpu": {
+              "mean": 0.00000823864894395968
+            }
+          },
+          {
+            "name": "PerformanceMonitorWorkerThread",
+            "cpu": {
+              "mean": 0.003917477572852828
+            }
+          },
+          {
+            "name": "MetadataThread",
+            "cpu": {
+              "mean": 0.00000411932447197984
+            }
+          },
+          {
+            "name": "EventsQueueThread",
+            "cpu": {
+              "mean": 0.04977791691940438
+            }
+          },
+          {
+            "name": "DelayedAlertEnrichment",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "MaintainProcessMap",
+            "cpu": {
+              "mean": 0.001837218714503009
+            }
+          },
+          {
+            "name": "FileScoreThread",
+            "cpu": {
+              "mean": 0.001923724528414585
+            }
+          },
+          {
+            "name": "DiagnosticMalwareThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "QuarantineManagerWorkerThread",
+            "cpu": {
+              "mean": 0.001557104650408379
+            }
+          },
+          {
+            "name": "EventProcessingThread",
+            "cpu": {
+              "mean": 0.00591534994176305
+            }
+          },
+          {
+            "name": "HostIsolationMonitorThread",
+            "cpu": {
+              "mean": 0.0006508532665728148
+            }
+          },
+          {
+            "name": "MountMonitor",
+            "cpu": {
+              "mean": 0.002533384550267602
+            }
+          },
+          {
+            "name": "responseActionsUploadThread",
+            "cpu": {
+              "mean": 0.001771309522951331
+            }
+          },
+          {
+            "name": "responseActionsProcessThread",
+            "cpu": {
+              "mean": 0.001783667496367271
+            }
+          },
+          {
+            "name": "serviceCommsThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "grpcConnectionManagerThread",
+            "cpu": {
+              "mean": 0.001956679124190424
+            }
+          },
+          {
+            "name": "checkinAPIThread",
+            "cpu": {
+              "mean": 0.0002389210358973501
+            }
+          },
+          {
+            "name": "actionsAPIThread",
+            "cpu": {
+              "mean": 0.0003913361794870389
+            }
+          },
+          {
+            "name": "stateReportThread",
+            "cpu": {
+              "mean": 0.003550860912819238
+            }
+          },
+          {
+            "name": "EventsLoopThread",
+            "cpu": {
+              "mean": 0.0077690568352644
+            }
+          },
+          {
+            "name": "FanotifyWatchdog",
+            "cpu": {
+              "mean": 0.0001647732096556607
+            }
+          },
+          {
+            "name": "FanotifySyncConsumer",
+            "cpu": {
+              "mean": 0.001103980504692926
+            }
+          },
+          {
+            "name": "FanotifyAsyncConsumer",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "FanotifyConsumer",
+            "cpu": {
+              "mean": 0.02717934093270123
+            }
+          },
+          {
+            "name": "RulesEngineThread",
+            "cpu": {
+              "mean": 0.03744471189424889
+            }
+          }
+        ],
+        "event_filter": {
+          "active_global_count": 0,
+          "active_user_count": 0
+        },
+        "uptime": {
+          "endpoint": 24275825,
+          "system": 29714870
+        }
+      }
+    },
+    "ecs": {
+      "version": "1.11.0"
+    },
+    "data_stream": {
+      "namespace": "default",
+      "type": "metrics",
+      "dataset": "endpoint.metrics"
+    },
+    "elastic": {
+      "agent": {
+        "id": "123"
+      }
+    },
+    "host": {
+      "hostname": "123",
+      "os": {
+        "Ext": {
+          "variant": "Amazon Linux"
+        },
+        "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+        "name": "Linux",
+        "family": "amazon linux",
+        "type": "linux",
+        "version": "2",
+        "platform": "amazon linux",
+        "full": "Amazon Linux 2"
+      },
+      "ip": ["127.0.0.1", "::1"],
+      "name": "123",
+      "id": "123",
+      "mac": ["aa:aa:aa:aa:aa:aa"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "sequence": 34569822,
+      "ingested": "2024-01-26T14:35:45Z",
+      "created": "2024-01-26T14:35:43.564911752Z",
+      "kind": "metric",
+      "module": "endpoint",
+      "action": "endpoint_metrics",
+      "id": "123",
+      "category": ["host"],
+      "type": ["info"],
+      "dataset": "endpoint.metrics"
+    },
+    "message": "Endpoint metrics"
+  },
+  {
+    "agent": {
+      "build": {
+        "original": "version: 8.6.2, compiled: Fri Feb 10 14:00:00 2023, branch: 8.6, commit: eaee25e73cc58a52387e50d5bce542ec8965f638"
+      },
+      "id": "123",
+      "type": "endpoint",
+      "version": "8.6.2"
+    },
+    "@timestamp": "2024-01-26T15:06:50.254822749Z",
+    "Endpoint": {
+      "metrics": {
+        "system_impact": [
+          {
+            "process": {
+              "executable": "/usr/sbin/sshd"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 304
+            },
+            "process_events": {
+              "week_idle_ms": 31791,
+              "week_ms": 110821
+            },
+            "network_events": {
+              "week_idle_ms": 2030,
+              "week_ms": 53
+            },
+            "overall": {
+              "week_idle_ms": 33821,
+              "week_ms": 111178
+            }
+          },
+          {
+            "process": {
+              "executable": "unknown"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 4552
+            },
+            "overall": {
+              "week_idle_ms": 0,
+              "week_ms": 4552
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 130,
+              "week_ms": 7
+            },
+            "process": {
+              "executable": "/lib/systemd/systemd"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 1920
+            },
+            "process_events": {
+              "week_idle_ms": 1273,
+              "week_ms": 1750
+            },
+            "overall": {
+              "week_idle_ms": 1403,
+              "week_ms": 3677
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 7,
+              "week_ms": 0
+            },
+            "process": {
+              "executable": "/bin/systemctl"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 3055
+            },
+            "process_events": {
+              "week_idle_ms": 0,
+              "week_ms": 9
+            },
+            "overall": {
+              "week_idle_ms": 7,
+              "week_ms": 3064
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 3104,
+              "week_ms": 1
+            },
+            "process": {
+              "executable": "/usr/bin/apt-key"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 61
+            },
+            "process_events": {
+              "week_idle_ms": 178857,
+              "week_ms": 2062
+            },
+            "overall": {
+              "week_idle_ms": 181961,
+              "week_ms": 2124
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/gce_workload_cert_refresh"
+            },
+            "process_events": {
+              "week_idle_ms": 230,
+              "week_ms": 1405
+            },
+            "network_events": {
+              "week_idle_ms": 135,
+              "week_ms": 21
+            },
+            "overall": {
+              "week_idle_ms": 365,
+              "week_ms": 1426
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/apt-config"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 65
+            },
+            "process_events": {
+              "week_idle_ms": 18708,
+              "week_ms": 840
+            },
+            "overall": {
+              "week_idle_ms": 18708,
+              "week_ms": 905
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/lib/apt/apt.systemd.daily"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 273
+            },
+            "process_events": {
+              "week_idle_ms": 1064,
+              "week_ms": 352
+            },
+            "overall": {
+              "week_idle_ms": 1064,
+              "week_ms": 625
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/dpkg"
+            },
+            "process_events": {
+              "week_idle_ms": 11479,
+              "week_ms": 558
+            },
+            "overall": {
+              "week_idle_ms": 11479,
+              "week_ms": 558
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/sbin/cron"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 80
+            },
+            "process_events": {
+              "week_idle_ms": 270,
+              "week_ms": 451
+            },
+            "overall": {
+              "week_idle_ms": 270,
+              "week_ms": 531
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/cmp"
+            },
+            "process_events": {
+              "week_idle_ms": 39452,
+              "week_ms": 513
+            },
+            "overall": {
+              "week_idle_ms": 39452,
+              "week_ms": 513
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 144,
+              "week_ms": 0
+            },
+            "process": {
+              "executable": "/sbin/dhclient-script"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 251
+            },
+            "process_events": {
+              "week_idle_ms": 2412,
+              "week_ms": 186
+            },
+            "overall": {
+              "week_idle_ms": 2556,
+              "week_ms": 437
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/env"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 413
+            },
+            "process_events": {
+              "week_idle_ms": 45,
+              "week_ms": 4
+            },
+            "overall": {
+              "week_idle_ms": 45,
+              "week_ms": 417
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/cat"
+            },
+            "process_events": {
+              "week_idle_ms": 39679,
+              "week_ms": 359
+            },
+            "overall": {
+              "week_idle_ms": 39679,
+              "week_ms": 359
+            }
+          },
+          {
+            "process": {
+              "executable": "/bin/sh"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 35
+            },
+            "process_events": {
+              "week_idle_ms": 444,
+              "week_ms": 197
+            },
+            "overall": {
+              "week_idle_ms": 444,
+              "week_ms": 232
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/lib/apt/apt-helper"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 100
+            },
+            "process_events": {
+              "week_idle_ms": 8,
+              "week_ms": 62
+            },
+            "overall": {
+              "week_idle_ms": 8,
+              "week_ms": 162
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/date"
+            },
+            "process_events": {
+              "week_idle_ms": 1024,
+              "week_ms": 143
+            },
+            "overall": {
+              "week_idle_ms": 1024,
+              "week_ms": 143
+            }
+          },
+          {
+            "file_events": {
+              "week_idle_ms": 5315,
+              "week_ms": 2
+            },
+            "process": {
+              "executable": "/usr/bin/apt-get"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 53
+            },
+            "process_events": {
+              "week_idle_ms": 576,
+              "week_ms": 76
+            },
+            "overall": {
+              "week_idle_ms": 5891,
+              "week_ms": 131
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/unattended-upgrade"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 27
+            },
+            "process_events": {
+              "week_idle_ms": 139,
+              "week_ms": 95
+            },
+            "overall": {
+              "week_idle_ms": 139,
+              "week_ms": 122
+            }
+          },
+          {
+            "process": {
+              "executable": "/usr/bin/gpgconf"
+            },
+            "malware": {
+              "week_idle_ms": 0,
+              "week_ms": 26
+            },
+            "process_events": {
+              "week_idle_ms": 12075,
+              "week_ms": 93
+            },
+            "overall": {
+              "week_idle_ms": 12075,
+              "week_ms": 119
+            }
+          }
+        ],
+        "memory": {
+          "endpoint": {
+            "private": {
+              "mean": 373780821,
+              "latest": 411860992
+            }
+          }
+        },
+        "disks": [
+          {
+            "total": 0,
+            "free": 0,
+            "device": "sysfs",
+            "mount": "/sys",
+            "fstype": "sysfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "proc",
+            "mount": "/proc",
+            "fstype": "proc"
+          },
+          {
+            "total": 2049777664,
+            "free": 2049777664,
+            "device": "udev",
+            "mount": "/dev",
+            "fstype": "devtmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "devpts",
+            "mount": "/dev/pts",
+            "fstype": "devpts"
+          },
+          {
+            "total": 412172288,
+            "free": 411795456,
+            "device": "tmpfs",
+            "mount": "/run",
+            "fstype": "tmpfs"
+          },
+          {
+            "endpoint_drive": true,
+            "total": 10331889664,
+            "free": 4091109376,
+            "device": "/dev/sda1",
+            "mount": "/",
+            "fstype": "ext4"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "securityfs",
+            "mount": "/sys/kernel/security",
+            "fstype": "securityfs"
+          },
+          {
+            "total": 2060849152,
+            "free": 2060849152,
+            "device": "tmpfs",
+            "mount": "/dev/shm",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 5242880,
+            "free": 5242880,
+            "device": "tmpfs",
+            "mount": "/run/lock",
+            "fstype": "tmpfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "cgroup2",
+            "mount": "/sys/fs/cgroup",
+            "fstype": "cgroup2"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "pstore",
+            "mount": "/sys/fs/pstore",
+            "fstype": "pstore"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "efivarfs",
+            "mount": "/sys/firmware/efi/efivars",
+            "fstype": "efivarfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "none",
+            "mount": "/sys/fs/bpf",
+            "fstype": "bpf"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "systemd-1",
+            "mount": "/proc/sys/fs/binfmt_misc",
+            "fstype": "autofs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "hugetlbfs",
+            "mount": "/dev/hugepages",
+            "fstype": "hugetlbfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "mqueue",
+            "mount": "/dev/mqueue",
+            "fstype": "mqueue"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "debugfs",
+            "mount": "/sys/kernel/debug",
+            "fstype": "debugfs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "tracefs",
+            "mount": "/sys/kernel/tracing",
+            "fstype": "tracefs"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "fusectl",
+            "mount": "/sys/fs/fuse/connections",
+            "fstype": "fusectl"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "configfs",
+            "mount": "/sys/kernel/config",
+            "fstype": "configfs"
+          },
+          {
+            "total": 129751040,
+            "free": 118589440,
+            "device": "/dev/sda15",
+            "mount": "/boot/efi",
+            "fstype": "vfat"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "binfmt_misc",
+            "mount": "/proc/sys/fs/binfmt_misc",
+            "fstype": "binfmt_misc"
+          },
+          {
+            "total": 0,
+            "free": 0,
+            "device": "tracefs",
+            "mount": "/sys/kernel/debug/tracing",
+            "fstype": "tracefs"
+          }
+        ],
+        "documents_volume": {
+          "file_events": {
+            "suppressed_count": 1651293,
+            "suppressed_bytes": 0,
+            "sent_count": 0,
+            "sent_bytes": 0
+          },
+          "process_events": {
+            "suppressed_count": 0,
+            "suppressed_bytes": 0,
+            "sent_count": 11026887,
+            "sent_bytes": 23412176619
+          },
+          "network_events": {
+            "suppressed_count": 3270009,
+            "suppressed_bytes": 0,
+            "sent_count": 0,
+            "sent_bytes": 0
+          },
+          "overall": {
+            "suppressed_count": 4921302,
+            "suppressed_bytes": 0,
+            "sent_count": 11026887,
+            "sent_bytes": 23412176619
+          }
+        },
+        "malicious_behavior_rules": [
+          {
+            "id": "123",
+            "endpoint_uptime_percent": 0
+          }
+        ],
+        "cpu": {
+          "endpoint": {
+            "histogram": {
+              "counts": [
+                3934326, 520, 140, 110, 212, 78, 41, 18, 12, 25, 9, 5, 5, 2, 0, 0, 0, 0, 0, 0
+              ],
+              "values": [
+                5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
+              ]
+            },
+            "mean": 0.2697424700222798,
+            "latest": 0.1
+          }
+        },
+        "threads": [
+          {
+            "name": "Cron",
+            "cpu": {
+              "mean": 0.005330585583239717
+            }
+          },
+          {
+            "name": "FileLogThread",
+            "cpu": {
+              "mean": 0.01387886588350829
+            }
+          },
+          {
+            "name": "LoggingLimitThread",
+            "cpu": {
+              "mean": 0.0003385089239880071
+            }
+          },
+          {
+            "name": "DocumentLoggingThread",
+            "cpu": {
+              "mean": 0.002019893909071295
+            }
+          },
+          {
+            "name": "DocumentLoggingMaintenance",
+            "cpu": {
+              "mean": 0.0001711144011367948
+            }
+          },
+          {
+            "name": "BulkConsumerThread",
+            "cpu": {
+              "mean": 0.01437360969549076
+            }
+          },
+          {
+            "name": "DocumentLoggingConsumerThread",
+            "cpu": {
+              "mean": 0.1566068758230231
+            }
+          },
+          {
+            "name": "DocumentLoggingLimitThread",
+            "cpu": {
+              "mean": 0.000383147463414997
+            }
+          },
+          {
+            "name": "ArtifactManifestDownload",
+            "cpu": {
+              "mean": 0.00202733366564246
+            }
+          },
+          {
+            "name": "PolicyReloadThread",
+            "cpu": {
+              "mean": 0.00001487951314232998
+            }
+          },
+          {
+            "name": "PerformanceMonitorWorkerThread",
+            "cpu": {
+              "mean": 0.005423582540379278
+            }
+          },
+          {
+            "name": "MetadataThread",
+            "cpu": {
+              "mean": 0.00001115963485674749
+            }
+          },
+          {
+            "name": "EventsQueueThread",
+            "cpu": {
+              "mean": 0.05409447002894065
+            }
+          },
+          {
+            "name": "DelayedAlertEnrichment",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "MaintainProcessMap",
+            "cpu": {
+              "mean": 0.002905224941039929
+            }
+          },
+          {
+            "name": "FileScoreThread",
+            "cpu": {
+              "mean": 0.003567363275873613
+            }
+          },
+          {
+            "name": "DiagnosticMalwareThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "QuarantineManagerWorkerThread",
+            "cpu": {
+              "mean": 0.002083131839926198
+            }
+          },
+          {
+            "name": "EventProcessingThread",
+            "cpu": {
+              "mean": 0.01754294664738331
+            }
+          },
+          {
+            "name": "HostIsolationMonitorThread",
+            "cpu": {
+              "mean": 0.0008481322806622976
+            }
+          },
+          {
+            "name": "MountMonitor",
+            "cpu": {
+              "mean": 0.003463206812704382
+            }
+          },
+          {
+            "name": "responseActionsUploadThread",
+            "cpu": {
+              "mean": 0.00270807149264102
+            }
+          },
+          {
+            "name": "responseActionsProcessThread",
+            "cpu": {
+              "mean": 0.002689472100521233
+            }
+          },
+          {
+            "name": "serviceCommsThread",
+            "cpu": {
+              "mean": 0
+            }
+          },
+          {
+            "name": "grpcConnectionManagerThread",
+            "cpu": {
+              "mean": 0.0110926774602411
+            }
+          },
+          {
+            "name": "checkinAPIThread",
+            "cpu": {
+              "mean": 0.0003124700433295513
+            }
+          },
+          {
+            "name": "actionsAPIThread",
+            "cpu": {
+              "mean": 0.0004910243538035807
+            }
+          },
+          {
+            "name": "stateReportThread",
+            "cpu": {
+              "mean": 0.00539010824743476
+            }
+          },
+          {
+            "name": "EventsLoopThread",
+            "cpu": {
+              "mean": 0.003266057265515501
+            }
+          },
+          {
+            "name": "FanotifyWatchdog",
+            "cpu": {
+              "mean": 0.0002231929794201937
+            }
+          },
+          {
+            "name": "FanotifySyncConsumer",
+            "cpu": {
+              "mean": 0.001885980676100637
+            }
+          },
+          {
+            "name": "FanotifyAsyncConsumer",
+            "cpu": {
+              "mean": 0.0002492321603525497
+            }
+          },
+          {
+            "name": "FanotifyConsumer",
+            "cpu": {
+              "mean": 0.03793164685246193
+            }
+          },
+          {
+            "name": "RulesEngineThread",
+            "cpu": {
+              "mean": 0.02721466395730229
+            }
+          }
+        ],
+        "event_filter": {
+          "active_global_count": 0,
+          "active_user_count": 0
+        },
+        "uptime": {
+          "endpoint": 26882599,
+          "system": 26883343
+        }
+      }
+    },
+    "ecs": {
+      "version": "1.11.0"
+    },
+    "data_stream": {
+      "namespace": "default",
+      "type": "metrics",
+      "dataset": "endpoint.metrics"
+    },
+    "elastic": {
+      "agent": {
+        "id": "123"
+      }
+    },
+    "host": {
+      "hostname": "123",
+      "os": {
+        "Ext": {
+          "variant": "Debian"
+        },
+        "kernel": "5.10.0-21-cloud-amd64 #1 SMP Debian 5.10.162-1 (2023-01-21)",
+        "name": "Linux",
+        "family": "debian",
+        "type": "linux",
+        "version": "11.8",
+        "platform": "debian",
+        "full": "Debian 11.8"
+      },
+      "ip": ["127.0.0.1", "::1"],
+      "name": "123",
+      "id": "123",
+      "mac": ["aa:aa:aa:aa:aa:aa"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "sequence": 16194584,
+      "ingested": "2024-01-26T15:06:52Z",
+      "created": "2024-01-26T15:06:50.254822749Z",
+      "kind": "metric",
+      "module": "endpoint",
+      "action": "endpoint_metrics",
+      "id": "123",
+      "category": ["host"],
+      "type": ["info"],
+      "dataset": "endpoint.metrics"
+    },
+    "message": "Endpoint metrics"
+  }
+]

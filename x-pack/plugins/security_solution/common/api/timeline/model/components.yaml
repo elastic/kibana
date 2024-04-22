@@ -18,7 +18,7 @@ components:
       type: object
       properties:
         columns:
-           $ref: '#/components/schemas/ColumnHeaderResult'
+          $ref: '#/components/schemas/ColumnHeaderResult'
         created:
           type: number
         createdBy:
@@ -244,9 +244,6 @@ components:
               type: string
             version:
               type: string
-            timelineVersion:
-              nullable: true
-              type: string  
     GlobalNote:
       type: object
       properties:
@@ -254,9 +251,6 @@ components:
           type: string
         version:
           type: string
-        timelineVersion:
-          nullable: true
-          type: string  
         note:
           type: string
         timelineId:
@@ -278,8 +272,6 @@ components:
               type: string
             version:
               type: string
-            timelineVersion:
-              type: string 
     RowRendererId:
       type: string
       enum:
@@ -384,8 +376,6 @@ components:
           type: string
         version:
           type: string
-        timelineVersion:
-          type: string
     Sort:
       type: object
       properties:
@@ -415,30 +405,30 @@ components:
       description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
     ImportTimelines:
       allOf:
-          - $ref: '#/components/schemas/SavedTimeline'
-          - type: object
-            properties:
-              savedObjectId:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+              nullable: true
+            version:
+              type: string
+              nullable: true
+            globalNotes:
+              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/BareNote'
+            eventNotes:
+              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/BareNote'
+            pinnedEventIds:
+              nullable: true
+              type: array
+              items:
                 type: string
-                nullable: true
-              version:
-                type: string
-                nullable: true
-              globalNotes:
-                nullable: true
-                type: array
-                items:
-                  $ref: '#/components/schemas/BareNote'
-              eventNotes:
-                nullable: true
-                type: array
-                items:
-                  $ref: '#/components/schemas/BareNote'
-              pinnedEventIds:
-                nullable: true
-                type: array
-                items:
-                  type: string
     ImportTimelineResult:
       type: object
       properties:

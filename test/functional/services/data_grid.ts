@@ -26,7 +26,6 @@ interface SelectOptions {
 export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly header = this.ctx.getPageObject('header');
   private readonly retry = this.ctx.getService('retry');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
@@ -84,7 +83,7 @@ export class DataGridService extends FtrService {
   }
 
   private getCellElementSelector(rowIndex: number = 0, columnIndex: number = 0) {
-    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`;
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`;
   }
 
   /**
@@ -151,7 +150,7 @@ export class DataGridService extends FtrService {
 
   public async getFields(options?: SelectOptions) {
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await this.find.allByCssSelector(selector);
 
@@ -174,8 +173,11 @@ export class DataGridService extends FtrService {
     return await this.testSubjects.find(selector);
   }
 
-  public async getBodyRows(options?: SelectOptions): Promise<WebElementWrapper[][]> {
-    return this.getDocTableRows(options);
+  public async getBodyRows(
+    options?: SelectOptions,
+    selector: string = 'docTable'
+  ): Promise<WebElementWrapper[][]> {
+    return this.getDocTableRows(options, selector);
   }
 
   public async getRowsText(renderMoreRows?: boolean) {
@@ -202,22 +204,22 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of rows (which are array of cells)
    */
-  public async getDocTableRows(options?: SelectOptions) {
+  public async getDocTableRows(options?: SelectOptions, selector: string = 'docTable') {
     // open full screen mode
     if (options?.renderMoreRows) {
       await this.testSubjects.click('dataGridFullScreenButton');
     }
 
-    const table = await this.getTable('docTable');
+    const table = await this.getTable(selector);
 
     if (!table) {
       return [];
     }
 
-    const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+    const cellSelector = options?.isAnchorRow
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
-    const cells = await table.findAllByCssSelector(selector);
+    const cells = await table.findAllByCssSelector(cellSelector);
 
     const rows: WebElementWrapper[][] = [];
     let rowIdx = -1;
@@ -239,8 +241,11 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of cells for that row
    */
-  public async getRow(options: SelectOptions): Promise<WebElementWrapper[]> {
-    return (await this.getBodyRows(options))[options.rowIndex || 0];
+  public async getRow(
+    options: SelectOptions,
+    selector: string = 'docTable'
+  ): Promise<WebElementWrapper[]> {
+    return (await this.getBodyRows(options, selector))[options.rowIndex || 0];
   }
 
   public async clickRowToggle(
@@ -434,19 +439,6 @@ export class DataGridService extends FtrService {
     return detailRows[0];
   }
 
-  public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
-    const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
-    const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
-    await addInclusiveFilterButton.click();
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-  }
-
-  public async getAddInclusiveFilterButton(
-    tableDocViewRow: WebElementWrapper
-  ): Promise<WebElementWrapper> {
-    return await tableDocViewRow.findByTestSubject(`~addInclusiveFilterButton`);
-  }
-
   public async getTableDocViewRow(
     detailsRow: WebElementWrapper,
     fieldName: string
@@ -471,16 +463,6 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click(`${actionName}-${fieldName}`);
   }
 
-  public async removeInclusiveFilter(
-    detailsRow: WebElementWrapper,
-    fieldName: string
-  ): Promise<void> {
-    const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
-    const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
-    await addInclusiveFilterButton.click();
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-  }
-
   public async hasNoResults() {
     return await this.find.existsByCssSelector('.euiDataGrid__noResults');
   }
@@ -502,5 +484,123 @@ export class DataGridService extends FtrService {
     });
     await this.testSubjects.click(option);
     await this.checkCurrentRowsPerPageToBe(newValue);
+  }
+
+  public async selectRow(rowIndex: number) {
+    const columns = await this.getRow({ rowIndex });
+    const checkbox = await columns[1].findByClassName('euiCheckbox__input');
+    await checkbox.click();
+  }
+
+  public async openSelectedRowsMenu() {
+    await this.testSubjects.click('unifiedDataTableSelectionBtn');
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('unifiedDataTableSelectionMenu');
+    });
+  }
+
+  public async compareSelectedButtonExists() {
+    return await this.testSubjects.exists('unifiedDataTableCompareSelectedDocuments');
+  }
+
+  public async clickCompareSelectedButton() {
+    await this.testSubjects.click('unifiedDataTableCompareSelectedDocuments');
+  }
+
+  public async waitForComparisonModeToLoad() {
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+    });
+  }
+
+  public async getComparisonDisplay() {
+    const display = await this.testSubjects.find('unifiedDataTableComparisonDisplay');
+    return await display.getVisibleText();
+  }
+
+  public async getComparisonFieldNames() {
+    const fields = await this.testSubjects.findAll('unifiedDataTableComparisonFieldName');
+    return await Promise.all(fields.map((field) => field.getVisibleText()));
+  }
+
+  public async getComparisonRow(rowIndex: number) {
+    const columns = await this.getRow({ rowIndex }, 'unifiedDataTableCompareDocuments');
+    const fieldName = await columns[0]
+      .findByTestSubject('unifiedDataTableComparisonFieldName')
+      .then((field) => field.getVisibleText());
+    const values = await Promise.all(
+      columns.slice(1).map(async (cell) =>
+        cell
+          .findByClassName('unifiedDataTable__cellValue')
+          .then((cellValue) => cellValue.parseDomContent())
+          .then((content) => content.html())
+      )
+    );
+    return { fieldName, values };
+  }
+
+  public async openComparisonSettingsMenu() {
+    if (await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu')) {
+      return;
+    }
+    await this.testSubjects.click('unifiedDataTableComparisonSettings');
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu');
+    });
+  }
+
+  public async toggleShowDiffSwitch() {
+    await this.openComparisonSettingsMenu();
+    await this.testSubjects.click('unifiedDataTableShowDiffSwitch');
+  }
+
+  public async selectComparisonDiffMode(diffMode: 'basic' | 'chars' | 'words' | 'lines') {
+    await this.openComparisonSettingsMenu();
+    const menuEntry = await this.testSubjects.find(`unifiedDataTableDiffMode-${diffMode}`);
+    await menuEntry.click();
+  }
+
+  public async getComparisonDiffSegments(rowIndex: number, cellIndex: number) {
+    const columns = await this.getRow({ rowIndex }, 'unifiedDataTableCompareDocuments');
+    const segments = await columns[cellIndex].findAllByClassName(
+      'unifiedDataTable__comparisonSegment'
+    );
+    return Promise.all(
+      segments.map(async (segment) => {
+        const decoration = await segment.getComputedStyle('text-decoration');
+        return {
+          decoration: decoration.includes('underline')
+            ? 'added'
+            : decoration.includes('line-through')
+            ? 'removed'
+            : undefined,
+          value: await segment.getVisibleText(),
+        };
+      })
+    );
+  }
+
+  public async showAllFieldsSwitchExists() {
+    await this.openComparisonSettingsMenu();
+    return await this.testSubjects.exists('unifiedDataTableDiffOptionSwitch-showAllFields');
+  }
+
+  public async toggleShowAllFieldsSwitch() {
+    await this.openComparisonSettingsMenu();
+    await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showAllFields');
+  }
+
+  public async toggleShowMatchingValuesSwitch() {
+    await this.openComparisonSettingsMenu();
+    await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showMatchingValues');
+  }
+
+  public async toggleShowDiffDecorationsSwitch() {
+    await this.openComparisonSettingsMenu();
+    await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
+  }
+
+  public async exitComparisonMode() {
+    await this.testSubjects.click('unifiedDataTableExitDocumentComparison');
   }
 }

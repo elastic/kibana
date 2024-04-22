@@ -72,10 +72,38 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export interface ESQLLiteral extends ESQLAstBaseItem {
+export type ESQLLiteral =
+  | ESQLNumberLiteral
+  | ESQLBooleanLiteral
+  | ESQLNullLiteral
+  | ESQLStringLiteral;
+
+// @internal
+export interface ESQLNumberLiteral extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'string' | 'number' | 'boolean' | 'null';
-  value: string | number;
+  literalType: 'number';
+  value: number;
+}
+
+// @internal
+export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'boolean';
+  value: string;
+}
+
+// @internal
+export interface ESQLNullLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'null';
+  value: string;
+}
+
+// @internal
+export interface ESQLStringLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'string';
+  value: string;
 }
 
 export interface ESQLMessage {

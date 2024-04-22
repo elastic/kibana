@@ -166,7 +166,7 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(navigationTree$: ",
+            "(id: string, navigationTree$: ",
             "Observable",
             "<",
             {
@@ -201,6 +201,21 @@
             {
               "parentPluginId": "serverless",
               "id": "def-public.ServerlessPluginStart.initNavigation.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.initNavigation.$2",
               "type": "Object",
               "tags": [],
               "label": "navigationTree$",
@@ -232,7 +247,7 @@
             },
             {
               "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.initNavigation.$2",
+              "id": "def-public.ServerlessPluginStart.initNavigation.$3",
               "type": "Object",
               "tags": [],
               "label": "config",
@@ -243,7 +258,7 @@
               "children": [
                 {
                   "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$2.dataTestSubj",
+                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.dataTestSubj",
                   "type": "string",
                   "tags": [],
                   "label": "dataTestSubj",
@@ -257,7 +272,7 @@
                 },
                 {
                   "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$2.panelContentProvider",
+                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.panelContentProvider",
                   "type": "Function",
                   "tags": [],
                   "label": "panelContentProvider",

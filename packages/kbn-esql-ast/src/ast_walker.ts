@@ -294,7 +294,7 @@ function getBooleanValue(ctx: BooleanLiteralContext | BooleanValueContext) {
 
 function getConstant(ctx: ConstantContext | undefined): ESQLAstItem | undefined {
   if (ctx instanceof NullLiteralContext) {
-    return createLiteral('string', ctx.NULL());
+    return createLiteral('null', ctx.NULL());
   }
   if (ctx instanceof QualifiedIntegerLiteralContext) {
     // despite the generic name, this is a date unit constant:
@@ -311,7 +311,7 @@ function getConstant(ctx: ConstantContext | undefined): ESQLAstItem | undefined 
     return getBooleanValue(ctx);
   }
   if (ctx instanceof StringLiteralContext) {
-    return createLiteral('string', ctx.string_().STRING());
+    return createLiteral('string', ctx.string_().QUOTED_STRING());
   }
   if (
     ctx instanceof NumericArrayLiteralContext ||
@@ -327,7 +327,7 @@ function getConstant(ctx: ConstantContext | undefined): ESQLAstItem | undefined 
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
-      const literal = createLiteral('string', string.STRING());
+      const literal = createLiteral('string', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);
       }
@@ -412,7 +412,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
         fn.args.push(arg);
-        const literal = createLiteral('string', regex._pattern.STRING());
+        const literal = createLiteral('string', regex._pattern.QUOTED_STRING());
         if (literal) {
           fn.args.push(literal);
         }
@@ -530,7 +530,7 @@ export function visitOrderExpression(ctx: OrderExpressionContext[]) {
 }
 
 export function visitDissect(ctx: DissectCommandContext) {
-  const pattern = ctx.string_().getToken(esql_parser.STRING, 0);
+  const pattern = ctx.string_().getToken(esql_parser.QUOTED_STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
     ...(pattern && textExistsAndIsValid(pattern.getText())
@@ -540,7 +540,7 @@ export function visitDissect(ctx: DissectCommandContext) {
 }
 
 export function visitGrok(ctx: GrokCommandContext) {
-  const pattern = ctx.string_().getToken(esql_parser.STRING, 0);
+  const pattern = ctx.string_().getToken(esql_parser.QUOTED_STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
     ...(pattern && textExistsAndIsValid(pattern.getText())

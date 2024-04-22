@@ -161,7 +161,7 @@ function getLensTopNavConfig(options: {
 
   if (actions.getUnderlyingDataUrl.visible) {
     const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
-      defaultMessage: 'Explore data in Discover',
+      defaultMessage: 'Explore in Discover',
     });
 
     topNavMenu.push({
@@ -297,6 +297,7 @@ export const LensTopNavMenu = ({
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
+    notifications,
   } = useKibana<LensAppServices>().services;
 
   const {
@@ -639,6 +640,7 @@ export const LensTopNavMenu = ({
               onClose: () => {
                 anchorElement?.focus();
               },
+              toasts: notifications.toasts,
             });
           },
         },
@@ -793,6 +795,7 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    notifications.toasts,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

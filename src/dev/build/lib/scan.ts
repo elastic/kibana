@@ -10,7 +10,7 @@ import Fs from 'fs';
 
 import { join } from 'path';
 import * as Rx from 'rxjs';
-import { map, mergeAll, mergeMap } from 'rxjs/operators';
+import { map, mergeAll, mergeMap } from 'rxjs';
 
 const getStat$ = Rx.bindNodeCallback<[string], [Fs.Stats]>(Fs.stat);
 const getReadDir$ = Rx.bindNodeCallback<[string], [string[]]>(Fs.readdir);

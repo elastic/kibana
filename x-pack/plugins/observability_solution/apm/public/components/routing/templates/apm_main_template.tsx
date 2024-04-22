@@ -9,9 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
@@ -66,8 +67,6 @@ export function ApmMainTemplate({
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
 
-  const aiAssistant = services.observabilityAIAssistant;
-
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   const { data, status } = useFetcher((callApmApi) => {
@@ -77,8 +76,7 @@ export function ApmMainTemplate({
   // create static data view on initial load
   useFetcher(
     (callApmApi) => {
-      const canCreateDataView =
-        application?.capabilities.savedObjectsManagement.edit;
+      const canCreateDataView = application?.capabilities.savedObjectsManagement.edit;
 
       if (canCreateDataView) {
         return callApmApi('POST /internal/apm/data_view/static');
@@ -91,19 +89,17 @@ export function ApmMainTemplate({
     location.pathname.includes(path)
   );
 
-  const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } =
-    useFetcher(
-      (callApmApi) => {
-        if (!data?.hasData && !shouldBypassNoDataScreen) {
-          return callApmApi('GET /internal/apm/fleet/has_apm_policies');
-        }
-      },
-      [shouldBypassNoDataScreen, data?.hasData]
-    );
+  const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
+    (callApmApi) => {
+      if (!data?.hasData && !shouldBypassNoDataScreen) {
+        return callApmApi('GET /internal/apm/fleet/has_apm_policies');
+      }
+    },
+    [shouldBypassNoDataScreen, data?.hasData]
+  );
 
   const isLoading =
-    status === FETCH_STATUS.LOADING ||
-    fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
+    status === FETCH_STATUS.LOADING || fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
 
   const hasApmData = !!data?.hasData;
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
@@ -118,25 +114,13 @@ export function ApmMainTemplate({
     isServerless: config?.serverlessOnboarding,
   });
 
-  useEffect(() => {
-    return aiAssistant.service.setScreenContext({
-      screenDescription: [
-        hasApmData
-          ? 'The user has APM data.'
-          : 'The user does not have APM data.',
-        hasApmIntegrations
-          ? 'The user has the APM integration installed. '
-          : 'The user does not have the APM integration installed',
-        noDataConfig !== undefined
-          ? 'The user is looking at a screen that tells them they do not have any data.'
-          : '',
-      ].join('\n'),
-    });
-  }, [hasApmData, hasApmIntegrations, noDataConfig, aiAssistant]);
+  useDefaultAiAssistantStarterPromptsForAPM({
+    hasApmData,
+    hasApmIntegrations,
+    noDataConfig,
+  });
 
-  const rightSideItems = [
-    ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
-  ];
+  const rightSideItems = [...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : [])];
 
   const sanitizedPath = getPathForFeedback(window.location.pathname);
   const pageHeaderTitle = (
@@ -154,9 +138,7 @@ export function ApmMainTemplate({
               sanitizedPath={sanitizedPath}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {environmentFilter && <ApmEnvironmentFilter />}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{environmentFilter && <ApmEnvironmentFilter />}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -181,9 +163,7 @@ export function ApmMainTemplate({
     </ObservabilityPageTemplate>
   );
 
-  return (
-    <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
-  );
+  return <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>;
 
   return pageTemplate;
 }

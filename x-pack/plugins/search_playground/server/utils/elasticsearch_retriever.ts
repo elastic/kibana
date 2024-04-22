@@ -8,7 +8,11 @@
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
 import { Document } from '@langchain/core/documents';
 import { Client } from '@elastic/elasticsearch';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsAggregate,
+  SearchHit,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
@@ -18,7 +22,7 @@ export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
    * The name of the field the content resides in
    */
-  content_field: string | ((hit: SearchHit<any>) => Document);
+  content_field: string | Record<string, string>;
 
   index: string;
 
@@ -42,7 +46,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   index: string;
 
-  content_field: string | ((hit: SearchHit<any>) => Document);
+  content_field: Record<string, string> | string;
 
   hit_doc_mapper?: HitDocMapper;
 
@@ -63,20 +67,32 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   async _getRelevantDocuments(query: string): Promise<Document[]> {
     try {
-      const results = await this.client.search({
-        index: this.index,
-        query: this.query_body_fn(query),
-        size: this.k,
-      });
+      const queryBody = this.query_body_fn(query);
+
+      const results = (await this.client.transport.request({
+        method: 'POST',
+        path: `/${this.index}/_search`,
+        body: {
+          ...queryBody,
+          size: this.k,
+        },
+      })) as SearchResponse<unknown, Record<string, AggregationsAggregate>>;
 
       const hits = results.hits.hits;
 
+      // default elasticsearch doc to LangChain doc
       let mapper: HitDocMapper = (hit: SearchHit<any>) => {
+        const pageContentFieldKey =
+          typeof this.content_field === 'string'
+            ? this.content_field
+            : this.content_field[hit._index as string];
+
         return new Document({
-          pageContent: hit._source[this.content_field as string],
+          pageContent: hit._source[pageContentFieldKey],
           metadata: {
-            score: hit._score,
-            id: hit._id,
+            _score: hit._score,
+            _id: hit._id,
+            _index: hit._index,
           },
         });
       };

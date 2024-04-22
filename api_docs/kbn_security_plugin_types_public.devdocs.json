@@ -568,6 +568,40 @@
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.UserProfileAPIClient.userProfileLoaded$",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfileLoaded$",
+            "description": [
+              "\nIndicates if the user profile data has been loaded from the server.\nUseful to distinguish between the case when the user profile data is `null` because the HTTP\nrequest has not finished or because there is no user profile data for the current user."
+            ],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.UserProfileAPIClient.enabled$",
+            "type": "Object",
+            "tags": [],
+            "label": "enabled$",
+            "description": [
+              "Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles."
+            ],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.UserProfileAPIClient.getCurrent",
             "type": "Function",
             "tags": [],
@@ -814,6 +848,50 @@
                 "label": "data",
                 "description": [
                   "Application data to be written (merged with existing data)."
+                ],
+                "signature": [
+                  "D"
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.UserProfileAPIClient.partialUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "partialUpdate",
+            "description": [
+              "\nPartially updates user profile data of the current user, merging the previous data with the provided data."
+            ],
+            "signature": [
+              "<D extends Partial<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">>(data: D) => Promise<void>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.UserProfileAPIClient.partialUpdate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [
+                  "Application data to be merged with existing data."
                 ],
                 "signature": [
                   "D"

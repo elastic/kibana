@@ -90,7 +90,7 @@ export function ObservabilityAlertSearchBar({
     onAlertStatusChange(status);
   }, [onAlertStatusChange, status]);
 
-  useEffect(() => {
+  const submitQuery = useCallback(() => {
     try {
       onEsQueryChange(
         buildEsQuery({
@@ -99,7 +99,9 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
+          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
           filters,
+          config: getEsQueryConfig(uiSettings),
         })
       );
     } catch (error) {
@@ -108,23 +110,43 @@ export function ObservabilityAlertSearchBar({
       });
       onKueryChange(DEFAULT_QUERY_STRING);
     }
-  }, [filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
+  }, [
+    defaultSearchQueries,
+    filters,
+    kuery,
+    onEsQueryChange,
+    onKueryChange,
+    rangeFrom,
+    rangeTo,
+    status,
+    uiSettings,
+    toasts,
+  ]);
 
-  const onSearchBarParamsChange = useCallback<
-    (query: {
+  useEffect(() => {
+    submitQuery();
+  }, [submitQuery]);
+
+  const onQuerySubmit = (
+    {
+      dateRange,
+      query,
+    }: {
       dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
       query?: string;
-    }) => void
-  >(
-    ({ dateRange, query }) => {
+    },
+    isUpdate?: boolean
+  ) => {
+    if (isUpdate) {
       clearSavedQuery();
       onKueryChange(query ?? '');
       timeFilterService.setTime(dateRange);
       onRangeFromChange(dateRange.from);
       onRangeToChange(dateRange.to);
-    },
-    [onKueryChange, timeFilterService, clearSavedQuery, onRangeFromChange, onRangeToChange]
-  );
+    } else {
+      submitQuery();
+    }
+  };
 
   const onFilterUpdated = useCallback<(filters: Filter[]) => void>(
     (updatedFilters) => {
@@ -149,7 +171,7 @@ export function ObservabilityAlertSearchBar({
           onSavedQueryUpdated={setSavedQuery}
           onClearSavedQuery={clearSavedQuery}
           query={kuery}
-          onQuerySubmit={onSearchBarParamsChange}
+          onQuerySubmit={onQuerySubmit}
         />
       </EuiFlexItem>
 

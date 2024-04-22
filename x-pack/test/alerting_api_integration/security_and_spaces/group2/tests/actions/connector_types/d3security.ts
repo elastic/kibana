@@ -198,7 +198,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${d3SecurityActionId}. Connector name: D3 Security. Connector type: .d3security`,
           });
         });

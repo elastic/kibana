@@ -2035,15 +2035,7 @@
           },
           "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; validate: { params: ",
           "RuleTypeParamsValidator",
-          "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.IRuleTypeAlerts",
-            "text": "IRuleTypeAlerts"
-          },
-          "<never> | undefined; recoveryActionGroup?: ",
+          "<TParams>; }; recoveryActionGroup?: ",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
@@ -2107,7 +2099,15 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; doesSetRecoveryContext?: boolean | undefined; alerts?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.IRuleTypeAlerts",
+            "text": "IRuleTypeAlerts"
+          },
+          "<never> | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
           "<TParams> | undefined; fieldsForAAD?: string[] | undefined; }"
         ],
@@ -3588,7 +3588,7 @@
             "signature": [
               "<T extends ",
               "SuppressionFields8130",
-              ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined) => Promise<",
+              ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -3665,6 +3665,20 @@
                 "description": [],
                 "signature": [
                   "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.PersistenceServices.alertWithSuppression.$6",
+                "type": "number",
+                "tags": [],
+                "label": "maxAlerts",
+                "description": [],
+                "signature": [
+                  "number | undefined"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
@@ -3871,7 +3885,7 @@
             "section": "def-server.SuppressedAlertServiceResult",
             "text": "SuppressedAlertServiceResult"
           },
-          "<T> extends Omit<",
+          "<T> extends ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -3879,7 +3893,7 @@
             "section": "def-server.PersistenceAlertServiceResult",
             "text": "PersistenceAlertServiceResult"
           },
-          "<T>, \"alertsWereTruncated\">"
+          "<T>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -4424,7 +4438,7 @@
         "signature": [
           "<T extends ",
           "SuppressionFields8130",
-          ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined) => Promise<",
+          ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -4501,6 +4515,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.SuppressedAlertService.$6",
+            "type": "number",
+            "tags": [],
+            "label": "maxAlerts",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,

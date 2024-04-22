@@ -21,7 +21,6 @@ import {
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { useIsEsqlRuleTypeEnabled } from '../../../../common/components/hooks';
 
 interface SelectRuleTypeProps {
@@ -199,7 +198,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqlRuleType"
-                title={<TechnicalPreviewBadge label={i18n.ESQL_TYPE_TITLE} />}
+                title={i18n.ESQL_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.ESQL_TYPE_DESCRIPTION}
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}

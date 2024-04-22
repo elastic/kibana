@@ -37,8 +37,8 @@ Object {
   "results": Array [
     Object {
       "groupings": Object {},
-      "id": "slo-one",
       "instanceId": "*",
+      "sloId": "slo-one",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -52,8 +52,8 @@ Object {
     },
     Object {
       "groupings": Object {},
-      "id": "slo_two",
       "instanceId": "*",
+      "sloId": "slo_two",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -67,8 +67,8 @@ Object {
     },
     Object {
       "groupings": Object {},
-      "id": "slo-three",
       "instanceId": "*",
+      "sloId": "slo-three",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -82,8 +82,8 @@ Object {
     },
     Object {
       "groupings": Object {},
-      "id": "slo-five",
       "instanceId": "*",
+      "sloId": "slo-five",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -97,8 +97,8 @@ Object {
     },
     Object {
       "groupings": Object {},
-      "id": "slo-four",
       "instanceId": "*",
+      "sloId": "slo-four",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
