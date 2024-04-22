@@ -59,24 +59,19 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
 
-    const [
-      apmEventClient,
-      annotationsClient,
-      coreContext,
-      apmAlertsClient,
-      mlClient,
-    ] = await Promise.all([
-      getApmEventClient(resources),
-      plugins.observability.setup.getScopedAnnotationsClient(context, request),
-      context.core,
-      getApmAlertsClient(resources),
-      getMlClient(resources),
-      getRandomSampler({
-        security: resources.plugins.security,
-        probability: 1,
-        request: resources.request,
-      }),
-    ]);
+    const [apmEventClient, annotationsClient, coreContext, apmAlertsClient, mlClient] =
+      await Promise.all([
+        getApmEventClient(resources),
+        plugins.observability.setup.getScopedAnnotationsClient(context, request),
+        context.core,
+        getApmAlertsClient(resources),
+        getMlClient(resources),
+        getRandomSampler({
+          security: resources.plugins.security,
+          probability: 1,
+          request: resources.request,
+        }),
+      ]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     return getObservabilityAlertDetailsContext({
@@ -116,9 +111,7 @@ const getApmTimeSeriesRoute = createApmServerRoute({
     });
 
     return {
-      content: timeseries.map(
-        (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')
-      ),
+      content: timeseries.map((series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')),
       data: timeseries,
     };
   },
@@ -131,9 +124,7 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ content: APMDownstreamDependency[] }> => {
+  handler: async (resources): Promise<{ content: APMDownstreamDependency[] }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { query } = params;

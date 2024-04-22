@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,13 +18,12 @@ interface Props {
 export function ProfilingHostsCallout({ serviceName }: Props) {
   const { services } = useKibana<ApmPluginStartDeps>();
 
-  const baseUrl =
-    services.docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
+  const baseUrl = services.docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
 
-  const [
-    apmUniversalProfilingShowCallout,
-    setAPMUniversalProfilingShowCallout,
-  ] = useLocalStorage('apmUniversalProfilingShowCallout', true);
+  const [apmUniversalProfilingShowCallout, setAPMUniversalProfilingShowCallout] = useLocalStorage(
+    'apmUniversalProfilingShowCallout',
+    true
+  );
 
   if (apmUniversalProfilingShowCallout === false) {
     return null;

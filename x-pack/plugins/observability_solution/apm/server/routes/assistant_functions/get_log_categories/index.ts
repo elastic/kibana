@@ -9,11 +9,7 @@ import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
-import {
-  SERVICE_NAME,
-  CONTAINER_ID,
-  HOST_NAME,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
 export type LogCategories =
@@ -49,9 +45,7 @@ export async function getLogCategories({
   ]);
 
   const index =
-    (await coreContext.uiSettings.client.get<string>(
-      aiAssistantLogsIndexPattern
-    )) ?? 'logs-*';
+    (await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern)) ?? 'logs-*';
 
   const search = getTypedSearch(esClient);
 
@@ -80,8 +74,7 @@ export async function getLogCategories({
   });
   const totalDocCount = hitCountRes.hits.total.value;
   const rawSamplingProbability = Math.min(100_000 / totalDocCount, 1);
-  const samplingProbability =
-    rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
+  const samplingProbability = rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
 
   const categorizedLogsRes = await search({
     index,
@@ -116,8 +109,7 @@ export async function getLogCategories({
 
   return categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
     ({ doc_count: docCount, key, sample }) => {
-      const sampleMessage = (sample.hits.hits[0]._source as { message: string })
-        .message;
+      const sampleMessage = (sample.hits.hits[0]._source as { message: string }).message;
       return { errorCategory: key as string, docCount, sampleMessage };
     }
   );
