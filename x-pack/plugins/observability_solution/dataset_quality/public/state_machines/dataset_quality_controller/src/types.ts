@@ -16,6 +16,7 @@ import {
   DataStreamSettings,
   DataStreamDetails,
   DataStreamStatServiceResponse,
+  IntegrationsResponse,
   DataStreamStat,
   IntegrationsResponse,
 } from '../../../../common/data_streams_stats';

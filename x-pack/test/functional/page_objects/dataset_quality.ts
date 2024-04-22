@@ -318,10 +318,12 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       timeValue: number,
       unit: TimeUnitId
     ) {
+      // Only click the menu button found under the provided container
       const datePickerToggleQuickMenuButton = await container.findByTestSubject(
         testSubjectSelectors.superDatePickerToggleQuickMenuButton
       );
       await datePickerToggleQuickMenuButton.click();
+
       const datePickerQuickMenu = await testSubjects.find(
         testSubjectSelectors.superDatePickerQuickMenu
       );
