@@ -44,12 +44,11 @@ async function getSimulatedIndexTemplateForIndexPattern({
   esClient: ElasticsearchClient;
   indexPattern: string;
 }) {
-  const simulatedIndexTemplate =
-    await esClient.transport.request<IndicesSimulateTemplateResponse>({
-      method: 'POST',
-      path: '/_index_template/_simulate',
-      body: { index_patterns: [indexPattern] },
-    });
+  const simulatedIndexTemplate = await esClient.transport.request<IndicesSimulateTemplateResponse>({
+    method: 'POST',
+    path: '/_index_template/_simulate',
+    body: { index_patterns: [indexPattern] },
+  });
 
   const indexTemplates = await Promise.all(
     (simulatedIndexTemplate.overlapping ?? []).map(
@@ -72,10 +71,7 @@ async function getSimulatedIndexTemplateForIndexPattern({
   };
 }
 
-async function getTemplatePriority(
-  esClient: ElasticsearchClient,
-  name: string
-) {
+async function getTemplatePriority(esClient: ElasticsearchClient, name: string) {
   const res = await getIndexTemplate(esClient, { name });
   return res.index_templates[0]?.index_template?.priority;
 }
@@ -83,13 +79,12 @@ async function getTemplatePriority(
 function getIsNonStandardIndexTemplate(templateName: string) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
   const stackIndexTemplateNames = ['logs', 'metrics'];
-  const isNonStandard = [
-    ...apmIndexTemplateNames,
-    ...stackIndexTemplateNames,
-  ].every((apmIndexTemplateName) => {
-    const notMatch = templateName !== apmIndexTemplateName;
-    return notMatch;
-  });
+  const isNonStandard = [...apmIndexTemplateNames, ...stackIndexTemplateNames].every(
+    (apmIndexTemplateName) => {
+      const notMatch = templateName !== apmIndexTemplateName;
+      return notMatch;
+    }
+  );
 
   return isNonStandard;
 }
@@ -104,9 +99,7 @@ async function handleInvalidIndexTemplateException<T>(promise: Promise<T>) {
       // @ts-expect-error
       error.meta.body.error.type === 'invalid_index_template_exception'
     ) {
-      console.error(
-        `Suppressed exception caused by cross cluster search: ${error.message}}`
-      );
+      console.error(`Suppressed exception caused by cross cluster search: ${error.message}}`);
       return [];
     }
 

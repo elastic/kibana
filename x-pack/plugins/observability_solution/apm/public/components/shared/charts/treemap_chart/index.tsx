@@ -30,12 +30,7 @@ export function TreemapChart({
   const colorPalette = euiPaletteColorBlind();
 
   return (
-    <ChartContainer
-      hasData={!isEmpty(data)}
-      height={height}
-      status={fetchStatus}
-      id={id}
-    >
+    <ChartContainer hasData={!isEmpty(data)} height={height} status={fetchStatus} id={id}>
       <Chart>
         <Partition
           data={data}
@@ -47,8 +42,7 @@ export function TreemapChart({
             {
               groupByRollup: (d: Datum) => d.label,
               shape: {
-                fillColor: (dataName, sortIndex) =>
-                  colorPalette[Math.floor(sortIndex % 10)],
+                fillColor: (dataName, sortIndex) => colorPalette[Math.floor(sortIndex % 10)],
               },
               fillLabel: {
                 valueFormatter: () => '',

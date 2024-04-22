@@ -137,7 +137,6 @@ export function ClustersTable({ clusters }: Props) {
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
           : items
       }
-      isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
       itemId="name"
       columns={columns}
