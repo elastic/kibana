@@ -526,14 +526,6 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('mlJobEditFlyout');
     }
 
-    public async clickEditAnnotationAction(jobId: string) {
-      await testSubjects.click(this.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
-      await testSubjects.click('mlAnnotationsActionEdit');
-      await testSubjects.existOrFail('mlAnnotationFlyout', {
-        timeout: 3_000,
-      });
-    }
-
     public async clickDeleteJobAction(jobId: string) {
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonDeleteJob');

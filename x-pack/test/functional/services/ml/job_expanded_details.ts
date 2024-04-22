@@ -15,8 +15,18 @@ export function MachineLearningJobExpandedDetailsProvider(
   jobTable: MlADJobTable
 ) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
+    async clickEditAnnotationAction(jobId: string) {
+      await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
+      await find.existsByCssSelector('div[data-popover-open="true"][data-popover-panel="true"]');
+      await testSubjects.click('mlAnnotationsActionEdit');
+      await testSubjects.existOrFail('mlAnnotationFlyout', {
+        timeout: 3_000,
+      });
+    },
+
     async assertJobRowCalendars(
       jobId: string,
       expectedCalendars: string[],
@@ -51,7 +61,7 @@ export function MachineLearningJobExpandedDetailsProvider(
           await testSubjects.missingOrFail('clearSearchButton');
         }
 
-        await jobTable.clickEditAnnotationAction(jobId);
+        await this.clickEditAnnotationAction(jobId);
 
         await testSubjects.setValue('mlAnnotationsFlyoutTextInput', newAnnotationText, {
           clearWithKeyboard: true,
