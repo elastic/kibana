@@ -20,6 +20,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
 
+  const TINY_ELSER = {
+    ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
+    id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
+  };
+
   describe('@serverless NLP Cleanup Task in Essentials Tier', () => {
     describe('New Essentials Deployment', () => {
       it('registers and enables NLP Cleanup Task', async () => {
@@ -33,18 +38,18 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('Model Loading', () => {
         before(async () => {
           // Create a light-weight model that has a `model_type` of `pytorch`
-          await ml.api.importTrainedModel(
-            SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-            SUPPORTED_TRAINED_MODELS.TINY_ELSER.name
-          );
+          await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id);
+          await ml.testResources.setKibanaTimeZoneToUTC();
           // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
           await ml.api.assureMlStatsIndexExists();
+          await ml.api.syncSavedObjects();
         });
 
         after(async () => {
           await ml.api.stopAllTrainedModelDeploymentsES();
           await ml.api.deleteAllTrainedModelsES();
           await ml.api.cleanMlIndices();
+          await ml.testResources.cleanMLSavedObjects();
         });
 
         it('executes NLP Cleanup Task and successfully cleans up only pytorch models', async () => {
