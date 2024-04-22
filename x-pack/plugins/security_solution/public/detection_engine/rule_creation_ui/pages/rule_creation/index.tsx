@@ -213,8 +213,10 @@ const CreateRulePageComponent: React.FC = () => {
   const esqlIndex = useEsqlIndex(
     defineStepData.queryBar.query.query,
     ruleType,
-    defineStepForm.isValid
+    // defineStepForm.isValid
+    defineStepForm.getErrors().length === 0
   );
+
   const memoizedIndex = useMemo(
     () => (isEsqlRuleValue ? esqlIndex : defineStepData.index),
     [defineStepData.index, esqlIndex, isEsqlRuleValue]
