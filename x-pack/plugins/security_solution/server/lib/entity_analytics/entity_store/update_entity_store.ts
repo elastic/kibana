@@ -190,7 +190,7 @@ export const updateEntityStore = async ({
         delete agentRecordsById[hostName];
       }
 
-      return buildEntityFromComposite({ composite, assetCriticality, riskScore });
+      return buildEntityFromComposite({ composite, assetCriticality, riskScore, agent });
     }
   );
 
@@ -547,8 +547,9 @@ function buildEntityFromComposite(opts: {
   composite: CompositeDocument;
   assetCriticality?: AssetCriticalityRecord;
   riskScore?: EcsRiskScore;
+  agent?: Agent;
 }): NewEntityStoreEntity {
-  const { composite, assetCriticality, riskScore } = opts;
+  const { composite, assetCriticality, riskScore, agent } = opts;
   return {
     '@timestamp': new Date().toISOString(),
     entity_type: 'host',
@@ -561,6 +562,7 @@ function buildEntityFromComposite(opts: {
       ...(composite.latest_os_timestamp ? { os_seen_at: composite.latest_os_timestamp } : {}),
       ...(composite.latest_os ? { os: composite.latest_os } : {}),
       ...(riskScore?.host?.risk ? { risk: riskScore.host.risk } : {}),
+      ...(agent ? { agent } : {}),
     },
   };
 }
@@ -619,6 +621,9 @@ async function getNewAssetCriticalitiesAndEntityAssetCriticalities(
   lastProcessedCriticalityId?: string
 ): Promise<Record<string, AssetCriticalityRecord>> {
   try {
+    if (hostNames.length > 0) {
+      console.log('getting asset criticalities for hostNames', hostNames);
+    }
     const newAssetCriticalities = await getNextAssetCriticalities({
       assetCriticalityService,
       fromTimestamp: lastProcessedCriticalityTimestamp,
@@ -740,8 +745,11 @@ async function getNewAgentRecords(
   lastProcessedAgentCheckinTimestamp?: string,
   lastProcessedAgentId?: string
 ): Promise<Record<string, Agent>> {
+  if (hostNames.length > 0) {
+    console.log('getting agents for hostNames', hostNames);
+  }
   const hostNamesFilter = hostNames.length
-    ? hostNames.map((hostName) => `local_metadata.host.name: ${hostName}`).join(' or ')
+    ? hostNames.map((hostName) => `local_metadata.host.name: '${hostName}'`).join(' or ')
     : '';
 
   const lastCheckinFilter = lastProcessedAgentCheckinTimestamp
@@ -761,6 +769,10 @@ async function getNewAgentRecords(
     sortOrder: 'desc',
   });
 
+  if (agents.length > 0) {
+    console.log('got agents for hostNames', agents);
+  }
+
   if (!lastProcessedAgentId || !lastProcessedAgentCheckinTimestamp || !agents.length) {
     return _.keyBy(agents, 'local_metadata.host.name');
   }
@@ -778,114 +790,3 @@ async function getNewAgentRecords(
 
   return _.keyBy(agents.slice(lastProcessedIndex + 1), 'local_metadata.host.name');
 }
-
-// example agent record
-// {
-//   "_index": ".fleet-agents-7",
-//   "_id": "c05bc335-7ad7-45f5-bdf5-f7c9c3416999",
-//   "_score": 1,
-//   "_source": {
-//     "access_api_key_id": "WDxG740BAG_XfFTa8Wbz",
-//     "action_seq_no": [
-//       -1
-//     ],
-//     "active": true,
-//     "agent": {
-//       "id": "c05bc335-7ad7-45f5-bdf5-f7c9c3416999",
-//       "version": "8.13.0"
-//     },
-//     "enrolled_at": "2024-02-28T10:33:40Z",
-//     "local_metadata": {
-//       "elastic": {
-//         "agent": {
-//           "build.original": "8.13.0 (build: edeb9adbf0c11a997359038d1393d14ab03462ce at 2024-02-23 12:32:56 +0000 UTC)",
-//           "complete": false,
-//           "id": "c05bc335-7ad7-45f5-bdf5-f7c9c3416999",
-//           "log_level": "info",
-//           "snapshot": false,
-//           "upgradeable": false,
-//           "version": "8.13.0"
-//         }
-//       },
-//       "host": {
-//         "architecture": "x86_64",
-//         "hostname": "ec7ed2db3b3f",
-//         "id": "",
-//         "ip": [
-//           "127.0.0.1/8",
-//           "172.17.0.10/16"
-//         ],
-//         "mac": [
-//           "02:42:ac:11:00:0a"
-//         ],
-//         "name": "ec7ed2db3b3f"
-//       },
-//       "os": {
-//         "family": "debian",
-//         "full": "Ubuntu focal(20.04.6 LTS (Focal Fossa))",
-//         "kernel": "5.15.0-1032-gcp",
-//         "name": "Ubuntu",
-//         "platform": "ubuntu",
-//         "version": "20.04.6 LTS (Focal Fossa)"
-//       }
-//     },
-//     "policy_id": "policy-elastic-agent-on-cloud",
-//     "type": "PERMANENT",
-//     "outputs": {
-//       "es-containerhost": {
-//         "api_key": "XjxH740BAG_XfFTaAmYH:AtX5ejLMRIyfcmRXTMX-Lg",
-//         "permissions_hash": "b8bf91d03aa17d178cdd82db91a1e0e7711e8fd623ee2d5cb689f912ad5cd026",
-//         "type": "elasticsearch",
-//         "api_key_id": "XjxH740BAG_XfFTaAmYH"
-//       }
-//     },
-//     "policy_revision_idx": 5,
-//     "policy_coordinator_idx": 1,
-//     "updated_at": "2024-02-28T10:36:25Z",
-//     "components": [
-//       {
-//         "id": "fleet-server-es-containerhost",
-//         "units": [
-//           {
-//             "id": "fleet-server-es-containerhost-fleet-server-fleet_server-elastic-cloud-fleet-server",
-//             "type": "input",
-//             "message": "Re-configuring",
-//             "status": "CONFIGURING"
-//           },
-//           {
-//             "id": "fleet-server-es-containerhost",
-//             "type": "output",
-//             "message": "Re-configuring",
-//             "status": "CONFIGURING"
-//           }
-//         ],
-//         "type": "fleet-server",
-//         "message": "Healthy: communicating with pid '153'",
-//         "status": "HEALTHY"
-//       },
-//       {
-//         "id": "apm-es-containerhost",
-//         "units": [
-//           {
-//             "id": "apm-es-containerhost",
-//             "type": "output",
-//             "message": "Healthy",
-//             "status": "HEALTHY"
-//           },
-//           {
-//             "id": "apm-es-containerhost-elastic-cloud-apm",
-//             "type": "input",
-//             "message": "Healthy",
-//             "status": "HEALTHY"
-//           }
-//         ],
-//         "type": "apm",
-//         "message": "Healthy: communicating with pid '179'",
-//         "status": "HEALTHY"
-//       }
-//     ],
-//     "last_checkin_message": "Running",
-//     "last_checkin_status": "online",
-//     "last_checkin": "2024-02-28T10:36:20Z"
-//   }
-// }
