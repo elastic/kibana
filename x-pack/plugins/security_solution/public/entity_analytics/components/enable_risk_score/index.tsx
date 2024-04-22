@@ -14,8 +14,6 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { RiskScoreEnableButton } from '../risk_score_onboarding/risk_score_enable_button';
 import * as i18n from './translations';
-import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
-import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 
 const EnableRiskScoreComponent = ({
   isDeprecated,
@@ -33,7 +31,6 @@ const EnableRiskScoreComponent = ({
     to: string;
   };
 }) => {
-  const privileges = useMissingRiskEnginePrivileges();
   const { signalIndexExists } = useCheckSignalIndex();
   if (!isDeprecated && !isDisabled) {
     return null;
@@ -51,36 +48,27 @@ const EnableRiskScoreComponent = ({
 
   return (
     <EuiPanel hasBorder>
-      {!privileges.isLoading && !privileges.hasAllRequiredPrivileges ? (
-        <RiskEnginePrivilegesCallOut privileges={privileges} />
-      ) : (
-        <>
-          <HeaderSection
-            title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />}
-            titleSize="s"
-          />
-          <EuiEmptyPrompt
-            title={<h2>{text.cta}</h2>}
-            body={
-              <>
-                {text.body}
-                {` `}
-                <RiskScoreDocLink riskScoreEntity={entityType} />
-              </>
-            }
-            actions={
-              <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-                <RiskScoreEnableButton
-                  disabled={!signalIndexExists}
-                  refetch={refetch}
-                  riskScoreEntity={entityType}
-                  timerange={timerange}
-                />
-              </EuiToolTip>
-            }
-          />
-        </>
-      )}
+      <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
+      <EuiEmptyPrompt
+        title={<h2>{text.cta}</h2>}
+        body={
+          <>
+            {text.body}
+            {` `}
+            <RiskScoreDocLink riskScoreEntity={entityType} />
+          </>
+        }
+        actions={
+          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+            <RiskScoreEnableButton
+              disabled={!signalIndexExists}
+              refetch={refetch}
+              riskScoreEntity={entityType}
+              timerange={timerange}
+            />
+          </EuiToolTip>
+        }
+      />
     </EuiPanel>
   );
 };

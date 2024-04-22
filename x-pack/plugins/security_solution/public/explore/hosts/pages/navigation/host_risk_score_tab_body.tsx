@@ -96,19 +96,23 @@ export const HostRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return (
+      <EuiPanel hasBorder>
+        <RiskEnginePrivilegesCallOut privileges={privileges} />
+      </EuiPanel>
+    );
+  }
+
   if (status.isDisabled || status.isDeprecated) {
     return (
       <EuiPanel hasBorder>
-        {!privileges.isLoading && !privileges.hasAllRequiredPrivileges ? (
-          <RiskEnginePrivilegesCallOut privileges={privileges} />
-        ) : (
-          <EnableRiskScore
-            {...status}
-            entityType={RiskScoreEntity.host}
-            refetch={refetch}
-            timerange={timerange}
-          />
-        )}
+        <EnableRiskScore
+          {...status}
+          entityType={RiskScoreEntity.host}
+          refetch={refetch}
+          timerange={timerange}
+        />
       </EuiPanel>
     );
   }
