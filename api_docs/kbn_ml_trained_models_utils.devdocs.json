@@ -384,7 +384,7 @@
         "label": "InferenceAPIConfigResponse",
         "description": [],
         "signature": [
-          "{ model_id: string; task_type: \"text_embedding\" | \"sparse_embedding\"; task_settings: { model?: string | undefined; }; } & ",
+          "{ model_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
           "InferenceServiceSettings"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
@@ -437,7 +437,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"text_embedding\" | \"fill_mask\""
+          "\"text_embedding\" | \"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
