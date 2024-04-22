@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { sloEditLocatorID } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -50,8 +44,7 @@ export function SloCallout({
           type: 'sli.apm.transactionErrorRate',
           params: {
             service: serviceName,
-            environment:
-              environment === ENVIRONMENT_ALL.value ? '*' : environment,
+            environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
             transactionName,
             transactionType,
           },

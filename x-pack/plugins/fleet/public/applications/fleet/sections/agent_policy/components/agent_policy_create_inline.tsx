@@ -188,7 +188,6 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             agentPolicy={newAgentPolicy}
             updateAgentPolicy={updateNewAgentPolicy}
             validation={validation}
-            isEditing={false}
           />
         </StyledEuiAccordion>
       </>

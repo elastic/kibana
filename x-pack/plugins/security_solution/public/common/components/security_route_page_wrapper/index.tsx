@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName } from '../../../../common';
-import { useLinkAuthorized } from '../../links';
+import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 interface SecurityRoutePageWrapperProps {
   pageName: SecurityPageName;
+  redirectOnMissing?: boolean;
 }
 
 /**
@@ -37,12 +39,18 @@ interface SecurityRoutePageWrapperProps {
 export const SecurityRoutePageWrapper: React.FC<SecurityRoutePageWrapperProps> = ({
   children,
   pageName,
+  redirectOnMissing,
 }) => {
-  const isAuthorized = useLinkAuthorized(pageName);
+  const link = useLinkInfo(pageName);
   const UpsellPage = useUpsellingPage(pageName);
 
+  const isAuthorized = link != null && !link.unauthorized;
   if (isAuthorized) {
     return <TrackApplicationView viewId={pageName}>{children}</TrackApplicationView>;
+  }
+
+  if (redirectOnMissing && link == null) {
+    return <Redirect to="" />; // redirects to the home page
   }
 
   if (UpsellPage) {
