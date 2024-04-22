@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -17,7 +18,11 @@ import {
   EuiIcon,
   EuiCode,
   OnTimeChangeProps,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { useDegradedDocsChart } from '../../../hooks';
 
 import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
 import { flyoutDegradedDocsText } from '../../../../common/translations';
@@ -35,26 +40,56 @@ export function DegradedDocs({
   lastReloadTime: number;
   onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
 }) {
+  const { dataView, breakdown, ...chartProps } = useDegradedDocsChart({ dataStream });
+
+  const [breakdownDataViewField, setBreakdownDataViewField] = useState<DataViewField | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (breakdown.dataViewField && breakdown.fieldSupportsBreakdown) {
+      setBreakdownDataViewField(breakdown.dataViewField);
+    } else {
+      setBreakdownDataViewField(undefined);
+    }
+
+    if (breakdown.dataViewField && !breakdown.fieldSupportsBreakdown) {
+      // TODO: If needed, notify user that the field is not breakable
+    }
+  }, [setBreakdownDataViewField, breakdown.dataViewField, breakdown.fieldSupportsBreakdown]);
+
   return (
     <EuiPanel hasBorder grow={false}>
-      <EuiFlexGroup
-        css={css`
-          flex-grow: 1;
-        `}
-        justifyContent="flexStart"
-        alignItems="center"
-        gutterSize="xs"
-      >
-        <EuiTitle size="xxxs">
-          <h6>{flyoutDegradedDocsText}</h6>
-        </EuiTitle>
-        <EuiToolTip content={degradedDocsTooltip}>
-          <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </EuiToolTip>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem
+          css={css`
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 4px;
+          `}
+        >
+          <EuiTitle size="xxxs">
+            <h6>{flyoutDegradedDocsText}</h6>
+          </EuiTitle>
+          <EuiToolTip content={degradedDocsTooltip}>
+            <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </EuiToolTip>
+        </EuiFlexItem>
+
+        <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
+          <UnifiedBreakdownFieldSelector
+            dataView={dataView!}
+            breakdown={{ field: breakdownDataViewField }}
+            onBreakdownFieldChange={breakdown.onChange}
+          />
+        </EuiSkeletonRectangle>
       </EuiFlexGroup>
-      <EuiSpacer />
+
+      <EuiSpacer size="m" />
+
       <DegradedDocsChart
-        dataStream={dataStream}
+        {...chartProps}
         timeRange={timeRange}
         lastReloadTime={lastReloadTime}
         onTimeRangeChange={onTimeRangeChange}

@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
@@ -25,27 +24,28 @@ const DISABLED_ACTIONS = [
   'create-ml-ad-job-action',
 ];
 
-export function DegradedDocsChart({
-  dataStream,
-  timeRange,
-  lastReloadTime,
-  dataView,
-  breakdownDataViewField,
-  onTimeRangeChange,
-}: {
-  dataStream?: string;
+interface DegradedDocsChartProps
+  extends Pick<
+    ReturnType<typeof useDegradedDocsChart>,
+    'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
+  > {
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
-  dataView?: DataView;
-  breakdownDataViewField?: DataViewField;
   onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
-}) {
+}
+
+export function DegradedDocsChart({
+  attributes,
+  isChartLoading,
+  onChartLoading,
+  extraActions,
+  timeRange,
+  lastReloadTime,
+  onTimeRangeChange,
+}: DegradedDocsChartProps) {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
-
-  const { attributes, filterQuery, extraActions, isChartLoading, handleChartLoading } =
-    useDegradedDocsChart({ dataStream, breakdownDataViewField });
 
   const handleBrushEnd = useCallback(
     ({ range: [start, end] }: { range: number[] }) => {
@@ -79,11 +79,7 @@ export function DegradedDocsChart({
               extraActions={extraActions}
               disableTriggers={false}
               lastReloadRequestTime={lastReloadTime}
-              query={{
-                language: 'kuery',
-                query: filterQuery || '',
-              }}
-              onLoad={handleChartLoading}
+              onLoad={onChartLoading}
               onBrushEnd={handleBrushEnd}
             />
           )}

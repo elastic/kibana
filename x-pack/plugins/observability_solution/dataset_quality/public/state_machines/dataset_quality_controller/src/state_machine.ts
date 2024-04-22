@@ -218,6 +218,9 @@ export const createPureDatasetQualityControllerStateMachine = (
                           target: 'fetching',
                           actions: ['storeFlyoutOptions'],
                         },
+                        BREAKDOWN_FIELD_CHANGE: {
+                          actions: ['storeFlyoutOptions'],
+                        },
                       },
                     },
                   },
@@ -253,13 +256,6 @@ export const createPureDatasetQualityControllerStateMachine = (
                 CLOSE_FLYOUT: {
                   target: 'closed',
                   actions: ['resetFlyoutOptions'],
-                },
-                UPDATE_INSIGHTS_TIME_RANGE: {
-                  target: '#DatasetQualityController.flyout.fetching',
-                  actions: ['storeFlyoutOptions'],
-                },
-                BREAKDOWN_FIELD_CHANGE: {
-                  actions: ['storeFlyoutOptions'],
                 },
               },
             },
@@ -357,28 +353,25 @@ export const createPureDatasetQualityControllerStateMachine = (
             : {};
         }),
         storeFlyoutOptions: assign((context, event) => {
-          return 'dataset' in event
-            ? {
-                flyout: {
-                  ...context.flyout,
-                  dataset: event.dataset as FlyoutDataset,
-                },
-              }
-            : 'timeRange' in event
-            ? {
-                flyout: {
-                  ...context.flyout,
-                  insightsTimeRange: event.timeRange,
-                },
-              }
-            : 'breakdownField' in event
-            ? {
-                flyout: {
-                  ...context.flyout,
-                  breakdownField: event.breakdownField ?? undefined,
-                },
-              }
-            : {};
+          const insightsTimeRange =
+            'timeRange' in event
+              ? event.timeRange
+              : context.flyout?.insightsTimeRange ?? context.filters?.timeRange;
+          const dataset =
+            'dataset' in event ? (event.dataset as FlyoutDataset) : context.flyout?.dataset;
+          const breakdownField =
+            'breakdownField' in event
+              ? event.breakdownField ?? undefined
+              : context.flyout?.breakdownField;
+
+          return {
+            flyout: {
+              ...context.flyout,
+              dataset,
+              insightsTimeRange,
+              breakdownField,
+            },
+          };
         }),
         resetFlyoutOptions: assign((_context, _event) => ({ flyout: undefined })),
         storeDataStreamStats: assign((_context, event) => {
