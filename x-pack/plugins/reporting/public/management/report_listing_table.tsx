@@ -421,7 +421,6 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
           }
           pagination={pagination}
           selection={selection}
-          isSelectable={true}
           onChange={this.onTableChange}
           data-test-subj={REPORT_TABLE_ID}
           rowProps={() => ({ 'data-test-subj': REPORT_TABLE_ROW_ID })}

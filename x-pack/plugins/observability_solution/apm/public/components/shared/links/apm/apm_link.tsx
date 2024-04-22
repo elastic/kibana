@@ -86,12 +86,7 @@ export function getLegacyApmHref({
   });
 }
 
-export function LegacyAPMLink({
-  path = '',
-  query,
-  mergeQuery,
-  ...rest
-}: Props) {
+export function LegacyAPMLink({ path = '', query, mergeQuery, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
   const { basePath } = core.http;
@@ -100,7 +95,5 @@ export function LegacyAPMLink({
 
   const href = getLegacyApmHref({ basePath, path, search, query: mergedQuery });
 
-  return (
-    <EuiLink data-test-subj="apmLegacyAPMLinkLink" {...rest} href={href} />
-  );
+  return <EuiLink data-test-subj="apmLegacyAPMLinkLink" {...rest} href={href} />;
 }

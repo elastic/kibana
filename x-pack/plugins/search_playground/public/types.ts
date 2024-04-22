@@ -56,6 +56,7 @@ export enum ChatFormFields {
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
+  queryFields = 'query_fields',
 }
 
 export interface ChatForm {
@@ -67,6 +68,7 @@ export interface ChatForm {
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
+  [ChatFormFields.queryFields]: { [index: string]: string[] };
 }
 
 export enum MessageRole {

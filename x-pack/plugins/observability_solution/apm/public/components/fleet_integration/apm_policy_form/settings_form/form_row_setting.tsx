@@ -31,14 +31,12 @@ interface Props {
   isDisabled?: boolean;
 }
 
-const ENABLED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.enabledLabel',
-  { defaultMessage: 'Enabled' }
-);
-const DISABLED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.disabledLabel',
-  { defaultMessage: 'Disabled' }
-);
+const ENABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.enabledLabel', {
+  defaultMessage: 'Enabled',
+});
+const DISABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.disabledLabel', {
+  defaultMessage: 'Disabled',
+});
 
 export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
   switch (row.type) {
@@ -96,9 +94,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
       );
     }
     case 'combo': {
-      const comboOptions = Array.isArray(value)
-        ? value.map((label) => ({ label }))
-        : [];
+      const comboOptions = Array.isArray(value) ? value.map((label) => ({ label })) : [];
       return (
         <EuiComboBox
           data-test-subj={row.dataTestSubj}
@@ -134,12 +130,9 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
               onChange(row.key, val);
             }}
             options={{
-              ariaLabel: i18n.translate(
-                'xpack.apm.fleet_integration.settings.yamlCodeEditor',
-                {
-                  defaultMessage: 'YAML Code Editor',
-                }
-              ),
+              ariaLabel: i18n.translate('xpack.apm.fleet_integration.settings.yamlCodeEditor', {
+                defaultMessage: 'YAML Code Editor',
+              }),
               wordWrap: 'off',
               tabSize: 2,
               // To avoid left margin

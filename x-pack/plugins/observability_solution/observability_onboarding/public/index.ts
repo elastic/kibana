@@ -7,6 +7,8 @@
 
 import {
   ApplicationStart,
+  ChromeStart,
+  DocLinksStart,
   HttpStart,
   PluginInitializer,
   PluginInitializerContext,
@@ -30,15 +32,13 @@ export interface ObservabilityOnboardingAppServices {
   application: ApplicationStart;
   http: HttpStart;
   config: ConfigSchema;
+  docLinks: DocLinksStart;
+  chrome: ChromeStart;
 }
 
 export const plugin: PluginInitializer<
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart
-> = (ctx: PluginInitializerContext<ConfigSchema>) =>
-  new ObservabilityOnboardingPlugin(ctx);
+> = (ctx: PluginInitializerContext<ConfigSchema>) => new ObservabilityOnboardingPlugin(ctx);
 
-export type {
-  ObservabilityOnboardingPluginSetup,
-  ObservabilityOnboardingPluginStart,
-};
+export type { ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart };

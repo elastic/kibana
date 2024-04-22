@@ -440,7 +440,7 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiTable responsive={false}>
+          <EuiTable responsiveBreakpoint={false}>
             <EuiTableHeader>{headers}</EuiTableHeader>
             <EuiTableBody>{rowElements}</EuiTableBody>
           </EuiTable>
