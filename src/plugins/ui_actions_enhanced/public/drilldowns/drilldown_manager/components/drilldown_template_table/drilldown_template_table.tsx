@@ -107,11 +107,10 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
     <>
       <EuiInMemoryTable
         itemId="id"
-        tableLayout={'auto'}
+        tableLayout="auto"
         items={items}
         columns={columns}
-        isSelectable={!!onClone}
-        responsive={false}
+        responsiveBreakpoint={false}
         search={search}
         sorting={{
           sort: {
@@ -125,7 +124,6 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
           },
           selectableMessage: () => txtSelectableMessage,
         }}
-        hasActions={true}
       />
       <EuiSpacer />
       {!!onClone && !!selected.length && (
