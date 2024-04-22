@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
+import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
@@ -28,10 +28,10 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
   const { http } = useKibanaServices();
   const { isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
-      const result = await http.delete<{ connector: Connector }>(
+      const result = await http.delete<AcknowledgedResponseBase>(
         `/internal/serverless_search/connectors/${connectorId}`
       );
-      return result.connector;
+      return result.acknowledged;
     },
   });
 

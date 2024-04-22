@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
@@ -50,7 +50,7 @@ const FIRST_RECORD_PAGINATION = {
 
 export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPanelProps) => {
   const { telemetry } = useKibana().services;
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),

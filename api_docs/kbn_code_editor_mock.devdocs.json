@@ -27,9 +27,9 @@
         "label": "MockedCodeEditor",
         "description": [],
         "signature": [
-          "(props: ",
+          "(props: Omit<",
           "MonacoEditorProps",
-          " & { \"data-test-subj\"?: string | undefined; }) => JSX.Element"
+          ", \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }) => JSX.Element"
         ],
         "path": "packages/shared-ux/code_editor/mocks/code_editor_mock.tsx",
         "deprecated": false,
@@ -43,8 +43,9 @@
             "label": "props",
             "description": [],
             "signature": [
+              "Omit<",
               "MonacoEditorProps",
-              " & { \"data-test-subj\"?: string | undefined; }"
+              ", \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }"
             ],
             "path": "packages/shared-ux/code_editor/mocks/code_editor_mock.tsx",
             "deprecated": false,

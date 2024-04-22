@@ -11,6 +11,12 @@ import { RouteDependencies } from '../../..';
 
 export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
   router.get({ path: '/api/console/es_config', validate: false }, async (ctx, req, res) => {
+    const cloudUrl = services.esLegacyConfigService.getCloudUrl();
+    if (cloudUrl) {
+      const body: EsConfigApiResponse = { host: cloudUrl };
+
+      return res.ok({ body });
+    }
     const {
       hosts: [host],
     } = await services.esLegacyConfigService.readConfig();

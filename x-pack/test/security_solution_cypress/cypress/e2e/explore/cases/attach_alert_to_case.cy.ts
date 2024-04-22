@@ -14,6 +14,7 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const loadDetectionsPage = (role: SecurityRoleName) => {
   login(role);
@@ -21,12 +22,23 @@ const loadDetectionsPage = (role: SecurityRoleName) => {
   waitForAlertsToPopulate();
 };
 
+const cleanKibana = () => {
+  cy.task('esArchiverUnload', { archiveName: 'query_alert' });
+  deleteAlertsAndRules();
+};
+
 describe('Alerts timeline', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
+    cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
+  });
+
+  afterEach(() => {
+    cleanKibana();
   });
 
   context('Privileges: read only', { tags: ['@ess'] }, () => {

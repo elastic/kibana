@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,7 +17,7 @@ import { NodeAvailableWarning } from '../../../components/node_available_warning
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { JobMap } from '../job_map';
-import { ListingPageUrlState } from '../../../../../common/types/common';
+import type { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';

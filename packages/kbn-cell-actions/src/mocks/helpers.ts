@@ -39,6 +39,6 @@ export const makeActionContext = (
     },
   ],
   nodeRef: {} as MutableRefObject<HTMLElement>,
-  metadata: undefined,
+  metadata: { dataViewId: 'mockDataViewId' },
   ...override,
 });

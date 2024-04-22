@@ -18,17 +18,29 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, UseField, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  useForm,
+  UseField,
+  Form,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUICustomField } from '../../../../common/ui';
 import type { CustomFieldType } from '../types';
 import { View } from './view';
-import { CANCEL, EDIT_CUSTOM_FIELDS_ARIA_LABEL, NO_CUSTOM_FIELD_SET, SAVE } from '../translations';
+import {
+  CANCEL,
+  EDIT_CUSTOM_FIELDS_ARIA_LABEL,
+  NO_CUSTOM_FIELD_SET,
+  SAVE,
+  POPULATED_WITH_DEFAULT,
+} from '../translations';
 import { getTextFieldConfig } from './config';
 
 interface FormState {
+  value: string;
   isValid: boolean | undefined;
   submit: FormHook<{ value: string }>['submit'];
 }
@@ -46,20 +58,30 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
   isLoading,
   onChange,
 }) => {
-  const { form } = useForm({
-    defaultValue: { value: initialValue },
+  const { form } = useForm<{ value: string }>({
+    defaultValue: {
+      value:
+        customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
+          ? String(customFieldConfiguration.defaultValue)
+          : initialValue,
+    },
   });
-
-  const { submit, isValid: isFormValid } = form;
-
-  useEffect(() => {
-    onChange({ isValid: isFormValid, submit });
-  }, [isFormValid, onChange, submit]);
-
+  const [{ value }] = useFormData({ form });
+  const { submit, isValid } = form;
   const formFieldConfig = getTextFieldConfig({
     required: customFieldConfiguration.required,
     label: customFieldConfiguration.label,
   });
+  const populatedWithDefault =
+    value === customFieldConfiguration?.defaultValue && isEmpty(initialValue);
+
+  useEffect(() => {
+    onChange({
+      value,
+      isValid,
+      submit,
+    });
+  }, [isValid, onChange, submit, value]);
 
   return (
     <Form form={form}>
@@ -67,6 +89,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         path="value"
         config={formFieldConfig}
         component={TextField}
+        helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
           euiFieldProps: {
             fullWidth: true,
@@ -89,11 +112,12 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   isLoading,
   canUpdate,
 }) => {
+  const initialValue = customField?.value ?? '';
   const [isEdit, setIsEdit] = useState(false);
-
   const [formState, setFormState] = useState<FormState>({
     isValid: undefined,
     submit: async () => ({ isValid: false, data: { value: '' } }),
+    value: initialValue,
   });
 
   const onEdit = () => {
@@ -121,9 +145,10 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
     setIsEdit(false);
   };
 
-  const initialValue = customField?.value ?? '';
   const title = customFieldConfiguration.label;
-  const isTextFieldValid = formState.isValid;
+  const isTextFieldValid =
+    formState.isValid ||
+    (formState.value === customFieldConfiguration.defaultValue && !initialValue);
   const isCustomFieldValueDefined = !isEmpty(customField?.value);
 
   return (

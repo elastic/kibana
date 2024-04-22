@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
@@ -79,7 +79,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
     setQuery,
   });
 
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
       telemetry.reportRiskInputsExpandedFlyoutOpened({

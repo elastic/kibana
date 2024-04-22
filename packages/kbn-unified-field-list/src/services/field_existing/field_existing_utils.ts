@@ -53,6 +53,7 @@ export async function fetchFieldExistence({
     // filled in by data views service
     pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+    includeEmptyFields: false,
   });
 
   // take care of fields of existingFieldList, that are not yet available
@@ -61,7 +62,7 @@ export async function fetchFieldExistence({
   const newFields = existingFieldList.filter((field) => !dataView.getFieldByName(field.name));
   // refresh the data view in case there are new fields
   if (newFields.length) {
-    await dataViewsService.refreshFields(dataView, false);
+    await dataViewsService.refreshFields(dataView, false, true);
   }
   const allFields = buildFieldList(dataView, metaFields);
   return {

@@ -52,6 +52,8 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldLabel', {
       defaultMessage: 'Replacement',
     }),
+    deserializer: flow(String, to.escapeBackslashes),
+    serializer: from.unescapeBackslashes,
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldHelpText',
       {

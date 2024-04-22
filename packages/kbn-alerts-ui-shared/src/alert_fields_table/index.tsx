@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Alert } from '@kbn/alerting-types';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 
 export const search = {
   box: {
@@ -28,7 +29,7 @@ export const search = {
   },
 };
 
-const columns = [
+const columns: Array<EuiBasicTableColumn<AlertField>> = [
   {
     field: 'key',
     name: i18n.translate('alertsUIShared.alertFieldsTable.field', {
@@ -86,18 +87,46 @@ const useFieldBrowserPagination = () => {
   };
 };
 
+type AlertField = Exclude<
+  {
+    [K in keyof Alert]: { key: K; value: Alert[K] };
+  }[keyof Alert],
+  undefined
+>;
+
 export interface AlertFieldsTableProps {
+  /**
+   * The raw alert object
+   */
   alert: Alert;
+  /**
+   * A list of alert field keys to be shown in the table.
+   * When not defined, all the fields are shown.
+   */
+  fields?: Array<keyof Alert>;
 }
 
-export const AlertFieldsTable = memo(({ alert }: AlertFieldsTableProps) => {
+/**
+ * A paginated, filterable table to show alert object fields
+ */
+export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) => {
   const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
+  const items = useMemo(() => {
+    let _items = Object.entries(alert).map(
+      ([key, value]) =>
+        ({
+          key,
+          value,
+        } as AlertField)
+    );
+    if (fields?.length) {
+      _items = _items.filter((f) => fields.includes(f.key));
+    }
+    return _items;
+  }, [alert, fields]);
   return (
     <EuiInMemoryTable
-      items={Object.entries(alert).map(([key, value]) => ({
-        key,
-        value: Array.isArray(value) ? value?.[0] : value,
-      }))}
+      items={items}
       itemId="key"
       columns={columns}
       onTableChange={onTableChange}

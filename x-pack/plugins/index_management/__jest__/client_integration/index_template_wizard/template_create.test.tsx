@@ -528,8 +528,7 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
-        allowAutoCreate: true,
+        allowAutoCreate: 'TRUE',
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -557,7 +556,7 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            allowAutoCreate: true,
+            allowAutoCreate: 'TRUE',
             dataStream: {},
             _kbnMeta: {
               type: 'default',
@@ -618,7 +617,6 @@ describe('<TemplateCreate />', () => {
       await testBed.actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         lifecycle: {
           enabled: true,
           value: 1,
@@ -657,7 +655,7 @@ describe('<TemplateCreate />', () => {
             },
             index_patterns: DEFAULT_INDEX_PATTERNS,
             data_stream: {},
-            allow_auto_create: false,
+            allow_auto_create: 'NO_OVERWRITE',
           }),
         })
       );

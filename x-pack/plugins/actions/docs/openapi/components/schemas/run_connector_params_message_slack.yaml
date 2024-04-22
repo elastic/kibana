@@ -1,0 +1,11 @@
+title: Slack connector parameters
+description: >
+  Test an action that sends a message to Slack.
+  It is applicable only when the connector type is `.slack`.
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    description: The Slack message text, which cannot contain Markdown, images, or other advanced formatting.

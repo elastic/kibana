@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AppNavLinkStatus } from '@kbn/core/public';
-
 export interface ConfigSchema {
   deeplinks: {
-    navLinkStatus: keyof typeof AppNavLinkStatus;
+    navLinkStatus: 'default' | 'visible';
   };
 }

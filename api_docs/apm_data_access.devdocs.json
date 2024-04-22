@@ -22,9 +22,9 @@
         "label": "APMDataAccessConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>; }"
+          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
         ],
-        "path": "x-pack/plugins/apm_data_access/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/apm_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -37,9 +37,9 @@
         "label": "APMIndices",
         "description": [],
         "signature": [
-          "{ readonly error: string; readonly metric: string; readonly transaction: string; readonly span: string; readonly onboarding: string; readonly sourcemap: string; }"
+          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
-        "path": "x-pack/plugins/apm_data_access/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/apm_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -53,7 +53,7 @@
       "tags": [],
       "label": "ApmDataAccessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/apm_data_access/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -65,9 +65,9 @@
           "label": "apmIndicesFromConfigFile",
           "description": [],
           "signature": [
-            "{ readonly error: string; readonly metric: string; readonly transaction: string; readonly span: string; readonly onboarding: string; readonly sourcemap: string; }"
+            "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
           ],
-          "path": "x-pack/plugins/apm_data_access/server/types.ts",
+          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -87,9 +87,9 @@
               "section": "def-common.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
-            ") => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>"
+            ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
           ],
-          "path": "x-pack/plugins/apm_data_access/server/types.ts",
+          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -109,7 +109,7 @@
                   "text": "SavedObjectsClientContract"
                 }
               ],
-              "path": "x-pack/plugins/apm_data_access/server/types.ts",
+              "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -128,7 +128,7 @@
       "tags": [],
       "label": "ApmDataAccessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/apm_data_access/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -152,7 +152,7 @@
         "signature": [
           "\"apmDataAccess\""
         ],
-        "path": "x-pack/plugins/apm_data_access/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,7 +167,7 @@
         "signature": [
           "\"apmDataAccess\""
         ],
-        "path": "x-pack/plugins/apm_data_access/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -13,3 +13,8 @@ export type {
   MigrationResult,
   MigrateDocumentOptions,
 } from './kibana_migrator';
+export type {
+  IDocumentMigrator,
+  DocumentMigrateOptions,
+  IsDowngradeRequiredOptions,
+} from './document_migrator';

@@ -19,7 +19,7 @@ jobs:
       )
     steps:
       - name: Backport Action
-        uses: sqren/backport-github-action@v8.9.7
+        uses: sorenlouv/backport-github-action@v8.9.7
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
 

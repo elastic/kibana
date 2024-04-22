@@ -22,10 +22,12 @@ import {
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { BuildFlavor } from '@kbn/config';
+import type { I18nStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -47,6 +49,10 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   history: ScopedHistory;
   readOnly?: boolean;
+  buildFlavor: BuildFlavor;
+  theme: ThemeServiceStart;
+  i18nStart: I18nStart;
+  cloudOrgUrl?: string;
 }
 
 interface State {
@@ -57,6 +63,7 @@ interface State {
   showDeleteConfirmation: boolean;
   permissionDenied: boolean;
   includeReservedRoles: boolean;
+  isLoading: boolean;
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
@@ -68,7 +75,6 @@ export class RolesGridPage extends Component<Props, State> {
     readOnly: false,
   };
 
-  private tableRef: React.RefObject<EuiInMemoryTable<Role>>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -79,8 +85,8 @@ export class RolesGridPage extends Component<Props, State> {
       showDeleteConfirmation: false,
       permissionDenied: false,
       includeReservedRoles: true,
+      isLoading: false,
     };
-    this.tableRef = React.createRef();
   }
 
   public componentDidMount() {
@@ -94,40 +100,77 @@ export class RolesGridPage extends Component<Props, State> {
   }
 
   private getPageContent = () => {
-    const { roles } = this.state;
+    const { isLoading } = this.state;
+
+    const customRolesEnabled = this.props.buildFlavor === 'serverless';
+
+    const rolesTitle = customRolesEnabled ? (
+      <FormattedMessage
+        id="xpack.security.management.roles.customRoleTitle"
+        defaultMessage="Custom Roles"
+      />
+    ) : (
+      <FormattedMessage id="xpack.security.management.roles.roleTitle" defaultMessage="Roles" />
+    );
+
+    const rolesDescription = customRolesEnabled ? (
+      <FormattedMessage
+        id="xpack.security.management.roles.customRolesSubtitle"
+        defaultMessage="In addition to the predefined roles on the system, you can create your own roles and provide your users with the exact set of privileges that they need."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.roles.subtitle"
+        defaultMessage="Apply roles to groups of users and manage permissions across the stack."
+      />
+    );
+
+    const emptyResultsMessage = customRolesEnabled ? (
+      <FormattedMessage
+        id="xpack.security.management.roles.noCustomRolesFound"
+        defaultMessage="No custom roles to show"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.roles.noRolesFound"
+        defaultMessage="No items found"
+      />
+    );
+    const pageRightSideItems = [
+      <EuiButton
+        data-test-subj="createRoleButton"
+        {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
+        fill
+        iconType="plusInCircleFilled"
+      >
+        <FormattedMessage
+          id="xpack.security.management.roles.createRoleButtonLabel"
+          defaultMessage="Create role"
+        />
+      </EuiButton>,
+    ];
+    if (customRolesEnabled) {
+      pageRightSideItems.push(
+        <EuiButtonEmpty
+          href={this.props.cloudOrgUrl}
+          target="_blank"
+          iconSide="right"
+          iconType="popout"
+        >
+          <FormattedMessage
+            id="xpack.security.management.roles.assignRolesLinkLabel"
+            defaultMessage="Assign roles"
+          />
+        </EuiButtonEmpty>
+      );
+    }
     return (
       <>
         <EuiPageHeader
           bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.security.management.roles.roleTitle"
-              defaultMessage="Roles"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.security.management.roles.subtitle"
-              defaultMessage="Apply roles to groups of users and manage permissions across the stack."
-            />
-          }
-          rightSideItems={
-            this.props.readOnly
-              ? undefined
-              : [
-                  <EuiButton
-                    data-test-subj="createRoleButton"
-                    {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
-                    fill
-                    iconType="plusInCircleFilled"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.roles.createRoleButtonLabel"
-                      defaultMessage="Create role"
-                    />
-                  </EuiButton>,
-                ]
-          }
+          pageTitle={rolesTitle}
+          description={rolesDescription}
+          rightSideItems={this.props.readOnly ? undefined : pageRightSideItems}
         />
 
         <EuiSpacer size="l" />
@@ -139,6 +182,10 @@ export class RolesGridPage extends Component<Props, State> {
             callback={this.handleDelete}
             notifications={this.props.notifications}
             rolesAPIClient={this.props.rolesAPIClient}
+            buildFlavor={this.props.buildFlavor}
+            theme={this.props.theme}
+            i18nStart={this.props.i18nStart}
+            cloudOrgUrl={this.props.cloudOrgUrl}
           />
         ) : null}
 
@@ -156,14 +203,16 @@ export class RolesGridPage extends Component<Props, State> {
                     selectableMessage: (selectable: boolean) =>
                       !selectable ? 'Role is reserved' : '',
                     onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+                    selected: this.state.selection,
                   }
             }
             pagination={{
               initialPageSize: 20,
               pageSizeOptions: [10, 20, 30, 50, 100],
             }}
+            message={emptyResultsMessage}
             items={this.state.visibleRoles}
-            loading={roles.length === 0}
+            loading={isLoading}
             search={{
               toolsLeft: this.renderToolsLeft(),
               toolsRight: this.renderToolsRight(),
@@ -188,7 +237,6 @@ export class RolesGridPage extends Component<Props, State> {
                 direction: 'asc',
               },
             }}
-            ref={this.tableRef}
             rowProps={(role: Role) => {
               return {
                 'data-test-subj': `roleRow`,
@@ -222,7 +270,9 @@ export class RolesGridPage extends Component<Props, State> {
           );
         },
       },
-      {
+    ];
+    if (this.props.buildFlavor !== 'serverless') {
+      config.push({
         field: 'metadata',
         name: i18n.translate('xpack.security.management.roles.statusColumnName', {
           defaultMessage: 'Status',
@@ -231,8 +281,8 @@ export class RolesGridPage extends Component<Props, State> {
         render: (metadata: Role['metadata'], record: Role) => {
           return this.getRoleStatusBadges(record);
         },
-      },
-    ];
+      });
+    }
 
     if (!this.props.readOnly) {
       config.push({
@@ -367,7 +417,7 @@ export class RolesGridPage extends Component<Props, State> {
     const deprecated = isRoleDeprecated(role);
     const reserved = isRoleReserved(role);
 
-    const badges = [];
+    const badges: JSX.Element[] = [];
     if (!enabled) {
       badges.push(<DisabledBadge data-test-subj="roleDisabled" />);
     }
@@ -421,6 +471,7 @@ export class RolesGridPage extends Component<Props, State> {
 
   private async loadRoles() {
     try {
+      this.setState({ isLoading: true });
       const roles = await this.props.rolesAPIClient.getRoles();
 
       this.setState({
@@ -442,6 +493,8 @@ export class RolesGridPage extends Component<Props, State> {
           })
         );
       }
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
@@ -469,22 +522,23 @@ export class RolesGridPage extends Component<Props, State> {
   }
 
   private renderToolsRight() {
-    return (
-      <EuiSwitch
-        data-test-subj="showReservedRolesSwitch"
-        label={
-          <FormattedMessage
-            id="xpack.security.management.roles.showReservedRolesLabel"
-            defaultMessage="Show reserved roles"
-          />
-        }
-        checked={this.state.includeReservedRoles}
-        onChange={this.onIncludeReservedRolesChange}
-      />
-    );
+    if (this.props.buildFlavor !== 'serverless') {
+      return (
+        <EuiSwitch
+          data-test-subj="showReservedRolesSwitch"
+          label={
+            <FormattedMessage
+              id="xpack.security.management.roles.showReservedRolesLabel"
+              defaultMessage="Show reserved roles"
+            />
+          }
+          checked={this.state.includeReservedRoles}
+          onChange={this.onIncludeReservedRolesChange}
+        />
+      );
+    }
   }
   private onCancelDelete = () => {
-    this.setState({ showDeleteConfirmation: false, selection: [] });
-    this.tableRef.current?.setSelection([]);
+    this.setState({ showDeleteConfirmation: false });
   };
 }

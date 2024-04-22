@@ -30,17 +30,15 @@ import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
-import { kibanaObservable } from '../test_providers';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
-import { links } from '../../links/app_links';
+import { appLinks } from '../../../app_links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
@@ -201,7 +199,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = createCoreStartMock(history);
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const { storage } = createSecuritySolutionStorageMock();
   const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
@@ -211,11 +208,11 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(
-    mockGlobalState,
+  const store = createMockStore(
+    undefined,
     storeReducer,
-    kibanaObservable,
-    storage,
+    undefined,
+    undefined,
     // @ts-expect-error ts upgrade v4.7.4
     [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
   );
@@ -232,8 +229,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     // hide react-query output in console
     logger: {
       error: () => {},
+
       // eslint-disable-next-line no-console
       log: console.log,
+
       // eslint-disable-next-line no-console
       warn: console.warn,
     },
@@ -346,7 +345,7 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
-  const linkPaths = getLinksPaths(links);
+  const linkPaths = getLinksPaths(appLinks);
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
@@ -379,8 +378,8 @@ const createCoreStartMock = (
   return coreStart;
 };
 
-const getLinksPaths = (appLinks: AppLinkItems): Record<string, string> => {
-  return appLinks.reduce((result: Record<string, string>, link) => {
+const getLinksPaths = (links: AppLinkItems): Record<string, string> => {
+  return links.reduce((result: Record<string, string>, link) => {
     if (link.path) {
       result[link.id] = link.path;
     }

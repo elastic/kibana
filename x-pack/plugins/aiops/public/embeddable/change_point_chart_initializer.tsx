@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,28 +17,31 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import usePrevious from 'react-use/lib/usePrevious';
-import { pick } from 'lodash';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
-import { DEFAULT_SERIES } from './const';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { type EmbeddableChangePointChartExplicitInput } from './types';
-import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
-import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
-import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { pick } from 'lodash';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
 } from '../components/change_point_detection/change_point_detection_context';
-import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
-import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import { FunctionPicker } from '../components/change_point_detection/function_picker';
-import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { DEFAULT_AGG_FUNCTION } from '../components/change_point_detection/constants';
+import { FunctionPicker } from '../components/change_point_detection/function_picker';
+import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
+import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
+import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
+import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
+import { ViewTypeSelector } from '../components/change_point_detection/view_type_selector';
+import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
+import { DataSourceContextProvider } from '../hooks/use_data_source';
+import { DEFAULT_SERIES } from './const';
+import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import { type EmbeddableChangePointChartExplicitInput } from './types';
 
 export interface AnomalyChartsInitializerProps {
   initialInput?: Partial<EmbeddableChangePointChartInput>;
@@ -59,6 +61,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   } = useAiopsAppContext();
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
+  const [viewType, setViewType] = useState(initialInput?.viewType ?? 'charts');
 
   const [formInput, setFormInput] = useState<FormControlsProps>(
     pick(initialInput ?? {}, [
@@ -75,6 +78,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   const updatedProps = useMemo(() => {
     return {
       ...formInput,
+      viewType,
       title: isPopulatedObject(formInput)
         ? i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
             defaultMessage: 'Change point: {function}({metric}){splitBy}',
@@ -92,7 +96,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         : '',
       dataViewId,
     };
-  }, [formInput, dataViewId]);
+  }, [formInput, dataViewId, viewType]);
 
   return (
     <EuiModal onClose={onCancel} data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}>
@@ -100,13 +104,14 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.aiops.embeddableChangePointChart.modalTitle"
-            defaultMessage="Change point charts configuration"
+            defaultMessage="Change point detection configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
+          <ViewTypeSelector value={viewType} onChange={setViewType} />
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
@@ -129,7 +134,6 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
               }}
             />
           </EuiFormRow>
-
           <DataSourceContextProvider dataViewId={dataViewId}>
             <EuiHorizontalRule margin={'s'} />
             <ChangePointDetectionControlsContextProvider>

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
 import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   ManagementListResponse,

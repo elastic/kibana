@@ -12,8 +12,8 @@
     "@kbn/i18n",
     "@kbn/data-views-plugin",
     "@kbn/i18n-react",
-    "@kbn/test-jest-helpers",
     "@kbn/utility-types",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

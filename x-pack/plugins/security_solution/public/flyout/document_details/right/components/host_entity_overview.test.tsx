@@ -20,8 +20,7 @@ import {
 import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -41,9 +40,14 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
+
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContextValue;
+} as unknown as ExpandableFlyoutApi;
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
@@ -71,15 +75,17 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const renderHostEntityContent = () =>
   render(
     <TestProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <RightPanelContext.Provider value={panelContextValue}>
+        <HostEntityOverview hostName={hostName} />
+      </RightPanelContext.Provider>
     </TestProviders>
   );
 
 describe('<HostEntityContent />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   describe('license is valid', () => {
     it('should render os family and host risk level', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);

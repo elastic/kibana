@@ -33,7 +33,8 @@
     "@kbn/core-usage-data-server",
     "@kbn/core-custom-branding-server-internal",
     "@kbn/core-custom-branding-server",
-    "@kbn/core-user-settings-server-internal"
+    "@kbn/core-user-settings-server-internal",
+    "@kbn/core-security-server-internal"
   ],
   "exclude": [
     "target/**/*",

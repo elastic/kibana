@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -60,6 +60,7 @@ import {
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  ipPrefixFunction,
   ipRangeFunction,
   ISearchOptions,
   kibana,
@@ -80,6 +81,7 @@ import {
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -97,6 +99,7 @@ import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
 import { esqlSearchStrategyProvider } from './strategies/esql_search';
+import { esqlAsyncSearchStrategyProvider } from './strategies/esql_async_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -179,6 +182,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
     this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(
+      ESQL_ASYNC_SEARCH_STRATEGY,
+      esqlAsyncSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
+    );
 
     // We don't want to register this because we don't want the client to be able to access this
     // strategy, but we do want to expose it to other server-side plugins
@@ -225,6 +232,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(geoBoundingBoxFunction);
     expressions.registerFunction(geoPointFunction);
+    expressions.registerFunction(ipPrefixFunction);
     expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);

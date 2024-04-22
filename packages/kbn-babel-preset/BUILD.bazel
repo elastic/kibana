@@ -25,7 +25,8 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//@babel/plugin-proposal-class-properties",
+  "@npm//@babel/plugin-transform-class-properties",
+  "@npm//@babel/plugin-proposal-decorators",
   "@npm//@babel/plugin-proposal-export-namespace-from",
   "@npm//@babel/plugin-proposal-nullish-coalescing-operator",
   "@npm//@babel/plugin-proposal-optional-chaining",
@@ -39,6 +40,7 @@ RUNTIME_DEPS = [
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
   "@npm//babel-plugin-transform-react-remove-prop-types",
+  "@npm//babel-plugin-transform-typescript-metadata",
 ]
 
 js_library(

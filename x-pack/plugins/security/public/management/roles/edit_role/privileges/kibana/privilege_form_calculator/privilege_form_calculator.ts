@@ -47,11 +47,12 @@ export class PrivilegeFormCalculator {
    *
    * @param featureId the feature id to get the Primary Feature KibanaPrivilege for.
    * @param privilegeIndex the index of the kibana privileges role component
+   * @param allSpacesSelected indicates if the privilege form is configured to grant access to all spaces.
    */
   public getDisplayedPrimaryFeaturePrivilegeId(
     featureId: string,
     privilegeIndex: number,
-    allSpacesSelected?: boolean
+    allSpacesSelected: boolean
   ) {
     return this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex, allSpacesSelected)
       ?.id;
@@ -62,11 +63,12 @@ export class PrivilegeFormCalculator {
    *
    * @param featureId the feature id
    * @param privilegeIndex the index of the kibana privileges role component
+   * @param allSpacesSelected indicates if the privilege form is configured to grant access to all spaces.
    */
   public hasCustomizedSubFeaturePrivileges(
     featureId: string,
     privilegeIndex: number,
-    allSpacesSelected?: boolean
+    allSpacesSelected: boolean
   ) {
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 
@@ -185,13 +187,19 @@ export class PrivilegeFormCalculator {
    * @param featureId the feature id
    * @param privilegeIndex  the index of the kibana privileges role component
    * @param willBeCustomizing flag indicating if this feature is about to have its sub-feature privileges customized or not
+   * @param allSpacesSelected indicates if the privilege form is configured to grant access to all spaces.
    */
   public updateSelectedFeaturePrivilegesForCustomization(
     featureId: string,
     privilegeIndex: number,
-    willBeCustomizing: boolean
+    willBeCustomizing: boolean,
+    allSpacesSelected: boolean
   ) {
-    const primary = this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex);
+    const primary = this.getDisplayedPrimaryFeaturePrivilege(
+      featureId,
+      privilegeIndex,
+      allSpacesSelected
+    );
     const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
 
     if (!primary) {
@@ -283,11 +291,12 @@ export class PrivilegeFormCalculator {
    *
    * @param featureId the feature id to get the Primary Feature KibanaPrivilege for.
    * @param privilegeIndex the index of the kibana privileges role component
+   * @param allSpacesSelected indicates if the privilege form is configured to grant access to all spaces.
    */
   private getDisplayedPrimaryFeaturePrivilege(
     featureId: string,
     privilegeIndex: number,
-    allSpacesSelected?: boolean
+    allSpacesSelected: boolean
   ) {
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 

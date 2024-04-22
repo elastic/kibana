@@ -12,7 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/es-query"
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

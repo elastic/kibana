@@ -42,6 +42,10 @@
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
           },
           {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
           },
@@ -67,11 +71,11 @@
           },
           {
             "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "transform",

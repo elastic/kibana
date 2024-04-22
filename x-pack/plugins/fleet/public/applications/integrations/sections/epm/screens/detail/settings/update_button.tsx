@@ -143,8 +143,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [history, getPath, name, version]);
 
   const handleClickUpdate = useCallback(async () => {
-    await installPackage({ name, version, title, fromUpdate: true });
-  }, [installPackage, name, title, version]);
+    await installPackage({ name, version, title, isUpgrade: true });
+    navigateToNewSettingsPage();
+  }, [installPackage, name, title, version, navigateToNewSettingsPage]);
 
   const upgradePackagePoliciesMutation = useUpgradePackagePoliciesMutation();
 
@@ -156,40 +157,68 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
-    await installPackage({ name, version, title });
+    const hasUpgraded = await installPackage({ name, version, title, isUpgrade: true });
+    //  If install package failed do not upgrade package policies
+    if (!hasUpgraded) {
+      setIsUpgradingPackagePolicies(false);
+      return;
+    }
 
-    upgradePackagePoliciesMutation.mutate(
-      {
-        // Only upgrade policies that don't have conflicts
-        packagePolicyIds: packagePolicyIds.filter(
-          (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-        ),
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addSuccess({
-            title: toMountPoint(
-              <FormattedMessage
-                id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-                defaultMessage="Updated {title} and upgraded policies"
-                values={{ title }}
-              />,
-              { theme$ }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-                defaultMessage="Successfully updated {title} and upgraded policies"
-                values={{ title }}
-              />,
-              { theme$ }
-            ),
-          });
-
-          navigateToNewSettingsPage();
-        },
-      }
+    // Only upgrade policies that don't have conflicts
+    const packagePolicyIdsToUpdate = packagePolicyIds.filter(
+      (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
     );
+
+    if (!packagePolicyIdsToUpdate.length) {
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
+
+    try {
+      await upgradePackagePoliciesMutation.mutateAsync({
+        packagePolicyIds: packagePolicyIdsToUpdate,
+      });
+      notifications.toasts.addSuccess({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+            defaultMessage="Updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+            defaultMessage="Successfully updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+      });
+
+      navigateToNewSettingsPage();
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
+          {
+            defaultMessage: 'Error updating policies',
+          }
+        ),
+        toastMessage: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
+          {
+            defaultMessage: 'Integrations policies, need to be manually updated. \n Error: {error}',
+            values: {
+              error: error.message,
+            },
+          }
+        ),
+      });
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
   }, [
     isUpgradingPackagePolicies,
     setIsUpgradingPackagePolicies,

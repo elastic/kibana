@@ -103,6 +103,72 @@ tests that should run in a serverless environment have to be added to the
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.
 
+### Roles-based testing
+
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+and in oder to properly test Kibana functionality, test design requires to login with
+a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
+the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
+
+General recommendations:
+- use the minimal required role to access tested functionality
+- when feature logic depends on both project type & role, make sure to add separate tests
+- avoid using basic authentication, unless it is the actual test case
+- run the tests against real project(s) on MKI to validate it is stable
+
+
+#### Functional UI test example
+
+Recommendations:
+- in each test file top level `describe` suite should start with `loginWithRole` call in `before` hook
+- no need to log out, you can change role by calling `loginWithRole` again.
+- for the common tests you can use `loginWithPrivilegedRole` to login as Editor/Developer 
+
+```
+describe("my test suite", async function() {
+  before(async () => {
+    await PageObjects.svlCommonPage.loginWithRole('viewer');
+    await esArchiver.load(...);
+    await PageObjects.dashboard.navigateToApp();
+  });
+
+  it('test step', async() => {
+    await PageObjects.dashboard.loadSavedDashboard('old dashboard');
+    await PageObjects.dashboard.waitForRenderComplete();
+    ...
+  });
+});
+```
+
+#### API integration test example
+
+Recommendations:
+- in each test file top level `describe` suite should start with `createApiKeyForRole` call in `before` hook
+- don't forget to invalidate api key using `invalidateApiKeyForRole` in `after` hook
+- make api calls using `supertestWithoutAuth` with generated api key header
+
+```
+describe("my test suite", async function() {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
+    it(''test step', async () => {
+      const { body, status } = await supertestWithoutAuth
+        .delete('/api/spaces/space/default')
+        .set(commonRequestHeader)
+        .set(roleAuthc.apiKeyHeader);
+      ...
+    });
+});
+```
+
 ### Testing with feature flags
 
 **tl;dr:** Tests specific to functionality behind a feature flag need special

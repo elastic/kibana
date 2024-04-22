@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '53 available fields. 3 meta fields.'
+          '48 available fields. 5 empty fields. 3 meta fields.'
         );
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           '@timestamp, Document'
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '53 available fields. 3 meta fields.'
+          '48 available fields. 5 empty fields. 3 meta fields.'
         );
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           '@timestamp, Document'

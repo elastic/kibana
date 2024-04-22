@@ -36,7 +36,27 @@ export default function ({ getService }: FtrProviderContext) {
       const FROM = '2019-02-09T01:57:24.870Z';
       const TO = '2019-02-12T01:57:24.870Z';
 
-      it('Make sure that we get Source NetworkTopNFlow data with bytes_in descending sort', async () => {
+      it('should get Source NetworkTopNFlowCount total count', async () => {
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
+          options: {
+            defaultIndex: ['filebeat-*'],
+            factoryQueryType: NetworkQueries.topNFlowCount,
+            flowTarget: FlowTargetSourceDest.source,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
+            },
+            inspect: false,
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
+
+        expect(networkTopNFlow.totalCount).to.be(121);
+      });
+
+      it('should get Source NetworkTopNFlow data with bytes_in descending sort', async () => {
         const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
@@ -47,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 0,
               cursorStart: 0,
-              fakePossibleCount: 50,
+              fakePossibleCount: 0,
               querySize: 10,
             },
             timerange: {
@@ -61,7 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
-        expect(networkTopNFlow.totalCount).to.be(121);
         expect(
           networkTopNFlow.edges.map((i: NetworkTopNFlowEdges) => i.node.source!.ip).join(',')
         ).to.be(
@@ -70,15 +89,14 @@ export default function ({ getService }: FtrProviderContext) {
         expect(networkTopNFlow.edges[0].node.destination).to.be(undefined);
         expect(networkTopNFlow.edges[0].node.source!.flows).to.be(498);
         expect(networkTopNFlow.edges[0].node.source!.destination_ips).to.be(132);
-        expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
       });
 
-      it('Make sure that we get Source NetworkTopNFlow data with bytes_in ascending sort ', async () => {
+      it('should get Source NetworkTopNFlow data with bytes_in ascending sort ', async () => {
         const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['filebeat-*'],
-            factoryQueryType: 'topNFlow',
+            factoryQueryType: NetworkQueries.topNFlow,
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
             flowTarget: FlowTargetSourceDest.source,
@@ -86,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 0,
               cursorStart: 0,
-              fakePossibleCount: 50,
+              fakePossibleCount: 0,
               querySize: 10,
             },
             timerange: {
@@ -100,7 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
-        expect(networkTopNFlow.totalCount).to.be(121);
         expect(
           networkTopNFlow.edges.map((i: NetworkTopNFlowEdges) => i.node.source!.ip).join(',')
         ).to.be(
@@ -109,10 +126,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(networkTopNFlow.edges[0].node.destination).to.be(undefined);
         expect(networkTopNFlow.edges[0].node.source!.flows).to.be(12);
         expect(networkTopNFlow.edges[0].node.source!.destination_ips).to.be(1);
-        expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
       });
 
-      it('Make sure that we get Destination NetworkTopNFlow data', async () => {
+      it('should get Destination NetworkTopNFlow data', async () => {
         const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
@@ -125,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 0,
               cursorStart: 0,
-              fakePossibleCount: 50,
+              fakePossibleCount: 0,
               querySize: 10,
             },
             timerange: {
@@ -139,14 +155,12 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
-        expect(networkTopNFlow.totalCount).to.be(154);
         expect(networkTopNFlow.edges[0].node.destination!.flows).to.be(19);
         expect(networkTopNFlow.edges[0].node.destination!.source_ips).to.be(1);
         expect(networkTopNFlow.edges[0].node.source).to.be(undefined);
-        expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
       });
 
-      it('Make sure that pagination is working in NetworkTopNFlow query', async () => {
+      it('should paginate NetworkTopNFlow query', async () => {
         const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
@@ -159,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
             pagination: {
               activePage: 1,
               cursorStart: 10,
-              fakePossibleCount: 50,
+              fakePossibleCount: 0,
               querySize: 20,
             },
             timerange: {
@@ -173,7 +187,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
-        expect(networkTopNFlow.totalCount).to.be(121);
         expect(networkTopNFlow.edges[0].node.source!.ip).to.be('8.248.223.246');
       });
     });

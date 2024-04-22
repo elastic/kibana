@@ -8,20 +8,9 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
-export { DefaultNavigation, getPresets, Navigation } from './src/ui';
+export { Navigation } from './src/ui';
+export type { NavigationProps } from './src/ui';
 
-export type {
-  GroupDefinition,
-  PresetDefinition,
-  ItemDefinition,
-  NavigationGroupPreset,
-  NavigationTreeDefinition,
-  ProjectNavigationDefinition,
-  RecentlyAccessedDefinition,
-  RootNavigationItemDefinition,
-  PanelComponentProps,
-  PanelContent,
-  PanelContentProvider,
-} from './src/ui';
+export type { PanelComponentProps, PanelContent, PanelContentProvider } from './src/ui';
 
-export type { NavigationServices } from './types';
+export type { NavigationServices, NavigationKibanaDependencies } from './src/types';

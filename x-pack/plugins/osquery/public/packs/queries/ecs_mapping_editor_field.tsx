@@ -162,7 +162,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
-            {option.value.field}
+            <b>{option.value.field}</b>
           </span>
         </EuiFlexItem>
 
@@ -394,7 +394,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       >
         <EuiFlexItem grow={false}>
           <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
-            {option.value.suggestion_label}
+            <b>{option.value.suggestion_label}</b>
           </span>
         </EuiFlexItem>
         <EuiFlexItem css={descriptionWrapperCss} grow={false}>

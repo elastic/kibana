@@ -6,13 +6,12 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   ApplicationStart,
-  CoreTheme,
+  I18nStart,
+  ThemeServiceStart,
   FatalErrorsStart,
   ScopedHistory,
   DocLinksStart,
@@ -24,8 +23,11 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
+import { IndexManagementBreadcrumb } from './services/breadcrumbs';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
@@ -36,12 +38,15 @@ export interface AppDependencies {
     executionContext: ExecutionContextStart;
     application: ApplicationStart;
     http: HttpSetup;
+    i18n: I18nStart;
+    theme: ThemeServiceStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
     share: SharePluginStart;
     cloud?: CloudSetup;
+    console?: ConsolePluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -57,13 +62,12 @@ export interface AppDependencies {
     enableDataStreamsStorageColumn: boolean;
   };
   history: ScopedHistory;
-  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
   url: SharePluginStart['url'];
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
-  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({

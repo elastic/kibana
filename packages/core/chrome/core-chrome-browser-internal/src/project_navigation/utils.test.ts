@@ -15,6 +15,7 @@ const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   href: `http://mocked/kibana/foo/${path}`,
   title,
   baseUrl: '',
+  visibleIn: ['globalSearch'],
 });
 
 describe('flattenNav', () => {

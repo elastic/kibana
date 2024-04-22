@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../../../routes';
 import { DOCUMENTS_TITLE } from '../../../documents';
-import { generateEnginePath, EngineLogic } from '../../../engine';
+import { generateEnginePath } from '../../../engine';
 
 import { QueryClick } from '../../types';
 
@@ -25,8 +25,6 @@ interface Props {
 type Columns = Array<EuiBasicTableColumn<QueryClick>>;
 
 export const QueryClicksTable: React.FC<Props> = ({ items }) => {
-  const { engineName } = EngineLogic.values;
-
   const DOCUMENT_COLUMN = {
     ...FIRST_COLUMN_PROPS,
     field: 'document',
@@ -35,7 +33,7 @@ export const QueryClicksTable: React.FC<Props> = ({ items }) => {
       return document ? (
         <EuiLinkTo
           to={generateEnginePath(ENGINE_DOCUMENT_DETAIL_PATH, {
-            engineName,
+            engineName: document.engine,
             documentId: document.id,
           })}
         >

@@ -50,6 +50,7 @@ Object {
                 "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
+                  "includeEmptyRows": true,
                   "interval": "auto",
                 },
                 "scale": "interval",
@@ -60,6 +61,9 @@ Object {
                 "isBucketed": false,
                 "label": "Count of records",
                 "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
@@ -233,6 +237,7 @@ Object {
                 "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
+                  "includeEmptyRows": true,
                   "interval": "auto",
                 },
                 "scale": "interval",
@@ -243,6 +248,9 @@ Object {
                 "isBucketed": false,
                 "label": "Count of records",
                 "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
                 "scale": "ratio",
                 "sourceField": "___records___",
               },

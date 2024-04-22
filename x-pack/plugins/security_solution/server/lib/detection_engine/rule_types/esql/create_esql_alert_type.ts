@@ -27,6 +27,9 @@ export const createEsqlAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: EsqlRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',

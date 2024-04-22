@@ -19,6 +19,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -45,6 +46,7 @@ export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+export { securityServiceMock } from '@kbn/core-security-server-mocks';
 
 export type {
   ElasticsearchClientMock,
@@ -98,6 +100,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         branch: 'branch',
         buildNum: 100,
         buildSha: 'buildSha',
+        buildShaShort: 'buildShaShort',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
         buildFlavor: 'traditional',
@@ -131,6 +134,7 @@ function createCoreRequestHandlerContextMock() {
     deprecations: {
       client: deprecationsServiceMock.createClient(),
     },
+    security: securityServiceMock.createRequestHandlerContext(),
   };
 }
 
@@ -141,7 +145,9 @@ export type CustomRequestHandlerMock<T> = {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
 
-const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
+const createCustomRequestHandlerContextMock = <T extends Record<string, unknown>>(
+  contextParts: T
+): CustomRequestHandlerMock<T> => {
   const mock = Object.entries(contextParts).reduce(
     (context, [key, value]) => {
       // @ts-expect-error type matching from inferred types is hard

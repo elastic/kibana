@@ -11,7 +11,7 @@ import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorDefinition } from '../types';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
 
 interface ResearchConfigurationProps {
   nativeConnector: ConnectorDefinition;

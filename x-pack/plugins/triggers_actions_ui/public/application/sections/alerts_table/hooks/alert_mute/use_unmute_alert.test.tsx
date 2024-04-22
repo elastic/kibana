@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import * as api from '../../../../lib/rule_api/unmute_alert';
 import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -31,13 +31,11 @@ describe('useUnmuteAlert', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'unmuteAlertInstance');
 
-    const { waitForNextUpdate, result } = renderHook(() => useUnmuteAlert(), {
+    const { result } = renderHook(() => useUnmuteAlert(), {
       wrapper: appMockRender.AppWrapper,
     });
 
     result.current.mutate(params);
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(muteAlertInstanceSpy).toHaveBeenCalledWith({

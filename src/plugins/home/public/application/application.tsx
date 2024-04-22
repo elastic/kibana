@@ -37,7 +37,11 @@ export const renderApp = async (
   const navLinksSubscription = chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = featureCatalogue
       .getSolutions()
-      .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
+      .filter(({ id }) =>
+        navLinks.find(
+          ({ visibleIn, category }) => visibleIn.includes('home') && category?.id === id
+        )
+      );
 
     render(
       <RedirectAppLinks

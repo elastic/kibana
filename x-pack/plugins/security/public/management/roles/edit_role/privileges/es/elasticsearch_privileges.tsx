@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +43,8 @@ interface Props {
   indexPatterns: string[];
   remoteClusters?: Cluster[];
   canUseRemoteIndices?: boolean;
+  isDarkMode?: boolean;
+  buildFlavor: BuildFlavor;
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
@@ -66,6 +69,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       license,
       builtinESPrivileges,
       canUseRemoteIndices,
+      buildFlavor,
     } = this.props;
 
     return (
@@ -98,52 +102,55 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-
         <EuiSpacer />
 
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
-                defaultMessage="Run As privileges"
+        {buildFlavor === 'traditional' && (
+          <>
+            <EuiDescribedFormGroup
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
+                    defaultMessage="Run As privileges"
+                  />
+                </h3>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+                    defaultMessage="Allow requests to be submitted on the behalf of other users. "
+                  />
+                  {this.learnMore(docLinks.links.security.runAsPrivilege)}
+                </p>
+              }
+            >
+              <EuiComboBox
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
+                  { defaultMessage: 'Run as privileges' }
+                )}
+                placeholder={
+                  this.props.editable
+                    ? i18n.translate(
+                        'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
+                        { defaultMessage: 'Add a user…' }
+                      )
+                    : undefined
+                }
+                options={this.props.runAsUsers.map((username) => ({
+                  label: username,
+                  isGroupLabelOption: false,
+                }))}
+                selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
+                onCreateOption={this.onCreateRunAsOption}
+                onChange={this.onRunAsUserChange}
+                isDisabled={!editable}
               />
-            </h3>
-          }
-          description={
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
-                defaultMessage="Allow requests to be submitted on the behalf of other users. "
-              />
-              {this.learnMore(docLinks.links.security.runAsPrivilege)}
-            </p>
-          }
-        >
-          <EuiComboBox
-            aria-label={i18n.translate(
-              'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
-              { defaultMessage: 'Run as privileges' }
-            )}
-            placeholder={
-              this.props.editable
-                ? i18n.translate(
-                    'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
-                    { defaultMessage: 'Add a user…' }
-                  )
-                : undefined
-            }
-            options={this.props.runAsUsers.map((username) => ({
-              label: username,
-              isGroupLabelOption: false,
-            }))}
-            selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
-            onCreateOption={this.onCreateRunAsOption}
-            onChange={this.onRunAsUserChange}
-            isDisabled={!editable}
-          />
-        </EuiDescribedFormGroup>
-        <EuiSpacer />
+            </EuiDescribedFormGroup>
+            <EuiSpacer />
+          </>
+        )}
 
         <EuiTitle size="xs">
           <h3>
@@ -173,9 +180,9 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           onChange={onChange}
           availableIndexPrivileges={builtinESPrivileges.index}
           editable={editable}
+          isDarkMode={this.props.isDarkMode}
         />
-
-        {canUseRemoteIndices && (
+        {buildFlavor === 'traditional' && canUseRemoteIndices && (
           <>
             <EuiSpacer />
             <EuiSpacer />
@@ -208,6 +215,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               onChange={onChange}
               availableIndexPrivileges={builtinESPrivileges.index}
               editable={editable}
+              isDarkMode={this.props.isDarkMode}
             />
           </>
         )}

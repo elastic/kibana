@@ -6,40 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTextColor,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
-import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
-import ReactDOM from 'react-dom';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-
-const toMountPoint = (node: React.ReactNode, params: ToMountPointParams): MountPoint => {
-  const mount = (element: HTMLElement) => {
-    ReactDOM.render(<Fragment {...params}>{node}</Fragment>, element);
-    return () => ReactDOM.unmountComponentAtNode(element);
-  };
-
-  // only used for tests and snapshots serialization
-  if (process.env.NODE_ENV !== 'production') {
-    mount.__reactMount__ = node;
-  }
-
-  return mount;
-};
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {
@@ -138,7 +115,7 @@ export const GuideCard = ({
 
   const cardCss = css`
     position: relative;
-    height: 125px;
+    height: 150px;
     width: 380px;
     .euiCard__top {
       margin-block-end: 8px;
@@ -149,7 +126,7 @@ export const GuideCard = ({
     }
     @media (min-width: 768px) and (max-width: 1210px) {
       max-width: 230px;
-      height: 175px;
+      height: 200px;
       justify-content: center;
     }
   `;
@@ -175,16 +152,12 @@ export const GuideCard = ({
           )}
           {isComplete && (
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <small>
-                  {i18n.translate('guidedOnboardingPackage.gettingStarted.cards.completeLabel', {
-                    defaultMessage: 'Guide complete',
-                  })}
-                </small>
-              </EuiFlexItem>
+              <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+              <small>
+                {i18n.translate('guidedOnboardingPackage.gettingStarted.cards.completeLabel', {
+                  defaultMessage: 'Guide complete',
+                })}
+              </small>
             </EuiFlexGroup>
           )}
         </>

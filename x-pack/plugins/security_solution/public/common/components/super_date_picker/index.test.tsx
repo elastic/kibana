@@ -11,15 +11,8 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
-import {
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../mock';
+import { mockGlobalState, createMockStore } from '../../mock';
 import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
-import type { State } from '../../store';
-import { createStore } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
@@ -27,6 +20,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const state = mockGlobalState;
 const timepickerRanges = [
   {
     from: 'now/d',
@@ -82,13 +76,11 @@ const timepickerRanges = [
 
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
-    const state: State = mockGlobalState;
-    const { storage } = createSecuritySolutionStorageMock();
-    let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    let store = createMockStore();
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createMockStore();
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 

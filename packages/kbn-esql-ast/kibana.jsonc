@@ -1,0 +1,5 @@
+{
+    "type": "shared-common",
+    "id": "@kbn/esql-ast",
+    "owner": "@elastic/kibana-esql"
+  }

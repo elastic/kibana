@@ -18,8 +18,8 @@ import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { CreateCaseFormProps } from './form';
 import { CreateCaseForm } from './form';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -27,13 +27,13 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../containers/configure/use_get_all_case_configurations');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
 const initialCaseValue: FormProps = {
@@ -81,7 +81,7 @@ describe('CreateCaseForm', () => {
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
-    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
   });
 
   afterEach(() => {
@@ -219,12 +219,14 @@ describe('CreateCaseForm', () => {
   });
 
   it('should render custom fields when available', () => {
-    useGetCaseConfigurationMock.mockImplementation(() => ({
-      ...useCaseConfigureResponse,
-      data: {
-        ...useCaseConfigureResponse.data,
-        customFields: customFieldsConfigurationMock,
-      },
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      data: [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          customFields: customFieldsConfigurationMock,
+        },
+      ],
     }));
 
     const result = render(

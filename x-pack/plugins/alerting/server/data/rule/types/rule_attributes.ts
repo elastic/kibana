@@ -114,14 +114,14 @@ interface AlertsFilterTimeFrameAttributes {
   };
 }
 
-interface AlertsFilterAttributes {
+export interface AlertsFilterAttributes {
   query?: AlertsFilterQueryAttributes;
   timeframe?: AlertsFilterTimeFrameAttributes;
 }
 
 export interface RuleActionAttributes {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: SavedObjectAttributes;
@@ -131,6 +131,7 @@ export interface RuleActionAttributes {
     throttle: string | null;
   };
   alertsFilter?: AlertsFilterAttributes;
+  useAlertDataAsTemplate?: boolean;
 }
 
 type MappedParamsAttributes = SavedObjectAttributes & {
@@ -140,6 +141,10 @@ type MappedParamsAttributes = SavedObjectAttributes & {
 
 interface RuleMetaAttributes {
   versionApiKeyLastmodified?: string;
+}
+
+interface AlertDelayAttributes {
+  active: number;
 }
 
 export interface RuleAttributes {
@@ -174,4 +179,5 @@ export interface RuleAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  alertDelay?: AlertDelayAttributes;
 }

@@ -6,14 +6,12 @@
  */
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
 
 export interface GetCapabilitiesParams {
   http: HttpSetup;
   signal?: AbortSignal | undefined;
 }
-
-export type GetCapabilitiesResponse = AssistantFeatures;
 
 /**
  * API call for fetching assistant capabilities
@@ -31,13 +29,10 @@ export const getCapabilities = async ({
   try {
     const path = `/internal/elastic_assistant/capabilities`;
 
-    const response = await http.fetch(path, {
-      method: 'GET',
+    return await http.get<GetCapabilitiesResponse>(path, {
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
-
-    return response as GetCapabilitiesResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }

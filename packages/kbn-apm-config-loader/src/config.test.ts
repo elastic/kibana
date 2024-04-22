@@ -151,6 +151,7 @@ describe('ApmConfiguration', () => {
       delete process.env.ELASTIC_APM_ENVIRONMENT;
       delete process.env.ELASTIC_APM_SECRET_TOKEN;
       delete process.env.ELASTIC_APM_API_KEY;
+      delete process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE;
       delete process.env.ELASTIC_APM_SERVER_URL;
       delete process.env.NODE_ENV;
     });
@@ -183,6 +184,18 @@ describe('ApmConfiguration', () => {
             environment: 'ci',
           })
         );
+      });
+    });
+
+    it('ELASTIC_APM_KIBANA_FRONTEND_ACTIVE', () => {
+      process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE = 'false';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('servicesOverrides');
+      // @ts-ignore
+      expect(serverConfig.servicesOverrides).toEqual({
+        'kibana-frontend': {
+          active: false,
+        },
       });
     });
 
@@ -403,6 +416,32 @@ describe('ApmConfiguration', () => {
           serviceName: 'externalServiceName',
         })
       );
+    });
+  });
+
+  describe('isUsersRedactionEnabled', () => {
+    it('defaults to true', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {},
+        },
+      };
+
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      expect(config.isUsersRedactionEnabled()).toEqual(true);
+    });
+
+    it('uses the value defined in the config if specified', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            redactUsers: false,
+          },
+        },
+      };
+
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      expect(config.isUsersRedactionEnabled()).toEqual(false);
     });
   });
 });

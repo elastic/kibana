@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBasicTableColumn,
+  EuiText,
   EuiBadge,
   EuiButtonIcon,
   EuiIcon,
@@ -17,6 +18,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import React from 'react';
+import moment from 'moment';
 import styled from 'styled-components';
 
 import { EMPTY_STAT, getIlmPhaseDescription, getIncompatibleStatColor } from '../../helpers';
@@ -40,7 +42,8 @@ export interface IndexSummaryTableItem {
   ilmPhase: IlmPhase | undefined;
   pattern: string;
   patternDocsCount: number;
-  sizeInBytes: number;
+  sizeInBytes: number | undefined;
+  checkedAt: number | undefined;
 }
 
 export const getResultToolTip = (incompatible: number | undefined): string => {
@@ -117,6 +120,24 @@ export const getSummaryTableILMPhaseColumn = (
       ]
     : [];
 
+export const getSummaryTableSizeInBytesColumn = ({
+  formatBytes,
+}: {
+  formatBytes: (value: number | undefined) => string;
+}): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
+  {
+    field: 'sizeInBytes',
+    name: i18n.SIZE,
+    render: (_, { sizeInBytes }) =>
+      Number.isInteger(sizeInBytes) ? (
+        <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
+          <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+        </EuiToolTip>
+      ) : null,
+    sortable: true,
+    truncateText: false,
+  },
+];
 export const getSummaryTableColumns = ({
   formatBytes,
   formatNumber,
@@ -229,10 +250,22 @@ export const getSummaryTableColumns = ({
   {
     field: 'sizeInBytes',
     name: i18n.SIZE,
-    render: (_, { sizeInBytes }) => (
-      <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
-        <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
-      </EuiToolTip>
+    render: (_, { sizeInBytes }) =>
+      Number.isInteger(sizeInBytes) ? (
+        <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
+          <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+        </EuiToolTip>
+      ) : null,
+    sortable: true,
+    truncateText: false,
+  },
+  {
+    field: 'checkedAt',
+    name: i18n.LAST_CHECK,
+    render: (_, { checkedAt }) => (
+      <EuiText size="xs">
+        {checkedAt && moment(checkedAt).isValid() ? moment(checkedAt).fromNow() : EMPTY_STAT}
+      </EuiText>
     ),
     sortable: true,
     truncateText: false,

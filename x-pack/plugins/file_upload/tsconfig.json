@@ -15,6 +15,7 @@
     "@kbn/ml-is-populated-object",
     "@kbn/config-schema",
     "@kbn/code-editor",
+    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",

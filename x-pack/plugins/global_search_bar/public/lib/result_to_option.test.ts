@@ -52,6 +52,24 @@ describe('resultToOption', () => {
     );
   });
 
+  it('uses icon for `index` type', () => {
+    const input = createSearchResult({ type: 'index', icon: 'index-icon' });
+    expect(resultToOption(input, [])).toEqual(
+      expect.objectContaining({
+        icon: { type: 'index-icon' },
+      })
+    );
+  });
+
+  it('uses icon for `connector` type', () => {
+    const input = createSearchResult({ type: 'connector', icon: 'connector-icon' });
+    expect(resultToOption(input, [])).toEqual(
+      expect.objectContaining({
+        icon: { type: 'connector-icon' },
+      })
+    );
+  });
+
   it('does not use icon for other types', () => {
     const input = createSearchResult({ type: 'dashboard', icon: 'dash-icon' });
     expect(resultToOption(input, [])).toEqual(
@@ -103,6 +121,7 @@ describe('resultToOption', () => {
           id: 'known',
           name: 'Known',
           description: 'Known',
+          managed: false,
           color: '#000000',
         };
       }
@@ -123,6 +142,7 @@ describe('resultToOption', () => {
               "color": "#000000",
               "description": "Known",
               "id": "known",
+              "managed": false,
               "name": "Known",
             },
           ]

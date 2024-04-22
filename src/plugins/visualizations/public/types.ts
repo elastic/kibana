@@ -55,6 +55,7 @@ export interface VisSavedObject extends ISavedVis {
   searchSource?: ISearchSource;
   version?: string;
   tags?: string[];
+  managed: boolean;
 }
 
 export interface SaveVisOptions {
@@ -79,7 +80,7 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst<TVisParams = VisParams> = (
+export type VisToExpressionAst<TVisParams extends VisParams = VisParams> = (
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

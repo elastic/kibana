@@ -11,7 +11,7 @@ import {
   EXISTING_CASE_SELECT_BUTTON,
   VIEW_CASE_TOASTER_LINK,
 } from '../../../../screens/expandable_flyout/common';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { ALERT_CHECKBOX, EMPTY_ALERT_TABLE } from '../../../../screens/alerts';
 import {
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
@@ -34,6 +34,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
@@ -42,6 +43,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import {
+  closeFlyout,
   collapseDocumentDetailsExpandableFlyoutLeftSection,
   expandDocumentDetailsExpandableFlyoutLeftSection,
   fillOutFormToCreateNewCase,
@@ -72,7 +74,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   });
 
   it('should display header and footer basics', () => {
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ICON).should('exist');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
@@ -80,10 +82,12 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('have.text', 'open');
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('have.text', 'Risk score:');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('have.text', 'Risk score');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
       .should('be.visible')
       .and('have.text', rule.risk_score);
+
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).should('have.text', 'Assignees');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
       .should('be.visible')
@@ -128,7 +132,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   // TODO this will change when add to existing case is improved
   //  https://github.com/elastic/security-team/issues/6298
   it('should add to existing case', () => {
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
     fillOutFormToCreateNewCase();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE);
@@ -141,7 +145,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   // TODO this will change when add to new case is improved
   //  https://github.com/elastic/security-team/issues/6298
   it('should add to new case', () => {
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
     fillOutFormToCreateNewCase();
 
@@ -151,7 +155,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   it('should mark as acknowledged', () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 1);
 
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
 
     cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
@@ -161,7 +165,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   it('should mark as closed', () => {
     cy.get(ALERT_CHECKBOX).should('have.length', 1);
 
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
 
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
@@ -170,7 +174,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
   // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown
   it('should test other action within take action dropdown', () => {
-    expandFirstAlertExpandableFlyout();
+    expandAlertAtIndexExpandableFlyout();
 
     cy.log('should add endpoint exception');
 
@@ -211,5 +215,49 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
       .within(() =>
         cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY).should('exist')
       );
+  });
+
+  describe('Local storage persistence', () => {
+    before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
+    });
+
+    it('should remember which tab was selected when opening another alert or after page refresh', () => {
+      expandAlertAtIndexExpandableFlyout();
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('have.class', 'euiTab-isSelected');
+
+      openTableTab();
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('have.class', 'euiTab-isSelected');
+
+      cy.log('should persist selected tab when opening a different alert');
+
+      expandAlertAtIndexExpandableFlyout(1);
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('not.have.class', 'euiTab-isSelected');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('have.class', 'euiTab-isSelected');
+
+      cy.log('should persist selected tab after closing flyout');
+
+      closeFlyout();
+      expandAlertAtIndexExpandableFlyout();
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('not.have.class', 'euiTab-isSelected');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('have.class', 'euiTab-isSelected');
+
+      cy.log('should persist selected tab after page refresh');
+
+      closeFlyout();
+      cy.reload();
+
+      expandAlertAtIndexExpandableFlyout();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('not.have.class', 'euiTab-isSelected');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('have.class', 'euiTab-isSelected');
+    });
   });
 });

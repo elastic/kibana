@@ -7,20 +7,12 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
-import { ACTION_CUSTOMIZE_PANEL } from '@kbn/embeddable-plugin/public';
 
 const mockActions = [
   { id: 'inspect' },
@@ -66,7 +58,7 @@ describe('LensEmbeddable', () => {
         queries: [
           {
             id: 'testId',
-            inspect: { dsl: [], response: [] },
+            inspect: { dsl: [], response: ['{"mockResponse": "mockResponse"}'] },
             isInspected: false,
             loading: false,
             selectedInspectIndex: 0,
@@ -78,8 +70,7 @@ describe('LensEmbeddable', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore(state);
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
@@ -132,7 +123,7 @@ describe('LensEmbeddable', () => {
 
   it('should not render Panel settings action', () => {
     expect(
-      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes(ACTION_CUSTOMIZE_PANEL)
+      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes('ACTION_CUSTOMIZE_PANEL')
     ).toBeTruthy();
   });
 });

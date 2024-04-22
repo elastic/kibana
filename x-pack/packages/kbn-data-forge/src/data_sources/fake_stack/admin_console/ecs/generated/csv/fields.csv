@@ -1,0 +1,48 @@
+ECS_Version,Indexed,Field_Set,Field,Type,Level,Normalization,Example,Description
+8.0.0,true,base,@timestamp,date,core,,2016-05-23T08:05:34.853Z,Date/time when the event originated.
+8.0.0,true,base,labels,object,core,,"{""application"": ""foo-bar"", ""env"": ""production""}",Custom key/value pairs.
+8.0.0,true,base,message,match_only_text,core,,Hello World,Log message optimized for viewing in a log viewer.
+8.0.0,true,base,tags,keyword,core,array,"[""production"", ""env2""]",List of keywords used to tag each event.
+8.0.0,true,event,event.action,keyword,core,,user-password-change,The action captured by the event.
+8.0.0,true,event,event.category,keyword,core,array,authentication,Event category. The second categorization field in the hierarchy.
+8.0.0,true,event,event.duration,long,core,,,Duration of the event in nanoseconds.
+8.0.0,true,host,host.name,keyword,core,,,Name of the host.
+8.0.0,true,http,http.request.body.bytes,long,extended,,887,Size in bytes of the request body.
+8.0.0,true,http,http.request.body.content,wildcard,extended,,Hello world,The full HTTP request body.
+8.0.0,true,http,http.request.body.content.text,match_only_text,extended,,Hello world,The full HTTP request body.
+8.0.0,true,http,http.request.bytes,long,extended,,1437,Total size in bytes of the request (body and headers).
+8.0.0,true,http,http.request.id,keyword,extended,,123e4567-e89b-12d3-a456-426614174000,HTTP request ID.
+8.0.0,true,http,http.request.method,keyword,extended,,POST,HTTP request method.
+8.0.0,true,http,http.request.mime_type,keyword,extended,,image/gif,Mime type of the body of the request.
+8.0.0,true,http,http.request.referrer,keyword,extended,,https://blog.example.com/,Referrer for this HTTP request.
+8.0.0,true,http,http.response.body.bytes,long,extended,,887,Size in bytes of the response body.
+8.0.0,true,http,http.response.body.content,wildcard,extended,,Hello world,The full HTTP response body.
+8.0.0,true,http,http.response.body.content.text,match_only_text,extended,,Hello world,The full HTTP response body.
+8.0.0,true,http,http.response.bytes,long,extended,,1437,Total size in bytes of the response (body and headers).
+8.0.0,true,http,http.response.mime_type,keyword,extended,,image/gif,Mime type of the body of the response.
+8.0.0,true,http,http.response.status_code,long,extended,,404,HTTP response status code.
+8.0.0,true,http,http.version,keyword,extended,,1.1,HTTP version.
+8.0.0,true,log,log.level,keyword,core,,error,Log level of the log event.
+8.0.0,true,log,log.logger,keyword,core,,org.elasticsearch.bootstrap.Bootstrap,Name of the logger.
+8.0.0,true,url,url.domain,keyword,extended,,www.elastic.co,Domain of the url.
+8.0.0,true,url,url.extension,keyword,extended,,png,"File extension from the request url, excluding the leading dot."
+8.0.0,true,url,url.fragment,keyword,extended,,,Portion of the url after the `#`.
+8.0.0,true,url,url.full,wildcard,extended,,https://www.elastic.co:443/search?q=elasticsearch#top,Full unparsed URL.
+8.0.0,true,url,url.full.text,match_only_text,extended,,https://www.elastic.co:443/search?q=elasticsearch#top,Full unparsed URL.
+8.0.0,true,url,url.original,wildcard,extended,,https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch,Unmodified original url as seen in the event source.
+8.0.0,true,url,url.original.text,match_only_text,extended,,https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch,Unmodified original url as seen in the event source.
+8.0.0,true,url,url.password,keyword,extended,,,Password of the request.
+8.0.0,true,url,url.path,wildcard,extended,,,"Path of the request, such as ""/search""."
+8.0.0,true,url,url.port,long,extended,,443,"Port of the request, such as 443."
+8.0.0,true,url,url.query,keyword,extended,,,Query string of the request.
+8.0.0,true,url,url.registered_domain,keyword,extended,,example.com,"The highest registered url domain, stripped of the subdomain."
+8.0.0,true,url,url.scheme,keyword,extended,,https,Scheme of the url.
+8.0.0,true,url,url.subdomain,keyword,extended,,east,The subdomain of the domain.
+8.0.0,true,url,url.top_level_domain,keyword,extended,,co.uk,"The effective top level domain (com, org, net, co.uk)."
+8.0.0,true,url,url.username,keyword,extended,,,Username of the request.
+8.0.0,true,user,user.id,keyword,core,,S-1-5-21-202424912787-2692429404-2351956786-1000,Unique identifier of the user.
+8.0.0,true,user,user.name,keyword,core,,a.einstein,Short name or login of the user.
+8.0.0,true,user,user.name.text,match_only_text,core,,a.einstein,Short name or login of the user.
+8.0.0,true,user,user.roles,keyword,extended,array,"[""kibana_admin"", ""reporting_user""]",Array of user roles at the time of the event.
+8.0.0,true,user_agent,user_agent.original,keyword,extended,,"Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",Unparsed user_agent string.
+8.0.0,true,user_agent,user_agent.original.text,match_only_text,extended,,"Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",Unparsed user_agent string.

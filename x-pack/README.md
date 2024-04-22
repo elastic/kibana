@@ -20,12 +20,6 @@ xpack.observability.unsafe.alertDetails.uptime.enabled: true
 
 **[For Uptime rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
 
-```yaml
-xpack.observability.unsafe.alertDetails.observability.enabled: true
-```
-
-**[For Observability Threshold rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
-
 # Development
 
 By default, Kibana will run with X-Pack installed as mentioned in the [contributing guide](../CONTRIBUTING.md).

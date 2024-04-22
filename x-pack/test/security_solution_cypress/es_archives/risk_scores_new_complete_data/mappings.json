@@ -30,6 +30,15 @@
                 "category_1_score": {
                   "type": "float"
                 },
+                "category_2_count": {
+                  "type": "long"
+                },
+                "category_2_score": {
+                  "type": "float"
+                },
+                "criticality_level": {
+                  "type": "keyword"
+                },
                 "id_field": {
                   "type": "keyword"
                 },
@@ -55,6 +64,9 @@
                     },
                     "timestamp": {
                       "type": "date"
+                    },
+                    "contribution_score": {
+                      "type": "float"
                     }
                   }
                 },
@@ -87,6 +99,15 @@
                 "category_1_score": {
                   "type": "float"
                 },
+                "category_2_count": {
+                  "type": "long"
+                },
+                "category_2_score": {
+                  "type": "float"
+                },
+                "criticality_level": {
+                  "type": "keyword"
+                },
                 "id_field": {
                   "type": "keyword"
                 },
@@ -112,6 +133,9 @@
                     },
                     "timestamp": {
                       "type": "date"
+                    },
+                    "contribution_score": {
+                      "type": "float"
                     }
                   }
                 },
@@ -204,6 +228,9 @@
                         },
                         "timestamp": {
                           "type": "date"
+                        },
+                        "contribution_score": {
+                          "type": "float"
                         }
                       }
                     },
@@ -261,6 +288,9 @@
                         },
                         "timestamp": {
                           "type": "date"
+                        },
+                        "contribution_score": {
+                          "type": "float"
                         }
                       }
                     },

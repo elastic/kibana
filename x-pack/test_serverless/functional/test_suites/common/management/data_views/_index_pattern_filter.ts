@@ -16,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
 
   describe('index pattern filter', function describeIndexTests() {
+    // https://github.com/elastic/kibana/issues/178733
+    this.tags('failsOnMKI');
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
@@ -173,6 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.settings.clickIndexPatternLogstash();
+
+      await PageObjects.settings.refreshDataViewFieldList();
 
       await testSubjects.existOrFail('dataViewMappingConflict');
 

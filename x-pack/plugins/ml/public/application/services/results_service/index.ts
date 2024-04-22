@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
-import { ml, MlApiServices } from '../ml_api_service';
+import type { MlApiServices } from '../ml_api_service';
+import { ml } from '../ml_api_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 export type MlResultsService = typeof mlResultsService;
 
@@ -28,4 +31,15 @@ export function mlResultsServiceProvider(mlApiServices: MlApiServices) {
     ...resultsServiceProvider(mlApiServices),
     ...resultsServiceRxProvider(mlApiServices),
   };
+}
+
+export function useMlResultsService(): MlResultsService {
+  const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
+  const resultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), [mlApiServices]);
+  return resultsService;
 }

@@ -17,5 +17,5 @@ export const getNetworkDetailsUrl = (
   detailName: string,
   flowTarget?: FlowTarget | FlowTargetSourceDest,
   search?: string,
-  tabName = NetworkDetailsRouteType.flows
+  tabName = NetworkDetailsRouteType.events
 ) => `/ip/${detailName}/${flowTarget || FlowTarget.source}/${tabName}${appendSearch(search)}`;

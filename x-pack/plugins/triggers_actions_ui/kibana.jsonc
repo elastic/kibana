@@ -10,6 +10,7 @@
       "xpack",
       "trigger_actions_ui"
     ],
+
     "requiredPlugins": [
       "management",
       "charts",
@@ -24,14 +25,17 @@
       "actions",
       "dashboard",
       "licensing",
-      "expressions"
+      "expressions",
+      "lens",
+      "controls",
+      "embeddable"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
       "spaces",
-      "serverless",
+      "serverless"
     ],
     "requiredBundles": [
       "alerting",

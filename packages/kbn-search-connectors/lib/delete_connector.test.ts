@@ -8,8 +8,6 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '..';
-
 import { deleteConnectorById } from './delete_connector';
 
 jest.mock('./cancel_syncs', () => ({
@@ -19,7 +17,9 @@ import { cancelSyncs } from './cancel_syncs';
 
 describe('deleteConnector lib function', () => {
   const mockClient = {
-    delete: jest.fn(),
+    transport: {
+      request: jest.fn(),
+    },
   };
 
   beforeEach(() => {
@@ -28,14 +28,17 @@ describe('deleteConnector lib function', () => {
   });
 
   it('should delete connector and cancel syncs', async () => {
-    mockClient.delete.mockImplementation(() => true);
+    mockClient.transport.request.mockImplementation(() => ({
+      acknowledged: true,
+    }));
 
-    await deleteConnectorById(mockClient as unknown as ElasticsearchClient, 'connectorId');
+    await expect(
+      deleteConnectorById(mockClient as unknown as ElasticsearchClient, 'connectorId')
+    ).resolves.toEqual({ acknowledged: true });
     expect(cancelSyncs as jest.Mock).toHaveBeenCalledWith(mockClient, 'connectorId');
-    expect(mockClient.delete).toHaveBeenCalledWith({
-      id: 'connectorId',
-      index: CONNECTORS_INDEX,
-      refresh: 'wait_for',
+    expect(mockClient.transport.request).toHaveBeenCalledWith({
+      method: 'DELETE',
+      path: '/_connector/connectorId',
     });
     jest.useRealTimers();
   });

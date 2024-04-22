@@ -6,14 +6,27 @@
  */
 
 import React from 'react';
-import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { EmbeddableContext, ViewMode, CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
-  isEnhancedEmbeddable,
-  embeddableEnhancedDrilldownGrouping,
+  tracksOverlays,
+  type PresentationContainer,
+  type TracksOverlays,
+} from '@kbn/presentation-containers';
+import {
+  apiCanAccessViewMode,
+  apiHasSupportedTriggers,
+  getInheritedViewMode,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasUniqueId,
+  type HasParentApi,
+  type HasSupportedTriggers,
+} from '@kbn/presentation-publishing';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import {
+  apiHasDynamicActions,
+  type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { txtDisplayName } from './i18n';
@@ -27,11 +40,19 @@ export interface FlyoutEditDrilldownParams {
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
-export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
+export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
+  Required<HasDynamicActions> &
+  HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
+  HasSupportedTriggers &
+  Partial<HasUniqueId>;
+
+const isApiCompatible = (api: unknown | null): api is FlyoutEditDrilldownActionApi =>
+  apiHasDynamicActions(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
+
+export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
-  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -45,30 +66,20 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
 
   public readonly MenuItem = MenuItem as any;
 
-  public async isCompatible({ embeddable }: EmbeddableContext) {
-    if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
-    if (!isEnhancedEmbeddable(embeddable)) return false;
-    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
+    return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
   }
 
-  public async execute(context: EmbeddableContext) {
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const { core, plugins } = this.params.start();
-    const { embeddable } = context;
-
-    if (!isEnhancedEmbeddable(embeddable)) {
-      throw new Error(
-        'Need embeddable to be EnhancedEmbeddable to execute FlyoutEditDrilldownAction.'
-      );
-    }
 
     const templates = createDrilldownTemplatesFromSiblings(embeddable);
-    const closed$ = new Subject<true>();
+    const overlayTracker = tracksOverlays(embeddable.parentApi) ? embeddable.parentApi : undefined;
     const close = () => {
-      closed$.next(true);
+      if (overlayTracker) overlayTracker.clearOverlays();
       handle.close();
-    };
-    const closeFlyout = () => {
-      close();
     };
 
     const handle = core.overlays.openFlyout(
@@ -86,24 +97,12 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
       {
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
+        onClose: () => {
+          close();
+        },
       }
     );
 
-    // Close flyout on application change.
-    core.application.currentAppId$
-      .pipe(takeUntil(closed$), skip(1), take(1))
-      .subscribe(closeFlyout);
-
-    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
-    embeddable
-      .getInput$()
-      .pipe(
-        takeUntil(closed$),
-        map((input) => input.viewMode),
-        distinctUntilChanged(),
-        filter((mode) => mode !== ViewMode.EDIT),
-        take(1)
-      )
-      .subscribe({ next: closeFlyout, complete: closeFlyout });
+    overlayTracker?.openOverlay(handle);
   }
 }

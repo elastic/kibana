@@ -143,6 +143,7 @@ describe('helpers', () => {
       pattern: 'auditbeat-*',
       patternDocsCount: 57410,
       sizeInBytes: 103344068,
+      checkedAt: Date.now(),
     };
 
     const hasIncompatible: IndexSummaryTableItem = {
@@ -188,6 +189,7 @@ describe('helpers', () => {
         },
         { field: 'ilmPhase', name: 'ILM Phase', sortable: true, truncateText: false },
         { field: 'sizeInBytes', name: 'Size', sortable: true, truncateText: false },
+        { field: 'checkedAt', name: 'Last check', sortable: true, truncateText: false },
       ]);
     });
 
@@ -562,6 +564,30 @@ describe('helpers', () => {
         );
 
         expect(screen.getByTestId('sizeInBytes')).toHaveTextContent('98.6MB');
+      });
+
+      test('it should not render sizeInBytes if it is not a number', () => {
+        const testIndexSummaryTableItem = { ...indexSummaryTableItem, sizeInBytes: undefined };
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          itemIdToExpandedRowMap: {},
+          isILMAvailable,
+          pattern: 'auditbeat-*',
+          toggleExpanded: jest.fn(),
+        });
+
+        const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
+          .render;
+
+        render(
+          <TestProviders>
+            {sizeInBytesRender != null &&
+              sizeInBytesRender(testIndexSummaryTableItem, testIndexSummaryTableItem)}
+          </TestProviders>
+        );
+
+        expect(screen.queryByTestId('sizeInBytes')).toBeNull();
       });
     });
   });

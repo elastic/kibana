@@ -13,7 +13,7 @@
           "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.  Uses\nservices from a Provider to supply props to a pure component."
         ],
         "signature": [
-          "({ onDataViewCreated, allowAdHocDataView, }: ",
+          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, }: ",
           "AnalyticsNoDataPageProps",
           ") => JSX.Element"
         ],
@@ -26,7 +26,7 @@
             "id": "def-public.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n}",
+            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView,\n}",
             "description": [],
             "signature": [
               "AnalyticsNoDataPageProps"
@@ -50,7 +50,7 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ onDataViewCreated, allowAdHocDataView, showPlainSpinner, ...services }: React.PropsWithChildren<AnalyticsNoDataPageProps>) => JSX.Element"
+          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, showPlainSpinner, ...services }: React.PropsWithChildren<AnalyticsNoDataPageProps>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
         "deprecated": false,
@@ -61,7 +61,7 @@
             "id": "def-public.AnalyticsNoDataPage.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n  ...services\n}",
+            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView,\n  showPlainSpinner,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AnalyticsNoDataPageProps>"
@@ -280,6 +280,24 @@
             "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-public.AnalyticsNoDataPageProps.onESQLNavigationComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "onESQLNavigationComplete",
+            "description": [
+              "Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

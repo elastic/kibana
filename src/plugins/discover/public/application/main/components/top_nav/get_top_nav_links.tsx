@@ -122,14 +122,14 @@ export const getTopNavLinks = ({
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
       const savedSearch = state.savedSearchState.getState();
-      const sharingData = await getSharingData(
+      const searchSourceSharingData = await getSharingData(
         savedSearch.searchSource,
         state.appState.getState(),
         services,
         isTextBased
       );
 
-      const { locator } = services;
+      const { locator, notifications } = services;
       const appState = state.appState.getState();
       const { timefilter } = services.data.query.timefilter;
       const timeRange = timefilter.getTime();
@@ -183,7 +183,9 @@ export const getTopNavLinks = ({
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
-          ...sharingData,
+          isTextBased,
+          locatorParams: [{ id: locator.id, params }],
+          ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title
           title:
             savedSearch.title ||
@@ -196,6 +198,7 @@ export const getTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
+        toasts: notifications.toasts,
       });
     },
   };

@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Execute Connector API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/actions/connector/{connectorId}/_execute:
+    post:
+      operationId: ExecuteConnector
+      x-codegen-enabled: true
+      description: Execute Elastic Assistant connector by id
+      summary: Execute Elastic Assistant connector
+      tags:
+        - Connector API
+      parameters:
+        - name: connectorId
+          in: path
+          required: true
+          description: The connector's `id` value.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - actionTypeId
+                - params
+                - replacements
+                - subAction
+              properties:
+                conversationId:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
+                message:
+                  type: string
+                model:
+                  type: string
+                subAction:
+                  type: string
+                  enum:
+                    - invokeAI
+                    - invokeStream
+                actionTypeId:
+                  type: string
+                alertsIndexPattern:
+                  type: string
+                allow:
+                  type: array
+                  items:
+                    type: string
+                allowReplacement:
+                  type: array
+                  items:
+                    type: string
+                isEnabledKnowledgeBase:
+                  type: boolean
+                isEnabledRAGAlerts:
+                  type: boolean
+                replacements:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+                size:
+                  type: number
+                langSmithProject:
+                  type: string
+                langSmithApiKey:
+                  type: string
+      responses:
+        '200':
+          description: Successful static response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - connector_id
+                  - status
+                properties:
+                  data:
+                    type: string
+                  connector_id:
+                    type: string
+                  status:
+                    type: string
+                  trace_data:
+                    type: object
+                    description: Trace Data
+                    properties:
+                      transactionId:
+                        type: string
+                        description: Could be any string, not necessarily a UUID
+                      traceId:
+                        type: string
+                        description: Could be any string, not necessarily a UUID
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+

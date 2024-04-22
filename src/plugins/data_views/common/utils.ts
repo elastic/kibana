@@ -27,3 +27,11 @@ export async function findByName(client: PersistenceAPI, name: string) {
     return savedObjects ? savedObjects[0] : undefined;
   }
 }
+
+export function unwrapEtag(ifNoneMatch: string) {
+  let requestHash = ifNoneMatch.replace(/^"(.+)"$/, '$1');
+  if (requestHash.indexOf('-') > -1) {
+    requestHash = requestHash.split('-')[0];
+  }
+  return requestHash;
+}

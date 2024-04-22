@@ -176,7 +176,7 @@ export const isDetectionsPath = (pathname: string): boolean => {
 
 export const isDashboardViewPath = (pathname: string): boolean =>
   matchPath(pathname, {
-    path: `/${DASHBOARDS_PATH}/:id`,
+    path: `${DASHBOARDS_PATH}/:detailName`,
     exact: false,
     strict: false,
   }) != null;
@@ -206,11 +206,10 @@ export const isThreatIntelligencePath = (pathname: string): boolean => {
 
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
-  capabilities: Capabilities,
   services: StartServices
 ): RouteProps[] => {
   return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-    if (isSubPluginAvailable(key, capabilities)) {
+    if (isSubPluginAvailable(key, services.application.capabilities)) {
       acc.push(...value.routes);
     } else {
       const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;

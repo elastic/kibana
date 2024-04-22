@@ -61,9 +61,6 @@ x-pack/plugins/lens/public/datatable_visualization/expression.tsx kibana-app
 x-pack/plugins/lens/public/datatable_visualization/index.ts kibana-app
 x-pack/plugins/lens/public/datatable_visualization/visualization.test.tsx kibana-app
 x-pack/plugins/lens/public/datatable_visualization/visualization.tsx kibana-app
-x-pack/plugins/lens/public/debounced_component/debounced_component.test.tsx kibana-app
-x-pack/plugins/lens/public/debounced_component/debounced_component.tsx kibana-app
-x-pack/plugins/lens/public/debounced_component/index.ts kibana-app
 x-pack/plugins/lens/public/drag_drop/drag_drop.test.tsx kibana-app
 x-pack/plugins/lens/public/drag_drop/drag_drop.tsx kibana-app
 x-pack/plugins/lens/public/drag_drop/index.ts kibana-app

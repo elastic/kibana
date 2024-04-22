@@ -14,6 +14,7 @@ export class HomePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   public readonly log = this.ctx.getService('log');
+  private readonly toasts = this.ctx.getService('toasts');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -29,7 +30,7 @@ export class HomePageObject extends FtrService {
 
   async openSampleDataAccordion() {
     const accordionButton = await this.testSubjects.find('showSampleDataButton');
-    let expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+    let expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
     let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
     this.log.debug(`Sample data accordion expanded: ${expanded}`);
 
@@ -37,7 +38,7 @@ export class HomePageObject extends FtrService {
       await this.retry.waitFor('sample data according to be expanded', async () => {
         this.log.debug(`Opening sample data accordion`);
         await accordionButton.click();
-        expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+        expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
         expanded = expandedAttribute.toLocaleLowerCase().includes('true');
         return expanded;
       });
@@ -47,9 +48,12 @@ export class HomePageObject extends FtrService {
 
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const installStatus = await (
+      await sampleDataCard.findByCssSelector('[data-status]')
+    ).getAttribute('data-status');
     const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
     this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
-    return deleteButton.length > 0;
+    return installStatus === 'installed' && deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -71,7 +75,7 @@ export class HomePageObject extends FtrService {
     const panelAttributes = await Promise.all(
       solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
     );
-    return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
+    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
   }
 
   async goToSampleDataPage() {
@@ -165,7 +169,7 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
-    await this.common.closeToastIfExists();
+    await this.toasts.dismissIfExists();
     await this.retry.try(async () => {
       await this.testSubjects.click(`launchSampleDataSet${id}`);
       await this.find.byCssSelector(

@@ -7,12 +7,13 @@
 
 import './_classification_exploration.scss';
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
-  EuiDataGridCellValueElementProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -35,7 +36,7 @@ import { VegaChart } from '../../../../../components/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
 
 import { ErrorCallout } from '../error_callout';
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 
@@ -44,10 +45,9 @@ import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_tabl
 
 import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
 
+import type { ConfusionMatrixColumn, ConfusionMatrixColumnData } from './column_data';
 import {
   ACTUAL_CLASS_ID,
-  ConfusionMatrixColumn,
-  ConfusionMatrixColumnData,
   getColumnData,
   getTrailingControlColumns,
   MAX_COLUMNS,

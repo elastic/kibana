@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
@@ -31,7 +31,7 @@ interface PanelFooterProps {
  *
  */
 export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
-  const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
+  const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
   const {
     eventId,
     indexName,

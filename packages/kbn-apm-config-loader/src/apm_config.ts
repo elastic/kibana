@@ -24,4 +24,5 @@ const apmReusableConfigSchema = schema.object(
 
 export const apmConfigSchema = apmReusableConfigSchema.extends({
   servicesOverrides: schema.maybe(schema.recordOf(schema.string(), apmReusableConfigSchema)),
+  redactUsers: schema.maybe(schema.boolean({ defaultValue: true })),
 });

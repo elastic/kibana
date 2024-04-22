@@ -22,6 +22,8 @@ interface HostPanelHeaderProps {
   observedHost: ObservedEntityData<HostItem>;
 }
 
+const linkTitleCSS = { width: 'fit-content' };
+
 export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps) => {
   const lastSeenDate = useMemo(
     () => observedHost.lastSeen.date && new Date(observedHost.lastSeen.date),
@@ -43,6 +45,7 @@ export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps
             path={getHostDetailsUrl(hostName)}
             target={'_blank'}
             external={false}
+            css={linkTitleCSS}
           >
             <FlyoutTitle title={hostName} iconType={'storage'} isLink />
           </SecuritySolutionLinkAnchor>

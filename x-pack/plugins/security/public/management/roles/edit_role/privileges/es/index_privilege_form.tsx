@@ -48,6 +48,7 @@ interface Props {
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
+  isDarkMode?: boolean;
 }
 
 interface State {
@@ -460,6 +461,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   )}
                   value={indexPrivilege.query ?? ''}
                   onChange={this.onQueryChange}
+                  useDarkTheme={this.props.isDarkMode}
                   options={{
                     readOnly: this.props.isRoleReadOnly,
                     minimap: {

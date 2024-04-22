@@ -34,6 +34,7 @@ export class ExampleCurrencyFormat extends FieldFormat {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency: this.param('currency'),
+      currencyDisplay: 'narrowSymbol',
     }).format(val);
   };
 }

@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   let updateTemplate: typeof indexManagementService['templates']['api']['updateTemplate'];
   let deleteTemplates: typeof indexManagementService['templates']['api']['deleteTemplates'];
   let simulateTemplate: typeof indexManagementService['templates']['api']['simulateTemplate'];
+  let cleanUpTemplates: typeof indexManagementService['templates']['api']['cleanUpTemplates'];
 
   let getRandomString: () => string;
   describe('Index templates', function () {
@@ -30,10 +31,20 @@ export default function ({ getService }: FtrProviderContext) {
       ({
         templates: {
           helpers: { getTemplatePayload, catTemplate, getSerializedTemplate },
-          api: { createTemplate, updateTemplate, deleteTemplates, simulateTemplate },
+          api: {
+            createTemplate,
+            updateTemplate,
+            deleteTemplates,
+            simulateTemplate,
+            cleanUpTemplates,
+          },
         },
       } = indexManagementService);
       getRandomString = () => randomness.string({ casing: 'lower', alpha: true });
+    });
+
+    after(async () => {
+      await cleanUpTemplates({ 'x-elastic-internal-origin': 'xxx' });
     });
 
     describe('get', () => {
@@ -92,7 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
             'hasAliases',
             'hasMappings',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
+            'ignoreMissingComponentTemplates',
           ].sort();
 
           expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
@@ -112,7 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
             'indexPatterns',
             'template',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
+            'ignoreMissingComponentTemplates',
           ].sort();
 
           expect(body.name).to.eql(templateName);

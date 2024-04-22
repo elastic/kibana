@@ -138,8 +138,8 @@ describe('ContentManagementPlugin', () => {
         // Each procedure has been called with the context and input
         const context = {
           requestHandlerContext: mockedRequestHandlerContext,
+          request: expect.any(Object),
           contentRegistry: 'mockedContentRegistry',
-          getTransformsFactory: expect.any(Function),
           mSearchService: expect.any(MSearchService),
         };
         expect(mockGet).toHaveBeenCalledWith(context, input);

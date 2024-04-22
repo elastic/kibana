@@ -4,6 +4,84 @@ This is a test plan for the workflows of installing and upgrading prebuilt rules
 
 Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic. It does not cover any past functionality that was removed or functionality to be implemented in the future. The plan is about to change in the future Milestones.
 
+## Table of Contents
+
+- [Useful information](#useful-information)
+  - [Tickets](#tickets)
+  - [Terminology](#terminology)
+  - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
+  - [Functional requirements](#functional-requirements)
+- [Scenarios](#scenarios)
+
+  - [Package installation](#package-installation)
+    - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
+    - [**Scenario: Package is installed via bundled Fleet package in Kibana**](#scenario-package-is-installed-via-bundled-fleet-package-in-kibana)
+    - [**Scenario: Large package can be installed on a small Kibana instance**](#scenario-large-package-can-be-installed-on-a-small-kibana-instance)
+  - [Rule installation and upgrade via the Prebuilt rules API](#rule-installation-and-upgrade-via-the-prebuilt-rules-api)
+    - [**Scenario: API can install all prebuilt rules**](#scenario-api-can-install-all-prebuilt-rules)
+    - [**Scenario: API can install prebuilt rules that are not yet installed**](#scenario-api-can-install-prebuilt-rules-that-are-not-yet-installed)
+    - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
+    - [**Scenario: API does not install or upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-install-or-upgrade-prebuilt-rules-if-they-are-up-to-date)
+  - [Scenarios for the real package](#scenarios-for-the-real-package)
+    - [**Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**](#scenario-user-can-install-prebuilt-rules-from-scratch-then-install-new-rules-and-upgrade-existing-rules-from-the-new-package)
+  - [Rule installation and upgrade notifications on the Rule Management page](#rule-installation-and-upgrade-notifications-on-the-rule-management-page)
+    - [**Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**](#scenario-user-is-not-notified-when-no-prebuilt-rules-are-installed-and-there-are-no-prebuilt-rules-assets)
+    - [**Scenario: User is NOT notified when all prebuilt rules are installed and up to date**](#scenario-user-is-not-notified-when-all-prebuilt-rules-are-installed-and-up-to-date)
+    - [**Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**](#scenario-user-is-notified-when-no-prebuilt-rules-are-installed-and-there-are-rules-available-to-install)
+    - [**Scenario: User is notified when some prebuilt rules can be installed**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-installed)
+    - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
+    - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
+    - [**Scenario: User is notified after a prebuilt rule gets deleted**](#scenario-user-is-notified-after-a-prebuilt-rule-gets-deleted)
+  - [Rule installation workflow: base cases](#rule-installation-workflow-base-cases)
+    - [**Scenario: User can install prebuilt rules one by one**](#scenario-user-can-install-prebuilt-rules-one-by-one)
+    - [**Scenario: User can install multiple prebuilt rules selected on the page**](#scenario-user-can-install-multiple-prebuilt-rules-selected-on-the-page)
+    - [**Scenario: User can install all available prebuilt rules at once**](#scenario-user-can-install-all-available-prebuilt-rules-at-once)
+    - [**Scenario: Empty screen is shown when all prebuilt rules are installed**](#scenario-empty-screen-is-shown-when-all-prebuilt-rules-are-installed)
+    - [**Scenario: User can preview rules available for installation**](#scenario-user-can-preview-rules-available-for-installation)
+    - [**Scenario: User can install a rule using the rule preview**](#scenario-user-can-install-a-rule-using-the-rule-preview)
+    - [**Scenario: User can see correct rule information in preview before installing**](#scenario-user-can-see-correct-rule-information-in-preview-before-installing)
+    - [**Scenario: Tabs and sections without content should be hidden in preview before installing**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-installing)
+  - [Rule installation workflow: filtering, sorting, pagination](#rule-installation-workflow-filtering-sorting-pagination)
+  - [Rule installation workflow: misc cases](#rule-installation-workflow-misc-cases)
+    - [**Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-add-rules-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
+    - [**Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-add-rules-page-to-the-rule-management-page-via-breadcrumbs)
+  - [Rule upgrade workflow: base cases](#rule-upgrade-workflow-base-cases)
+    - [**Scenario: User can upgrade prebuilt rules one by one**](#scenario-user-can-upgrade-prebuilt-rules-one-by-one)
+    - [**Scenario: User can upgrade multiple prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-prebuilt-rules-selected-on-the-page)
+    - [**Scenario: User can upgrade all available prebuilt rules at once**](#scenario-user-can-upgrade-all-available-prebuilt-rules-at-once)
+    - [**Scenario: User can preview rules available for upgrade**](#scenario-user-can-preview-rules-available-for-upgrade)
+    - [**Scenario: User can upgrade a rule using the rule preview**](#scenario-user-can-upgrade-a-rule-using-the-rule-preview)
+    - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
+    - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
+  - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
+  - [Rule upgrade workflow: viewing rule changes in JSON diff view](#rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
+    - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
+    - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
+    - [**Scenario: Rule actions and exception lists should not be shown as modified**](#scenario-rule-actions-and-exception-lists-should-not-be-shown-as-modified)
+    - [**Scenario: Dynamic properties should not be included in preview**](#scenario-dynamic-properties-should-not-be-included-in-preview)
+    - [**Scenario: Technical properties should not be included in preview**](#scenario-technical-properties-should-not-be-included-in-preview)
+    - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
+    - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
+    - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
+  - [Rule upgrade workflow: viewing rule changes in per-field diff view](#rule-upgrade-workflow-viewing-rule-changes-in-per-field-diff-view)
+    - [**Scenario: User can see changes in a side-by-side per-field diff view**](#scenario-user-can-see-changes-in-a-side-by-side-per-field-diff-view)
+    - [**Scenario: Field groupings should be rendered together in the same accordion panel**](#scenario-field-groupings-should-be-rendered-together-in-the-same-accordion-panel)
+    - [**Scenario: Undefined values are displayed with empty diffs**](#scenario-undefined-values-are-displayed-with-empty-diffs)
+    - [**Scenario: Field diff components have the same grouping and order as in rule details overview**](#scenario-field-diff-components-have-the-same-grouping-and-order-as-in-rule-details-overview)
+  - [Rule upgrade workflow: preserving rule bound data](#rule-upgrade-workflow-preserving-rule-bound-data)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-the-same-rule-type)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
+  - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
+    - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
+  - [Error handling](#error-handling)
+    - [**Scenario: Error is handled when any operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-operation-on-prebuilt-rules-fails)
+  - [Authorization / RBAC](#authorization--rbac)
+    - [**Scenario: User with read privileges on Security Solution cannot install prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-install-prebuilt-rules)
+    - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
+  - [Kibana upgrade](#kibana-upgrade)
+    - [**Scenario: User can use prebuilt rules after upgrading Kibana from version A to B**](#scenario-user-can-use-prebuilt-rules-after-upgrading-kibana-from-version-a-to-b)
+
 ## Useful information
 
 ### Tickets
@@ -704,7 +782,9 @@ When user opens the Rule Updates table
 Then all X rules available for upgrade should be displayed in the table
 When user opens the rule preview for the 1st rule
 Then the preview should open
-And all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
+And the "Updates" tab should be active
+When user selects the "Overview" tab
+Then all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 When user selects the 2nd rule in the table
 Then the preview should be updated
 And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
@@ -731,6 +811,276 @@ And the Investigation Guide tab should NOT be displayed
 ### Rule upgrade workflow: filtering, sorting, pagination
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
+
+### Rule upgrade workflow: viewing rule changes in JSON diff view
+
+#### **Scenario: User can see changes in a side-by-side JSON diff view**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of these rules new versions are available
+When user opens the Rule Updates table and selects a rule
+Then the upgrade preview should open
+And rule changes should be displayed in a two-column JSON diff view
+And correct rule version numbers should be displayed in their respective columns
+When the user selects another rule without closing the preview
+Then the preview should display the changes for the newly selected rule
+```
+
+#### **Scenario: User can see precisely how property values would change after upgrade**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a rule preview with rule changes is open
+Then each line of <column> that was <change_type> should have <bg_color> background
+And marked with <line_badge> badge
+And each changed word in <column> should be highlighted with <accent_color>
+
+Examples:
+| change_type | column         | bg_color         | accent_color         | line_badge |
+| updated     | Current rule   | removed_bg_color | removed_accent_color | -          |
+| updated     | Elastic update | added_bg_color   | added_accent_color   | +          |
+| removed     | Current rule   | removed_bg_color | none                 | -          |
+| removed     | Elastic update | none             | none                 | none       |
+| added       | Current rule   | none             | none                 | none       |
+| added       | Elastic update | added_bg_color   | none                 | +          |
+```
+
+#### **Scenario: Rule actions and exception lists should not be shown as modified**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And the currently installed version of this rule doesn't have any actions or an exception list
+And a user has set up actions and an exception list for this rule
+And this rule has an update available
+And the update doesn't define any actions or an exception list
+When a user opens the upgrade preview for this rule
+Then the preview should open
+And the JSON diff shouldn't show any modifications to rule's actions or exception list
+```
+
+#### **Scenario: Dynamic properties should not be included in preview**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule is disabled by default
+And a user has enabled this rule
+And this rule executed at least once
+And this rule has an update available
+When user opens the upgrade preview
+Then the preview should open
+And the JSON diff shouldn't show any <property> properties on both sides
+
+Examples:
+| property          |
+| execution_summary |
+| enabled           |
+```
+
+#### **Scenario: Technical properties should not be included in preview**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+When a user opens the upgrade preview
+Then the preview should open
+And the JSON diff shouldn't show any <technical_property> properties on both sides
+
+Examples:
+| technical_property |
+| revision           |
+| updated_at         |
+| updated_by         |
+| created_at         |
+| created_by         |
+```
+
+#### **Scenario: Properties with semantically equal values should not be shown as modified**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has properties with different, but semantically equal values
+When a user opens the upgrade preview
+Then the preview should open
+And the JSON diff shouldn't show any changes to properties with semantically equal values
+
+Duration examples:
+| 1h       |
+| 60m      |
+| 3600s    |
+
+Empty value examples:
+| no value  |
+| ''        |
+| []        |
+| undefined |
+| null      |
+```
+
+#### **Scenario: Unchanged sections of a rule should be hidden by default**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+When a user opens the upgrade preview
+Then the preview should open
+And only the sections of the diff that have changes should be visible
+And unchanged sections should be hidden behind a button with a number of unchanged lines
+When a user clicks on the hidden section button
+Then the section should expand and show the unchanged properties
+```
+
+#### **Scenario: Properties should be sorted alphabetically**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+When a user opens the upgrade preview
+Then the preview should open
+And visible properties should be sorted alphabetically
+When a user expands all hidden sections
+Then all properties of the rule should be sorted alphabetically
+```
+
+### Rule upgrade workflow: viewing rule changes in per-field diff view
+
+#### **Scenario: User can see changes in a side-by-side per-field diff view**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of these rules new versions are available
+When user opens the Rule Updates table and selects a rule
+Then the per-field upgrade preview should open
+And rule changes should be displayed in a two-column diff view with each field in its own accordion component
+And all field diff accordions should be open by default
+And correct rule version numbers should be displayed in their respective columns
+When the user selects another rule without closing the preview
+Then the preview should display the changes for the newly selected rule
+```
+
+#### **Scenario: User can see changes when updated rule is a different rule type**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available that changes the rule type
+When user opens the upgrade preview
+Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
+# When tooltip enhancement is added, this step needs to be added to the corresponding test scenario
+And a tooltip is displayed with information about changing rule types
+```
+
+#### **Scenario: Field groupings should be rendered together in the same accordion panel**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule contains one or more <field> values
+When user opens the upgrade preview
+The <field> diff accordion panel should display its grouped rule properties
+And each property should have its name displayed inside the panel above its value
+
+Examples:
+| field              |
+| data_source        |
+| kql_query          |
+| eql_query          |
+| esql_query         |
+| threat_query       |
+| rule_schedule      |
+| rule_name_override |
+| timestamp_override |
+| timeline_template  |
+| building_block     |
+| threshold          |
+```
+
+#### **Scenario: Undefined values are displayed with empty diffs**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has field in the <version_one> version that didn't exist in the <version_two> version
+When a user opens the upgrade preview
+Then the preview should open
+And the old/new field should render an empty panel
+
+Examples:
+| version_one | version_two |
+| target      | current     |
+| current     | target      |
+```
+
+#### **Scenario: Field diff components have the same grouping and order as in rule details overview**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has multiple fields that are different between the current and target version
+When a user opens the upgrade preview
+Then the multiple field diff accordions should be sorted in the same order as on the rule details overview tab
+And the field diff accordions should be grouped inside its corresponding <section> accordion
+And any <section> accordion that doesn't have fields inside it shouldn't be displayed
+
+Examples:
+| section     |
+| About       |
+| Definition  |
+| Schedule    |
+| Setup Guide |
+```
+
+### Rule upgrade workflow: preserving rule bound data
+
+#### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**
+
+**Automation**: 1 unit test per case, 1 integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has the same rule type
+When a user upgrades the rule
+Then the rule bound data should be preserved
+```
+
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
+
+#### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**
+
+**Automation**: 1 unit test per case, 1 integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has a different rule type
+When a user upgrades the rule
+Then the rule bound data should be preserved
+```
+
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
 
 ### Rule upgrade workflow: misc cases
 

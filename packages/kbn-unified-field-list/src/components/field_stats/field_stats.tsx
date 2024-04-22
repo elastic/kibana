@@ -11,6 +11,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -33,14 +34,14 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { showExamplesForField } from '../../services/field_stats/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,
   canProvideNumberSummaryForField,
-} from '../../services/field_stats/field_stats_utils';
+} from '../../utils/can_provide_stats';
 import { loadFieldStats } from '../../services/field_stats';
+import { loadFieldStatsTextBased } from '../../services/field_stats_text_based';
 import type { AddFieldFilterHandler } from '../../types';
 import {
   FieldTopValues,
@@ -57,8 +58,8 @@ export interface FieldStatsState {
   totalDocuments?: number;
   sampledDocuments?: number;
   sampledValues?: number;
-  histogram?: BucketedAggregation<number | string>;
-  topValues?: BucketedAggregation<number | string>;
+  histogram?: BucketedAggregation<number | string | boolean>;
+  topValues?: BucketedAggregation<number | string | boolean>;
   numberSummary?: NumberSummary;
 }
 
@@ -134,6 +135,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
+  const isTextBased = !!query && isOfAggregateQueryType(query);
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -184,17 +186,32 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      const results = await loadFieldStats({
-        services: { data },
-        dataView: loadedDataView,
-        field,
-        fromDate,
-        toDate,
-        dslQuery:
-          dslQuery ??
-          buildEsQuery(loadedDataView, query ?? [], filters ?? [], getEsQueryConfig(uiSettings)),
-        abortController: abortControllerRef.current,
-      });
+      const results = isTextBased
+        ? await loadFieldStatsTextBased({
+            services: { data },
+            dataView: loadedDataView,
+            field,
+            fromDate,
+            toDate,
+            baseQuery: query,
+            abortController: abortControllerRef.current,
+          })
+        : await loadFieldStats({
+            services: { data },
+            dataView: loadedDataView,
+            field,
+            fromDate,
+            toDate,
+            dslQuery:
+              dslQuery ??
+              buildEsQuery(
+                loadedDataView,
+                query ?? [],
+                filters ?? [],
+                getEsQueryConfig(uiSettings)
+              ),
+            abortController: abortControllerRef.current,
+          });
 
       abortControllerRef.current = null;
 
@@ -279,44 +296,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
-    const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
-    const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
-        {sampledDocuments && sampledDocuments < totalDocuments ? (
-          <FormattedMessage
-            id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
-            defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
-            values={{
-              sampledDocuments,
-              sampledDocumentsFormatted: (
-                <strong data-test-subj={dataTestSubjDocsCount}>
-                  {fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                    .convert(sampledDocuments)}
-                </strong>
-              ),
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
-            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-            values={{
-              totalDocuments,
-              totalDocumentsFormatted: (
-                <strong data-test-subj={dataTestSubjDocsCount}>
-                  {fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                    .convert(totalDocuments)}
-                </strong>
-              ),
-            }}
-          />
-        )}
-      </EuiText>
-    ) : (
-      <></>
-    );
+    const countsElement = getCountsElement(state, services, isTextBased, dataTestSubject);
 
     return (
       <>
@@ -338,7 +318,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     );
   }
 
-  if (!canProvideStatsForField(field)) {
+  if (!canProvideStatsForField(field, isTextBased)) {
     const messageNoAnalysis = (
       <FieldSummaryMessage
         message={i18n.translate('unifiedFieldList.fieldStats.notAvailableForThisFieldDescription', {
@@ -355,7 +335,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
-  if (canProvideNumberSummaryForField(field) && isNumberSummaryValid(numberSummary)) {
+  if (canProvideNumberSummaryForField(field, isTextBased) && isNumberSummaryValid(numberSummary)) {
     title = (
       <EuiTitle size="xxxs">
         <h6>
@@ -458,7 +438,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {showExamplesForField(field)
+          {topValues.areExamples
             ? i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
                 defaultMessage: 'Examples',
               })
@@ -563,7 +543,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (topValues && topValues.buckets.length) {
     return combineWithTitleAndFooter(
       <FieldTopValues
-        areExamples={showExamplesForField(field)}
+        areExamples={topValues.areExamples}
         buckets={topValues.buckets}
         dataView={dataView}
         field={field}
@@ -578,6 +558,96 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   return null;
 };
+
+function getCountsElement(
+  state: FieldStatsState,
+  services: FieldStatsServices,
+  isTextBased: boolean,
+  dataTestSubject: string
+): JSX.Element {
+  const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
+  const { fieldFormats } = services;
+  const { totalDocuments, sampledValues, sampledDocuments, topValues } = state;
+
+  if (!totalDocuments) {
+    return <></>;
+  }
+
+  let labelElement;
+
+  if (isTextBased) {
+    labelElement = topValues?.areExamples ? (
+      <FormattedMessage
+        id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
+        defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+        values={{
+          sampledDocuments,
+          sampledDocumentsFormatted: (
+            <strong data-test-subj={dataTestSubjDocsCount}>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampledDocuments)}
+            </strong>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel"
+        defaultMessage="Calculated from {sampledValuesFormatted} sample {sampledValues, plural, one {value} other {values}}."
+        values={{
+          sampledValues,
+          sampledValuesFormatted: (
+            <strong data-test-subj={dataTestSubjDocsCount}>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampledValues)}
+            </strong>
+          ),
+        }}
+      />
+    );
+  } else {
+    labelElement =
+      sampledDocuments && sampledDocuments < totalDocuments ? (
+        <FormattedMessage
+          id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+          values={{
+            sampledDocuments,
+            sampledDocumentsFormatted: (
+              <strong data-test-subj={dataTestSubjDocsCount}>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(sampledDocuments)}
+              </strong>
+            ),
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
+          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+          values={{
+            totalDocuments,
+            totalDocumentsFormatted: (
+              <strong data-test-subj={dataTestSubjDocsCount}>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(totalDocuments)}
+              </strong>
+            ),
+          }}
+        />
+      );
+  }
+
+  return (
+    <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
+      {labelElement}
+    </EuiText>
+  );
+}
 
 /**
  * Component which fetches and renders stats for a data view field

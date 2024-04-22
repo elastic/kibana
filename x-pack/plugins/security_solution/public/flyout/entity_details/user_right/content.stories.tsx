@@ -8,8 +8,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
   mockManagedUserData,
@@ -18,21 +17,16 @@ import {
 import { UserPanelContent } from './content';
 import { mockObservedUser } from './mocks';
 
-const flyoutContextValue = {
-  openLeftPanel: () => window.alert('openLeftPanel called'),
-  panels: {},
-} as unknown as ExpandableFlyoutContextValue;
-
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
 storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <TestProvider>
         <EuiFlyout size="m" onClose={() => {}}>
           {storyFn()}
         </EuiFlyout>
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     </StorybookProviders>
   ))
   .add('default', () => (

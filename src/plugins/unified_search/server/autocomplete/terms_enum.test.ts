@@ -57,17 +57,15 @@ describe('_terms_enum suggestions', () => {
           "field": "field_name",
           "index_filter": Object {
             "bool": Object {
-              "must": Array [
-                Object {
-                  "terms": Object {
-                    "_tier": Array [
-                      "data_hot",
-                      "data_warm",
-                      "data_content",
-                    ],
-                  },
+              "must": Array [],
+              "must_not": Object {
+                "terms": Object {
+                  "_tier": Array [
+                    "data_cold",
+                    "data_frozen",
+                  ],
                 },
-              ],
+              },
             },
           },
           "string": "query",
@@ -97,17 +95,15 @@ describe('_terms_enum suggestions', () => {
           "field": "fieldName",
           "index_filter": Object {
             "bool": Object {
-              "must": Array [
-                Object {
-                  "terms": Object {
-                    "_tier": Array [
-                      "data_hot",
-                      "data_warm",
-                      "data_content",
-                    ],
-                  },
+              "must": Array [],
+              "must_not": Object {
+                "terms": Object {
+                  "_tier": Array [
+                    "data_cold",
+                    "data_frozen",
+                  ],
                 },
-              ],
+              },
             },
           },
           "string": "query",

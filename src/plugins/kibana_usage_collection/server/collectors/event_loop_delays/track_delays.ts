@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { takeUntil, finalize, map } from 'rxjs/operators';
+import { takeUntil, finalize, map } from 'rxjs';
 import { Observable, timer, switchMap } from 'rxjs';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';

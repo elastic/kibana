@@ -18,9 +18,6 @@ jest.mock('../../license', () => ({
 jest.mock('../../capabilities/get_capabilities', () => ({
   getCapabilities: () => {},
 }));
-jest.mock('../../services/field_format_service', () => ({
-  getFieldFormat: () => {},
-}));
 jest.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
 jest.mock('./description_cell', () => () => (
   <div id="mockDescriptorCom">mocked description component</div>
@@ -30,6 +27,10 @@ jest.mock('../entity_cell', () => () => <div id="mocEntityCom">mocked entity com
 jest.mock('./influencers_cell', () => () => (
   <div id="mocInfluencerCom">mocked influencer component</div>
 ));
+
+const mlFieldFormatServiceMock = {
+  getFieldFormat: () => {},
+};
 
 const columnData = {
   items: mockAnomaliesTableData.default.anomalies,
@@ -48,6 +49,7 @@ const columnData = {
 describe('AnomaliesTable', () => {
   test('all columns created', () => {
     const columns = getColumns(
+      mlFieldFormatServiceMock,
       columnData.items,
       columnData.jobIds,
       columnData.examplesByJobId,
@@ -103,6 +105,7 @@ describe('AnomaliesTable', () => {
     };
 
     const columns = getColumns(
+      mlFieldFormatServiceMock,
       noEntityValueColumnData.items,
       noEntityValueColumnData.jobIds,
       noEntityValueColumnData.examplesByJobId,
@@ -133,6 +136,7 @@ describe('AnomaliesTable', () => {
     };
 
     const columns = getColumns(
+      mlFieldFormatServiceMock,
       noInfluencersColumnData.items,
       noInfluencersColumnData.jobIds,
       noInfluencersColumnData.examplesByJobId,
@@ -163,6 +167,7 @@ describe('AnomaliesTable', () => {
     };
 
     const columns = getColumns(
+      mlFieldFormatServiceMock,
       noActualColumnData.items,
       noActualColumnData.jobIds,
       noActualColumnData.examplesByJobId,
@@ -193,6 +198,7 @@ describe('AnomaliesTable', () => {
     };
 
     const columns = getColumns(
+      mlFieldFormatServiceMock,
       noTypicalColumnData.items,
       noTypicalColumnData.jobIds,
       noTypicalColumnData.examplesByJobId,
@@ -223,6 +229,7 @@ describe('AnomaliesTable', () => {
     };
 
     const columns = getColumns(
+      mlFieldFormatServiceMock,
       multipleJobIdsData.items,
       multipleJobIdsData.jobIds,
       multipleJobIdsData.examplesByJobId,

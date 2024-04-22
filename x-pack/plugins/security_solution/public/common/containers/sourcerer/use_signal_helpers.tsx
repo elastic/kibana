@@ -7,9 +7,8 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { sourcererSelectors } from '../../store';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useDataView } from '../source/use_data_view';
@@ -33,17 +32,8 @@ export const useSignalHelpers = (): {
     data: { dataViews },
   } = useKibana().services;
 
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const getSignalIndexNameSelector = useMemo(
-    () => sourcererSelectors.signalIndexNameSelector(),
-    []
-  );
-  const signalIndexNameSourcerer = useDeepEqualSelector(getSignalIndexNameSelector);
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-
+  const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
   const signalIndexNeedsInit = useMemo(
     () => !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
     [defaultDataView.title, signalIndexNameSourcerer]

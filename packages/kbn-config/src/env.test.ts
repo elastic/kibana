@@ -248,3 +248,35 @@ describe('packageInfo.buildFlavor', () => {
     expect(env.packageInfo.buildFlavor).toEqual('traditional');
   });
 });
+
+describe('packageInfo.buildShaShort', () => {
+  const sha = 'c6e1a25bea71a623929a8f172c0273bf0c811ca0';
+  it('provides the sha and a short version of the sha', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
+
+    const env = new Env(
+      '/some/home/dir',
+      {
+        branch: 'whathaveyou',
+        version: 'v1',
+        build: {
+          distributable: true,
+          number: 100,
+          sha,
+          date: BUILD_DATE,
+        },
+      },
+      getEnvOptions({
+        cliArgs: { dev: false },
+        configs: ['/some/other/path/some-kibana.yml'],
+        repoPackages: ['FakePackage1', 'FakePackage2'] as unknown as Package[],
+      })
+    );
+
+    expect(env.packageInfo.buildSha).toEqual('c6e1a25bea71a623929a8f172c0273bf0c811ca0');
+    expect(env.packageInfo.buildShaShort).toEqual('c6e1a25bea71');
+  });
+});

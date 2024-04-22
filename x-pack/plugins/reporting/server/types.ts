@@ -33,7 +33,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { ExportTypesRegistry } from './lib';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 /**
  * Plugin Setup Contract

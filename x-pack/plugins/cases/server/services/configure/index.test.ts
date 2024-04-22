@@ -6,7 +6,7 @@
  */
 
 import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { CustomFieldTypes, ConnectorTypes } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -43,7 +43,22 @@ const basicConfigFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  customFields: [],
+  customFields: [
+    {
+      type: CustomFieldTypes.TOGGLE as const,
+      key: 'toggle_custom_field',
+      label: 'Toggle',
+      required: true,
+      defaultValue: true,
+    },
+    {
+      type: CustomFieldTypes.TEXT as const,
+      key: 'text_custom_field',
+      label: 'Text',
+      required: true,
+      defaultValue: 'foobar',
+    },
+  ],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -172,7 +187,22 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
-            "customFields": Array [],
+            "customFields": Array [
+              Object {
+                "defaultValue": true,
+                "key": "toggle_custom_field",
+                "label": "Toggle",
+                "required": true,
+                "type": "toggle",
+              },
+              Object {
+                "defaultValue": "foobar",
+                "key": "text_custom_field",
+                "label": "Text",
+                "required": true,
+                "type": "text",
+              },
+            ],
             "owner": "securitySolution",
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {
@@ -443,7 +473,22 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
-            "customFields": Array [],
+            "customFields": Array [
+              Object {
+                "defaultValue": true,
+                "key": "toggle_custom_field",
+                "label": "Toggle",
+                "required": true,
+                "type": "toggle",
+              },
+              Object {
+                "defaultValue": "foobar",
+                "key": "text_custom_field",
+                "label": "Text",
+                "required": true,
+                "type": "text",
+              },
+            ],
             "owner": "securitySolution",
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {

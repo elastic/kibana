@@ -83,11 +83,13 @@ class RuleEditorFlyoutUI extends Component {
   }
 
   componentDidMount() {
-    this.toastNotificationService = toastNotificationServiceProvider(
-      this.props.kibana.services.notifications.toasts
-    );
-    if (typeof this.props.setShowFunction === 'function') {
-      this.props.setShowFunction(this.showFlyout);
+    if (this.props.kibana.services.notifications) {
+      this.toastNotificationService = toastNotificationServiceProvider(
+        this.props.kibana.services.notifications.toasts
+      );
+      if (typeof this.props.setShowFunction === 'function') {
+        this.props.setShowFunction(this.showFlyout);
+      }
     }
   }
 
@@ -480,7 +482,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   render() {
-    const docsUrl = this.props.kibana.services.docLinks.links.ml.customRules;
+    const docsUrl = this.props.kibana.services.docLinks?.links.ml.customRules;
     const {
       isFlyoutVisible,
       job,

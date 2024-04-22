@@ -22,7 +22,7 @@ export interface WaitForTaskResponse {
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
-  response?: estypes.TasksTaskStatus;
+  response?: estypes.TasksGetResponse['response'];
 }
 
 /**

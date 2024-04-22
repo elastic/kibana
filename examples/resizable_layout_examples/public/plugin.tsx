@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import image from './resizable_layout_examples.png';
 
@@ -22,7 +22,7 @@ export class ResizableLayoutExamplesPlugin implements Plugin {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');

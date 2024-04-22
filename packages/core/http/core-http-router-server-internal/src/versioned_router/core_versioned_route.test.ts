@@ -6,45 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { hapiMocks } from '@kbn/hapi-mocks';
-import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
-import type {
-  IRouter,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '@kbn/core-http-server';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core-http-server';
+import { Router } from '../router';
+import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
-import { CoreKibanaRequest } from '../request';
 import { Method } from './types';
-
-const createRequest = (
-  {
-    version,
-    body,
-    params,
-    query,
-  }: { version: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
-    version: '1',
-  }
-) =>
-  CoreKibanaRequest.from(
-    hapiMocks.createRequest({
-      payload: body,
-      params,
-      query,
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: version },
-      app: { requestId: 'fakeId' },
-    }),
-    passThroughValidation
-  );
+import { createRequest } from './core_versioned_route.test.util';
 
 describe('Versioned route', () => {
-  let router: IRouter;
+  let router: Router;
   let responseFactory: jest.Mocked<KibanaResponseFactory>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
   beforeEach(() => {
@@ -62,6 +35,13 @@ describe('Versioned route', () => {
       })),
     } as any;
     router = createRouter();
+  });
+
+  const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
+    createFooValidation();
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('can register multiple handlers', () => {
@@ -165,7 +145,8 @@ describe('Versioned route', () => {
 
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining(expectedRouteConfig),
-      expect.any(Function)
+      expect.any(Function),
+      { isVersioned: true }
     );
   });
 
@@ -177,65 +158,17 @@ describe('Versioned route', () => {
     ).not.toThrow();
   });
 
-  describe('when in dev', () => {
-    // NOTE: Temporary test to ensure single public API version is enforced
-    it('only allows "2023-10-31" as public route versions', () => {
-      expect(() =>
-        CoreVersionedRouter.from({ router, isDev: true })
-          .get({ access: 'public', path: '/foo' })
-          .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
-      ).toThrow(/Invalid public version/);
-    });
-
-    it('runs request AND response validations', async () => {
+  it.each([['static' as const], ['lazy' as const]])(
+    'runs %s request validations',
+    async (staticOrLazy) => {
       let handler: RequestHandler;
 
-      let validatedBody = false;
-      let validatedParams = false;
-      let validatedQuery = false;
-      let validatedOutputBody = false;
-
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      const versionedRouter = CoreVersionedRouter.from({ router });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
-          validate: {
-            request: {
-              body: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedBody = true;
-                  },
-                }),
-              }),
-              params: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedParams = true;
-                  },
-                }),
-              }),
-              query: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedQuery = true;
-                  },
-                }),
-              }),
-            },
-            response: {
-              200: {
-                body: schema.object({
-                  foo: schema.number({
-                    validate: () => {
-                      validatedOutputBody = true;
-                    },
-                  }),
-                }),
-              },
-            },
-          },
+          validate: staticOrLazy === 'static' ? fooValidation : () => fooValidation,
         },
         handlerFn
       );
@@ -252,10 +185,146 @@ describe('Versioned route', () => {
       );
 
       expect(kibanaResponse.status).toBe(200);
-      expect(validatedBody).toBe(true);
-      expect(validatedParams).toBe(true);
-      expect(validatedQuery).toBe(true);
-      expect(validatedOutputBody).toBe(true);
+      expect(validateBodyFn).toHaveBeenCalledTimes(1);
+      expect(validateParamsFn).toHaveBeenCalledTimes(1);
+      expect(validateQueryFn).toHaveBeenCalledTimes(1);
+      expect(validateOutputFn).toHaveBeenCalledTimes(0); // does not call this in non-dev
+    }
+  );
+
+  it('constructs lazily provided validations once (idempotency)', async () => {
+    let handler: RequestHandler;
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const lazyValidation = jest.fn(() => fooValidation);
+    versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: lazyValidation,
+      },
+      handlerFn
+    );
+
+    for (let i = 0; i < 10; i++) {
+      const { status } = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+      expect(status).toBe(200);
+    }
+
+    expect(lazyValidation).toHaveBeenCalledTimes(1);
+  });
+
+  describe('when in dev', () => {
+    // NOTE: Temporary test to ensure single public API version is enforced
+    it('only allows "2023-10-31" as public route versions', () => {
+      expect(() =>
+        CoreVersionedRouter.from({ router, isDev: true })
+          .get({ access: 'public', path: '/foo' })
+          .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
+      ).toThrow(/Invalid public version/);
     });
+
+    it('also runs response validations', async () => {
+      let handler: RequestHandler;
+
+      (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: fooValidation,
+        },
+        handlerFn
+      );
+
+      const kibanaResponse = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+
+      expect(kibanaResponse.status).toBe(200);
+      expect(validateBodyFn).toHaveBeenCalledTimes(1);
+      expect(validateParamsFn).toHaveBeenCalledTimes(1);
+      expect(validateQueryFn).toHaveBeenCalledTimes(1);
+      expect(validateOutputFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('allows using default resolution for specific internal routes', async () => {
+    const versionedRouter = CoreVersionedRouter.from({
+      router,
+      isDev: true,
+      useVersionResolutionStrategyForInternalPaths: ['/bypass_me/{id?}'],
+    });
+
+    let bypassVersionHandler: RequestHandler;
+    (router.post as jest.Mock).mockImplementation(
+      (opts: unknown, fn) => (bypassVersionHandler = fn)
+    );
+    versionedRouter.post({ path: '/bypass_me/{id?}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      handlerFn
+    );
+
+    let doNotBypassHandler1: RequestHandler;
+    (router.put as jest.Mock).mockImplementation((opts: unknown, fn) => (doNotBypassHandler1 = fn));
+    versionedRouter.put({ path: '/do_not_bypass_me/{id}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      handlerFn
+    );
+
+    let doNotBypassHandler2: RequestHandler;
+    (router.get as jest.Mock).mockImplementation((opts: unknown, fn) => (doNotBypassHandler2 = fn));
+    versionedRouter.get({ path: '/do_not_bypass_me_either', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      handlerFn
+    );
+
+    const byPassedVersionResponse = await bypassVersionHandler!(
+      {} as any,
+      createRequest({ version: undefined }),
+      responseFactory
+    );
+
+    const doNotBypassResponse1 = await doNotBypassHandler1!(
+      {} as any,
+      createRequest({ version: undefined }),
+      responseFactory
+    );
+
+    const doNotBypassResponse2 = await doNotBypassHandler2!(
+      {} as any,
+      createRequest({ version: undefined }),
+      responseFactory
+    );
+
+    expect(byPassedVersionResponse.status).toBe(200);
+    expect(doNotBypassResponse1.status).toBe(400);
+    expect(doNotBypassResponse1.payload).toMatch('Please specify a version');
+    expect(doNotBypassResponse2.status).toBe(400);
+    expect(doNotBypassResponse2.payload).toMatch('Please specify a version');
   });
 });

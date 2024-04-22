@@ -26,11 +26,13 @@ import { DeferredTransformAccordion } from './deferred_transforms_accordion';
 interface Props {
   packageInfo: PackageInfo;
   deferredInstallations: EsAssetReference[];
+  forceRefreshAssets?: () => void;
 }
 
 export const DeferredAssetsSection: FunctionComponent<Props> = ({
   deferredInstallations,
   packageInfo,
+  forceRefreshAssets,
 }) => {
   const authz = useAuthz();
 
@@ -60,6 +62,7 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
         packageInfo={packageInfo}
         type={ElasticsearchAssetType.transform}
         deferredInstallations={deferredTransforms}
+        forceRefreshAssets={forceRefreshAssets}
       />
     </>
   );

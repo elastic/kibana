@@ -25,10 +25,14 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
-import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
+import {
+  createDataStreamBackingIndex,
+  createDataStreamPayload,
+  createNonDataStreamIndex,
+} from './data_streams_tab.helpers';
 
 import { createMemoryHistory } from 'history';
 import {
@@ -81,30 +85,8 @@ describe('<IndexManagementHome />', () => {
   describe('data stream column', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([
-        {
-          health: '',
-          status: '',
-          primary: '',
-          replica: '',
-          documents: '',
-          documents_deleted: '',
-          size: '',
-          primary_size: '',
-          name: 'data-stream-index',
-          data_stream: 'dataStream1',
-        },
-        {
-          health: '',
-          status: '',
-          primary: '',
-          replica: '',
-          documents: '',
-          documents_deleted: '',
-          size: '',
-          primary_size: '',
-          name: 'no-data-stream-index',
-          data_stream: null,
-        },
+        createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
+        createNonDataStreamIndex('no-data-stream-index'),
       ]);
 
       // The detail panel should still appear even if there are no data streams.
@@ -193,26 +175,6 @@ describe('<IndexManagementHome />', () => {
 
     test('renders the default empty list content', () => {
       expect(testBed.exists('createIndexMessage')).toBe(true);
-    });
-
-    it('displays an empty list content if set via extensions service', async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([]);
-      await act(async () => {
-        testBed = await setup(httpSetup, {
-          services: {
-            extensionsService: {
-              _emptyListContent: {
-                renderContent: () => {
-                  return <div>Empty list content</div>;
-                },
-              },
-            },
-          },
-        });
-      });
-      testBed.component.update();
-
-      expect(testBed.component.text()).toContain('Empty list content');
     });
 
     it('renders "no indices found" prompt for search', async () => {
@@ -528,6 +490,72 @@ describe('<IndexManagementHome />', () => {
       // It refresh indices after saving
       expect(httpSetup.get).toHaveBeenCalledTimes(2);
       expect(httpSetup.get).toHaveBeenNthCalledWith(2, '/api/index_management/indices');
+    });
+  });
+
+  describe('extensions service', () => {
+    it('displays an empty list content if set via extensions service', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([]);
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          services: {
+            extensionsService: {
+              _emptyListContent: {
+                renderContent: () => {
+                  return <div>Empty list content</div>;
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+
+      expect(testBed.component.text()).toContain('Empty list content');
+    });
+
+    it('renders additional columns registered via extensions service', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...createNonDataStreamIndex('test-index'),
+          ilm: {
+            phase: 'hot phase',
+            managed: true,
+          },
+        },
+      ]);
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          services: {
+            extensionsService: {
+              _columns: [
+                {
+                  fieldName: 'ilm.phase',
+                  label: 'ILM column 1',
+                  order: 55,
+                },
+                {
+                  fieldName: 'ilm.managed',
+                  label: 'ILM column 2',
+                  order: 56,
+                  render: (index: Index) => {
+                    if (index.ilm?.managed) {
+                      return <div>ILM managed</div>;
+                    }
+                  },
+                },
+              ],
+            },
+          },
+        });
+      });
+      testBed.component.update();
+
+      const text = testBed.component.text();
+      expect(text).toContain('ILM column 1');
+      expect(text).toContain('hot phase');
+      expect(text).toContain('ILM column 2');
+      expect(text).toContain('ILM managed');
     });
   });
 });

@@ -21,7 +21,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-inference-api.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

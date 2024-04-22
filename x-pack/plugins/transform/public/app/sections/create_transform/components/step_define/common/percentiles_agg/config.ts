@@ -6,13 +6,13 @@
  */
 
 import { PercentilesAggForm } from './percentiles_form_component';
-import { IPivotAggsConfigPercentiles } from './types';
+import type { IPivotAggsConfigPercentiles } from './types';
+import type { PivotAggsConfigBase } from '../../../../../../common';
 import {
   isPivotAggsConfigWithUiBase,
   PERCENTILES_AGG_DEFAULT_PERCENTS,
-  PivotAggsConfigBase,
 } from '../../../../../../common';
-import { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
+import type { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
 
 /**
  * TODO this callback has been moved.

@@ -18,7 +18,7 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-plugin/common';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { services } from './services';
 
 export default async () => {
@@ -59,6 +59,10 @@ export default async () => {
         'xpack.security.authc.realms.file.file1.order=-100',
         `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
+
+        // Enable strict request validation for security related ES APIs.
+        'xpack.security.authz.has_privileges.strict_request_validation.enabled=true',
+        'xpack.security.authc.api_key.strict_request_validation.enabled=true',
 
         'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
         `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,

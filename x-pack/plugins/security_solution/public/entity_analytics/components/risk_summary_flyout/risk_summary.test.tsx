@@ -18,17 +18,6 @@ import type {
   VisualizationEmbeddableProps,
 } from '../../../common/components/visualization_actions/types';
 
-const mockContributingAlerts = Array(6).fill({});
-const expectedRiskInputsLength = mockContributingAlerts.length;
-
-const mockUseRiskContributingAlerts = jest
-  .fn()
-  .mockReturnValue({ loading: false, data: mockContributingAlerts });
-
-jest.mock('../../hooks/use_risk_contributing_alerts', () => ({
-  useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
-}));
-
 const mockVisualizationEmbeddable = jest
   .fn()
   .mockReturnValue(<div data-test-subj="visualization-embeddable" />);
@@ -38,12 +27,58 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
 describe('RiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table', () => {
+  it('renders risk summary table with alerts only', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+
+    // Alerts
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+    );
+
+    // Context
+    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
+      `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+    );
+
+    // Result row doesn't exist if alerts are the only category
+    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
+    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
+  });
+
+  it('renders risk summary table with context and totals', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
     const { getByTestId } = render(
       <TestProviders>
         <RiskSummary
@@ -55,10 +90,26 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+
+    // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${expectedRiskInputsLength}`
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
     );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('CategoryAlerts');
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+    );
+
+    // Result
+    expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+    );
+
+    expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
+      `${
+        (mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0) +
+        (mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0)
+      }`
+    );
   });
 
   it('renders risk summary table when riskScoreData is empty', () => {
@@ -126,6 +177,48 @@ describe('RiskSummary', () => {
         sourceField: 'host.risk.calculated_score_norm',
       })
     );
+  });
+
+  it('builds lens cases attachment metadata for host risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensMetadata: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata;
+
+    expect(lensMetadata).toMatchInlineSnapshot(`
+      Object {
+        "description": "Risk score for host test",
+      }
+    `);
+  });
+
+  it('builds lens cases attachment metadata for user risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockUserRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensMetadata: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata;
+
+    expect(lensMetadata).toMatchInlineSnapshot(`
+      Object {
+        "description": "Risk score for user test",
+      }
+    `);
   });
 
   it('builds lens attributes for user risk score', () => {

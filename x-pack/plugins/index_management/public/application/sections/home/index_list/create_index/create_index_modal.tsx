@@ -156,7 +156,10 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
           data-test-subj="createIndexSaveButton"
           data-telemetry-id="idxMgmt-indexList-createIndex-saveButton"
         >
-          <FormattedMessage id="xpack.idxMgmt.createIndex.modal.saveButton" defaultMessage="Save" />
+          <FormattedMessage
+            id="xpack.idxMgmt.createIndex.modal.saveButton"
+            defaultMessage="Create"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

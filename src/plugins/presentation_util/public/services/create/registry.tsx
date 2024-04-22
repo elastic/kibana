@@ -18,7 +18,10 @@ import { PluginServiceProvidersMediator } from './providers_mediator';
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export class PluginServiceRegistry<Services, StartParameters = {}> {
+export class PluginServiceRegistry<
+  Services extends Record<keyof Services, {}>,
+  StartParameters = {}
+> {
   private providers: PluginServiceProviders<Services, StartParameters>;
   private providersMediator: PluginServiceProvidersMediator<Services, StartParameters>;
   private _isStarted = false;

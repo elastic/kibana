@@ -7,17 +7,16 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { LabelBadge } from './label_badge';
 
 export const NavItemLabel: React.FC<{
   item: ChromeProjectNavigationNode;
-}> = ({ item: { title, openInNewTab, withBadge, badgeOptions } }) => {
+}> = ({ item: { title, withBadge, badgeOptions } }) => {
   return (
     <>
-      {title} {openInNewTab && <EuiIcon type="popout" size="s" />}
+      {title}
       {withBadge && <LabelBadge text={badgeOptions?.text} />}
     </>
   );

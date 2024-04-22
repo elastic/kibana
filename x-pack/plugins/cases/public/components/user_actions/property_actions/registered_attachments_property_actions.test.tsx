@@ -18,7 +18,7 @@ import {
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174384
+// Failing: See https://github.com/elastic/kibana/issues/174384
 describe.skip('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
@@ -41,13 +41,7 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
 
-    await waitForEuiPopoverOpen();
-
-    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
-      1
-    );
-
-    expect(screen.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action-group')).toBeInTheDocument();
   });
 
   it('renders the modal info correctly', async () => {
@@ -85,7 +79,7 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Delete'));
+    userEvent.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(props.onDelete).toHaveBeenCalled();

@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
+import { TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
@@ -33,6 +33,8 @@ import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { TaskRunnerContext } from './types';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -97,6 +99,7 @@ describe('Task Runner Factory', () => {
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
   const rulesClient = rulesClientMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     data: dataPlugin,
@@ -131,6 +134,7 @@ describe('Task Runner Factory', () => {
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {

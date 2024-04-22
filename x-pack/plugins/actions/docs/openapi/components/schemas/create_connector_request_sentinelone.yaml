@@ -1,0 +1,29 @@
+title: Create SentinelOne connector request
+description: >
+  The SentinelOne connector communicates with SentinelOne Management Console via REST API.
+  This functionality is in technical preview and may be changed or removed in a future release.
+  Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+x-technical-preview: true
+type: object
+required:
+  - config
+  - connector_type_id
+  - name
+  - secrets
+properties:
+  config:
+    $ref: 'config_properties_sentinelone.yaml'
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .sentinelone
+    examples:
+      - .sentinelone
+  name:
+    type: string
+    description: The display name for the connector.
+    examples:
+      - my-connector
+  secrets:
+    $ref: 'secrets_properties_sentinelone.yaml'

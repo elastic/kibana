@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import { isRangeParams } from '../range_value_input';
 
 export const strings = {
   getIsOperatorOptionLabel: () =>
@@ -32,6 +34,14 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
       defaultMessage: 'is between',
     }),
+  getIsGreaterOrEqualOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.greaterThanOrEqualOptionLabel', {
+      defaultMessage: 'greater or equal',
+    }),
+  getLessThanOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.lessThanOrEqualOptionLabel', {
+      defaultMessage: 'less than',
+    }),
   getIsNotBetweenOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
       defaultMessage: 'is not between',
@@ -46,10 +56,24 @@ export const strings = {
     }),
 };
 
+export enum OPERATORS {
+  LESS = 'less',
+  GREATER_OR_EQUAL = 'greater_or_equal',
+  BETWEEN = 'between',
+  IS = 'is',
+  NOT_BETWEEN = 'not_between',
+  IS_NOT = 'is_not',
+  IS_ONE_OF = 'is_one_of',
+  IS_NOT_ONE_OF = 'is_not_one_of',
+  EXISTS = 'exists',
+  DOES_NOT_EXIST = 'does_not_exist',
+}
+
 export interface Operator {
   message: string;
   type: FILTERS;
   negate: boolean;
+  id: OPERATORS;
 
   /**
    * KbnFieldTypes applicable for operator
@@ -61,72 +85,149 @@ export interface Operator {
    * takes precedence over {@link fieldTypes}
    */
   field?: (field: DataViewField) => boolean;
+  /**
+   * If applicable, preserves or converts filter params when switching between operators
+   */
+  getParamsFromPrevOperator?: (
+    prevOperator: Operator | undefined,
+    params: FilterMetaParams
+  ) => FilterMetaParams | undefined;
 }
 
-export const isOperator = {
+const isSharedProps = {
+  type: FILTERS.PHRASE,
+  getParamsFromPrevOperator: (prevOperator: Operator | undefined, params: FilterMetaParams) => {
+    if (!prevOperator) return;
+    if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id)) return params;
+    if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) {
+      if (Array.isArray(params) && params.length > 0) return params[0];
+    }
+  },
+};
+
+export const isOperator: Operator = {
+  ...isSharedProps,
   message: strings.getIsOperatorOptionLabel(),
-  type: FILTERS.PHRASE,
   negate: false,
+  id: OPERATORS.IS,
 };
 
-export const isNotOperator = {
+export const isNotOperator: Operator = {
+  ...isSharedProps,
   message: strings.getIsNotOperatorOptionLabel(),
-  type: FILTERS.PHRASE,
   negate: true,
+  id: OPERATORS.IS_NOT,
 };
 
-export const isOneOfOperator = {
+const isOneOfSharedProps = {
+  type: FILTERS.PHRASES,
+  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  getParamsFromPrevOperator: (prevOperator: Operator | undefined, params: FilterMetaParams) => {
+    if (!prevOperator) return;
+    if ([OPERATORS.IS_ONE_OF, OPERATORS.IS_NOT_ONE_OF].includes(prevOperator.id)) return params;
+    if ([OPERATORS.IS, OPERATORS.IS_NOT].includes(prevOperator.id) && typeof params === 'string') {
+      if (!Array.isArray(params)) return [params];
+    }
+  },
+};
+
+export const isOneOfOperator: Operator = {
+  ...isOneOfSharedProps,
   message: strings.getIsOneOfOperatorOptionLabel(),
-  type: FILTERS.PHRASES,
   negate: false,
-  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  id: OPERATORS.IS_ONE_OF,
 };
 
-export const isNotOneOfOperator = {
+export const isNotOneOfOperator: Operator = {
+  ...isOneOfSharedProps,
   message: strings.getIsNotOneOfOperatorOptionLabel(),
-  type: FILTERS.PHRASES,
   negate: true,
-  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  id: OPERATORS.IS_NOT_ONE_OF,
 };
 
-export const isBetweenOperator = {
+const rangeOperatorsSharedProps = {
+  type: FILTERS.RANGE,
+  field: (field: DataViewField) => {
+    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
+      return true;
+
+    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
+
+    return false;
+  },
+};
+
+const betweenGetParamsFromPrevOperator = (
+  prevOperator: Operator | undefined,
+  params: FilterMetaParams
+) => {
+  if (!prevOperator) return;
+  if (
+    [OPERATORS.LESS, OPERATORS.GREATER_OR_EQUAL, OPERATORS.BETWEEN, OPERATORS.NOT_BETWEEN].includes(
+      prevOperator.id
+    )
+  )
+    return params;
+};
+
+export const isBetweenOperator: Operator = {
+  ...rangeOperatorsSharedProps,
   message: strings.getIsBetweenOperatorOptionLabel(),
-  type: FILTERS.RANGE,
+  id: OPERATORS.BETWEEN,
   negate: false,
-  field: (field: DataViewField) => {
-    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
-      return true;
-
-    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
-
-    return false;
-  },
+  getParamsFromPrevOperator: betweenGetParamsFromPrevOperator,
 };
 
-export const isNotBetweenOperator = {
+export const isNotBetweenOperator: Operator = {
+  ...rangeOperatorsSharedProps,
   message: strings.getIsNotBetweenOperatorOptionLabel(),
-  type: FILTERS.RANGE,
   negate: true,
-  field: (field: DataViewField) => {
-    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
-      return true;
+  id: OPERATORS.NOT_BETWEEN,
+  getParamsFromPrevOperator: betweenGetParamsFromPrevOperator,
+};
 
-    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
-
-    return false;
+export const isLessThanOperator: Operator = {
+  ...rangeOperatorsSharedProps,
+  message: strings.getLessThanOperatorOptionLabel(),
+  id: OPERATORS.LESS,
+  negate: false,
+  getParamsFromPrevOperator: (prevOperator, params) => {
+    if (!prevOperator) return;
+    if (
+      [OPERATORS.BETWEEN, OPERATORS.NOT_BETWEEN].includes(prevOperator.id) &&
+      isRangeParams(params)
+    )
+      return { from: undefined, to: params?.to };
   },
 };
 
-export const existsOperator = {
+export const isGreaterOrEqualOperator: Operator = {
+  ...rangeOperatorsSharedProps,
+  message: strings.getIsGreaterOrEqualOperatorOptionLabel(),
+  id: OPERATORS.GREATER_OR_EQUAL,
+  negate: false,
+  getParamsFromPrevOperator: (prevOperator, params) => {
+    if (!prevOperator) return;
+    if (
+      [OPERATORS.BETWEEN, OPERATORS.NOT_BETWEEN].includes(prevOperator.id) &&
+      isRangeParams(params)
+    )
+      return { from: params?.from, to: undefined };
+  },
+};
+
+export const existsOperator: Operator = {
   message: strings.getExistsOperatorOptionLabel(),
   type: FILTERS.EXISTS,
   negate: false,
+  id: OPERATORS.EXISTS,
 };
 
-export const doesNotExistOperator = {
+export const doesNotExistOperator: Operator = {
   message: strings.getDoesNotExistOperatorOptionLabel(),
   type: FILTERS.EXISTS,
   negate: true,
+  id: OPERATORS.DOES_NOT_EXIST,
 };
 
 export const FILTER_OPERATORS: Operator[] = [
@@ -134,6 +235,8 @@ export const FILTER_OPERATORS: Operator[] = [
   isNotOperator,
   isOneOfOperator,
   isNotOneOfOperator,
+  isGreaterOrEqualOperator,
+  isLessThanOperator,
   isBetweenOperator,
   isNotBetweenOperator,
   existsOperator,

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -41,6 +42,12 @@ export function fetchTextBased(
     time: timeRange,
     dataView,
     inputQuery,
+    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestTitle', {
+      defaultMessage: 'Table',
+    }),
+    descriptionForInspector: i18n.translate('discover.inspectorTextBasedRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+    }),
   })
     .then((ast) => {
       if (ast) {
@@ -62,14 +69,13 @@ export function fetchTextBased(
             const rows = table?.rows ?? [];
             textBasedQueryColumns = table?.columns ?? undefined;
             textBasedHeaderWarning = table.warning ?? undefined;
-            finalData = rows.map(
-              (row: Record<string, string>, idx: number) =>
-                ({
-                  id: String(idx),
-                  raw: row,
-                  flattened: row,
-                } as unknown as DataTableRecord)
-            );
+            finalData = rows.map((row: Record<string, string>, idx: number) => {
+              return {
+                id: String(idx),
+                raw: row,
+                flattened: row,
+              } as unknown as DataTableRecord;
+            });
           }
         });
         return lastValueFrom(execution).then(() => {

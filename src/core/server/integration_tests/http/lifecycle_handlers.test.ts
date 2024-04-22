@@ -378,6 +378,7 @@ describe('core lifecycle handlers with no strict client version check', () => {
         versioned: {
           strictClientVersionCheck: false,
           versionResolution: 'newest',
+          useVersionResolutionStrategyForInternalPaths: [],
         },
       },
     });

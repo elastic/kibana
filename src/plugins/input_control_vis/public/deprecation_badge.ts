@@ -6,19 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { Action } from '@kbn/ui-actions-plugin/public';
-
-import { Embeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { VisualizeInput } from '@kbn/visualizations-plugin/public';
+import {
+  apiCanAccessViewMode,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  getViewModeSubject,
+} from '@kbn/presentation-publishing';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
-export const ACTION_DEPRECATION_BADGE = 'ACTION_INPUT_CONTROL_DEPRECATION_BADGE';
+import { INPUT_CONTROL_VIS_TYPE } from './input_control_vis_type';
 
-export interface DeprecationBadgeActionContext {
-  embeddable: Embeddable<VisualizeInput>;
-}
+const ACTION_DEPRECATION_BADGE = 'ACTION_INPUT_CONTROL_DEPRECATION_BADGE';
 
-export class InputControlDeprecationBadge implements Action<DeprecationBadgeActionContext> {
+type InputControlDeprecationActionApi = CanAccessViewMode & HasVisualizeConfig;
+
+const isApiCompatible = (api: unknown | null): api is InputControlDeprecationActionApi =>
+  Boolean(apiCanAccessViewMode(api) && apiHasVisualizeConfig(api));
+
+const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
+  return (
+    isApiCompatible(api) &&
+    getInheritedViewMode(api) === ViewMode.EDIT &&
+    api.getVis().type.name === INPUT_CONTROL_VIS_TYPE
+  );
+};
+
+export class InputControlDeprecationBadge implements Action<EmbeddableApiContext> {
   public id = ACTION_DEPRECATION_BADGE;
   public type = ACTION_DEPRECATION_BADGE;
   public disabled = true;
@@ -40,11 +57,22 @@ export class InputControlDeprecationBadge implements Action<DeprecationBadgeActi
     });
   }
 
-  public async isCompatible({ embeddable }: DeprecationBadgeActionContext) {
-    return (
-      embeddable.getInput().viewMode === ViewMode.EDIT &&
-      embeddable.getInput()?.savedVis?.type === 'input_control_vis'
-    );
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    return compatibilityCheck(embeddable);
+  }
+
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable) && embeddable.getVis().type.name === INPUT_CONTROL_VIS_TYPE;
+  }
+
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
+  ) {
+    if (!isApiCompatible(embeddable)) return;
+    return getViewModeSubject(embeddable)?.subscribe(() => {
+      onChange(compatibilityCheck(embeddable), this);
+    });
   }
 
   public async execute() {

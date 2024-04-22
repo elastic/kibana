@@ -102,7 +102,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 import { CreatePackagePolicySinglePage } from '.';
-import { AGENTLESS_POLICY_ID } from './hooks/setup_technology';
+import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -269,7 +269,7 @@ describe('when on the package policy create page', () => {
         },
       ],
       name: 'nginx-1',
-      namespace: 'default',
+      namespace: '',
       package: {
         name: 'nginx',
         title: 'Nginx',
@@ -523,7 +523,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty name', async () => {
           await act(async () => {
-            fireEvent.change(renderResult.getByLabelText('Integration name'), {
+            fireEvent.change(renderResult.getByTestId('packagePolicyNameInput'), {
               target: { value: '' },
             });
           });
@@ -536,7 +536,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty package var', async () => {
           await act(async () => {
-            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+            fireEvent.click(renderResult.getByText('Change defaults'));
           });
 
           await act(async () => {
@@ -553,7 +553,7 @@ describe('when on the package policy create page', () => {
 
         test('should submit form with changed package var', async () => {
           await act(async () => {
-            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+            fireEvent.click(renderResult.getByText('Change defaults'));
           });
 
           await act(async () => {
@@ -658,6 +658,23 @@ describe('when on the package policy create page', () => {
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
         });
+      });
+
+      test('should not show confirmation modal', async () => {
+        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
+          data: { results: { total: 1 } },
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText('Existing hosts')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
       });
     });
   });

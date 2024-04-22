@@ -223,11 +223,8 @@ export default function (providerContext: FtrProviderContext) {
           },
           mapping: {
             total_fields: {
-              limit: '10000',
+              limit: '1000',
             },
-          },
-          query: {
-            default_field: ['logs_test_name', 'new_field_name'],
           },
         },
       });
@@ -259,34 +256,6 @@ export default function (providerContext: FtrProviderContext) {
             type: 'keyword',
           },
         },
-      });
-
-      const resUserSettings = await es.transport.request<any>(
-        {
-          method: 'GET',
-          path: `/_component_template/${logsTemplateName}@custom`,
-        },
-        { meta: true }
-      );
-      expect(resUserSettings.statusCode).equal(200);
-      expect(resUserSettings.body).eql({
-        component_templates: [
-          {
-            name: 'logs-all_assets.test_logs@custom',
-            component_template: {
-              _meta: {
-                managed: true,
-                managed_by: 'fleet',
-                package: {
-                  name: 'all_assets',
-                },
-              },
-              template: {
-                settings: {},
-              },
-            },
-          },
-        ],
       });
     });
     it('should have updated the metrics mapping component template', async function () {

@@ -46,20 +46,11 @@ type ExpectedBulkGetResult = Either<
 
 export const performBulkGet = async <T>(
   { objects, options }: PerformBulkGetParams<T>,
-  {
-    helpers,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    registry,
-    extensions = {},
-  }: ApiExecutionContext
+  { helpers, allowedTypes, client, serializer, registry, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsBulkResponse<T>> => {
   const {
     common: commonHelper,
     validation: validationHelper,
-    encryption: encryptionHelper,
     migration: migrationHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
@@ -162,61 +153,67 @@ export const performBulkGet = async <T>(
   }
 
   const authObjects: AuthorizeBulkGetObject[] = [];
-  const result = {
-    saved_objects: expectedBulkGetResults.map((expectedResult) => {
-      if (isLeft(expectedResult)) {
-        const { type, id } = expectedResult.value;
-        authObjects.push({ type, id, existingNamespaces: [], error: true });
-        return expectedResult.value as any;
-      }
+  const documents = expectedBulkGetResults.map<SavedObject<T>>((expectedResult) => {
+    if (isLeft(expectedResult)) {
+      const { type, id } = expectedResult.value;
+      authObjects.push({ type, id, existingNamespaces: [], error: true });
+      return expectedResult.value as any;
+    }
 
-      const {
-        type,
-        id,
-        // set to default namespaces value for `rawDocExistsInNamespaces` check below
-        namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)],
-        esRequestIndex,
-      } = expectedResult.value;
+    const {
+      type,
+      id,
+      // set to default namespaces value for `rawDocExistsInNamespaces` check below
+      namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)],
+      esRequestIndex,
+    } = expectedResult.value;
 
-      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+    const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
+    // @ts-expect-error MultiGetHit._source is optional
+    const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
+
+    authObjects.push({
+      type,
+      id,
+      objectNamespaces: namespaces,
       // @ts-expect-error MultiGetHit._source is optional
-      const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
+      existingNamespaces: doc?._source?.namespaces ?? [],
+      error: docNotFound,
+    });
 
-      authObjects.push({
-        type,
+    if (docNotFound) {
+      return {
         id,
-        objectNamespaces: namespaces,
-        // @ts-expect-error MultiGetHit._source is optional
-        existingNamespaces: doc?._source?.namespaces ?? [],
-        error: docNotFound,
-      });
+        type,
+        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+      } as any as SavedObject<T>;
+    }
 
-      if (docNotFound) {
-        return {
-          id,
-          type,
-          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-        } as any as SavedObject<T>;
-      }
-
-      // @ts-expect-error MultiGetHit._source is optional
-      const document = getSavedObjectFromSource(registry, type, id, doc, {
-        migrationVersionCompatibility,
-      });
-      const migrated = migrationHelper.migrateStorageDocument(document);
-
-      return migrated;
-    }),
-  };
+    // @ts-expect-error MultiGetHit._source is optional
+    return getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility,
+    });
+  });
 
   const authorizationResult = await securityExtension?.authorizeBulkGet({
     namespace,
     objects: authObjects,
   });
 
-  return encryptionHelper.optionallyDecryptAndRedactBulkResult(
-    result,
-    authorizationResult?.typeMap
-  );
+  const results: Array<SavedObject<T>> = [];
+  for (const doc of documents) {
+    results.push(
+      doc.error
+        ? doc
+        : await migrationHelper.migrateAndDecryptStorageDocument({
+            document: doc,
+            typeMap: authorizationResult?.typeMap,
+          })
+    );
+  }
+
+  return {
+    saved_objects: results,
+  };
 };

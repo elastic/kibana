@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
 interface Props {
   children: ReactNode;

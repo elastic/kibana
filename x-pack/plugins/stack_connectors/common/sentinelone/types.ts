@@ -16,9 +16,14 @@ import {
   SentinelOneGetRemoteScriptsResponseSchema,
   SentinelOneGetRemoteScriptsStatusParams,
   SentinelOneIsolateHostParamsSchema,
-  SentinelOneKillProcessParamsSchema,
   SentinelOneSecretsSchema,
   SentinelOneActionParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneGetActivitiesResponseSchema,
+  SentinelOneExecuteScriptResponseSchema,
 } from './schema';
 
 export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
@@ -29,11 +34,10 @@ export type SentinelOneBaseApiResponse = TypeOf<typeof SentinelOneBaseApiRespons
 export type SentinelOneGetAgentsParams = Partial<TypeOf<typeof SentinelOneGetAgentsParamsSchema>>;
 export type SentinelOneGetAgentsResponse = TypeOf<typeof SentinelOneGetAgentsResponseSchema>;
 
-export type SentinelOneAgent = SentinelOneGetAgentsResponse['data'][0];
-
-export type SentinelOneKillProcessParams = TypeOf<typeof SentinelOneKillProcessParamsSchema>;
-
 export type SentinelOneExecuteScriptParams = TypeOf<typeof SentinelOneExecuteScriptParamsSchema>;
+export type SentinelOneExecuteScriptResponse = TypeOf<
+  typeof SentinelOneExecuteScriptResponseSchema
+>;
 
 export type SentinelOneGetRemoteScriptStatusParams = TypeOf<
   typeof SentinelOneGetRemoteScriptsStatusParams
@@ -46,6 +50,31 @@ export type SentinelOneGetRemoteScriptsParams = TypeOf<
 export type SentinelOneGetRemoteScriptsResponse = TypeOf<
   typeof SentinelOneGetRemoteScriptsResponseSchema
 >;
+
+export type SentinelOneFetchAgentFilesParams = TypeOf<
+  typeof SentinelOneFetchAgentFilesParamsSchema
+>;
+export type SentinelOneFetchAgentFilesResponse = TypeOf<
+  typeof SentinelOneFetchAgentFilesResponseSchema
+>;
+
+export type SentinelOneDownloadAgentFileParams = TypeOf<
+  typeof SentinelOneDownloadAgentFileParamsSchema
+>;
+
+export type SentinelOneActivityRecord<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>['data'][number],
+  'data'
+> & {
+  data: TData;
+};
+
+export type SentinelOneGetActivitiesParams = TypeOf<typeof SentinelOneGetActivitiesParamsSchema>;
+
+export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>,
+  'data'
+> & { data: Array<SentinelOneActivityRecord<TData>> };
 
 export type SentinelOneIsolateHostParams = TypeOf<typeof SentinelOneIsolateHostParamsSchema>;
 

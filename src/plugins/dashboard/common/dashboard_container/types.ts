@@ -14,7 +14,6 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RefreshInterval } from '@kbn/data-plugin/common';
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import { DashboardOptions } from '../types';
@@ -65,6 +64,5 @@ export interface DashboardContainerInput extends EmbeddableInput {
   syncCursor: DashboardOptions['syncCursor'];
 
   // dashboard contents
-  controlGroupInput?: PersistableControlGroupInput;
   panels: DashboardPanelMap;
 }

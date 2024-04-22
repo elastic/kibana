@@ -19,7 +19,6 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
@@ -77,7 +76,7 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')

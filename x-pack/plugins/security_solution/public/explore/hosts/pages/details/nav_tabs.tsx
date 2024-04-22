@@ -28,6 +28,12 @@ export const navTabsHostDetails = ({
   const hiddenTabs = [];
 
   const hostDetailsNavTabs = {
+    [HostsTableType.events]: {
+      id: HostsTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
+      disabled: false,
+    },
     [HostsTableType.authentications]: {
       id: HostsTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
@@ -44,12 +50,6 @@ export const navTabsHostDetails = ({
       id: HostsTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
-      disabled: false,
-    },
-    [HostsTableType.events]: {
-      id: HostsTableType.events,
-      name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
       disabled: false,
     },
     [HostsTableType.risk]: {

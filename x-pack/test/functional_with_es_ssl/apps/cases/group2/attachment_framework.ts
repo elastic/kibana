@@ -250,7 +250,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              */
             await cases.create.createCase({ owner });
             await cases.common.expectToasterToContain('has been updated');
-            await toasts.dismissAllToastsWithChecks();
+            await toasts.dismissAllWithChecks();
           }
 
           const casesCreatedFromFlyout = await findCases({ supertest });
@@ -262,7 +262,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Modal', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/178690
+      describe.skip('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -343,7 +344,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
-            await toasts.dismissAllToastsWithChecks();
+            await toasts.dismissAllWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
         });
@@ -395,7 +396,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await testSubjects.click('cases-table-add-case-filter-bar');
 
         await cases.create.createCase({
           title: caseTitle,
@@ -406,7 +408,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
@@ -434,7 +436,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);

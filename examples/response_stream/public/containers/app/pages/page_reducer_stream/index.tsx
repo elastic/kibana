@@ -105,7 +105,7 @@ export const PageReducerStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiSpacer,
@@ -15,20 +17,19 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiSkeletonText,
 } from '@elastic/eui';
 
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
-
-import type { Category } from '../../../common/api/log_categorization/types';
+import { stringHash } from '@kbn/ml-string-hash';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
@@ -50,6 +51,7 @@ import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
+import type { DocumentStats } from '../../hooks/use_document_count_stats';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -80,12 +82,14 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
+  const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
+    displayExamples: boolean;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -157,14 +161,13 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
         to: globalState.time.to,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(globalState?.time), timefilter]);
+  }, [globalState?.time, timefilter]);
 
   const fields = useMemo(
     () =>
       dataView.fields
         .filter(
-          ({ displayName, esTypes, count }) =>
+          ({ displayName, esTypes }) =>
             esTypes && esTypes.includes('text') && !['_id', '_index'].includes(displayName)
         )
         .map(({ displayName }) => ({
@@ -172,29 +175,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
         })),
     [dataView]
   );
-
-  useEffect(() => {
-    if (documentStats.documentCountStats?.buckets) {
-      randomSampler.setDocCount(documentStats.totalCount);
-      setEventRate(
-        Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
-          key: +key,
-          docCount,
-        }))
-      );
-      setData(null);
-      setFieldValidationResult(null);
-      setTotalCount(documentStats.totalCount);
-    }
-  }, [
-    documentStats,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    randomSampler,
-  ]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -233,6 +213,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       setFieldValidationResult(validationResult);
       setData({
         categories: categorizationResult.categories,
+        displayExamples: categorizationResult.hasExamples,
       });
     } catch (error) {
       toasts.addError(error, {
@@ -255,6 +236,43 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     intervalMs,
     toasts,
     embeddingOrigin,
+  ]);
+
+  useEffect(() => {
+    const buckets = documentStats.documentCountStats?.buckets;
+    if (buckets === undefined) {
+      return;
+    }
+
+    const hash = createDocumentStatsHash(documentStats);
+    if (hash !== previousDocumentStatsHash) {
+      randomSampler.setDocCount(documentStats.totalCount);
+      setEventRate(
+        Object.entries(buckets).map(([key, docCount]) => ({
+          key: +key,
+          docCount,
+        }))
+      );
+      setData(null);
+      setFieldValidationResult(null);
+      setTotalCount(documentStats.totalCount);
+      if (fieldValidationResult !== null) {
+        loadCategories();
+      }
+    }
+    setPreviousDocumentStatsHash(hash);
+  }, [
+    documentStats,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    randomSampler,
+    totalCount,
+    previousDocumentStatsHash,
+    fieldValidationResult,
+    loadCategories,
   ]);
 
   useEffect(
@@ -385,8 +403,21 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           timefilter={timefilter}
+          displayExamples={data.displayExamples}
         />
       ) : null}
     </EuiPageBody>
   );
 };
+
+/**
+ * Creates a hash from the document stats to determine if the document stats have changed.
+ */
+function createDocumentStatsHash(documentStats: DocumentStats) {
+  const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
+  const totalCount = documentStats.documentCountStats?.totalCount;
+  const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
+  const firstBucketTimeStamp = times.length ? times[0] : undefined;
+  const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
+  return stringHash(`${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}`);
+}

@@ -247,4 +247,8 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
   public randomAgentStatus() {
     return this.randomChoice(agentStatusList);
   }
+
+  public randomString(length: number = 5) {
+    return super.randomString(length);
+  }
 }

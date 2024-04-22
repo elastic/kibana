@@ -7,6 +7,7 @@
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
@@ -40,7 +41,7 @@ export async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: El
         bool: {
           filter: {
             term: {
-              'index-pattern.type': 'rollup',
+              'index-pattern.type': DataViewType.ROLLUP,
             },
           },
         },

@@ -26,13 +26,13 @@ import {
   isAgentUpgrading,
   getNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
+  differsOnlyInPatch,
 } from '../../../common/services';
-import { getMaxVersion } from '../../../common/services/get_min_max_version';
+import { checkFleetServerVersion } from '../../../common/services/check_fleet_server_versions';
 import { getAgentById } from '../../services/agents';
-import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
-import { getLatestAvailableVersion } from '../../services/agents/versions';
+import { getLatestAvailableAgentVersion } from '../../services/agents/versions';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -42,9 +42,9 @@ export const postAgentUpgradeHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { version, source_uri: sourceUri, force } = request.body;
+  const { version, source_uri: sourceUri, force, skipRateLimitCheck } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
-  const latestAgentVersion = await getLatestAvailableVersion();
+  const latestAgentVersion = await getLatestAvailableAgentVersion();
   try {
     checkKibanaVersion(version, kibanaVersion, force);
   } catch (err) {
@@ -80,7 +80,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       .utc(moment.duration(timeToWaitMs).asMilliseconds())
       .format('mm[m]ss[s]');
 
-    if (hasBeenUpgradedRecently) {
+    if (!skipRateLimitCheck && hasBeenUpgradedRecently) {
       return response.customError({
         statusCode: 429,
         body: {
@@ -111,7 +111,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       });
     }
 
-    if (!force && !isAgentUpgradeableToVersion(agent, version)) {
+    if (!force && !skipRateLimitCheck && !isAgentUpgradeableToVersion(agent, version)) {
       return response.customError({
         statusCode: 400,
         body: {
@@ -152,6 +152,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     source_uri: sourceUri,
     agents,
     force,
+    skipRateLimitCheck,
     rollout_duration_seconds: upgradeDurationSeconds,
     start_time: startTime,
     batchSize,
@@ -171,12 +172,15 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const agentOptions = Array.isArray(agents)
+      ? { agentIds: agents }
+      : { kuery: agents, showInactive: request.body.includeInactive };
     const upgradeOptions = {
       ...agentOptions,
       sourceUri,
       version,
       force,
+      skipRateLimitCheck,
       upgradeDurationSeconds,
       startTime,
       batchSize,
@@ -198,7 +202,11 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
   if (!versionToUpgradeNumber)
     throw new AgentRequestInvalidError(`Version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (!force && semverGt(versionToUpgradeNumber, kibanaVersionNumber)) {
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, kibanaVersionNumber) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, kibanaVersionNumber)
+  ) {
     throw new AgentRequestInvalidError(
       `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
@@ -213,42 +221,6 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
   if (force && !(kibanaMajorGt || kibanaMajorEqMinorGte)) {
     throw new AgentRequestInvalidError(
       `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the installed kibana version ${kibanaVersionNumber}`
-    );
-  }
-};
-
-// Check the installed fleet server version
-const checkFleetServerVersion = (
-  versionToUpgradeNumber: string,
-  fleetServerAgents: Agent[],
-  force = false
-) => {
-  const fleetServerVersions = fleetServerAgents.map(
-    (agent) => agent.local_metadata.elastic.agent.version
-  ) as string[];
-
-  const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
-
-  if (!maxFleetServerVersion) {
-    return;
-  }
-
-  if (!force && semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
-    throw new AgentRequestInvalidError(
-      `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
-    );
-  }
-
-  const fleetServerMajorGt =
-    semverMajor(maxFleetServerVersion) > semverMajor(versionToUpgradeNumber);
-  const fleetServerMajorEqMinorGte =
-    semverMajor(maxFleetServerVersion) === semverMajor(versionToUpgradeNumber) &&
-    semverMinor(maxFleetServerVersion) >= semverMinor(versionToUpgradeNumber);
-
-  // When force is enabled, only the major and minor versions are checked
-  if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
-    throw new AgentRequestInvalidError(
-      `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 };

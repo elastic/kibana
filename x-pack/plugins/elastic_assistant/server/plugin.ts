@@ -5,52 +5,25 @@
  * 2.0.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-  IContextProvider,
-  KibanaRequest,
-  SavedObjectsClientContract,
-  type AnalyticsServiceSetup,
-} from '@kbn/core/server';
-import { once } from 'lodash';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { ReplaySubject, type Subject } from 'rxjs';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
+  ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStart,
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
-  GetElser,
-  PLUGIN_ID,
 } from './types';
-import {
-  deleteKnowledgeBaseRoute,
-  getKnowledgeBaseStatusRoute,
-  postActionsConnectorExecuteRoute,
-  postEvaluateRoute,
-  postKnowledgeBaseRoute,
-} from './routes';
-import {
-  appContextService,
-  GetRegisteredFeatures,
-  GetRegisteredTools,
-} from './services/app_context';
-import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
-
-interface CreateRouteHandlerContextParams {
-  core: CoreSetup<ElasticAssistantPluginStart, unknown>;
-  logger: Logger;
-  getRegisteredFeatures: GetRegisteredFeatures;
-  getRegisteredTools: GetRegisteredTools;
-  telemetry: AnalyticsServiceSetup;
-}
+import { AIAssistantService } from './ai_assistant_service';
+import { RequestContextFactory } from './routes/request_context_factory';
+import { PLUGIN_ID } from '../common/constants';
+import { registerRoutes } from './routes/register_routes';
+import { appContextService } from './services/app_context';
 
 export class ElasticAssistantPlugin
   implements
@@ -62,70 +35,49 @@ export class ElasticAssistantPlugin
     >
 {
   private readonly logger: Logger;
+  private assistantService: AIAssistantService | undefined;
+  private pluginStop$: Subject<void>;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  private createRouteHandlerContext = ({
-    core,
-    logger,
-    getRegisteredFeatures,
-    getRegisteredTools,
-    telemetry,
-  }: CreateRouteHandlerContextParams): IContextProvider<
-    ElasticAssistantRequestHandlerContext,
-    typeof PLUGIN_ID
-  > => {
-    return async function elasticAssistantRouteHandlerContext(context, request) {
-      const [_, pluginsStart] = await core.getStartServices();
-
-      return {
-        actions: pluginsStart.actions,
-        getRegisteredFeatures,
-        getRegisteredTools,
-        logger,
-        telemetry,
-      };
-    };
-  };
-
-  public setup(core: CoreSetup, plugins: ElasticAssistantPluginSetupDependencies) {
+  public setup(
+    core: ElasticAssistantPluginCoreSetupDependencies,
+    plugins: ElasticAssistantPluginSetupDependencies
+  ) {
     this.logger.debug('elasticAssistant: Setup');
+
+    this.assistantService = new AIAssistantService({
+      logger: this.logger.get('service'),
+      taskManager: plugins.taskManager,
+      kibanaVersion: this.kibanaVersion,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      pluginStop$: this.pluginStop$,
+    });
+
+    const requestContextFactory = new RequestContextFactory({
+      logger: this.logger,
+      core,
+      plugins,
+      kibanaVersion: this.kibanaVersion,
+      assistantService: this.assistantService,
+    });
+
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
     core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      this.createRouteHandlerContext({
-        core: core as CoreSetup<ElasticAssistantPluginStart, unknown>,
-        logger: this.logger,
-        getRegisteredFeatures: (pluginName: string) => {
-          return appContextService.getRegisteredFeatures(pluginName);
-        },
-        getRegisteredTools: (pluginName: string) => {
-          return appContextService.getRegisteredTools(pluginName);
-        },
-        telemetry: core.analytics,
-      })
+      (context, request) => requestContextFactory.create(context, request)
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    const getElserId: GetElser = once(
-      async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
-        return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-          .model_id;
-      }
-    );
-
-    // Knowledge Base
-    deleteKnowledgeBaseRoute(router);
-    getKnowledgeBaseStatusRoute(router, getElserId);
-    postKnowledgeBaseRoute(router, getElserId);
-    // Actions Connector Execute (LLM Wrapper)
-    postActionsConnectorExecuteRoute(router, getElserId);
-    // Evaluate
-    postEvaluateRoute(router, getElserId);
-    // Capabilities
-    getCapabilitiesRoute(router);
+    // this.assistantService registerKBTask
+    registerRoutes(router, this.logger, plugins);
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
@@ -163,5 +115,7 @@ export class ElasticAssistantPlugin
 
   public stop() {
     appContextService.stop();
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
   }
 }

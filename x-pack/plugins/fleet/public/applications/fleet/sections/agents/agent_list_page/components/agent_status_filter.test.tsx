@@ -91,21 +91,21 @@ describe('AgentStatusFilter', () => {
   it('Should should show difference between last seen inactive agents and total agents', async () => {
     mockLocalStorage['fleet.lastSeenInactiveAgentsCount'] = '100';
 
-    const { getByText, container } = renderComponent({
+    const { getByText, getByTestId } = renderComponent({
       selectedStatus: [],
       onSelectedStatusChange: () => {},
       totalInactiveAgents: 999,
     });
 
     await act(async () => {
-      const statusFilterButton = container.querySelector(
-        '[data-test-subj="agentList.statusFilter"]'
-      );
+      const statusFilterButton = getByTestId('agentList.statusFilter');
 
-      expect(statusFilterButton).not.toBeNull();
-      fireEvent.click(statusFilterButton!);
+      fireEvent.click(statusFilterButton);
 
-      await waitFor(() => expect(getByText('899')).toBeInTheDocument());
+      await waitFor(() => {
+        expect(getByTestId('agentList.agentStatusFilterOptions')).toBeInTheDocument();
+        expect(getByText('899')).toBeInTheDocument();
+      });
     });
   });
 });

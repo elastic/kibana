@@ -8,6 +8,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
+import { useUserData } from '../../../../../detections/components/user_info';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
@@ -23,6 +24,7 @@ import { useRuleDetailsFlyout } from '../../../../rule_management/components/rul
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import * as i18n from './translations';
+import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -99,6 +101,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleResponse[]>([]);
 
+  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+
   const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
     filter: '',
     tags: [],
@@ -122,11 +126,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
     refetchInterval: 60000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     // Fetch rules to install only after background installation of security_detection_rules package is complete
-    enabled: Boolean(
-      !isUpgradingSecurityPackages &&
-        prebuiltRulesStatus &&
-        prebuiltRulesStatus.num_prebuilt_rules_total_in_package > 0
-    ),
+    enabled: isUpgradeReviewRequestEnabled({
+      canUserCRUD,
+      isUpgradingSecurityPackages,
+      prebuiltRulesStatus,
+    }),
   });
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
@@ -135,11 +139,13 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const { openRulePreview, closeRulePreview, previewedRule } = useRuleDetailsFlyout(filteredRules);
-  const canPreviewedRuleBeInstalled = Boolean(
-    (previewedRule?.rule_id && loadingRules.includes(previewedRule.rule_id)) ||
-      isRefetching ||
-      isUpgradingSecurityPackages
-  );
+
+  const isPreviewRuleLoading =
+    previewedRule?.rule_id && loadingRules.includes(previewedRule.rule_id);
+  const canPreviewedRuleBeInstalled =
+    !userInfoLoading &&
+    canUserCRUD &&
+    !(isPreviewRuleLoading || isRefetching || isUpgradingSecurityPackages);
 
   const installOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
@@ -237,7 +243,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
             closeFlyout={closeRulePreview}
             ruleActions={
               <EuiButton
-                disabled={canPreviewedRuleBeInstalled}
+                disabled={!canPreviewedRuleBeInstalled}
                 onClick={() => {
                   installOneRule(previewedRule.rule_id ?? '');
                   closeRulePreview();

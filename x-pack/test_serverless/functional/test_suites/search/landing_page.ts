@@ -7,8 +7,14 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { testHasEmbeddedConsole } from './embedded_console';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlSearchLandingPage', 'svlCommonPage']);
+  const pageObjects = getPageObjects([
+    'svlSearchLandingPage',
+    'svlCommonPage',
+    'svlCommonNavigation',
+  ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
 
   describe('landing page', function () {
@@ -37,6 +43,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // We can select a non-default language
       await pageObjects.svlSearchLandingPage.languageClients.selectLanguage('curl');
       await pageObjects.svlSearchLandingPage.languageClients.expectLanguageSelected('curl');
+    });
+
+    it('has embedded dev console', async () => {
+      await testHasEmbeddedConsole(pageObjects);
     });
 
     describe('API Key creation', async () => {

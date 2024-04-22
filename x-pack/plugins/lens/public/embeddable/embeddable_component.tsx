@@ -85,6 +85,7 @@ export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceI
   withDefaultActions?: boolean;
   extraActions?: Action[];
   showInspector?: boolean;
+  abortController?: AbortController;
 };
 
 export type EmbeddableComponent = React.ComponentType<EmbeddableComponentProps>;
@@ -142,6 +143,7 @@ interface EmbeddablePanelWrapperProps {
   extraActions?: Action[];
   showInspector?: boolean;
   withDefaultActions?: boolean;
+  abortController?: AbortController;
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
@@ -152,6 +154,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   extraActions,
   showInspector = true,
   withDefaultActions,
+  abortController,
 }) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });
   useEffect(() => {

@@ -6,15 +6,65 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { Adapters } from '../types';
-import { IContainer } from '../containers/i_container';
+import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import {
+  HasEditCapabilities,
+  HasType,
+  HasDisableTriggers,
+  PublishesBlockingError,
+  PublishesDataLoading,
+  PublishesDataViews,
+  PublishesDisabledActionIds,
+  PublishesUnifiedSearch,
+  HasParentApi,
+  HasUniqueId,
+  PublishesViewMode,
+  PublishesWritablePanelDescription,
+  PublishesWritablePanelTitle,
+  PublishesPhaseEvents,
+  PublishesSavedObjectId,
+  HasLegacyLibraryTransforms,
+} from '@kbn/presentation-publishing';
+import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
-import { EmbeddableAppContext } from '../../embeddable_panel/types';
+import { IContainer } from '../containers/i_container';
+import { EmbeddableHasTimeRange } from '../filterable_embeddable/types';
+import { HasInspectorAdapters } from '../inspector';
+import { Adapters } from '../types';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
+
+/**
+ * Types for compatibility between the legacy Embeddable system and the new system
+ */
+export type LegacyEmbeddableAPI = HasType &
+  HasUniqueId &
+  HasDisableTriggers &
+  PublishesPhaseEvents &
+  PublishesViewMode &
+  PublishesDataViews &
+  HasEditCapabilities &
+  PublishesDataLoading &
+  HasInspectorAdapters &
+  PublishesBlockingError &
+  PublishesUnifiedSearch &
+  PublishesDisabledActionIds &
+  PublishesWritablePanelTitle &
+  PublishesWritablePanelDescription &
+  Partial<HasLegacyLibraryTransforms> &
+  HasParentApi<DefaultPresentationPanelApi['parentApi']> &
+  EmbeddableHasTimeRange &
+  PublishesSavedObjectId;
+
+export interface EmbeddableAppContext {
+  /**
+   * Current app's path including query and hash starting from {appId}
+   */
+  getCurrentPath?: () => string;
+  currentAppId?: string;
+}
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
@@ -42,7 +92,7 @@ export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   N = any
-> {
+> extends LegacyEmbeddableAPI {
   /**
    * Is this embeddable an instance of a Container class, can it contain
    * nested embeddables?
@@ -231,4 +281,6 @@ export interface IEmbeddable<
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
 
   refreshInputFromParent(): void;
+
+  untilInitializationFinished(): Promise<void>;
 }

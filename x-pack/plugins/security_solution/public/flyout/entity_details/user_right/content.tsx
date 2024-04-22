@@ -8,7 +8,8 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
-import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -45,6 +46,7 @@ export const UserPanelContent = ({
   openDetailsPanel,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
+  const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
 
   return (
     <FlyoutBody>
@@ -58,7 +60,7 @@ export const UserPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalitySelector entity={{ name: userName, type: 'user' }} />
+      <AssetCriticalityAccordion entity={{ name: userName, type: 'user' }} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}
@@ -68,12 +70,14 @@ export const UserPanelContent = ({
         queryId={OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
-      <ManagedUser
-        managedUser={managedUser}
-        contextID={contextID}
-        isDraggable={isDraggable}
-        openDetailsPanel={openDetailsPanel}
-      />
+      {isManagedUserEnable && (
+        <ManagedUser
+          managedUser={managedUser}
+          contextID={contextID}
+          isDraggable={isDraggable}
+          openDetailsPanel={openDetailsPanel}
+        />
+      )}
     </FlyoutBody>
   );
 };

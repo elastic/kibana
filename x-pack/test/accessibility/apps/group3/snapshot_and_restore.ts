@@ -16,15 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await es.snapshot.createRepository({
       name: repoName,
       verify: true,
-      type: 'fs',
       repository: {
         type: 'fs',
         settings: {
           location: 'temp',
         },
-      },
-      settings: {
-        location: 'temp',
       },
     });
   }

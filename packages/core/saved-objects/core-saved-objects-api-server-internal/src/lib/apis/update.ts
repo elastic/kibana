@@ -248,7 +248,7 @@ export const executeUpdate = async <T>(
 
     const updatedAttributes = mergeForUpdate({
       targetAttributes: {
-        ...migrated!.attributes,
+        ...(migrated!.attributes as Record<string, unknown>),
       },
       updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
         type,

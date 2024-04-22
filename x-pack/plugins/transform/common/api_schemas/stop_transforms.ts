@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { transformStateSchema, CommonResponseStatusSchema } from './common';
+import type { CommonResponseStatusSchema } from './common';
+import { transformStateSchema } from './common';
 
 export const stopTransformsRequestSchema = schema.arrayOf(
   schema.object({

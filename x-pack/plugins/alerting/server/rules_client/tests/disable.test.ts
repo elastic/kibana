@@ -11,6 +11,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -25,6 +26,7 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock'
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { migrateLegacyActions } from '../lib';
 import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
@@ -74,8 +76,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   eventLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -297,7 +302,7 @@ describe('disable()', () => {
       },
       ownerId: null,
     });
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1', untrack: true });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -386,7 +391,7 @@ describe('disable()', () => {
 
   test('disables the rule even if unable to retrieve task manager doc to generate untrack event log events', async () => {
     taskManager.get.mockRejectedValueOnce(new Error('Fail'));
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1', untrack: true });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -436,6 +441,55 @@ describe('disable()', () => {
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
       `rulesClient.disable('1') - Could not write untrack events - Fail`
     );
+  });
+
+  test('should not untrack rule alert if untrack is false', async () => {
+    await rulesClient.disable({ id: '1', untrack: false });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
+        revision: 0,
+        scheduledTaskId: '1',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        nextRun: null,
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.get).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@kbn/ecs';
+import { EcsFlat, EcsVersion } from '@elastic/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -44,7 +44,7 @@ import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { useDataQualityContext } from '../data_quality_context';
-import { getSizeInBytes } from '../../helpers';
+import { formatStorageResult, postStorageResult, getSizeInBytes } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -104,7 +104,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
-  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
+  const { telemetryEvents, isILMAvailable, httpFetch, toasts } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -249,7 +249,9 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
-        updatePatternRollup({
+        const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
+
+        const updatedRollup = {
           ...patternRollup,
           results: {
             ...patternRollup.results,
@@ -262,12 +264,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               markdownComments,
               pattern,
               sameFamily: indexSameFamily,
+              checkedAt,
             },
           },
-        });
+        };
+        updatePatternRollup(updatedRollup);
 
         if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
-          telemetryEvents.reportDataQualityIndexChecked?.({
+          const report = {
             batchId: uuidv4(),
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
@@ -276,7 +280,10 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             indexName,
             isCheckAll: false,
             numberOfDocuments: docsCount,
+            numberOfFields: partitionedFieldMetadata.all.length,
             numberOfIncompatibleFields: indexIncompatible,
+            numberOfEcsFields: partitionedFieldMetadata.ecsCompliant.length,
+            numberOfCustomFields: partitionedFieldMetadata.custom.length,
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
             numberOfSameFamily: indexSameFamily,
@@ -289,7 +296,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             unallowedValueFields: getIncompatibleValuesFields(
               partitionedFieldMetadata.incompatible
             ),
-          });
+          };
+          telemetryEvents.reportDataQualityIndexChecked?.(report);
+
+          const result = updatedRollup.results[indexName];
+          if (result) {
+            const storageResult = formatStorageResult({ result, report, partitionedFieldMetadata });
+            postStorageResult({ storageResult, httpFetch, toasts });
+          }
         }
       }
     }
@@ -297,6 +311,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     docsCount,
     formatBytes,
     formatNumber,
+    httpFetch,
     ilmPhase,
     indexId,
     indexName,
@@ -309,6 +324,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     patternRollup,
     requestTime,
     telemetryEvents,
+    toasts,
     unallowedValuesError,
     updatePatternRollup,
   ]);

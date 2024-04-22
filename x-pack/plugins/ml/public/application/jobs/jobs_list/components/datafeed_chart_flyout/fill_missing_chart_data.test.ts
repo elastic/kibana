@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fillMissingChartData, ChartDataWithNullValues } from './fill_missing_chart_data';
+import type { ChartDataWithNullValues } from './fill_missing_chart_data';
+import { fillMissingChartData } from './fill_missing_chart_data';
 
 const completeData: ChartDataWithNullValues = [
   [1666828800000, 7],

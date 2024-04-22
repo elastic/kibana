@@ -18,13 +18,14 @@ export type { AppMount, AppMountParameters, AppUnmount } from './src/app_mount';
 export type {
   App,
   AppDeepLink,
+  AppDeepLinkLocations,
   PublicAppInfo,
   AppNavOptions,
   PublicAppDeepLinkInfo,
   AppUpdater,
   AppUpdatableFields,
 } from './src/application';
-export { AppNavLinkStatus, AppStatus } from './src/application';
+export { AppStatus } from './src/application';
 export type {
   ApplicationSetup,
   ApplicationStart,

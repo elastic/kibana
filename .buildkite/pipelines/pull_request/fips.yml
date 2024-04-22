@@ -1,0 +1,14 @@
+steps:
+  - command: .buildkite/scripts/steps/fips/build.sh
+    label: 'Build FIPS Image'
+    agents:
+      queue: n2-2-spot
+    depends_on:
+      - build
+      - quick_checks
+    timeout_in_minutes: 60
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

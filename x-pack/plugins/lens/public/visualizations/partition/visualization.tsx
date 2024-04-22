@@ -52,6 +52,7 @@ import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -772,5 +773,12 @@ export const getPieVisualization = ({
         },
       ],
     };
+  },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    return getColorMappingTelemetryEvents(
+      state?.layers[0]?.colorMapping,
+      prevState?.layers[0]?.colorMapping
+    );
   },
 });

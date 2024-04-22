@@ -20,6 +20,14 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import {
+  AssetCriticalitySelector,
+  AssetCriticalityTitle,
+} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -62,7 +70,7 @@ import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
@@ -167,6 +175,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [detailName]
   );
 
+  const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
+  const privileges = useAssetCriticalityPrivileges(entity.name);
+  const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
+  const criticality = useAssetCriticalityData({
+    entity,
+    enabled: canReadAssetCriticality,
+  });
+
   return (
     <>
       {indicesExist ? (
@@ -199,7 +215,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   ),
                 ]}
               />
-
+              {canReadAssetCriticality && (
+                <>
+                  <AssetCriticalityTitle />
+                  <EuiSpacer size="s" />
+                  <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                  <EuiHorizontalRule margin="m" />
+                </>
+              )}
               <AnomalyTableProvider
                 criteriaFields={hostToCriteria(hostOverview)}
                 startDate={from}
@@ -280,7 +303,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

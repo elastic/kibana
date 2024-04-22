@@ -45,7 +45,10 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleCreateProps,
+  AlertSuppression,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
@@ -407,6 +410,21 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
+  const alertSuppressionFields =
+    ruleFields.groupByFields.length > 0
+      ? {
+          alert_suppression: {
+            group_by: ruleFields.groupByFields,
+            duration:
+              ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
+                ? ruleFields.groupByDuration
+                : undefined,
+            missing_fields_strategy: (ruleFields.suppressionMissingFields ||
+              DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as AlertSuppression['missing_fields_strategy'],
+          },
+        }
+      : {};
+
   const typeFields = isMlFields(ruleFields)
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
@@ -451,6 +469,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
+        ...alertSuppressionFields,
       }
     : isEqlFields(ruleFields)
     ? {
@@ -462,6 +481,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
       }
     : isNewTermsFields(ruleFields)
     ? {
@@ -471,6 +491,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
+        ...alertSuppressionFields,
       }
     : isEsqlFields(ruleFields) && !('index' in ruleFields)
     ? {
@@ -478,20 +499,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
       }
     : {
-        ...(ruleFields.groupByFields.length > 0
-          ? {
-              alert_suppression: {
-                group_by: ruleFields.groupByFields,
-                duration:
-                  ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
-                    ? ruleFields.groupByDuration
-                    : undefined,
-                missing_fields_strategy:
-                  ruleFields.suppressionMissingFields ||
-                  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-              },
-            }
-          : {}),
+        ...alertSuppressionFields,
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,

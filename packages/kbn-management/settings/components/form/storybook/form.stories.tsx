@@ -82,7 +82,9 @@ export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => 
 
   const onClearQuery = () => {};
 
-  return <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery }} />;
+  return (
+    <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery, scope: 'namespace' }} />
+  );
 };
 
 Form.args = {

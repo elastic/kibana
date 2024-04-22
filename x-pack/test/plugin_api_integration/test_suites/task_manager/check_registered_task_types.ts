@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
+    'sampleAdHocTaskTimingOut',
+    'lowPriorityTask',
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
@@ -31,9 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
-    'sampleRecurringTaskWithInvalidIndirectParam',
-    'sampleOneTimeTaskWithInvalidIndirectParam',
-    'sampleTaskWithParamsSchema',
     'taskToDisable',
   ];
 
@@ -53,15 +52,18 @@ export default function ({ getService }: FtrProviderContext) {
         'Synthetics:Clean-Up-Package-Policies',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
+        'actions:.cases',
         'actions:.cases-webhook',
         'actions:.d3security',
         'actions:.email',
         'actions:.gen-ai',
         'actions:.index',
         'actions:.jira',
+        'actions:.observability-ai-assistant',
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',
+        `actions:.sentinelone`,
         'actions:.server-log',
         'actions:.servicenow',
         'actions:.servicenow-itom',

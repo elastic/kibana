@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { Subscription } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -75,7 +75,7 @@ export class UserBannerService {
                   <ReactMarkdownLazy>{content.trim()}</ReactMarkdownLazy>
                 </React.Suspense>
 
-                <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>
+                <EuiButton color="primary" size="s" onClick={() => banners.remove(id!)}>
                   <FormattedMessage
                     id="core.ui.overlays.banner.closeButtonLabel"
                     defaultMessage="Close"

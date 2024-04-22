@@ -9,6 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { useParams } from 'react-router-dom';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -29,21 +30,27 @@ interface CreateParams {
   fatalErrors: FatalErrorsSetup;
   license: SecurityLicense;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  buildFlavor: BuildFlavor;
 }
 
 export const rolesManagementApp = Object.freeze({
   id: 'roles',
-  create({ license, fatalErrors, getStartServices }: CreateParams) {
-    const title = i18n.translate('xpack.security.management.rolesTitle', {
-      defaultMessage: 'Roles',
-    });
+  create({ license, fatalErrors, getStartServices, buildFlavor }: CreateParams) {
+    const title =
+      buildFlavor === 'serverless'
+        ? i18n.translate('xpack.security.management.rolesTitleServerless', {
+            defaultMessage: 'Custom Roles',
+          })
+        : i18n.translate('xpack.security.management.rolesTitle', {
+            defaultMessage: 'Roles',
+          });
     return {
       id: this.id,
       order: 20,
       title,
       async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
-          [startServices, { dataViews, features, spaces }],
+          [startServices, { dataViews, features, spaces, cloud }],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -67,6 +74,7 @@ export const rolesManagementApp = Object.freeze({
           i18n: i18nStart,
           notifications,
           chrome,
+          theme: themeServiceStart,
         } = startServices;
 
         chrome.docTitle.change(title);
@@ -110,6 +118,10 @@ export const rolesManagementApp = Object.freeze({
                 dataViews={dataViews}
                 history={history}
                 spacesApiUi={spacesApiUi}
+                buildFlavor={buildFlavor}
+                i18nStart={i18nStart}
+                theme={themeServiceStart}
+                cloudOrgUrl={cloud?.organizationUrl}
               />
             </Breadcrumb>
           );
@@ -136,6 +148,10 @@ export const rolesManagementApp = Object.freeze({
                           rolesAPIClient={rolesAPIClient}
                           history={history}
                           readOnly={!startServices.application.capabilities.roles.save}
+                          buildFlavor={buildFlavor}
+                          i18nStart={i18nStart}
+                          theme={themeServiceStart}
+                          cloudOrgUrl={cloud?.organizationUrl}
                         />
                       </Route>
                       <Route path="/edit/:roleName?">

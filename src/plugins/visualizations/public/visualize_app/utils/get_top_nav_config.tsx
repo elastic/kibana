@@ -410,6 +410,7 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            toasts: toastNotifications,
           });
         }
       },
@@ -605,6 +606,14 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    mustCopyOnSaveMessage={
+                      savedVis.managed
+                        ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
+                            defaultMessage:
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
+                          })
+                        : undefined
+                    }
                   />
                 );
               }

@@ -36,6 +36,12 @@
       "serverless",
       "noDataPage"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil", "savedObjects"]
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "presentationUtil",
+      "presentationPanel",
+      "savedObjects"
+    ]
   }
 }

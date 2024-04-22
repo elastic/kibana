@@ -13,7 +13,7 @@ import { EuiText, EuiTitle } from '@elastic/eui';
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
-import { MLInferencePipelineOption } from './ml_inference_logic';
+import { MLInferencePipelineOption } from './pipeline_select_logic';
 import { PipelineSelectOption, PipelineSelectOptionDisabled } from './pipeline_select_option';
 
 import { MODEL_REDACTED_VALUE } from './utils';

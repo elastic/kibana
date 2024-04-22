@@ -6,10 +6,8 @@
  */
 
 import {
-  createSkipError,
   createTaskRunError,
   getErrorSource,
-  isSkipError,
   isUnrecoverableError,
   isUserError,
   TaskErrorSource,
@@ -34,10 +32,6 @@ describe('Error Types', () => {
 
     it('idnentifies normal errors', () => {
       expect(isUnrecoverableError(new Error('OMG'))).toBeFalsy();
-    });
-
-    it('createSkipError', () => {
-      expect(isSkipError(createSkipError(new Error('OMG')))).toBeTruthy();
     });
 
     it('createTaskRunError', () => {

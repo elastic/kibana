@@ -14,7 +14,7 @@ import type { ContextProviderName, ContextProviderOpts } from './types';
 import { schemaToIoTs, validateSchema } from '../schema/validation';
 
 export class ContextService {
-  private readonly contextProvidersRegistry = new Map<ContextProviderName, Partial<EventContext>>();
+  private readonly contextProvidersRegistry = new Map<ContextProviderName, unknown>();
   private readonly contextProvidersSubscriptions = new Map<ContextProviderName, Subscription>();
 
   constructor(
@@ -58,7 +58,7 @@ export class ContextService {
         })
       )
       .subscribe((context) => {
-        // We store each context linked to the context provider so they can increase and reduce
+        // We store each context linked to the context provider, so they can increase and reduce
         // the number of fields they report without having left-overs in the global context.
         this.contextProvidersRegistry.set(name, context);
 
@@ -86,7 +86,7 @@ export class ContextService {
    */
   private updateGlobalContext() {
     this.context$.next(
-      [...this.contextProvidersRegistry.values()].reduce((acc, context) => {
+      [...this.contextProvidersRegistry.values()].reduce((acc: Partial<EventContext>, context) => {
         return {
           ...acc,
           ...this.removeEmptyValues(context),
@@ -95,8 +95,8 @@ export class ContextService {
     );
   }
 
-  private removeEmptyValues(context?: Partial<EventContext>) {
-    if (!context) {
+  private removeEmptyValues(context: unknown) {
+    if (!isObject(context)) {
       return {};
     }
     return Object.keys(context).reduce((acc, key) => {
@@ -106,4 +106,8 @@ export class ContextService {
       return acc;
     }, {} as Partial<EventContext>);
   }
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }

@@ -31,15 +31,20 @@ import {
   saveSourcerer,
 } from '../../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
+import { waitForFleetSetup } from '../../../../tasks/fleet_integrations';
 import { SOURCERER } from '../../../../screens/sourcerer';
-import { createTimeline } from '../../../../tasks/api_calls/timelines';
-import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
+import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
+import { getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+  before(() => {
+    waitForFleetSetup();
+  });
+
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
@@ -57,6 +62,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/173854
   describe('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
@@ -92,18 +98,15 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     });
   });
   describe('Alerts checkbox', () => {
-    before(() => {
+    beforeEach(() => {
       login();
-      createTimeline(getTimeline()).then((response) =>
+      deleteTimelines();
+      createTimeline().then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
       );
-    });
-
-    beforeEach(() => {
-      login();
       visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();
     });

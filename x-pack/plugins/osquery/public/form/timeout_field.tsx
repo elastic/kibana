@@ -28,15 +28,15 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
       validate: (currentValue: number) => {
         if (currentValue < QUERY_TIMEOUT.DEFAULT || isNaN(currentValue)) {
           return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
-            defaultMessage: 'Timeout value must be greater than {than} seconds.',
-            values: { than: QUERY_TIMEOUT.DEFAULT },
+            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or higher.',
+            values: { timeoutInSeconds: QUERY_TIMEOUT.DEFAULT },
           });
         }
 
         if (currentValue > QUERY_TIMEOUT.MAX) {
           return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
-            defaultMessage: 'Timeout value must be lower than {than} seconds.',
-            values: { than: QUERY_TIMEOUT.MAX },
+            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or or lower. ',
+            values: { timeoutInSeconds: QUERY_TIMEOUT.MAX },
           });
         }
       },
@@ -61,7 +61,8 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
           <EuiFlexItem grow={false}>
             <EuiIconTip
               content={i18n.translate('xpack.osquery.liveQuery.timeoutHint', {
-                defaultMessage: 'Maximum time to wait for query results, default is 60 seconds.',
+                defaultMessage:
+                  'The default and minimum timeout period is 60 seconds. Increase this value if your query needs more time to run.',
               })}
             />
           </EuiFlexItem>

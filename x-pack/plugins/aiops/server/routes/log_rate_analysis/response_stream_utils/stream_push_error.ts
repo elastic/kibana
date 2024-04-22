@@ -7,14 +7,13 @@
 
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
-
-import type { LogDebugMessage } from './log_debug_message';
-
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import {
   addErrorAction,
   type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
+
+import type { LogDebugMessage } from './log_debug_message';
 
 /**
  * Helper function that will push an error message to the stream.

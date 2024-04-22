@@ -10,30 +10,20 @@ import moment from 'moment';
 
 import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import { render } from '@testing-library/react';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../../common/mock';
-import { usePreviewHistogram } from './use_preview_histogram';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 import { PreviewHistogram } from './preview_histogram';
-import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/translation';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { createStore } from '../../../../common/store';
 import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
 
 jest.mock('../../../../common/components/control_columns', () => ({
   transformControlColumns: (props: TransformColumnsProps) => [],
@@ -46,17 +36,17 @@ jest.mock('../../../../common/components/control_columns', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
-jest.mock('./use_preview_histogram');
 jest.mock('../../../../common/utils/normalize_time_range');
 jest.mock('../../../../common/components/events_viewer/use_timelines_events');
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
+  useVisualizationResponse: jest.fn(),
+}));
+
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const getMockUseIsExperimentalFeatureEnabled =
-  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
-    mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
+const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as jest.Mock;
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../../timelines/components/fields_browser', () => ({
@@ -82,9 +72,6 @@ describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
 
   beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(
-      getMockUseIsExperimentalFeatureEnabled({ alertsPreviewChartEmbeddablesEnabled: false })
-    );
     (useGlobalTime as jest.Mock).mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',
       isInitializing: false,
@@ -93,50 +80,31 @@ describe('PreviewHistogram', () => {
     });
   });
 
-  const { storage } = createSecuritySolutionStorageMock();
-
-  const store = createStore(
-    {
-      ...mockGlobalState,
-      dataTable: {
-        ...mockGlobalState.dataTable,
-        tableById: {
-          [TableId.rulePreview]: {
-            ...mockGlobalState.dataTable.tableById[TableId.test],
-          },
+  const store = createMockStore({
+    ...mockGlobalState,
+    dataTable: {
+      ...mockGlobalState.dataTable,
+      tableById: {
+        [TableId.rulePreview]: {
+          ...mockGlobalState.dataTable.tableById[TableId.test],
         },
       },
     },
-    SUB_PLUGINS_REDUCER,
-    kibanaObservable,
-    storage
-  );
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('when there is no data', () => {
-    (usePreviewHistogram as jest.Mock).mockReturnValue([
-      false,
-      {
-        inspect: { dsl: [], response: [] },
-        totalCount: 1,
-        refetch: jest.fn(),
-        data: [],
-        buckets: [],
-      },
-    ]);
+  describe('PreviewHistogram', () => {
+    test('should render Lens embeddable', () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        loading: false,
+        requests: [],
+        responses: [{ hits: { total: 1 } }],
+      });
 
-    test('it renders an empty histogram and table', async () => {
-      (useTimelineEvents as jest.Mock).mockReturnValue([
-        false,
-        {
-          ...mockEventViewerResponse,
-          totalCount: 1,
-        },
-      ]);
-      const wrapper = mount(
+      const { getByTestId } = render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
@@ -148,27 +116,18 @@ describe('PreviewHistogram', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.findWhere((node) => node.text() === '1 alert').exists()).toBeTruthy();
-      expect(
-        wrapper.findWhere((node) => node.text() === ALL_VALUES_ZEROS_TITLE).exists()
-      ).toBeTruthy();
+
+      expect(getByTestId('visualization-embeddable')).toBeInTheDocument();
     });
-  });
 
-  describe('when there is data', () => {
-    test('it renders loader when isLoading is true', () => {
-      (usePreviewHistogram as jest.Mock).mockReturnValue([
-        true,
-        {
-          inspect: { dsl: [], response: [] },
-          totalCount: 1,
-          refetch: jest.fn(),
-          data: [],
-          buckets: [],
-        },
-      ]);
+    test('should render inspect action', () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        loading: false,
+        requests: [],
+        responses: [{ hits: { total: 1 } }],
+      });
 
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
@@ -181,7 +140,53 @@ describe('PreviewHistogram', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="preview-histogram-loading"]`).exists()).toBeTruthy();
+      expect(mockVisualizationEmbeddable.mock.calls[0][0].withActions).toEqual(INSPECT_ACTION);
+    });
+
+    test('should disable filter when clicking on the chart', () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        loading: false,
+        requests: [],
+        responses: [{ hits: { total: 1 } }],
+      });
+
+      render(
+        <TestProviders store={store}>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            timeframeOptions={getLastMonthTimeframe()}
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            indexPattern={getMockIndexPattern()}
+          />
+        </TestProviders>
+      );
+
+      expect(mockVisualizationEmbeddable.mock.calls[0][0].disableOnClickFilter).toBeTruthy();
+    });
+
+    test('should show chart legend when if it is not EQL rule', () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        loading: false,
+        requests: [],
+        responses: [{ hits: { total: 1 } }],
+      });
+
+      render(
+        <TestProviders store={store}>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            timeframeOptions={getLastMonthTimeframe()}
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            indexPattern={getMockIndexPattern()}
+          />
+        </TestProviders>
+      );
+
+      expect(mockVisualizationEmbeddable.mock.calls[0][0].extraOptions.showLegend).toBeTruthy();
     });
   });
 
@@ -197,36 +202,13 @@ describe('PreviewHistogram', () => {
           totalCount: 0,
         },
       ]);
-      const usePreviewHistogramMock = usePreviewHistogram as jest.Mock;
-      usePreviewHistogramMock.mockReturnValue([
-        true,
-        {
-          inspect: { dsl: [], response: [] },
-          totalCount: 1,
-          refetch: jest.fn(),
-          data: [],
-          buckets: [],
-        },
-      ]);
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        loading: false,
+        requests: [],
+        responses: [{ hits: { total: 0 } }],
+      });
 
-      usePreviewHistogramMock.mockImplementation(
-        ({ startDate, endDate }: { startDate: string; endDate: string }) => {
-          expect(startDate).toEqual('2015-03-12T09:17:10.000Z');
-          expect(endDate).toEqual('2020-03-12T09:17:10.000Z');
-          return [
-            true,
-            {
-              inspect: { dsl: [], response: [] },
-              totalCount: 1,
-              refetch: jest.fn(),
-              data: [],
-              buckets: [],
-            },
-          ];
-        }
-      );
-
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
@@ -244,49 +226,10 @@ describe('PreviewHistogram', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="preview-histogram-loading"]`).exists()).toBeTruthy();
-    });
-  });
-
-  describe('when the alertsPreviewChartEmbeddablesEnabled experimental feature flag is enabled', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        getMockUseIsExperimentalFeatureEnabled({
-          alertsPreviewChartEmbeddablesEnabled: true,
-        })
-      );
-
-      (usePreviewHistogram as jest.Mock).mockReturnValue([
-        false,
-        {
-          inspect: { dsl: [], response: [] },
-          totalCount: 1,
-          refetch: jest.fn(),
-          data: [],
-          buckets: [],
-        },
-      ]);
-      wrapper = mount(
-        <TestProviders store={store}>
-          <PreviewHistogram
-            addNoiseWarning={jest.fn()}
-            previewId={'test-preview-id'}
-            spaceId={'default'}
-            ruleType={'query'}
-            indexPattern={getMockIndexPattern()}
-            timeframeOptions={getLastMonthTimeframe()}
-          />
-        </TestProviders>
-      );
-    });
-
-    test('should not fetch preview data', () => {
-      expect((usePreviewHistogram as jest.Mock).mock.calls[0][0].skip).toEqual(true);
-    });
-
-    test('should render Lens embeddable', () => {
-      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
+      expect(mockVisualizationEmbeddable.mock.calls[0][0].timerange).toEqual({
+        from: moment(start, format).toISOString(),
+        to: moment(end, format).toISOString(),
+      });
     });
   });
 });

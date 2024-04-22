@@ -12,8 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default ({ getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/163950
-  describe.skip('Findings Page onboarding', function () {
+  describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
     let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
@@ -28,7 +27,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
     });
 
     it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
-      await findings.navigateToVulnerabilities();
+      await findings.navigateToLatestVulnerabilitiesPage();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);

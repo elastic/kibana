@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
@@ -13,18 +13,28 @@ import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { retry } from '../../common/retry';
+
+const TIMEOUT = 70_000;
+const RETRIES = 120;
+const RETRY_DELAY = 500;
 
 export async function waitForRuleStatus({
   id,
   expectedStatus,
   supertest,
+  retryService,
+  logger,
 }: {
   id: string;
   expectedStatus: string;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  retryService: RetryService;
+  logger: ToolingLog;
 }): Promise<Record<string, any>> {
-  return pRetry(
-    async () => {
+  const ruleResponse = await retry<Record<string, any>>({
+    test: async () => {
       const response = await supertest.get(`/api/alerting/rule/${id}`);
       const { execution_status: executionStatus } = response.body || {};
       const { status } = executionStatus || {};
@@ -33,40 +43,65 @@ export async function waitForRuleStatus({
       }
       return executionStatus;
     },
-    { retries: 10 }
-  );
+    utilityName: 'fetching rule',
+    logger,
+    retryService,
+    timeout: TIMEOUT,
+    retries: RETRIES,
+    retryDelay: RETRY_DELAY,
+  });
+
+  return ruleResponse;
 }
 
 export async function waitForDocumentInIndex<T>({
   esClient,
   indexName,
+  docCountTarget = 1,
+  retryService,
+  logger,
 }: {
   esClient: Client;
   indexName: string;
+  docCountTarget?: number;
+  retryService: RetryService;
+  logger: ToolingLog;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
-    async () => {
-      const response = await esClient.search<T>({ index: indexName });
-      if (response.hits.hits.length === 0) {
-        throw new Error('No hits found');
+  return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
+    test: async () => {
+      const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
+      if (!response.hits.total || response.hits.total < docCountTarget) {
+        throw new Error(
+          `Number of hits does not match expectation (total: ${response.hits.total}, target: ${docCountTarget})`
+        );
       }
+      logger.debug(`Returned document: ${JSON.stringify(response.hits.hits[0])}`);
       return response;
     },
-    { retries: 10 }
-  );
+    utilityName: `waiting for documents in ${indexName} index`,
+    logger,
+    retryService,
+    timeout: TIMEOUT,
+    retries: RETRIES,
+    retryDelay: RETRY_DELAY,
+  });
 }
 
 export async function waitForAlertInIndex<T>({
   esClient,
   indexName,
   ruleId,
+  retryService,
+  logger,
 }: {
   esClient: Client;
   indexName: string;
   ruleId: string;
+  retryService: RetryService;
+  logger: ToolingLog;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
-    async () => {
+  return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
+    test: async () => {
       const response = await esClient.search<T>({
         index: indexName,
         body: {
@@ -82,6 +117,11 @@ export async function waitForAlertInIndex<T>({
       }
       return response;
     },
-    { retries: 10 }
-  );
+    utilityName: `waiting for alerting document in the alerting index (${indexName})`,
+    logger,
+    retryService,
+    timeout: TIMEOUT,
+    retries: RETRIES,
+    retryDelay: RETRY_DELAY,
+  });
 }

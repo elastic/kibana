@@ -16,8 +16,8 @@ const invalidHostnames = ['asdf$%^', '0'];
 
 let mockHostname = 'kibana-hostname';
 
-jest.mock('os', () => {
-  const original = jest.requireActual('os');
+jest.mock('node:os', () => {
+  const original = jest.requireActual('node:os');
 
   return {
     ...original,
@@ -349,6 +349,14 @@ test('can specify socket timeouts', () => {
   expect(socketTimeout).toBe(5e5);
 });
 
+test('can specify payload timeouts', () => {
+  const obj = {
+    payloadTimeout: 654321,
+  };
+  const { payloadTimeout } = config.schema.validate(obj);
+  expect(payloadTimeout).toBe(654321);
+});
+
 describe('with compression', () => {
   test('accepts valid referrer whitelist', () => {
     const {
@@ -527,6 +535,29 @@ describe('restrictInternalApis', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
     ).toMatchObject({ restrictInternalApis: false });
+  });
+});
+
+describe('cdn', () => {
+  it('allows correct URL', () => {
+    expect(config.schema.validate({ cdn: { url: 'https://cdn.example.com' } })).toMatchObject({
+      cdn: { url: 'https://cdn.example.com' },
+    });
+  });
+  it.each([['foo'], ['http:./']])('throws for invalid URL %s', (url) => {
+    expect(() => config.schema.validate({ cdn: { url } })).toThrowErrorMatchingInlineSnapshot(
+      `"[cdn.url]: expected URI with scheme [http|https]."`
+    );
+  });
+  it.each([
+    ['https://cdn.example.com:1234/asd?thing=1', 'URL query string not allowed'],
+    ['https://cdn.example.com:1234/asd#cool', 'URL fragment not allowed'],
+    [
+      'https://cdn.example.com:1234/asd?thing=1#cool',
+      'URL fragment not allowed, but found "#cool"\nURL query string not allowed, but found "?thing=1"',
+    ],
+  ])('throws for disallowed values %s', (url, expecterError) => {
+    expect(() => config.schema.validate({ cdn: { url } })).toThrow(expecterError);
   });
 });
 

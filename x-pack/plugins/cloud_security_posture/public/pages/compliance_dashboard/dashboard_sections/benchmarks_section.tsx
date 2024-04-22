@@ -19,7 +19,7 @@ import type {
   PosturePolicyTemplate,
 } from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { RULE_FAILED } from '../../../../common/constants';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
 import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
@@ -70,13 +70,14 @@ export const BenchmarksSection = ({
 
   const navToFailedFindingsByBenchmarkAndSection = (
     benchmark: BenchmarkData,
-    ruleSection: string
+    ruleSection: string,
+    resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
     navToFindings({
       ...getPolicyTemplateQuery(dashboardType),
       ...getBenchmarkIdQuery(benchmark),
       'rule.section': ruleSection,
-      'result.evaluation': RULE_FAILED,
+      'result.evaluation': resultEvaluation,
     });
   };
 
@@ -190,9 +191,25 @@ export const BenchmarksSection = ({
                 compact
                 data={benchmark.groupedFindingsEvaluation}
                 maxItems={3}
-                onCellClick={(resourceTypeName) =>
-                  navToFailedFindingsByBenchmarkAndSection(benchmark, resourceTypeName)
-                }
+                onCellClick={(resourceTypeName) => {
+                  const cisSectionEvaluation = benchmark.groupedFindingsEvaluation.find(
+                    (groupedFindingsEvaluation) =>
+                      groupedFindingsEvaluation.name === resourceTypeName
+                  );
+                  // if the CIS Section posture score is 100, we should navigate with result evaluation as passed or result evaluation as failed
+                  if (
+                    cisSectionEvaluation?.postureScore &&
+                    Math.trunc(cisSectionEvaluation?.postureScore) === 100
+                  ) {
+                    navToFailedFindingsByBenchmarkAndSection(
+                      benchmark,
+                      resourceTypeName,
+                      RULE_PASSED
+                    );
+                  } else {
+                    navToFailedFindingsByBenchmarkAndSection(benchmark, resourceTypeName);
+                  }
+                }}
                 viewAllButtonTitle={i18n.translate(
                   'xpack.csp.dashboard.risksTable.benchmarkCardViewAllButtonTitle',
                   {

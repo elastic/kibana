@@ -66,6 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177113
   registry.when('Cold start rate when data is generated', { config: 'basic', archives: [] }, () => {
     describe('without comparison', () => {
       let body: ColdStartRate;

@@ -27,6 +27,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
   alertsWereTruncated: boolean;
+  suppressedItemsCount?: number;
 }
 
 export const bulkCreateFactory =

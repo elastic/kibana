@@ -6,13 +6,12 @@
  */
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
-  const svlCommonPage = getPageObject('svlCommonPage');
+export default ({ getService, loadTestFile }: FtrProviderContext) => {
+  const browser = getService('browser');
 
   describe('Discover alerting', function () {
     before(async function () {
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
+      await browser.setWindowSize(1600, 1200);
     });
 
     loadTestFile(require.resolve('./search_source_alert'));

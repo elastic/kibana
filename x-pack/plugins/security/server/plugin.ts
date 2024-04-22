@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
@@ -44,6 +44,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
+import { buildSecurityApi } from './build_security_api';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
@@ -255,11 +256,13 @@ export class SecurityPlugin
       elasticsearch: core.elasticsearch,
       config,
       license,
-      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       customBranding: core.customBranding,
     });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
+
+    const getCurrentUser = (request: KibanaRequest) =>
+      this.getAuthentication().getCurrentUser(request);
 
     this.auditSetup = this.auditService.setup({
       license,
@@ -268,7 +271,7 @@ export class SecurityPlugin
       http: core.http,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
-      getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      getCurrentUser,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 
@@ -283,10 +286,9 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       kibanaIndexName,
       packageVersion: this.initializerContext.env.packageInfo.version,
-      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: () => spaces?.spacesService,
       features,
-      getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      getCurrentUser,
       customBranding: core.customBranding,
     });
 
@@ -296,15 +298,23 @@ export class SecurityPlugin
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
+      getCurrentUser,
     });
 
     setupSavedObjects({
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
+      getCurrentUser,
     });
 
     this.registerDeprecations(core, license);
+
+    core.security.registerSecurityApi(
+      buildSecurityApi({
+        getAuthc: this.getAuthentication.bind(this),
+      })
+    );
 
     defineRoutes({
       router: core.http.createRouter(),

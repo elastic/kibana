@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
+import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,6 +23,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
+  const log = getService('log');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -38,8 +40,7 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/163203
-  describe.skip('EPM - get', () => {
+  describe('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -114,12 +115,16 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await installPackage(testPkgName, testPkgVersion);
         await installPackage('experimental', '0.1.0');
+        await bundlePackage('endpoint-8.6.1');
         await installPackage('endpoint', '8.6.1');
       });
       after(async () => {
         await uninstallPackage(testPkgName, testPkgVersion);
         await uninstallPackage('experimental', '0.1.0');
         await uninstallPackage('endpoint', '8.6.1');
+      });
+      after(async () => {
+        await removeBundledPackages(log);
       });
       it('Allows the fetching of installed packages', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);

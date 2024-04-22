@@ -47,6 +47,25 @@ const ManagedPipelineCallout = () => (
   </EuiCallOut>
 );
 
+const DeprecatedPipelineCallout = () => (
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    data-test-subj="deprecatedPipelineCallout"
+    title={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.deprecatedCalloutTitle"
+        defaultMessage="This pipeline is deprecated"
+      />
+    }
+  >
+    <FormattedMessage
+      id="xpack.ingestPipelines.edit.deprecatedCalloutDescription"
+      defaultMessage="This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one."
+    />
+  </EuiCallOut>
+);
+
 export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { name },
@@ -164,6 +183,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       {pipeline?.isManaged && (
         <>
           <ManagedPipelineCallout />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {pipeline?.deprecated && (
+        <>
+          <DeprecatedPipelineCallout />
           <EuiSpacer size="l" />
         </>
       )}

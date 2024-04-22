@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ActionConnector,
   ActionType,
-  RuleAction,
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
@@ -23,7 +22,12 @@ import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import {
+  RuleNotifyWhen,
+  RuleNotifyWhenType,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -214,6 +218,56 @@ describe('action_type_form', () => {
       expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
       expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
       expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders the alerts filters with the producerId set to SIEM', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFieldsWithExecutionMode,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    render(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: undefined,
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
+          },
+          producerId: AlertConsumers.SIEM,
+          featureId: AlertConsumers.SIEM,
+        })}
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
+      expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
     });
   });
 
@@ -598,10 +652,12 @@ function getActionTypeForm({
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
   ruleTypeId,
+  producerId = AlertConsumers.INFRASTRUCTURE,
+  featureId = AlertConsumers.INFRASTRUCTURE,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: RuleAction;
+  actionItem?: SanitizedRuleAction;
   defaultActionGroupId?: string;
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
   actionTypeIndex?: Record<string, ActionType>;
@@ -617,6 +673,8 @@ function getActionTypeForm({
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
   ruleTypeId?: string;
+  producerId?: string;
+  featureId?: string;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -631,7 +689,7 @@ function getActionTypeForm({
     secrets: {},
   };
 
-  const actionItemDefault: RuleAction = {
+  const actionItemDefault = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',
@@ -709,8 +767,8 @@ function getActionTypeForm({
       summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
       defaultNotifyWhenValue={defaultNotifyWhenValue}
-      producerId="infrastructure"
-      featureId="infrastructure"
+      producerId={producerId}
+      featureId={featureId}
       ruleTypeId={ruleTypeId}
     />
   );

@@ -62,7 +62,7 @@ export class SimpleEmbeddableFactoryDefinition
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.migrations.displayName', {
-      defaultMessage: 'hello world',
+      defaultMessage: 'simple migration embeddable',
     });
   }
 }

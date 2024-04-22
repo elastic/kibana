@@ -23,6 +23,7 @@ export const curlDefinition: LanguageDefinition = {
   -d'
 { "index" : { "_index" : "${indexName ?? INDEX_NAME_PLACEHOLDER}" } }
 {"name": "foo", "title": "bar" }
+'
 `,
 };
 

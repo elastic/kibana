@@ -21,15 +21,19 @@ import {
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
 
+import type { BuildFlavor } from '@kbn/config';
 import type {
   Capabilities,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
+  I18nStart,
   NotificationsStart,
   ScopedHistory,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -37,7 +41,8 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
@@ -88,29 +93,56 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+  buildFlavor: BuildFlavor;
+  i18nStart: I18nStart;
+  theme: ThemeServiceStart;
+  cloudOrgUrl?: string;
 }
 
 function useRemoteClusters(http: HttpStart) {
   return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
 }
 
-function useFeatureCheck(http: HttpStart) {
-  return useAsync(() =>
-    http.get<CheckRoleMappingFeaturesResponse>('/internal/security/_check_role_mapping_features')
-  );
+interface CheckRoleMappingFeaturesResponseWhenServerless {
+  value: boolean;
+}
+function useFeatureCheck(
+  http: HttpStart,
+  buildFlavor: 'serverless'
+): AsyncState<CheckRoleMappingFeaturesResponseWhenServerless>;
+
+function useFeatureCheck(
+  http: HttpStart,
+  buildFlavor: BuildFlavor
+): AsyncState<CheckRoleMappingFeaturesResponse>;
+
+function useFeatureCheck(http: HttpStart, buildFlavor?: BuildFlavor) {
+  return useAsync(async () => {
+    if (buildFlavor !== 'serverless') {
+      return http.get<CheckRoleMappingFeaturesResponse>(
+        '/internal/security/_check_role_mapping_features'
+      );
+    }
+    return { value: true };
+  }, [http, buildFlavor]);
 }
 
 function useRunAsUsers(
   userAPIClient: PublicMethodsOf<UserAPIClient>,
-  fatalErrors: FatalErrorsSetup
+  fatalErrors: FatalErrorsSetup,
+  buildFlavor: BuildFlavor
 ) {
   const [userNames, setUserNames] = useState<string[] | null>(null);
   useEffect(() => {
-    userAPIClient.getUsers().then(
-      (users) => setUserNames(users.map((user) => user.username)),
-      (err) => fatalErrors.add(err)
-    );
-  }, [fatalErrors, userAPIClient]);
+    if (buildFlavor !== 'serverless') {
+      userAPIClient.getUsers().then(
+        (users) => setUserNames(users.map((user) => user.username)),
+        (err) => fatalErrors.add(err)
+      );
+    } else {
+      setUserNames([]);
+    }
+  }, [fatalErrors, userAPIClient, buildFlavor]);
 
   return userNames;
 }
@@ -303,7 +335,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
   notifications,
   history,
   spacesApiUi,
+  buildFlavor,
+  i18nStart,
+  theme,
+  cloudOrgUrl,
 }) => {
+  const isDarkMode = useDarkMode();
+
   if (!dataViews) {
     // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
     // as the login page). That said, it _is_ required for this page to function correctly, so we throw an error here if it's not available.
@@ -320,12 +358,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
   const [previousName, setPreviousName] = useState<string>('');
-  const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
+  const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors, buildFlavor);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
-  const featureCheckState = useFeatureCheck(http);
+  const featureCheckState = useFeatureCheck(http, buildFlavor);
   const remoteClustersState = useRemoteClusters(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
@@ -405,7 +443,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
     if (isEditingExistingRole && !isRoleReadOnly) {
       return (
         <EuiFlexItem grow={false}>
-          <DeleteRoleButton canDelete={true} onDelete={handleDeleteRole} />
+          <DeleteRoleButton
+            roleName={role.name}
+            canDelete={true}
+            onDelete={handleDeleteRole}
+            buildFlavor={buildFlavor}
+          />
         </EuiFlexItem>
       );
     }
@@ -425,7 +468,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
             />
           }
           helpText={
-            !isRoleReserved && isEditingExistingRole ? (
+            !isEditingExistingRole ? (
+              <FormattedMessage
+                id="xpack.security.management.createRole.roleNameFormRowHelpText"
+                defaultMessage="Once the role is created you can no longer edit its name."
+              />
+            ) : !isRoleReserved ? (
               <FormattedMessage
                 id="xpack.security.management.editRole.roleNameFormRowHelpText"
                 defaultMessage="A role's name cannot be changed once it has been created."
@@ -482,7 +530,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}
-          canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
+          canUseRemoteIndices={
+            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
+          }
+          isDarkMode={isDarkMode}
+          buildFlavor={buildFlavor}
         />
       </div>
     );
@@ -602,12 +654,39 @@ export const EditRolePage: FunctionComponent<Props> = ({
         return;
       }
 
-      notifications.toasts.addSuccess(
-        i18n.translate(
-          'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
-          { defaultMessage: 'Saved role' }
-        )
-      );
+      if (buildFlavor === 'serverless') {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.security.management.editRole.customRoleSuccessfullySavedNotificationTitle',
+            { defaultMessage: 'Custom role created' }
+          ),
+          text: toMountPoint(
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.customRoleSuccessfullySavedNotificationText"
+                  defaultMessage="You can now assign this role to users of this project from your Organization page."
+                />
+              </p>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" href={cloudOrgUrl}>
+                    Assign role
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>,
+            { i18n: i18nStart, theme }
+          ),
+        });
+      } else {
+        notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
+            { defaultMessage: 'Saved role' }
+          )
+        );
+      }
 
       backToRoleList();
     }
@@ -635,12 +714,44 @@ export const EditRolePage: FunctionComponent<Props> = ({
       return;
     }
 
-    notifications.toasts.addSuccess(
-      i18n.translate(
-        'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
-        { defaultMessage: 'Deleted role' }
-      )
-    );
+    if (buildFlavor === 'serverless') {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
+          defaultMessage:
+            '{numberOfCustomRoles, plural, one {# custom role} other {# custom roles}} deleted',
+          values: { numberOfCustomRoles: 1 },
+        }),
+        text: toMountPoint(
+          <>
+            <p>
+              {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                defaultMessage: `The deleted role will still appear listed on the user profile in Organization
+                  Management and on the User Profile for those that don't have admin access.`,
+              })}
+            </p>
+
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={cloudOrgUrl}>
+                  Manage Members
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>,
+          {
+            i18n: i18nStart,
+            theme,
+          }
+        ),
+      });
+    } else {
+      notifications.toasts.addSuccess(
+        i18n.translate(
+          'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
+          { defaultMessage: 'Deleted role' }
+        )
+      );
+    }
 
     backToRoleList();
   };
@@ -653,7 +764,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-            defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+            defaultMessage="Set privileges on your Elasticsearch data and control access to your Project spaces."
           />
         </EuiText>
         {isRoleReserved && (

@@ -59,6 +59,10 @@ export function LogRateAnalysisResultsGroupsTableProvider({ getService }: FtrPro
       return rows;
     }
 
+    public async scrollAnalysisTableIntoView() {
+      await testSubjects.scrollIntoView('aiopsLogRateAnalysisResultsGroupsTable');
+    }
+
     public rowSelector(rowId: string, subSelector?: string) {
       const row = `~aiopsLogRateAnalysisResultsGroupsTable > ~row-${rowId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;

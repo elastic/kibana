@@ -8,7 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,8 +44,8 @@ import {
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
   RuleAction,
@@ -428,7 +428,7 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter = hasFieldsForAAD;
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -571,6 +571,7 @@ export const ActionTypeForm = ({
                     actionConnector={actionConnector}
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}
+                    producerId={producerId}
                   />
                   {warning ? (
                     <>
@@ -702,8 +703,8 @@ export const ActionTypeForm = ({
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
                     data-test-subj="action-type-form-beta-badge"
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}

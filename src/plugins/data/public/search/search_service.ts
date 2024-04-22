@@ -39,6 +39,7 @@ import {
   fieldFunction,
   geoBoundingBoxFunction,
   geoPointFunction,
+  ipPrefixFunction,
   ipRangeFunction,
   ISearchGeneric,
   kibana,
@@ -149,6 +150,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(ipPrefixFunction);
     expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);

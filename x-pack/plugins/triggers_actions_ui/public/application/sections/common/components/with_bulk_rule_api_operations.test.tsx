@@ -139,7 +139,11 @@ describe('with_bulk_rule_api_operations', () => {
   it('disableRule calls the disableRule api', () => {
     const { http } = useKibanaMock().services;
     const ComponentToExtend = ({ bulkDisableRules, rule }: ComponentOpts & { rule: Rule }) => {
-      return <button onClick={() => bulkDisableRules({ ids: [rule.id] })}>{'call api'}</button>;
+      return (
+        <button onClick={() => bulkDisableRules({ ids: [rule.id], untrack: true })}>
+          {'call api'}
+        </button>
+      );
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
@@ -148,7 +152,7 @@ describe('with_bulk_rule_api_operations', () => {
     component.find('button').simulate('click');
 
     expect(bulkDisableRules).toHaveBeenCalledTimes(1);
-    expect(bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], http });
+    expect(bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], http, untrack: true });
   });
 
   // bulk rules
@@ -212,7 +216,9 @@ describe('with_bulk_rule_api_operations', () => {
     const { http } = useKibanaMock().services;
     const ComponentToExtend = ({ bulkDisableRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return (
-        <button onClick={() => bulkDisableRules({ ids: rules.map((rule) => rule.id) })}>
+        <button
+          onClick={() => bulkDisableRules({ ids: rules.map((rule) => rule.id), untrack: true })}
+        >
           {'call api'}
         </button>
       );
@@ -227,6 +233,7 @@ describe('with_bulk_rule_api_operations', () => {
     expect(bulkDisableRules).toHaveBeenCalledWith({
       ids: [rules[0].id, rules[1].id],
       http,
+      untrack: true,
     });
   });
 

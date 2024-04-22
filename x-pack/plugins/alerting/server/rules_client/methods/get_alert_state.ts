@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RuleTaskState } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -18,18 +19,28 @@ export async function getAlertState(
   context: RulesClientContext,
   { id }: GetAlertStateParams
 ): Promise<RuleTaskState | void> {
-  const alert = await get(context, { id });
+  const rule = await get(context, { id });
   await context.authorization.ensureAuthorized({
-    ruleTypeId: alert.alertTypeId,
-    consumer: alert.consumer,
+    ruleTypeId: rule.alertTypeId,
+    consumer: rule.consumer,
     operation: ReadOperations.GetRuleState,
     entity: AlertingAuthorizationEntity.Rule,
   });
-  if (alert.scheduledTaskId) {
-    const { state } = taskInstanceToAlertTaskInstance(
-      await context.taskManager.get(alert.scheduledTaskId),
-      alert
-    );
-    return state;
+  if (rule.scheduledTaskId) {
+    try {
+      const { state } = taskInstanceToAlertTaskInstance(
+        await context.taskManager.get(rule.scheduledTaskId),
+        rule
+      );
+      return state;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        context.logger.warn(`Task (${rule.scheduledTaskId}) not found`);
+      } else {
+        context.logger.warn(
+          `An error occurred when getting the task state for (${rule.scheduledTaskId}): ${e.message}`
+        );
+      }
+    }
   }
 }

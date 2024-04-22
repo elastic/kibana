@@ -7,8 +7,8 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { buildRuleKey } from '../../../../common/utils/rules_states';
 import {
-  buildRuleKey,
   getBenchmarkRules,
   muteDetectionRules,
   setRulesStates,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,16 +26,16 @@ import {
   useResultsViewConfig,
   getDestinationIndex,
 } from '../../../../common';
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionAnalytics, ExpandableSectionSplom } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
-import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
+import type { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 import { DataViewPrompt } from '../data_view_prompt';
 
 function getFilters(resultsField: string) {

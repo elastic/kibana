@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import { once } from 'lodash';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
@@ -23,7 +24,7 @@ import type {
   RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { Method } from './types';
+import type { Method, VersionedRouterRoute } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
@@ -46,6 +47,12 @@ export const passThroughValidation = {
   params: schema.nullable(schema.any()),
   query: schema.nullable(schema.any()),
 };
+
+function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
+  if (handler.options.validate === false) return undefined;
+  if (typeof handler.options.validate === 'function') return handler.options.validate();
+  return handler.options.validate;
+}
 
 export class CoreVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
@@ -70,6 +77,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return new CoreVersionedRoute(router, method, path, options);
   }
 
+  private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
   private enableQueryVersion: boolean;
   private constructor(
@@ -78,6 +86,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
+    this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
     this.router.router[this.method](
@@ -86,7 +95,8 @@ export class CoreVersionedRoute implements VersionedRoute {
         validate: passThroughValidation,
         options: this.getRouteConfigOptions(),
       },
-      this.requestHandler
+      this.requestHandler,
+      { isVersioned: true }
     );
   }
 
@@ -121,7 +131,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     let version: undefined | ApiVersion;
 
     const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && this.isPublic) {
+    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
       version = this.getDefaultVersion();
     } else {
       version = maybeVersion;
@@ -154,7 +164,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         }]. Available versions are: ${this.versionsToString()}`,
       });
     }
-    const validation = handler.options.validate || undefined;
+    const validation = extractValidationSchemaFromHandler(handler);
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
@@ -228,7 +238,14 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
-    this.handlers.set(options.version, { fn: handler, options });
+    this.handlers.set(options.version, {
+      fn: handler,
+      options: {
+        ...options,
+        validate:
+          typeof options.validate === 'function' ? once(options.validate) : options.validate,
+      },
+    });
     return this;
   }
 

@@ -15,14 +15,14 @@ export const ColumnNameWithTooltip = ({
   tooltipContent: EuiToolTipProps['content'];
   columnName: ReactNode;
 }) => (
-  <EuiToolTip content={tooltipContent}>
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem>
-        <span>{columnName}</span>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiIcon size="m" color="subdued" type="questionInCircle" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiToolTip>
+  <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexItem>
+      <span>{columnName}</span>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiToolTip content={tooltipContent}>
+        <EuiIcon size="m" color="subdued" type="iInCircle" />
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );

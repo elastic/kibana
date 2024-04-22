@@ -36,6 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const find = getService('find');
+  const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
 
@@ -51,9 +52,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  // Flaky: https://github.com/elastic/kibana/issues/173682
-  // FLAKY: https://github.com/elastic/kibana/issues/173681
-  // FLAKY: https://github.com/elastic/kibana/issues/173682
+  // FLAKY: https://github.com/elastic/kibana/issues/180493
+  // Failing: See https://github.com/elastic/kibana/issues/180493
   describe.skip('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
 
@@ -244,7 +244,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               checkResult.value
             );
           }
-          await pageObjects.common.closeToast();
+          await toasts.dismiss();
 
           // Title is shown after adding an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -263,7 +263,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
-          await retry.waitForWithTimeout('entry is updated in list', 10000, async () => {
+          await retry.waitForWithTimeout('entry is updated in list', 20000, async () => {
             const currentValue = await testSubjects.getVisibleText(
               `${testData.pagePrefix}-card-criteriaConditions${
                 testData.pagePrefix === 'EventFiltersListPage' ? '-condition' : ''
@@ -278,7 +278,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           }
 
-          await pageObjects.common.closeToast();
+          await toasts.dismiss();
 
           // Title still shown after editing an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -336,7 +336,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           policyId: firstPolicy.packagePolicy.id,
           suffix: firstSuffix,
         });
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
 
         // Create second trusted app
         await createArtifact(testData, {
@@ -344,11 +344,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           suffix: secondSuffix,
           createButton: 'pageAddButton',
         });
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
 
         // Create third trusted app
         await createArtifact(testData, { suffix: thirdSuffix, createButton: 'pageAddButton' });
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
 
         // Checks if fleet artifact has been updated correctly
         await checkFleetArtifacts(

@@ -26,7 +26,9 @@ export const EUIAmsterdamColorBlindPalette: ColorMapping.CategoricalPalette = {
   name: 'Default',
   colorCount: EUI_AMSTERDAM_PALETTE_COLORS.length,
   type: 'categorical',
-  getColor(valueInRange) {
-    return EUI_AMSTERDAM_PALETTE_COLORS[valueInRange];
+  getColor(indexInRange, isDarkMode, loop) {
+    return EUI_AMSTERDAM_PALETTE_COLORS[
+      loop ? indexInRange % EUI_AMSTERDAM_PALETTE_COLORS.length : indexInRange
+    ];
   },
 };

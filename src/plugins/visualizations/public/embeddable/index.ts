@@ -12,3 +12,5 @@ export { VIS_EVENT_TO_TRIGGER } from './events';
 export { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 
 export type { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
+
+export { type HasVisualizeConfig, apiHasVisualizeConfig } from './interfaces/has_visualize_config';

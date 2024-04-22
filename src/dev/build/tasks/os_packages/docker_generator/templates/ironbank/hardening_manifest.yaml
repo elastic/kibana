@@ -52,6 +52,10 @@ maintainers:
     name: 'Jonathan Budzenski'
     username: 'jbudz'
     cht_member: false
+  - email: 'brad.white@elastic.co'
+    name: 'Brad White'
+    username: 'brad.white'
+    cht_member: false
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'

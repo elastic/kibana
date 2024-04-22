@@ -30,7 +30,6 @@
     "@kbn/cases-plugin",
     "@kbn/test",
     "@kbn/repo-info",
-    "@kbn/data-views-plugin",
     "@kbn/tooling-log",
   ]
 }

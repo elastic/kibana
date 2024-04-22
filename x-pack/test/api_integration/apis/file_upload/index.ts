@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('File upload', function () {
     loadTestFile(require.resolve('./has_import_permission'));
     loadTestFile(require.resolve('./index_exists'));
+    loadTestFile(require.resolve('./preview_index_time_range'));
   });
 }

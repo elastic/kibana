@@ -15,6 +15,7 @@ type Settings = {
 /**
  * A utility function returning a representative set of UiSettings.
  * @param requiresPageReload The value of the `requirePageReload` param for all settings.
+ * @param readonly The value of the `readonly` param for all settings.
  */
 export const getSettingsMock = (
   requiresPageReload: boolean = false,
@@ -121,6 +122,41 @@ export const getSettingsMock = (
       userValue: null,
       value: undefined,
       category: ['notifications', 'search'],
+      ...defaults,
+    },
+  };
+};
+
+/**
+ * A utility function returning a set of global settings.
+ * @param requiresPageReload The value of the `requirePageReload` param for all settings.
+ * @param readonly The value of the `readonly` param for all settings.
+ */
+export const getGlobalSettingsMock = (
+  requiresPageReload: boolean = false,
+  readonly: boolean = false
+) => {
+  const defaults = {
+    requiresPageReload,
+    readonly,
+  };
+  return {
+    globalString: {
+      description: 'Description for a Global String test setting',
+      name: 'global:string:test:setting',
+      type: 'string',
+      userValue: null,
+      value: 'hello world',
+      category: ['custom branding'],
+      ...defaults,
+    },
+    globalBoolean: {
+      description: 'Description for a Global Boolean test setting',
+      name: 'global:boolean:test:setting',
+      type: 'boolean',
+      userValue: null,
+      value: true,
+      category: ['custom branding'],
       ...defaults,
     },
   };

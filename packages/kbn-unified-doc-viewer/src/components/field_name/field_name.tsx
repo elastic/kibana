@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
-import { getFieldTypeName } from '@kbn/field-utils';
+import { FieldDescriptionIconButton, getFieldTypeName } from '@kbn/field-utils';
 
 interface Props {
   fieldName: string;
@@ -46,7 +46,7 @@ export function FieldName({
         <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
 
-      <EuiFlexGroup wrap={true} gutterSize="none" responsive={false} alignItems="flexStart">
+      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart" direction="row">
         <EuiFlexItem className="kbnDocViewer__fieldName eui-textBreakAll" grow={false}>
           <EuiToolTip
             position="top"
@@ -57,6 +57,12 @@ export function FieldName({
             <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
           </EuiToolTip>
         </EuiFlexItem>
+
+        {fieldMapping?.customDescription ? (
+          <EuiFlexItem grow={false}>
+            <FieldDescriptionIconButton field={fieldMapping} />
+          </EuiFlexItem>
+        ) : null}
 
         {isMultiField && (
           <EuiToolTip

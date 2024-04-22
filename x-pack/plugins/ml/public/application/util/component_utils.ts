@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
 /**
  * Removes focus from a button element when clicked, for example to

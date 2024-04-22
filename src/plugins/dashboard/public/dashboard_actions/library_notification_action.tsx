@@ -9,69 +9,64 @@
 import React from 'react';
 
 import {
-  ViewMode,
-  type IEmbeddable,
-  isErrorEmbeddable,
-  isReferenceOrValueEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  getViewModeSubject,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
+import { isApiCompatible, UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
-export interface LibraryNotificationActionContext {
-  embeddable: IEmbeddable;
-}
-
-export class LibraryNotificationAction implements Action<LibraryNotificationActionContext> {
+export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_LIBRARY_NOTIFICATION;
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
   constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
-  private displayName = dashboardLibraryNotificationStrings.getDisplayName();
-
-  private icon = 'folderCheck';
-
-  public readonly MenuItem = ({ context }: { context: LibraryNotificationActionContext }) => {
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
-    return (
-      <LibraryNotificationPopover
-        unlinkAction={this.unlinkAction}
-        displayName={this.displayName}
-        context={context}
-        icon={this.getIconType({ embeddable })}
-        id={this.id}
-      />
-    );
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return <LibraryNotificationPopover unlinkAction={this.unlinkAction} api={embeddable} />;
   };
 
-  public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
-    return this.displayName;
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable);
   }
 
-  public getIconType({ embeddable }: LibraryNotificationActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
-    return this.icon;
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: LibraryNotificationAction) => void
+  ) {
+    if (!isApiCompatible(embeddable)) return;
+
+    /**
+     * TODO: Upgrade this action by subscribing to changes in the existance of a saved object id. Currently,
+     *  this is unnecessary because a link or unlink operation will cause the panel to unmount and remount.
+     */
+    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
+      embeddable.canUnlinkFromLibrary().then((canUnlink) => {
+        onChange(viewMode === 'edit' && canUnlink, this);
+      });
+    });
   }
 
-  public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
-    return (
-      !isErrorEmbeddable(embeddable) &&
-      embeddable.getRoot().isContainer &&
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-      isReferenceOrValueEmbeddable(embeddable) &&
-      embeddable.inputIsRefType(embeddable.getInput())
-    );
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return dashboardLibraryNotificationStrings.getDisplayName();
+  }
+
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return 'folderCheck';
+  }
+
+  public isCompatible = async ({ embeddable }: EmbeddableApiContext) => {
+    if (!isApiCompatible(embeddable)) return false;
+    return getInheritedViewMode(embeddable) === 'edit' && embeddable.canUnlinkFromLibrary();
   };
 
   public execute = async () => {};

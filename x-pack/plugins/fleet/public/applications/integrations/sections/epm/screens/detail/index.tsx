@@ -135,9 +135,10 @@ export function Detail() {
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
 
-  const canInstallPackages = useAuthz().integrations.installPackages;
-  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+  const authz = useAuthz();
+  const canInstallPackages = authz.integrations.installPackages;
+  const canReadPackageSettings = authz.integrations.readPackageSettings;
+  const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
 
   const {
     data: permissionCheck,
@@ -185,7 +186,9 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery();
+  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
+    enabled: authz.fleet.readSettings,
+  });
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
@@ -207,7 +210,7 @@ export function Detail() {
       prerelease: prereleaseIntegrationsEnabled,
     },
     {
-      enabled: !isSettingsInitialLoading, // Load only after settings are loaded
+      enabled: !authz.fleet.readSettings || !isSettingsInitialLoading, // Load only after settings are loaded
       refetchOnMount: 'always',
     }
   );
@@ -776,7 +779,7 @@ export function Detail() {
             <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
-            <AssetsPage packageInfo={packageInfo} />
+            <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
             <Configs packageInfo={packageInfo} />

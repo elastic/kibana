@@ -25,6 +25,15 @@ import {
   RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
 import { visitWithTimeRange } from './navigation';
+import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
+import { LOADING_SPINNER } from '../screens/loading';
+
+export const updateDashboardTimeRange = () => {
+  // eslint-disable-next-line cypress/no-force
+  cy.get(GET_DATE_PICKER_APPLY_BUTTON(GLOBAL_FILTERS_CONTAINER)).click({ force: true }); // Force to fix global timerange flakiness
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
+};
 
 export const waitForAnomaliesToBeLoaded = () => {
   cy.waitUntil(() => {
@@ -69,12 +78,20 @@ export const mockRiskEngineEnabled = () => {
   }).as('riskIndexStatus');
 };
 
-export const enableRiskEngine = () => {
-  cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-  cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
-  riskEngineStatusChange();
-  cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
-};
+/**
+ * @deprecated
+ * At the moment there isn't a way to clean all assets created by the risk engine enablement.
+ * We can't clean assets after each tests and we can't call this function from the `after` hook (cypress good practice).
+ * Reintroduce this task when we can safely delete the risk engine data.
+ *
+ * Please use `mockRiskEngineEnabled` instead.
+ */
+// const enableRiskEngine = () => {
+//   cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+//   cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+//   riskEngineStatusChange();
+//   cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+// };
 
 export const updateRiskEngine = () => {
   cy.get(RISK_SCORE_UPDATE_BUTTON).click();

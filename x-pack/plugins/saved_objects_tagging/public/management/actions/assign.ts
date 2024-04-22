@@ -6,7 +6,7 @@
  */
 
 import { Observable, from } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { TagWithRelations } from '../../../common';
@@ -60,6 +60,7 @@ export const getAssignAction = ({
     ),
     type: 'icon',
     icon: 'tag',
+    available: (tag) => !tag.managed,
     onClick: async (tag: TagWithRelations) => {
       const flyout = await openFlyout({
         tagIds: [tag.id],

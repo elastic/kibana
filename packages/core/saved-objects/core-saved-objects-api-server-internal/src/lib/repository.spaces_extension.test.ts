@@ -518,7 +518,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                   ? currentSpace.expectedNamespace
                   : undefined,
               },
-            })
+            }),
+            expect.any(Object)
           );
         });
       });
@@ -764,7 +765,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                   ? `${currentSpace.expectedNamespace}`
                   : undefined,
               },
-            })
+            }),
+            expect.any(Object)
           );
         });
       });

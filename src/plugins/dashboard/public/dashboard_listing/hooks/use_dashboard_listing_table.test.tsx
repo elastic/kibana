@@ -147,7 +147,6 @@ describe('useDashboardListingTable', () => {
       initialPageSize: 5,
       listingLimit: 20,
       onFetchSuccess: expect.any(Function),
-      itemIsEditable: expect.any(Function),
       setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,

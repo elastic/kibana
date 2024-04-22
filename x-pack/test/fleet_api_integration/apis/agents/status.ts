@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -232,11 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should work with deprecated api', async () => {
-      await supertest
-        .get(`/api/fleet/agent-status`)
-        .set('kbn-xsrf', 'xxxx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
-        .expect(200);
+      await supertest.get(`/api/fleet/agent-status`).set('kbn-xsrf', 'xxxx').expect(200);
     });
 
     it('should work with adequate package privileges', async () => {
@@ -332,14 +327,14 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
     });
 
-    it('should return 400 if passed kuery is not correct', async () => {
+    it('with enableStrictKQLValidation should return 400 if passed kuery is not correct', async () => {
       await supertest
         .get(`/api/fleet/agent_status?kuery='test%3A'`)
         .set('kbn-xsrf', 'xxxx')

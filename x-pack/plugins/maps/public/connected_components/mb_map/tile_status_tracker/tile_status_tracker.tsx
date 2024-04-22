@@ -13,7 +13,7 @@ import type { TileError, TileMetaFeature } from '../../../../common/descriptor_t
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { ILayer } from '../../../classes/layers/layer';
 import { isLayerGroup } from '../../../classes/layers/layer_group';
-import { IVectorSource } from '../../../classes/sources/vector_source';
+import { isESVectorTileSource } from '../../../classes/sources/es_source';
 import { getTileKey as getCenterTileKey } from '../../../classes/util/geo_tile_utils';
 import { boundsToExtent } from '../../../classes/util/maplibre_utils';
 import { ES_MVT_META_LAYER_NAME } from '../../../classes/util/tile_meta_feature_utils';
@@ -69,12 +69,7 @@ export class TileStatusTracker extends Component<Props> {
         return;
       }
 
-      const source = layer.getSource();
-      if (
-        source.isESSource() &&
-        typeof (source as IVectorSource).isMvt === 'function' &&
-        !(source as IVectorSource).isMvt()
-      ) {
+      if (!isESVectorTileSource(layer.getSource())) {
         // clear tile cache when layer is not tiled
         this._tileErrorCache.clearLayer(layer.getId(), this._updateTileStatusForAllLayers);
       }
@@ -156,7 +151,7 @@ export class TileStatusTracker extends Component<Props> {
       const ajaxError =
         'body' in e.error && 'statusText' in e.error ? (e.error as AJAXError) : undefined;
 
-      if (!ajaxError || !targetLayer.getSource().isESSource()) {
+      if (!ajaxError || !isESVectorTileSource(targetLayer.getSource())) {
         this._updateTileStatusForAllLayers();
         return;
       }
@@ -254,11 +249,7 @@ export class TileStatusTracker extends Component<Props> {
   }, 100);
 
   _getTileMetaFeatures = (layer: ILayer) => {
-    const source = layer.getSource();
-    return layer.isVisible() &&
-      source.isESSource() &&
-      typeof (source as IVectorSource).isMvt === 'function' &&
-      (source as IVectorSource).isMvt()
+    return layer.isVisible() && isESVectorTileSource(layer.getSource())
       ? // querySourceFeatures can return duplicated features when features cross tile boundaries.
         // Tile meta will never have duplicated features since by their nature, tile meta is a feature contained within a single tile
         (this.props.mbMap

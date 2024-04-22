@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -28,7 +27,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -38,7 +36,7 @@ import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
-import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
+import { focusMainFlyout, memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
@@ -71,6 +69,7 @@ const LinksEditor = ({
   initialLayout,
   parentDashboard,
   isByReference,
+  flyoutId,
 }: {
   onSaveToLibrary: (newLinks: Link[], newLayout: LinksLayoutType) => Promise<void>;
   onAddToDashboard: (newLinks: Link[], newLayout: LinksLayoutType) => void;
@@ -79,6 +78,7 @@ const LinksEditor = ({
   initialLayout?: LinksLayoutType;
   parentDashboard?: DashboardContainer;
   isByReference: boolean;
+  flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
@@ -89,7 +89,7 @@ const LinksEditor = ({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<Link[]>([]);
-  const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
+  const [saveByReference, setSaveByReference] = useState(!initialLinks ? false : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
 
@@ -120,6 +120,7 @@ const LinksEditor = ({
       const newLink = await openLinkEditorFlyout({
         parentDashboard,
         link: linkToEdit,
+        mainFlyoutId: flyoutId,
         ref: editLinkFlyoutRef,
       });
       if (newLink) {
@@ -137,7 +138,7 @@ const LinksEditor = ({
         }
       }
     },
-    [editLinkFlyoutRef, orderedLinks, parentDashboard]
+    [editLinkFlyoutRef, orderedLinks, parentDashboard, flyoutId]
   );
 
   const hasZeroLinks = useMemo(() => {
@@ -151,8 +152,9 @@ const LinksEditor = ({
           return link.id !== linkId;
         })
       );
+      focusMainFlyout(flyoutId);
     },
-    [orderedLinks]
+    [orderedLinks, flyoutId]
   );
 
   return (
@@ -168,14 +170,6 @@ const LinksEditor = ({
                   : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
               </h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
-              {/* The EuiBadge needs an empty title to prevent the default tooltip */}
-              <EuiBadge color="hollow" tabIndex={0} title="">
-                {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
-              </EuiBadge>
-            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

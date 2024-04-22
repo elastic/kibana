@@ -23,6 +23,7 @@ import {
   BulkEditResponse,
   BulkOperationResponse,
   BulkOperationAttributesWithoutHttp,
+  BulkDisableParamsWithoutHttp,
 } from '../../../../types';
 import type {
   LoadExecutionLogAggregationsProps,
@@ -92,7 +93,7 @@ export interface ComponentOpts {
   cloneRule: (ruleId: string) => Promise<Rule>;
   bulkDeleteRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
   bulkEnableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
-  bulkDisableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
+  bulkDisableRules: (props: BulkDisableParamsWithoutHttp) => Promise<BulkOperationResponse>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -199,7 +200,7 @@ export function withBulkRuleOperations<T>(
         bulkEnableRules={async (bulkEnableProps: BulkOperationAttributesWithoutHttp) => {
           return await bulkEnableRules({ http, ...bulkEnableProps });
         }}
-        bulkDisableRules={async (bulkDisableProps: BulkOperationAttributesWithoutHttp) => {
+        bulkDisableRules={async (bulkDisableProps: BulkDisableParamsWithoutHttp) => {
           return await bulkDisableRules({ http, ...bulkDisableProps });
         }}
       />

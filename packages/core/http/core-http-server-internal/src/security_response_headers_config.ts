@@ -30,7 +30,7 @@ export const securityResponseHeadersSchema = schema.object({
       schema.literal('unsafe-url'),
       schema.literal(null),
     ],
-    { defaultValue: 'no-referrer-when-downgrade' }
+    { defaultValue: 'strict-origin-when-cross-origin' }
   ),
   permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy

@@ -22,10 +22,10 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { usePanel } from './panel';
 import { isActiveFromUrl } from '../../utils';
+import type { NavigateToUrlFn } from '../../types';
+import { usePanel } from './panel';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {
@@ -96,6 +96,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     }
   }, [openPanel, closePanel, item, selectedNode]);
 
+  const isExpanded = selectedNode?.path === path;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
@@ -115,15 +117,17 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
       {isIconVisible && (
         <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
           <EuiButtonIcon
-            display={selectedNode?.path === path ? 'base' : 'empty'}
+            display={isExpanded ? 'base' : 'empty'}
             size="s"
             color="text"
             onClick={onIconClick}
             iconType="spaces"
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
-              defaultMessage: 'Toggle panel navigation',
+              defaultMessage: 'Toggle "{title}" panel navigation',
+              values: { title },
             })}
+            aria-expanded={isExpanded}
             data-test-subj={buttonDataTestSubj}
           />
         </EuiFlexItem>

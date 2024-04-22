@@ -39,10 +39,10 @@ export const bulkDisableRulesRoute = ({
           const rulesClient = (await context.alerting).getRulesClient();
 
           const body: BulkDisableRulesRequestBodyV1 = req.body;
-          const { filter, ids } = body;
+          const { filter, ids, untrack } = body;
 
           try {
-            const bulkDisableResults = await rulesClient.bulkDisableRules({ filter, ids });
+            const bulkDisableResults = await rulesClient.bulkDisableRules({ filter, ids, untrack });
 
             const resultBody: BulkDisableRulesResponseV1<RuleParamsV1> = {
               body: {

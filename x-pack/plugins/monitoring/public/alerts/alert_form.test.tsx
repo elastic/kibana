@@ -29,13 +29,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-interface AlertAction {
-  group: string;
-  id: string;
-  actionTypeId: string;
-  params: unknown;
-}
-
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -264,7 +257,7 @@ describe('alert_form', () => {
                 setActionIdByIndex={(id: string, index: number) => {
                   initialAlert.actions[index].id = id;
                 }}
-                setActions={(_updatedActions: AlertAction[]) => {}}
+                setActions={() => {}}
                 setActionParamsProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }

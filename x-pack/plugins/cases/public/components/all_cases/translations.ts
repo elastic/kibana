@@ -139,12 +139,9 @@ export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const CLEAR_FILTERS = i18n.translate(
-  'xpack.cases.allCasesView.filterAssignees.clearFilters',
-  {
-    defaultMessage: 'Clear filters',
-  }
-);
+export const CLEAR_FILTERS = i18n.translate('xpack.cases.allCasesView.clearFilters', {
+  defaultMessage: 'Clear filters',
+});
 
 export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
   i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {

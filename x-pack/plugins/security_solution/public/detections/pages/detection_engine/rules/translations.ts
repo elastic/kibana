@@ -547,6 +547,13 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
+  }
+);
+
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -1204,6 +1211,14 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
     defaultMessage: 'Install rule',
   }
 );
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
 
 export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',

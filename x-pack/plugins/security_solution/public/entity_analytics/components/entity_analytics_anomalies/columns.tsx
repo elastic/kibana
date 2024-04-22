@@ -16,8 +16,8 @@ import type { AnomaliesCount } from '../../../common/components/ml/anomaly/use_a
 
 type AnomaliesColumns = Array<EuiTableFieldDataColumnType<AnomaliesCount>>;
 
-const MediumShadeText = styled.span`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+const DarkShadeText = styled.span`
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
 `;
 
 export const useAnomaliesColumns = (
@@ -42,7 +42,7 @@ export const useAnomaliesColumns = (
           ) {
             return jobName;
           } else {
-            return <MediumShadeText>{jobName}</MediumShadeText>;
+            return <DarkShadeText>{jobName}</DarkShadeText>;
           }
         },
       },

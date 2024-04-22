@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
+  const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
+    'svlCommonPage',
+    'lens',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -22,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -71,10 +77,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(2);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(2);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area');
-        expect(await layersSettings[1].getVisibleText()).to.be('Bar vertical');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(2);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
+        expect(await layerChartSwitches[1].getVisibleText()).to.be('Bar vertical');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -89,9 +95,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Bar vertical');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar vertical');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -156,9 +162,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area stacked');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area stacked');
       });
     });
 
@@ -169,9 +175,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area percentage');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area percentage');
       });
     });
 
@@ -182,9 +188,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Bar horizontal');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar horizontal');
       });
     });
 

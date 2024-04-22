@@ -25,5 +25,8 @@
     "@kbn/i18n-react",
     "@kbn/cloud-plugin",
     "@kbn/serverless-common-settings",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/i18n",
+    "@kbn/management-cards-navigation",
   ]
 }

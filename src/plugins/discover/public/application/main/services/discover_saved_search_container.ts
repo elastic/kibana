@@ -8,9 +8,14 @@
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  canImportVisContext,
+  UnifiedHistogramVisContext,
+} from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -110,6 +115,20 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
+  /**
+   * Updates the current state of the saved search with new time range and refresh interval
+   */
+  updateTimeRange: () => void;
+  /**
+   * Passes filter manager filters to saved search filters
+   * @param params
+   */
+  updateWithFilterManagerFilters: () => SavedSearch;
+  /**
+   * Updates the current value of visContext in saved search
+   * @param params
+   */
+  updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -169,6 +188,26 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
+
+  const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
+    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+    hasChanged$.next(hasChanged);
+    savedSearchCurrent$.next(nextSavedSearch);
+  };
+
+  const updateWithFilterManagerFilters = () => {
+    const nextSavedSearch: SavedSearch = {
+      ...getState(),
+    };
+
+    nextSavedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithFilterManagerFilters done', nextSavedSearch);
+    return nextSavedSearch;
+  };
+
   const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
@@ -186,12 +225,43 @@ export function getSavedSearchContainer({
       useFilterAndQueryServices,
     });
 
-    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-    hasChanged$.next(hasChanged);
-    savedSearchCurrent$.next(nextSavedSearch);
+    assignNextSavedSearch({ nextSavedSearch });
 
     addLog('[savedSearch] update done', nextSavedSearch);
     return nextSavedSearch;
+  };
+
+  const updateTimeRange = () => {
+    const previousSavedSearch = getState();
+    if (!previousSavedSearch.timeRestore) {
+      return;
+    }
+    const refreshInterval = services.timefilter.getRefreshInterval();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      timeRange: services.timefilter.getTime(),
+      refreshInterval: { value: refreshInterval.value, pause: refreshInterval.pause },
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
+  };
+
+  const updateVisContext = ({
+    nextVisContext,
+  }: {
+    nextVisContext: UnifiedHistogramVisContext | undefined;
+  }) => {
+    const previousSavedSearch = getState();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      visContext: nextVisContext,
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
@@ -221,6 +291,9 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
+    updateTimeRange,
+    updateWithFilterManagerFilters,
+    updateVisContext,
   };
 }
 
@@ -264,7 +337,10 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
       return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
     }
 
-    const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+    const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
+    const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
+
+    const isSame = isEqual(prevValue, nextValue);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
@@ -313,12 +389,30 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   return true;
 }
 
+function getSavedSearchFieldForComparison(
+  savedSearch: Omit<SavedSearch, 'searchSource'>,
+  fieldName: keyof Omit<SavedSearch, 'searchSource'>
+) {
+  if (fieldName === 'visContext') {
+    const visContext = cloneDeep(savedSearch.visContext);
+    if (canImportVisContext(visContext) && visContext?.attributes?.title) {
+      // ignore differences in title as it sometimes does not match the actual vis type/shape
+      visContext.attributes.title = 'same';
+    }
+    return visContext;
+  }
+
+  return savedSearch[fieldName];
+}
+
 function getSearchSourceFieldValueForComparison(
   searchSource: SavedSearch['searchSource'],
   searchSourceFieldName: keyof SearchSourceFields
 ) {
   if (searchSourceFieldName === 'index') {
-    return searchSource.getField('index')?.id;
+    const query = searchSource.getField('query');
+    // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
+    return query && 'esql' in query ? query.esql : searchSource.getField('index')?.id;
   }
 
   if (searchSourceFieldName === 'filter') {

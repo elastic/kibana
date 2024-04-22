@@ -44,9 +44,7 @@ describe(
       const testNote = 'test note';
       const updatedTestNote = 'updated test note';
 
-      // FLAKY: https://github.com/elastic/kibana/issues/169187
-      // FLAKY: https://github.com/elastic/kibana/issues/169188
-      describe.skip('Renders and saves protection updates', () => {
+      describe('Renders and saves protection updates', () => {
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
         const defaultDate = moment.utc().subtract(1, 'days');
@@ -88,6 +86,21 @@ describe(
           cy.getByTestSubj('protection-updates-manifest-name-note-title');
           cy.getByTestSubj('protection-updates-manifest-note');
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.enabled');
+        });
+
+        it('should display warning modal when user has unsaved changes', () => {
+          loadProtectionUpdatesUrl(policy.id);
+          cy.getByTestSubj('protection-updates-manifest-switch').click();
+          cy.getByTestSubj('policySettingsTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalCancelButton').click();
+          });
+          cy.url().should('include', 'protectionUpdates');
+          cy.getByTestSubj('policySettingsTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalConfirmButton').click();
+          });
+          cy.url().should('include', 'settings');
         });
 
         it('should successfully update the manifest version to custom date', () => {
@@ -307,6 +320,49 @@ describe(
             cy.getByTestSubj('protection-updates-manifest-note-view-mode').should('not.exist');
             cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
           });
+        });
+      });
+    });
+    describe('Policy settings', () => {
+      const loadSettingsUrl = (policyId: string) =>
+        loadPage(`/app/security/administration/policy/${policyId}/settings`);
+
+      describe('Renders policy settings form', () => {
+        let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+        let policy: PolicyData;
+
+        beforeEach(() => {
+          login();
+          disableExpandableFlyoutAdvancedSettings();
+          getEndpointIntegrationVersion().then((version) => {
+            createAgentPolicyTask(version).then((data) => {
+              indexedPolicy = data;
+              policy = indexedPolicy.integrationPolicies[0];
+            });
+          });
+        });
+
+        afterEach(() => {
+          if (indexedPolicy) {
+            cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+          }
+        });
+        it('should render disabled button and display modal if unsaved changes are present', () => {
+          loadSettingsUrl(policy.id);
+          cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
+          cy.getByTestSubj('endpointPolicyForm-malware-enableDisableSwitch').click();
+          cy.getByTestSubj('policyDetailsSaveButton').should('not.be.disabled');
+          cy.getByTestSubj('policyProtectionUpdatesTab').click();
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalCancelButton').click();
+          });
+          cy.url().should('include', 'settings');
+          cy.getByTestSubj('policyProtectionUpdatesTab').click();
+
+          cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
+            cy.getByTestSubj('confirmModalConfirmButton').click();
+          });
+          cy.url().should('include', 'protectionUpdates');
         });
       });
     });

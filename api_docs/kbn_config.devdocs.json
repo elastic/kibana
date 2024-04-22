@@ -39,7 +39,7 @@
               "\nInformation about Kibana package (version, build number etc.)."
             ],
             "signature": [
-              "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildDate: Date; readonly buildFlavor: ",
+              "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildShaShort: string; readonly buildDate: Date; readonly buildFlavor: ",
               {
                 "pluginId": "@kbn/config",
                 "scope": "common",
@@ -74,6 +74,39 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/config",
+        "id": "def-common.getConfigFromFiles",
+        "type": "Function",
+        "tags": [],
+        "label": "getConfigFromFiles",
+        "description": [],
+        "signature": [
+          "(configFiles: readonly string[]) => Record<string, any>"
+        ],
+        "path": "packages/kbn-config/src/raw/read_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-common.getConfigFromFiles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "configFiles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-config/src/raw/read_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/config",
         "id": "def-common.hasConfigPathIntersection",
@@ -959,6 +992,17 @@
             "type": "string",
             "tags": [],
             "label": "buildSha",
+            "description": [],
+            "path": "packages/kbn-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-common.PackageInfo.buildShaShort",
+            "type": "string",
+            "tags": [],
+            "label": "buildShaShort",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
             "deprecated": false,

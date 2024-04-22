@@ -26,17 +26,26 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+
+const cleanUpKibana = () => {
+  cy.task('esArchiverUnload', { archiveName: 'query_alert' });
+  deleteAlertsAndRules();
+};
 
 describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
-  before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
-  });
   beforeEach(() => {
+    cleanUpKibana();
+    cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     login();
     disableExpandableFlyout();
     startAlertsCasesTour();
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
+  });
+
+  afterEach(() => {
+    cleanUpKibana();
   });
 
   it('Completes the tour with next button clicks', () => {

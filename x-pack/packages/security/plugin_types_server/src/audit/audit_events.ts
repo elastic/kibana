@@ -26,6 +26,7 @@ export interface AuditKibana {
   saved_object?: {
     type: string;
     id: string;
+    name?: string;
   };
   /**
    * Name of authentication provider associated with a login event.

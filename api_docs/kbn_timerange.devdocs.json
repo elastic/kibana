@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/timerange",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.getDateISORange",
+        "type": "Function",
+        "tags": [],
+        "label": "getDateISORange",
+        "description": [],
+        "signature": [
+          "({ from, to }: { from: string; to: string; }) => { startDate: string; endDate: string; }"
+        ],
+        "path": "packages/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.getDateISORange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ from, to }",
+            "description": [],
+            "path": "packages/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getDateISORange.$1.from",
+                "type": "string",
+                "tags": [],
+                "label": "from",
+                "description": [],
+                "path": "packages/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getDateISORange.$1.to",
+                "type": "string",
+                "tags": [],
+                "label": "to",
+                "description": [],
+                "path": "packages/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/timerange",
+        "id": "def-common.getDateRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getDateRange",
+        "description": [],
+        "signature": [
+          "({ from, to }: { from: string; to: string; }) => { startDate: number; endDate: number; }"
+        ],
+        "path": "packages/kbn-timerange/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/timerange",
+            "id": "def-common.getDateRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ from, to }",
+            "description": [],
+            "path": "packages/kbn-timerange/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getDateRange.$1.from",
+                "type": "string",
+                "tags": [],
+                "label": "from",
+                "description": [],
+                "path": "packages/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/timerange",
+                "id": "def-common.getDateRange.$1.to",
+                "type": "string",
+                "tags": [],
+                "label": "to",
+                "description": [],
+                "path": "packages/kbn-timerange/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

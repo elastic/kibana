@@ -13,6 +13,7 @@ import {
   type FieldId,
   EVENT_RATE_FIELD_ID,
 } from '@kbn/ml-anomaly-utils';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
 import { ml, type MlApiServices } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
@@ -57,7 +58,7 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
 
       const resp = await this._mlApiService.jobs.newJobCaps(
         dataView.getIndexPattern(),
-        dataView.type === 'rollup'
+        dataView.type === DataViewType.ROLLUP
       );
       const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 

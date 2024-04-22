@@ -71,18 +71,17 @@ const dataServiceMock = {
     ...data.query,
     savedQueries: {
       ...data.query.savedQueries,
-      getAllSavedQueries: jest.fn(() =>
-        Promise.resolve({
-          id: '123',
-          attributes: {
-            total: 123,
-          },
-        })
-      ),
       findSavedQueries: jest.fn(() =>
         Promise.resolve({
           total: 123,
-          queries: [],
+          queries: [
+            {
+              id: '123',
+              attributes: {
+                total: 123,
+              },
+            },
+          ],
         })
       ),
     },
@@ -114,6 +113,8 @@ const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionCo
 
 const casesServiceMock = casesPluginMock.createStartContract();
 
+export const EMPTY_PAGE_SECURITY_TEMPLATE = 'empty-page-security-template' as const;
+
 export const mockedServices = {
   ...coreServiceMock,
   data: dataServiceMock,
@@ -127,7 +128,11 @@ export const mockedServices = {
   securityLayout: {
     getPluginWrapper:
       () =>
-      ({ children }: any) => {
+      ({ children, isEmptyState, emptyPageBody }: any) => {
+        if (isEmptyState && emptyPageBody) {
+          return <div data-test-subj={EMPTY_PAGE_SECURITY_TEMPLATE}>{emptyPageBody}</div>;
+        }
+
         return <>{children}</>;
       },
   },

@@ -13,7 +13,7 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../../common/types/latest';
+} from '../../../../common/types/rules/v4';
 import { getSortedCspBenchmarkRulesTemplates } from './utils';
 
 export const findBenchmarkRuleHandler = async (
@@ -45,7 +45,7 @@ export const findBenchmarkRuleHandler = async (
   );
 
   // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
-  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules, 'asc');
 
   return {
     items: sortedCspBenchmarkRules,

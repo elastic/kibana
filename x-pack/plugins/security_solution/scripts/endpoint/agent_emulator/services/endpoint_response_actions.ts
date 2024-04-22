@@ -34,6 +34,7 @@ export const fetchEndpointActionList = async (
         page: 1,
         pageSize: 10,
         startDate: undefined,
+        agentTypes: undefined,
         elasticAgentIds: undefined,
         endDate: undefined,
         userIds: undefined,

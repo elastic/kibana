@@ -24,18 +24,20 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
+import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 import {
+  PLAYGROUND_PATH,
   CONNECTORS_PATH,
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
-  SETTINGS_PATH,
 } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
+  const indicesNavItems = useIndicesNav();
   if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
@@ -63,6 +65,7 @@ export const useEnterpriseSearchNav = () => {
             defaultMessage: 'Indices',
           }),
           ...generateNavLink({
+            items: indicesNavItems,
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
@@ -90,21 +93,17 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
           }),
         },
-        ...(productFeatures.hasDefaultIngestPipeline
-          ? [
-              {
-                id: 'settings',
-                name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
-                  defaultMessage: 'Settings',
-                }),
-                ...generateNavLink({
-                  shouldNotCreateHref: true,
-                  shouldShowActiveForSubroutes: true,
-                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
-                }),
-              },
-            ]
-          : []),
+        {
+          id: 'playground',
+          name: i18n.translate('xpack.enterpriseSearch.nav.PlaygroundTitle', {
+            defaultMessage: 'Playground',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH,
+          }),
+        },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',

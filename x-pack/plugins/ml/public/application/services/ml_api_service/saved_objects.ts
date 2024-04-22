@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { ML_INTERNAL_BASE_PATH, ML_EXTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { useMlKibana } from '../../contexts/kibana';
 
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 
 import type {
   JobType,
