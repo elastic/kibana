@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
+import { from, ReplaySubject } from 'rxjs';
 
 import {
   CoreSetup,
@@ -30,11 +30,13 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
-  ReportingCsvPanelAction,
   getSharedComponents,
   reportingCsvShareProvider,
+  reportingCsvShareModalProvider,
+  reportingExportModalProvider,
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
+import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 
@@ -70,7 +72,7 @@ export class ReportingPublicPlugin
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
-  private readonly stop$ = new Rx.ReplaySubject<void>(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
@@ -123,7 +125,7 @@ export class ReportingPublicPlugin
       uiActions: uiActionsSetup,
     } = setupDeps;
 
-    const startServices$ = Rx.from(getStartServices());
+    const startServices$ = from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);
@@ -205,7 +207,7 @@ export class ReportingPublicPlugin
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
+    startServices$.subscribe(([{ application, i18n: i18nStart }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
           reportingCsvShareProvider({
@@ -218,8 +220,8 @@ export class ReportingPublicPlugin
             theme: core.theme,
           })
         );
-
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+          // needed for Canvas and legacy tests
           shareSetup.register(
             reportingScreenshotShareProvider({
               apiClient,
@@ -232,9 +234,35 @@ export class ReportingPublicPlugin
             })
           );
         }
+        if (shareSetup.isNewVersion()) {
+          shareSetup.register(
+            reportingCsvShareModalProvider({
+              apiClient,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+              i18n: i18nStart,
+            })
+          );
+
+          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+            shareSetup.register(
+              reportingExportModalProvider({
+                apiClient,
+                uiSettings,
+                license,
+                application,
+                usesUiCapabilities,
+                theme: core.theme,
+                i18n: i18nStart,
+              })
+            );
+          }
+        }
       });
     });
-
     return reportingStart;
   }
 

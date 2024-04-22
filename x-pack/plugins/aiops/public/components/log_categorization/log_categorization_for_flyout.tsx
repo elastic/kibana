@@ -47,7 +47,6 @@ import type { EventRate } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
-import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
@@ -295,9 +294,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 />
               </h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-            <TechnicalPreviewBadge />
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>

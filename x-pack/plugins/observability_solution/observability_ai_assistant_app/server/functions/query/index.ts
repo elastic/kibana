@@ -78,7 +78,8 @@ export function registerQueryFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.UserOnly,
-      description: 'Display the results of an ES|QL query',
+      description:
+        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
       parameters: {
         type: 'object',
         properties: {
@@ -108,7 +109,7 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. This function takes no arguments.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no arguments.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
     async ({ messages, connectorId, chat }, signal) => {
@@ -194,6 +195,14 @@ export function registerQueryFunction({
               parameters: {
                 type: 'object',
                 properties: {
+                  guides: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
+                    },
+                    description: 'A list of guides',
+                  },
                   commands: {
                     type: 'array',
                     items: {
@@ -229,12 +238,19 @@ export function registerQueryFunction({
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
-        commands: string[];
-        functions: string[];
+        guides?: string[];
+        commands?: string[];
+        functions?: string[];
         intention: VisualizeESQLUserIntention;
       };
 
-      const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
+      const keywords = [
+        ...(args.commands ?? []),
+        ...(args.functions ?? []),
+        ...(args.guides ?? []),
+        'SYNTAX',
+        'OVERVIEW',
+      ].map((keyword) => keyword.toUpperCase());
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
@@ -380,7 +396,19 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: {} }))
+        startWith(
+          createFunctionResponseMessage({
+            name: 'query',
+            content: {},
+            data: {
+              documentation: {
+                intention: args.intention,
+                keywords,
+                files: messagesToInclude,
+              },
+            },
+          })
+        )
       );
     }
   );
