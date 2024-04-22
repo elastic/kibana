@@ -19,6 +19,8 @@ paths:
     $ref: paths/setup.yaml
   /settings:
     $ref: paths/settings.yaml
+  /settings/enrollment:
+    $ref: paths/settings_enrollment.yaml
   /service-tokens:
     $ref: paths/service_tokens_deprecated.yaml
   /service_tokens:

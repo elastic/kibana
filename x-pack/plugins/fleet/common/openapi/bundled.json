@@ -1,5 +1,6 @@
 {
   "openapi": "3.0.0",
+  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -17,12 +18,6 @@
       "url": "http://KIBANA_HOST:5601/api/fleet"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ],
-  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -191,6 +186,41 @@
           }
         },
         "operationId": "update-settings"
+      }
+    },
+    "/settings/enrollment": {
+      "get": {
+        "summary": "Get enrollment settings",
+        "tags": [
+          "Fleet internals"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agentPolicyId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An agent policy ID to scope the enrollment settings to, for example that policy's fleet server host, its proxy, download location, etc. If not provided, the default fleet server policy will be used (if any)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_settings_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "get-enrollment-settings"
       }
     },
     "/service-tokens": {
@@ -9185,5 +9215,10 @@
         ]
       }
     }
-  }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
 }
