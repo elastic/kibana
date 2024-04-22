@@ -13,6 +13,7 @@ import { deNormalize } from '../application/components/mappings_editor/lib';
 import { useAppContext } from '../application/app_context';
 import { useComponentTemplatesContext } from '../application/components/component_templates/component_templates_context';
 import { State } from '../application/components/mappings_editor/types';
+import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
 
 interface InferenceModel {
   data: InferenceAPIConfigResponse[];
@@ -28,6 +29,7 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
   const { api } = useComponentTemplatesContext();
 
   const { inferenceToModelIdMap } = state;
+  const dispatch = useDispatch();
 
   const [pendingDeployments, setPendingDeployments] = useState<Set<string>>(new Set());
 
@@ -86,17 +88,22 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
     []
   );
 
-  const getInferenceToModelIdMap = useCallback(async () => {
+  const fetchInferenceToModelIdMap = useCallback(async () => {
     const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
 
     const deploymentStatsByModelId = getTrainedModelStats(trainedModelStats);
     const defaultInferenceIds = getDefaultInferenceIds(deploymentStatsByModelId);
     const modelIdMap = getCustomInferenceIdMap(deploymentStatsByModelId, inferenceModels);
-    return { ...defaultInferenceIds, ...modelIdMap };
+
+    dispatch({
+      type: 'inferenceToModelIdMap.update',
+      value: { inferenceToModelIdMap: { ...defaultInferenceIds, ...modelIdMap } },
+    });
   }, [
     getCustomInferenceIdMap,
     getDefaultInferenceIds,
     getTrainedModelStats,
+    dispatch,
     fetchInferenceModelsAndTrainedModelStats,
   ]);
 
@@ -131,7 +138,7 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
 
   return {
     getPendingDeployments,
-    getInferenceToModelIdMap,
+    fetchInferenceToModelIdMap,
     fetchInferenceModelsAndTrainedModelStats,
     pendingDeployments,
     setPendingDeployments,

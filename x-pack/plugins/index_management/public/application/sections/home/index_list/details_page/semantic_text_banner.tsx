@@ -22,13 +22,13 @@ export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBanner
           <EuiFlexItem>
             <EuiText size="m" color="success">
               <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.mappings.semanticText.description"
+                id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description"
                 defaultMessage="{label} Add a field to your mapping and choose 'semantic_text' to get started.'"
                 values={{
                   label: (
                     <strong>
                       <FormattedMessage
-                        id="yourApp.semanticTextFieldAvailable"
+                        id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.semanticTextFieldAvailable"
                         defaultMessage="semantic_text field type now available!"
                       />
                     </strong>
@@ -44,7 +44,7 @@ export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBanner
               data-test-subj="SemanticTextBannerDismissButton"
             >
               <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.mappings.semanticText.dismiss"
+                id="xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.dismiss"
                 defaultMessage="Dismiss"
               />
             </EuiButtonEmpty>
