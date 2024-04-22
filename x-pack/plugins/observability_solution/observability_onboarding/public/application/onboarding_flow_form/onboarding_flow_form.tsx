@@ -164,6 +164,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             searchQuery={integrationSearch}
             setSearchQuery={setIntegrationSearch}
             ref={packageListSearchBarRef}
+            customCards={customCards?.filter(({ name, type }) => type === 'generated')}
+            joinCardLists
           />
         </>
       )}
