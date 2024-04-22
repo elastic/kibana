@@ -94,7 +94,6 @@ export const createArgsWithLayers = (
     position: Position.Top,
   },
   valueLabels: 'hide',
-  valuesInLegend: false,
   xAxisConfig: {
     type: 'xAxisConfig',
     position: 'bottom',

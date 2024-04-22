@@ -26,7 +26,7 @@ import { LegendDisplay } from '../../../common/constants';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { shouldShowValuesInLegend } from './render_helpers';
+import { getLegendStats } from './render_helpers';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -133,11 +133,14 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     [onStateChange]
   );
 
-  const onValueInLegendChange = useCallback(() => {
-    onStateChange({
-      showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
-    });
-  }, [layer, state.shape, onStateChange]);
+  const onLegendStatsChange = useCallback(
+    (legendStats) => {
+      onStateChange({
+        legendStats,
+      });
+    },
+    [onStateChange]
+  );
 
   const onEmptySizeRatioChange = useCallback(
     (sizeId) => {
@@ -245,11 +248,9 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
         onDisplayChange={onLegendDisplayChange}
-        valueInLegend={shouldShowValuesInLegend(layer, state.shape)}
-        renderValueInLegendSwitch={
-          'showValues' in PartitionChartsMeta[state.shape]?.legend ?? false
-        }
-        onValueInLegendChange={onValueInLegendChange}
+        legendStats={getLegendStats(layer, state.shape)}
+        allowLegendStats={'defaultLegendStats' in PartitionChartsMeta[state.shape]?.legend ?? false}
+        onLegendStatsChange={onLegendStatsChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
         renderNestedLegendSwitch={

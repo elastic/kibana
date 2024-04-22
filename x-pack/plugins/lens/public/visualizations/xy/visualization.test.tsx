@@ -23,13 +23,9 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
-  XYPersistedState,
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
@@ -48,7 +44,7 @@ import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { layerTypes, Visualization } from '../..';
+import { layerTypes, LegendStats, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
@@ -58,6 +54,12 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import {
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedState,
+} from './persistence';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -601,6 +603,53 @@ describe('xy_visualization', () => {
           ).layers
         )
       ).toHaveLength(1);
+    });
+
+    describe('transforming to legend stats', () => {
+      it('loads a xy chart with `legendStats` property', () => {
+        const persistedState: XYPersistedState = {
+          ...exampleState(),
+          legend: {
+            ...exampleState().legend,
+            legendStats: ['values' as LegendStats.values],
+          },
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['values']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+      it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: false,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual([]);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with `valuesInLegend` property equal to true and transforms to legendStats: [`values`]', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: true,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['values']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with deprecated undefined `valuesInLegend` and transforms to legendStats: [`values`]', () => {
+        const transformedState = xyVisualization.initialize(() => 'first', exampleState());
+
+        expect(transformedState.legend.legendStats).toEqual(undefined);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
     });
   });
 
@@ -3786,6 +3835,23 @@ describe('xy_visualization', () => {
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },
       ]);
+    });
+
+    it('should transform legendStats to valuesInLegend', () => {
+      const state = exampleState();
+      const { state: noLegendStatsState } = xyVisualization.getPersistableState!(state);
+      expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
+      expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
+
+      state.legend.legendStats = ['values' as LegendStats.values];
+      const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
+      expect(legendStatsState.legend.legendStats).not.toBeDefined();
+      expect(legendStatsState.valuesInLegend).toEqual(true);
+
+      state.legend.legendStats = [];
+      const { state: legendStatsStateFalsy } = xyVisualization.getPersistableState!(state);
+      expect(legendStatsStateFalsy.legend.legendStats).not.toBeDefined();
+      expect(legendStatsStateFalsy.valuesInLegend).toEqual(false);
     });
   });
 

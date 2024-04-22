@@ -11,7 +11,7 @@ import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/chart
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension, LegendStats } from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   type AllowedPartitionOverrides,
@@ -80,7 +80,7 @@ export interface PartitionVisParams extends VisCommonParams {
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
-  showValuesInLegend?: boolean;
+  legendStats?: LegendStats[];
   respectSourceOrder?: boolean;
   emptySizeRatio?: EmptySizeRatios;
   startFromSecondLargestSlice?: boolean;
@@ -110,7 +110,7 @@ export interface MosaicVisConfig
 
 export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
   bucket?: ExpressionValueVisDimension | string;
-  showValuesInLegend: boolean;
+  legendStats?: LegendStats[];
 }
 
 export interface PartitionChartProps {

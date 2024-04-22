@@ -22,6 +22,8 @@ import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
+import { LegendStats } from '@kbn/visualizations-plugin/common';
+import { PersistedPieVisualizationState } from './persistence';
 
 jest.mock('../../id_generator');
 
@@ -52,6 +54,8 @@ function getExampleState(): PieVisualizationState {
         numberDisplay: NumberDisplay.PERCENT,
         categoryDisplay: CategoryDisplay.DEFAULT,
         legendDisplay: LegendDisplay.DEFAULT,
+        legendPosition: 'bottom',
+        truncateLegend: true,
         nestedLegend: false,
       },
     ],
@@ -158,6 +162,75 @@ describe('pie_visualization', () => {
           shape: PieChartTypes.DONUT,
         })
       );
+    });
+  });
+
+  describe('#initialize', () => {
+    describe('converting to legendStats', () => {
+      it('loads a chart with `legendStats` property', () => {
+        const persistedState = getExampleState();
+        persistedState.layers[0].legendStats = ['values' as LegendStats.values];
+
+        const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
+
+        expect(runtimeState.layers[0].legendStats).toEqual(['values']);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+      it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
+        const persistedState: PersistedPieVisualizationState = getExampleState();
+        persistedState.layers[0].showValuesInLegend = false;
+
+        const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
+
+        expect(runtimeState.layers[0].legendStats).toEqual([]);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+
+      it('loads a xy chart with `showValuesInLegend` property equal to true and converts to legendStats: [`values`]', () => {
+        const persistedState: PersistedPieVisualizationState = getExampleState();
+        persistedState.layers[0].showValuesInLegend = true;
+
+        const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
+
+        expect(runtimeState.layers[0].legendStats).toEqual(['values']);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+
+      it('loads a xy chart with undefined `showValuesInLegend` and converts to legendStats: [`values`]', () => {
+        const runtimeState = pieVisualization.initialize(() => 'first', getExampleState());
+
+        expect(runtimeState.layers[0].legendStats).toEqual(undefined);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+    });
+  });
+
+  describe('#getPersistableState', () => {
+    describe('converting to legend stats', () => {
+      it('converts `legendStats` to `valuesInLegend`', () => {
+        const runtimeState = getExampleState();
+        // no legend stats at all
+        const { state } = pieVisualization.getPersistableState!(runtimeState);
+        expect('legendStats' in state.layers[0]).toBeFalsy();
+        expect(state.layers[0].showValuesInLegend).toEqual(undefined);
+
+        // legend stats === ['values']
+        runtimeState.layers[0].legendStats = ['values' as LegendStats.values];
+        const { state: stateWithShowValuesInLegendTrue } =
+          pieVisualization.getPersistableState!(runtimeState);
+
+        expect('legendStats' in stateWithShowValuesInLegendTrue.layers[0]).toBeFalsy();
+        expect(stateWithShowValuesInLegendTrue.layers[0].showValuesInLegend).toEqual(true);
+
+        // legend stats === ['values']
+        runtimeState.layers[0].legendStats = [];
+
+        const { state: stateWithShowValuesInLegendFalse } =
+          pieVisualization.getPersistableState!(runtimeState);
+
+        expect('legendStats' in stateWithShowValuesInLegendFalse.layers[0]).toBeFalsy();
+        expect(stateWithShowValuesInLegendFalse.layers[0].showValuesInLegend).toEqual(false);
+      });
     });
   });
 

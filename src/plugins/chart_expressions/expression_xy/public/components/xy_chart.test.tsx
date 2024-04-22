@@ -37,7 +37,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { DataLayerConfig } from '../../common';
-import { LayerTypes } from '../../common/constants';
+import { LayerTypes, LegendStats } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
   chartsActiveCursorService,
@@ -740,7 +740,10 @@ describe('XYChart component', () => {
   test('ignores legend extra for ordinal chart', () => {
     const { args } = sampleArgs();
     const component = shallow(
-      <XYChart {...defaultProps} args={{ ...args, valuesInLegend: true }} />
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, legend: { ...args.legend, legendStats: [LegendStats.values] } }}
+      />
     );
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
   });
@@ -752,8 +755,11 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
+          legend: {
+            ...args.legend,
+            legendStats: [LegendStats.values],
+          },
           layers: [dateHistogramLayer],
-          valuesInLegend: true,
         }}
       />
     );

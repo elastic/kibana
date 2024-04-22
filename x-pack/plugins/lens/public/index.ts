@@ -38,6 +38,7 @@ export type {
   LegacyMetricState as MetricState,
   ValueLabelConfig,
   PieVisualizationState,
+  LegendStats,
   PieLayerState,
   SharedPieLayerState,
   LayerType,

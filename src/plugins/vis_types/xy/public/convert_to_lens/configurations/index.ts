@@ -29,6 +29,7 @@ import {
   VisParams,
 } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
+import { LegendStats } from '../../to_ast';
 
 function getYScaleType(scale?: Scale): XYConfiguration['yLeftScale'] | undefined {
   const type = scale?.type;
@@ -235,6 +236,9 @@ export const getConfiguration = (
       shouldTruncate: vis.params.truncateLegend ?? vis.type.visConfig.defaults.truncateLegend,
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
+      legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
+        ? [LegendStats.values]
+        : undefined,
     },
     fittingFunction: fittingFunction
       ? fittingFunction[0].toUpperCase() + fittingFunction.slice(1)
@@ -269,7 +273,6 @@ export const getConfiguration = (
     xTitle: xAxis.title.text,
     valueLabels:
       vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
-    valuesInLegend: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show),
     showCurrentTimeMarker: isTimeChart
       ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
       : undefined,

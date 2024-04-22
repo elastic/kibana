@@ -131,9 +131,6 @@ Object {
         "valueLabels": Array [
           "hide",
         ],
-        "valuesInLegend": Array [
-          false,
-        ],
         "xAxisConfig": Array [
           Object {
             "chain": Array [

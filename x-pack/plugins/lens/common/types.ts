@@ -64,7 +64,7 @@ export interface SharedPieLayerState {
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
-  showValuesInLegend?: boolean;
+  legendStats?: LegendStats[];
   nestedLegend?: boolean;
   percentDecimals?: number;
   emptySizeRatio?: number;
@@ -79,11 +79,16 @@ export type PieLayerState = SharedPieLayerState & {
   layerType: LayerType;
 };
 
+export enum LegendStats {
+  values = 'values',
+}
+
 export interface PieVisualizationState {
   shape: $Values<typeof PieChartTypes>;
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
+
 export interface LegacyMetricState {
   autoScaleMetricAlignment?: 'left' | 'right' | 'center';
   layerId: string;

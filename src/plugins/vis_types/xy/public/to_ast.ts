@@ -47,6 +47,7 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
     shouldTruncate: params.truncateLegend,
     showSingleSeries: true,
     legendSize,
+    legendStats: params.labels.show ? [LegendStats.values] : undefined,
   });
 
   return buildExpression([legend]);
@@ -186,6 +187,10 @@ function getScaleType(
   }
 
   return type;
+}
+
+export enum LegendStats {
+  values = 'values',
 }
 
 function getXAxisPosition(position: Position) {
@@ -434,7 +439,6 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
-    valuesInLegend: vis.params.labels.show,
     singleTable: true,
   });
 

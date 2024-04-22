@@ -49,6 +49,7 @@ import {
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
+  LegendStats,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 
@@ -214,6 +215,10 @@ export interface LegendConfig {
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
   legendSize?: LegendSize;
+  /**
+   * metrics to display in the legend
+   */
+  legendStats?: LegendStats[];
 }
 
 // Arguments to XY chart expression, with computed properties
@@ -226,7 +231,6 @@ export interface XYArgs extends DataLayerArgs {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
@@ -277,7 +281,6 @@ export interface LayeredXYArgs {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
@@ -302,7 +305,6 @@ export interface XYProps {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;

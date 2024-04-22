@@ -134,3 +134,7 @@ export const AxisModes = {
   WIGGLE: 'wiggle',
   SILHOUETTE: 'silhouette',
 } as const;
+
+export enum LegendStats {
+  values = 'values',
+}

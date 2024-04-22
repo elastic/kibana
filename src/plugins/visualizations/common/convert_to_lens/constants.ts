@@ -137,3 +137,7 @@ export const GaugeColorModes = {
 } as const;
 
 export const CollapseFunctions = ['sum', 'avg', 'min', 'max'] as const;
+
+export enum LegendStats {
+  values = 'values',
+}

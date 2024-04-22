@@ -27,6 +27,7 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
   CollapseFunctions,
+  LegendStats,
 } from '../constants';
 import { ExpressionValueVisDimension } from '../../expression_functions';
 
@@ -142,6 +143,7 @@ export interface LegendConfig {
   maxLines?: number;
   shouldTruncate?: boolean;
   legendSize?: LegendSize;
+  legendStats?: LegendStats[];
 }
 
 export interface XYConfiguration {
@@ -168,7 +170,6 @@ export interface XYConfiguration {
   fillOpacity?: number;
   minBarHeight?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   showCurrentTimeMarker?: boolean;
 }
 
@@ -238,7 +239,7 @@ export interface PartitionLayerState {
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
-  showValuesInLegend?: boolean;
+  legendStats?: LegendStats[];
   nestedLegend?: boolean;
   percentDecimals?: number;
   emptySizeRatio?: number;
