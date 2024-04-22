@@ -7,6 +7,7 @@
  */
 
 import { ParsedRequest } from '@kbn/monaco';
+import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import { constructUrl } from '../../../../lib/es';
 import type { DevToolsVariable } from '../../../components';
 import { EditorRequest } from './monaco_editor_actions_provider';
@@ -73,4 +74,34 @@ export const trackSentRequests = (
     const eventName = `${method}_${url}`;
     trackUiMetric.count(eventName);
   });
+};
+
+/*
+ * This function takes a request url as a string and returns it parts,
+ * for example '_search/test' => ['_search', 'test']
+ */
+const urlPartsSeparatorRegex = /\//;
+const endOfUrlToken = '__url_path_end__';
+export const tokenizeRequestUrl = (url: string): string[] => {
+  const parts = url.split(urlPartsSeparatorRegex);
+  // this special token is used to mark the end of the url
+  parts.push(endOfUrlToken);
+  return parts;
+};
+
+/*
+ * This function returns a documentation link from the autocomplete endpoint object
+ * and replaces the branch in the url with the current version "docLinkVersion"
+ */
+export const getDocumentationLinkFromAutocompleteContext = (
+  { endpoint }: AutoCompleteContext,
+  docLinkVersion: string
+): string | null => {
+  if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
+    return endpoint.documentation
+      .replace('/master/', `/${docLinkVersion}/`)
+      .replace('/current/', `/${docLinkVersion}/`)
+      .replace('/{branch}/', `/${docLinkVersion}/`);
+  }
+  return null;
 };

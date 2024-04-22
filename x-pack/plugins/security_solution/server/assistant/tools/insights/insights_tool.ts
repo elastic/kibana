@@ -10,7 +10,7 @@ import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-pl
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { LLMChain } from 'langchain/chains';
 import { OutputFixingParser } from 'langchain/output_parsers';
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool } from '@langchain/core/tools';
 
 import { APP_UI_ID } from '../../../../common';
 import { getAnonymizedAlerts } from './get_anonymized_alerts';
