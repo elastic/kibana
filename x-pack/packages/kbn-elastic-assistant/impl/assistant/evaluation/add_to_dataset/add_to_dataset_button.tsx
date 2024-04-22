@@ -124,7 +124,7 @@ export const AddToDatasetButton: React.FC<Props> = React.memo(({ selectedConvers
           >
             <EuiButtonIcon
               aria-label={i18n.ADD_TO_DATASET_POPOVER_TITLE(selectedMessageCount)}
-              data-test-subj="settings"
+              data-test-subj="add-to-dataset"
               onClick={togglePopover}
               isDisabled={isDisabled}
               iconType="listAdd"
