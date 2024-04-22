@@ -183,11 +183,13 @@ export function Dashboards() {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
           {currentDashboard && (
-            <FilterExplanationCallout
-              dashboardFilterAssetIdEnabled={currentDashboard.dashboardFilterAssetIdEnabled}
-            />
+            <>
+              <EuiSpacer size="s" />
+              <FilterExplanationCallout
+                dashboardFilterAssetIdEnabled={currentDashboard.dashboardFilterAssetIdEnabled}
+              />
+            </>
           )}
           <EuiFlexItem grow>
             <EuiSpacer size="l" />

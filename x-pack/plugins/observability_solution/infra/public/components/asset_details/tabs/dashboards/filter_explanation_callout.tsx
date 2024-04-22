@@ -13,9 +13,10 @@ import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { css } from '@emotion/react';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
-export const FilterExplanationCallout: React.FC<{
+interface Props {
   dashboardFilterAssetIdEnabled: boolean;
-}> = ({ dashboardFilterAssetIdEnabled }) => {
+}
+export const FilterExplanationCallout = ({ dashboardFilterAssetIdEnabled }: Props) => {
   const { asset } = useAssetDetailsRenderPropsContext();
 
   return (
