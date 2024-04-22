@@ -33,6 +33,7 @@ describe('LinkToAlertsPage component', () => {
   it('renders correctly with default props', () => {
     const props: LinkToAlertsPageProps = {
       dateRange: { from: '2024-04-01', to: '2024-04-15' },
+      ['data-test-subj']: 'test-link',
     };
     const { container } = render(
       <IntlProvider locale="en">
