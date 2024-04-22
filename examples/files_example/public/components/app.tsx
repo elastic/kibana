@@ -12,6 +12,7 @@ import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
 
 import {
+  EuiProvider,
   EuiPageTemplate,
   EuiInMemoryTable,
   EuiInMemoryTableProps,
@@ -131,7 +132,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   ];
 
   return (
-    <>
+    <EuiProvider>
       <EuiPageTemplate restrictWidth>
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
@@ -185,6 +186,6 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           }}
         />
       )}
-    </>
+    </EuiProvider>
   );
 };
