@@ -22,8 +22,8 @@
 
     - name: setup nvm for vagrant user
       lineinfile:
-        path: ~/.profile
-        line: source ~/.nvm/nvm.sh
+        path: "$HOME/.profile"
+        line: "source $HOME/.nvm/nvm.sh"
         create: yes
       become_flags: -i
 
@@ -33,7 +33,11 @@
     executable: /bin/bash
     chdir: "$HOME"
 
-# - name: install yarn?
+- name: install yarn
+  npm:
+    name: yarn
+    global: true
+
 # - name: install git?
 # - name: pull source?
 # /var/log/kibana
