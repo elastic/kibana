@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  LABEL_LIFECYCLE_STATE,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { LABEL_LIFECYCLE_STATE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
@@ -67,42 +60,37 @@ export async function getLaunchesByLocation({
     },
   };
 
-  const response = await apmEventClient.logEventSearch(
-    'get_mobile_location_launches',
-    {
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
-        },
-        aggs: {
-          timeseries: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: intervalString,
-              min_doc_count: 0,
-            },
-            aggs,
-          },
-          ...aggs,
+  const response = await apmEventClient.logEventSearch('get_mobile_location_launches', {
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
       },
-    }
-  );
+      aggs: {
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+          },
+          aggs,
+        },
+        ...aggs,
+      },
+    },
+  });
 
   return {
-    location: response.aggregations?.launches?.byLocation?.buckets[0]
-      ?.key as string,
-    value:
-      response.aggregations?.launches?.byLocation?.buckets[0]?.doc_count ?? 0,
+    location: response.aggregations?.launches?.byLocation?.buckets[0]?.key as string,
+    value: response.aggregations?.launches?.byLocation?.buckets[0]?.doc_count ?? 0,
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,

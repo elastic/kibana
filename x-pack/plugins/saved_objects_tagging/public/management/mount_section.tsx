@@ -7,9 +7,8 @@
 
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
@@ -45,27 +44,25 @@ export const mountSection = async ({
   title,
 }: MountSectionParams) => {
   const [coreStart] = await core.getStartServices();
-  const { element, setBreadcrumbs, theme$ } = mountParams;
+  const { element, setBreadcrumbs } = mountParams;
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
   const assignableTypes = await assignmentService.getAssignableTypes();
   coreStart.chrome.docTitle.change(title);
 
   ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <RedirectToHomeIfUnauthorized applications={coreStart.application}>
-          <TagManagementPage
-            setBreadcrumbs={setBreadcrumbs}
-            core={coreStart}
-            tagClient={tagClient}
-            tagCache={tagCache}
-            assignmentService={assignmentService}
-            capabilities={capabilities}
-            assignableTypes={assignableTypes}
-          />
-        </RedirectToHomeIfUnauthorized>
-      </KibanaThemeProvider>
-    </I18nProvider>,
+    <KibanaRenderContextProvider {...coreStart}>
+      <RedirectToHomeIfUnauthorized applications={coreStart.application}>
+        <TagManagementPage
+          setBreadcrumbs={setBreadcrumbs}
+          core={coreStart}
+          tagClient={tagClient}
+          tagCache={tagCache}
+          assignmentService={assignmentService}
+          capabilities={capabilities}
+          assignableTypes={assignableTypes}
+        />
+      </RedirectToHomeIfUnauthorized>
+    </KibanaRenderContextProvider>,
     element
   );
 
