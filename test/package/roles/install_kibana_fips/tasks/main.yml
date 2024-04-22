@@ -13,7 +13,7 @@
 
 - name: set kibana node version
   set_fact:
-    node_version: "{{ node_ver_file['content'] | b64decode | first }}"
+    node_version: "{{ node_ver_file['content'] | b64decode }}"
 
 - debug:
     msg: "{{ node_version }}"
