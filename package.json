@@ -512,6 +512,7 @@
     "@kbn/index-management": "link:x-pack/packages/index-management",
     "@kbn/index-management-plugin": "link:x-pack/plugins/index_management",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
+    "@kbn/inference_integration_flyout": "link:x-pack/packages/ml/inference_integration_flyout",
     "@kbn/infra-forge": "link:x-pack/packages/kbn-infra-forge",
     "@kbn/infra-plugin": "link:x-pack/plugins/observability_solution/infra",
     "@kbn/ingest-pipelines-plugin": "link:x-pack/plugins/ingest_pipelines",
