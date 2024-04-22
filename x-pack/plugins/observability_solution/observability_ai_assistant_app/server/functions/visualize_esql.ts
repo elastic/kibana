@@ -64,7 +64,12 @@ export function registerVisualizeESQLFunction({
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
 
-      const message = getMessageForLLM(intention, query, Boolean(errorMessages.length));
+      // there is an actual error only when the query hasn't returned results
+      // and the client side validation has detected errors, we are adding the
+      // extra columns check as the client side validator can return false positives
+      const queryHasActualErrors = Boolean(errorMessages.length && !columns.length);
+
+      const message = getMessageForLLM(intention, query, queryHasActualErrors);
 
       return {
         data: {
@@ -72,7 +77,7 @@ export function registerVisualizeESQLFunction({
         },
         content: {
           message,
-          errorMessages: !columns.length ? errorMessages : [],
+          errorMessages: queryHasActualErrors ? errorMessages : [],
         },
       };
     }
