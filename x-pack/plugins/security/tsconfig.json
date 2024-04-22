@@ -75,6 +75,13 @@
     "@kbn/code-editor-mock",
     "@kbn/core-security-browser",
     "@kbn/core-security-server",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-security-common",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

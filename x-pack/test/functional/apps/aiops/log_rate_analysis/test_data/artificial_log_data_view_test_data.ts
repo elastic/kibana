@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type LogRateAnalysisType, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { type LogRateAnalysisType, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import type { TestData } from '../../types';
 
@@ -34,12 +34,14 @@ interface GetArtificialLogDataViewTestDataOptions {
   analysisType: LogRateAnalysisType;
   textField: boolean;
   zeroDocsFallback: boolean;
+  autoRun: boolean;
 }
 
 export const getArtificialLogDataViewTestData = ({
   analysisType,
   textField,
   zeroDocsFallback,
+  autoRun,
 }: GetArtificialLogDataViewTestDataOptions): TestData => {
   function getAnalysisGroupsTable() {
     if (zeroDocsFallback) {
@@ -133,6 +135,7 @@ export const getArtificialLogDataViewTestData = ({
   return {
     suiteTitle: getSuiteTitle(),
     analysisType,
+    autoRun,
     dataGenerator: getDataGenerator(),
     isSavedSearch: false,
     sourceIndexOrSavedSearch: getDataGenerator(),
@@ -161,6 +164,7 @@ export const getArtificialLogDataViewTestData = ({
           wp: getWindowParameters(),
         },
       },
+      prompt: 'change-point',
     },
   };
 };

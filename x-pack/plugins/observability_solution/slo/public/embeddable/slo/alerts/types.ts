@@ -22,3 +22,16 @@ export interface EmbeddableSloProps {
 }
 
 export type SloAlertsEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
+
+export interface HasSloAlertsConfig {
+  getSloAlertsConfig: () => SloAlertsEmbeddableInput;
+  updateSloAlertsConfig: (next: SloAlertsEmbeddableInput) => void;
+}
+
+export const apiHasSloAlertsConfig = (api: unknown | null): api is HasSloAlertsConfig => {
+  return Boolean(
+    api &&
+      typeof (api as HasSloAlertsConfig).getSloAlertsConfig === 'function' &&
+      typeof (api as HasSloAlertsConfig).updateSloAlertsConfig === 'function'
+  );
+};

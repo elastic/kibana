@@ -12,6 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 /**
  * User configurable state of data grid, persisted in saved search
@@ -33,7 +34,13 @@ export type ValueToStringConverter = (
 /**
  * Custom column types per column name
  */
-export type DataTableColumnTypes = Record<string, string>;
+export type DataTableColumnsMeta = Record<
+  string,
+  {
+    type: DatatableColumnMeta['type'];
+    esType?: DatatableColumnMeta['esType'];
+  }
+>;
 
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;

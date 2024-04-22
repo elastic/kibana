@@ -175,7 +175,7 @@
           "\nPublic-facing interface\nApps should use this interface to build job params.\nbrowserTimezone and version is provided by Reporting"
         ],
         "signature": [
-          "{ title: string; objectType: string; layout: { id?: ",
+          "{ title: string; layout: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -195,7 +195,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ">[]; pagingStrategy?: ",
+          ">[]; objectType: string; pagingStrategy?: ",
           "CsvPagingStrategy",
           " | undefined; }"
         ],

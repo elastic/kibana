@@ -177,7 +177,7 @@ describe('helpers', () => {
           name: 'Result',
           sortable: true,
           truncateText: false,
-          width: '50px',
+          width: '65px',
         },
         { field: 'indexName', name: 'Index', sortable: true, truncateText: false, width: '300px' },
         { field: 'docsCount', name: 'Docs', sortable: true, truncateText: false },
@@ -564,6 +564,30 @@ describe('helpers', () => {
         );
 
         expect(screen.getByTestId('sizeInBytes')).toHaveTextContent('98.6MB');
+      });
+
+      test('it should not render sizeInBytes if it is not a number', () => {
+        const testIndexSummaryTableItem = { ...indexSummaryTableItem, sizeInBytes: undefined };
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          itemIdToExpandedRowMap: {},
+          isILMAvailable,
+          pattern: 'auditbeat-*',
+          toggleExpanded: jest.fn(),
+        });
+
+        const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
+          .render;
+
+        render(
+          <TestProviders>
+            {sizeInBytesRender != null &&
+              sizeInBytesRender(testIndexSummaryTableItem, testIndexSummaryTableItem)}
+          </TestProviders>
+        );
+
+        expect(screen.queryByTestId('sizeInBytes')).toBeNull();
       });
     });
   });

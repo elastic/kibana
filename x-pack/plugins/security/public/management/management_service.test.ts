@@ -51,6 +51,7 @@ describe('ManagementService', () => {
         fatalErrors,
         authc,
         management: managementSetup,
+        buildFlavor: 'traditional',
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -111,6 +112,7 @@ describe('ManagementService', () => {
         fatalErrors,
         authc,
         management: managementSetup,
+        buildFlavor: 'traditional',
       });
 
       // Only API Keys app should be registered
@@ -181,6 +183,7 @@ describe('ManagementService', () => {
         fatalErrors,
         authc: securityMock.createSetup().authc,
         management: managementSetup,
+        buildFlavor: 'traditional',
       });
 
       const getMockedApp = (id: string) => {

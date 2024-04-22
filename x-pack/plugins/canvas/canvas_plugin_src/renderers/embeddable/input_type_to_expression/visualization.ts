@@ -36,5 +36,5 @@ export function toExpression(input: VisualizeInput & { savedObjectId: string }):
     expressionParts.push(`hideLegend=true`);
   }
 
-  return expressionParts.join(' ');
+  return `${expressionParts.join(' ')} | render`;
 }

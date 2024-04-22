@@ -12,10 +12,10 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { StateComparators } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import { EmbeddableStateComparators } from './types';
 
 interface SuperTestStateType {
   name: string;
@@ -26,7 +26,7 @@ interface SuperTestStateType {
 describe('react embeddable unsaved changes', () => {
   let initialState: SuperTestStateType;
   let lastSavedState: SuperTestStateType;
-  let comparators: EmbeddableStateComparators<SuperTestStateType>;
+  let comparators: StateComparators<SuperTestStateType>;
   let deserializeState: (state: SerializedPanelState) => SuperTestStateType;
   let parentApi: (PresentationContainer & PublishesLastSavedState) | null;
 
@@ -47,7 +47,7 @@ describe('react embeddable unsaved changes', () => {
     const nameSubject = new BehaviorSubject<string>(initialState.name);
     const ageSubject = new BehaviorSubject<number>(initialState.age);
     const taglineSubject = new BehaviorSubject<string>(initialState.tagline);
-    const defaultComparators: EmbeddableStateComparators<SuperTestStateType> = {
+    const defaultComparators: StateComparators<SuperTestStateType> = {
       name: [nameSubject, jest.fn((nextName) => nameSubject.next(nextName))],
       age: [ageSubject, jest.fn((nextAge) => ageSubject.next(nextAge))],
       tagline: [taglineSubject, jest.fn((nextTagline) => taglineSubject.next(nextTagline))],
@@ -56,7 +56,7 @@ describe('react embeddable unsaved changes', () => {
   };
 
   const startTrackingUnsavedChanges = (
-    customComparators?: EmbeddableStateComparators<SuperTestStateType>
+    customComparators?: StateComparators<SuperTestStateType>
   ) => {
     comparators = customComparators ?? initializeDefaultComparators();
     deserializeState = jest.fn((state) => state.rawState as SuperTestStateType);
@@ -142,7 +142,7 @@ describe('react embeddable unsaved changes', () => {
     lastSavedState.age = 20;
     initialState.age = 50;
     const ageSubject = new BehaviorSubject(initialState.age);
-    const customComparators: EmbeddableStateComparators<SuperTestStateType> = {
+    const customComparators: StateComparators<SuperTestStateType> = {
       ...initializeDefaultComparators(),
       age: [
         ageSubject,

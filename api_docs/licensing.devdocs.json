@@ -827,10 +827,6 @@
               "path": "x-pack/plugins/logstash/public/plugin.ts"
             },
             {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts"
-            },
-            {
               "plugin": "painlessLab",
               "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
             },
@@ -861,6 +857,10 @@
             {
               "plugin": "apm",
               "path": "x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx"
+            },
+            {
+              "plugin": "slo",
+              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
             }
           ]
         },
@@ -2212,6 +2212,10 @@
             },
             {
               "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
+            },
+            {
+              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/indicator_match/threat_mapping/create_threat_signals.ts"
             },
             {
@@ -2257,6 +2261,18 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
             },
             {
               "plugin": "actions",

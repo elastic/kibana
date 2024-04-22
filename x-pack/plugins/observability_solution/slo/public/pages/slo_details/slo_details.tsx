@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -35,16 +35,14 @@ import { HeaderControl } from './components/header_control';
 import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
-import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
+import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 
 export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
+    observabilityAIAssistant,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { search } = useLocation();
@@ -52,11 +50,12 @@ export function SloDetailsPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-  const sloInstanceId = useGetInstanceIdQueryParam();
+  const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
   const { isLoading, data: slo } = useFetchSloDetails({
     sloId,
+    remoteName,
     instanceId: sloInstanceId,
     shouldRefetch: isAutoRefreshing,
   });
@@ -80,11 +79,11 @@ export function SloDetailsPage() {
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   useEffect(() => {
-    if (!slo) {
+    if (!slo || !observabilityAIAssistant) {
       return;
     }
 
-    return setScreenContext({
+    return observabilityAIAssistant.service.setScreenContext({
       screenDescription: dedent(`
         The user is looking at the detail page for the following SLO
 
@@ -103,7 +102,7 @@ export function SloDetailsPage() {
         },
       ],
     });
-  }, [setScreenContext, slo]);
+  }, [observabilityAIAssistant, slo]);
 
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {
@@ -124,7 +123,8 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
+        pageTitle: slo?.name ?? <EuiSkeletonText lines={1} />,
+        children: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: [
           <HeaderControl isLoading={isPerformingAction} slo={slo} />,
           <AutoRefreshButton

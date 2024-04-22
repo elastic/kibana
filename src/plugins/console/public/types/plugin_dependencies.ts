@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement } from 'react';
+import type { FC } from 'react';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
-import { EmbeddableConsoleProps } from './embeddable_console';
+import { EmbeddableConsoleProps, EmbeddedConsoleView } from './embeddable_console';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -43,11 +43,6 @@ export interface ConsolePluginSetup {
  */
 export interface ConsolePluginStart {
   /**
-   * renderEmbeddableConsole is available if the console UI is enabled. This function can be called to
-   * render an embeddable version of the developer console on the page.
-   */
-  renderEmbeddableConsole?: (props?: EmbeddableConsoleProps) => ReactElement | null;
-  /**
    * isEmbeddedConsoleAvailable is available if the embedded console can be rendered. Returns true when
    * called if the Embedded Console is currently rendered.
    */
@@ -57,4 +52,14 @@ export interface ConsolePluginStart {
    * this function will open the embedded console on the page if it is currently rendered.
    */
   openEmbeddedConsole?: (content?: string) => void;
+  /**
+   * EmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana
+   */
+  EmbeddableConsole?: FC<EmbeddableConsoleProps>;
+  /**
+   * Register an alternate view for the Embedded Console
+   *
+   * When registering an alternate view ensure that the content component you register is lazy loaded.
+   */
+  registerEmbeddedConsoleAlternateView?: (view: EmbeddedConsoleView | null) => void;
 }

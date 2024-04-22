@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
-import { renderEmbeddableConsole } from './application/containers/embeddable';
+import { EmbeddableConsole } from './application/containers/embeddable';
 import {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
@@ -18,11 +19,13 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddableConsoleProps,
-  EmbeddableConsoleDependencies,
+  EmbeddedConsoleView,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
 
-export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+export class ConsoleUIPlugin
+  implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
+{
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo = new EmbeddableConsoleInfo();
 
@@ -109,6 +112,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
     const {
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     const consoleStart: ConsolePluginStart = {};
@@ -122,20 +126,25 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       embeddedConsoleUiSetting;
 
     if (embeddedConsoleAvailable) {
-      consoleStart.renderEmbeddableConsole = (props?: EmbeddableConsoleProps) => {
-        const consoleDeps: EmbeddableConsoleDependencies = {
+      consoleStart.EmbeddableConsole = (props: EmbeddableConsoleProps) => {
+        return EmbeddableConsole({
+          ...props,
           core,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);
           },
-        };
-        return renderEmbeddableConsole(props, consoleDeps);
+          alternateView: this._embeddableConsole.alternateView,
+          isMonacoEnabled,
+        });
       };
       consoleStart.isEmbeddedConsoleAvailable = () =>
         this._embeddableConsole.isEmbeddedConsoleAvailable();
       consoleStart.openEmbeddedConsole = (content?: string) =>
         this._embeddableConsole.openEmbeddedConsole(content);
+      consoleStart.registerEmbeddedConsoleAlternateView = (view: EmbeddedConsoleView | null) => {
+        this._embeddableConsole.registerAlternateView(view);
+      };
     }
 
     return consoleStart;

@@ -167,7 +167,7 @@ export function AlertsPopover({
           ),
           icon: 'tableOfContents',
           href: services?.application?.getUrlForApp(
-            'management/insightsAndAlerting/triggersActions/alerts'
+            'management/insightsAndAlerting/triggersActions/rules'
           ),
           ['data-test-subj']: 'discoverManageAlertsButton',
         },

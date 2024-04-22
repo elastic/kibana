@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
@@ -17,6 +18,8 @@ interface AlertSearchBarContainerState {
   rangeTo: string;
   kuery: string;
   status: AlertStatus;
+  filters: Filter[];
+  savedQueryId?: string;
 }
 
 interface AlertSearchBarStateTransitions {
@@ -32,6 +35,12 @@ interface AlertSearchBarStateTransitions {
   setStatus: (
     state: AlertSearchBarContainerState
   ) => (status: AlertStatus) => AlertSearchBarContainerState;
+  setFilters: (
+    state: AlertSearchBarContainerState
+  ) => (filters: Filter[]) => AlertSearchBarContainerState;
+  setSavedQueryId: (
+    state: AlertSearchBarContainerState
+  ) => (savedQueryId?: string) => AlertSearchBarContainerState;
 }
 
 const defaultState: AlertSearchBarContainerState = {
@@ -39,6 +48,7 @@ const defaultState: AlertSearchBarContainerState = {
   rangeTo: 'now',
   kuery: '',
   status: ALL_ALERTS.status,
+  filters: [],
 };
 
 const transitions: AlertSearchBarStateTransitions = {
@@ -46,6 +56,8 @@ const transitions: AlertSearchBarStateTransitions = {
   setRangeTo: (state) => (rangeTo) => ({ ...state, rangeTo }),
   setKuery: (state) => (kuery) => ({ ...state, kuery }),
   setStatus: (state) => (status) => ({ ...state, status }),
+  setFilters: (state) => (filters) => ({ ...state, filters }),
+  setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
 };
 
 const alertSearchBarStateContainer = createStateContainer(defaultState, transitions);

@@ -213,6 +213,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         taskManager: plugins.taskManager,
         telemetry: core.analytics,
+        entityAnalyticsConfig: config.entityAnalytics,
       });
     }
 
@@ -557,8 +558,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+      assistantAlertsInsights: config.experimentalFeatures.assistantAlertsInsights,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      assistantStreamingEnabled: config.experimentalFeatures.assistantStreamingEnabled,
+    });
+    plugins.elasticAssistant.registerFeatures('management', {
+      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
@@ -644,6 +648,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsClient,
+      connectorActions: plugins.actions,
     });
 
     if (plugins.taskManager) {

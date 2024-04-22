@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type { GetAgentsOptions } from '.';
@@ -22,13 +24,17 @@ const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 3 * 60 * 1000; // 3 hours;
 
 export async function requestDiagnostics(
   esClient: ElasticsearchClient,
-  agentId: string
+  agentId: string,
+  additionalMetrics?: RequestDiagnosticsAdditionalMetrics[]
 ): Promise<{ actionId: string }> {
   const response = await createAgentAction(esClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'REQUEST_DIAGNOSTICS',
     expiration: new Date(Date.now() + REQUEST_DIAGNOSTICS_TIMEOUT_MS).toISOString(),
+    data: {
+      additional_metrics: additionalMetrics,
+    },
   });
   return { actionId: response.id };
 }
@@ -38,11 +44,14 @@ export async function bulkRequestDiagnostics(
   soClient: SavedObjectsClientContract,
   options: GetAgentsOptions & {
     batchSize?: number;
+    additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
   }
 ): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await requestDiagnosticsBatch(esClient, givenAgents, {});
+    return await requestDiagnosticsBatch(esClient, givenAgents, {
+      additionalMetrics: options.additionalMetrics,
+    });
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -54,7 +63,9 @@ export async function bulkRequestDiagnostics(
   });
   if (res.total <= batchSize) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await requestDiagnosticsBatch(esClient, givenAgents, {});
+    return await requestDiagnosticsBatch(esClient, givenAgents, {
+      additionalMetrics: options.additionalMetrics,
+    });
   } else {
     return await new RequestDiagnosticsActionRunner(
       esClient,

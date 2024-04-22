@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { DataViewsService } from '@kbn/data-views-plugin/common';

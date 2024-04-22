@@ -6,6 +6,8 @@
  */
 
 import type { FromSchema } from 'json-schema-to-ts';
+import { Observable } from 'rxjs';
+import { ChatCompletionChunkEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -21,12 +23,17 @@ export type RespondFunctionResources = Pick<
   'context' | 'logger' | 'plugins' | 'request'
 >;
 
+export type ChatFn = (
+  ...args: Parameters<ObservabilityAIAssistantClient['chat']>
+) => Promise<Observable<ChatCompletionChunkEvent>>;
+
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
     arguments: TArguments;
     messages: Message[];
     connectorId: string;
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
+    chat: ChatFn;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;

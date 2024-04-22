@@ -53,11 +53,9 @@ export function registerAlertsFunction({
       descriptionForUser: 'Get alerts for Observability',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           featureIds: {
             type: 'array',
-            additionalItems: false,
             items: {
               type: 'string',
               enum: DEFAULT_FEATURE_IDS,
@@ -73,7 +71,7 @@ export function registerAlertsFunction({
             type: 'string',
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
-          filter: {
+          kqlFilter: {
             type: 'string',
             description:
               'a KQL query to filter the data by. If no filter should be applied, leave it empty.',

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import type { TestData } from '../../types';
 
 export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote with spike',
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+  autoRun: false,
   dataGenerator: 'farequote_with_spike',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
@@ -42,5 +43,6 @@ export const farequoteDataViewTestData: TestData = {
         },
       },
     },
+    prompt: 'empty',
   },
 };

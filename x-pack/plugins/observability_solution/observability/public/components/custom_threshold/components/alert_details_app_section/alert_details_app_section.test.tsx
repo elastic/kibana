@@ -64,6 +64,15 @@ jest.mock('../../../../utils/kibana_react', () => ({
       data: {
         search: jest.fn(),
       },
+      share: {
+        url: {
+          locators: {
+            get: jest
+              .fn()
+              .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('/view-in-app-url') }),
+          },
+        },
+      },
     },
   }),
 }));
@@ -98,26 +107,41 @@ describe('AlertDetailsAppSection', () => {
   it('should render rule and alert data', async () => {
     const result = renderComponent();
 
-    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(6);
+    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(7);
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
   it('should render alert summary fields', async () => {
     renderComponent();
 
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
       {
         label: 'Source',
         value: (
-          <Groups
-            groups={[
-              {
-                field: 'host.name',
-                value: 'host-1',
-              },
-            ]}
-          />
+          <React.Fragment>
+            <Groups
+              groups={[
+                {
+                  field: 'host.name',
+                  value: 'host-1',
+                },
+              ]}
+              timeRange={{
+                from: '2023-03-28T10:43:13.802Z',
+                to: 'now',
+              }}
+            />
+            <span>
+              <EuiLink
+                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
+                href="/view-in-app-url"
+                target="_blank"
+              >
+                View related logs
+              </EuiLink>
+            </span>
+          </React.Fragment>
         ),
       },
       {
@@ -139,7 +163,7 @@ describe('AlertDetailsAppSection', () => {
     const alertFields = { tags: [], 'kibana.alert.group': undefined };
     renderComponent({}, alertFields);
 
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
       {
         label: 'Rule',
@@ -160,7 +184,7 @@ describe('AlertDetailsAppSection', () => {
       { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
     );
 
-    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(6);
+    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(7);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });
 

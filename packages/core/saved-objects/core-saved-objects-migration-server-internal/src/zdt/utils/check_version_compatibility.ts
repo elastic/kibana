@@ -12,8 +12,10 @@ import {
   compareVirtualVersions,
   getVirtualVersionMap,
   type IndexMapping,
-  type CompareModelVersionResult,
+  type CompareModelVersionStatus,
+  type CompareModelVersionDetails,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { getUpdatedRootFields } from '../../core/compare_mappings';
 
 interface CheckVersionCompatibilityOpts {
   mappings: IndexMapping;
@@ -22,12 +24,20 @@ interface CheckVersionCompatibilityOpts {
   deletedTypes: string[];
 }
 
+type CheckVersionCompatibilityStatus = 'greater' | 'lesser' | 'equal' | 'conflict';
+
+interface CheckVersionCompatibilityResult {
+  status: CheckVersionCompatibilityStatus;
+  versionDetails: CompareModelVersionDetails;
+  updatedRootFields: string[];
+}
+
 export const checkVersionCompatibility = ({
   mappings,
   types,
   source,
   deletedTypes,
-}: CheckVersionCompatibilityOpts): CompareModelVersionResult => {
+}: CheckVersionCompatibilityOpts): CheckVersionCompatibilityResult => {
   const appVersions = getVirtualVersionMap(types);
   const indexVersions = getVirtualVersionsFromMappings({
     mappings,
@@ -37,5 +47,34 @@ export const checkVersionCompatibility = ({
   if (!indexVersions) {
     throw new Error(`Cannot check version: ${source} not present in the mapping meta`);
   }
-  return compareVirtualVersions({ appVersions, indexVersions, deletedTypes });
+
+  const updatedRootFields = getUpdatedRootFields(mappings);
+  const modelVersionStatus = compareVirtualVersions({ appVersions, indexVersions, deletedTypes });
+  const status = getCompatibilityStatus(modelVersionStatus.status, updatedRootFields.length > 0);
+
+  return {
+    status,
+    updatedRootFields,
+    versionDetails: modelVersionStatus.details,
+  };
+};
+
+const getCompatibilityStatus = (
+  versionStatus: CompareModelVersionStatus,
+  hasUpdatedRootFields: boolean
+): CheckVersionCompatibilityStatus => {
+  if (!hasUpdatedRootFields) {
+    return versionStatus;
+  }
+  switch (versionStatus) {
+    case 'lesser':
+      // lower model versions but additional root mappings => conflict
+      return 'conflict';
+    case 'equal':
+      // no change on model versions but additional root mappings => greater
+      return 'greater';
+    default:
+      // greater and conflict are not impacted
+      return versionStatus;
+  }
 };

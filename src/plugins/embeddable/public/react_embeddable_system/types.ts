@@ -7,7 +7,7 @@
  */
 import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { HasType, PublishesUnsavedChanges, PublishingSubject } from '@kbn/presentation-publishing';
+import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 import React, { ReactElement } from 'react';
 
 export type ReactEmbeddableRegistration<
@@ -41,27 +41,9 @@ export interface ReactEmbeddableFactory<
     initialState: StateType,
     buildApi: (
       apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
-      comparators: EmbeddableStateComparators<StateType>
-    ) => ApiType
+      comparators: StateComparators<StateType>
+    ) => ApiType,
+    uuid: string,
+    parentApi?: unknown
   ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
 }
-
-/**
- * State comparators
- */
-export type EmbeddableComparatorFunction<StateType, KeyType extends keyof StateType> = (
-  last: StateType[KeyType] | undefined,
-  current: StateType[KeyType] | undefined,
-  lastState?: Partial<StateType>,
-  currentState?: Partial<StateType>
-) => boolean;
-
-export type EmbeddableComparatorDefinition<StateType, KeyType extends keyof StateType> = [
-  PublishingSubject<StateType[KeyType]>,
-  (value: StateType[KeyType]) => void,
-  EmbeddableComparatorFunction<StateType, KeyType>?
-];
-
-export type EmbeddableStateComparators<StateType> = {
-  [KeyType in keyof StateType]: EmbeddableComparatorDefinition<StateType, KeyType>;
-};

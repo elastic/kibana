@@ -34,6 +34,13 @@ export const indexTypesMapMock = {
   '.complementary_index': ['testtype3'],
 };
 
+export const hashToVersionMapMock = {
+  'testtype|someHash': '10.1.0',
+  'testtype2|anotherHash': '10.2.0',
+  'testtasktype|hashesAreCool': '10.1.0',
+  'testtype3|yetAnotherHash': '10.1.0',
+};
+
 export const savedObjectTypeRegistryMock = createRegistry([
   // typeRegistry depicts an updated index map:
   //   .my_index: ['testtype', 'testtype3'],

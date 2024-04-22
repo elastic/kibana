@@ -19,7 +19,7 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
-import { ErrorWithReason, getReasonFromError } from '../lib/error_with_reason';
+import { getReasonFromError } from '../lib/error_with_reason';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -48,26 +48,16 @@ describe('rule_loader', () => {
     bar: schema.boolean(),
   });
 
-  const getDefaultValidateRuleParams = ({
-    error,
-    enabled: ruleEnabled = true,
-  }: {
-    error?: ErrorWithReason;
-    enabled?: boolean;
-  }) => ({
+  const getDefaultValidateRuleParams = (ruleEnabled: boolean = true) => ({
     paramValidator,
     ruleId,
     spaceId,
     ruleTypeRegistry,
-    ruleData: error
-      ? { error }
-      : {
-          data: {
-            indirectParams: { ...mockedRawRuleSO.attributes, enabled: ruleEnabled },
-            version: '1',
-            references: [],
-          },
-        },
+    ruleData: {
+      rawRule: { ...mockedRawRuleSO.attributes, enabled: ruleEnabled },
+      version: '1',
+      references: [],
+    },
   });
 
   beforeEach(() => {
@@ -92,7 +82,7 @@ describe('rule_loader', () => {
     describe('succeeds', () => {
       test('validates and returns the results', () => {
         const result = validateRuleAndCreateFakeRequest({
-          ...getDefaultValidateRuleParams({}),
+          ...getDefaultValidateRuleParams(),
           context,
         });
 
@@ -107,27 +97,11 @@ describe('rule_loader', () => {
       });
     });
 
-    test('throws when there is decrypt attributes error', () => {
-      let outcome = 'success';
-      try {
-        validateRuleAndCreateFakeRequest({
-          ...getDefaultValidateRuleParams({
-            error: new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, new Error('test')),
-          }),
-          context,
-        });
-      } catch (err) {
-        outcome = 'failure';
-        expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Decrypt);
-      }
-      expect(outcome).toBe('failure');
-    });
-
     test('throws when rule is not enabled', async () => {
       let outcome = 'success';
       try {
         validateRuleAndCreateFakeRequest({
-          ...getDefaultValidateRuleParams({ enabled: false }),
+          ...getDefaultValidateRuleParams(false),
           context,
         });
       } catch (err) {
@@ -146,7 +120,7 @@ describe('rule_loader', () => {
       let outcome = 'success';
       try {
         validateRuleAndCreateFakeRequest({
-          ...getDefaultValidateRuleParams({}),
+          ...getDefaultValidateRuleParams(),
           context,
         });
       } catch (err) {
@@ -164,7 +138,7 @@ describe('rule_loader', () => {
       let outcome = 'success';
       try {
         validateRuleAndCreateFakeRequest({
-          ...getDefaultValidateRuleParams({}),
+          ...getDefaultValidateRuleParams(),
           context,
         });
       } catch (err) {
@@ -182,7 +156,7 @@ describe('rule_loader', () => {
       contextMock.spaceIdToNamespace.mockReturnValue(undefined);
       const result = await getDecryptedRule(context, ruleId, 'default');
 
-      expect(result.indirectParams).toEqual({
+      expect(result.rawRule).toEqual({
         ...mockedRawRuleSO.attributes,
         apiKey,
         enabled,
@@ -201,7 +175,7 @@ describe('rule_loader', () => {
       const result = await getDecryptedRule(context, ruleId, spaceId);
 
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual([spaceId]);
-      expect(result.indirectParams).toEqual({
+      expect(result.rawRule).toEqual({
         ...mockedRawRuleSO.attributes,
         apiKey,
         enabled,

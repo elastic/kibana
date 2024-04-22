@@ -24,7 +24,7 @@ export async function resolveEmbeddableSloUserInput(
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
     try {
-      const modalSession = overlays.openModal(
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider
             services={{
@@ -34,12 +34,13 @@ export async function resolveEmbeddableSloUserInput(
           >
             <QueryClientProvider client={queryClient}>
               <SloConfiguration
+                initialInput={input}
                 onCreate={(update: EmbeddableSloProps) => {
-                  modalSession.close();
+                  flyoutSession.close();
                   resolve(update);
                 }}
                 onCancel={() => {
-                  modalSession.close();
+                  flyoutSession.close();
                   reject();
                 }}
               />

@@ -6,10 +6,7 @@
  */
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import {
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 
@@ -78,6 +75,7 @@ const configSchema = schema.object({
      * enabling this feature flag.
      */
     profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
+    ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   serverless: schema.object({
     enabled: offeringBasedSchema({
@@ -89,13 +87,7 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
-  deprecations: ({
-    rename,
-    unused,
-    renameFromRoot,
-    deprecateFromRoot,
-    unusedFromRoot,
-  }) => [
+  deprecations: ({ rename, unused, renameFromRoot, deprecateFromRoot, unusedFromRoot }) => [
     unused('ui.transactionGroupBucketSize', {
       level: 'warning',
     }),
@@ -105,16 +97,12 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
     unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
     unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
-    renameFromRoot(
-      'xpack.apm.maxServiceEnvironments',
-      `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
-    ),
-    renameFromRoot(
-      'xpack.apm.maxServiceSelection',
-      `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
-    ),
+    renameFromRoot('xpack.apm.maxServiceEnvironments', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.apm.maxServiceSelection', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
   ],
   exposeToBrowser: {
     serviceMapEnabled: true,

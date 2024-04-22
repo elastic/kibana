@@ -307,4 +307,16 @@ describe('Legacy Alerts Client', () => {
       '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
     });
   });
+
+  test('isTrackedAlert() should return true if alert was active in a previous execution, false otherwise', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      logger,
+      ruleType,
+    });
+
+    await alertsClient.initializeExecution(defaultExecutionOpts);
+    expect(alertsClient.isTrackedAlert('1')).toBe(true);
+    expect(alertsClient.isTrackedAlert('2')).toBe(true);
+    expect(alertsClient.isTrackedAlert('3')).toBe(false);
+  });
 });

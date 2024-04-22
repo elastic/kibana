@@ -30,11 +30,11 @@ interface ConnectorSetupEmptyPromptProps {
 export const ConnectorSetupEmptyPrompt = ({ connector }: ConnectorSetupEmptyPromptProps) => {
   const { http } = useKibanaServices();
   const assetBasePath = useAssetBasePath();
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
 
   const connectorsIconPath = assetBasePath + '/connectors.svg';
   const connectorPath = http.basePath.prepend(`/app/connectors/${connector.id}`);
-  const connectorType = connectorTypes?.connectors?.find(
+  const connectorType = connectorTypes.find(
     (cType) => cType.serviceType === connector.service_type
   );
   return (

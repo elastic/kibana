@@ -1092,7 +1092,7 @@
               "\nSaved object that was created, changed, deleted or accessed as part of this event."
             ],
             "signature": [
-              "{ type: string; id: string; } | undefined"
+              "{ type: string; id: string; name?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
             "deprecated": false,

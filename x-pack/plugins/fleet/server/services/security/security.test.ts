@@ -27,6 +27,8 @@ describe('When using calculateRouteAuthz()', () => {
       allAgents: false,
       readSettings: false,
       allSettings: false,
+      addAgents: false,
+      addFleetServers: false,
     },
     integrations: {
       readPackageInfo: false,
@@ -706,7 +708,7 @@ describe('getAuthzFromRequest', () => {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-all',
+              privilege: 'api:fleet-agents-all',
               authorized: true,
             },
           ],

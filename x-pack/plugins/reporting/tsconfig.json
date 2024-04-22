@@ -31,7 +31,6 @@
     "@kbn/rison",
     "@kbn/task-manager-plugin",
     "@kbn/config",
-    "@kbn/logging-mocks",
     "@kbn/core-http-server",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/safer-lodash-set",
@@ -50,6 +49,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
     "@kbn/analytics-client",
+    "@kbn/reporting-csv-share-panel",
   ],
   "exclude": [
     "target/**/*",

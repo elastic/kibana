@@ -35,7 +35,7 @@ export interface ConfigPanelWrapperProps {
   getUserMessages?: UserMessagesGetter;
   hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
-  shouldDisplayChartSwitch?: boolean;
+  onlyAllowSwitchToSubtypes?: boolean;
 }
 
 export interface LayerPanelProps {
@@ -84,7 +84,7 @@ export interface LayerPanelProps {
   getUserMessages?: UserMessagesGetter;
   displayLayerSettings: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
-  shouldDisplayChartSwitch?: boolean;
+  onlyAllowSwitchToSubtypes?: boolean;
 }
 
 export interface LayerDatasourceDropProps {

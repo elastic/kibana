@@ -25,7 +25,7 @@
 }
 
 @mixin euiFlyout {
-  @include kibanaFullBodyHeight();
+  height: calc(100vh - var(--euiFixedHeadersOffset, 0));
   position: fixed;
   display: flex;
   inline-size: 50vw;

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { FormatFactory } from '../../types';
+import type { FormatFactory, RowHeightMode } from '../../types';
 import type { ColumnConfigArg } from './datatable_column';
 import type { DatatableExpressionFunction } from './types';
 
@@ -29,7 +29,7 @@ export interface DatatableArgs {
   sortingDirection: SortingState['direction'];
   fitRowToContent?: boolean;
   rowHeightLines?: number;
-  headerRowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: RowHeightMode;
   headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
 }

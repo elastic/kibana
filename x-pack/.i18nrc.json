@@ -4,6 +4,7 @@
     "xpack.actions": "plugins/actions",
     "xpack.aiops": [
       "packages/ml/aiops_components",
+      "packages/ml/aiops_log_pattern_analysis",
       "plugins/aiops"
     ],
     "xpack.alerting": "plugins/alerting",
@@ -28,6 +29,7 @@
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
     "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
     "xpack.elasticAssistantCommon": "packages/kbn-elastic-assistant-common",
+    "xpack.elasticAssistantPlugin": "plugins/elastic_assistant",
     "xpack.ecsDataQualityDashboard": "plugins/ecs_data_quality_dashboard",
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
@@ -47,6 +49,7 @@
     ],
     "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
+    "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
@@ -73,6 +76,7 @@
       "packages/ml/data_grid",
       "packages/ml/data_view_utils",
       "packages/ml/date_picker",
+      "packages/ml/inference_integration_flyout",
       "packages/ml/trained_models_utils",
       "packages/ml/category_validator",
       "packages/ml/ui_actions",
@@ -86,6 +90,7 @@
       "plugins/observability_solution/observability_ai_assistant",
       "plugins/observability_solution/observability_ai_assistant_app"
     ],
+    "xpack.observabilityAiAssistantManagement": "plugins/observability_solution/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
@@ -105,6 +110,8 @@
     ],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.searchNotebooks": "plugins/search_notebooks",
+    "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",

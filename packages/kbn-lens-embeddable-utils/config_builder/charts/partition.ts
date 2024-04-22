@@ -70,7 +70,7 @@ function buildFormulaLayer(
   layer: LensTreeMapConfig | LensPieConfig | LensMosaicConfig,
   layerNr: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {

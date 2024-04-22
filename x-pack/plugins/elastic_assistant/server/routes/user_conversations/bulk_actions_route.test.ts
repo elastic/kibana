@@ -74,14 +74,14 @@ describe('Perform bulk action route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
-        conversations_count: 2,
+        conversations_count: 3,
         attributes: {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
             skipped: 0,
-            succeeded: 2,
-            total: 2,
+            succeeded: 3,
+            total: 3,
           },
         },
       });
@@ -94,7 +94,7 @@ describe('Perform bulk action route', () => {
         (await clients.elasticAssistant.getAIAssistantConversationsDataClient.getWriter())
           .bulk as jest.Mock
       ).mockResolvedValue({
-        docs_created: [mockConversation, mockConversation],
+        docs_created: ['49403909-ca9b-49ba-9d7a-7e5320e68d04'],
         docs_updated: [],
         docs_deleted: [],
         errors: [
@@ -130,9 +130,9 @@ describe('Perform bulk action route', () => {
         attributes: {
           summary: {
             failed: 3,
-            succeeded: 2,
+            succeeded: 1,
             skipped: 0,
-            total: 5,
+            total: 4,
           },
           errors: [
             {

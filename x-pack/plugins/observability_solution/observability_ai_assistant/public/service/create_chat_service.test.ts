@@ -33,55 +33,54 @@ async function getConcatenatedMessage(
 }
 
 describe('createChatService', () => {
-  describe('chat', () => {
-    let service: ObservabilityAIAssistantChatService;
+  let service: ObservabilityAIAssistantChatService;
+  const clientSpy = jest.fn();
 
-    const clientSpy = jest.fn();
+  function respondWithChunks({ chunks, status = 200 }: { status?: number; chunks: string[] }) {
+    const response = {
+      response: {
+        status,
+        body: new ReadableStream({
+          start(controller) {
+            chunks.forEach((chunk) => {
+              controller.enqueue(new TextEncoder().encode(chunk));
+            });
+            controller.close();
+          },
+        }),
+      },
+    };
 
-    function respondWithChunks({ chunks, status = 200 }: { status?: number; chunks: string[] }) {
-      const response = {
-        response: {
-          status,
-          body: new ReadableStream({
-            start(controller) {
-              chunks.forEach((chunk) => {
-                controller.enqueue(new TextEncoder().encode(chunk));
-              });
-              controller.close();
-            },
-          }),
-        },
+    clientSpy.mockResolvedValueOnce(response);
+  }
+
+  beforeEach(async () => {
+    clientSpy.mockImplementationOnce(async () => {
+      return {
+        functionDefinitions: [],
+        contextDefinitions: [],
       };
+    });
+    service = await createChatService({
+      analytics: {
+        optIn: () => {},
+        reportEvent: () => {},
+        telemetryCounter$: new Observable(),
+      },
+      apiClient: clientSpy,
+      registrations: [],
+      signal: new AbortController().signal,
+    });
+  });
 
-      clientSpy.mockResolvedValueOnce(response);
-    }
+  afterEach(() => {
+    clientSpy.mockReset();
+  });
 
+  describe('chat', () => {
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
       return service.chat('my_test', { signal, messages: [], connectorId: '' });
     }
-
-    beforeEach(async () => {
-      clientSpy.mockImplementationOnce(async () => {
-        return {
-          functionDefinitions: [],
-          contextDefinitions: [],
-        };
-      });
-      service = await createChatService({
-        analytics: {
-          optIn: () => {},
-          reportEvent: () => {},
-          telemetryCounter$: new Observable(),
-        },
-        apiClient: clientSpy,
-        registrations: [],
-        signal: new AbortController().signal,
-      });
-    });
-
-    afterEach(() => {
-      clientSpy.mockReset();
-    });
 
     it('correctly parses a stream of JSON lines', async () => {
       const chunk1 =
@@ -228,6 +227,39 @@ describe('createChatService', () => {
             }, 0);
           })
       ).rejects.toEqual(expect.any(AbortError));
+    });
+  });
+
+  describe('complete', () => {
+    it("sends the user's preferred response language to the API", async () => {
+      respondWithChunks({
+        chunks: [
+          '{"id":"my-id","type":"chatCompletionChunk","message":{"content":"Some message"}}',
+        ],
+      });
+
+      const response$ = service.complete({
+        connectorId: '',
+        getScreenContexts: () => [],
+        messages: [],
+        persist: false,
+        signal: new AbortController().signal,
+        responseLanguage: 'orcish',
+      });
+
+      await getConcatenatedMessage(response$);
+
+      expect(clientSpy).toHaveBeenNthCalledWith(
+        2,
+        'POST /internal/observability_ai_assistant/chat/complete',
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({
+              responseLanguage: 'orcish',
+            }),
+          }),
+        })
+      );
     });
   });
 });

@@ -68,7 +68,7 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
       <EuiLink
         key={props.id}
         href={href}
-        css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}
+        css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
         title={props.id}
       >
         {props.id}

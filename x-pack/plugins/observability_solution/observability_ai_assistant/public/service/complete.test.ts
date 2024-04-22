@@ -98,6 +98,7 @@ describe('complete', () => {
         messages,
         persist: false,
         signal: new AbortController().signal,
+        responseLanguage: 'orcish',
         ...params,
       },
       requestCallback

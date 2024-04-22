@@ -13,6 +13,7 @@ import { responseActionsClientMock } from '../../services/actions/clients/mocks'
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
 import { waitFor } from '@testing-library/react';
+import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -50,6 +51,21 @@ describe('CompleteExternalTaskRunner class', () => {
     expect(endpointContextServicesMock.createLogger().debug).toHaveBeenCalledWith(
       `Exiting: Run aborted due to license not being Enterprise`
     );
+  });
+
+  it('should NOT log an error if agentType is not configured with a connector', async () => {
+    (endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(
+      () => {
+        const clientMock = responseActionsClientMock.create();
+        (clientMock.processPendingActions as jest.Mock).mockImplementation(async () => {
+          throw new ResponseActionsConnectorNotConfiguredError('foo');
+        });
+        return clientMock;
+      }
+    );
+    await runnerInstance.run();
+
+    expect(endpointContextServicesMock.createLogger().error).not.toHaveBeenCalled();
   });
 
   it('should call `processPendingAction` for each external agent type', async () => {

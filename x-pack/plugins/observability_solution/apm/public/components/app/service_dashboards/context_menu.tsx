@@ -4,14 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 interface Props {
   items: React.ReactNode[];
@@ -36,7 +31,9 @@ export function ContextMenu({ items }: Props) {
           display="base"
           size="s"
           iconType="boxesVertical"
-          aria-label="More"
+          aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
+            defaultMessage: 'More',
+          })}
           onClick={onButtonClick}
         />
       }
@@ -47,8 +44,11 @@ export function ContextMenu({ items }: Props) {
     >
       <EuiContextMenuPanel
         size="s"
-        items={items.map((item: React.ReactNode) => (
-          <EuiContextMenuItem size="s"> {item}</EuiContextMenuItem>
+        items={items.map((item, index) => (
+          <EuiContextMenuItem key={index} size="s">
+            {' '}
+            {item}
+          </EuiContextMenuItem>
         ))}
       />
     </EuiPopover>

@@ -41,11 +41,8 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   async function cleanUpTransform(transformId: string) {
-    const destinationIndex = generateDestIndex(transformId);
-
-    await transform.api.stopTransform(transformId);
     await transform.api.cleanTransformIndices();
-    await transform.api.deleteIndices(destinationIndex);
+    await transform.api.deleteIndices(generateDestIndex(transformId));
   }
 
   // If transform was created with sufficient permissions -> should create and start
@@ -72,13 +69,13 @@ export default ({ getService }: FtrProviderContext) => {
         TRANSFORM_STATE.STOPPED,
         `Expected transform state of ${transformId} to be '${TRANSFORM_STATE.STOPPED}' (got ${stats.state})`
       );
-      expect(stats.health.status).to.eql(
+      expect(stats.health?.status).to.eql(
         'red',
-        `Expected transform health status of ${transformId} to be 'red' (got ${stats.health.status})`
+        `Expected transform health status of ${transformId} to be 'red' (got ${stats.health?.status})`
       );
-      expect(stats.health.issues![0].type).to.eql(
+      expect(stats.health?.issues![0].type).to.eql(
         'privileges_check_failed',
-        `Expected transform health issue of ${transformId} to be 'privileges_check_failed' (got ${stats.health.status})`
+        `Expected transform health issue of ${transformId} to be 'privileges_check_failed' (got ${stats.health?.status})`
       );
     }
 
@@ -94,9 +91,9 @@ export default ({ getService }: FtrProviderContext) => {
         )})`
       );
       const stats = await transform.api.getTransformStats(transformId);
-      expect(stats.health.status).to.eql(
+      expect(stats.health?.status).to.eql(
         'green',
-        `Expected transform health status of ${transformId} to be 'green' (got ${stats.health.status})`
+        `Expected transform health status of ${transformId} to be 'green' (got ${stats.health?.status})`
       );
     }
 
@@ -234,9 +231,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
-          await transform.api.stopTransform(id);
-        });
         await transform.api.cleanTransformIndices();
         await asyncForEach(destinationIndices, async (destinationIndex: string) => {
           await transform.api.deleteIndices(destinationIndex);

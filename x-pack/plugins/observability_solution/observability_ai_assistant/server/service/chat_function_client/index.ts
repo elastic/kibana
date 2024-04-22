@@ -18,7 +18,7 @@ import {
 } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
-import type { FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
+import type { ChatFn, FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
 
 export class FunctionArgsValidationError extends Error {
   constructor(public readonly errors: ErrorObject[]) {
@@ -53,8 +53,6 @@ export class ChatFunctionClient {
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
-            additionalProperties: false,
-            additionalItems: false,
             properties: {
               data: {
                 type: 'array',
@@ -64,8 +62,6 @@ export class ChatFunctionClient {
                   type: 'string',
                   enum: allData.map((data) => data.name),
                 },
-                additionalItems: false,
-                additionalProperties: false,
               },
             },
             required: ['data' as const],
@@ -146,12 +142,14 @@ export class ChatFunctionClient {
   }
 
   async executeFunction({
+    chat,
     name,
     args,
     messages,
     signal,
     connectorId,
   }: {
+    chat: ChatFn;
     name: string;
     args: string | undefined;
     messages: Message[];
@@ -169,7 +167,13 @@ export class ChatFunctionClient {
     this.validate(name, parsedArguments);
 
     return await fn.respond(
-      { arguments: parsedArguments, messages, connectorId, screenContexts: this.screenContexts },
+      {
+        arguments: parsedArguments,
+        messages,
+        connectorId,
+        screenContexts: this.screenContexts,
+        chat,
+      },
       signal
     );
   }

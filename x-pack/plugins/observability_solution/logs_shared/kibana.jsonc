@@ -13,8 +13,10 @@
       "dataViews",
       "usageCollection",
       "observabilityShared",
-      "observabilityAIAssistant",
       "share"
+    ],
+    "optionalPlugins": [
+      "observabilityAIAssistant",
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]

@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-import { Replacement } from '@kbn/elastic-assistant-common';
+import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
 
-export interface ResponseBody {
-  data: string;
-  connector_id: string;
-  replacements?: Replacement[];
-  status: string;
-  trace_data?: {
-    transaction_id: string;
-    trace_id: string;
-  };
-}
+export type ResponseBody = ExecuteConnectorResponse;
