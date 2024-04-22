@@ -26,20 +26,25 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
   ) {
     const assets: Map<string, ServiceAssetDocument> = new Map();
 
-    let toFlush: TAsset[] = [];
+    let toFlush: ServiceAssetDocument[] = [];
     let cb: (() => void) | undefined;
 
-    function flush(stream: Duplex, callback?: () => void) {
-      const allItems = [...assets.values()];
+    function flush(stream: Duplex, includeCurrentAssets: boolean, callback?: () => void) {
+      const allItems = [...toFlush];
 
       toFlush = [];
+
+      if (includeCurrentAssets) {
+        allItems.push(...assets.values());
+        assets.clear();
+      }
 
       while (allItems.length) {
         const next = allItems.shift()!;
         const serialized = serialize(next);
         const shouldWriteNext = stream.push(serialized);
         if (!shouldWriteNext) {
-          // toFlush = allItems;
+          toFlush = allItems;
           cb = callback;
           return;
         }
@@ -54,10 +59,10 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
     return new PassThrough({
       objectMode: true,
       read() {
-        flush(this, cb);
+        flush(this, false, cb);
       },
       final(callback) {
-        flush(this, callback);
+        flush(this, true, callback);
       },
       write(event: TFields, encoding, callback) {
         if (!filter(event)) {

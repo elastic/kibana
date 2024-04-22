@@ -36,6 +36,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
 
   private pipelineCallback: (base: Readable) => NodeJS.WritableStream;
   protected dataStreams: string[] = [];
+  protected indices: string[] = [];
 
   constructor(options: { client: Client; logger: Logger } & SynthtraceEsClientOptions) {
     this.client = options.client;
@@ -46,12 +47,32 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async clean() {
-    this.logger.info(`Cleaning data streams ${this.dataStreams.join(',')}`);
+    this.logger.info(
+      `Cleaning data streams "${this.dataStreams.join(',')}" and indices "${this.indices.join(
+        ','
+      )}"`
+    );
 
-    await this.client.indices.deleteDataStream({
-      name: this.dataStreams.join(','),
-      expand_wildcards: ['open', 'hidden'],
-    });
+    await Promise.all([
+      ...(this.dataStreams.length
+        ? [
+            this.client.indices.deleteDataStream({
+              name: this.dataStreams.join(','),
+              expand_wildcards: ['open', 'hidden'],
+            }),
+          ]
+        : []),
+      ...(this.indices.length
+        ? [
+            this.client.indices.delete({
+              index: this.indices.join(','),
+              expand_wildcards: ['open', 'hidden'],
+              ignore_unavailable: true,
+              allow_no_indices: true,
+            }),
+          ]
+        : []),
+    ]);
   }
 
   async refresh() {
