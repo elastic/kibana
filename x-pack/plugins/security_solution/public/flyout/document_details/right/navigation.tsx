@@ -36,7 +36,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
       },
     });
     telemetry.reportDetailsFlyoutOpened({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'left',
     });
   }, [eventId, openLeftPanel, indexName, scopeId, telemetry]);
