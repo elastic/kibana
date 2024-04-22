@@ -320,7 +320,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleExecutionLogger,
             alerting,
           });
-          wroteWarningStatus = rangeTuplesWarningStatus;
+          if (rangeTuplesWarningStatus) {
+            wroteWarningStatus = rangeTuplesWarningStatus;
+          }
 
           if (remainingGap.asMilliseconds() > 0) {
             hasError = true;
