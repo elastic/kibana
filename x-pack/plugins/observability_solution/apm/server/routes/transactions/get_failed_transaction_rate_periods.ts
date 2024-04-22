@@ -25,6 +25,7 @@ export interface FailedTransactionRateResponse {
 export async function getFailedTransactionRatePeriods({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionType,
   transactionName,
@@ -38,6 +39,7 @@ export async function getFailedTransactionRatePeriods({
 }: {
   environment: string;
   kuery: string;
+  filters?: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
@@ -52,6 +54,7 @@ export async function getFailedTransactionRatePeriods({
   const commonProps = {
     environment,
     kuery,
+    filters,
     serviceName,
     transactionTypes: [transactionType],
     transactionName,

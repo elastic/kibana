@@ -25,10 +25,12 @@ import {
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
+import { parseEsFiltersOrThrow } from '../../../utils/parse_es_filters_or_throw';
 
 function searchLatency({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionType,
   transactionName,
@@ -45,6 +47,7 @@ function searchLatency({
 }: {
   environment: string;
   kuery: string;
+  filters?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -70,6 +73,8 @@ function searchLatency({
     useDurationSummary
   );
 
+  const parsedFilters = parseEsFiltersOrThrow(filters);
+
   const params = {
     apm: {
       sources: [{ documentType, rollupInterval }],
@@ -87,7 +92,9 @@ function searchLatency({
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(FAAS_ID, serverlessId),
+            ...(parsedFilters.filter ?? []),
           ],
+          must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
       aggs: {
@@ -111,6 +118,7 @@ function searchLatency({
 export async function getLatencyTimeseries({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionType,
   transactionName,
@@ -127,6 +135,7 @@ export async function getLatencyTimeseries({
 }: {
   environment: string;
   kuery: string;
+  filters?: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -144,6 +153,7 @@ export async function getLatencyTimeseries({
   const response = await searchLatency({
     environment,
     kuery,
+    filters,
     serviceName,
     transactionType,
     transactionName,
@@ -195,6 +205,7 @@ export async function getLatencyPeriods({
   apmEventClient,
   latencyAggregationType,
   kuery,
+  filters,
   environment,
   start,
   end,
@@ -210,6 +221,7 @@ export async function getLatencyPeriods({
   apmEventClient: APMEventClient;
   latencyAggregationType: LatencyAggregationType;
   kuery: string;
+  filters?: string;
   environment: string;
   start: number;
   end: number;
@@ -225,6 +237,7 @@ export async function getLatencyPeriods({
     transactionName,
     apmEventClient,
     kuery,
+    filters,
     environment,
     documentType,
     rollupInterval,

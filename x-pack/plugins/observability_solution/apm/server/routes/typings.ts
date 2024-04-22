@@ -68,3 +68,5 @@ export interface APMCore {
   setup: CoreSetup;
   start: () => Promise<CoreStart>;
 }
+
+export class BadRequestError extends Error {}

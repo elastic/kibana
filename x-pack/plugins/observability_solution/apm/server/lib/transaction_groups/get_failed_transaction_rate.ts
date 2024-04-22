@@ -18,10 +18,12 @@ import {
   getFailedTransactionRateTimeSeries,
   getOutcomeAggregation,
 } from '../helpers/transaction_error_rate';
+import { parseEsFiltersOrThrow } from '../../utils/parse_es_filters_or_throw';
 
 export async function getFailedTransactionRate({
   environment,
   kuery,
+  filters,
   serviceName,
   transactionTypes,
   transactionName,
@@ -35,6 +37,7 @@ export async function getFailedTransactionRate({
 }: {
   environment: string;
   kuery: string;
+  filters?: string;
   serviceName: string;
   transactionTypes: string[];
   transactionName?: string;
@@ -54,6 +57,7 @@ export async function getFailedTransactionRate({
     end,
     offset,
   });
+  const parsedFilters = parseEsFiltersOrThrow(filters);
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -62,7 +66,9 @@ export async function getFailedTransactionRate({
     ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
+    ...parsedFilters.filter,
   ];
+  const mustNot = parsedFilters.must_not;
 
   const outcomes = getOutcomeAggregation(documentType);
 
@@ -73,7 +79,7 @@ export async function getFailedTransactionRate({
     body: {
       track_total_hits: false,
       size: 0,
-      query: { bool: { filter } },
+      query: { bool: { filter, must_not: mustNot } },
       aggs: {
         ...outcomes,
         timeseries: {

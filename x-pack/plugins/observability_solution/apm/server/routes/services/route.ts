@@ -77,6 +77,7 @@ import {
   ServiceTransactionTypesResponse,
 } from './get_service_transaction_types';
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
+import { BadRequestError } from '../typings';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -495,7 +496,7 @@ const serviceThroughputRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string }),
+      t.partial({ transactionName: t.string, filters: t.string }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
@@ -512,6 +513,7 @@ const serviceThroughputRoute = createApmServerRoute({
     const {
       environment,
       kuery,
+      filters,
       transactionType,
       transactionName,
       offset,
@@ -525,6 +527,7 @@ const serviceThroughputRoute = createApmServerRoute({
     const commonProps = {
       environment,
       kuery,
+      filters,
       serviceName,
       apmEventClient,
       transactionType,
@@ -534,29 +537,36 @@ const serviceThroughputRoute = createApmServerRoute({
       bucketSizeInSeconds,
     };
 
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getThroughput({
-        ...commonProps,
-        start,
-        end,
-      }),
-      offset
-        ? getThroughput({
-            ...commonProps,
-            start,
-            end,
-            offset,
-          })
-        : [],
-    ]);
+    try {
+      const [currentPeriod, previousPeriod] = await Promise.all([
+        getThroughput({
+          ...commonProps,
+          start,
+          end,
+        }),
+        offset
+          ? getThroughput({
+              ...commonProps,
+              start,
+              end,
+              offset,
+            })
+          : [],
+      ]);
 
-    return {
-      currentPeriod,
-      previousPeriod: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries: currentPeriod,
-        previousPeriodTimeseries: previousPeriod,
-      }),
-    };
+      return {
+        currentPeriod,
+        previousPeriod: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentPeriod,
+          previousPeriodTimeseries: previousPeriod,
+        }),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestError) {
+        throw Boom.badRequest(error.message);
+      }
+      throw error;
+    }
   },
 });
 
