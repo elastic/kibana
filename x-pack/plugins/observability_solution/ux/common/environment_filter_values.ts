@@ -62,10 +62,8 @@ export function getNextEnvironmentUrlParam({
   requestedEnvironment?: string;
   currentEnvironmentUrlParam: Environment;
 }) {
-  const normalizedRequestedEnvironment =
-    requestedEnvironment || ENVIRONMENT_NOT_DEFINED.value;
-  const normalizedQueryEnvironment =
-    currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;
+  const normalizedRequestedEnvironment = requestedEnvironment || ENVIRONMENT_NOT_DEFINED.value;
+  const normalizedQueryEnvironment = currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;
 
   if (normalizedRequestedEnvironment === normalizedQueryEnvironment) {
     return currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;

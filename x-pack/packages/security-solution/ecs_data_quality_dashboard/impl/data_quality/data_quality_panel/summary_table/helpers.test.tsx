@@ -177,7 +177,7 @@ describe('helpers', () => {
           name: 'Result',
           sortable: true,
           truncateText: false,
-          width: '50px',
+          width: '65px',
         },
         { field: 'indexName', name: 'Index', sortable: true, truncateText: false, width: '300px' },
         { field: 'docsCount', name: 'Docs', sortable: true, truncateText: false },

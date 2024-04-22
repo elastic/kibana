@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 
 import { useDispatch } from 'react-redux';
@@ -48,8 +48,10 @@ export const DeleteParam = ({
     if (!isDeleting) {
       return;
     }
+    const { core, toasts } = kibanaService;
+
     if (status === FETCH_STATUS.FAILURE) {
-      kibanaService.toasts.addDanger(
+      toasts.addDanger(
         {
           title: toMountPoint(
             <p data-test-subj="uptimeDeleteParamFailure">
@@ -58,13 +60,14 @@ export const DeleteParam = ({
                 defaultMessage: 'Param {name} failed to delete.',
                 values: { name },
               })}
-            </p>
+            </p>,
+            core
           ),
         },
         { toastLifeTimeMs: 3000 }
       );
     } else if (status === FETCH_STATUS.SUCCESS) {
-      kibanaService.toasts.addSuccess(
+      toasts.addSuccess(
         {
           title: toMountPoint(
             <p data-test-subj="uptimeDeleteParamSuccess">
@@ -72,7 +75,8 @@ export const DeleteParam = ({
                 defaultMessage: 'Param {name} deleted successfully.',
                 values: { name },
               })}
-            </p>
+            </p>,
+            core
           ),
         },
         { toastLifeTimeMs: 3000 }
