@@ -31,7 +31,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('Processes operations:', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170371
+  describe.skip('Processes operations:', () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
