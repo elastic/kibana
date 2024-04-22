@@ -124,6 +124,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     dataStreamStat: dataStreamStat!,
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
+    breakdownField: breakdownDataViewField?.name,
   });
 
   const getOpenInLogsExplorerAction = useMemo(() => {
