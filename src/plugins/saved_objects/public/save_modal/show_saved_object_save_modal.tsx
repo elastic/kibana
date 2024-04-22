@@ -9,8 +9,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getI18n, getTheme } from '../kibana_services';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getAnalytics, getI18n, getTheme } from '../kibana_services';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -59,9 +59,9 @@ export function showSaveModal(
 
   const I18nContext = getI18n().Context;
   ReactDOM.render(
-    <KibanaThemeProvider theme$={getTheme().theme$}>
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <I18nContext>{Wrapper ? <Wrapper>{element}</Wrapper> : element}</I18nContext>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     container
   );
 }
