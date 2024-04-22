@@ -30,7 +30,7 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
 export async function getIndexPatternFromESQLQuery(esql?: string) {
   const { ast } = await getAstAndSyntaxErrors(esql);
   const fromCommand = ast.find(({ name }) => name === 'from');
-  const args = fromCommand?.args as ESQLSource[];
+  const args = (fromCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.text).join(',');
 }

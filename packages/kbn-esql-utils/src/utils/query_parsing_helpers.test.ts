@@ -132,6 +132,9 @@ describe('sql/esql query helpers', () => {
         'FROM foo-1, foo-2 // from command used'
       );
       expect(idxPattern12).toBe('foo-1,foo-2');
+
+      const idxPattern13 = await getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
+      expect(idxPattern13).toBe('');
     });
   });
 
