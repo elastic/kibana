@@ -83,12 +83,6 @@ const PackageListGridWrapper = ({
             <EuiSearchBar
               box={{
                 incremental: true,
-<<<<<<< HEAD
-=======
-                inputRef: (ref: any) => {
-                  (searchBarRef as React.MutableRefObject<HTMLInputElement>).current = ref;
-                },
->>>>>>> upstream/main
               }}
               onChange={(arg) => {
                 if (setSearchQuery) {
