@@ -340,7 +340,6 @@ export const IndexPatternTable = ({
         <EuiInMemoryTable
           allowNeutralSort={false}
           itemId="id"
-          isSelectable={dataViews.getCanSaveSync()}
           items={indexPatterns}
           columns={columns}
           pagination={pagination}
