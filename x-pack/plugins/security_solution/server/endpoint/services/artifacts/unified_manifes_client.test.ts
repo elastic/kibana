@@ -112,6 +112,7 @@ describe('unified_manifest_client', () => {
             ...mockUnifiedManifestAttributes({ policyId: `policy-${i}` }),
             id: `id-${i}`,
             created: '1',
+            version: '1',
           };
         })
       );

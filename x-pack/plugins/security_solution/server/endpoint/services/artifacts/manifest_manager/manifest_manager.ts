@@ -9,7 +9,7 @@ import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -112,7 +112,6 @@ export class ManifestManager {
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
   protected productFeaturesService: ProductFeaturesService;
-  protected cachedUnifiedManifestsSO: InternalUnifiedManifestSchema[];
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -127,7 +126,6 @@ export class ManifestManager {
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
     this.productFeaturesService = context.productFeaturesService;
-    this.cachedUnifiedManifestsSO = [];
   }
 
   /**
@@ -525,7 +523,7 @@ export class ManifestManager {
     try {
       let manifestSo;
       if (this.experimentalFeatures.unifiedManifestEnabled) {
-        const unifiedManifestsSo = await this.getAllUnifiedManifestsSOFromCache();
+        const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
         // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
         // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
         // behind for package policy to pick it up.
@@ -884,19 +882,8 @@ export class ManifestManager {
     return new UnifiedManifestClient(this.savedObjectsClient);
   }
 
-  public async getAllUnifiedManifestsSOFromCache(): Promise<InternalUnifiedManifestSchema[]> {
-    // Fetch Unified Manifests from SO on getLatestManifest, cache them and remove on successful commit / caught errors.
-    // This is to avoid fetching Unified Manifests from SO on every getLatestManifest call which is every task run (1 minute).
-    if (!this.cachedUnifiedManifestsSO.length) {
-      this.cachedUnifiedManifestsSO =
-        await this.getUnifiedManifestClient().getAllUnifiedManifests();
-    }
-    return this.cachedUnifiedManifestsSO;
-  }
-
-  public clearCachedUnifiedManifestsSO(): void {
-    // Clear cached Unified Manifests after successful commit.
-    this.cachedUnifiedManifestsSO = [];
+  public async getAllUnifiedManifestsSO(): Promise<InternalUnifiedManifestSchema[]> {
+    return this.getUnifiedManifestClient().getAllUnifiedManifests();
   }
 
   public transformUnifiedManifestSOtoLegacyManifestSO(
@@ -947,7 +934,7 @@ export class ManifestManager {
   public transformLegacyManifestSOtoUnifiedManifestSO(
     manifestSo: InternalManifestSchema,
     unifiedManifestsSo: InternalUnifiedManifestSchema[]
-  ): Array<Omit<InternalUnifiedManifestUpdateSchema, 'id'> & { id?: string }> {
+  ): Array<InternalUnifiedManifestBaseSchema & { id?: string }> {
     const manifestObject = manifestSo.artifacts.reduce(
       (
         acc: Record<string, InternalUnifiedManifestBaseSchema & { id?: string }>,
@@ -1008,6 +995,7 @@ export class ManifestManager {
             acc.unifiedManifestsToUpdate.push({
               ...unifiedManifest,
               semanticVersion: this.setNewSemanticVersion(unifiedManifest.semanticVersion),
+              version: existingUnifiedManifest.version,
             } as InternalUnifiedManifestUpdateSchema);
           }
         } else {
@@ -1053,7 +1041,7 @@ export class ManifestManager {
   }
 
   public async commitUnified(manifestSo: InternalManifestSchema): Promise<void> {
-    const existingUnifiedManifestsSo = await this.getAllUnifiedManifestsSOFromCache();
+    const existingUnifiedManifestsSo = await this.getAllUnifiedManifestsSO();
 
     const unifiedManifestSO = this.transformLegacyManifestSOtoUnifiedManifestSO(
       manifestSo,
@@ -1100,8 +1088,6 @@ export class ManifestManager {
       if (!hasGlobalManifest || unifiedManifestsToDelete.length) {
         await this.bumpGlobalUnifiedManifestVersion();
       }
-      // Clear fetched Unified Manifests from cache since they are not up-to-date anymore
-      this.clearCachedUnifiedManifestsSO();
     }
   }
 }

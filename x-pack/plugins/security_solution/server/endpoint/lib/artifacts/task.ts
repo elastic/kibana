@@ -170,15 +170,12 @@ export class ManifestTask {
           this.logger.error(
             `unable to recover from error while attempting to retrieve last computed manifest`
           );
-          manifestManager.clearCachedUnifiedManifestsSO();
-
           return;
         }
       }
 
       if (!oldManifest) {
         this.logger.debug('Last computed manifest not available yet');
-        manifestManager.clearCachedUnifiedManifestsSO();
         return;
       }
 
@@ -228,7 +225,6 @@ export class ManifestTask {
 
       await manifestManager.cleanup(newManifest);
     } catch (err) {
-      manifestManager.clearCachedUnifiedManifestsSO();
       this.logger.error(wrapErrorIfNeeded(err));
     }
   };

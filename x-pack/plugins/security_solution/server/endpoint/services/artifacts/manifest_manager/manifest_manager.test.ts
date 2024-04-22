@@ -151,7 +151,7 @@ describe('ManifestManager', () => {
         })
       );
 
-      manifestManager.getAllUnifiedManifestsSOFromCache = jest.fn().mockImplementation(() => []);
+      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => []);
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -187,7 +187,7 @@ describe('ManifestManager', () => {
         }
       });
 
-      manifestManager.getAllUnifiedManifestsSOFromCache = jest.fn().mockImplementation(() => []);
+      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => []);
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -209,7 +209,7 @@ describe('ManifestManager', () => {
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
       ).fetchAll.mockReturnValue(createFetchAllArtifactsIterableMock([ARTIFACTS as Artifact[]]));
 
-      manifestManager.getAllUnifiedManifestsSOFromCache = mockGetAllUnifiedManifestsSOFromCache;
+      manifestManager.getAllUnifiedManifestsSO = mockGetAllUnifiedManifestsSOFromCache;
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -243,7 +243,7 @@ describe('ManifestManager', () => {
       });
       const manifestManager = new ManifestManager(manifestManagerContext);
 
-      manifestManager.getAllUnifiedManifestsSOFromCache = mockGetAllUnifiedManifestsSOFromCache;
+      manifestManager.getAllUnifiedManifestsSO = mockGetAllUnifiedManifestsSOFromCache;
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
@@ -461,7 +461,7 @@ describe('ManifestManager', () => {
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
-      manifestManager.getAllUnifiedManifestsSOFromCache = jest.fn().mockImplementation(() => [
+      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => [
         {
           policyId: '.global',
           semanticVersion: '1.0.0',
@@ -2089,6 +2089,7 @@ describe('ManifestManager', () => {
           artifactIds: [ARTIFACT_ID_EXCEPTIONS_WINDOWS],
           id: `${idx}`,
           created: '1',
+          version: 'abc',
         })
       );
 
