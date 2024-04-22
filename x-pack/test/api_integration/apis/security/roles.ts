@@ -451,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .get('/api/security/roles/engineering')
+          .get('/internal/security/roles/engineering')
           .set('kbn-xsrf', 'xxx')
           .expect(200)
           .expect((res: { body: Role[] }) => {

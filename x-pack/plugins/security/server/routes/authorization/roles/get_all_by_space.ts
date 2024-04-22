@@ -21,7 +21,7 @@ export function defineGetAllRolesBySpaceRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/api/security/roles/{spaceId}',
+      path: '/internal/security/roles/{spaceId}',
       options: {
         tags: ['access:spacesManagement'],
       },
