@@ -586,7 +586,7 @@ export const buildRequiredFieldsDescription = (
 };
 
 export const buildAlertSuppressionDescription = (
-  label: string,
+  label: string = i18n.GROUP_BY_LABEL,
   values: string[],
   ruleType: Type
 ): ListItems[] => {
