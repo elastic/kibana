@@ -77,7 +77,6 @@ export const getCypressBaseConfig = (
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
-        experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
