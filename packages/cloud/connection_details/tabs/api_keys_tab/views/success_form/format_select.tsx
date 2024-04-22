@@ -53,7 +53,7 @@ export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange }) =
           }),
         },
       ]}
-      onChange={(value) => onChange(value as Format)}
+      onChange={(newValue) => onChange(newValue as Format)}
     />
   );
 };
