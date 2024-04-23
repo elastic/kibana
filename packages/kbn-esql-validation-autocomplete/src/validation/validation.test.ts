@@ -656,7 +656,7 @@ describe('validation logic', () => {
           }
         }
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = (numberField ${op} 0)`, ['Unknown column [numberField]']);
@@ -664,10 +664,33 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`row var = "a" ${op} 0`, [
           `Argument of [${op}] must be [number], found value ["a"] type [string]`,
         ]);
+        testErrorsAndWarnings(`row var = to_ip("a") ${op} to_ip("a")`, []);
+        testErrorsAndWarnings(
+          `row var = to_datetime("2020-10-1") ${op} to_datetime("2020-10-1")`,
+          []
+        );
+        testErrorsAndWarnings(
+          `row var = false ${op} false`,
+          ['==', '!='].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+              ]
+        );
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
         testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
+        testErrorsAndWarnings(
+          `row var = to_datetime("2020-10-1") ${op} to_datetime("2020-10-1")`,
+          ['+', '-'].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
+                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
+              ]
+        );
       }
 
       for (const op of ['like', 'rlike']) {
@@ -1064,15 +1087,26 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where ${nValue} > 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT ${nValue} > 0`, []);
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`from a_index | where numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | where (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
+        testErrorsAndWarnings(`from a_index | where stringField ${op} 0`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
         ]);
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | where ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
       }
 
       for (const nesting of NESTED_DEPTHS) {
@@ -1643,11 +1677,31 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
         ]);
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | eval ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 1`, []);
+        testErrorsAndWarnings(
+          `from a_index | eval to_datetime("2020-10-1") ${op} to_datetime("2020-10-1")`,
+          ['+', '-'].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
+                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
+              ]
+        );
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
@@ -1744,6 +1798,12 @@ describe('validation logic', () => {
 
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
+
+      testErrorsAndWarnings(`from a_index | eval result = case(false, 0, 1), round(result)`, []);
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats sum(result)`,
+        []
+      );
 
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [

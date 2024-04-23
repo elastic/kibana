@@ -397,7 +397,8 @@ export function isEqualType(
       return false;
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    return wrappedTypes.some((ct) => argType === ct);
+    // if final type is of type any make it pass for now
+    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
   }
 }
 
