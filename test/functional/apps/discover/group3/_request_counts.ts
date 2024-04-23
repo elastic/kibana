@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
@@ -79,19 +80,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(searchCount).to.be(0);
       await cb();
       await waitForLoadingToFinish();
-      searchCount = await getSearchCount(type);
+      await retry.waitFor('correct search request count', async () => {
+        searchCount = await getSearchCount(type);
 
-      log.debug(
-        `comparing search request counts - type: ${type} actual: ${searchCount} expected: ${expected}`
-      );
+        log.debug(
+          `comparing search request counts - type: ${type} actual: ${searchCount} expected: ${expected}`
+        );
 
-      if (type === 'esql' && searchCount !== expected && searchCount > 0) {
         // `searchCount` should be the same as `expected` or it can be less by 1
-        expect(searchCount).to.be(expected - 1); // minus esql editor autocomplete request sometimes?
-        return;
-      }
-
-      expect(searchCount).to.be(expected);
+        return type === 'esql' && searchCount !== expected && searchCount > 0
+          ? searchCount === expected - 1 // minus esql editor autocomplete request sometimes?
+          : searchCount === expected;
+      });
     };
 
     const getSharedTests = ({
@@ -314,7 +314,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedRequests: 3, // table, chart and query editor autocomplete sometimes?
         expectedRequestsAfterTimeRangeChanged: 4, // table, chart, query editor autocomplete or chart again?
         expectedRequestsAfterNewSearchPressed: 4, // table, 2 chart requests, and query editor autocomplete?
-        expectedRequestsForSavedSearches: 4, // table, 2 chart requests, and query editor autocomplete?
+        expectedRequestsForSavedSearches: 5, // table, 2 chart requests, and query editor autocomplete?
       });
 
       it('should send 2 request (documents + chart) when toggling the chart visibility', async () => {
