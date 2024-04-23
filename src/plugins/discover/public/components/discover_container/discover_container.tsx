@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
@@ -59,15 +59,13 @@ export const DiscoverContainerInternal = ({
   stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
-  const [discoverServices] = useState<DiscoverServices>(() => getDiscoverServices());
-
   const services = useMemo<DiscoverServices>(() => {
     return {
-      ...discoverServices,
+      ...getDiscoverServices(),
       ...overrideServices,
       getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
     };
-  }, [discoverServices, overrideServices, scopedHistory]);
+  }, [getDiscoverServices, overrideServices, scopedHistory]);
 
   if (isLoading) {
     return (
