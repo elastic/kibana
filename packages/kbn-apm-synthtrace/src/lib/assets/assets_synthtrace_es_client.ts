@@ -11,7 +11,7 @@ import {
   ApmFields,
   ESDocumentWithOperation,
   LogDocument,
-  OAMAssetDocument,
+  AssetDocument,
 } from '@kbn/apm-synthtrace-client';
 import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
@@ -24,7 +24,7 @@ import { createTracesAssetsAggregator } from './aggregators/create_traces_assets
 
 export type AssetsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
-export class AssetsSynthtraceEsClient extends SynthtraceEsClient<OAMAssetDocument> {
+export class AssetsSynthtraceEsClient extends SynthtraceEsClient<AssetDocument> {
   constructor(options: { client: Client; logger: Logger } & AssetsSynthtraceEsClientOptions) {
     super({
       ...options,
@@ -54,11 +54,28 @@ function assetsPipeline() {
   };
 }
 
-function getMergeAssetsTransform() {
-  const mergedDocuments: Record<string, OAMAssetDocument> = {};
+function getAssetsFilterTransform() {
   return new Transform({
     objectMode: true,
-    transform(document: ESDocumentWithOperation<OAMAssetDocument>, encoding, callback) {
+    transform(
+      document: ESDocumentWithOperation<AssetDocument | ApmFields | LogDocument>,
+      encoding,
+      callback
+    ) {
+      if ('asset.id' in document) {
+        callback(null, document);
+      } else {
+        callback();
+      }
+    },
+  });
+}
+
+function getMergeAssetsTransform() {
+  const mergedDocuments: Record<string, AssetDocument> = {};
+  return new Transform({
+    objectMode: true,
+    transform(document: ESDocumentWithOperation<AssetDocument>, encoding, callback) {
       const assetId = document['asset.id'];
       if (!mergedDocuments[assetId]) {
         mergedDocuments[assetId] = { ...document };
@@ -74,27 +91,10 @@ function getMergeAssetsTransform() {
   });
 }
 
-function getAssetsFilterTransform() {
-  return new Transform({
-    objectMode: true,
-    transform(
-      document: ESDocumentWithOperation<OAMAssetDocument | ApmFields | LogDocument>,
-      encoding,
-      callback
-    ) {
-      if ('asset.id' in document) {
-        callback(null, document);
-      } else {
-        callback();
-      }
-    },
-  });
-}
-
 function getRoutingTransform() {
   return new Transform({
     objectMode: true,
-    transform(document: ESDocumentWithOperation<OAMAssetDocument>, encoding, callback) {
+    transform(document: ESDocumentWithOperation<AssetDocument>, encoding, callback) {
       if ('asset.type' in document) {
         document._index = `assets`;
       } else {
