@@ -588,7 +588,9 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
+    const titleObjects = await this.find.allByCssSelector(
+      '[data-test-subj=embeddablePanelTitleInner] .embPanel__titleText'
+    );
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
