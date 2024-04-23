@@ -83,22 +83,6 @@ describe('CaseConnector', () => {
       });
     });
 
-    it('does not override externalId', async () => {
-      const subActions = service.getSubActions();
-      const subAction = subActions.get('pushToService');
-
-      const newIncidentSchemaMock = { ...incidentSchemaMock, externalId: 'Overridden' };
-      expect(
-        subAction?.schema?.validate({
-          incident: { ...newIncidentSchemaMock, externalId: 'test' },
-          comments: [],
-        })
-      ).toEqual({
-        incident: { ...newIncidentSchemaMock, externalId: 'test' },
-        comments: [],
-      });
-    });
-
     it('should accept null for externalId', async () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
@@ -284,6 +268,58 @@ describe('CaseConnector', () => {
         url: 'https://example.com',
         pushedDate: '2022-05-06T09:41:00.401Z',
       });
+    });
+  });
+
+  describe('PushParamsSchema', () => {
+    let newService: TestCaseConnector;
+    beforeEach(() => {
+      jest.resetAllMocks();
+      jest.clearAllMocks();
+
+      const newPushToServiceSchema = {
+        name: schema.string(),
+        externalId: schema.number(),
+      };
+
+      newService = new TestCaseConnector(
+        {
+          configurationUtilities: mockedActionsConfig,
+          logger,
+          connector: { id: 'test-id', type: '.test' },
+          config: { url: 'https://example.com' },
+          secrets: { username: 'elastic', password: 'changeme' },
+          services,
+        },
+        newPushToServiceSchema
+      );
+    });
+
+    it('should add externalId as null', async () => {
+      const subActions = newService.getSubActions();
+      const subAction = subActions.get('pushToService');
+      expect(
+        subAction?.schema?.validate({
+          incident: { name: 'foo' },
+          comments: [],
+        })
+      ).toEqual({
+        incident: { name: 'foo', externalId: null },
+        comments: [],
+      });
+    });
+
+    it('should not override externalId schema', async () => {
+      const subActions = newService.getSubActions();
+      const subAction = subActions.get('pushToService');
+      expect(() =>
+        subAction?.schema?.validate({
+          incident: { name: 'foo', externalId: 123 },
+          comments: [],
+        })
+      ).toThrow(
+        '[incident.externalId]: types that failed validation:\n- [incident.externalId.0]: expected value of type [string] but got [number]\n- [incident.externalId.1]: expected value to equal [null]'
+      );
     });
   });
 });

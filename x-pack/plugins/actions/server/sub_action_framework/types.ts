@@ -50,7 +50,7 @@ export type IServiceAbstract<Config, Secrets> = abstract new (
 
 export type ICaseServiceAbstract<Config, Secrets, Incident, GetIncidentResponse> = abstract new (
   params: ServiceParams<Config, Secrets>,
-  pushToServiceIncidentParamsSchema: Record<string, Type<unknown> | null>
+  pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
 ) => SubActionConnector<Config, Secrets>;
 
 export enum ValidatorType {

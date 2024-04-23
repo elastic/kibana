@@ -153,7 +153,7 @@ export class TestCaseConnector extends CaseConnector<
 > {
   constructor(
     params: ServiceParams<TestConfig, TestSecrets>,
-    pushToServiceParamsSchema: Record<string, Type<unknown> | null>
+    pushToServiceParamsSchema: Record<string, Type<unknown>>
   ) {
     super(params, pushToServiceParamsSchema);
   }
