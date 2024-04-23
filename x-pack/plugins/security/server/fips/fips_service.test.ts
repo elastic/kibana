@@ -5,244 +5,210 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+const mockGetFipsFn = jest.fn();
+jest.mock('crypto', () => ({
+  randomBytes: jest.fn(),
+  constants: jest.requireActual('crypto').constants,
+  get getFips() {
+    return mockGetFipsFn;
+  },
+}));
+
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { License } from '@kbn/licensing-plugin/common/license';
-import { licenseMock as licensingMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 
-import type {
-  FipsServiceSetupInternal,
-  FipsServiceSetupParams,
-  FipsServiceStartInternal,
-  FipsServiceStartParams,
-} from './fips_service';
+import type { FipsServiceSetupInternal, FipsServiceSetupParams } from './fips_service';
 import { FipsService } from './fips_service';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 
 const logger = loggingSystemMock.createLogger();
 
+function buildMockFipsServiceSetupParams(
+  licenseType: LicenseType,
+  isFipsConfigured: boolean,
+  features$: Observable<Partial<SecurityLicenseFeatures>>,
+  isAvailable: Observable<boolean> = of(true)
+): FipsServiceSetupParams {
+  mockGetFipsFn.mockImplementationOnce(() => {
+    return isFipsConfigured ? 1 : 0;
+  });
+
+  const license = licenseMock.create(features$, licenseType, isAvailable);
+
+  let mockConfig = {};
+  if (isFipsConfigured) {
+    mockConfig = { fipsMode: { enabled: true } };
+  }
+
+  return {
+    license,
+    config: createConfig(ConfigSchema.validate(mockConfig), loggingSystemMock.createLogger(), {
+      isTLSEnabled: false,
+    }),
+  };
+}
+
 describe('FipsService', () => {
-  const mockFipsSetupParams: FipsServiceSetupParams = {
-    license: licenseMock.create(),
-    config: createConfig(
-      ConfigSchema.validate({ fipsMode: { enabled: true } }),
-      loggingSystemMock.createLogger(),
-      {
-        isTLSEnabled: false,
-      }
-    ),
-  };
-
-  const license = licensingMock.createLicenseMock();
-  const licenseSubject = new BehaviorSubject<ILicense>(license);
-  const license$ = licenseSubject.asObservable();
-
-  const mockFipsStartParams: FipsServiceStartParams = {
-    license$,
-  };
-
   let fipsService: FipsService;
   let fipsServiceSetup: FipsServiceSetupInternal;
-  let fipsServiceStart: FipsServiceStartInternal;
+
+  beforeAll(() => {
+    fipsService = new FipsService(logger);
+  });
 
   beforeEach(() => {
-    fipsService = new FipsService(logger);
+    logger.fatal.mockClear();
   });
 
   afterEach(() => {
     logger.fatal.mockClear();
   });
 
-  // describe('', () => {});
-
   describe('setup()', () => {
     it('should expose correct setup contract', () => {
-      fipsServiceSetup = fipsService.setup(mockFipsSetupParams);
+      fipsService = new FipsService(logger);
+      fipsServiceSetup = fipsService.setup(
+        buildMockFipsServiceSetupParams('platinum', true, of({ allowFips: true }))
+      );
 
       expect(fipsServiceSetup).toMatchInlineSnapshot(`
         Object {
-          "canStartInFipsMode": [Function],
+          "validateLicenseForFips": [Function],
         }
       `);
     });
   });
 
-  describe('start()', () => {
-    it('should expose correct start contract', () => {
-      fipsService.setup(mockFipsSetupParams);
-      fipsServiceStart = fipsService.start(mockFipsStartParams);
+  describe('#validateLicenseForFips', () => {
+    describe('start-up check', () => {
+      it('should not throw Error/log.fatal if license features allowFips and `fipsMode.enabled` is `false`', () => {
+        fipsServiceSetup = fipsService.setup(
+          buildMockFipsServiceSetupParams('platinum', false, of({ allowFips: true }))
+        );
+        fipsServiceSetup.validateLicenseForFips();
 
-      expect(fipsServiceStart).toMatchInlineSnapshot(`
-      Object {
-        "monitorForLicenseDowngradeToLogFipsRestartError": [Function],
-      }
-    `);
-    });
-  });
-
-  describe('#canStartInFipsMode', () => {
-    it('should not throw Error and log `fatal` if `fipsMode.enabled` is not `true` and license < platinum', () => {
-      fipsServiceSetup = fipsService.setup({
-        license: licenseMock.create({}, 'basic'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: false } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
+        expect(logger.fatal).not.toHaveBeenCalled();
       });
 
-      fipsServiceSetup.canStartInFipsMode();
+      it('should not throw Error/log.fatal if license features allowFips and `fipsMode.enabled` is `true`', () => {
+        fipsServiceSetup = fipsService.setup(
+          buildMockFipsServiceSetupParams('platinum', true, of({ allowFips: true }))
+        );
+        fipsServiceSetup.validateLicenseForFips();
 
-      expect(logger.fatal).not.toHaveBeenCalled();
-    });
-
-    it('should not throw Error and log `fatal` if `fipsMode.enabled` is not `true` and license >= platinum', () => {
-      fipsServiceSetup = fipsService.setup({
-        license: licenseMock.create({ allowFips: true }, 'platinum'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: false } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
+        expect(logger.fatal).not.toHaveBeenCalled();
       });
 
-      fipsServiceSetup.canStartInFipsMode();
+      it('should not throw Error/log.fatal if license features do not allowFips and `fipsMode.enabled` is `false`', () => {
+        fipsServiceSetup = fipsService.setup(
+          buildMockFipsServiceSetupParams('basic', false, of({}))
+        );
+        fipsServiceSetup.validateLicenseForFips();
 
-      expect(logger.fatal).not.toHaveBeenCalled();
-    });
-
-    it('should not throw Error and log `fatal` if `fipsMode.enabled` is `true` and license >= platinum', () => {
-      fipsServiceSetup = fipsService.setup({
-        license: licenseMock.create({ allowFips: true }, 'platinum'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: true } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
+        expect(logger.fatal).not.toHaveBeenCalled();
       });
 
-      fipsServiceSetup.canStartInFipsMode();
+      it('should throw Error/log.fatal if license features do not allowFips and `fipsMode.enabled` is `true`', () => {
+        fipsServiceSetup = fipsService.setup(
+          buildMockFipsServiceSetupParams('basic', true, of({}))
+        );
 
-      expect(logger.fatal).not.toHaveBeenCalled();
+        expect(() => {
+          fipsServiceSetup.validateLicenseForFips();
+        }).toThrowError();
+        expect(logger.fatal).toHaveBeenCalledTimes(1);
+      });
     });
 
-    it('should throw Error and log `fatal` if `fipsMode.enabled` is `true` and license < platinum', () => {
-      fipsServiceSetup = fipsService.setup({
-        license: licenseMock.create({}),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: true } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
+    describe('monitoring check', () => {
+      describe('with fipsMode.enabled', () => {
+        let mockFeaturesSubject: BehaviorSubject<Partial<SecurityLicenseFeatures>>;
+        let mockIsAvailableSubject: BehaviorSubject<boolean>;
+        let mockFeatures$: Observable<Partial<SecurityLicenseFeatures>>;
+        let mockIsAvailable$: Observable<boolean>;
+
+        beforeAll(() => {
+          mockFeaturesSubject = new BehaviorSubject<Partial<SecurityLicenseFeatures>>({
+            allowFips: true,
+          });
+          mockIsAvailableSubject = new BehaviorSubject<boolean>(true);
+          mockFeatures$ = mockFeaturesSubject.asObservable();
+          mockIsAvailable$ = mockIsAvailableSubject.asObservable();
+          fipsServiceSetup = fipsService.setup(
+            buildMockFipsServiceSetupParams('platinum', true, mockFeatures$, mockIsAvailable$)
+          );
+
+          fipsServiceSetup.validateLicenseForFips();
+        });
+
+        beforeEach(() => {
+          mockFeaturesSubject.next({ allowFips: true });
+          mockIsAvailableSubject.next(true);
+        });
+
+        it('should not log.fatal if license changes to unavailable and `fipsMode.enabled` is `true`', () => {
+          mockIsAvailableSubject.next(false);
+          expect(logger.fatal).not.toHaveBeenCalled();
+        });
+
+        it('should not log.fatal if license features continue to allowFips and `fipsMode.enabled` is `true`', () => {
+          mockFeaturesSubject.next({ allowFips: true });
+          expect(logger.fatal).not.toHaveBeenCalled();
+        });
+
+        it('should log.fatal if license features change to not allowFips and `fipsMode.enabled` is `true`', () => {
+          mockFeaturesSubject.next({});
+          expect(logger.fatal).toHaveBeenCalledTimes(1);
+        });
       });
 
-      expect(() => fipsServiceSetup.canStartInFipsMode()).toThrowError();
-      expect(logger.fatal).toHaveBeenCalled();
-    });
-  });
+      describe('with not fipsMode.enabled', () => {
+        let mockFeaturesSubject: BehaviorSubject<Partial<SecurityLicenseFeatures>>;
+        let mockIsAvailableSubject: BehaviorSubject<boolean>;
+        let mockFeatures$: Observable<Partial<SecurityLicenseFeatures>>;
+        let mockIsAvailable$: Observable<boolean>;
 
-  describe('#monitorForLicenseDowngradeToLogFipsRestartError', () => {
-    afterEach(() => {
-      licenseSubject.next(license);
-    });
+        beforeAll(() => {
+          mockFeaturesSubject = new BehaviorSubject<Partial<SecurityLicenseFeatures>>({
+            allowFips: true,
+          });
+          mockIsAvailableSubject = new BehaviorSubject<boolean>(true);
+          mockFeatures$ = mockFeaturesSubject.asObservable();
+          mockIsAvailable$ = mockIsAvailableSubject.asObservable();
 
-    it('should not log `fatal` if license is not available', () => {
-      fipsService.setup({
-        license: licenseMock.create({ allowFips: true }, 'platinum'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: true } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
+          fipsServiceSetup = fipsService.setup(
+            buildMockFipsServiceSetupParams('platinum', false, mockFeatures$, mockIsAvailable$)
+          );
+
+          fipsServiceSetup.validateLicenseForFips();
+        });
+
+        beforeEach(() => {
+          mockFeaturesSubject.next({ allowFips: true });
+          mockIsAvailableSubject.next(true);
+        });
+
+        it('should not log.fatal if license changes to unavailable and `fipsMode.enabled` is `false`', () => {
+          mockIsAvailableSubject.next(false);
+          expect(logger.fatal).not.toHaveBeenCalled();
+        });
+
+        it('should not log.fatal if license features continue to allowFips and `fipsMode.enabled` is `false`', () => {
+          mockFeaturesSubject.next({ allowFips: true });
+          expect(logger.fatal).not.toHaveBeenCalled();
+        });
+
+        it('should not log.fatal if license change to not allowFips and `fipsMode.enabled` is `false`', () => {
+          console.log('Test');
+          mockFeaturesSubject.next({});
+          expect(logger.fatal).not.toHaveBeenCalled();
+        });
       });
-
-      fipsServiceStart = fipsService.start({ license$ });
-
-      const nextLicense = License.fromJSON({ signature: 'xyz' });
-      licenseSubject.next(nextLicense);
-
-      fipsServiceStart.monitorForLicenseDowngradeToLogFipsRestartError();
-
-      expect(logger.fatal).not.toHaveBeenCalled();
-    });
-
-    it('should not log `fatal` if `fipsMode.enabled` is `false`', () => {
-      fipsService.setup({
-        license: licenseMock.create({}, 'basic'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: false } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
-      });
-
-      fipsServiceStart = fipsService.start({ license$ });
-
-      const nextLicense = licensingMock.createLicense();
-      licenseSubject.next(nextLicense);
-
-      fipsServiceStart.monitorForLicenseDowngradeToLogFipsRestartError();
-
-      expect(logger.fatal).not.toHaveBeenCalled();
-    });
-
-    it('should not log `fatal` if `fipsMode.enabled` is `true` and license >= platinum', () => {
-      fipsService.setup({
-        license: licenseMock.create({ allowFips: true }, 'platinum'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: true } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
-      });
-
-      fipsServiceStart = fipsService.start({ license$ });
-
-      const nextLicense = licensingMock.createLicense({ license: { type: 'platinum' } });
-      licenseSubject.next(nextLicense);
-
-      fipsServiceStart.monitorForLicenseDowngradeToLogFipsRestartError();
-
-      expect(logger.fatal).not.toHaveBeenCalled();
-    });
-
-    it('should log `fatal` if `fipsMode.enabled` is `true` and license < platinum', () => {
-      fipsService.setup({
-        license: licenseMock.create({ allowFips: false }, 'basic'),
-        config: createConfig(
-          ConfigSchema.validate({ fipsMode: { enabled: true } }),
-          loggingSystemMock.createLogger(),
-          {
-            isTLSEnabled: false,
-          }
-        ),
-      });
-
-      fipsServiceStart = fipsService.start({ license$ });
-
-      const nextLicense = licensingMock.createLicense({ license: { type: 'basic' } });
-      licenseSubject.next(nextLicense);
-
-      fipsServiceStart.monitorForLicenseDowngradeToLogFipsRestartError();
-
-      expect(logger.fatal).toHaveBeenCalledTimes(1);
     });
   });
 });

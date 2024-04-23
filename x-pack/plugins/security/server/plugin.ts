@@ -52,7 +52,7 @@ import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
-import type { FipsServiceSetupInternal, FipsServiceStartInternal } from './fips';
+import type { FipsServiceSetupInternal } from './fips';
 import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
@@ -186,7 +186,6 @@ export class SecurityPlugin
 
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
-  private fipsServiceStart?: FipsServiceStartInternal;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -303,7 +302,7 @@ export class SecurityPlugin
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
     this.fipsServiceSetup = this.fipsService.setup({ config, license });
-    this.fipsServiceSetup.canStartInFipsMode();
+    this.fipsServiceSetup.validateLicenseForFips();
 
     setupSpacesClient({
       spaces,
@@ -429,9 +428,6 @@ export class SecurityPlugin
       basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
-
-    this.fipsServiceStart = this.fipsService.start({ license$: licensing.license$ });
-    this.fipsServiceStart.monitorForLicenseDowngradeToLogFipsRestartError();
 
     return Object.freeze<SecurityPluginStart>({
       authc: {
