@@ -4962,6 +4962,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
   version "0.0.0"
   uid ""
@@ -15917,10 +15921,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.5.0.tgz#9ee75189ac4bd919d432c6c1457c8cb2ef0b3903"
-  integrity sha512-doIe7VPdCRgbFjEdswQvHj1Puem8L2pDFEdeUuT7CX3Xr3+gbOvgQGV7s742dJWgO2l0nSekvdgc7UBaPvOb6A==
+elastic-apm-node@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.5.2.tgz#7c4a9d77a891302f16e988a6ff4ade5563e805ec"
+  integrity sha512-m4hvI/1MpVlR5B8k6BOU7WzdFOXjYux/iRso6av6qqJhYKSbHKhF93ncatw4nXU1q88tu31gwB9CzA2/6F4hFQ==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"

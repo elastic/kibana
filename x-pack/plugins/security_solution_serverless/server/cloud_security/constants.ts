@@ -43,3 +43,34 @@ export const METERING_CONFIGS = {
     assets_identifier: 'agent.id',
   },
 };
+
+// see https://github.com/elastic/security-team/issues/8970 for billable asset definition
+export const BILLABLE_ASSETS_CONFIG = {
+  [CSPM]: {
+    filter_attribute: 'resource.sub_type',
+    values: [
+      'aws-ebs',
+      'aws-ec2',
+      'aws-s3',
+      'aws-rds',
+      'azure-disk',
+      'azure-document-db-database-account',
+      'azure-flexible-mysql-server-db',
+      'azure-flexible-postgresql-server-db',
+      'azure-mysql-server-db',
+      'azure-postgresql-server-db',
+      'azure-sql-server',
+      'azure-vm',
+      'gcp-bigquery-dataset',
+      'gcp-bigquery-table',
+      'gcp-compute-disk',
+      'gcp-compute-instance',
+      'gcp-sqladmin-instance',
+      'gcp-storage-bucket',
+    ],
+  },
+  [KSPM]: {
+    filter_attribute: 'resource.sub_type',
+    values: ['Node', 'node'],
+  },
+};

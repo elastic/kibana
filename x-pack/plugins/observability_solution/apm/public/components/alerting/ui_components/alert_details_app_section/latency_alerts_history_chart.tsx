@@ -43,6 +43,7 @@ interface LatencyAlertsHistoryChartProps {
   start: string;
   end: string;
   transactionType?: string;
+  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   environment: string;
   timeZone: string;
@@ -54,6 +55,7 @@ export function LatencyAlertsHistoryChart({
   start,
   end,
   transactionType,
+  transactionName,
   latencyAggregationType,
   environment,
   timeZone,
@@ -65,7 +67,11 @@ export function LatencyAlertsHistoryChart({
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    // ServiceTransactionMetric does not have transactionName as a dimension, but it is faster than TransactionMetric
+    // We use TransactionMetric only when there is a transactionName
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
   const { http, notifications } = useKibana().services;
   const { data, status } = useFetcher(
@@ -80,7 +86,7 @@ export function LatencyAlertsHistoryChart({
               start,
               end,
               transactionType,
-              transactionName: undefined,
+              transactionName,
               latencyAggregationType,
               bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               documentType: preferred.source.documentType,
@@ -93,7 +99,16 @@ export function LatencyAlertsHistoryChart({
         });
       }
     },
-    [end, environment, latencyAggregationType, serviceName, start, transactionType, preferred]
+    [
+      end,
+      environment,
+      latencyAggregationType,
+      serviceName,
+      start,
+      transactionName,
+      transactionType,
+      preferred,
+    ]
   );
   const memoizedData = useMemo(
     () =>
