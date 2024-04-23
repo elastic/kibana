@@ -9,44 +9,94 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { FunctionComponent } from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiText, EuiLink } from '@elastic/eui';
-import integrationsIconUrl from './integrations_icon.svg';
+import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import supportIconUrl from './support_icon.svg';
 import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';
 import forumIconUrl from './forum_icon.svg';
+import { ObservabilityOnboardingAppServices } from '../..';
+
+const URL_FORUM = 'https://discuss.elastic.co/';
 
 export const Footer: FunctionComponent = () => {
+  const {
+    services: { docLinks, chrome },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+  const helpSupportUrl = useObservable(chrome.getHelpSupportUrl$());
   const sections = [
-    {
-      iconUrl: integrationsIconUrl,
-      title: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.dataSourcesFlexItemLabel',
-        { defaultMessage: 'Data sources' }
-      ),
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
-    },
     {
       iconUrl: demoIconUrl,
       title: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.demoEnvironmentFlexItemLabel',
         { defaultMessage: 'Demo environment' }
       ),
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
-    },
-    {
-      iconUrl: docsIconUrl,
-      title: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLabel',
-        { defaultMessage: 'Explore forum' }
+      description: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.demoEnvironmentFlexItemDescription',
+        {
+          defaultMessage: 'Explore our live demo environment',
+        }
       ),
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
+      linkLabel: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.demoEnvironmentFlexItemLinkLabel',
+        { defaultMessage: 'Explore demo' }
+      ),
+      link: URL_DEMO_ENV,
     },
     {
       iconUrl: forumIconUrl,
       title: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLabel',
+        { defaultMessage: 'Explore forum' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemDescription',
+        {
+          defaultMessage: 'Exchange thoughts about Elastic',
+        }
+      ),
+      linkLabel: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLinkLabel',
+        { defaultMessage: 'Discuss forum' }
+      ),
+      link: URL_FORUM,
+    },
+    {
+      iconUrl: docsIconUrl,
+      title: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.browseDocumentationFlexItemLabel',
         { defaultMessage: 'Browse documentation' }
       ),
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
+      description: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.browseDocumentationFlexItemDescription',
+        {
+          defaultMessage: 'In-depth guides on all Elastic features',
+        }
+      ),
+      linkLabel: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.browseDocumentationFlexItemLinkLabel',
+        { defaultMessage: 'Learn more' }
+      ),
+      link: docLinks.links.observability.guide,
+    },
+    {
+      iconUrl: supportIconUrl,
+      title: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.supportHubFlexItemLabel',
+        { defaultMessage: 'Support Hub' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.supportHubFlexItemDescription',
+        {
+          defaultMessage: 'Get help by opening a case',
+        }
+      ),
+      linkLabel: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.supportHubFlexItemLinkLabel',
+        { defaultMessage: 'Open Support Hub' }
+      ),
+      link: helpSupportUrl,
     },
   ];
 
@@ -68,12 +118,11 @@ export const Footer: FunctionComponent = () => {
             <p>
               <EuiLink
                 data-test-subj="observabilityOnboardingFooterLearnMoreLink"
-                href="#/navigation/link"
+                href={section.link}
+                target="_blank"
                 external
               >
-                {i18n.translate('xpack.observability_onboarding.footer.learnMoreLinkLabel', {
-                  defaultMessage: 'Learn more',
-                })}
+                {section.linkLabel}
               </EuiLink>
             </p>
           </EuiText>
