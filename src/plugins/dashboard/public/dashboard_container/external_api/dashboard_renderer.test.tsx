@@ -32,6 +32,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       select: jest.fn(),
       navigateToDashboard: jest.fn().mockResolvedValue({}),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
@@ -148,6 +149,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
       select: jest.fn(),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
@@ -242,6 +244,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
       select: jest.fn().mockReturnValue('WhatAnExpandedPanel'),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
