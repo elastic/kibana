@@ -21,7 +21,6 @@ import type {
   GetSignalValuesMap,
   ThreatMatchNamedQuery,
 } from './types';
-import { INDICATOR_PER_PAGE } from './get_threat_list';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -246,7 +245,6 @@ export const getMaxClauseCountErrorValue = (
   threatEntriesCount: number
 ) =>
   searchesPerformed.reduce<number>((acc, search) => {
-    console.error('INSIDE OF GET MAX CLAUSE ERROR');
     const failedToCreateQueryMessage: string | undefined = search.errors.find((err) =>
       err.includes('failed to create query: maxClauseCount is set to')
     );
@@ -261,10 +259,7 @@ export const getMaxClauseCountErrorValue = (
     const foundNestedClauseCountValue = tooManyNestedClausesMessage?.match(regex)?.[0];
 
     if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
-      console.error('TOO MANY NESTED');
-      console.error('foundMaxClauseCountValue', foundNestedClauseCountValue);
       const tempVal = parseInt(foundNestedClauseCountValue, 10);
-      console.error('tempVal', tempVal);
 
       // minus 1 since the max clause count value is exclusive
       // multiplying by two because we need to account for the
@@ -275,19 +270,14 @@ export const getMaxClauseCountErrorValue = (
       // because we are searching over event and threat fields.
       // so we need to make this smaller than a single 'failed to create query'
       // max clause count error.
-      const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1))); // 10); // INDICATOR_PER_PAGE);
-      console.error('WHAT IS VAL', val);
-      // throw Error('OOPS');
+      const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1)));
       return val;
     } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
-      console.error('MULTIPLE');
       const tempVal = parseInt(foundMaxClauseCountValue, 10);
       // minus 1 since the max clause count value is exclusive
       // and we add 1 to threatEntries to increase the number of "buckets"
       // that our searches are spread over, smaller buckets means less clauses
       const val = Math.floor((tempVal - 1) / (threatEntriesCount + 1));
-      // throw Error('OOPS 2');
-
       return val;
     } else {
       return acc;

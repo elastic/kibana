@@ -10,7 +10,6 @@ import { firstValueFrom } from 'rxjs';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { uniq, chunk } from 'lodash/fp';
-import { isEmpty } from 'lodash';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
@@ -75,7 +74,6 @@ export const createThreatSignals = async ({
   experimentalFeatures,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
-  console.error('WHAT ARE THREAT MATCH FIELDS', JSON.stringify(threatMatchedFields, null, 2));
   const threatFieldsLength = threatMatchedFields.threat.length;
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
     services,
@@ -179,13 +177,7 @@ export const createThreatSignals = async ({
     createSignal: CreateSignalInterface;
     totalDocumentCount: number;
   }) => {
-    let list;
-    try {
-      console.error('ABOUT TO CALL GET DOCUMENT LIST (getThreatList)');
-      list = await getDocumentList({ searchAfter: undefined });
-    } catch (exc) {
-      console.error('WAS THERE AN EXC', exc);
-    }
+    let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
 
     // this is re-assigned depending on max clause count errors
@@ -197,13 +189,7 @@ export const createThreatSignals = async ({
       ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
-      console.error('LOOPING CONCURRENT SEARCHES');
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
-
-      // console.error('SEARCHES PERFORMED', searchesPerformed);
-
-      // Did our searches fail with an error containing the maxClauseCount
-      // error message?
 
       const maxClauseCountValue = getMaxClauseCountErrorValue(
         searchesPerformed,
@@ -212,7 +198,7 @@ export const createThreatSignals = async ({
 
       if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {
         eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
-          `indicator match with rule id: ${alertId} generated a max clause count error, attempting to resolve within executor`,
+          `indicator match with rule id: ${alertId} generated a max clause count error, attempting to resolve within executor. Setting IM rule page size to ${maxClauseCountValue}`,
         ]);
         // parse the error message to acquire the number of maximum possible clauses
         // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
@@ -300,13 +286,9 @@ export const createThreatSignals = async ({
           break;
         }
 
-        try {
-          list = await getDocumentList({
-            searchAfter: sortIds,
-          });
-        } catch (exc) {
-          console.error('ANOTHER ERROR', exc);
-        }
+        list = await getDocumentList({
+          searchAfter: sortIds,
+        });
       }
     }
   };
@@ -323,10 +305,6 @@ export const createThreatSignals = async ({
   // at the same time, there are concerns on performance of IM rule when sorting is set to asc, as it may lead to longer rule runs, since it will
   // first go through alerts that might ve been processed in earlier executions, when look back interval set to large values (it can't be larger than 24h)
   const sortOrder = isAlertSuppressionConfigured ? 'asc' : 'desc';
-
-  console.error(
-    `WHAT IS EVENT COUNT: ${eventCount} and what is threatListCount: ${threatListCount}`
-  );
 
   if (eventCount < threatListCount) {
     await createSignals({

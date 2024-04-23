@@ -18,7 +18,6 @@ import type {
  * This should not exceed 10000 (10k)
  */
 export const INDICATOR_PER_PAGE = 1000;
-// export const INDICATOR_PER_PAGE = 10;
 
 export const getThreatList = async ({
   esClient,
@@ -38,9 +37,7 @@ export const getThreatList = async ({
   indexFields,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
-  // const calculatedPerPage = 9361; // perPage ?? INDICATOR_PER_PAGE;
 
-  console.error('WHAT IS CALCULATED PER PAGE?', calculatedPerPage);
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
@@ -57,25 +54,6 @@ export const getThreatList = async ({
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
-  // threat filters is really big for some reason.
-  // console.error('WHAT ARE THREAT FILTERS', JSON.stringify(threatFilters));
-  // console.error('WHAT IS THE QUERY', JSON.stringify(query, null, 2));
-
-  console.error(
-    'WHAT ARE THREAT FILTERS 1 ',
-    JSON.stringify(threatFilters?.[1]?.query?.bool?.should?.[0].bool.should.length)
-  );
-
-  console.error(
-    'WHAT ARE THREAT FILTERS 2',
-    JSON.stringify(threatFilters?.[1]?.query?.bool?.should?.length)
-  );
-
-  console.error('WHAT IS THE QUERYFILTER', queryFilter.bool.filter.length);
-  // console.error('WHAT IS THE QUERYFILTER', queryFilter.query.bool.should[0].bool.filter.length);
-  // console.error('WHAT IS THE QUERYFILTER', queryFilter.query.bool.should.length);
-
-  // try {
   const response = await esClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
@@ -100,9 +78,6 @@ export const getThreatList = async ({
   reassignPitId(response.pit_id);
 
   return response;
-  // } catch (exc) {
-  // console.error('GET THREAT LIST EXC', exc);
-  // }
 };
 
 export const getSortForThreatList = ({

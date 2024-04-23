@@ -58,15 +58,12 @@ export const createEventSignal = async ({
   isAlertSuppressionActive,
   experimentalFeatures,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  console.error('CURRENT EVENT LIST LENGTH', currentEventList.length);
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
-    threatList: currentEventList, //.slice(0, 99),
+    threatList: currentEventList,
     entryKey: 'field',
     allowedFieldsForTermsQuery,
   });
-
-  // console.error('THREAT FILTERS FROM EVENTS', JSON.stringify(threatFiltersFromEvents));
 
   if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
@@ -95,26 +92,22 @@ export const createEventSignal = async ({
       indexFields: threatIndexFields,
     };
 
-    // console.error('THREAT SEARCH PARAMS', JSON.stringify(threatSearchParams.threatFilters));
-
     let signalsQueryMap;
     try {
       signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
         threatSearchParams,
         eventsCount: currentEventList.length,
         signalValueMap: getSignalValueMap({
-          eventList: currentEventList, //.slice(0, 99),
+          eventList: currentEventList,
           threatMatchedFields,
         }),
         termsQueryAllowed: true,
       });
     } catch (exc) {
-      console.error('WHAT WAS THE GET SIGNALS QUERY MAP ERROR', exc);
       // we receive an error if the event list count < threat list count
       // which puts us into the create_event_signal which differs from create threat signal
       // in that we call getSignalsQueryMapFromThreatIndex which can *throw* an error
       // rather than *return* one.
-      console.error('ERROR CAUGHT', exc);
       if (
         exc.message.includes('Query contains too many nested clauses; maxClauseCount is set to')
       ) {
