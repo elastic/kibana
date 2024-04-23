@@ -68,16 +68,14 @@ function transformRoleApplicationsToKibanaPrivileges(
   application: string,
   logger: Logger
 ) {
-  const isReservedPrivilege = (app: string): boolean => {
-    return (
-      app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD || app === PRIVILEGES_ALL_WILDCARD
-    );
-  };
+  const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
+  const isWildcardPrivilage = (app: string) => app === PRIVILEGES_ALL_WILDCARD;
 
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
       roleApplication.application === application ||
-      isReservedPrivilege(roleApplication.application)
+      isReservedPrivilege(roleApplication.application) ||
+      isWildcardPrivilage(roleApplication.application)
   );
 
   // if any application entry contains an empty resource, we throw an error
@@ -90,11 +88,11 @@ function transformRoleApplicationsToKibanaPrivileges(
   if (
     roleKibanaApplications.some(
       (entry) =>
-        isReservedPrivilege(entry.application) &&
+        (isReservedPrivilege(entry.application) || isWildcardPrivilage(entry.application)) &&
         !entry.privileges.every(
           (privilege) =>
             PrivilegeSerializer.isSerializedReservedPrivilege(privilege) ||
-            privilege === PRIVILEGES_ALL_WILDCARD
+            isWildcardPrivilage(privilege)
         )
     )
   ) {
@@ -108,6 +106,7 @@ function transformRoleApplicationsToKibanaPrivileges(
     roleKibanaApplications.some(
       (entry) =>
         !isReservedPrivilege(entry.application) &&
+        !isWildcardPrivilage(entry.application) &&
         entry.privileges.some((privilege) =>
           PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
         )
@@ -182,7 +181,9 @@ function transformRoleApplicationsToKibanaPrivileges(
   }
 
   const allResources = roleKibanaApplications
-    .filter((entry) => !isReservedPrivilege(entry.application))
+    .filter(
+      (entry) => !isReservedPrivilege(entry.application) && !isWildcardPrivilage(entry.application)
+    )
     .flatMap((entry) => entry.resources);
 
   // if we have improperly formatted resource entries, we can't transform these

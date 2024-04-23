@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PRIVILEGES_ALL_WILDCARD } from '../../common/constants';
+
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const reservedPrefix = 'reserved_';
@@ -39,14 +41,6 @@ export class PrivilegeSerializer {
 
   public static isSerializedFeaturePrivilege(privilegeName: string) {
     return privilegeName.startsWith(featurePrefix);
-  }
-
-  public static normalizeBasePrivilageName(privilegeName: string) {
-    if (privilegeName === '*') {
-      return 'all';
-    }
-
-    return privilegeName;
   }
 
   public static serializeGlobalBasePrivilege(privilegeName: string) {
@@ -109,5 +103,17 @@ export class PrivilegeSerializer {
     }
 
     return privilege.slice(reservedPrefix.length);
+  }
+
+  /**
+   * Used to convert application privilege wildcard to 'all'.
+   * UI understands only 'all' and 'read' base privilege.
+   */
+  private static normalizeBasePrivilageName(privilegeName: string) {
+    if (privilegeName === PRIVILEGES_ALL_WILDCARD) {
+      return 'all';
+    }
+
+    return privilegeName;
   }
 }
