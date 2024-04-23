@@ -164,6 +164,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
           })
       ),
     };
