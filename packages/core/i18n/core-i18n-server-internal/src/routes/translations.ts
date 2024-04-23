@@ -32,51 +32,55 @@ export const registerTranslationsRoute = ({
 }) => {
   let translationCache: TranslationCache;
 
-  router.get(
-    {
-      path: `/translations/${translationHash}/{locale}.json`,
-      validate: {
-        params: schema.object({
-          locale: schema.string(),
-        }),
-      },
-      options: {
-        access: 'public',
-        authRequired: false,
-      },
-    },
-    (ctx, req, res) => {
-      if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
-        return res.notFound({
-          body: `Unknown locale: ${req.params.locale}`,
-        });
-      }
-      if (!translationCache) {
-        const translations = JSON.stringify(i18n.getTranslation());
-        translationCache = {
-          translations,
-          hash: translationHash,
-        };
-      }
+  ['/translations/{locale}.json', `/translations/${translationHash}/{locale}.json`].forEach(
+    (routePath) => {
+      router.get(
+        {
+          path: routePath,
+          validate: {
+            params: schema.object({
+              locale: schema.string(),
+            }),
+          },
+          options: {
+            access: 'public',
+            authRequired: false,
+          },
+        },
+        (ctx, req, res) => {
+          if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
+            return res.notFound({
+              body: `Unknown locale: ${req.params.locale}`,
+            });
+          }
+          if (!translationCache) {
+            const translations = JSON.stringify(i18n.getTranslation());
+            translationCache = {
+              translations,
+              hash: translationHash,
+            };
+          }
 
-      let headers: Record<string, string>;
-      if (isDist) {
-        headers = {
-          'content-type': 'application/json',
-          'cache-control': `public, max-age=${365 * DAY}, immutable`,
-        };
-      } else {
-        headers = {
-          'content-type': 'application/json',
-          'cache-control': 'must-revalidate',
-          etag: translationCache.hash,
-        };
-      }
+          let headers: Record<string, string>;
+          if (isDist) {
+            headers = {
+              'content-type': 'application/json',
+              'cache-control': `public, max-age=${365 * DAY}, immutable`,
+            };
+          } else {
+            headers = {
+              'content-type': 'application/json',
+              'cache-control': 'must-revalidate',
+              etag: translationCache.hash,
+            };
+          }
 
-      return res.ok({
-        headers,
-        body: translationCache.translations,
-      });
+          return res.ok({
+            headers,
+            body: translationCache.translations,
+          });
+        }
+      );
     }
   );
 };

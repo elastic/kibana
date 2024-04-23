@@ -16,12 +16,23 @@ describe('registerTranslationsRoute', () => {
       router,
       locale: 'en',
       isDist: true,
-      translationHash: 'XXX',
+      translationHash: 'XXXX',
     });
-    expect(router.get).toHaveBeenCalledTimes(1);
+    expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ options: { access: 'public', authRequired: false } }),
+      expect.objectContaining({
+        path: '/translations/{locale}.json',
+        options: { access: 'public', authRequired: false },
+      }),
+      expect.any(Function)
+    );
+    expect(router.get).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        path: '/translations/XXXX/{locale}.json',
+        options: { access: 'public', authRequired: false },
+      }),
       expect.any(Function)
     );
   });
