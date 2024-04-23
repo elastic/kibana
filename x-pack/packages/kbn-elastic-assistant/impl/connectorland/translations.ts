@@ -52,6 +52,13 @@ export const ADD_NEW_CONNECTOR = i18n.translate(
   }
 );
 
+export const ADD_CONNECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelector.addConnectorButtonLabel',
+  {
+    defaultMessage: 'Add connector',
+  }
+);
+
 export const INLINE_CONNECTOR_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorLabel',
   {

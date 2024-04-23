@@ -6,10 +6,10 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { useCallback, useRef, useState } from 'react';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import { useMutation } from '@tanstack/react-query';
 import { useAssistantContext } from '../../assistant_context';
-import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
+import { fetchConnectorExecuteAction } from '../api';
 
 interface SendMessageProps {
   apiConfig: ApiConfig;
@@ -19,58 +19,31 @@ interface SendMessageProps {
   replacements: Replacements;
 }
 
-interface UseSendMessage {
-  abortStream: () => void;
-  isLoading: boolean;
-  sendMessage: ({
-    apiConfig,
-    http,
-    message,
-  }: SendMessageProps) => Promise<FetchConnectorExecuteResponse>;
-}
-
-export const useSendMessage = (): UseSendMessage => {
+export const useSendMessage = () => {
   const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions } =
     useAssistantContext();
-  const [isLoading, setIsLoading] = useState(false);
-  const abortController = useRef(new AbortController());
-  const sendMessage = useCallback(
-    async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
-      setIsLoading(true);
 
-      try {
-        return await fetchConnectorExecuteAction({
-          conversationId,
-          isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
-          alertsIndexPattern,
-          apiConfig,
-          isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
-          assistantStreamingEnabled,
-          http,
-          message,
-          replacements,
-          signal: abortController.current.signal,
-          size: knowledgeBase.latestAlerts,
-          traceOptions,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [
-      alertsIndexPattern,
-      assistantStreamingEnabled,
-      knowledgeBase.isEnabledRAGAlerts,
-      knowledgeBase.isEnabledKnowledgeBase,
-      knowledgeBase.latestAlerts,
-      traceOptions,
-    ]
-  );
-
-  const cancelRequest = useCallback(() => {
-    abortController.current.abort();
-    abortController.current = new AbortController();
-  }, []);
-
-  return { isLoading, sendMessage, abortStream: cancelRequest };
+  return useMutation({
+    mutationKey: ['useSendMessage'],
+    mutationFn: async ({
+      apiConfig,
+      http,
+      message,
+      conversationId,
+      replacements,
+    }: SendMessageProps) =>
+      fetchConnectorExecuteAction({
+        conversationId,
+        isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
+        alertsIndexPattern,
+        apiConfig,
+        isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
+        assistantStreamingEnabled,
+        http,
+        message,
+        replacements,
+        size: knowledgeBase.latestAlerts,
+        traceOptions,
+      }),
+  });
 };

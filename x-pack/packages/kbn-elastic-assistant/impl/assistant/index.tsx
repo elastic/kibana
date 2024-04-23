@@ -521,7 +521,6 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,
@@ -1002,7 +1001,6 @@ const AssistantComponent: React.FC<Props> = ({
                           isDisabled={isSendingDisabled}
                           shouldRefocusPrompt={shouldRefocusPrompt}
                           userPrompt={userPrompt}
-                          handleButtonSendMessage={handleChatSend}
                           handleOnChatCleared={handleOnChatCleared}
                           handlePromptChange={handlePromptChange}
                           handleSendMessage={handleChatSend}
@@ -1122,7 +1120,6 @@ const AssistantComponent: React.FC<Props> = ({
           isDisabled={isSendingDisabled}
           shouldRefocusPrompt={shouldRefocusPrompt}
           userPrompt={userPrompt}
-          handleButtonSendMessage={handleButtonSendMessage}
           handleOnChatCleared={handleOnChatCleared}
           handlePromptChange={handlePromptChange}
           handleSendMessage={handleChatSend}

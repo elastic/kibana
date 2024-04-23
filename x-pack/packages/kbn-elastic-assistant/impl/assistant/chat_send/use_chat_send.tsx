@@ -35,7 +35,6 @@ export interface UseChatSendProps {
 
 export interface UseChatSend {
   abortStream: () => void;
-  handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
@@ -66,7 +65,7 @@ export const useChatSend = ({
     toasts,
   } = useAssistantContext();
 
-  const { isLoading, sendMessage, abortStream } = useSendMessage();
+  const { isLoading, mutateAsync: sendMessage, reset: abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
@@ -209,14 +208,6 @@ export const useChatSend = ({
     });
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
-  const handleButtonSendMessage = useCallback(
-    (message: string) => {
-      handleSendMessage(message);
-      setUserPrompt('');
-    },
-    [handleSendMessage, setUserPrompt]
-  );
-
   const handleOnChatCleared = useCallback(async () => {
     const defaultSystemPromptId = getDefaultSystemPrompt({
       allSystemPrompts,
@@ -246,7 +237,6 @@ export const useChatSend = ({
 
   return {
     abortStream,
-    handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,

@@ -18,6 +18,8 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: ${euiThemeVars.euiSizeXXL};
+  margin-bottom: ${euiThemeVars.euiSizeL};
 
   :before,
   :after {
