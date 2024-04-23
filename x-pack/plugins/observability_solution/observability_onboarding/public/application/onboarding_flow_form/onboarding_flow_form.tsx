@@ -92,16 +92,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const selectedCategory: Category | null = searchParams.get('category') as Category | null;
 
   useEffect(() => {
-    let timeout;
-
-    if (customCardsRef.current && selectedCategory && hasPackageListLoaded) {
-      timeout = setTimeout(() => {
-        customCardsRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end',
-        });
-      }, 10);
+    if (selectedCategory === null || !hasPackageListLoaded) {
+      return;
     }
+
+    const timeout = setTimeout(() => {
+      customCardsRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }, 10);
 
     return () => clearTimeout(timeout);
   }, [selectedCategory, hasPackageListLoaded]);
