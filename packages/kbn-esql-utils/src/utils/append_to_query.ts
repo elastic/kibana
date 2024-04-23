@@ -12,13 +12,21 @@ export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): 
   return `${baseESQLQuery}\n${appendedText}`;
 }
 
-export function appendWhereClauseToESQLQuery(
+export async function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
   field: string,
   value: string,
   operation: '+' | '-'
-): string {
+): Promise<string> {
   const operator = operation === '+' ? '==' : '!=';
+
+  const { getAstAndSyntaxErrors } = await import('@kbn/esql-ast');
+  const { ast } = await getAstAndSyntaxErrors(baseESQLQuery);
+  const lastCommandIsWhere = ast[ast.length - 1].name === 'where';
+  if (lastCommandIsWhere) {
+    const whereClause = `and ${field}${operator}"${value}"`;
+    return appendToESQLQuery(baseESQLQuery, whereClause);
+  }
   const whereClause = `| where ${field}${operator}"${value}"`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }

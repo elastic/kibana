@@ -148,10 +148,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   );
 
   const onPopulateWhereClause = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       if (query && isOfAggregateQueryType(query) && 'esql' in query) {
         const fieldName = typeof field === 'string' ? field : field.name;
-        const updatedQuery = appendWhereClauseToESQLQuery(
+        const updatedQuery = await appendWhereClauseToESQLQuery(
           query.esql,
           fieldName,
           String(values),
