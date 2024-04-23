@@ -10,7 +10,6 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { MlGetTrainedModelsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { waitFor } from '../../../../../common/utils/security_solution';
-import { SUPPORTED_TRAINED_MODELS } from '../../../../../functional/services/ml/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esSupertest = getService('esSupertest');
@@ -19,11 +18,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const logger = getService('log');
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
-
-  const TINY_ELSER = {
-    ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
-    id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-  };
 
   describe('@serverless NLP Cleanup Task in Essentials Tier', () => {
     describe('New Essentials Deployment', () => {
@@ -38,18 +32,9 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('Model Loading', () => {
         before(async () => {
           // Create a light-weight model that has a `model_type` of `pytorch`
-          await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id);
-          await ml.testResources.setKibanaTimeZoneToUTC();
+          await ml.api.importTrainedModel('pt_tiny_fill_mask', 'pt_tiny_fill_mask');
           // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
           await ml.api.assureMlStatsIndexExists();
-          await ml.api.syncSavedObjects();
-        });
-
-        after(async () => {
-          await ml.api.stopAllTrainedModelDeploymentsES();
-          await ml.api.deleteAllTrainedModelsES();
-          await ml.api.cleanMlIndices();
-          await ml.testResources.cleanMLSavedObjects();
         });
 
         it('executes NLP Cleanup Task and successfully cleans up only pytorch models', async () => {
