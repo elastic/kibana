@@ -145,7 +145,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.index(documents);
     });
 
-    // after(() => synthtraceEsClient.clean());
+    after(() => synthtraceEsClient.clean());
 
     describe('returns the transaction error rate', () => {
       let errorRateResponse: ErrorRate;
