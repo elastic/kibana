@@ -7,7 +7,6 @@
  */
 
 import { appendHash, Fields } from '@kbn/apm-synthtrace-client';
-import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_assets';
 import { Duplex, PassThrough } from 'stream';
 
 export function assetsAggregatorFactory<TFields extends Fields>() {
@@ -19,14 +18,13 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
     }: {
       filter: (event: TFields) => boolean;
       getAggregateKey: (event: TFields) => string;
-      init: (event: TFields) => ServiceAssetDocument;
+      init: (event: TFields) => TAsset;
     },
-    reduce: (asset: ServiceAssetDocument, event: TFields) => void,
-    serialize: (asset: ServiceAssetDocument) => TOutput
+    reduce: (asset: TAsset, event: TFields) => void,
+    serialize: (asset: TAsset) => TOutput
   ) {
-    const assets: Map<string, ServiceAssetDocument> = new Map();
-
-    let toFlush: ServiceAssetDocument[] = [];
+    const assets: Map<string, TAsset> = new Map();
+    let toFlush: TAsset[] = [];
     let cb: (() => void) | undefined;
 
     function flush(stream: Duplex, includeCurrentAssets: boolean, callback?: () => void) {
@@ -70,21 +68,17 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
           return;
         }
 
-        function writeAssetAggregator() {
-          const key = appendHash(getAggregateKey(event), '');
+        const key = appendHash(getAggregateKey(event), '');
 
-          let asset = assets.get(key);
+        let asset = assets.get(key);
 
-          if (!asset) {
-            asset = init({ ...event });
-            assets.set(key, asset);
-          }
-
-          reduce(asset, event);
-          callback();
+        if (!asset) {
+          asset = init({ ...event });
+          assets.set(key, asset);
         }
 
-        writeAssetAggregator();
+        reduce(asset, event);
+        callback();
       },
     });
   };
