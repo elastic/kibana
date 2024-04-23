@@ -49,7 +49,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   // https://github.com/elastic/kibana/issues/173168
-  describe('Favorite Timelines', { tags: ['@skipInServerlessMKI'] }, () => {
+  describe('Favorite Timelines', { tags: ['@skipInServerless'] }, () => {
     it('should appear on overview page', () => {
       createTimeline()
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
