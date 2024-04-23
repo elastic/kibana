@@ -10,7 +10,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { getDefaultArguments } from './constants';
+import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
 import { TraceOptions } from './types';
@@ -102,8 +102,7 @@ export class ActionsClientLlm extends LLM {
           messages: [assistantMessage], // the assistant message
           ...getDefaultArguments(this.llmType, this.temperature),
           // This timeout is large because LangChain prompts can be complicated and take a long time
-          // TODO put into constants file once merged: https://github.com/elastic/kibana/pull/181088
-          timeout: this.#timeout ?? 180000,
+          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
         },
       },
     };

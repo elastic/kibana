@@ -18,7 +18,7 @@ import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
-import { DEFAULT_OPEN_AI_MODEL } from './constants';
+import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import { InvokeAIActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
@@ -207,8 +207,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
           })),
           signal: this.#signal,
           // This timeout is large because LangChain prompts can be complicated and take a long time
-          // TODO put into constants file once merged: https://github.com/elastic/kibana/pull/181088
-          timeout: this.#timeout ?? 180000,
+          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
         },
       },
       signal: this.#signal,
