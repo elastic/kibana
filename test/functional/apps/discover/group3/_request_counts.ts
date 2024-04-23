@@ -76,12 +76,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.canvasExists();
     };
 
-    const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
-      await browser.execute(async () => {
-        performance.clearResourceTimings();
-      });
-      let searchCount = await getSearchCount(type);
-      expect(searchCount).to.be(0);
+    const expectSearches = async (
+      type: 'ese' | 'esql',
+      expected: number,
+      cb: Function,
+      options?: { dontResetTimings?: boolean }
+    ) => {
+      let searchCount;
+      if (!options?.dontResetTimings) {
+        await browser.execute(async () => {
+          performance.clearResourceTimings();
+        });
+        searchCount = await getSearchCount(type);
+        expect(searchCount).to.be(0);
+      }
       await cb();
       await waitForLoadingToFinish();
       await retry.waitFor('correct search request count', async () => {
@@ -124,9 +132,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.execute(async () => {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
-        await waitForLoadingToFinish();
-        const searchCount = await getSearchCount(type);
-        expect(searchCount).to.be(expectedRequests);
+        await expectSearches(
+          type,
+          expectedRequests,
+          async () => {
+            // nothing
+          },
+          { dontResetTimings: true }
+        );
       });
 
       it(`should send ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
