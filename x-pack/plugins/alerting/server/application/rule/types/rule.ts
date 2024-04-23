@@ -72,7 +72,7 @@ export interface Rule<Params extends RuleParams = never> {
   muteAll: RuleSchemaType['muteAll'];
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
-  executionStatus: RuleExecutionStatus;
+  executionStatus?: RuleExecutionStatus;
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleSchemaType['activeSnoozes'];
@@ -110,7 +110,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
-  executionStatus: RuleExecutionStatus;
+  executionStatus?: RuleExecutionStatus;
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleDomainSchemaType['activeSnoozes'];

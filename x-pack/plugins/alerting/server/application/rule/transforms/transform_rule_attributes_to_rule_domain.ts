@@ -10,7 +10,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
-import { RuleAttributes } from '../../../data/rule/types';
+import { RuleAttributes, RuleExecutionStatusAttributes } from '../../../data/rule/types';
 import { PartialRule } from '../../../types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
@@ -32,7 +32,7 @@ const INITIAL_LAST_RUN_METRICS = {
 const transformEsExecutionStatus = (
   logger: Logger,
   ruleId: string,
-  esRuleExecutionStatus: RuleAttributes['executionStatus']
+  esRuleExecutionStatus: RuleExecutionStatusAttributes
 ): RuleDomain['executionStatus'] => {
   const {
     lastExecutionDate,
@@ -204,7 +204,9 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
-    executionStatus: transformEsExecutionStatus(logger, id, executionStatus),
+    ...(executionStatus
+      ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
+      : {}),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
     ...(includeSnoozeData

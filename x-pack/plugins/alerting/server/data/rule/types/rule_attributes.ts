@@ -171,7 +171,7 @@ export interface RuleAttributes {
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: RuleMetaAttributes;
-  executionStatus: RuleExecutionStatusAttributes;
+  executionStatus?: RuleExecutionStatusAttributes;
   monitoring?: RuleMonitoringAttributes;
   snoozeSchedule?: RuleSnoozeScheduleAttributes[];
   isSnoozedUntil?: string | null;
