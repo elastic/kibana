@@ -142,6 +142,10 @@ export default ({ getService }: FtrProviderContext): void => {
         ],
         max_signals: 100,
         setup: '# some setup markdown',
+        required_fields: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'my-non-ecs-field', type: 'keyword' },
+        ],
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
 
@@ -162,6 +166,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const [ruleJson] = body.toString().split(/\n/);
 
       expect(JSON.parse(ruleJson)).toMatchObject(defaultableFields);
+
+      const parsedRule = JSON.parse(ruleJson);
+
+      expect(parsedRule.required_fields).to.eql([
+        { name: '@timestamp', type: 'date', ecs: true },
+        { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+      ]);
     });
 
     it('should export rules with actions connectors', async () => {

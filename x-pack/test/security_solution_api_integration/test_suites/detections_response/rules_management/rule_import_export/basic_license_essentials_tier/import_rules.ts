@@ -125,7 +125,12 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
         };
+
         const ruleToImport = getCustomQueryRuleParams({
           ...defaultableFields,
           rule_id: 'rule-1',

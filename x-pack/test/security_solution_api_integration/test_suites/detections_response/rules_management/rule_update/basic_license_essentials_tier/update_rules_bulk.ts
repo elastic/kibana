@@ -96,6 +96,35 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedRule).toMatchObject(expectedRule);
       });
 
+      it('should update a rule with defaultable fields', async () => {
+        const expectedRule = {
+          ...getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+          }),
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
+
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+        });
+
+        const { body: updatedRulesBulkResponse } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [expectedRule],
+          })
+          .expect(200);
+
+        expect(updatedRulesBulkResponse[0].required_fields).to.eql(expectedRule.required_fields);
+
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(updatedRule.required_fields).to.eql(expectedRule.required_fields);
+      });
+
       it('should update two rule properties of name using the two rules rule_id', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 

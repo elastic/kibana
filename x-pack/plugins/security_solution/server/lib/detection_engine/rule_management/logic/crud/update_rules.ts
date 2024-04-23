@@ -6,7 +6,6 @@
  */
 
 /* eslint-disable complexity */
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import type { RuleUpdateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -15,6 +14,7 @@ import { transformRuleToAlertAction } from '../../../../../../common/detection_e
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
+import { addEcsToRequiredFields } from '../../utils/utils';
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
@@ -33,18 +33,7 @@ export const updateRules = async ({
     return null;
   }
 
-  const requiredFieldsWithEcs = (ruleUpdate.required_fields ?? []).map(
-    (requiredFieldWithoutEcs) => {
-      const isEcsField = Boolean(
-        ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
-      );
-
-      return {
-        ...requiredFieldWithoutEcs,
-        ecs: isEcsField,
-      };
-    }
-  );
+  const requiredFieldsWithEcs = addEcsToRequiredFields(ruleUpdate.required_fields);
 
   const alertActions =
     ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];

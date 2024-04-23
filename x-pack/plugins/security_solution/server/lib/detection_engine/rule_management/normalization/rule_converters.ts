@@ -11,7 +11,6 @@ import { stringifyZodError } from '@kbn/zod-helpers';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import {
@@ -23,7 +22,6 @@ import {
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   RelatedIntegrationArray,
-  RequiredFieldArray,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -79,6 +77,7 @@ import type {
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import {
+  addEcsToRequiredFields,
   convertAlertSuppressionToCamel,
   convertAlertSuppressionToSnake,
   migrateLegacyInvestigationFields,
@@ -432,12 +431,13 @@ export const patchTypeSpecificSnakeToCamel = (
 export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
+
+  const requiredFieldsWithEcs = addEcsToRequiredFields(nextParams.required_fields);
 
   const alertActions =
     nextParams.actions?.map((action) => transformRuleToAlertAction(action)) ?? existingRule.actions;
@@ -463,7 +463,7 @@ export const convertPatchAPIToInternalSchema = (
       meta: nextParams.meta ?? existingParams.meta,
       maxSignals: nextParams.max_signals ?? existingParams.maxSignals,
       relatedIntegrations: nextParams.related_integrations ?? existingParams.relatedIntegrations,
-      requiredFields: nextParams.required_fields ?? existingParams.requiredFields,
+      requiredFields: requiredFieldsWithEcs,
       riskScore: nextParams.risk_score ?? existingParams.riskScore,
       riskScoreMapping: nextParams.risk_score_mapping ?? existingParams.riskScoreMapping,
       ruleNameOverride: nextParams.rule_name_override ?? existingParams.ruleNameOverride,
@@ -488,7 +488,6 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
-// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
@@ -502,16 +501,7 @@ export const convertCreateAPIToInternalSchema = (
   const alertActions = input.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
 
-  const requiredFieldsWithEcs = (input.required_fields ?? []).map((requiredFieldWithoutEcs) => {
-    const isEcsField = Boolean(
-      ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
-    );
-
-    return {
-      ...requiredFieldWithoutEcs,
-      ecs: isEcsField,
-    };
-  });
+  const requiredFieldsWithEcs = addEcsToRequiredFields(input.required_fields);
 
   return {
     name: input.name,
