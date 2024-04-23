@@ -37,16 +37,22 @@ export function TrainedModelsDeploymentModal({
   const [mlManagementPageUrl, setMlManagementPageUrl] = useState<string>('');
 
   useEffect(() => {
+    let isCancelled = false;
     const mlLocator = url?.locators.get(ML_APP_LOCATOR);
     const generateUrl = async () => {
       if (mlLocator) {
         const mlURL = await mlLocator.getUrl({
           page: TRAINED_MODELS_MANAGE,
         });
-        setMlManagementPageUrl(mlURL);
+        if (!isCancelled) {
+          setMlManagementPageUrl(mlURL);
+        }
       }
     };
     generateUrl();
+    return () => {
+      isCancelled = true;
+    };
   }, [url]);
 
   const ErroredDeployments = pendingDeployments.filter(
