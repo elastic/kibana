@@ -12,7 +12,11 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
+import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
@@ -59,7 +63,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
     model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure

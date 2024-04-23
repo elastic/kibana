@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ActionsClientChatOpenAI } from './openai';
-export { ActionsClientLlm } from './actions_client_llm';
+export { ActionsClientChatOpenAI } from './chat_openai';
+export { ActionsClientLlm } from './llm';
