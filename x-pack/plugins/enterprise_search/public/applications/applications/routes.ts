@@ -17,6 +17,8 @@ export enum SearchApplicationViewTabs {
 export const SEARCH_APPLICATION_CREATION_PATH = `${SEARCH_APPLICATIONS_PATH}/new`;
 export const SEARCH_APPLICATION_PATH = `${SEARCH_APPLICATIONS_PATH}/:searchApplicationName`;
 export const SEARCH_APPLICATION_TAB_PATH = `${SEARCH_APPLICATION_PATH}/:tabId`;
+export const PLAYGROUND_PATH = `${ROOT_PATH}playground`;
+
 export const SEARCH_APPLICATION_CONNECT_PATH = `${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/:connectTabId`;
 export enum SearchApplicationConnectTabs {
   SEARCHAPI = 'search_api',

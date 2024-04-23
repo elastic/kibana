@@ -6,7 +6,10 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
@@ -15,7 +18,7 @@ import { Prompt } from '../../common/prompt';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
-jest.mock('@kbn/elastic-assistant-common/impl/llm', () => ({
+jest.mock('@kbn/elastic-assistant-common/impl/language_models', () => ({
   ActionsClientChatOpenAI: jest.fn(),
   ActionsClientLlm: jest.fn(),
 }));

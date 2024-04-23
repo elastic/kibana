@@ -747,6 +747,54 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useGenAIConnectorsWithoutContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useGenAIConnectorsWithoutContext",
+        "description": [],
+        "signature": [
+          "(assistant: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantService",
+            "text": "ObservabilityAIAssistantService"
+          },
+          ") => ",
+          "UseGenAIConnectorsResult"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useGenAIConnectorsWithoutContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "assistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantService",
+                "text": "ObservabilityAIAssistantService"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
