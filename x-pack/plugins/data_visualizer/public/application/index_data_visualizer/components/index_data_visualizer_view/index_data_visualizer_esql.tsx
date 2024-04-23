@@ -98,6 +98,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const indexPattern = useMemo(() => {
     let indexPatternFromQuery = '';
     if (isESQLQuery(query)) {
+      // deprecated, use the async new getIndexPatternFromESQLQuery instead
       indexPatternFromQuery = getIndexPatternFromESQLQueryDeprecated(query.esql);
     }
     // we should find a better way to work with ESQL queries which dont need a dataview
