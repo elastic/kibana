@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -81,8 +81,21 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const [searchParams, setSearchParams] = useSearchParams();
+
   const packageListRef = React.useRef<HTMLDivElement | null>(null);
-  const [integrationSearch, setIntegrationSearch] = useState('');
+  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+
+  useEffect(() => {
+    const searchParam = searchParams.get('search') ?? '';
+    if (integrationSearch === searchParam) return;
+    const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    if (integrationSearch) {
+      entries.search = integrationSearch;
+    } else {
+      delete entries.search;
+    }
+    setSearchParams(entries, { replace: true });
+  }, [integrationSearch, searchParams, setSearchParams]);
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
@@ -97,7 +110,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         );
       }
     },
-    [setIntegrationSearch]
+    []
   );
 
   const customCards = useCustomCardsForCategory(
@@ -153,7 +166,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {Array.isArray(customCards) && <OnboardingFlowPackageList customCards={customCards} />}
+          {Array.isArray(customCards) && (
+            <OnboardingFlowPackageList
+              customCards={customCards}
+              flowSearch={integrationSearch}
+              flowCategory={searchParams.get('category')}
+            />
+          )}
 
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
@@ -164,9 +183,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           <OnboardingFlowPackageList
             showSearchBar={true}
             searchQuery={integrationSearch}
+            flowSearch={integrationSearch}
             setSearchQuery={setIntegrationSearch}
+            flowCategory={searchParams.get('category')}
             ref={packageListRef}
-            customCards={customCards?.filter(({ name, type }) => type === 'virtual')}
+            customCards={customCards?.filter(
+              (card) => card.type === 'virtual' && !card.isCollectionCard
+            )}
             joinCardLists
           />
         </>
