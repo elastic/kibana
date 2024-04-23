@@ -7,6 +7,9 @@
 
 import { Message } from '../schemas';
 import { getMessageContentAndRole } from './helpers';
+import { getCombinedMessage } from '@kbn/elastic-assistant/impl/assistant/prompt/helpers';
+import type { SelectedPromptContext } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
+import type { Prompt } from '@kbn/elastic-assistant';
 
 describe('helpers', () => {
   describe('getMessageContentAndRole', () => {
@@ -22,6 +25,83 @@ describe('helpers', () => {
 
         expect(result).toEqual(expectedOutput);
       });
+    });
+  });
+  describe('getCombinedMessage', () => {
+    const defaultGetAnonymizedValue = jest.fn((args) => args.rawValue);
+
+    const mockPrompt: Prompt = {
+      content: 'This is a system prompt',
+      id: '123',
+      name: 'prompt name',
+      promptType: 'system',
+    };
+
+    const mockPromptContexts: Record<string, SelectedPromptContext> = {
+      context1: {
+        promptContextId: 'context1',
+        rawData: 'This is raw data for context 1',
+        replacements: { field1: 'replaced1', field2: 'replaced2' },
+      },
+      context2: {
+        promptContextId: 'context2',
+        rawData: 'This is raw data for context 2',
+        replacements: {},
+      },
+    };
+
+    const mockCurrentReplacements = {
+      currentReplacement1: 'value1',
+      currentReplacement2: 'value2',
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should return the correct combined message for a new chat', () => {
+      const result = getCombinedMessage({
+        currentReplacements: mockCurrentReplacements,
+        getAnonymizedValue: defaultGetAnonymizedValue,
+        isNewChat: true,
+        promptText: 'This is a user prompt',
+        selectedPromptContexts: mockPromptContexts,
+        selectedSystemPrompt: mockPrompt,
+      });
+
+      expect(result.content).toEqual(
+        `This is a system prompt\n\nCONTEXT:\n\"\"\"\nThis is raw data for context 1\n\"\"\"\n,CONTEXT:\n\"\"\"\nThis is raw data for context 2\n\"\"\"\n\nThis is a user prompt`
+      );
+    });
+
+    it('should return the correct combined message for an existing chat', () => {
+      const result = getCombinedMessage({
+        currentReplacements: mockCurrentReplacements,
+        getAnonymizedValue: defaultGetAnonymizedValue,
+        isNewChat: false,
+        promptText: 'This is a user prompt',
+        selectedPromptContexts: mockPromptContexts,
+        selectedSystemPrompt: undefined,
+      });
+
+      expect(result.content).toEqual(
+        `CONTEXT:\n\"\"\"\nThis is raw data for context 1\n\"\"\"\n,CONTEXT:\n\"\"\"\nThis is raw data for context 2\n\"\"\"\n\nThis is a user prompt`
+      );
+    });
+
+    it('should remove extra spaces when there is no prompt content or prompt conext', () => {
+      const customGetAnonymizedValue = jest.fn((args) => `ANONYMIZED(${args.rawValue})`);
+
+      const result = getCombinedMessage({
+        currentReplacements: mockCurrentReplacements,
+        getAnonymizedValue: customGetAnonymizedValue,
+        isNewChat: true,
+        promptText: 'This is a user prompt',
+        selectedPromptContexts: {},
+        selectedSystemPrompt: { ...mockPrompt, content: '' },
+      });
+
+      expect(result.content).toEqual(`This is a user prompt`);
     });
   });
 });
