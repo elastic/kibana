@@ -26,7 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQueryDeprecated } from '@kbn/esql-utils';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -60,7 +60,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
   const [query, setQuery] = useState<ESQLQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
-  const [indexPattern, setIndexPattern] = useState<string | undefined>();
 
   const toggleShowEmptyFields = () => {
     setDataVisualizerListState({
@@ -96,19 +95,17 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   // Query that has been typed, but has not submitted with cmd + enter
   const [localQuery, setLocalQuery] = useState<ESQLQuery>({ esql: '' });
 
-  useEffect(() => {
-    const getIndex = async () => {
-      let indexPatternFromQuery: string | undefined;
-      if (isESQLQuery(query)) {
-        indexPatternFromQuery = await getIndexPatternFromESQLQuery(query.esql);
-        if (indexPatternFromQuery !== '') {
-          indexPatternFromQuery = undefined;
-        }
-      }
-      setIndexPattern(indexPatternFromQuery);
-    };
-    getIndex();
-  }, []);
+  const indexPattern = useMemo(() => {
+    let indexPatternFromQuery = '';
+    if (isESQLQuery(query)) {
+      indexPatternFromQuery = getIndexPatternFromESQLQueryDeprecated(query.esql);
+    }
+    // we should find a better way to work with ESQL queries which dont need a dataview
+    if (indexPatternFromQuery === '') {
+      return undefined;
+    }
+    return indexPatternFromQuery;
+  }, [query]);
 
   useEffect(
     function updateAdhocDataViewFromQuery() {
@@ -136,7 +133,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       };
     },
 
-    [data.dataViews, currentDataView]
+    [indexPattern, data.dataViews, currentDataView]
   );
 
   const input: DataVisualizerGridInput<ESQLQuery> = useMemo(() => {
