@@ -187,7 +187,8 @@ export const createThreatSignals = async ({
 
       const maxClauseCountValue = getMaxClauseCountErrorValue(
         searchesPerformed,
-        threatFieldsLength
+        threatFieldsLength,
+        eventsTelemetry
       );
 
       if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {

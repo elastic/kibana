@@ -9,6 +9,10 @@ import moment from 'moment';
 
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { get, isEmpty } from 'lodash';
+
+import { TelemetryChannel } from '../../../../telemetry/types';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../../types';
 import { parseInterval } from '../../utils/utils';
 import { ThreatMatchQueryType } from './types';
@@ -242,7 +246,8 @@ export const getSignalValueMap = ({
 
 export const getMaxClauseCountErrorValue = (
   searchesPerformed: SearchAfterAndBulkCreateReturnType[],
-  threatEntriesCount: number
+  threatEntriesCount: number,
+  eventsTelemetry: ITelemetryEventsSender | undefined
 ) =>
   searchesPerformed.reduce<number>((acc, search) => {
     const failedToCreateQueryMessage: string | undefined = search.errors.find((err) =>
@@ -260,6 +265,9 @@ export const getMaxClauseCountErrorValue = (
 
     if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
       const tempVal = parseInt(foundNestedClauseCountValue, 10);
+      eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+        `Query contains too many nested clauses error received during IM search`,
+      ]);
 
       // minus 1 since the max clause count value is exclusive
       // multiplying by two because we need to account for the
@@ -274,6 +282,9 @@ export const getMaxClauseCountErrorValue = (
       return val;
     } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
       const tempVal = parseInt(foundMaxClauseCountValue, 10);
+      eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+        `failed to create query error received during IM search`,
+      ]);
       // minus 1 since the max clause count value is exclusive
       // and we add 1 to threatEntries to increase the number of "buckets"
       // that our searches are spread over, smaller buckets means less clauses
