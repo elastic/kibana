@@ -71,6 +71,20 @@
           },
           {
             "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.pluginId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "pluginId",
+            "description": [],
+            "signature": [
+              "symbol | undefined"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
             "id": "def-common.CoreVersionedRouter.from",
             "type": "Function",
             "tags": [],
