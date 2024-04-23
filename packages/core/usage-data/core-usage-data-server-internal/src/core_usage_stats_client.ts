@@ -182,13 +182,12 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
     this.coreUsageEvents$
       .pipe(
         takeUntil(stop$),
-        tap(({ isKibanaRequest, types }: CoreUsageEvent) => {
+        tap(({ id, isKibanaRequest, types }: CoreUsageEvent) => {
           const kibanaYesNo = isKibanaRequest ? 'yes' : 'no';
-          // NB this usage counter has the domainId: 'core' so it will be prefixed with 'core.'
+          // NB this usage counter has the domainId: 'core', and so will related docs in 'kibana-usage-counters' data view
           types?.forEach((type) =>
             incrementUsageCounter({
-              // e.g. 'kibana-usage-counters:core.saved_objects.api_calls.kibana_request.no.types.dashboard'
-              counterName: `saved_objects.api_calls.kibana_request.${kibanaYesNo}.types.${type}`,
+              counterName: `savedObjects.${id}.kibanaRequest.${kibanaYesNo}.types.${type}`,
             })
           );
         })

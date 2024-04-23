@@ -40,18 +40,20 @@ import { CoreUsageStatsClient } from '.';
 
 describe('CoreUsageStatsClient', () => {
   const stop$ = new Subject<void>();
+  const incrementUsageCounterMock = jest.fn();
   const setup = (namespace?: string) => {
     const debugLoggerMock = jest.fn();
     const basePathMock = httpServiceMock.createBasePath();
     // we could mock a return value for basePathMock.get, but it isn't necessary for testing purposes
     basePathMock.remove.mockReturnValue(namespace ? `/s/${namespace}` : '/');
     const repositoryMock = savedObjectsRepositoryMock.create();
-    const usageStatsClient = new CoreUsageStatsClient(
-      debugLoggerMock,
-      basePathMock,
-      Promise.resolve(repositoryMock),
-      stop$
-    );
+    const usageStatsClient = new CoreUsageStatsClient({
+      debugLogger: debugLoggerMock,
+      basePath: basePathMock,
+      repositoryPromise: Promise.resolve(repositoryMock),
+      stop$,
+      incrementUsageCounter: incrementUsageCounterMock,
+    });
     return { usageStatsClient, debugLoggerMock, basePathMock, repositoryMock };
   };
   const firstPartyRequestHeaders = {
@@ -63,6 +65,10 @@ describe('CoreUsageStatsClient', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
+  });
+
+  beforeEach(() => {
+    incrementUsageCounterMock.mockReset();
   });
 
   afterEach(() => {
@@ -280,6 +286,23 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsBulkCreate({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1', 'type2'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_CREATE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_CREATE_STATS_PREFIX}.kibanaRequest.yes.types.type2`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsBulkGet', () => {
@@ -367,6 +390,23 @@ describe('CoreUsageStatsClient', () => {
         ],
         incrementOptions
       );
+    });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsBulkGet({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_GET_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_GET_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
     });
   });
 
@@ -456,6 +496,23 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsBulkResolve({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1', 'type2'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_RESOLVE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_RESOLVE_STATS_PREFIX}.kibanaRequest.yes.types.type2`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsBulkUpdate', () => {
@@ -544,6 +601,23 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsBulkUpdate({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_UPDATE_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_UPDATE_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsCreate', () => {
@@ -628,6 +702,20 @@ describe('CoreUsageStatsClient', () => {
         ],
         incrementOptions
       );
+    });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsCreate({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${CREATE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
     });
   });
 
@@ -717,6 +805,23 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsBulkDelete({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_DELETE_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${BULK_DELETE_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsDelete', () => {
@@ -802,6 +907,20 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsDelete({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${DELETE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsFind', () => {
@@ -881,6 +1000,20 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsFind({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${FIND_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsGet', () => {
@@ -959,6 +1092,20 @@ describe('CoreUsageStatsClient', () => {
         ],
         incrementOptions
       );
+    });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsGet({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${GET_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
     });
   });
 
@@ -1048,6 +1195,20 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsResolve({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${RESOLVE_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsUpdate', () => {
@@ -1132,6 +1293,20 @@ describe('CoreUsageStatsClient', () => {
         ],
         incrementOptions
       );
+    });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsUpdate({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1'],
+      } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${UPDATE_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
     });
   });
 
@@ -1254,6 +1429,23 @@ describe('CoreUsageStatsClient', () => {
         ],
         incrementOptions
       );
+    });
+
+    it('reports SO type usage if provided', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsImport({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+      } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${IMPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${IMPORT_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
     });
   });
 
@@ -1386,6 +1578,23 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage if provided', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsResolveImportErrors({
+        request: httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders }),
+        types: ['type1', 'type2'],
+      } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.yes.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.yes.types.type2`,
+      });
+    });
   });
 
   describe('#incrementSavedObjectsExport', () => {
@@ -1478,6 +1687,24 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementSavedObjectsExport({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+        supportedTypes: ['type1', 'type2', 'type3'],
+      } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${EXPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${EXPORT_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
+    });
   });
 
   describe('#incrementLegacyDashboardsImport', () => {
@@ -1489,7 +1716,7 @@ describe('CoreUsageStatsClient', () => {
       await expect(
         usageStatsClient.incrementLegacyDashboardsImport({
           request,
-        } as IncrementSavedObjectsExportOptions)
+        } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
       await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
@@ -1501,7 +1728,7 @@ describe('CoreUsageStatsClient', () => {
       const request = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
       await usageStatsClient.incrementLegacyDashboardsImport({
         request,
-      } as IncrementSavedObjectsExportOptions);
+      } as BaseIncrementOptions);
       await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
@@ -1528,7 +1755,7 @@ describe('CoreUsageStatsClient', () => {
       const request = httpServerMock.createKibanaRequest();
       await usageStatsClient.incrementLegacyDashboardsImport({
         request,
-      } as IncrementSavedObjectsExportOptions);
+      } as BaseIncrementOptions);
       await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
@@ -1548,6 +1775,23 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('reports SO type usage if provided', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementLegacyDashboardsImport({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+      } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
+    });
   });
 
   describe('#incrementLegacyDashboardsExport', () => {
@@ -1559,7 +1803,7 @@ describe('CoreUsageStatsClient', () => {
       await expect(
         usageStatsClient.incrementLegacyDashboardsExport({
           request,
-        } as IncrementSavedObjectsExportOptions)
+        } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
       await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
@@ -1571,7 +1815,7 @@ describe('CoreUsageStatsClient', () => {
       const request = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
       await usageStatsClient.incrementLegacyDashboardsExport({
         request,
-      } as IncrementSavedObjectsExportOptions);
+      } as BaseIncrementOptions);
       await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
@@ -1598,7 +1842,7 @@ describe('CoreUsageStatsClient', () => {
       const request = httpServerMock.createKibanaRequest();
       await usageStatsClient.incrementLegacyDashboardsExport({
         request,
-      } as IncrementSavedObjectsExportOptions);
+      } as BaseIncrementOptions);
       await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
@@ -1617,6 +1861,23 @@ describe('CoreUsageStatsClient', () => {
         ],
         incrementOptions
       );
+    });
+
+    it('reports SO type usage if provided', async () => {
+      const { usageStatsClient } = setup('foo');
+
+      await usageStatsClient.incrementLegacyDashboardsExport({
+        request: httpServerMock.createKibanaRequest(),
+        types: ['type1', 'type2'],
+      } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
+      expect(incrementUsageCounterMock).toHaveBeenCalledTimes(2);
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.kibanaRequest.no.types.type1`,
+      });
+      expect(incrementUsageCounterMock).toHaveBeenCalledWith({
+        counterName: `savedObjects.${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.kibanaRequest.no.types.type2`,
+      });
     });
   });
 });
