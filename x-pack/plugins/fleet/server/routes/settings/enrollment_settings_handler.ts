@@ -20,10 +20,7 @@ import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '..
 import { defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService, packagePolicyService, downloadSourceService } from '../../services';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
-import {
-  getFleetServerHostsForAgentPolicy,
-  getDefaultFleetServerHost,
-} from '../../services/fleet_server_host';
+import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
 import { getFleetProxy } from '../../services/fleet_proxies';
 
 export const getEnrollmentSettingsHandler: FleetRequestHandler<
@@ -67,14 +64,15 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       scopedAgentPolicy.download_source_id ?? undefined
     );
 
-    // Get associated fleet server host
-    settingsResponse.fleet_server.host = await getFleetServerHostsForAgentPolicy(
-      soClient,
-      scopedAgentPolicy
-    );
-    // Otherwise return the default fleet server host
-    if (!settingsResponse.fleet_server.host) {
-      settingsResponse.fleet_server.host = (await getDefaultFleetServerHost(soClient)) ?? undefined;
+    // Get associated fleet server host, or default one if it doesn't exist
+    // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
+    try {
+      settingsResponse.fleet_server.host = await getFleetServerHostsForAgentPolicy(
+        soClient,
+        scopedAgentPolicy
+      );
+    } catch (e) {
+      settingsResponse.fleet_server.host = undefined;
     }
 
     // if a fleet server host was found, get associated fleet server host proxy if any
@@ -139,10 +137,9 @@ const getFleetServerAgentPolicies = async (
   ];
 
   // Retrieve associated agent policies
-  const fleetServerAgentPolicies = await agentPolicyService.getByIDs(
-    soClient,
-    fleetServerAgentPolicyIds
-  );
+  const fleetServerAgentPolicies = fleetServerAgentPolicyIds.length
+    ? await agentPolicyService.getByIDs(soClient, fleetServerAgentPolicyIds)
+    : [];
 
   return {
     fleetServerAgentPolicies: fleetServerAgentPolicies.map(mapPolicy),
