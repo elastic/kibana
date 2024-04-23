@@ -25,7 +25,7 @@ export type TheHiveConnectorType = SubActionConnectorType<TheHiveConfig, TheHive
 export function getConnectorType(): TheHiveConnectorType {
   return {
     id: THEHIVE_CONNECTOR_ID,
-    minimumLicenseRequired: 'gold',
+    minimumLicenseRequired: 'platinum',
     name: THEHIVE_TITLE,
     getService: (params) => new TheHiveConnector(params),
     supportedFeatureIds: [
