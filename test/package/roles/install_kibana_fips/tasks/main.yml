@@ -71,7 +71,7 @@
     dest: "{{ kibana_dist_path }}"
     remote_src: yes
 
-- name: copy configuration
+- name: copy kibana yml configuration
   become: yes
   template:
     src: templates/kibana.yml
@@ -148,5 +148,3 @@
 - name: sleep
   shell:
     cmd: sleep 10h
-# /var/log/kibana
-# sudo / yum broken
