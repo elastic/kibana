@@ -5522,6 +5522,27 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.defaultPanelDescription",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultPanelDescription",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<string | undefined> | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.disabledActionIds",
             "type": "Object",
             "tags": [],

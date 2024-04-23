@@ -264,6 +264,9 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           pipelinesToDelete={pipelinesToDelete}
         />
       ) : null}
+      {services.consolePlugin?.EmbeddableConsole ? (
+        <services.consolePlugin.EmbeddableConsole />
+      ) : null}
     </>
   );
 };
