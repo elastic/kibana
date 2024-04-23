@@ -1577,7 +1577,7 @@
     "ejs": "^3.1.8",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
-    "eslint": "^8.46.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-ban": "^1.6.0",
     "eslint-plugin-cypress": "^2.15.1",
