@@ -164,14 +164,34 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle'], dataStream) => (
-      <ConditionalWrap
-        condition={dataStream.isDataStreamFullyManagedByILM}
-        wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
-      >
-        <>{getLifecycleValue(lifecycle, INFINITE_AS_ICON)}</>
-      </ConditionalWrap>
-    ),
+    render: (lifecycle: DataStream['lifecycle'], dataStream) => {
+      const usingEffectiveRetention = lifecycle?.enabled && lifecycle?.effective_retention;
+      const usingDataRetention = lifecycle?.enabled && lifecycle?.data_retention;
+
+      return (
+        <ConditionalWrap
+          condition={dataStream.isDataStreamFullyManagedByILM}
+          wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
+        >
+          <>
+            {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}
+            {' '}
+            {(usingEffectiveRetention || usingDataRetention) && (
+              <EuiToolTip
+                content={i18n.translate('xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip', {
+                  defaultMessage: `This data stream is using {retentionType}.`,
+                  values: {
+                    retentionType: usingEffectiveRetention ? 'effective retention' : 'customer defined retention'
+                  }
+                })}
+              >
+                <EuiIcon size="s" color="subdued" type="iInCircle" />
+              </EuiToolTip>
+            )}
+          </>
+        </ConditionalWrap>
+      );
+    },
   });
 
   columns.push({
