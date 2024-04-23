@@ -35,16 +35,7 @@ interface LocatorPathConstructionParams {
 export const constructLocatorPath = async (params: LocatorPathConstructionParams) => {
   const {
     dataSourceSelection,
-    locatorParams: {
-      filterControls,
-      filters,
-      query,
-      refreshInterval,
-      timeRange,
-      columns,
-      origin,
-      breakdownField,
-    },
+    locatorParams: { filterControls, filters, query, refreshInterval, timeRange, columns, origin },
     useHash,
   } = params;
 
@@ -56,7 +47,6 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
       query,
       refreshInterval,
       time: timeRange,
-      breakdownField,
       columns: columns?.map((column) => {
         return column.type === 'smart-field' ? SMART_FALLBACK_FIELDS[column.smartField] : column;
       }),

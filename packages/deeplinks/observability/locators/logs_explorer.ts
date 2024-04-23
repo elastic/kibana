@@ -68,10 +68,6 @@ export interface LogsExplorerNavigationParams extends SerializableRecord {
    * Optionally apply curated filter controls
    */
   filterControls?: FilterControls;
-  /**
-   * Optionally set chart's breakdown field
-   */
-  breakdownField?: string;
 }
 
 export interface LogsExplorerLocatorParams extends LogsExplorerNavigationParams {
