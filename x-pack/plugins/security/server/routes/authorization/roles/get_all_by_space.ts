@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
+import { ALL_SPACES_ID } from '../../../../common/constants';
 import { compareRoles, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -33,19 +34,6 @@ export function defineGetAllRolesBySpaceRoutes({
       try {
         const hideReservedRoles = buildFlavor === 'serverless';
         const esClient = (await context.core).elasticsearch.client;
-        const spaceId = request.params.spaceId;
-
-        const { cluster: clusterPrivileges } = await esClient.asCurrentUser.security.hasPrivileges({
-          body: {
-            cluster: ['manage_security', 'read_security'],
-          },
-        });
-
-        if (!clusterPrivileges.manage_security && !clusterPrivileges.read_security) {
-          return response.forbidden({
-            body: { message: `User not authorized to view roles in space ${spaceId}` },
-          });
-        }
 
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
@@ -71,7 +59,7 @@ export function defineGetAllRolesBySpaceRoutes({
                 role.kibana.some(
                   (privilege) =>
                     privilege.spaces.includes(request.params.spaceId) ||
-                    privilege.spaces.includes('*')
+                    privilege.spaces.includes(ALL_SPACES_ID)
                 )
             )
             .sort(compareRoles),

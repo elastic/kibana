@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -20,7 +18,6 @@ const application = 'kibana-.kibana';
 interface TestOptions {
   name?: string;
   licenseCheckResult?: LicenseCheck;
-  privilegesCheckResult?: Pick<SecurityHasPrivilegesResponse, 'cluster'>;
   apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
   spaceId?: string;
@@ -48,18 +45,7 @@ describe('GET all roles by space id', () => {
 
   const getRolesTest = (
     description: string,
-    {
-      licenseCheckResult = { state: 'valid' },
-      privilegesCheckResult = {
-        cluster: {
-          manage_security: true,
-          read_security: true,
-        },
-      },
-      apiResponse,
-      spaceId = 'test',
-      asserts,
-    }: TestOptions
+    { licenseCheckResult = { state: 'valid' }, apiResponse, spaceId = 'test', asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -74,10 +60,6 @@ describe('GET all roles by space id', () => {
         core: mockCoreContext,
         licensing: mockLicensingContext,
       });
-
-      mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValueOnce(
-        privilegesCheckResult as unknown as SecurityHasPrivilegesResponse
-      );
 
       if (apiResponse) {
         mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
@@ -106,9 +88,6 @@ describe('GET all roles by space id', () => {
         expect(
           mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
         ).toHaveBeenCalled();
-        expect(
-          mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges
-        ).toHaveBeenCalled();
       }
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
@@ -120,14 +99,6 @@ describe('GET all roles by space id', () => {
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
-    getRolesTest('returns result of privilege checker', {
-      privilegesCheckResult: { cluster: { manage_security: false, read_security: false } },
-      asserts: {
-        statusCode: 403,
-        result: { message: 'User not authorized to view roles in space test' },
-      },
-    });
-
     const error = Boom.notAcceptable('test not acceptable message');
     getRolesTest('returns error from cluster client', {
       apiResponse: async () => {
@@ -136,7 +107,7 @@ describe('GET all roles by space id', () => {
       asserts: { statusCode: 406, result: error },
     });
 
-    getRolesTest(`return error if we have empty resources`, {
+    getRolesTest(`returns error if we have empty resources`, {
       apiResponse: () => ({
         first_role: {
           cluster: [],
@@ -165,7 +136,7 @@ describe('GET all roles by space id', () => {
   });
 
   describe('success', () => {
-    getRolesTest(`return empty roles list if there is no space match`, {
+    getRolesTest(`returns empty roles list if there is no space match`, {
       apiResponse: () => ({
         first_role: {
           cluster: ['manage_watcher'],
@@ -197,155 +168,153 @@ describe('GET all roles by space id', () => {
       },
     });
 
-    describe('space', () => {
-      getRolesTest(`return roles for matching space`, {
-        apiResponse: () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['space_all', 'space_read'],
-                resources: ['space:marketing', 'space:sales'],
-              },
-              {
-                application,
-                privileges: ['space_read'],
-                resources: ['space:engineering'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-          second_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['space_all', 'space_read'],
-                resources: ['space:marketing', 'space:sales'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        spaceId: 'engineering',
-        asserts: {
-          statusCode: 200,
-          result: [
+    getRolesTest(`returns roles for matching space`, {
+      apiResponse: () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
             {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [
-                {
-                  base: ['all', 'read'],
-                  feature: {},
-                  spaces: ['marketing', 'sales'],
-                },
-                {
-                  base: ['read'],
-                  feature: {},
-                  spaces: ['engineering'],
-                },
-              ],
-              _transform_error: [],
-              _unrecognized_applications: [],
+              application,
+              privileges: ['space_all', 'space_read'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+            {
+              application,
+              privileges: ['space_read'],
+              resources: ['space:engineering'],
             },
           ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
         },
-      });
+        second_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all', 'space_read'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      spaceId: 'engineering',
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                feature: {},
+                spaces: ['marketing', 'sales'],
+              },
+              {
+                base: ['read'],
+                feature: {},
+                spaces: ['engineering'],
+              },
+            ],
+            _transform_error: [],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
+    });
 
-      getRolesTest(`return roles with access to all spaces`, {
-        apiResponse: () => ({
-          first_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['all', 'read'],
-                resources: ['*'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-          second_role: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application,
-                privileges: ['space_all', 'space_read'],
-                resources: ['space:marketing', 'space:sales'],
-              },
-            ],
-            run_as: [],
-            metadata: {
-              _reserved: true,
-            },
-            transient_metadata: {
-              enabled: true,
-            },
-          },
-        }),
-        asserts: {
-          statusCode: 200,
-          result: [
+    getRolesTest(`returns roles with access to all spaces`, {
+      apiResponse: () => ({
+        first_role: {
+          cluster: [],
+          indices: [],
+          applications: [
             {
-              name: 'first_role',
-              metadata: {
-                _reserved: true,
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              elasticsearch: {
-                cluster: [],
-                indices: [],
-                run_as: [],
-              },
-              kibana: [
-                {
-                  base: ['all', 'read'],
-                  feature: {},
-                  spaces: ['*'],
-                },
-              ],
-              _transform_error: [],
-              _unrecognized_applications: [],
+              application,
+              privileges: ['all', 'read'],
+              resources: ['*'],
             },
           ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
         },
-      });
+        second_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all', 'space_read'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            name: 'first_role',
+            metadata: {
+              _reserved: true,
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                feature: {},
+                spaces: ['*'],
+              },
+            ],
+            _transform_error: [],
+            _unrecognized_applications: [],
+          },
+        ],
+      },
     });
   });
 });
