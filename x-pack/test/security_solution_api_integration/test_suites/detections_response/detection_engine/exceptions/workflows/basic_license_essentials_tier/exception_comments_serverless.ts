@@ -26,8 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @skipInQA exception item comments - serverless specific behavior', () => {
+  describe('@serverless exception item comments - serverless specific behavior', () => {
     describe('Rule Exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
