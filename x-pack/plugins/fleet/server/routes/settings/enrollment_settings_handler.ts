@@ -59,10 +59,15 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
     }
 
     // Get download source
-    settingsResponse.download_source = await getDownloadSource(
-      soClient,
-      scopedAgentPolicy.download_source_id ?? undefined
-    );
+    // ignore errors if the download source is not found
+    try {
+      settingsResponse.download_source = await getDownloadSource(
+        soClient,
+        scopedAgentPolicy.download_source_id ?? undefined
+      );
+    } catch (e) {
+      settingsResponse.download_source = undefined;
+    }
 
     // Get associated fleet server host, or default one if it doesn't exist
     // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
@@ -76,11 +81,16 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
     }
 
     // if a fleet server host was found, get associated fleet server host proxy if any
-    if (settingsResponse.fleet_server.host?.proxy_id) {
-      settingsResponse.fleet_server.host_proxy = await getFleetProxy(
-        soClient,
-        settingsResponse.fleet_server.host.proxy_id
-      );
+    // ignore errors if the proxy is not found
+    try {
+      if (settingsResponse.fleet_server.host?.proxy_id) {
+        settingsResponse.fleet_server.host_proxy = await getFleetProxy(
+          soClient,
+          settingsResponse.fleet_server.host.proxy_id
+        );
+      }
+    } catch (e) {
+      settingsResponse.fleet_server.host_proxy = undefined;
     }
 
     return response.ok({ body: settingsResponse });
