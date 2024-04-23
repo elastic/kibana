@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  reactRouterNavigate,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { CustomCard, FeaturedCard } from '../packages_list/types';
@@ -24,26 +21,23 @@ export function useCustomCardsForCategory(
 ): CustomCard[] | undefined {
   const history = useHistory();
   const location = useLocation();
-  const getUrlForApp = useKibana()?.services.application?.getUrlForApp;
+  const {
+    services: { application, http },
+  } = useKibana();
+  const getUrlForApp = application?.getUrlForApp;
+  const basePath = http?.basePath;
 
-  const { href: systemLogsUrl } = reactRouterNavigate(
-    history,
-    `/systemLogs/${location.search}`
-  );
-  const { href: customLogsUrl } = reactRouterNavigate(
-    history,
-    `/customLogs/${location.search}`
-  );
+  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
 
   switch (category) {
     case 'apm':
       return [
         {
-          id: 'apm-generated',
-          type: 'generated',
+          id: 'apm-virtual',
+          type: 'virtual',
           title: 'Elastic APM',
-          description:
-            'Collect distributed traces from your applications with Elastic APM',
+          description: 'Collect distributed traces from your applications with Elastic APM',
           name: 'apm',
           categories: ['observability'],
           icons: [
@@ -52,13 +46,32 @@ export function useCustomCardsForCategory(
               src: 'apmApp',
             },
           ],
-          url: getUrlForApp?.('apm') ?? '',
+          url: `${getUrlForApp?.('apm')}/onboarding` ?? '',
           version: '',
           integration: '',
         },
         {
-          id: 'synthetics-generated',
-          type: 'generated',
+          id: 'otel-virtual',
+          type: 'virtual',
+          title: 'OpenTelemetry',
+          description: 'Collect distributed traces with OpenTelemetry',
+          name: 'otel',
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src:
+                basePath?.prepend('/plugins/observabilityOnboarding/assets/opentelemetry.svg') ??
+                '',
+            },
+          ],
+          url: `${getUrlForApp?.('apm')}/onboarding?agent=openTelemetry` ?? '',
+          version: '',
+          integration: '',
+        },
+        {
+          id: 'synthetics-virtual',
+          type: 'virtual',
           title: 'Synthetic monitor',
           description: 'Monitor endpoints, pages, and user journeys',
           name: 'synthetics',
@@ -80,8 +93,8 @@ export function useCustomCardsForCategory(
         toFeaturedCard('prometheus'),
         toFeaturedCard('docker'),
         {
-          id: 'azure-generated',
-          type: 'generated',
+          id: 'azure-virtual',
+          type: 'virtual',
           title: 'Azure',
           description: 'Collect logs and metrics from Microsoft Azure',
           name: 'azure',
@@ -94,11 +107,10 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('azure'),
         },
         {
-          id: 'aws-generated',
-          type: 'generated',
+          id: 'aws-virtual',
+          type: 'virtual',
           title: 'AWS',
-          description:
-            'Collect logs and metrics from Amazon Web Services (AWS)',
+          description: 'Collect logs and metrics from Amazon Web Services (AWS)',
           name: 'aws',
           categories: ['observability'],
           icons: [],
@@ -109,8 +121,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('aws'),
         },
         {
-          id: 'gcp-generated',
-          type: 'generated',
+          id: 'gcp-virtual',
+          type: 'virtual',
           title: 'Google Cloud Platform',
           description: 'Collect logs and metrics from Google Cloud Platform',
           name: 'gcp',
@@ -127,16 +139,15 @@ export function useCustomCardsForCategory(
       return [
         {
           id: 'system-logs',
-          type: 'generated',
+          type: 'virtual',
           title: 'Stream host system logs',
-          description:
-            'The quickest path to onboard log data from your own machine or server',
-          name: 'system-logs-generated',
+          description: 'The quickest path to onboard log data from your own machine or server',
+          name: 'system-logs-virtual',
           categories: ['observability'],
           icons: [
             {
               type: 'svg',
-              src: '/XXXXXXXXXXXX/plugins/home/assets/logos/system.svg',
+              src: basePath?.prepend('/plugins/home/assets/logos/system.svg') ?? '',
             },
           ],
           url: systemLogsUrl,
@@ -144,12 +155,11 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         {
-          id: 'logs-logs',
-          type: 'generated',
+          id: 'custom-logs',
+          type: 'virtual',
           title: 'Stream log files',
-          description:
-            'Stream any logs into Elastic in a simple way and explore their data',
-          name: 'logs-logs-generated',
+          description: 'Stream any logs into Elastic in a simple way and explore their data',
+          name: 'custom-logs-virtual',
           categories: ['observability'],
           icons: [
             {
@@ -163,8 +173,8 @@ export function useCustomCardsForCategory(
         },
         toFeaturedCard('nginx'),
         {
-          id: 'azure-logs-generated',
-          type: 'generated',
+          id: 'azure-logs-virtual',
+          type: 'virtual',
           title: 'Azure',
           description: 'Collect logs from Microsoft Azure',
           name: 'azure',
@@ -177,8 +187,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('azure'),
         },
         {
-          id: 'aws-logs-generated',
-          type: 'generated',
+          id: 'aws-logs-virtual',
+          type: 'virtual',
           title: 'AWS',
           description: 'Collect logs from Amazon Web Services (AWS)',
           name: 'aws',
@@ -191,8 +201,8 @@ export function useCustomCardsForCategory(
           onCardClick: createCollectionCardHandler('aws'),
         },
         {
-          id: 'gcp-logs-generated',
-          type: 'generated',
+          id: 'gcp-logs-virtual',
+          type: 'virtual',
           title: 'Google Cloud Platform',
           description: 'Collect logs from Google Cloud Platform',
           name: 'gcp',

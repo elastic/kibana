@@ -44,7 +44,7 @@ jest.mock('uuid', () => {
 });
 
 const field = 'host.name';
-const combinedQueries = {
+const filterQuery = {
   bool: {
     must: [],
     filter: [
@@ -200,7 +200,7 @@ describe('TopN', () => {
       };
       wrapper = mount(
         <TestProviders>
-          <TopN {...testProps} combinedQueries={JSON.stringify(combinedQueries)} />
+          <TopN {...testProps} filterQuery={JSON.stringify(filterQuery)} />
         </TestProviders>
       );
     });
