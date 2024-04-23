@@ -43,14 +43,16 @@ export class UptimeOverviewLocatorDefinition
   public readonly getLocation = async (
     params: UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
   ) => {
-    const urlParams = new URLSearchParams();
+    let qs = '';
 
     if (isUptimeOverviewLocatorParams(params)) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value) {
-          urlParams.set(key, value as string);
-        }
-      });
+      qs = Object.entries(params)
+        .map(([key, value]) => {
+          if (value) {
+            return `${key}=${value}`;
+          }
+        })
+        .join('&');
     } else {
       const searchParams: string[] = [];
       if (params.host) searchParams.push(formatSearchKey('host.name', params.host));
@@ -60,14 +62,12 @@ export class UptimeOverviewLocatorDefinition
         searchParams.push(formatSearchKey(`host.ip`, params.ip));
         searchParams.push(formatSearchKey(`monitor.ip`, params.ip));
       }
-
       if (searchParams.length > 0) {
-        urlParams.set('search', searchParams.join(' OR '));
+        qs = `search=${searchParams.join(' OR ')}`;
       }
     }
 
-    const queryParams = urlParams.toString();
-    const path = `${OVERVIEW_ROUTE}${queryParams ? `?${queryParams}` : ''}`;
+    const path = `${OVERVIEW_ROUTE}${qs ? `?${qs}` : ''}`;
 
     return {
       app: 'uptime',

@@ -59,4 +59,15 @@ describe('uptimeOverviewNavigatorParams', () => {
     });
     expect(location.path).toEqual(`${OVERVIEW_ROUTE}?search=container.id: "foo"`);
   });
+
+  it('creates a path with expected search and date range', async () => {
+    const location = await uptimeOverviewNavigator.getLocation({
+      search: 'foo',
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
+    });
+    expect(location.path).toEqual(
+      `${OVERVIEW_ROUTE}?search=foo&dateRangeStart=now-15m&dateRangeEnd=now`
+    );
+  });
 });
