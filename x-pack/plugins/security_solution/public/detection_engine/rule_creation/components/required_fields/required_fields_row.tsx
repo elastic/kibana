@@ -244,6 +244,5 @@ const REQUIRED_FIELDS_FIELD_CONFIG: FieldConfig<
   RequiredFieldWithOptionalEcs
 > = {
   type: FIELD_TYPES.JSON,
-  //   validations: [{ validator: validateRelatedIntegration }],
   defaultValue: { name: '', type: '' },
 };
