@@ -73,19 +73,6 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         const connectorsList = await this.getConnectorsList();
         return Boolean(connectorsList.find((name) => name === connectorName));
       },
-      async confirmConnectorCreated() {
-        // this is necessary because of the refresh delay on stateless Elasticsearch
-        await retry.waitForWithTimeout('connector table to appear', 5000, () =>
-          testSubjects
-            .existOrFail('serverlessSearchConnectorTable')
-            .then(() => true)
-            .catch(async () => {
-              await browser.refresh();
-              return false;
-            })
-        );
-        await browser.refresh();
-      },
       async confirmDeleteConnectorModalComponentsExists() {
         await testSubjects.existOrFail('serverlessSearchDeleteConnectorModalFieldText');
         await testSubjects.existOrFail('confirmModalConfirmButton');
