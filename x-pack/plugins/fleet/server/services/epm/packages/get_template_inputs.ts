@@ -16,10 +16,11 @@ import type {
   PackageInfo,
   NewPackagePolicy,
   PackagePolicyInput,
-  FullAgentPolicyInput,
   FullAgentPolicyInputStream,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
+
+import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
 import { getPackageInfo } from '.';
 import { getPackageAssetsMap } from './get';
@@ -27,47 +28,32 @@ import { getPackageAssetsMap } from './get';
 type Format = 'yml' | 'json';
 
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
-export const templatePackagePolicyToFullInputs = (
+export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs: PackagePolicyInput[]
-): FullAgentPolicyInput[] => {
-  const fullInputs: FullAgentPolicyInput[] = [];
+): FullAgentPolicyInputStream[] => {
+  const fullInputsStreams: FullAgentPolicyInputStream[] = [];
 
-  if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputs;
+  if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputsStreams;
 
   packagePolicyInputs.forEach((input) => {
-    const fullInput = {
-      ...(input.compiled_input || {}),
-      ...(input.streams.length
-        ? {
-            streams: input.streams.map((stream) => {
-              const fullStream: FullAgentPolicyInputStream = {
-                id: stream.id,
-                type: input.type,
-                data_stream: stream.data_stream,
-                ...stream.compiled_stream,
-                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [k: string]: any }),
-              };
-              return fullStream;
-            }),
-          }
-        : {}),
+    const fullInputStream = {
+      // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
+      id: input.policy_template ? `${input.type}-${input.policy_template}` : `${input.type}`,
+      ...getFullInputStreams(input, true),
     };
 
-    // deeply merge the input.config values with the full policy input
+    // deeply merge the input.config values with the full policy input stream
     merge(
-      fullInput,
+      fullInputStream,
       Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
         acc[key] = value;
         return acc;
       }, {} as Record<string, unknown>)
     );
-    fullInputs.push(fullInput);
+    fullInputsStreams.push(fullInputStream);
   });
 
-  return fullInputs;
+  return fullInputsStreams;
 };
 
 export async function getTemplateInputs(
@@ -97,6 +83,7 @@ export async function getTemplateInputs(
     packageInfo,
     savedObjectsClient: soClient,
   });
+
   const compiledInputs = await _compilePackagePolicyInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
@@ -107,12 +94,9 @@ export async function getTemplateInputs(
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
-  const fullAgentPolicyInputs = templatePackagePolicyToFullInputs(
+  const inputs = templatePackagePolicyToFullInputStreams(
     packagePolicyWithInputs.inputs as PackagePolicyInput[]
   );
-  // @ts-ignore-next-line The return type is any because in some case we can have compiled_input instead of input.streams
-  // we don't know what it is. An example is integration APM
-  const inputs: any = fullAgentPolicyInputs.flatMap((input) => input?.streams || input);
 
   if (format === 'json') {
     return { inputs };
