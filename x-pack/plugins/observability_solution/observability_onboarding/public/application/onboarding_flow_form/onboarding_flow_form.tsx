@@ -44,7 +44,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
-          defaultMessage: 'Detect patterns, troubleshoot in real time, gain insights from logs.',
+          defaultMessage:
+            'Detect patterns, gain insights from logs, get alerted when no. of errors is beyond configured threshold',
         }
       ),
     },
@@ -57,7 +58,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
-          defaultMessage: 'Collect distributed traces and catch application performance problems.',
+          defaultMessage:
+            'Catch application problems, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
     },
@@ -71,7 +73,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.onboardingFlowForm.builtOnPowerfulElasticsearchLabel',
         {
           defaultMessage:
-            'Stream infrastructure metrics and accelerate root cause detection by breaking down silos.',
+            'Check my system’s health, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
     },
@@ -119,7 +121,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder paddingSize="xl">
       <TitleWithIcon
         iconType="indexRollupApp"
         title={i18n.translate(
@@ -131,7 +133,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={customMargin} gutterSize="m" direction="column">
+      <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
         {options.map((option) => (
           <EuiFlexItem key={option.id}>
             <EuiCheckableCard
@@ -147,7 +149,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() => setSearchParams({ category: option.id }, { replace: true })}
+              onChange={() => {
+                setIntegrationSearch('');
+                setSearchParams({ category: option.id }, { replace: true });
+              }}
             />
           </EuiFlexItem>
         ))}
@@ -164,7 +169,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               }
             )}
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           {Array.isArray(customCards) && (
             <OnboardingFlowPackageList
@@ -207,10 +212,19 @@ interface TitleWithIconProps {
 const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
+      <EuiAvatar
+        size="l"
+        name={title}
+        iconType={iconType}
+        iconSize="l"
+        color="subdued"
+        css={{
+          padding: '24px 22px 24px 26px',
+        }}
+      />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <strong>{title}</strong>
       </EuiTitle>
     </EuiFlexItem>
