@@ -17,46 +17,53 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
-import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
-import { useKibana } from '../../../utils/kibana_react';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
+import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
+import { useKibana } from '../../../../utils/kibana_react';
 
-export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
+export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
   const { http } = useKibana().services;
-  const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
+  const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
 
-  if (isLoading || isError || data === undefined || data?.length !== 1) {
+  if (isLoading || isError || results === undefined || results?.length === 0) {
     return null;
   }
 
-  const health = data[0].health;
-  if (health.overall === 'healthy') {
+  const unhealthySloList = results.filter((result) => result.health.overall === 'unhealthy');
+  if (unhealthySloList.length === 0) {
     return null;
   }
 
-  const count = health.rollup === 'unhealthy' && health.summary === 'unhealthy' ? 2 : 1;
+  const unhealthyRollupTransforms = results.filter(
+    (result) => result.health.rollup === 'unhealthy'
+  );
+  const unhealthySummaryTransforms = results.filter(
+    (result) => result.health.summary === 'unhealthy'
+  );
 
   return (
     <EuiCallOut
       color="warning"
       iconType="warning"
-      title={i18n.translate('xpack.slo.sloDetails.healthCallout.title', {
-        defaultMessage: 'This SLO has issues with its transform',
+      title={i18n.translate('xpack.slo.sloList.healthCallout.title', {
+        defaultMessage: 'Some SLOs have issues with their transform',
       })}
     >
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem>
           <FormattedMessage
-            id="xpack.slo.sloDetails.healthCallout.description"
+            id="xpack.slo.sloList.healthCallout.description"
             defaultMessage="The following {count, plural, one {transform is} other {transforms are}
           } in an unhealthy state:"
-            values={{ count }}
+            values={{
+              count: unhealthyRollupTransforms.length + unhealthySummaryTransforms.length,
+            }}
           />
           <ul>
-            {health.rollup === 'unhealthy' && (
+            {unhealthyRollupTransforms.map((result) => (
               <li>
-                {getSLOTransformId(slo.id, slo.revision)}
-                <EuiCopy textToCopy={getSLOTransformId(slo.id, slo.revision)}>
+                {getSLOTransformId(result.sloId, result.sloRevision)}
+                <EuiCopy textToCopy={getSLOTransformId(result.sloId, result.sloRevision)}>
                   {(copy) => (
                     <EuiButtonIcon
                       aria-label="Copy text to clipboard"
@@ -67,11 +74,12 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                   )}
                 </EuiCopy>
               </li>
-            )}
-            {health.summary === 'unhealthy' && (
+            ))}
+
+            {unhealthySummaryTransforms.map((result) => (
               <li>
-                {getSLOSummaryTransformId(slo.id, slo.revision)}
-                <EuiCopy textToCopy={getSLOSummaryTransformId(slo.id, slo.revision)}>
+                {getSLOSummaryTransformId(result.sloId, result.sloRevision)}
+                <EuiCopy textToCopy={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
                   {(copy) => (
                     <EuiButtonIcon
                       aria-label="Copy text to clipboard"
@@ -82,7 +90,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                   )}
                 </EuiCopy>
               </li>
-            )}
+            ))}
           </ul>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -92,7 +100,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             href={http?.basePath.prepend('/app/management/data/transform')}
           >
             <FormattedMessage
-              id="xpack.slo.sloDetails.healthCallout.buttonTransformLabel"
+              id="xpack.slo.sloList.healthCallout.buttonTransformLabel"
               defaultMessage="Inspect transform"
             />
           </EuiButton>

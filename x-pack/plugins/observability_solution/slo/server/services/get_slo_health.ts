@@ -40,7 +40,7 @@ export class GetSLOHealth {
       .map((item) => ({
         sloId: item.sloId,
         sloInstanceId: item.sloInstanceId,
-        revision: sloById[item.sloId].revision,
+        sloRevision: sloById[item.sloId].revision,
       }));
 
     const transformStatsById = await this.getTransformStats(sloList);
@@ -53,6 +53,7 @@ export class GetSLOHealth {
       return {
         sloId: item.sloId,
         sloInstanceId: item.sloInstanceId,
+        sloRevision: item.sloRevision,
         state,
         health,
       };
@@ -62,7 +63,7 @@ export class GetSLOHealth {
   }
 
   private async getSummaryDocsById(
-    filteredList: Array<{ sloId: string; sloInstanceId: string; revision: number }>
+    filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
   ) {
     const summaryDocs = await this.esClient.search<EsSummaryDocument>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -114,7 +115,7 @@ function buildSummaryKey(id: string, instanceId: string) {
 
 function computeState(
   summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { sloId: string; sloInstanceId: string; revision: number }
+  item: { sloId: string; sloInstanceId: string; sloRevision: number }
 ): State {
   const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.sloId, item.sloInstanceId)];
 
@@ -154,13 +155,13 @@ function getTransformHealth(
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; revision: number }
+  item: { sloId: string; sloInstanceId: string; sloRevision: number }
 ): { overall: HealthStatus; rollup: HealthStatus; summary: HealthStatus } {
   const rollup = getTransformHealth(
-    transformStatsById[getSLOTransformId(item.sloId, item.revision)]
+    transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
   );
   const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.sloId, item.revision)]
+    transformStatsById[getSLOSummaryTransformId(item.sloId, item.sloRevision)]
   );
 
   const overall: HealthStatus =
