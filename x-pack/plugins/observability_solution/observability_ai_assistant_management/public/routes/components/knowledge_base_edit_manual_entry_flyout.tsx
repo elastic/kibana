@@ -45,6 +45,10 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const [newEntryId, setNewEntryId] = useState(entry?.id ?? '');
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
+  const isEntryIdInvalid = newEntryId.trim() === '';
+  const isEntryTextInvalid = newEntryText.trim() === '';
+  const isFormInvalid = isEntryIdInvalid || isEntryTextInvalid;
+
   const handleSubmitNewEntryClick = async () => {
     createEntry({
       entry: {
@@ -96,6 +100,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
               fullWidth
               value={newEntryId}
               onChange={(e) => setNewEntryId(e.target.value)}
+              isInvalid={isEntryIdInvalid}
             />
           </EuiFormRow>
         ) : (
@@ -173,6 +178,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
               fill
               isLoading={isLoading}
               onClick={handleSubmitNewEntryClick}
+              isDisabled={isFormInvalid}
             >
               {i18n.translate(
                 'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',
