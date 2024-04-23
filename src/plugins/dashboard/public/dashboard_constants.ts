@@ -7,7 +7,6 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container';
 import type { DashboardContainerInput } from '../common';
 
 // ------------------------------------------------------------------
@@ -87,7 +86,7 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   title: '',
   tags: [],
   executionContext: {
-    type: DASHBOARD_CONTAINER_TYPE,
+    type: 'dashboard',
   },
 
   // options
