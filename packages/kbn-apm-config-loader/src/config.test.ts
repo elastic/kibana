@@ -45,7 +45,7 @@ describe('ApmConfiguration', () => {
     const kibanaConfig = {
       elastic: {
         apm: {
-          serviceName: "serviceNameOverride"
+          serviceName: 'serviceNameOverride',
         },
       },
     };
@@ -59,9 +59,9 @@ describe('ApmConfiguration', () => {
         apm: {
           servicesOverrides: {
             myservice: {
-              serviceName: "serviceNameOverride"
-            }
-          }
+              serviceName: 'serviceNameOverride',
+            },
+          },
         },
       },
     };
