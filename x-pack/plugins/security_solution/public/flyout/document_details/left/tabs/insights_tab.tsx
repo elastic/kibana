@@ -117,7 +117,7 @@ export const InsightsTab: React.FC = memo(() => {
         },
       });
       telemetry.reportDetailsFlyoutTabClicked({
-        tableId: scopeId,
+        location: scopeId,
         panel: 'left',
         tabId: optionId,
       });
