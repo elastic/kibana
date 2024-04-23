@@ -6,14 +6,6 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
-- name: fix /tmp permissions for ES
-  become: yes
-  file:
-    path: /tmp
-    state: directory
-    recurse: true
-    mode: "1777"
-
 - name: fix /var/log permissions for kibana
   become: yes
   file:
@@ -53,6 +45,11 @@
 #   shell:
 #     chdir: "{{ kibana_src_path }}"
 #     cmd: "yarn kbn reset && yarn kbn bootstrap"
+
+- name: create tmp dir for ES
+  file:
+    path: "{{ kibana_dist_path }}/.es/tmp"
+    state: directory
 
 - name: "ensure {{ kibana_dist_path }} dir exists"
   become: yes
