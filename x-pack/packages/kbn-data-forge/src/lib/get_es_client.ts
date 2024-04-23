@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import * as Fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { Config } from '../types';
 
 let esClient: Client;
@@ -20,9 +22,19 @@ export const getEsClient = (config: Config) => {
         password: config.elasticsearch.password,
       };
 
+  const isHTTPS = new URL(config.elasticsearch.host).protocol === 'https:';
+  const tls = isHTTPS
+    ? {
+        ca: Fs.readFileSync(CA_CERT_PATH),
+        rejectUnauthorized: true,
+      }
+    : undefined;
+
   esClient = new Client({
     node: config.elasticsearch.host,
     auth,
+    tls,
   });
+
   return esClient;
 };
