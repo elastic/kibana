@@ -147,10 +147,15 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       },
       async getConnectorFromConnectorTable(connectorName: string) {
         let value: string | null = null;
-        await retry.try(async () => {
-          value = await (
-            await testSubjects.find('serverlessSearchColumnsLink')
-          ).getAttribute(connectorName);
+        await retry.waitForWithTimeout('connector to appear', 5000, async () => {
+          await browser.refresh();
+          return testSubjects
+            .find('serverlessSearchColumnsLink')
+            .then(async (subject) => {
+              value = await subject.getAttribute(connectorName);
+              return true;
+            })
+            .catch(() => false);
         });
         return value;
       },
