@@ -46,7 +46,7 @@ interface Props {
   associateNote: AssociateNote;
   notes: TimelineResultNote[];
   showAddNote: boolean;
-  toggleShowAddNote: () => void | ((eventId: string) => void);
+  toggleShowAddNote: (eventId?: string) => void;
   eventId?: string;
 }
 

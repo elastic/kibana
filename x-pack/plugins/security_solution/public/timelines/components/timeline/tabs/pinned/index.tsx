@@ -6,14 +6,15 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, useState, memo } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
@@ -28,6 +29,7 @@ import { SourcererScopeName } from '../../../../../common/store/sourcerer/model'
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { withDataView } from '../../../../../common/components/with_data_view';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
@@ -41,9 +43,7 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { CustomTimelineDataGridBody } from '../../unified_components/data_table/custom_timeline_data_grid_body';
 import { memoizedGetColumnHeaders } from '../query';
-import { transformTimelineItemToUnifiedRows } from '../../unified_components/utils';
 import {
   FullWidthFlexGroup,
   ScrollableFlexItem,
@@ -64,7 +64,7 @@ interface PinnedFilter {
   };
 }
 
-export type Props = TimelineTabCommonProps & PropsFromRedux;
+export type Props = TimelineTabCommonProps & PropsFromRedux & { dataView: DataView };
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
@@ -106,8 +106,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
-  const dispatch = useDispatch();
-  const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -226,35 +224,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       })),
     [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, timelineId]
   );
-  const tableRows = useMemo(
-    () => transformTimelineItemToUnifiedRows({ events, dataView }),
-    [events, dataView]
-  );
-
-  const RenderCustomGridBody = useCallback(
-    ({
-      Cell,
-      visibleColumns,
-      visibleRowData,
-      setCustomGridBodyProps,
-    }: EuiDataGridCustomBodyProps) => {
-      if (events) {
-        return (
-          <CustomTimelineDataGridBody
-            Cell={Cell}
-            enabledRowRenderers={rowRenderers}
-            eventIdToNoteIds={eventIdToNoteIds}
-            setCustomGridBodyProps={setCustomGridBodyProps}
-            events={events}
-            rows={tableRows}
-            visibleColumns={visibleColumns}
-            visibleRowData={visibleRowData}
-          />
-        );
-      }
-    },
-    [events, eventIdToNoteIds, rowRenderers, tableRows]
-  );
 
   if (unifiedComponentsInTimelineEnabled) {
     return (
@@ -273,6 +242,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         totalCount={events.length}
         onEventClosed={onEventClosed}
         expandedDetail={expandedDetail}
+        eventIdToNoteIds={eventIdToNoteIds}
         showExpandedDetails={showExpandedDetails}
         onChangePage={loadPage}
         activeTab={TimelineTabs.pinned}
@@ -281,7 +251,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         pageInfo={pageInfo}
         leadingControlColumns={leadingControlColumns}
         trailingControlColumns={rowDetailColumn}
-        renderCustomGridBody={RenderCustomGridBody}
       />
     );
   }
@@ -317,7 +286,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
-                leadingControlColumns={leadingControlColumns}
+                leadingControlColumns={
+                  leadingControlColumns as unknown as EuiDataGridControlColumn[]
+                }
                 trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
@@ -373,7 +344,6 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       sort,
       eventIdToNoteIds,
-      pinnedEventsSaveObject,
     } = timeline;
 
     return {
@@ -402,9 +372,11 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
+const PinnedTabWithDataView = withDataView<Props>(PinnedTabContentComponent);
+
 const PinnedTabContent = connector(
-  React.memo(
-    PinnedTabContentComponent,
+  memo(
+    PinnedTabWithDataView,
     (prevProps, nextProps) =>
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback, memo } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -48,6 +48,7 @@ import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
+import type { UnifiedActionProps } from '../../unified_components/data_table/control_column_cell_render';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
@@ -263,7 +264,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
-        headerCellRender: (props) => {
+        headerCellRender: function HeaderCellRender(props: UnifiedActionProps) {
           return (
             <HeaderActions
               width={x.width}
@@ -276,9 +277,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               showSelectAllCheckbox={false}
               sort={sort}
               tabType={TimelineTabs.pinned}
-              timelineId={timelineId}
               fieldBrowserOptions={{}}
               {...props}
+              timelineId={timelineId}
             />
           );
         },

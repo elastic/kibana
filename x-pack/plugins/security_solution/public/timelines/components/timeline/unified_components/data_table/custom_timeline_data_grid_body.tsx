@@ -10,11 +10,14 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { appSelectors } from '../../../../../common/store';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import { timelineActions } from '../../../../store';
 import { NoteCards } from '../../../notes/note_cards';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
@@ -24,7 +27,9 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
   events: TimelineItem[];
-  eventIdToNoteIds: Record<string, string[]>;
+  eventIdToNoteIds?: Record<string, string[]>;
+  eventIdsAddingNotes?: Set<string>;
+  onToggleShowNotes: (eventId?: string) => void;
 };
 
 const emptyNotes: string[] = [];
@@ -81,16 +86,22 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
         {visibleRows.map((row, rowIndex) => {
           const eventId = eventIds[rowIndex];
           const noteIds: string[] = eventIdToNoteIds[eventId] || emptyNotes;
-          const notes = noteIds.map((noteId) => {
-            const note = notesById[noteId];
-            return {
-              savedObjectId: note.saveObjectId,
-              note: note.note,
-              noteId: note.id,
-              updated: (note.lastEdit ?? note.created).getTime(),
-              updatedBy: note.user,
-            };
-          });
+          const notes = noteIds
+            .map((noteId) => {
+              const note = notesById[noteId];
+              if (note) {
+                return {
+                  savedObjectId: note.saveObjectId,
+                  note: note.note,
+                  noteId: note.id,
+                  updated: (note.lastEdit ?? note.created).getTime(),
+                  updatedBy: note.user,
+                };
+              } else {
+                return null;
+              }
+            })
+            .filter((x) => x !== null) as TimelineResultNote[];
           return (
             <CustomDataGridSingleRow
               rowData={row}
@@ -140,6 +151,9 @@ type CustomTimelineDataGridSingleRowProps = {
   rowIndex: number;
   notes?: TimelineResultNote[] | null;
   rowIndicesWithNotes?: Map<number, string[]>;
+  eventId?: string;
+  eventIdsAddingNotes?: Set<string>;
+  onToggleShowNotes: (eventId?: string) => void;
 } & Pick<CustomTimelineDataGridBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
 
 /**
@@ -159,10 +173,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     notes,
     rowIndicesWithNotes,
     eventIdsAddingNotes,
-    eventId,
+    eventId = '',
     onToggleShowNotes,
   } = props;
-
+  const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
@@ -181,6 +195,19 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           }
         : {},
     [canShowRowRenderer]
+  );
+
+  const associateNote = useCallback(
+    (noteId: string) => {
+      dispatch(
+        timelineActions.addNoteToEvent({
+          eventId,
+          id: TimelineId.active,
+          noteId,
+        })
+      );
+    },
+    [dispatch, eventId]
   );
 
   return (
@@ -204,13 +231,13 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
-      {rowIndicesWithNotes.has(rowIndex) && (
+      {rowIndicesWithNotes?.has(rowIndex) && (
         <NoteCards
           ariaRowindex={rowIndex}
-          associateNote={() => {}}
+          associateNote={associateNote}
           data-test-subj="note-cards"
-          notes={notes}
-          showAddNote={eventIdsAddingNotes.has(eventId)}
+          notes={notes ?? []}
+          showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
           toggleShowAddNote={onToggleShowNotes}
           eventId={eventId}
         />

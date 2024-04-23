@@ -116,7 +116,6 @@ interface Props {
   updatedAt: number;
   isTextBasedQuery?: boolean;
   dataView: DataView;
-  renderCustomGridBody?: EuiDataGridProps['renderCustomGridBody'];
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
   pinnedEventIds?: TimelineModel['pinnedEventIds'];
@@ -142,7 +141,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   updatedAt,
   isTextBasedQuery,
   dataView,
-  renderCustomGridBody,
   trailingControlColumns,
   leadingControlColumns,
   pinnedEventIds,
@@ -367,7 +365,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [onFieldEdited]);
 
   const cellContext = useMemo(() => {
-    console.log(onToggleShowNotes);
     return { events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds };
   }, [events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds]);
 
@@ -435,7 +432,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       refetch={refetch}
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
-                      renderCustomGridBody={renderCustomGridBody}
                       totalCount={totalCount}
                       onEventClosed={onEventClosed}
                       expandedDetail={expandedDetail}

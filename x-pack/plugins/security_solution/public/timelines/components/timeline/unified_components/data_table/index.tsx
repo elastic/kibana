@@ -67,6 +67,7 @@ type CommonDataTableProps = {
   isTextBasedQuery?: boolean;
   leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
   cellContext?: EuiDataGridProps['cellContext'];
+  eventIdToNoteIds?: Record<string, string[]>;
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -106,8 +107,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
-    renderCustomGridBody,
-    // trailingControlColumns,
     leadingControlColumns,
     cellContext,
     eventIdToNoteIds,
@@ -414,7 +413,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomGridBody ?? renderCustomBodyCallback}
+            renderCustomGridBody={renderCustomBodyCallback}
             trailingControlColumns={trailingControlColumns}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}

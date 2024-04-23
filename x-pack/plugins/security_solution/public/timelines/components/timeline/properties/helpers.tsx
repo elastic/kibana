@@ -33,7 +33,7 @@ interface NotesButtonProps {
 interface SmallNotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
-  toggleShowNotes: () => void | ((eventId: string) => void);
+  toggleShowNotes: (eventId?: string) => void;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
 }

@@ -39,7 +39,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     onChangePage,
     activeTab,
     updatedAt,
-    renderCustomGridBody,
     trailingControlColumns,
     leadingControlColumns,
     pinnedEventIds,
@@ -88,7 +87,6 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             activeTab={activeTab}
             updatedAt={updatedAt}
             isTextBasedQuery={false}
-            renderCustomGridBody={renderCustomGridBody}
             trailingControlColumns={trailingControlColumns}
             leadingControlColumns={leadingControlColumns}
             pinnedEventIds={pinnedEventIds}

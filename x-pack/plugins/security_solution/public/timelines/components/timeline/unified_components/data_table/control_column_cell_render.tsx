@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { eventIsPinned } from '../../body/helpers';
 import { Actions } from '../../../../../common/components/header_actions';
 import { TimelineId } from '../../../../../../common/types';
-import { NotePreviews } from '../../../open_timeline/note_previews';
+import type { TimelineModel } from '../../../../store/model';
+import type { ActionProps } from '../../../../../../common/types';
 
-export const ControlColumnCellRender = memo(function RowCellRender(props) {
+export interface UnifiedActionProps extends ActionProps {
+  onToggleShowNotes: (eventId?: string) => void;
+  events: TimelineItem[];
+  pinnedEventIds: TimelineModel['pinnedEventIds'];
+}
+
+export const ControlColumnCellRender = memo(function RowCellRender(props: UnifiedActionProps) {
   const { rowIndex, events, ecsData, pinnedEventIds, onToggleShowNotes, eventIdToNoteIds } = props;
   const event = events && events[rowIndex];
   return (
@@ -19,8 +27,9 @@ export const ControlColumnCellRender = memo(function RowCellRender(props) {
       {...props}
       ecsData={ecsData ?? event.ecs}
       ariaRowindex={rowIndex}
-      checked={event?.selected}
-      columnValues={event}
+      rowIndex={rowIndex}
+      checked={false}
+      columnValues={'columnValues'}
       eventId={event?._id}
       eventIdToNoteIds={eventIdToNoteIds}
       isEventPinned={eventIsPinned({ eventId: event?._id, pinnedEventIds })}
