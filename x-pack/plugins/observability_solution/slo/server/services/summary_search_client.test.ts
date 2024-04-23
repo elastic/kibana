@@ -44,7 +44,7 @@ describe('Summary Search Client', () => {
       esClientMock,
       soClientMock,
       loggerMock.create(),
-      'some-space'
+      'default'
     );
   });
 
@@ -102,10 +102,10 @@ describe('Summary Search Client', () => {
         },
         max_score: 1,
         hits: [
-          aHitFromSummaryIndex(aSummaryDocument(SLO_ID1)),
-          aHitFromSummaryIndex(aSummaryDocument(SLO_ID2)),
-          aHitFromSummaryIndex(aSummaryDocument(SLO_ID3)),
-          aHitFromSummaryIndex(aSummaryDocument(SLO_ID5)), // no related temp doc
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID1, { isTempDoc: false })),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID2, { isTempDoc: false })),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID3, { isTempDoc: false })),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID5, { isTempDoc: false })), // no related temp doc
           aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID1, { isTempDoc: true })), // removed as dup
           aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID2, { isTempDoc: true })), // removed as dup
           aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID3, { isTempDoc: true })), // removed as dup

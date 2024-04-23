@@ -60,19 +60,20 @@ describe('GetSLOHealth', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "health": Object {
-              "overall": "unhealthy",
-              "rollup": "unhealthy",
-              "summary": "unhealthy",
-            },
-            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-            "sloInstanceId": "*",
-            "state": "no_data",
+      Array [
+        Object {
+          "health": Object {
+            "overall": "unhealthy",
+            "rollup": "unhealthy",
+            "summary": "unhealthy",
           },
-        ]
-      `);
+          "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+          "sloInstanceId": "*",
+          "sloRevision": 1,
+          "state": "no_data",
+        },
+      ]
+    `);
   });
 
   it('handles inexistant sloId', async () => {
@@ -139,19 +140,20 @@ describe('GetSLOHealth', () => {
       });
 
       expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "health": Object {
-            "overall": "healthy",
-            "rollup": "healthy",
-            "summary": "healthy",
+        Array [
+          Object {
+            "health": Object {
+              "overall": "healthy",
+              "rollup": "healthy",
+              "summary": "healthy",
+            },
+            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+            "sloInstanceId": "*",
+            "sloRevision": 1,
+            "state": "no_data",
           },
-          "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-          "sloInstanceId": "*",
-          "state": "no_data",
-        },
-      ]
-    `);
+        ]
+      `);
     });
 
     it('returns unhealthy whenever one of the transform is unhealthy', async () => {
@@ -189,19 +191,20 @@ describe('GetSLOHealth', () => {
       });
 
       expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "health": Object {
-            "overall": "unhealthy",
-            "rollup": "unhealthy",
-            "summary": "healthy",
+        Array [
+          Object {
+            "health": Object {
+              "overall": "unhealthy",
+              "rollup": "unhealthy",
+              "summary": "healthy",
+            },
+            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+            "sloInstanceId": "*",
+            "sloRevision": 1,
+            "state": "no_data",
           },
-          "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-          "sloInstanceId": "*",
-          "state": "no_data",
-        },
-      ]
-    `);
+        ]
+      `);
     });
   });
 
