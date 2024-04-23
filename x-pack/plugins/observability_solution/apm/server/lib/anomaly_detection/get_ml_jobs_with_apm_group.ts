@@ -23,15 +23,11 @@ function catch404(e: any) {
   throw e;
 }
 
-export function getMlJobsWithAPMGroup(
-  anomalyDetectors: MlAnomalyDetectors
-): Promise<ApmMlJob[]> {
+export function getMlJobsWithAPMGroup(anomalyDetectors: MlAnomalyDetectors): Promise<ApmMlJob[]> {
   return withApmSpan('get_ml_jobs_with_apm_group', async () => {
     try {
       const [jobs, jobStats, datafeedStats] = await Promise.all([
-        anomalyDetectors
-          .jobs(APM_ML_JOB_GROUP)
-          .then((response) => response.jobs),
+        anomalyDetectors.jobs(APM_ML_JOB_GROUP).then((response) => response.jobs),
         anomalyDetectors
           .jobStats(APM_ML_JOB_GROUP)
           .then((response) => response.jobs)
@@ -46,9 +42,7 @@ export function getMlJobsWithAPMGroup(
         datafeedStats.map((d) => [d.datafeed_id, d.state as DATAFEED_STATE])
       );
 
-      const jobStateMap = Object.fromEntries(
-        jobStats.map((j) => [j.job_id, j.state as JOB_STATE])
-      );
+      const jobStateMap = Object.fromEntries(jobStats.map((j) => [j.job_id, j.state as JOB_STATE]));
 
       return jobs.map((job): ApmMlJob => {
         const jobId = job.job_id;
@@ -59,9 +53,7 @@ export function getMlJobsWithAPMGroup(
           datafeedId,
           datafeedState: datafeedId ? datafeedStateMap[datafeedId] : undefined,
           version: Number(job?.custom_settings?.job_tags?.apm_ml_version ?? 1),
-          environment: String(
-            job?.custom_settings?.job_tags?.environment
-          ) as Environment,
+          environment: String(job?.custom_settings?.job_tags?.environment) as Environment,
           bucketSpan: job?.analysis_config.bucket_span as string,
         };
       });

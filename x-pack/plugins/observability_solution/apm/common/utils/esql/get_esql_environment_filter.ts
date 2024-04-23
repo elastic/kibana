@@ -6,10 +6,7 @@
  */
 
 import { identifier, string } from '.';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../../environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../es_fields/apm';
 
 export function getEsqlEnvironmentFilter(environment: string) {
