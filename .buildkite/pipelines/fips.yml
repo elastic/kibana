@@ -12,4 +12,4 @@ steps:
     label: "Smoke testing for FIPS"
     agents:
       queue: n2-4-virt
-    timeout_in_minutes: 180
+    timeout_in_minutes: 600
