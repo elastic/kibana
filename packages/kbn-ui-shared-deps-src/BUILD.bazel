@@ -37,6 +37,7 @@ webpack_cli(
     "//packages/shared-ux/error_boundary",
     "//packages/kbn-rison",
     "//packages/shared-ux/code_editor/impl:code_editor",
+    "//packages/kbn-esql-ast",
   ],
   output_dir = True,
   args = [
