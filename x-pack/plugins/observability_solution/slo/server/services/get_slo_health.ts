@@ -12,8 +12,8 @@ import {
   FetchSLOHealthResponse,
   fetchSLOHealthResponseSchema,
 } from '@kbn/slo-schema';
-import { differenceInMinutes } from 'date-fns';
 import { Dictionary, groupBy, keyBy } from 'lodash';
+import moment from 'moment';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -62,7 +62,7 @@ export class GetSLOHealth {
   }
 
   private async getSummaryDocsById(
-    filteredList: { sloId: string; sloInstanceId: string; revision: number }[]
+    filteredList: Array<{ sloId: string; sloInstanceId: string; revision: number }>
   ) {
     const summaryDocs = await this.esClient.search<EsSummaryDocument>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -130,12 +130,8 @@ function computeState(
   if (hasOnlyTempSummaryDoc) {
     state = 'no_data';
   } else if (summaryUpdatedAt && latestSliTimestamp) {
-    const now = new Date();
-    const summaryLag = differenceInMinutes(now, new Date(summaryUpdatedAt));
-    const indexingLag = differenceInMinutes(
-      new Date(summaryUpdatedAt),
-      new Date(latestSliTimestamp)
-    );
+    const summaryLag = moment().diff(new Date(summaryUpdatedAt), 'minute');
+    const indexingLag = moment(summaryUpdatedAt).diff(new Date(latestSliTimestamp), 'minute');
 
     // When the summaryUpdatedAt is greater than STALE_THRESHOLD_MINUTES minutes, the SLO is considered stale since no new data triggered a summary document update.
     // When the difference between the summaryUpdatedAt and the latestSliTimestamp is
