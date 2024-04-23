@@ -71,7 +71,7 @@ export enum TelemetryEventTypes {
   DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
   OnboardingHubStepOpen = 'Onboarding Hub Step Open',
   OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
-  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked'
+  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {
