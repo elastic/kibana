@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -73,6 +73,13 @@ export const getSearchEmbeddableFactory = (services: Services) => {
               dataLoading$.next(true);
               const abortController = new AbortController();
               prevRequestAbortController = abortController;
+              
+              // delay search so examples can demonstate loading state
+              const sleep = new Promise(function(resolve) {
+                setTimeout(resolve, 1000);
+              });
+              await sleep;
+              
               const count = await getCount(
                 defaultDataView,
                 services.data,
@@ -110,7 +117,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       return {
         api,
         Component: () => {
-          const [count, error] = useBatchedPublishingSubjects(count$, error$);
+          const [count, error, dataLoading] = useBatchedPublishingSubjects(count$, error$, dataLoading$);
 
           useEffect(() => {
             return () => {
@@ -134,13 +141,14 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             );
           }
 
-          return (
-            <p>
-              Found <strong>{count}</strong> from {defaultDataView.name}
-            </p>
-          );
+          return dataLoading
+            ? <EuiLoadingSpinner size="l" />
+            :  
+              <p>
+                Found <strong>{count}</strong> from {defaultDataView.name}
+              </p>;
         },
-      };
+      }
     },
   };
   return factory;

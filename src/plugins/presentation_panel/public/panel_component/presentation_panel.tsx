@@ -8,7 +8,7 @@
 
 import './_presentation_panel.scss';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
@@ -50,10 +50,10 @@ export const PresentationPanel = <
   }, []);
 
   const Panel = value?.Panel;
-  const unwrappedComponent = value?.unwrappedComponent;
+  const UnwrappedComponent = value?.unwrappedComponent;
   const shouldHavePanel = !loading && !hidePresentationPanelChrome;
   const shouldHaveUnwrappedComponent = !loading;
-  if (error || (shouldHavePanel && !Panel) || (shouldHaveUnwrappedComponent && !unwrappedComponent)) {
+  if (error || (shouldHavePanel && !Panel) || (shouldHaveUnwrappedComponent && !UnwrappedComponent)) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -76,6 +76,8 @@ export const PresentationPanel = <
     );
 
   return shouldHavePanel && Panel
-    ? <Panel<ApiType, PropsType> Component={unwrappedComponent!} {...passThroughProps} />
-    : unwrappedComponent! as unknown as JSX.Element;
+    ? <Panel<ApiType, PropsType> Component={UnwrappedComponent!} {...passThroughProps} />
+    : <EuiErrorBoundary>
+        <UnwrappedComponent />
+      </EuiErrorBoundary>;
 };

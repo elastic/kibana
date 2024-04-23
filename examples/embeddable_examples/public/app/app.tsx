@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters } from "@kbn/core-application-browser";
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { Overview } from './overview';
+import { RenderExamples } from './render_examples';
 
 const OVERVIEW_TAB_ID = 'overview';
 const RENDER_TAB_ID = 'render';
@@ -24,6 +25,10 @@ const App = () => {
   }
 
   function renderTabContent() {
+    if (selectedTabId === RENDER_TAB_ID) {
+      return <RenderExamples/>
+    }
+
     return <Overview/>
   }
   
@@ -32,23 +37,26 @@ const App = () => {
       <EuiPageBody>
         <EuiPageSection>
           <EuiPageHeader pageTitle="Embeddables" />
-          <EuiTabs>
-            <EuiTab
-              onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
-              isSelected={OVERVIEW_TAB_ID === selectedTabId}
-            >
-              Overview
-            </EuiTab>
-            <EuiTab
-              onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
-              isSelected={RENDER_TAB_ID === selectedTabId}
-            >
-              Render
-            </EuiTab>
-          </EuiTabs>
         </EuiPageSection>
         <EuiPageTemplate.Section>
           <EuiPageSection>
+            <EuiTabs>
+              <EuiTab
+                onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
+                isSelected={OVERVIEW_TAB_ID === selectedTabId}
+              >
+                Embeddables overview
+              </EuiTab>
+              <EuiTab
+                onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
+                isSelected={RENDER_TAB_ID === selectedTabId}
+              >
+                Rendering embeddables in your application
+              </EuiTab>
+            </EuiTabs>
+
+            <EuiSpacer/>
+
             {renderTabContent()}
           </EuiPageSection>
         </EuiPageTemplate.Section>
