@@ -15,7 +15,7 @@ export const INTRODUCTION_NOTEBOOK: Notebook = {
   }),
   description: i18n.translate('xpack.searchNotebooks.introductionNotebook.description', {
     defaultMessage:
-      'Learn all about Jupyter notebooks, how to preview them in the UI, and how to run them yourself.',
+      'Learn all about Jupyter notebooks, how to preview them in the UI, and how to run them.',
   }),
   notebook: {
     cells: [
