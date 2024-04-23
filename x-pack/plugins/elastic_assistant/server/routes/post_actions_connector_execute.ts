@@ -378,7 +378,7 @@ export const postActionsConnectorExecuteRoute = (
           logger.error(err);
           const error = transformError(err);
           if (onLlmResponse) {
-            onLlmResponse(error.message, {}, true);
+            await onLlmResponse(error.message, {}, true);
           }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
