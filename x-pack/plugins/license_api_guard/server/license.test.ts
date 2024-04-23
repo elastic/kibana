@@ -58,7 +58,14 @@ describe('License API guard', () => {
     const forbidden = jest.fn();
     const responseMock = httpServerMock.createResponseFactory();
     responseMock.forbidden = forbidden;
-    guardedRoute({} as RequestHandlerContext, {} as KibanaRequest, responseMock);
+    const maybePromise = guardedRoute(
+      {} as RequestHandlerContext,
+      {} as KibanaRequest,
+      responseMock
+    );
+    if ('catch' in maybePromise) {
+      maybePromise.catch(() => {});
+    }
 
     return {
       errorResponse:
