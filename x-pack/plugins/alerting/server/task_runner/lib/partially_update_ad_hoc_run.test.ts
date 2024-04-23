@@ -146,7 +146,7 @@ const DefaultAttributes = {
   ],
 };
 
-const UnallowedAttributes = { ...DefaultAttributes, enabled: false };
+const UnallowedAttributes = { ...DefaultAttributes, spaceId: 'yo' };
 const ExtraneousAttributes = { ...DefaultAttributes, foo: 'bar' };
 
 const MockAdHocRunId = 'abc';
