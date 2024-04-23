@@ -114,14 +114,7 @@ const PackagePolicyBaseSchema = {
   overrides: schema.maybe(
     schema.recordOf(
       schema.literal('inputs'),
-      schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
-      {
-        validate: (val) => {
-          if (Object.keys(val).some((key) => key.match(/compiled_stream/))) {
-            return 'compiled_stream overrides not allowed';
-          }
-        },
-      }
+      schema.arrayOf(schema.object(PackagePolicyInputsSchema))
     )
   ),
 };

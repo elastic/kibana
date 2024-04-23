@@ -769,11 +769,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: {
-      user?: AuthenticatedUser;
-      force?: boolean;
-      skipUniqueNameVerification?: boolean;
-    }
+    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
