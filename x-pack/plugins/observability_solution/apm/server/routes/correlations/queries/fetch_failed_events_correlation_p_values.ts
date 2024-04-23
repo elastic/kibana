@@ -7,10 +7,7 @@
 import { termQuery } from '@kbn/observability-plugin/server';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
-import {
-  EVENT_OUTCOME,
-  PROCESSOR_EVENT,
-} from '../../../../common/es_fields/apm';
+import { EVENT_OUTCOME, PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
@@ -44,46 +41,37 @@ export const fetchFailedEventsCorrelationPValues = async ({
     query,
   });
 
-  const resp = await apmEventClient.search(
-    'get_failed_events_correlation_p_values',
-    {
-      apm: {
-        events: [eventType],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              commonQuery,
-              ...termQuery(EVENT_OUTCOME, EventOutcome.failure),
-            ],
-          },
+  const resp = await apmEventClient.search('get_failed_events_correlation_p_values', {
+    apm: {
+      events: [eventType],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [commonQuery, ...termQuery(EVENT_OUTCOME, EventOutcome.failure)],
         },
-        aggs: {
-          failure_p_value: {
-            significant_terms: {
-              field: fieldName,
-              background_filter: {
-                // Important to have same query as above here
-                // without it, we would be comparing sets of different filtered elements
-                bool: {
-                  filter: [
-                    commonQuery,
-                    ...termQuery(PROCESSOR_EVENT, eventType),
-                  ],
-                },
+      },
+      aggs: {
+        failure_p_value: {
+          significant_terms: {
+            field: fieldName,
+            background_filter: {
+              // Important to have same query as above here
+              // without it, we would be comparing sets of different filtered elements
+              bool: {
+                filter: [commonQuery, ...termQuery(PROCESSOR_EVENT, eventType)],
               },
-              // No need to have must_not "event.outcome": "failure" clause
-              // if background_is_superset is set to true
-              p_value: { background_is_superset: true },
             },
+            // No need to have must_not "event.outcome": "failure" clause
+            // if background_is_superset is set to true
+            p_value: { background_is_superset: true },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   const { aggregations } = resp;
 
@@ -131,8 +119,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
       failurePercentage: bucket.doc_count / overallResult.doc_count,
       // Percentage of time the term appears in successful transactions
       successPercentage:
-        (bucket.bg_count - bucket.doc_count) /
-        (overallResult.bg_count - overallResult.doc_count),
+        (bucket.bg_count - bucket.doc_count) / (overallResult.bg_count - overallResult.doc_count),
       histogram,
     });
   }

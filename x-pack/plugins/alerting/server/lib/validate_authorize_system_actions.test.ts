@@ -50,7 +50,7 @@ describe('validateAndAuthorizeSystemActions', () => {
       systemActions: [],
       actionsClient,
       actionsAuthorization,
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(res).toBe(undefined);
@@ -78,7 +78,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         systemActions,
         actionsClient,
         actionsAuthorization,
-        rule: { consumer: 'stackAlerts' },
+        rule: { consumer: 'stackAlerts', producer: 'alerts' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action not-exist is not a system action"`);
   });
@@ -103,7 +103,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         systemActions,
         actionsClient,
         actionsAuthorization,
-        rule: { consumer: 'stackAlerts' },
+        rule: { consumer: 'stackAlerts', producer: 'alerts' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action not-exist is not a system action"`);
   });
@@ -128,7 +128,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         systemActions,
         actionsClient,
         actionsAuthorization,
-        rule: { consumer: 'stackAlerts' },
+        rule: { consumer: 'stackAlerts', producer: 'alerts' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]"`
@@ -161,7 +161,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         systemActions,
         actionsClient,
         actionsAuthorization,
-        rule: { consumer: 'stackAlerts' },
+        rule: { consumer: 'stackAlerts', producer: 'alerts' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Cannot use the same system action twice"`);
   });
@@ -213,7 +213,7 @@ describe('validateAndAuthorizeSystemActions', () => {
       systemActions,
       actionsClient,
       actionsAuthorization,
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(res).toBe(undefined);
@@ -281,7 +281,7 @@ describe('validateAndAuthorizeSystemActions', () => {
       systemActions,
       actionsClient,
       actionsAuthorization,
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(actionsAuthorization.ensureAuthorized).toBeCalledWith({

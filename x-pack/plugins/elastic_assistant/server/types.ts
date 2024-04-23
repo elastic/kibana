@@ -27,12 +27,18 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/ser
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  AlertsInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
+
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -203,11 +209,16 @@ export interface AssistantToolParams {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   isEnabledKnowledgeBase: boolean;
-  chain: RetrievalQAChain;
+  chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
+  llm?: ActionsClientLlm | ActionsClientChatOpenAI;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  request: KibanaRequest<
+    unknown,
+    unknown,
+    ExecuteConnectorRequestBody | AlertsInsightsPostRequestBody
+  >;
   size?: number;
 }

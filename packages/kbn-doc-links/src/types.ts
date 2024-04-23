@@ -170,6 +170,7 @@ export interface DocLinks {
     readonly languageClients: string;
     readonly licenseManagement: string;
     readonly machineLearningStart: string;
+    readonly playground: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
     readonly searchApplicationsTemplates: string;
@@ -182,6 +183,7 @@ export interface DocLinks {
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
+    readonly syncRulesAdvanced: string;
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
@@ -358,6 +360,7 @@ export interface DocLinks {
       readonly hostRiskScore: string;
       readonly userRiskScore: string;
       readonly entityRiskScoring: string;
+      readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
   };

@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
-import type { StartPlugins } from '../../../../plugin';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { InitRiskEngineResultResponse } from '../../types';
+import type { EntityAnalyticsRoutesDeps, InitRiskEngineResultResponse } from '../../types';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 export const riskEngineInitRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  router: EntityAnalyticsRoutesDeps['router'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
