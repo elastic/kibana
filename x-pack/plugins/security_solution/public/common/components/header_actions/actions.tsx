@@ -281,6 +281,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               showNotes={showNotes ?? false}
               toggleShowNotes={toggleShowNotes}
               timelineType={timelineType}
+              eventId={eventId}
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}

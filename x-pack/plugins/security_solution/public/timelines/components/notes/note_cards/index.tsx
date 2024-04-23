@@ -46,21 +46,34 @@ interface Props {
   associateNote: AssociateNote;
   notes: TimelineResultNote[];
   showAddNote: boolean;
-  toggleShowAddNote: () => void;
+  toggleShowAddNote: () => void | ((eventId: string) => void);
+  eventId?: string;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ ariaRowindex, associateNote, notes, showAddNote, toggleShowAddNote }) => {
+  ({ ariaRowindex, associateNote, notes, showAddNote, toggleShowAddNote, eventId }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
       (noteId: string) => {
         associateNote(noteId);
-        toggleShowAddNote();
+        if (eventId != null) {
+          toggleShowAddNote(eventId);
+        } else {
+          toggleShowAddNote();
+        }
       },
-      [associateNote, toggleShowAddNote]
+      [associateNote, toggleShowAddNote, eventId]
     );
+
+    const onCancelAddNote = useCallback(() => {
+      if (eventId != null) {
+        toggleShowAddNote(eventId);
+      } else {
+        toggleShowAddNote();
+      }
+    }, [eventId, toggleShowAddNote]);
 
     return (
       <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
@@ -85,7 +98,7 @@ export const NoteCards = React.memo<Props>(
             <AddNote
               associateNote={associateNoteAndToggleShow}
               newNote={newNote}
-              onCancelAddNote={toggleShowAddNote}
+              onCancelAddNote={onCancelAddNote}
               updateNewNote={setNewNote}
             />
           </AddNoteContainer>

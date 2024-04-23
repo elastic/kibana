@@ -371,6 +371,7 @@ export interface UnifiedDataTableProps {
    * This data is sent directly to actions.
    */
   cellActionsMetadata?: Record<string, unknown>;
+  cellContext?: EuiDataGridProps['cellContext'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -438,6 +439,7 @@ export const UnifiedDataTable = ({
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
   enableComparisonMode,
+  cellContext,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -1055,6 +1057,7 @@ export const UnifiedDataTable = ({
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={customTrailingControlColumn}
+              cellContext={cellContext}
             />
           )}
         </div>

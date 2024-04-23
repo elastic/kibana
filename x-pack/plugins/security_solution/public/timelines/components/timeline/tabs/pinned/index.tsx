@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, memo } from 'react';
 import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
@@ -17,18 +17,16 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
+import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { EventsTrSupplement } from '../../styles';
-import { appSelectors } from '../../../../../common/store';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
@@ -43,8 +41,9 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { NoteCards } from '../../../notes/note_cards';
+import { CustomTimelineDataGridBody } from '../../unified_components/data_table/custom_timeline_data_grid_body';
 import { memoizedGetColumnHeaders } from '../query';
+import { transformTimelineItemToUnifiedRows } from '../../unified_components/utils';
 import {
   FullWidthFlexGroup,
   ScrollableFlexItem,
@@ -58,20 +57,6 @@ const ExitFullScreenContainer = styled.div`
   width: 180px;
 `;
 
-const Row = styled.div`
-  display: flex;
-  min-width: fit-content;
-  flex-direction: column;
-`;
-
-const RowDetailsWrapper = styled.div`
-  flex-grow: 0;
-`;
-
-const ColumnsWrapper = styled.div`
-  display: flex;
-  width: 100%;
-`;
 interface PinnedFilter {
   bool: {
     should: Array<{ match_phrase: { _id: string } }>;
@@ -82,7 +67,6 @@ interface PinnedFilter {
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
-const emptyNotes: string[] = [];
 
 const rowDetailColumn = [
   {
@@ -107,6 +91,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   sort,
   expandedDetail,
   eventIdToNoteIds,
+  dataView,
 }) => {
   const {
     browserFields,
@@ -190,19 +175,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
-  const notesById = useDeepEqualSelector(getNotesByIds);
-
-  const additionalNotesRow = useMemo(() => {
-    return (
-      <EventsTrSupplement
-        className="siemEventsTable__trSupplement--notes"
-        data-test-subj="event-notes-flex-item"
-        $display="block"
-      />
-    );
-  }, []);
-
   const [queryLoadingState, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
@@ -219,20 +191,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
-  const eventIds = useMemo(() => events.map((e) => e._id), [events]);
-  const rowIndicesWithNotes = useMemo(() => {
-    return new Map(
-      eventIds
-        .map((eventId, index) => {
-          if (eventIdToNoteIds[eventId]) {
-            return [index, eventIdToNoteIds[eventId]];
-          } else {
-            return null;
-          }
-        })
-        .filter((x) => x !== null) as Array<[number, string[]]>
-    );
-  }, [eventIdToNoteIds, eventIds]);
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
     [queryLoadingState]
@@ -246,23 +204,32 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
-        headerCellRender: HeaderActions,
+        headerCellRender: () => {
+          return (
+            <HeaderActions
+              width={x.width}
+              browserFields={browserFields}
+              columnHeaders={localColumns}
+              isEventViewer={false}
+              isSelectAllChecked={false}
+              onSelectAll={() => {}}
+              showEventsSelect={false}
+              showSelectAllCheckbox={false}
+              sort={sort}
+              tabType={TimelineTabs.pinned}
+              timelineId={timelineId}
+              fieldBrowserOptions={{}}
+            />
+          );
+        },
+        rowCellRender: ControlColumnCellRender,
       })),
-    [ACTION_BUTTON_COUNT]
+    [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, timelineId]
   );
-
-  // const associateNote = useCallback(
-  //   (noteId: string) => {
-  //     dispatch(
-  //       timelineActions.addNoteToEvent({
-  //         eventId,
-  //         id: timelineId,
-  //         noteId,
-  //       })
-  //     );
-  //   },
-  //   [dispatch, eventId, timelineId]
-  // );
+  const tableRows = useMemo(
+    () => transformTimelineItemToUnifiedRows({ events, dataView }),
+    [events, dataView]
+  );
 
   const RenderCustomGridBody = useCallback(
     ({
@@ -271,69 +238,22 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       visibleRowData,
       setCustomGridBodyProps,
     }: EuiDataGridCustomBodyProps) => {
-      // Ensure we're displaying correctly-paginated rows
-      const visibleRows = events.slice(visibleRowData.startRow, visibleRowData.endRow);
-      return (
-        <>
-          {visibleRows.map((row, rowIndex) => {
-            const eventId = eventIds[rowIndex];
-            const noteIds: string[] = eventIdToNoteIds[eventId] || emptyNotes;
-            const notes = noteIds.map((noteId) => {
-              const note = notesById[noteId];
-              return {
-                savedObjectId: note.saveObjectId,
-                note: note.note,
-                noteId: note.id,
-                updated: (note.lastEdit ?? note.created).getTime(),
-                updatedBy: note.user,
-              };
-            });
-            return (
-              <Row
-                role="row"
-                key={`${rowIndex}`}
-                // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-                // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-                // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
-                // shouldHighlightRow is correct
-                className={`euiDataGridRow`}
-              >
-                <ColumnsWrapper>
-                  {visibleColumns.map((column, colIndex) => {
-                    // Skip the row details cell - we'll render it manually outside of the flex wrapper
-                    if (column.id !== 'row-details') {
-                      return (
-                        <Cell
-                          colIndex={colIndex}
-                          visibleRowIndex={rowIndex}
-                          key={`${rowIndex},${colIndex}`}
-                        />
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
-                </ColumnsWrapper>
-                {rowIndicesWithNotes.has(rowIndex) && (
-                  <RowDetailsWrapper>
-                    <NoteCards
-                      ariaRowindex={rowIndex}
-                      associateNote={() => {}}
-                      data-test-subj="note-cards"
-                      notes={notes}
-                      // showAddNote={!!showNotes[eventId]}
-                      showAddNote={false}
-                      toggleShowAddNote={() => {}}
-                    />
-                  </RowDetailsWrapper>
-                )}
-              </Row>
-            );
-          })}
-        </>
-      );
+      if (events) {
+        return (
+          <CustomTimelineDataGridBody
+            Cell={Cell}
+            enabledRowRenderers={rowRenderers}
+            eventIdToNoteIds={eventIdToNoteIds}
+            setCustomGridBodyProps={setCustomGridBodyProps}
+            events={events}
+            rows={tableRows}
+            visibleColumns={visibleColumns}
+            visibleRowData={visibleRowData}
+          />
+        );
+      }
     },
-    [eventIds, events, eventIdToNoteIds, notesById, rowIndicesWithNotes]
+    [events, eventIdToNoteIds, rowRenderers, tableRows]
   );
 
   if (unifiedComponentsInTimelineEnabled) {
@@ -349,6 +269,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         events={events}
         refetch={refetch}
         dataLoadingState={queryLoadingState}
+        pinnedEventIds={pinnedEventIds}
         totalCount={events.length}
         onEventClosed={onEventClosed}
         expandedDetail={expandedDetail}
@@ -358,6 +279,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
         pageInfo={pageInfo}
+        leadingControlColumns={leadingControlColumns}
         trailingControlColumns={rowDetailColumn}
         renderCustomGridBody={RenderCustomGridBody}
       />

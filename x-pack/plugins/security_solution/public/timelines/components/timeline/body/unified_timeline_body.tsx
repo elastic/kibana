@@ -41,6 +41,9 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     updatedAt,
     renderCustomGridBody,
     trailingControlColumns,
+    leadingControlColumns,
+    pinnedEventIds,
+    eventIdToNoteIds,
   } = props;
 
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
@@ -87,6 +90,9 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             isTextBasedQuery={false}
             renderCustomGridBody={renderCustomGridBody}
             trailingControlColumns={trailingControlColumns}
+            leadingControlColumns={leadingControlColumns}
+            pinnedEventIds={pinnedEventIds}
+            eventIdToNoteIds={eventIdToNoteIds}
           />
         </RootDragDropProvider>
       </StyledTableFlexItem>

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, memo } from 'react';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -55,6 +55,7 @@ import { getDefaultControlColumn } from '../../body/control_columns';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import {
@@ -109,6 +110,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   sort,
   timerangeKind,
   expandedDetail,
+  pinnedEventIds,
+  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -260,9 +263,28 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
-        headerCellRender: HeaderActions,
+        headerCellRender: (props) => {
+          return (
+            <HeaderActions
+              width={x.width}
+              browserFields={browserFields}
+              columnHeaders={localColumns}
+              isEventViewer={false}
+              isSelectAllChecked={false}
+              onSelectAll={() => {}}
+              showEventsSelect={false}
+              showSelectAllCheckbox={false}
+              sort={sort}
+              tabType={TimelineTabs.pinned}
+              timelineId={timelineId}
+              fieldBrowserOptions={{}}
+              {...props}
+            />
+          );
+        },
+        rowCellRender: ControlColumnCellRender,
       })),
-    [ACTION_BUTTON_COUNT]
+    [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, timelineId]
   );
 
   // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
@@ -341,6 +363,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         onEventClosed={onEventClosed}
         expandedDetail={expandedDetail}
         showExpandedDetails={showExpandedDetails}
+        leadingControlColumns={leadingControlColumns}
+        eventIdToNoteIds={eventIdToNoteIds}
+        pinnedEventIds={pinnedEventIds}
         onChangePage={loadPage}
         activeTab={activeTab}
         updatedAt={refreshedAt}
@@ -441,6 +466,8 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
+      pinnedEventIds,
+      eventIdToNoteIds,
       expandedDetail,
       filters,
       itemsPerPage,
@@ -476,6 +503,8 @@ const makeMapStateToProps = () => {
       expandedDetail,
       filters: timelineFilter,
       timelineId,
+      pinnedEventIds,
+      eventIdToNoteIds,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,

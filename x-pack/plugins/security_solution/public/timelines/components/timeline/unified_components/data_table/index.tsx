@@ -65,6 +65,8 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
+  leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
+  cellContext?: EuiDataGridProps['cellContext'];
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -105,7 +107,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSort,
     onFilter,
     renderCustomGridBody,
-    trailingControlColumns,
+    // trailingControlColumns,
+    leadingControlColumns,
+    cellContext,
+    eventIdToNoteIds,
   }) {
     const dispatch = useDispatch();
 
@@ -343,11 +348,22 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
+          eventIdToNoteIds={eventIdToNoteIds}
           setCustomGridBodyProps={setCustomGridBodyProps}
+          events={events}
           enabledRowRenderers={enabledRowRenderers}
+          eventIdsAddingNotes={cellContext?.eventIdsAddingNotes}
+          onToggleShowNotes={cellContext?.onToggleShowNotes}
         />
       ),
-      [tableRows, enabledRowRenderers]
+      [
+        tableRows,
+        enabledRowRenderers,
+        events,
+        eventIdToNoteIds,
+        cellContext?.eventIdsAddingNotes,
+        cellContext?.onToggleShowNotes,
+      ]
     );
 
     return (
@@ -398,8 +414,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomGridBody}
+            renderCustomGridBody={renderCustomGridBody ?? renderCustomBodyCallback}
             trailingControlColumns={trailingControlColumns}
+            externalControlColumns={leadingControlColumns}
+            cellContext={cellContext}
           />
           {showExpandedDetails && (
             <DetailsPanel

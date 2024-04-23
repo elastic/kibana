@@ -13,13 +13,21 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { appSelectors } from '../../../../../common/store';
+import { NoteCards } from '../../../notes/note_cards';
+import type { TimelineResultNote } from '../../../open_timeline/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
+  events: TimelineItem[];
+  eventIdToNoteIds: Record<string, string[]>;
 };
+
+const emptyNotes: string[] = [];
 
 /**
  *
@@ -36,25 +44,69 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
  * */
 export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
   function CustomTimelineDataGridBody(props) {
-    const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
-
+    const {
+      Cell,
+      visibleColumns,
+      visibleRowData,
+      rows,
+      enabledRowRenderers,
+      events = [],
+      eventIdToNoteIds = {},
+      eventIdsAddingNotes = new Set<string>(),
+      onToggleShowNotes,
+    } = props;
+    const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
+    const notesById = useDeepEqualSelector(getNotesByIds);
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
       [rows, visibleRowData]
     );
+    const eventIds = useMemo(() => events.map((e) => e._id), [events]);
+    const rowIndicesWithNotes = useMemo(() => {
+      return new Map(
+        eventIds
+          .map((eventId, index) => {
+            if (eventIdToNoteIds[eventId]) {
+              return [index, eventIdToNoteIds[eventId]];
+            } else {
+              return null;
+            }
+          })
+          .filter((x) => x !== null) as Array<[number, string[]]>
+      );
+    }, [eventIdToNoteIds, eventIds]);
 
     return (
       <>
-        {visibleRows.map((row, rowIndex) => (
-          <CustomDataGridSingleRow
-            rowData={row}
-            rowIndex={rowIndex}
-            key={rowIndex}
-            visibleColumns={visibleColumns}
-            Cell={Cell}
-            enabledRowRenderers={enabledRowRenderers}
-          />
-        ))}
+        {visibleRows.map((row, rowIndex) => {
+          const eventId = eventIds[rowIndex];
+          const noteIds: string[] = eventIdToNoteIds[eventId] || emptyNotes;
+          const notes = noteIds.map((noteId) => {
+            const note = notesById[noteId];
+            return {
+              savedObjectId: note.saveObjectId,
+              note: note.note,
+              noteId: note.id,
+              updated: (note.lastEdit ?? note.created).getTime(),
+              updatedBy: note.user,
+            };
+          });
+          return (
+            <CustomDataGridSingleRow
+              rowData={row}
+              rowIndex={rowIndex}
+              key={rowIndex}
+              visibleColumns={visibleColumns}
+              Cell={Cell}
+              enabledRowRenderers={enabledRowRenderers}
+              notes={notes}
+              rowIndicesWithNotes={rowIndicesWithNotes}
+              eventIdsAddingNotes={eventIdsAddingNotes}
+              eventId={eventId}
+              onToggleShowNotes={onToggleShowNotes}
+            />
+          );
+        })}
       </>
     );
   }
@@ -86,6 +138,8 @@ const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper',
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
+  notes?: TimelineResultNote[] | null;
+  rowIndicesWithNotes?: Map<number, string[]>;
 } & Pick<CustomTimelineDataGridBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
 
 /**
@@ -96,7 +150,18 @@ type CustomTimelineDataGridSingleRowProps = {
 const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   props: CustomTimelineDataGridSingleRowProps
 ) {
-  const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
+  const {
+    rowIndex,
+    rowData,
+    enabledRowRenderers,
+    visibleColumns,
+    Cell,
+    notes,
+    rowIndicesWithNotes,
+    eventIdsAddingNotes,
+    eventId,
+    onToggleShowNotes,
+  } = props;
 
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
@@ -139,6 +204,17 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
+      {rowIndicesWithNotes.has(rowIndex) && (
+        <NoteCards
+          ariaRowindex={rowIndex}
+          associateNote={() => {}}
+          data-test-subj="note-cards"
+          notes={notes}
+          showAddNote={eventIdsAddingNotes.has(eventId)}
+          toggleShowAddNote={onToggleShowNotes}
+          eventId={eventId}
+        />
+      )}
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
