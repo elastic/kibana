@@ -25,17 +25,14 @@ import { Actions } from '../../../stores/request';
 import {
   containsUrlParams,
   getCurlRequest,
-  getDocumentationLinkFromAutocompleteContext,
+  getDocumentationLink,
   getLineTokens,
-  getMethodAndUrlTokenPath,
   getMethodCompletionItems,
   getRequestEndLineNumber,
   getRequestStartLineNumber,
-  getUrlPathCompletionItemsFromContext,
-  populateContextForMethodAndUrl,
+  getUrlPathCompletionItems,
   replaceRequestVariables,
   stringifyRequest,
-  tokenizeRequestUrl,
   trackSentRequests,
 } from './utils';
 
@@ -256,12 +253,8 @@ export class MonacoEditorActionsProvider {
       return null;
     }
     const request = requests[0];
-    // get the url parts from the request url
-    const urlTokens = tokenizeRequestUrl(request.url);
 
-    const context = populateContextForMethodAndUrl(request.method, urlTokens);
-
-    return getDocumentationLinkFromAutocompleteContext(context, docLinkVersion);
+    return getDocumentationLink(request, docLinkVersion);
   }
 
   private async getAutocompleteType(
@@ -323,20 +316,8 @@ export class MonacoEditorActionsProvider {
       };
     }
     if (autocompleteType === AutocompleteType.PATH) {
-      const { lineNumber, column } = position;
-      // get the content of the line up until the current position
-      const lineContent = model.getValueInRange({
-        startLineNumber: lineNumber,
-        startColumn: 1,
-        endLineNumber: lineNumber,
-        endColumn: column,
-      });
-
-      // get the method and previous url parts for context
-      const { method, urlTokenPath } = getMethodAndUrlTokenPath(lineContent);
-      const context = populateContextForMethodAndUrl(method, urlTokenPath);
       return {
-        suggestions: getUrlPathCompletionItemsFromContext(context, model, position),
+        suggestions: getUrlPathCompletionItems(model, position),
       };
     }
 

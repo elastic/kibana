@@ -17,12 +17,12 @@ import { MetricsTracker } from '../../../../types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 
 const whitespacesRegex = /\s+/;
+/*
+ * This functions removes any trailing inline comments, for example
+ * "_search // comment" -> "_search"
+ * Ideally the parser should remove those comments, but currently they are included in url.
+ */
 export const removeTrailingWhitespaces = (url: string): string => {
-  /*
-   * This helper removes any trailing inline comments, for example
-   * "_search // comment" -> "_search"
-   * Ideally the parser removes those comments initially
-   */
   return url.trim().split(whitespacesRegex)[0];
 };
 
@@ -79,12 +79,13 @@ export const trackSentRequests = (
   });
 };
 
+const urlPartsSeparatorRegex = /\//;
+const endOfUrlToken = '__url_path_end__';
 /*
  * This function takes a request url as a string and returns it parts,
  * for example '_search/test' => ['_search', 'test']
+ * and also adds a marker for the url end.
  */
-const urlPartsSeparatorRegex = /\//;
-const endOfUrlToken = '__url_path_end__';
 export const tokenizeRequestUrl = (url: string): string[] => {
   const parts = url.split(urlPartsSeparatorRegex);
   // this special token is used to mark the end of the url
@@ -93,13 +94,15 @@ export const tokenizeRequestUrl = (url: string): string[] => {
 };
 
 /*
- * This function returns a documentation link from the autocomplete endpoint object
- * and replaces the branch in the url with the current version "docLinkVersion"
+ * This function initializes the autocomplete context for the request
+ * and returns a documentation link from the endpoint object
+ * with the branch in the url replaced by the current version "docLinkVersion"
  */
-export const getDocumentationLinkFromAutocompleteContext = (
-  { endpoint }: AutoCompleteContext,
-  docLinkVersion: string
-): string | null => {
+export const getDocumentationLink = (request: EditorRequest, docLinkVersion: string) => {
+  // get the url parts from the request url
+  const urlTokens = tokenizeRequestUrl(request.url);
+
+  const { endpoint } = populateContextForMethodAndUrl(request.method, urlTokens);
   if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
     return endpoint.documentation
       .replace('/master/', `/${docLinkVersion}/`)
@@ -154,12 +157,12 @@ export const getRequestEndLineNumber = (
   return endLineNumber;
 };
 
-/*
- * This function returns an array of suggestions items for the request method
- */
 const methodDetailLabel = i18n.translate('console.autocompleteSuggestions.methodLabel', {
   defaultMessage: 'method',
 });
+/*
+ * This function returns an array of completion items for the request method
+ */
 const autocompleteMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'];
 export const getMethodCompletionItems = (
   model: monaco.editor.ITextModel,
@@ -202,7 +205,7 @@ export const containsUrlParams = (lineContent: string): boolean => {
  * This function splits the input into a method and an url.
  * The url is split into parts and all except the last part is put into urlTokenPath
  */
-export const getMethodAndUrlTokenPath = (
+const getMethodAndUrlTokenPath = (
   lineContent: string
 ): { method: string; urlTokenPath: string[] } => {
   const lineTokens = getLineTokens(lineContent);
@@ -214,7 +217,10 @@ export const getMethodAndUrlTokenPath = (
   return { method, urlTokenPath: urlParts };
 };
 
-export const populateContextForMethodAndUrl = (method: string, urlTokenPath: string[]) => {
+/*
+ * This function initializes the autocomplete context for the provided method and url token path.
+ */
+const populateContextForMethodAndUrl = (method: string, urlTokenPath: string[]) => {
   // get autocomplete components for the request method
   const components = getTopLevelUrlCompleteComponents(method);
   // this object will contain the information later, it needs to be initialized with some data
@@ -230,14 +236,40 @@ export const populateContextForMethodAndUrl = (method: string, urlTokenPath: str
   return context;
 };
 
-export const getUrlPathCompletionItemsFromContext = (
-  context: AutoCompleteContext,
+const endpointDetailLabel = i18n.translate('console.autocompleteSuggestions.endpointLabel', {
+  defaultMessage: 'endpoint',
+});
+/*
+ * This function returns an array of completion items for the request method and the url path
+ */
+export const getUrlPathCompletionItems = (
   model: monaco.editor.ITextModel,
   position: monaco.Position
 ): monaco.languages.CompletionItem[] => {
-  const autoCompleteSet = context.autoCompleteSet;
-  // TODO the word doesn't include a dot
+  const { lineNumber, column } = position;
+  // get the content of the line up until the current position
+  const lineContent = model.getValueInRange({
+    startLineNumber: lineNumber,
+    startColumn: 1,
+    endLineNumber: lineNumber,
+    endColumn: column,
+  });
+
+  // get the method and previous url parts for context
+  const { method, urlTokenPath } = getMethodAndUrlTokenPath(lineContent);
+  const { autoCompleteSet } = populateContextForMethodAndUrl(method, urlTokenPath);
+
   const wordUntilPosition = model.getWordUntilPosition(position);
+  const range = {
+    startLineNumber: position.lineNumber,
+    // replace the whole word with the suggestion
+    startColumn: lineContent.endsWith('.')
+      ? // if there is a dot at the end of the content, it's ignored in the wordUntilPosition
+        wordUntilPosition.startColumn - 1
+      : wordUntilPosition.startColumn,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  };
   if (autoCompleteSet && autoCompleteSet.length > 0) {
     return (
       autoCompleteSet
@@ -248,16 +280,10 @@ export const getUrlPathCompletionItemsFromContext = (
           return {
             label: item.name!,
             insertText: item.name!,
-            detail: item.meta ?? 'endpoint',
+            detail: item.meta ?? endpointDetailLabel,
             // the kind is only used to configure the icon
             kind: monaco.languages.CompletionItemKind.Constant,
-            range: {
-              startLineNumber: position.lineNumber,
-              // replace the whole word with the suggestion
-              startColumn: wordUntilPosition.startColumn,
-              endLineNumber: position.lineNumber,
-              endColumn: position.column,
-            },
+            range,
           };
         })
     );
