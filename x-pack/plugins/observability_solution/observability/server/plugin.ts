@@ -52,6 +52,7 @@ import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
+import { AlertDetailsContextService } from './services';
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -98,6 +99,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
+
+    const alertDetailsContextService = new AlertDetailsContextService(
+      this.logger.get('alert_details_context_service')
+    );
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -293,6 +298,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           spaces: pluginStart.spaces,
           ruleDataService,
+          alertDetailsContextService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
         },
         logger: this.logger,
@@ -312,6 +318,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
+      alertDetailsContextService,
       alertsLocator,
     };
   }
