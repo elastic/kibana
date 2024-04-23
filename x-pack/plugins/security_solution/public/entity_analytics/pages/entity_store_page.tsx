@@ -20,9 +20,12 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiText,
+  EuiHealth,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect } from 'react';
+import moment from 'moment';
+import type { RiskLevels } from '../../../common/entity_analytics';
 import { RiskQueries } from '../../../common/search_strategy';
 import type { FillColor } from '../../common/components/charts/donutchart';
 import { DonutChart } from '../../common/components/charts/donutchart';
@@ -31,7 +34,8 @@ import { HeaderSection } from '../../common/components/header_section';
 import { BasicTable } from '../../common/components/ml/tables/basic_table';
 import { useSearchStrategy } from '../../common/containers/use_search_strategy';
 import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
-
+import { AssetCriticalityBadge } from '../components/asset_criticality/asset_criticality_badge';
+import { RiskScoreLevel } from '../components/severity/common';
 const useViewEntityFlyout = () => {
   const [isViewEntityPanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
   const [viewEntityPanelData, setViewEntityPanelData] = React.useState<any | null>(null);
@@ -198,20 +202,38 @@ export const EntityStorePage = () => {
       name: 'Host',
       field: 'host.name',
       sortable: true,
+      width: '20%',
     },
     {
-      name: 'Asset criticality',
-      field: 'host.asset.criticality',
+      name: 'Risk Level',
+      field: 'host.risk.calculated_level',
+      render: (data?: RiskLevels) => (data ? <RiskScoreLevel severity={data} /> : '-'),
       sortable: true,
     },
     {
       name: 'Risk Score',
       field: 'host.risk.calculated_score_norm',
+      render: (data?: number) => (data ? data.toFixed(0) : ''),
       sortable: true,
+    },
+    {
+      name: 'Asset criticality',
+      field: 'host.asset.criticality',
+      sortable: true,
+      render: (data: string) => (
+        <AssetCriticalityBadge criticalityLevel={(data as any) || 'unassigned'} />
+      ),
+    },
+    {
+      name: 'Agent Status',
+      field: 'host.agent.status',
+      sortable: true,
+      render: (data?: string) => (data ? <EuiHealth color="success">{data}</EuiHealth> : '-'),
     },
     {
       name: 'Last Seen',
       field: 'last_seen',
+      render: (data?: string) => (data ? moment(data).fromNow() : ''),
       sortable: true,
     },
     {
