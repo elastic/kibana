@@ -35,6 +35,7 @@ import { useAzureCredentialsForm } from './hooks';
 import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
+import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -215,6 +216,7 @@ const AzureCredentialTypeSelector = ({
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AzureCredentialsType);
       }}
+      data-test-subj={AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
     />
   </EuiFormRow>
 );
