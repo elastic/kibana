@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2024-01-01T12:00:00.000Z';
   const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180994
-  describe.skip('Dataset quality flyout', () => {
+  describe('Dataset quality flyout', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
@@ -86,7 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(lastActivityTextExists).to.eql(true);
     });
 
-    it('reflects the breakdown field state in url', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/180994
+    it.skip('reflects the breakdown field state in url', async () => {
       const testDatasetName = datasetNames[0];
       await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
