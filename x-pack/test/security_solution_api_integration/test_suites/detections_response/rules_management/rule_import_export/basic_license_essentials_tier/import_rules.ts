@@ -8,6 +8,7 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, combineToNdJson, fetchRule } from '../../../utils';
 import {
@@ -21,6 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  const securitySolutionApi = getService('securitySolutionApi');
 
   describe('@ess @serverless import_rules', () => {
     describe('importing rules with an index', () => {
@@ -133,6 +135,30 @@ export default ({ getService }: FtrProviderContext): void => {
         // should result in one success and a failure message
         expect(body.success_count).toBe(1);
         expect(body.errors[0].error.message).toBe('from: Failed to parse date-math expression');
+      });
+
+      it('should be able to import rules with defaultable fields', async () => {
+        const defaultableFields: BaseDefaultableFields = {
+          setup: '# some setup markdown',
+        };
+        const ruleToImport = getCustomQueryRuleParams({
+          ...defaultableFields,
+          rule_id: 'rule-1',
+        });
+        const ndjson = combineToNdJson(ruleToImport);
+
+        await securitySolutionApi
+          .importRules({ query: {} })
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(200);
+
+        const { body: importedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(importedRule).toMatchObject(ruleToImport);
       });
 
       it('should be able to import two rules', async () => {

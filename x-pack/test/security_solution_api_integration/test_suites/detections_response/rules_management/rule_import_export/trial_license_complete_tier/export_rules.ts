@@ -60,7 +60,6 @@ export default ({ getService }: FtrProviderContext): void => {
           getCustomQueryRuleParams({
             rule_id: ruleId,
             enabled: true,
-            setup: '# some setup markdown',
           })
         );
 
