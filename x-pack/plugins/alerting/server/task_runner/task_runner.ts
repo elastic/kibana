@@ -541,7 +541,7 @@ export class TaskRunner<
         );
       }
 
-      (async () => {
+      await (async () => {
         try {
           await runRuleParams.rulesClient.clearExpiredSnoozes({
             rule: runRuleParams.rule,
