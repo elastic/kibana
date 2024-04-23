@@ -99,6 +99,10 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
 
+  useEffect(() => {
+    controller.setParams(params);
+  }, [controller, params]);
+
   const updatePreview = useCallback(async () => {
     // don't prevent rendering if we're working with a composite subfield (has parentName)
     if (!parentName && scriptEditorValidation.isValidating) {
@@ -302,6 +306,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     });
   }, [name, script, document, controller, type, format]);
 
+  /*
   useEffect(() => {
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
@@ -310,6 +315,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       controller.setPreviewError(null);
     }
   }, [script?.source, controller]);
+  */
 
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)

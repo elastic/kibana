@@ -58,6 +58,17 @@ const previewStateDefault: PreviewState = {
   isPreviewAvailable: true,
   /** Flag to show/hide the preview panel */
   isPanelVisible: true,
+
+  // runtime field preview parms
+  params: {
+    name: null,
+    script: null,
+    format: null,
+    type: null,
+    index: null,
+    document: null,
+    parentName: null,
+  },
 };
 
 export class PreviewController {
@@ -227,6 +238,27 @@ export class PreviewController {
   getIsLastDoc = () => {
     const { currentIdx, documents } = this.internalState$.getValue();
     return currentIdx >= documents.length - 1;
+  };
+
+  setParams = (params: Partial<Params>) => {
+    const stateUpdate: Partial<PreviewState> = {
+      params: {
+        ...this.internalState$.getValue().params,
+        ...params,
+      },
+    };
+
+    // Whenever the source is not defined ("Set value" is toggled off or the
+    // script is empty) we clear the error and update the params cache.
+    if (params.script?.source === undefined) {
+      stateUpdate.previewResponse = {
+        ...this.internalState$.getValue().previewResponse,
+        error: null,
+      };
+      this.setLastExecutePainlessRequestParams({ script: undefined });
+    }
+
+    this.updateState(stateUpdate);
   };
 
   setLastExecutePainlessRequestParams = (
