@@ -48,10 +48,8 @@ export const EditConnector: React.FC = () => {
   const { data, isLoading } = useConnector(id);
 
   useEffect(() => {
-    if (data?.connector) {
-      setServiceType(data.connector.service_type || null);
-    }
-  }, [data?.connector]);
+    setServiceType(data?.connector.service_type || null);
+  }, [data?.connector.service_type]);
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">

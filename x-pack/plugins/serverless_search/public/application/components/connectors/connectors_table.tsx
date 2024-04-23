@@ -256,8 +256,8 @@ export const ConnectorsTable: React.FC = () => {
             connectors: <strong>{CONNECTORS_LABEL}</strong>,
             items: (
               <strong>
-                <EuiI18nNumber value={pageIndex * pageSize + 1} />-
-                <EuiI18nNumber value={pageIndex * pageSize + 1 + items.length} />
+                <EuiI18nNumber value={pageIndex * pageSize} />-
+                <EuiI18nNumber value={pageIndex * pageSize + items.length} />
               </strong>
             ),
             count: <EuiI18nNumber value={data?.connectors.length ?? 0} />,
