@@ -39,6 +39,7 @@ export const PresentationPanelInternal = <
   componentProps,
 
   onPanelStatusChange,
+  ...extraPanelProps
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -115,6 +116,7 @@ export const PresentationPanelInternal = <
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
       {...contentAttrs}
+      {...extraPanelProps}
     >
       {!hideHeader && api && (
         <PresentationPanelHeader
