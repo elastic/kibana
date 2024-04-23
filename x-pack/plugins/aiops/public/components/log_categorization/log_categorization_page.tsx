@@ -311,7 +311,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <SearchPanel
-            dataView={dataView}
             searchString={searchString ?? ''}
             searchQuery={searchQuery}
             searchQueryLanguage={searchQueryLanguage}
