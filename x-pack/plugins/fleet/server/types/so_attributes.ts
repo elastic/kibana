@@ -130,6 +130,7 @@ export interface PackagePolicySOAttributes {
     };
   };
   agents?: number;
+  overrides?: any | null;
 }
 
 interface OutputSoBaseAttributes {

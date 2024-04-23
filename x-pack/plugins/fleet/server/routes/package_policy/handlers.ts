@@ -56,6 +56,8 @@ import {
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
+import { isSimplifiedCreatePackagePolicyRequest, removeFieldsFromInputSchema } from './utils';
+
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 export const getPackagePoliciesHandler: FleetRequestHandler<
@@ -214,17 +216,6 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
   }
 };
 
-function isSimplifiedCreatePackagePolicyRequest(
-  body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
-): body is SimplifiedPackagePolicy {
-  // If `inputs` is not defined or if it's a non-array, the request body is using the new simplified API
-  if (body.inputs && Array.isArray(body.inputs)) {
-    return false;
-  }
-
-  return true;
-}
-
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.query>,
@@ -327,7 +318,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   try {
-    const { force, package: pkg, ...body } = request.body;
+    const { force, package: pkg, overrides, ...body } = request.body;
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
     if ('output_id' in body) {
       delete body.output_id;
@@ -353,19 +344,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
     } else {
-      // removed fields not recognized by schema
-      const packagePolicyInputs = packagePolicy.inputs.map((input) => {
-        const newInput = {
-          ...input,
-          streams: input.streams.map((stream) => {
-            const newStream = { ...stream };
-            delete newStream.compiled_stream;
-            return newStream;
-          }),
-        };
-        delete newInput.compiled_input;
-        return newInput;
-      });
+      const packagePolicyInputs = removeFieldsFromInputSchema(packagePolicy.inputs);
+
       // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
       newData = {
         ...body,
@@ -379,13 +359,16 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
+
+    if (overrides?.inputs) {
+      newData.inputs = removeFieldsFromInputSchema(overrides.inputs);
+    }
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
       request.params.packagePolicyId,
       newData,
-      { user, force },
-      packagePolicy.package?.version
+      { user, force }
     );
     return response.ok({
       body: {

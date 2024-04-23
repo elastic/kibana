@@ -428,6 +428,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           properties: {},
         },
         secret_references: { properties: { id: { type: 'keyword' } } },
+        overrides: { type: 'flattened', index: false },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
