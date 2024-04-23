@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -145,6 +147,24 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
+  const onPopulateWhereClause = useCallback(
+    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+      if (query && isOfAggregateQueryType(query) && 'esql' in query) {
+        const fieldName = typeof field === 'string' ? field : field.name;
+        const updatedQuery = appendWhereClauseToESQLQuery(
+          query.esql,
+          fieldName,
+          String(values),
+          operation
+        );
+        data.query.queryString.setQuery({
+          esql: updatedQuery,
+        });
+      }
+    },
+    [data, query]
+  );
+
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
@@ -223,7 +243,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
-          onAddFilter={onAddFilter as DocViewFilterFn}
+          onAddFilter={
+            isPlainRecord
+              ? (onPopulateWhereClause as DocViewFilterFn)
+              : (onAddFilter as DocViewFilterFn)
+          }
           onFieldEdited={onFieldEdited}
           container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
@@ -233,16 +257,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       </>
     );
   }, [
-    currentColumns,
-    dataView,
-    isPlainRecord,
-    mainContainer,
-    onAddFilter,
-    onDropFieldToTable,
-    onFieldEdited,
     resultState,
+    isPlainRecord,
+    dataView,
     stateContainer,
+    currentColumns,
     viewMode,
+    onPopulateWhereClause,
+    onAddFilter,
+    onFieldEdited,
+    mainContainer,
+    onDropFieldToTable,
     panelsToggle,
   ]);
 
@@ -318,7 +343,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 documents$={stateContainer.dataState.data$.documents$}
                 onAddField={onAddColumn}
                 columns={currentColumns}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onAddFilter={!isPlainRecord ? onAddFilter : onPopulateWhereClause}
                 onRemoveField={onRemoveColumn}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
                 selectedDataView={dataView}

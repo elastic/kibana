@@ -11,3 +11,14 @@
 export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): string {
   return `${baseESQLQuery}\n${appendedText}`;
 }
+
+export function appendWhereClauseToESQLQuery(
+  baseESQLQuery: string,
+  field: string,
+  value: string,
+  operation: '+' | '-'
+): string {
+  const operator = operation === '+' ? '==' : '!=';
+  const whereClause = `| where ${field}${operator}"${value}"`;
+  return appendToESQLQuery(baseESQLQuery, whereClause);
+}
