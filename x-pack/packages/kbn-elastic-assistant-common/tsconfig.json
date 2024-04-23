@@ -21,6 +21,5 @@
     "@kbn/core",
     "@kbn/actions-plugin",
     "@kbn/logging-mocks",
-    "@kbn/elastic-assistant",
   ]
 }
