@@ -15,14 +15,6 @@ import type { ReportingCore } from '..';
 
 const ONE_MB = 1024 * 1024;
 
-/**
- * The chunking size of reporting files. Larger CSV files will be split into
- * multiple documents, where the stream is chunked into pieces of approximately
- * this size. The actual document size will be slightly larger due to Base64
- * encoding and JSON metadata.
- */
-const CHUNK_SIZE = 4 * ONE_MB;
-
 type Callback = (error?: Error) => void;
 type SearchRequest = estypes.SearchRequest;
 
@@ -69,6 +61,14 @@ export class ContentStream extends Duplex {
    * Does not include data that is still queued for writing.
    */
   bytesWritten = 0;
+
+  /**
+   * The chunking size of reporting files. Larger CSV files will be split into
+   * multiple documents, where the stream is chunked into pieces of approximately
+   * this size. The actual document size will be slightly larger due to Base64
+   * encoding and JSON metadata.
+   */
+  chunkSize = 4 * ONE_MB;
 
   constructor(
     private client: ElasticsearchClient,
@@ -267,8 +267,8 @@ export class ContentStream extends Duplex {
   }
 
   private async flushAllFullChunks() {
-    while (this.bytesBuffered >= CHUNK_SIZE && this.buffers.length) {
-      await this.flush(CHUNK_SIZE);
+    while (this.bytesBuffered >= this.chunkSize && this.buffers.length) {
+      await this.flush(this.chunkSize);
     }
   }
 
