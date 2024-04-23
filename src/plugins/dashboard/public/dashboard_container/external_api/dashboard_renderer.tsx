@@ -31,6 +31,10 @@ import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
+  dashboardDraftSettings$,
+  type DashboardSettings,
+} from '../embeddable/dashboard_settings_draft';
+import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   DashboardCreationOptions,
@@ -61,6 +65,15 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
     const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
     const [dashboardMissing, setDashboardMissing] = useState(false);
+    const [dashboardSettingsDraft, setDashboardDraftSettings] = useState<DashboardSettings | null>(
+      null
+    );
+
+    useEffect(() => {
+      const s = dashboardDraftSettings$.subscribe(setDashboardDraftSettings);
+
+      return () => s.unsubscribe();
+    }, []);
 
     useImperativeHandle(
       ref,
@@ -169,7 +182,9 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       {
         [css`
           background: ${euiTheme.colors.emptyShade};
-        `]: dashboardContainer ? !dashboardContainer.getInput().useMargins : false,
+        `]: dashboardSettingsDraft
+          ? !dashboardSettingsDraft.useMargins
+          : !dashboardContainer?.getInput().useMargins,
       }
     );
 

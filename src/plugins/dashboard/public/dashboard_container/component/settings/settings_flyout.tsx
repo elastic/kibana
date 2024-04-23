@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DashboardContainerInput } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardSettingsDraft } from '../../embeddable/dashboard_settings_draft';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -44,9 +45,9 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
 
   const dashboard = useDashboardContainer();
 
-  const [dashboardSettingsState, setDashboardSettingsState] = useState({
-    ...dashboard.getInput(),
-  });
+  const [dashboardSettingsState, setDashboardSettingsState] = useDashboardSettingsDraft(
+    dashboard.getInput()
+  );
 
   const [isTitleDuplicate, setIsTitleDuplicate] = useState(false);
   const [isTitleDuplicateConfirmed, setIsTitleDuplicateConfirmed] = useState(false);
@@ -83,14 +84,17 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
     }
   };
 
-  const updateDashboardSetting = useCallback((newSettings: Partial<DashboardContainerInput>) => {
-    setDashboardSettingsState((prevDashboardSettingsState) => {
-      return {
-        ...prevDashboardSettingsState,
-        ...newSettings,
-      };
-    });
-  }, []);
+  const updateDashboardSetting = useCallback(
+    (newSettings: Partial<DashboardContainerInput>) => {
+      setDashboardSettingsState((prevDashboardSettingsState) => {
+        return {
+          ...prevDashboardSettingsState,
+          ...newSettings,
+        };
+      });
+    },
+    [setDashboardSettingsState]
+  );
 
   const renderDuplicateTitleCallout = () => {
     if (!isTitleDuplicate) {
