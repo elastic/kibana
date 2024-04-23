@@ -46,15 +46,15 @@
 #     chdir: "{{ kibana_src_path }}"
 #     cmd: "yarn kbn reset && yarn kbn bootstrap"
 
-- name: create tmp dir for ES
-  file:
-    path: "{{ kibana_dist_path }}/.es/tmp"
-    state: directory
-
 - name: "ensure {{ kibana_dist_path }} dir exists"
   become: yes
   file:
     path: "{{ kibana_dist_path }}"
+    state: directory
+
+- name: create tmp dir for ES
+  file:
+    path: "{{ kibana_dist_path }}/.es/tmp"
     state: directory
 
 - name: find kibana distribution
