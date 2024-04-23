@@ -38,6 +38,7 @@ export interface InvokeAIActionParamsSchema {
   temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
   functions?: ChatCompletionCreateParamsNonStreaming['functions'];
   signal?: AbortSignal;
+  timeout?: number;
 }
 
 export interface TraceOptions {
