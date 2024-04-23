@@ -77,8 +77,6 @@ export function getCombinedMessage({
   const content = `${
     isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
   }${promptContextsContent}\n${promptText}`;
-  console.log('content', JSON.stringify(content));
-  console.log('content', JSON.stringify(content.trim()));
 
   return {
     // trim ensures any extra \n and other whitespace is removed

@@ -41,7 +41,7 @@ describe('helpers', () => {
       context1: {
         promptContextId: 'context1',
         rawData: 'This is raw data for context 1',
-        replacements: { field1: 'replaced1', field2: 'replaced2' },
+        replacements: {},
       },
       context2: {
         promptContextId: 'context2',
@@ -54,20 +54,21 @@ describe('helpers', () => {
       currentReplacement1: 'value1',
       currentReplacement2: 'value2',
     };
+    const defaultProps = {
+      currentReplacements: mockCurrentReplacements,
+      getAnonymizedValue: defaultGetAnonymizedValue,
+      isNewChat: true,
+      promptText: 'This is a user prompt',
+      selectedPromptContexts: mockPromptContexts,
+      selectedSystemPrompt: mockPrompt,
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('should return the correct combined message for a new chat', () => {
-      const result = getCombinedMessage({
-        currentReplacements: mockCurrentReplacements,
-        getAnonymizedValue: defaultGetAnonymizedValue,
-        isNewChat: true,
-        promptText: 'This is a user prompt',
-        selectedPromptContexts: mockPromptContexts,
-        selectedSystemPrompt: mockPrompt,
-      });
+      const result = getCombinedMessage(defaultProps);
 
       expect(result.content).toEqual(
         `This is a system prompt\n\nCONTEXT:\n\"\"\"\nThis is raw data for context 1\n\"\"\"\n,CONTEXT:\n\"\"\"\nThis is raw data for context 2\n\"\"\"\n\nThis is a user prompt`
@@ -76,12 +77,8 @@ describe('helpers', () => {
 
     it('should return the correct combined message for an existing chat', () => {
       const result = getCombinedMessage({
-        currentReplacements: mockCurrentReplacements,
-        getAnonymizedValue: defaultGetAnonymizedValue,
+        ...defaultProps,
         isNewChat: false,
-        promptText: 'This is a user prompt',
-        selectedPromptContexts: mockPromptContexts,
-        selectedSystemPrompt: undefined,
       });
 
       expect(result.content).toEqual(
@@ -93,10 +90,7 @@ describe('helpers', () => {
       const customGetAnonymizedValue = jest.fn((args) => `ANONYMIZED(${args.rawValue})`);
 
       const result = getCombinedMessage({
-        currentReplacements: mockCurrentReplacements,
-        getAnonymizedValue: customGetAnonymizedValue,
-        isNewChat: true,
-        promptText: 'This is a user prompt',
+        ...defaultProps,
         selectedPromptContexts: {},
         selectedSystemPrompt: { ...mockPrompt, content: '' },
       });
