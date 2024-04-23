@@ -821,45 +821,52 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         if (s1AgentId && s1CommandBatchUuid) {
           const actionRequest =
             actionsByAgentAndBatchId[getLookupKey(s1AgentId, s1CommandBatchUuid)];
-          const downloadUrl = s1ActivityDoc?.sentinel_one.activity.data.downloaded.url ?? '';
-          const error = !downloadUrl
-            ? {
-                message: `File retrieval failed (No download URL defined in SentinelOne activity log id [${activityLogEntryId}]`,
-              }
-            : undefined;
 
-          completedResponses.push(
-            this.buildActionResponseEsDoc<
-              ResponseActionGetFileOutputContent,
-              SentinelOneGetFileResponseMeta
-            >({
-              actionId: actionRequest.EndpointActions.action_id,
-              agentId: Array.isArray(actionRequest.agent.id)
-                ? actionRequest.agent.id[0]
-                : actionRequest.agent.id,
-              data: {
-                command: 'get-file',
-                comment: s1ActivityDoc?.sentinel_one.activity.description.primary ?? '',
-                output: {
-                  type: 'json',
-                  content: {
-                    // code applies only to Endpoint agents
-                    code: '',
-                    // We don't know the file size for S1 retrieved files
-                    zip_size: 0,
-                    // We don't have the contents of the zip file for S1
-                    contents: [],
+          if (actionRequest) {
+            const downloadUrl = s1ActivityDoc?.sentinel_one.activity.data.downloaded.url ?? '';
+            const error = !downloadUrl
+              ? {
+                  message: `File retrieval failed (No download URL defined in SentinelOne activity log id [${activityLogEntryId}]`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                ResponseActionGetFileOutputContent,
+                SentinelOneGetFileResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'get-file',
+                  comment: s1ActivityDoc?.sentinel_one.activity.description.primary ?? '',
+                  output: {
+                    type: 'json',
+                    content: {
+                      // code applies only to Endpoint agents
+                      code: '',
+                      // We don't know the file size for S1 retrieved files
+                      zip_size: 0,
+                      // We don't have the contents of the zip file for S1
+                      contents: [],
+                    },
                   },
                 },
-              },
-              error,
-              meta: {
-                activityLogEntryId,
-                elasticDocId: s1Hit._id,
-                downloadUrl,
-              },
-            })
-          );
+                error,
+                meta: {
+                  activityLogEntryId,
+                  elasticDocId: s1Hit._id,
+                  downloadUrl,
+                },
+              })
+            );
+          } else {
+            warnings.push(
+              `Activity log entry ${s1Hit._id} was a matched, but no action request for it (should not happen)`
+            );
+          }
         }
       }
     } else {
