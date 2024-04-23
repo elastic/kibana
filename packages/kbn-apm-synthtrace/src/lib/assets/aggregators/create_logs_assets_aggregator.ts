@@ -8,9 +8,9 @@
 
 import { hashKeysOf, LogDocument } from '@kbn/apm-synthtrace-client';
 import { identity, noop } from 'lodash';
-import { assetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
+import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
 
-export const createAssetsAggregator = assetsAggregatorFactory<LogDocument>();
+export const createAssetsAggregator = createAssetsAggregatorFactory<LogDocument>();
 
 const KEY_FIELDS: Array<keyof LogDocument> = ['service.name'];
 
