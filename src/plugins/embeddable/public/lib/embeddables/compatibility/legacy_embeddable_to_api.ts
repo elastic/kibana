@@ -153,6 +153,7 @@ export const legacyEmbeddableToApi = (
   const panelDescription = inputKeyToSubject<string>('description');
 
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
+  const defaultPanelDescription = outputKeyToSubject<string>('defaultDescription');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
   function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
@@ -275,6 +276,7 @@ export const legacyEmbeddableToApi = (
 
       setPanelDescription,
       panelDescription,
+      defaultPanelDescription,
 
       canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
       linkToLibrary: () => linkLegacyEmbeddable(embeddable),

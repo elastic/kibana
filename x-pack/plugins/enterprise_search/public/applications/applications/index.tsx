@@ -11,15 +11,19 @@ import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { NotFound } from './components/not_found';
+import { Playground } from './components/playground/playground';
 import { SearchApplicationsRouter } from './components/search_applications/search_applications_router';
-import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
+import { PLAYGROUND_PATH, ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
 export const Applications = () => {
   return (
     <Routes>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_APPLICATIONS_PATH} />
+      <Redirect exact from={ROOT_PATH} to={PLAYGROUND_PATH} />
       <Route path={SEARCH_APPLICATIONS_PATH}>
         <SearchApplicationsRouter />
+      </Route>
+      <Route path={PLAYGROUND_PATH}>
+        <Playground />
       </Route>
       <Route>
         <NotFound />

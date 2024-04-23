@@ -24,6 +24,8 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
+const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
+
 describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
@@ -80,7 +82,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
         });
 
         cy.get('tbody > tr').should('have.length.greaterThan', 0);
-        cy.get('tbody > tr > td').should('contain', '/components/filebeat');
+        cy.get('tbody > tr > td').should('contain', AGENT_BEAT_FILE_PATH_SUFFIX);
       });
     });
 
@@ -89,7 +91,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       openResponseConsoleFromEndpointList();
 
       // get running processes
-      getRunningProcesses('/components/filebeat').then((pid) => {
+      getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
         // kill the process using PID
         inputConsoleCommand(`kill-process --pid ${pid}`);
         submitCommand();
@@ -102,7 +104,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       openResponseConsoleFromEndpointList();
 
       // get running processes
-      getRunningProcesses('/components/filebeat').then((pid) => {
+      getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
         // suspend the process using PID
         inputConsoleCommand(`suspend-process --pid ${pid}`);
         submitCommand();
