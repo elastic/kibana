@@ -62,6 +62,7 @@ describe('useSemanticText', () => {
   let form: any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     form = {
       getFields: jest.fn().mockReturnValue({
         referenceField: { value: 'title' },
