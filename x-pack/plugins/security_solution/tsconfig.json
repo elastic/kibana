@@ -198,6 +198,7 @@
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/management-plugin",
+    "@kbn/security-plugin-types-server",
     "@kbn/react-kibana-context-render"
   ]
 }

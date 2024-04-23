@@ -94,9 +94,7 @@ User prompt text`);
         selectedSystemPrompt: undefined, // <-- no system prompt
       });
 
-      expect(message.content).toEqual(`
-
-CONTEXT:
+      expect(message.content).toEqual(`CONTEXT:
 """
 alert data
 """
@@ -147,6 +145,56 @@ User prompt text`);
       });
 
       expect(Date.parse(message.timestamp)).not.toBeNaN();
+    });
+    it('should return the correct combined message for a new chat without prompt context', () => {
+      const result = getCombinedMessage({
+        currentReplacements: {},
+        isNewChat: true,
+        promptText: 'User prompt text',
+        selectedSystemPrompt: mockSystemPrompt,
+        selectedPromptContexts: {},
+      });
+
+      expect(result.content).toEqual(
+        `You are a helpful, expert assistant who answers questions about Elastic Security.\n\nUser prompt text`
+      );
+    });
+
+    it('should return the correct combined message for a new chat without system context and multiple selectedPromptContext', () => {
+      const result = getCombinedMessage({
+        currentReplacements: {},
+        isNewChat: true,
+        promptText: 'User prompt text',
+        selectedPromptContexts: {
+          context1: {
+            promptContextId: 'context1',
+            rawData: 'This is raw data for context 1',
+            replacements: {},
+          },
+          context2: {
+            promptContextId: 'context2',
+            rawData: 'This is raw data for context 2',
+            replacements: {},
+          },
+        },
+        selectedSystemPrompt: { ...mockSystemPrompt, content: '' },
+      });
+
+      expect(result.content).toEqual(
+        `CONTEXT:\n\"\"\"\nThis is raw data for context 1\n\"\"\"\n,CONTEXT:\n\"\"\"\nThis is raw data for context 2\n\"\"\"\n\nUser prompt text`
+      );
+    });
+
+    it('should remove extra spaces when there is no prompt content or system prompt', () => {
+      const result = getCombinedMessage({
+        currentReplacements: {},
+        isNewChat: true,
+        promptText: 'User prompt text',
+        selectedPromptContexts: {},
+        selectedSystemPrompt: { ...mockSystemPrompt, content: '' },
+      });
+
+      expect(result.content).toEqual(`User prompt text`);
     });
 
     describe('when there is data to anonymize', () => {
@@ -210,9 +258,7 @@ User prompt text`);
           selectedSystemPrompt: mockSystemPrompt,
         });
 
-        expect(message.content).toEqual(`
-
-User prompt text`);
+        expect(message.content).toEqual(`User prompt text`);
       });
     });
   });
