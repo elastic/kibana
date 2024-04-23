@@ -21,12 +21,11 @@ export function SearchEmbeddableRenderer(props: Props) {
   const initialState = useMemo(() => {
     return {
       rawState: {
-        timeRange: undefined
+        timeRange: undefined,
       },
       references: [],
     };
     // only run onMount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const parentApi = useMemo(() => {
@@ -38,7 +37,6 @@ export function SearchEmbeddableRenderer(props: Props) {
   }, []);
 
   useEffect(() => {
-    console.log('props.timeRange', props.timeRange);
     parentApi.timeRange$.next(props.timeRange);
   }, [props.timeRange, parentApi.timeRange$]);
 

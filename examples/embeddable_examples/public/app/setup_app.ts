@@ -7,8 +7,8 @@
  */
 
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import type { StartDeps } from '../plugin';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { StartDeps } from '../plugin';
 
 const APP_ID = 'embeddablesApp';
 const title = 'Embeddables';
@@ -19,16 +19,13 @@ export function setupApp(core: CoreSetup<StartDeps>, developerExamples: Develope
     title,
     visibleIn: [],
     async mount(params: AppMountParameters) {
-      // const [coreStart, depsStart] = await core.getStartServices();
       const { renderApp } = await import('./app');
-      return renderApp(
-        params.element
-      );
+      return renderApp(params.element);
     },
   });
   developerExamples.register({
     appId: APP_ID,
     title,
-    description: `Learn how to create a new embeddable type and use embeddables in your application.`,
+    description: `Learn about embeddables  and how to create a new embeddable types and use embeddables in your application.`,
   });
 }

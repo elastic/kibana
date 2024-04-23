@@ -30,7 +30,7 @@ export const PresentationPanel = <
   const { loading, value, error } = useAsync(async () => {
     if (hidePanelChrome) {
       return {
-        unwrappedComponent: isPromise(Component) ? await Component : Component
+        unwrappedComponent: isPromise(Component) ? await Component : Component,
       };
     }
 
@@ -44,7 +44,7 @@ export const PresentationPanel = <
     ]);
     const Panel = panelModule.PresentationPanelInternal;
     return { Panel, unwrappedComponent };
-    
+
     // Ancestry chain is expected to use 'key' attribute to reset DOM and state
     // when unwrappedComponent needs to be re-loaded
   }, []);
@@ -53,7 +53,11 @@ export const PresentationPanel = <
   const UnwrappedComponent = value?.unwrappedComponent;
   const shouldHavePanel = !loading && !hidePanelChrome;
   const shouldHaveUnwrappedComponent = !loading;
-  if (error || (shouldHavePanel && !Panel) || (shouldHaveUnwrappedComponent && !UnwrappedComponent)) {
+  if (
+    error ||
+    (shouldHavePanel && !Panel) ||
+    (shouldHaveUnwrappedComponent && !UnwrappedComponent)
+  ) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -75,9 +79,11 @@ export const PresentationPanel = <
       />
     );
 
-  return shouldHavePanel && Panel
-    ? <Panel<ApiType, PropsType> Component={UnwrappedComponent!} {...passThroughProps} />
-    : <EuiErrorBoundary>
-        <UnwrappedComponent />
-      </EuiErrorBoundary>;
+  return shouldHavePanel && Panel ? (
+    <Panel<ApiType, PropsType> Component={UnwrappedComponent!} {...passThroughProps} />
+  ) : (
+    <EuiErrorBoundary>
+      <UnwrappedComponent />
+    </EuiErrorBoundary>
+  );
 };

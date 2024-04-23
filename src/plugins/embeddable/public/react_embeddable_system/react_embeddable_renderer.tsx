@@ -131,5 +131,11 @@ export const ReactEmbeddableRenderer = <
     };
   }, []);
 
-  return <PresentationPanel hidePanelChrome={hidePanelChrome} {...panelProps} Component={componentPromise} />;
+  return (
+    <PresentationPanel
+      hidePanelChrome={hidePanelChrome}
+      {...panelProps}
+      Component={componentPromise}
+    />
+  );
 };

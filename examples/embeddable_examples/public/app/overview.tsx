@@ -15,7 +15,7 @@ export const Overview = () => {
     <EuiText>
       <p>
         Embeddables are React components that manage their own state, can be serialized and
-deserialized, and return an API that can be used to interact with them imperatively.
+        deserialized, and return an API that can be used to interact with them imperatively.
       </p>
     </EuiText>
   );

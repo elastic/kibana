@@ -9,24 +9,32 @@
 import React, { useMemo, useState } from 'react';
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type { Api, State } from '../react_embeddables/search/types';
-import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
-import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSuperDatePicker, EuiSwitch, EuiText, OnTimeChangeProps } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiText,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
+import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
+import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
+import type { Api, State } from '../react_embeddables/search/types';
 
 export const RenderExamples = () => {
   const initialState = useMemo(() => {
     return {
       rawState: {
-        timeRange: undefined
+        timeRange: undefined,
       },
       references: [],
     };
     // only run onMount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const parentApi = useMemo(() => {
@@ -36,9 +44,8 @@ export const RenderExamples = () => {
         from: 'now-24h',
         to: 'now',
       }),
-    }
+    };
     // only run onMount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [api, setApi] = useState<Api | null>(null);
@@ -57,7 +64,7 @@ export const RenderExamples = () => {
         onTimeChange={({ start, end }: OnTimeChangeProps) => {
           parentApi.timeRange$.next({
             from: start,
-            to: end
+            to: end,
           });
         }}
         onRefresh={() => {
@@ -111,9 +118,7 @@ export const RenderExamples = () => {
 
         <EuiFlexItem>
           <EuiText>
-            <p>
-              To avoid leaking embeddable details, wrap ReactEmbeddableRenderer in a component.
-            </p>
+            <p>To avoid leaking embeddable details, wrap ReactEmbeddableRenderer in a component.</p>
           </EuiText>
 
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
@@ -124,12 +129,9 @@ export const RenderExamples = () => {
 
           <EuiSpacer size="s" />
 
-          <SearchEmbeddableRenderer
-            timeRange={timeRange}
-          />
+          <SearchEmbeddableRenderer timeRange={timeRange} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      
     </div>
   );
 };

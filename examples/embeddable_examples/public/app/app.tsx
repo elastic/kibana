@@ -9,8 +9,17 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters } from "@kbn/core-application-browser";
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageSection,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { Overview } from './overview';
 import { RenderExamples } from './render_examples';
 
@@ -26,12 +35,12 @@ const App = () => {
 
   function renderTabContent() {
     if (selectedTabId === RENDER_TAB_ID) {
-      return <RenderExamples/>
+      return <RenderExamples />;
     }
 
-    return <Overview/>
+    return <Overview />;
   }
-  
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -55,7 +64,7 @@ const App = () => {
               </EuiTab>
             </EuiTabs>
 
-            <EuiSpacer/>
+            <EuiSpacer />
 
             {renderTabContent()}
           </EuiPageSection>

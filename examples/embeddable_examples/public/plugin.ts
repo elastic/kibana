@@ -17,6 +17,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -45,7 +46,6 @@ import { registerAddSearchPanelAction } from './react_embeddables/search/registe
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { setupApp } from './app/setup_app';
 
 export interface SetupDeps {
@@ -75,23 +75,12 @@ export interface StartApi {
   factories: ExampleEmbeddableFactories;
 }
 
-export class EmbeddableExamplesPlugin
-  implements
-    Plugin<
-      void,
-      StartApi,
-      SetupDeps,
-      StartDeps
-    >
-{
+export class EmbeddableExamplesPlugin implements Plugin<void, StartApi, SetupDeps, StartDeps> {
   private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
 
-  public setup(
-    core: CoreSetup<StartDeps>,
-    { embeddable, developerExamples }: SetupDeps
-  ) {
+  public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
     setupApp(core, developerExamples);
-    
+
     this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
       embeddable.registerEmbeddableFactory(
         HELLO_WORLD_EMBEDDABLE,
@@ -119,10 +108,7 @@ export class EmbeddableExamplesPlugin
       );
   }
 
-  public start(
-    core: CoreStart,
-    deps: StartDeps
-  ): StartApi {
+  public start(core: CoreStart, deps: StartDeps): StartApi {
     registerCreateFieldListAction(deps.uiActions);
     registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
