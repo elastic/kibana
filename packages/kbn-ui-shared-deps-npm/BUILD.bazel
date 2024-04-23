@@ -29,6 +29,7 @@ RUNTIME_DEPS = [
   "@npm//loader-utils",
   "@npm//val-loader",
   "//packages/kbn-repo-info",
+  "//packages/kbn-esql-ast",
   # deps in the dll need to be included in the sandbox for consumers
   # of this DLL (ui-shared-deps-src) because webpack won't actually
   # use the DLL version of a package until it has resolved to the same
