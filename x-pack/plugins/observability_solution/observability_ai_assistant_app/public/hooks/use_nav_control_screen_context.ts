@@ -59,8 +59,8 @@ export function useNavControlScreenContext() {
   }, []);
 
   useEffect(() => {
-    const start = datemath.parse(from)?.format() ?? moment().subtract(1, 'day').toISOString();
-    const end = datemath.parse(to)?.format() ?? moment().toISOString();
+    const start = datemath.parse(from)?.toISOString() ?? moment().subtract(1, 'day').toISOString();
+    const end = datemath.parse(to)?.toISOString() ?? moment().toISOString();
 
     return service.setScreenContext({
       screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}.`,

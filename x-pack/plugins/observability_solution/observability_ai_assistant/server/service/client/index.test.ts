@@ -236,7 +236,7 @@ describe('Observability AI Assistant client', () => {
         });
 
       stream = observableIntoStream(
-        await client.complete({
+        client.complete({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -750,7 +750,7 @@ describe('Observability AI Assistant client', () => {
 
       await llmSimulator.next({
         content: 'Hello',
-        function_call: { name: 'my-function', arguments: JSON.stringify({ foo: 'bar' }) },
+        function_call: { name: 'myFunction', arguments: JSON.stringify({ foo: 'bar' }) },
       });
 
       const prevLlmSimulator = llmSimulator;
@@ -780,7 +780,7 @@ describe('Observability AI Assistant client', () => {
               content: 'Hello',
               role: MessageRole.Assistant,
               function_call: {
-                name: 'my-function',
+                name: 'myFunction',
                 arguments: JSON.stringify({ foo: 'bar' }),
                 trigger: MessageRole.Assistant,
               },
@@ -792,7 +792,7 @@ describe('Observability AI Assistant client', () => {
       it('executes the function', () => {
         expect(functionClientMock.executeFunction).toHaveBeenCalledWith({
           connectorId: 'foo',
-          name: 'my-function',
+          name: 'myFunction',
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
@@ -818,7 +818,7 @@ describe('Observability AI Assistant client', () => {
                 role: MessageRole.Assistant,
                 content: 'Hello',
                 function_call: {
-                  name: 'my-function',
+                  name: 'myFunction',
                   arguments: JSON.stringify({ foo: 'bar' }),
                   trigger: MessageRole.Assistant,
                 },
@@ -851,7 +851,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: JSON.stringify({
                 my: 'content',
               }),
@@ -952,7 +952,7 @@ describe('Observability AI Assistant client', () => {
                 content: 'Hello',
                 role: MessageRole.Assistant,
                 function_call: {
-                  name: 'my-function',
+                  name: 'myFunction',
                   arguments: JSON.stringify({ foo: 'bar' }),
                   trigger: MessageRole.Assistant,
                 },
@@ -964,7 +964,7 @@ describe('Observability AI Assistant client', () => {
                 content: JSON.stringify({
                   my: 'content',
                 }),
-                name: 'my-function',
+                name: 'myFunction',
                 role: MessageRole.User,
               },
             },
@@ -999,7 +999,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: JSON.stringify({
                 message: 'Error: Function failed',
                 error: {},
@@ -1034,7 +1034,7 @@ describe('Observability AI Assistant client', () => {
 
         await nextTick();
 
-        response$.next(createFunctionResponseMessage({ name: 'my-function', content: {} }));
+        response$.next(createFunctionResponseMessage({ name: 'myFunction', content: {} }));
       });
 
       it('appends the function response', async () => {
@@ -1045,7 +1045,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: '{}',
             },
           },
@@ -1250,6 +1250,7 @@ describe('Observability AI Assistant client', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
+    const maxFunctionCalls = 8;
 
     beforeEach(async () => {
       client = createClient();
@@ -1325,23 +1326,15 @@ describe('Observability AI Assistant client', () => {
 
       await nextTick();
 
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
-
-      await requestAlertsFunctionCall();
+      for (let i = 0; i <= maxFunctionCalls; i++) {
+        await requestAlertsFunctionCall();
+      }
 
       await finished(stream);
     });
 
     it('executed the function no more than three times', () => {
-      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(5);
+      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(maxFunctionCalls);
     });
 
     it('does not give the LLM the choice to call a function anymore', () => {
@@ -1355,6 +1348,83 @@ describe('Observability AI Assistant client', () => {
       expect(firstBody.tools.length).toBe(1);
 
       expect(body.tools).toBeUndefined();
+    });
+  });
+
+  describe('when context has not been injected since last user message', () => {
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
+      client = createClient();
+      actionsClientMock.execute.mockImplementationOnce(async () => {
+        llmSimulator = createLlmSimulator();
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.hasFunction.mockReturnValue(true);
+      functionClientMock.executeFunction.mockImplementationOnce(async () => {
+        return {
+          content: [
+            {
+              id: 'my_document',
+              text: 'My document',
+            },
+          ],
+        };
+      });
+
+      const stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          persist: false,
+        })
+      );
+
+      dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      await waitForNextWrite(stream);
+
+      await llmSimulator.next({
+        content: 'Hello',
+      });
+
+      await llmSimulator.complete();
+
+      await finished(stream);
+    });
+
+    it('executes the context function', async () => {
+      expect(functionClientMock.executeFunction).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'context' })
+      );
+    });
+
+    it('appends the context request message', async () => {
+      expect(JSON.parse(dataHandler.mock.calls[0])).toEqual({
+        type: StreamingChatResponseEventType.MessageAdd,
+        id: expect.any(String),
+        message: {
+          '@timestamp': expect.any(String),
+          message: {
+            content: '',
+            role: MessageRole.Assistant,
+            function_call: {
+              name: 'context',
+              arguments: JSON.stringify({ queries: [], categories: [] }),
+              trigger: MessageRole.Assistant,
+            },
+          },
+        },
+      });
     });
   });
 

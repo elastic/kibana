@@ -16,7 +16,7 @@ export function registerGetApmDownstreamDependenciesFunction({
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
-      contexts: ['apm'],
+      contexts: ['core'],
       description: `Get the downstream dependencies (services or uninstrumented backends) for a 
       service. This allows you to map the downstream dependency name to a service, by 
       returning both span.destination.service.resource and service.name. Use this to 
@@ -43,13 +43,11 @@ export function registerGetApmDownstreamDependenciesFunction({
           },
           start: {
             type: 'string',
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
+            description: 'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
             type: 'string',
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+            description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
         required: ['service.name', 'start', 'end'],
