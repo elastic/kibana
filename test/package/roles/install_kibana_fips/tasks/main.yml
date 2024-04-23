@@ -88,7 +88,7 @@
 - name: copy kibana yml configuration
   become: yes
   template:
-    src: templates/kibana.yml
+    src: templates/fips/kibana.yml
     dest: "{{ kibana_dist_path }}/config/kibana.yml"
   register: config
 
