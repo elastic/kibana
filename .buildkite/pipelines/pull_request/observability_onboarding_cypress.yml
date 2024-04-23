@@ -3,7 +3,9 @@ steps:
     label: 'Observability onboarding Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 120
     parallelism: 2
     retry:

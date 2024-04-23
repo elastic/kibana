@@ -26,7 +26,7 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
@@ -287,7 +287,6 @@ export class Execution<
       isSyncColorsEnabled: () => execution.params.syncColors!,
       isSyncCursorEnabled: () => execution.params.syncCursor!,
       isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
-      shouldUseSizeTransitionVeil: () => execution.params.shouldUseSizeTransitionVeil!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };

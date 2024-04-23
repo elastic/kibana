@@ -8,7 +8,7 @@
 
 import { useStateFromPublishingSubject } from '../publishing_subject';
 import { apiHasParentApi, HasParentApi } from './has_parent_api';
-import { apiPublishesViewMode, PublishesViewMode, ViewMode } from './publishes_view_mode';
+import { apiPublishesViewMode, PublishesViewMode } from './publishes_view_mode';
 
 /**
  * This API can access a view mode, either its own or from its parent API.
@@ -49,6 +49,5 @@ export const getViewModeSubject = (api?: CanAccessViewMode) => {
 export const useInheritedViewMode = <ApiType extends CanAccessViewMode = CanAccessViewMode>(
   api: ApiType | undefined
 ) => {
-  const subject = getViewModeSubject(api);
-  useStateFromPublishingSubject<ViewMode, typeof subject>(subject);
+  return useStateFromPublishingSubject(getViewModeSubject(api));
 };

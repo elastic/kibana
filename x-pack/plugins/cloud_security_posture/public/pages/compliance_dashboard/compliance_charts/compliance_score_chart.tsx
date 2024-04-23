@@ -163,7 +163,8 @@ const PercentageLabels = ({
   );
 };
 
-const getPostureScorePercentage = (postureScore: number): string => `${Math.round(postureScore)}%`;
+export const getPostureScorePercentage = (postureScore: number): string =>
+  `${Math.round(postureScore)}%`;
 
 const PercentageInfo = ({
   compact,

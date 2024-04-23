@@ -160,18 +160,11 @@ const SimplifiedVarsSchema = schema.recordOf(
   )
 );
 
-export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
+export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  policy_id: schema.string(),
   namespace: schema.maybe(schema.string()),
-  package: schema.object({
-    name: schema.string(),
-    version: schema.string(),
-    experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
-  }),
-  force: schema.maybe(schema.boolean()),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: schema.maybe(
     schema.recordOf(
@@ -192,6 +185,26 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
     )
   ),
 });
+
+export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolicyBaseSchema.extends(
+  {
+    id: schema.string(),
+    package: schema.object({
+      name: schema.string(),
+    }),
+  }
+);
+
+export const SimplifiedCreatePackagePolicyRequestBodySchema =
+  SimplifiedPackagePolicyBaseSchema.extends({
+    policy_id: schema.string(),
+    force: schema.maybe(schema.boolean()),
+    package: schema.object({
+      name: schema.string(),
+      version: schema.string(),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+    }),
+  });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({
   ...CreatePackagePolicyProps,

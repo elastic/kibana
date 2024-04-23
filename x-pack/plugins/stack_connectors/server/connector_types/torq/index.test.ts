@@ -227,7 +227,11 @@ describe('execute Torq action', () => {
       scalar: '1970',
       scalar_with_json_chars: 'noinjection", "here": "',
     };
-    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = actionType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
     expect(params.body).toBe(
       `{"x": ${templatedObject}, "y": "${variables.scalar}", "z": "${variables.scalar_with_json_chars}"}`
     );

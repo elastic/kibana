@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await pageObjects.savedObjects.waitTableIsLoaded();
@@ -38,7 +38,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('export', () => {

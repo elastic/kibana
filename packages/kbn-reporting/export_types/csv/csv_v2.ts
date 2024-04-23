@@ -93,7 +93,10 @@ export class CsvV2ExportType extends ExportType<
     const locatorClient = await discoverPluginStart.locator.asScopedClient(req);
     const title = jobParams.title || (await locatorClient.titleFromLocator(params));
 
-    return { ...jobParams, title, objectType: 'search', isDeprecated: false };
+    const objectType = 'search' as const;
+    const pagingStrategy = this.config.csv.scroll.strategy;
+
+    return { ...jobParams, title, objectType, pagingStrategy };
   };
 
   public runTask = async (
@@ -144,6 +147,7 @@ export class CsvV2ExportType extends ExportType<
           ...job,
         },
         csvConfig,
+        taskInstanceFields,
         clients,
         cancellationToken,
         logger,

@@ -6,41 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { isQuery, isTimeRange } from '@kbn/data-plugin/common';
-import { Filter, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
-import { EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
-import { DashboardLocatorParams } from '../../dashboard_container';
-
-interface EmbeddableQueryInput extends EmbeddableInput {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
+import { isFilterPinned, type Query } from '@kbn/es-query';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import type { DashboardLocatorParams } from '../../dashboard_container';
 
 export const getDashboardLocatorParamsFromEmbeddable = (
-  source: IEmbeddable<EmbeddableQueryInput>,
+  api: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>,
   options: DashboardDrilldownOptions
 ): Partial<DashboardLocatorParams> => {
   const params: DashboardLocatorParams = {};
 
-  const input = source.getInput();
-  if (isQuery(input.query) && options.useCurrentFilters) {
-    params.query = input.query;
+  const query = api.parentApi?.query$?.value;
+  if (query && options.useCurrentFilters) {
+    params.query = query as Query;
   }
 
   // if useCurrentDashboardDataRange is enabled, then preserve current time range
   // if undefined is passed, then destination dashboard will figure out time range itself
   // for brush event this time range would be overwritten
-  if (isTimeRange(input.timeRange) && options.useCurrentDateRange) {
-    params.timeRange = input.timeRange;
+  const timeRange = api.timeRange$?.value ?? api.parentApi?.timeRange$?.value;
+  if (timeRange && options.useCurrentDateRange) {
+    params.timeRange = timeRange;
   }
 
   // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
   // otherwise preserve only pinned
-  params.filters = options.useCurrentFilters
-    ? input.filters
-    : input.filters?.filter((f) => isFilterPinned(f));
+  const filters = api.parentApi?.filters$?.value ?? [];
+  params.filters = options.useCurrentFilters ? filters : filters?.filter((f) => isFilterPinned(f));
 
   return params;
 };

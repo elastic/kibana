@@ -6,21 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { savedSearchMock } from '../__mocks__/saved_search';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import type { SearchInput } from './types';
 
 describe('getDiscoverLocatorParams', () => {
   it('should return saved search id if input has savedObjectId', () => {
-    const input = { savedObjectId: 'savedObjectId' } as SearchInput;
-    expect(getDiscoverLocatorParams({ input, savedSearch: savedSearchMock })).toEqual({
+    expect(
+      getDiscoverLocatorParams({
+        savedObjectId: new BehaviorSubject<string | undefined>('savedObjectId'),
+        getSavedSearch: () => savedSearchMock,
+      })
+    ).toEqual({
       savedSearchId: 'savedObjectId',
     });
   });
 
   it('should return Discover params if input has no savedObjectId', () => {
-    const input = {} as SearchInput;
-    expect(getDiscoverLocatorParams({ input, savedSearch: savedSearchMock })).toEqual({
+    expect(
+      getDiscoverLocatorParams({
+        getSavedSearch: () => savedSearchMock,
+      })
+    ).toEqual({
       dataViewId: savedSearchMock.searchSource.getField('index')?.id,
       dataViewSpec: savedSearchMock.searchSource.getField('index')?.toMinimalSpec(),
       timeRange: savedSearchMock.timeRange,

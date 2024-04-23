@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
         });
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
 
       it("sharing hashed url shouldn't crash the app", async () => {
@@ -173,12 +173,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.get(currentUrl, false);
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const { title } = await toasts.getErrorToast(1, true);
+          const { title } = await toasts.getErrorByIndex(1, true);
           expect(title).to.contain(
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
         });
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
     });
   });

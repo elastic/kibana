@@ -14,9 +14,13 @@ export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   const sentinelOneDataInAnalyzerEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneDataInAnalyzerEnabled'
   );
+  const crowdstrikeDataInAnalyzerEnabled = useIsExperimentalFeatureEnabled(
+    'crowdstrikeDataInAnalyzerEnabled'
+  );
   return useMemo(() => {
     const fileBeatModules = [
       ...(sentinelOneDataInAnalyzerEnabled ? ['sentinel_one_cloud_funnel', 'sentinel_one'] : []),
+      ...(crowdstrikeDataInAnalyzerEnabled ? ['crowdstrike'] : []),
     ] as const;
 
     const agentType = get(['agent', 'type', 0], ecsData);
@@ -36,5 +40,5 @@ export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
       processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
 
     return isAcceptedAgentType && hasProcessEntityId;
-  }, [ecsData, sentinelOneDataInAnalyzerEnabled]);
+  }, [crowdstrikeDataInAnalyzerEnabled, ecsData, sentinelOneDataInAnalyzerEnabled]);
 };

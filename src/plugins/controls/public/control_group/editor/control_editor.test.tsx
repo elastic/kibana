@@ -10,9 +10,10 @@ import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import { OptionsListEmbeddableFactory } from '../..';
 import {
   OptionsListEmbeddableInput,
@@ -39,6 +40,25 @@ describe('Data control editor', () => {
     componentOptions?: Partial<EditControlProps>;
     explicitInput?: Partial<ControlGroupInput>;
   }
+
+  const stubDataView = createStubDataView({
+    spec: {
+      id: 'logstash-*',
+      fields: {
+        ...stubFieldSpecMap,
+        'machine.os.raw': {
+          name: 'machine.os.raw',
+          customLabel: 'OS',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      },
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+    },
+  });
 
   pluginServices.getServices().dataViews.get = jest.fn().mockResolvedValue(stubDataView);
   pluginServices.getServices().dataViews.getIdsWithTitle = jest
@@ -187,10 +207,34 @@ describe('Data control editor', () => {
         expect(searchOptions.exists()).toBe(false);
       });
 
-      test('when creating range slider, does not have custom settings', async () => {
+      test('when creating range slider, does have custom settings', async () => {
         findTestSubject(controlEditor, 'create__rangeSliderControl').simulate('click');
         const searchOptions = findTestSubject(controlEditor, 'control-editor-custom-settings');
-        expect(searchOptions.exists()).toBe(false);
+        expect(searchOptions.exists()).toBe(true);
+      });
+
+      test('when creating range slider, validates step setting is greater than 0', async () => {
+        findTestSubject(controlEditor, 'create__rangeSliderControl').simulate('click');
+        const stepOption = findTestSubject(
+          controlEditor,
+          'rangeSliderControl__stepAdditionalSetting'
+        );
+        expect(stepOption.exists()).toBe(true);
+
+        const saveButton = findTestSubject(controlEditor, 'control-editor-save');
+        expect(saveButton.instance()).toBeEnabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: undefined } });
+        expect(saveButton.instance()).toBeDisabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 0.5 } });
+        expect(saveButton.instance()).toBeEnabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 0 } });
+        expect(saveButton.instance()).toBeDisabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 1 } });
+        expect(saveButton.instance()).toBeEnabled();
       });
     });
 

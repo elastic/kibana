@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { StartDeps, SetupDeps } from './types';
 
@@ -23,7 +22,7 @@ export class ContentManagementExamplesPlugin
     core.application.register({
       id: `contentManagementExamples`,
       title: `Content Management Examples`,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./examples');
         const [coreStart, deps] = await core.getStartServices();

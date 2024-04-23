@@ -139,7 +139,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
-    // let groupSelector: ReturnType<typeof findings.groupSelector>;
 
     before(async () => {
       await kibanaServer.savedObjects.clean({
@@ -219,7 +218,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('3 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -227,12 +226,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups findings by rule name and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Rule name');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('4 groups');
+        expect(groupCount).to.be('4 rules');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -283,13 +284,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups findings by cloud account and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
-
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Cloud account');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('2 cloud accounts');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -338,12 +341,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups findings by Kubernetes cluster and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Kubernetes cluster');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('2 kubernetes clusters');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -391,6 +397,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('SearchBar', () => {
       it('add filter', async () => {
         const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
         // Filter bar uses the field's customLabel in the DataView
@@ -403,7 +412,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 finding');
@@ -416,7 +425,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('3 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -432,7 +441,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 finding');
@@ -440,7 +449,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
-        expect(await grouping.getGroupCount()).to.be('3 groups');
+        expect(await grouping.getGroupCount()).to.be('3 resources');
         expect(await grouping.getUnitCount()).to.be('4 findings');
       });
     });
@@ -497,7 +506,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be(`${resourceGroupCount + 1} groups`);
+        expect(groupCount).to.be(`${resourceGroupCount + 1} resources`);
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be(`${findingsCount + 1} findings`);
@@ -524,7 +533,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         const groupCountAfterMute = await grouping.getGroupCount();
-        expect(groupCountAfterMute).to.be(`${resourceGroupCount} groups`);
+        expect(groupCountAfterMute).to.be(`${resourceGroupCount} resources`);
 
         const unitCountAfterMute = await grouping.getUnitCount();
         expect(unitCountAfterMute).to.be(`${findingsCount} findings`);

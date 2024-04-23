@@ -27,6 +27,9 @@ const configSchema = schema.object(
     keepaliveTimeout: schema.number({
       defaultValue: 120000,
     }),
+    payloadTimeout: schema.number({
+      defaultValue: 20000,
+    }),
     shutdownTimeout: schema.duration({
       defaultValue: '30s',
       validate: (duration) => {
@@ -73,6 +76,7 @@ export class ServerConfig implements IHttpConfig {
   keepaliveTimeout: number;
   shutdownTimeout: Duration;
   socketTimeout: number;
+  payloadTimeout: number;
   ssl: ISslConfig;
   cors: ICorsConfig;
   restrictInternalApis: boolean;
@@ -84,6 +88,7 @@ export class ServerConfig implements IHttpConfig {
     this.keepaliveTimeout = rawConfig.keepaliveTimeout;
     this.shutdownTimeout = rawConfig.shutdownTimeout;
     this.socketTimeout = rawConfig.socketTimeout;
+    this.payloadTimeout = rawConfig.payloadTimeout;
     this.ssl = new SslConfig(rawConfig.ssl);
     this.cors = {
       enabled: false,

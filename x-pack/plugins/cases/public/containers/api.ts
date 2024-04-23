@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { User } from '../../common/types/domain';
+import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -21,6 +21,7 @@ import type {
   GetCaseConnectorsResponse,
   UserActionFindResponse,
   SingleCaseMetricsResponse,
+  CustomFieldPutRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -34,6 +35,7 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   FilterOptions,
+  CaseUICustomField,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -47,6 +49,7 @@ import {
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
+  getCustomFieldReplaceUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -365,6 +368,29 @@ export const updateCases = async ({
   });
 
   return convertCasesToCamelCase(decodeCasesResponse(response));
+};
+
+export const replaceCustomField = async ({
+  caseId,
+  customFieldId,
+  request,
+  signal,
+}: {
+  caseId: string;
+  customFieldId: string;
+  request: CustomFieldPutRequest;
+  signal?: AbortSignal;
+}): Promise<CaseUICustomField> => {
+  const response = await KibanaServices.get().http.fetch<CaseCustomField>(
+    getCustomFieldReplaceUrl(caseId, customFieldId),
+    {
+      method: 'PUT',
+      body: JSON.stringify(request),
+      signal,
+    }
+  );
+
+  return convertToCamelCase<CaseCustomField, CaseUICustomField>(response);
 };
 
 export const postComment = async (

@@ -10,14 +10,7 @@ import { getPersistentControlsHook } from './use_persistent_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { renderHook } from '@testing-library/react-hooks';
 import { render, fireEvent } from '@testing-library/react';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
@@ -71,9 +64,6 @@ const groups = {
 };
 
 describe('usePersistentControls', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-  let store: ReturnType<typeof createStore>;
-
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockImplementation(() => groups[tableId]);
     (useShallowEqualSelector as jest.Mock).mockReturnValue({
@@ -81,15 +71,6 @@ describe('usePersistentControls', () => {
       showBuildBlockAlerts: false,
     });
     jest.clearAllMocks();
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups,
-      },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
@@ -101,6 +82,10 @@ describe('usePersistentControls', () => {
   });
 
   test('Should render the group selector component and allow the user to select a grouping field', () => {
+    const store = createMockStore({
+      ...mockGlobalState,
+      groups,
+    });
     const usePersistentControls = getPersistentControlsHook(tableId);
     const { result } = renderHook(() => usePersistentControls(), {
       wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,

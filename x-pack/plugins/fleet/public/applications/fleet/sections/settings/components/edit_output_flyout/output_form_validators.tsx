@@ -166,7 +166,7 @@ export function validateLogstashHosts(value: string[]) {
 
       const url = new URL(`http://${val}`);
 
-      if (url.host !== val) {
+      if (url.host !== val.toLowerCase()) {
         throw new Error('Invalid host');
       }
     } catch (error) {

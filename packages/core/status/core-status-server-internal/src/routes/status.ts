@@ -156,7 +156,7 @@ const getFullStatusResponse = async ({
   };
   query: { v8format?: boolean; v7format?: boolean };
 }): Promise<StatusHttpBody> => {
-  const { version, buildSha, buildNum, buildDate } = config.packageInfo;
+  const { version, buildSha, buildNum, buildDate, buildFlavor } = config.packageInfo;
   const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
 
   let statusInfo: StatusInfo | LegacyStatusInfo;
@@ -186,6 +186,7 @@ const getFullStatusResponse = async ({
       build_hash: buildSha,
       build_number: buildNum,
       build_snapshot: SNAPSHOT_POSTFIX.test(version),
+      build_flavor: buildFlavor,
       build_date: buildDate.toISOString(),
     },
     status: statusInfo,

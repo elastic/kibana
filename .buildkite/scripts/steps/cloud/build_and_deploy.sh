@@ -42,6 +42,7 @@ else
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
+    --skip-docker-fips \
     --skip-docker-ubuntu \
     --skip-docker-serverless \
     --skip-docker-contexts

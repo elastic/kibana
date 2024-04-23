@@ -13,6 +13,7 @@ import {
   createMockTaskInstance,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
+  createMockTaskMetrics,
   createMockSecurityTelemetryTask,
 } from './__mocks__';
 
@@ -28,7 +29,8 @@ describe('test security telemetry task', () => {
       createMockSecurityTelemetryTask(),
       logger,
       createMockTelemetryEventsSender(true),
-      createMockTelemetryReceiver()
+      createMockTelemetryReceiver(),
+      createMockTaskMetrics()
     );
 
     expect(telemetryTask).toBeInstanceOf(SecurityTelemetryTask);
@@ -41,7 +43,8 @@ describe('test security telemetry task', () => {
       createMockSecurityTelemetryTask(),
       logger,
       createMockTelemetryEventsSender(true),
-      createMockTelemetryReceiver()
+      createMockTelemetryReceiver(),
+      createMockTaskMetrics()
     );
     telemetryTask.register(mockTaskManagerSetup);
     await telemetryTask.start(mockTaskManagerStart);
@@ -58,6 +61,7 @@ describe('test security telemetry task', () => {
       mockTelemetryTaskConfig,
       mockTelemetryEventsSender,
       mockTelemetryReceiver,
+      mockTaskMetrics,
     } = await testTelemetryTaskRun(true, true);
 
     expect(mockTelemetryTaskConfig.runTask).toHaveBeenCalledWith(
@@ -65,6 +69,7 @@ describe('test security telemetry task', () => {
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       {
         last: testLastTimestamp,
         current: testResult.state.lastExecutionTimestamp,
@@ -92,11 +97,13 @@ describe('test security telemetry task', () => {
     const mockTelemetryTaskConfig = createMockSecurityTelemetryTask(testType, testLastTimestamp);
     const mockTelemetryEventsSender = createMockTelemetryEventsSender(optedIn, canConnect);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
+    const mockTaskMetrics = createMockTaskMetrics();
     const telemetryTask = new SecurityTelemetryTask(
       mockTelemetryTaskConfig,
       logger,
       mockTelemetryEventsSender,
-      mockTelemetryReceiver
+      mockTelemetryReceiver,
+      mockTaskMetrics
     );
     const mockTaskInstance = createMockTaskInstance(telemetryTask.getTaskId(), testType);
 
@@ -122,6 +129,7 @@ describe('test security telemetry task', () => {
       mockTelemetryTaskConfig,
       mockTelemetryEventsSender,
       mockTelemetryReceiver,
+      mockTaskMetrics,
     };
   }
 });

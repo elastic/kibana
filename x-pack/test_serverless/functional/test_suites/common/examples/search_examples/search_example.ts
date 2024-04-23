@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search example', () => {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     describe('with bfetch', () => {
@@ -54,9 +53,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await retry.waitFor('toasts gone', async () => {
-          return (await toasts.getToastCount()) === 0;
+          return (await toasts.getCount()) === 0;
         });
       });
 
@@ -91,10 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it.skip('should handle warnings', async () => {
         await testSubjects.click('searchWithWarning');
         await retry.waitFor('', async () => {
-          const toastCount = await toasts.getToastCount();
+          const toastCount = await toasts.getCount();
           return toastCount > 1;
         });
-        const warningToast = await toasts.getToastElement(2);
+        const warningToast = await toasts.getElementByIndex(2);
         const textEl = await warningToast.findByTestSubject('euiToastBody');
         const text: string = await textEl.getVisibleText();
         expect(text).to.contain('Watch out!');

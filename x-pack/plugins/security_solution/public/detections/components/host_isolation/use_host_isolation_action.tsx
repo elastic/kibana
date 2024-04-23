@@ -5,22 +5,23 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   getSentinelOneAgentId,
   isAlertFromSentinelOneEvent,
 } from '../../../common/utils/sentinelone_alert_check';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
+import type { AgentStatusInfo } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
-import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
+import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
-import { useSentinelOneAgentData } from './use_sentinelone_host_isolation';
+import { useAgentStatusHook } from './use_sentinelone_host_isolation';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;
@@ -35,11 +36,15 @@ export const useHostIsolationAction = ({
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
+  const useAgentStatus = useAgentStatusHook();
+
   const hasActionsAllPrivileges = useKibana().services.application?.capabilities?.actions?.save;
 
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
+
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
 
   const isEndpointAlert = useMemo(
@@ -74,27 +79,30 @@ export const useHostIsolationAction = ({
     isIsolated,
     agentStatus,
     capabilities,
-  } = useHostIsolationStatus({
+  } = useEndpointHostIsolationStatus({
     agentId,
+    agentType: sentinelOneAgentId ? 'sentinel_one' : 'endpoint',
   });
 
-  const { data: sentinelOneResponse } = useSentinelOneAgentData({ agentId: sentinelOneAgentId });
-
-  const sentinelOneAgentData = useMemo(
-    () => sentinelOneResponse?.data?.data?.[0],
-    [sentinelOneResponse]
+  const { data: sentinelOneAgentData } = useAgentStatus(
+    [sentinelOneAgentId || ''],
+    'sentinel_one',
+    {
+      enabled: !!sentinelOneAgentId && sentinelOneManualHostActionsEnabled,
+    }
   );
+  const sentinelOneAgentStatus = sentinelOneAgentData?.[`${sentinelOneAgentId}`];
 
   const isHostIsolated = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
-      return sentinelOneAgentData?.networkStatus === 'disconnected';
+      return sentinelOneAgentStatus?.isolated;
     }
 
     return isIsolated;
   }, [
     isIsolated,
     isSentinelOneAlert,
-    sentinelOneAgentData?.networkStatus,
+    sentinelOneAgentStatus?.isolated,
     sentinelOneManualHostActionsEnabled,
   ]);
 
@@ -107,8 +115,8 @@ export const useHostIsolationAction = ({
       });
     }
 
-    if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert && sentinelOneAgentData) {
-      return sentinelOneAgentData.isActive;
+    if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert && sentinelOneAgentStatus) {
+      return sentinelOneAgentStatus.status === 'healthy';
     }
     return false;
   }, [
@@ -117,7 +125,7 @@ export const useHostIsolationAction = ({
     hostOsFamily,
     isEndpointAlert,
     isSentinelOneAlert,
-    sentinelOneAgentData,
+    sentinelOneAgentStatus,
     sentinelOneManualHostActionsEnabled,
   ]);
 
@@ -130,29 +138,44 @@ export const useHostIsolationAction = ({
     }
   }, [closePopover, isHostIsolated, onAddIsolationStatusClick]);
 
-  const menuItemDisabled = useMemo(() => {
+  const isIsolationActionDisabled = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
-      return (
-        !sentinelOneAgentData ||
-        sentinelOneAgentData?.isUninstalled ||
-        sentinelOneAgentData?.isPendingUninstall
-      );
+      // 8.15 use FF for computing if action is enabled
+      if (agentStatusClientEnabled) {
+        return sentinelOneAgentStatus?.status === HostStatus.UNENROLLED;
+      }
+
+      // else use the old way
+      if (!sentinelOneAgentStatus) {
+        return true;
+      }
+
+      const { isUninstalled, isPendingUninstall } =
+        sentinelOneAgentStatus as AgentStatusInfo[string];
+
+      return isUninstalled || isPendingUninstall;
     }
 
     return agentStatus === HostStatus.UNENROLLED;
-  }, [agentStatus, isSentinelOneAlert, sentinelOneAgentData, sentinelOneManualHostActionsEnabled]);
+  }, [
+    agentStatus,
+    agentStatusClientEnabled,
+    isSentinelOneAlert,
+    sentinelOneAgentStatus,
+    sentinelOneManualHostActionsEnabled,
+  ]);
 
   const menuItems = useMemo(
     () => [
       {
         key: 'isolate-host-action-item',
         'data-test-subj': 'isolate-host-action-item',
-        disabled: menuItemDisabled,
+        disabled: isIsolationActionDisabled,
         onClick: isolateHostHandler,
         name: isHostIsolated ? UNISOLATE_HOST : ISOLATE_HOST,
       },
     ],
-    [isHostIsolated, isolateHostHandler, menuItemDisabled]
+    [isHostIsolated, isolateHostHandler, isIsolationActionDisabled]
   );
 
   return useMemo(() => {
@@ -164,7 +187,7 @@ export const useHostIsolationAction = ({
       isSentinelOneAlert &&
       sentinelOneManualHostActionsEnabled &&
       sentinelOneAgentId &&
-      sentinelOneAgentData &&
+      sentinelOneAgentStatus &&
       hasActionsAllPrivileges
     ) {
       return menuItems;
@@ -191,7 +214,7 @@ export const useHostIsolationAction = ({
     isSentinelOneAlert,
     loadingHostIsolationStatus,
     menuItems,
-    sentinelOneAgentData,
+    sentinelOneAgentStatus,
     sentinelOneAgentId,
     sentinelOneManualHostActionsEnabled,
   ]);

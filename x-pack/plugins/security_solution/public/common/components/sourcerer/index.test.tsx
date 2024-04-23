@@ -12,14 +12,7 @@ import { mount } from 'enzyme';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
-import { createStore } from '../../store';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { fireEvent, waitFor, render } from '@testing-library/react';
 import { useSourcererDataView } from '../../containers/sourcerer';
@@ -81,19 +74,16 @@ const { id, patternList, title } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );
-let store: ReturnType<typeof createStore>;
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
 };
 
 describe('Sourcerer component', () => {
-  const { storage } = createSecuritySolutionStorageMock();
   const pollForSignalIndexMock = jest.fn();
   let wrapper: ReactWrapper;
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
   });
@@ -104,7 +94,7 @@ describe('Sourcerer component', () => {
 
   it('renders data view title', () => {
     wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer {...defaultProps} />
       </TestProviders>
     );
@@ -120,7 +110,7 @@ describe('Sourcerer component', () => {
       showAlertsOnlyCheckbox: true,
     };
     wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer {...testProps} />
       </TestProviders>
     );
@@ -159,7 +149,7 @@ describe('Sourcerer component', () => {
   // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
   it('Mounts with all options selected', () => {
     wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer {...defaultProps} />
       </TestProviders>
     );
@@ -174,40 +164,35 @@ describe('Sourcerer component', () => {
     );
   });
   it('Removes duplicate options from title', () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          defaultDataView: {
+    const store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        defaultDataView: {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '1234',
+          title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
+          patternList: ['filebeat-*', 'auditbeat-*'],
+        },
+        kibanaDataViews: [
+          {
             ...mockGlobalState.sourcerer.defaultDataView,
             id: '1234',
             title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
             patternList: ['filebeat-*', 'auditbeat-*'],
           },
-          kibanaDataViews: [
-            {
-              ...mockGlobalState.sourcerer.defaultDataView,
-              id: '1234',
-              title: 'filebeat-*,auditbeat-*,auditbeat-*,auditbeat-*,auditbeat-*',
-              patternList: ['filebeat-*', 'auditbeat-*'],
-            },
-          ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              loading: false,
-              selectedDataViewId: '1234',
-              selectedPatterns: ['filebeat-*'],
-            },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            loading: false,
+            selectedDataViewId: '1234',
+            selectedPatterns: ['filebeat-*'],
           },
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -225,39 +210,34 @@ describe('Sourcerer component', () => {
     expect(options.length).toEqual(2);
   });
   it('Disables options with no data', () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          defaultDataView: {
+    const store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        defaultDataView: {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '1234',
+          title: 'filebeat-*,auditbeat-*,fakebeat-*',
+          patternList: ['filebeat-*', 'auditbeat-*'],
+        },
+        kibanaDataViews: [
+          {
             ...mockGlobalState.sourcerer.defaultDataView,
             id: '1234',
             title: 'filebeat-*,auditbeat-*,fakebeat-*',
             patternList: ['filebeat-*', 'auditbeat-*'],
           },
-          kibanaDataViews: [
-            {
-              ...mockGlobalState.sourcerer.defaultDataView,
-              id: '1234',
-              title: 'filebeat-*,auditbeat-*,fakebeat-*',
-              patternList: ['filebeat-*', 'auditbeat-*'],
-            },
-          ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              selectedDataViewId: '1234',
-              selectedPatterns: ['filebeat-*'],
-            },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            selectedDataViewId: '1234',
+            selectedPatterns: ['filebeat-*'],
           },
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -306,7 +286,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state2);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -351,7 +331,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state2);
     const { getByTestId, queryByTitle, queryAllByTestId } = render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -371,34 +351,29 @@ describe('Sourcerer component', () => {
     });
   });
   it('onSave dispatches setSelectedDataView', async () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          kibanaDataViews: [
-            mockGlobalState.sourcerer.defaultDataView,
-            {
-              ...mockGlobalState.sourcerer.defaultDataView,
-              id: '1234',
-              title: 'filebeat-*',
-              patternList: ['filebeat-*'],
-            },
-          ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              selectedDataViewId: id,
-              selectedPatterns: patternListNoSignals.slice(0, 2),
-            },
+    const store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          mockGlobalState.sourcerer.defaultDataView,
+          {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'filebeat-*',
+            patternList: ['filebeat-*'],
+          },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            selectedDataViewId: id,
+            selectedPatterns: patternListNoSignals.slice(0, 2),
           },
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -428,34 +403,29 @@ describe('Sourcerer component', () => {
   });
 
   it('onSave updates the URL param', () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          kibanaDataViews: [
-            mockGlobalState.sourcerer.defaultDataView,
-            {
-              ...mockGlobalState.sourcerer.defaultDataView,
-              id: '1234',
-              title: 'filebeat-*',
-              patternList: ['filebeat-*'],
-            },
-          ],
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              selectedDataViewId: id,
-              selectedPatterns: patternListNoSignals.slice(0, 2),
-            },
+    const store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          mockGlobalState.sourcerer.defaultDataView,
+          {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'filebeat-*',
+            patternList: ['filebeat-*'],
+          },
+        ],
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            selectedDataViewId: id,
+            selectedPatterns: patternListNoSignals.slice(0, 2),
           },
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     wrapper = mount(
       <TestProviders store={store}>
@@ -472,7 +442,7 @@ describe('Sourcerer component', () => {
 
   it('resets to default index pattern', async () => {
     wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer {...defaultProps} />
       </TestProviders>
     );
@@ -504,26 +474,21 @@ describe('Sourcerer component', () => {
     });
   });
   it('disables saving when no index patterns are selected', () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          kibanaDataViews: [
-            mockGlobalState.sourcerer.defaultDataView,
-            {
-              ...mockGlobalState.sourcerer.defaultDataView,
-              id: '1234',
-              title: 'auditbeat-*',
-              patternList: ['auditbeat-*'],
-            },
-          ],
-        },
+    const store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        kibanaDataViews: [
+          mockGlobalState.sourcerer.defaultDataView,
+          {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            id: '1234',
+            title: 'auditbeat-*',
+            patternList: ['auditbeat-*'],
+          },
+        ],
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -572,7 +537,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state2);
     const el = render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -620,7 +585,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state2);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -644,7 +609,7 @@ describe('Sourcerer component', () => {
     });
 
     mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
@@ -659,7 +624,7 @@ describe('Sourcerer component', () => {
     });
 
     mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer scope={sourcererModel.SourcererScopeName.default} />
       </TestProviders>
     );
@@ -674,7 +639,7 @@ describe('Sourcerer component', () => {
     });
 
     mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
@@ -688,10 +653,19 @@ describe('Sourcerer component', () => {
     });
 
     mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
       </TestProviders>
     );
     expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders without a popover when analyzer is the scope', () => {
+    mount(
+      <TestProviders>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.analyzer} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).exists()).toBeFalsy();
   });
 });

@@ -114,6 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176976
       describe('compare latency value between service inventory and service maps', () => {
         before(async () => {
           [latencyTransactionValues, latencyMetricValues] = await Promise.all([

@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { AggregateQuery } from '@kbn/es-query';
 import {
-  AggregateQuery,
+  getESQLAdHocDataview,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
-} from '@kbn/es-query';
+} from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
@@ -25,18 +26,16 @@ export async function getDataViewByTextBasedQueryLang(
   if ('esql' in query) {
     indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   }
-  // we should find a better way to work with ESQL queries which dont need a dataview
-  if (!indexPatternFromQuery && currentDataView) return currentDataView;
 
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await services.dataViews.create({
-      title: indexPatternFromQuery,
-    });
+    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
-    if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
+    // If the indexPatternFromQuery is empty string means that the user used either the ROW or SHOW META / SHOW INFO commands
+    // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
+    if (indexPatternFromQuery && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
       dataViewObj.timeFieldName = '@timestamp';
     }
     return dataViewObj;

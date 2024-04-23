@@ -132,7 +132,7 @@
         "signature": [
           "Partial<Pick<",
           "EuiCardProps",
-          ", \"title\" | \"className\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
+          ", \"className\" | \"title\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
         "path": "packages/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
@@ -170,7 +170,7 @@
         "signature": [
           "Partial<Pick<",
           "EuiCardProps",
-          ", \"title\" | \"className\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
+          ", \"className\" | \"title\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
         "path": "packages/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,

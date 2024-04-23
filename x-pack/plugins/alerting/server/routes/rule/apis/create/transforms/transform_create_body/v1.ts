@@ -10,25 +10,33 @@ import type {
   CreateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/create';
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
-import type { RuleParams } from '../../../../../../application/rule/types';
+import type {
+  RuleParams,
+  ActionRequest,
+  SystemActionRequest,
+} from '../../../../../../application/rule/types';
 
-const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleData['actions'] => {
-  if (!actions) return [];
+const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionRequest[] => {
+  if (!actions) {
+    return [];
+  }
 
   return actions.map(
     ({
+      group,
+      id,
+      params,
       frequency,
+      uuid,
       alerts_filter: alertsFilter,
       use_alert_data_for_template: useAlertDataForTemplate,
-      ...action
     }) => {
       return {
-        group: action.group,
-        id: action.id,
-        params: action.params,
-        actionTypeId: action.actionTypeId,
+        group: group ?? 'default',
+        id,
+        params,
+        ...(uuid ? { uuid } : {}),
         ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-        ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(frequency
           ? {
               frequency: {
@@ -44,9 +52,29 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
   );
 };
 
-export const transformCreateBody = <Params extends RuleParams = never>(
-  createBody: CreateRuleRequestBodyV1<Params>
-): CreateRuleData<Params> => {
+const transformCreateBodySystemActions = (actions: CreateRuleActionV1[]): SystemActionRequest[] => {
+  if (!actions) {
+    return [];
+  }
+
+  return actions.map(({ id, params, uuid }) => {
+    return {
+      id,
+      params,
+      ...(uuid ? { uuid } : {}),
+    };
+  });
+};
+
+export const transformCreateBody = <Params extends RuleParams = never>({
+  createBody,
+  actions,
+  systemActions,
+}: {
+  createBody: CreateRuleRequestBodyV1<Params>;
+  actions: CreateRuleRequestBodyV1<Params>['actions'];
+  systemActions: CreateRuleRequestBodyV1<Params>['actions'];
+}): CreateRuleData<Params> => {
   return {
     name: createBody.name,
     alertTypeId: createBody.rule_type_id,
@@ -56,8 +84,9 @@ export const transformCreateBody = <Params extends RuleParams = never>(
     ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
     params: createBody.params,
     schedule: createBody.schedule,
-    actions: transformCreateBodyActions(createBody.actions),
+    actions: transformCreateBodyActions(actions),
+    systemActions: transformCreateBodySystemActions(systemActions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
-    ...(createBody.notification_delay ? { notificationDelay: createBody.notification_delay } : {}),
+    ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
   };
 };

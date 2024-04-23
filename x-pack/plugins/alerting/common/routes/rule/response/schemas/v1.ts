@@ -66,12 +66,13 @@ const actionAlertsFilterSchema = schema.object({
 
 const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   connector_type_id: schema.string(),
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
+  use_alert_data_for_template: schema.maybe(schema.boolean()),
 });
 
 export const ruleExecutionStatusSchema = schema.object({
@@ -182,7 +183,7 @@ export const ruleSnoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const notificationDelaySchema = schema.object({
+export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
@@ -218,7 +219,7 @@ export const ruleResponseSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
-  notification_delay: schema.maybe(notificationDelaySchema),
+  alert_delay: schema.maybe(alertDelaySchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

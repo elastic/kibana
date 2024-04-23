@@ -48,7 +48,7 @@ components:
           properties:
             criticality_level:
               type: string
-              enum: [very_important, important, normal, not_important]
+              enum: [low_impact, medium_impact, high_impact, extreme_impact]
               description: The criticality level of the asset.
           required:
             - criticality_level

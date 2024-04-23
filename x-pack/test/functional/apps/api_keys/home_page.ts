@@ -192,7 +192,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Toggle metadata switch so the code editor shows up
         await apiKeyMetadataSwitch.click();
 
-        // Check default value of metadata and set value
+        // wait for monaco editor model to be updated
+        await pageObjects.common.sleep(300);
+
+        // Check default value of restrict privileges and set value
         const restrictPrivilegesCodeEditorValue =
           await pageObjects.apiKeys.getCodeEditorValueByIndex(0);
         expect(restrictPrivilegesCodeEditorValue).to.be('{}');

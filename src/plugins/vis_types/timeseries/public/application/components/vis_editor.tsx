@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
-import { share } from 'rxjs/operators';
+import { share } from 'rxjs';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import { css } from '@emotion/react';

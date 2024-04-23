@@ -4,5 +4,8 @@ ECS_Version,Indexed,Field_Set,Field,Type,Level,Normalization,Example,Description
 8.0.0,true,base,message,match_only_text,core,,Hello World,Log message optimized for viewing in a log viewer.
 8.0.0,true,base,tags,keyword,core,array,"[""production"", ""env2""]",List of keywords used to tag each event.
 8.0.0,true,host,host.name,keyword,core,,,Name of the host.
+8.0.0,true,http,http.response.bytes,long,extended,,1437,Total size in bytes of the response (body and headers).
+8.0.0,true,http,http.response.status_code,long,extended,,404,HTTP response status code.
 8.0.0,true,log,log.level,keyword,core,,error,Log level of the log event.
 8.0.0,true,log,log.logger,keyword,core,,org.elasticsearch.bootstrap.Bootstrap,Name of the logger.
+8.0.0,true,url,url.domain,keyword,extended,,www.elastic.co,Domain of the url.

@@ -133,14 +133,14 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
           {
             key: 'valid_key_1',
             label: 'Summary',
-            type: CustomFieldTypes.TEXT,
-            required: true,
+            type: CustomFieldTypes.TEXT as const,
+            required: false,
           },
           {
             key: 'valid_key_2',
             label: 'Sync',
-            type: CustomFieldTypes.TOGGLE,
-            required: true,
+            type: CustomFieldTypes.TOGGLE as const,
+            required: false,
           },
         ];
 
@@ -181,6 +181,55 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
           `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
         expect(await sync.getAttribute('aria-checked')).equal('true');
+      });
+
+      it('creates a case with custom fields that have default values', async () => {
+        const customFields = [
+          {
+            key: 'valid_key_3',
+            label: 'Summary required',
+            type: CustomFieldTypes.TEXT as const,
+            defaultValue: 'Default value',
+            required: true,
+          },
+          {
+            key: 'valid_key_4',
+            label: 'Sync required',
+            type: CustomFieldTypes.TOGGLE as const,
+            defaultValue: true,
+            required: true,
+          },
+        ];
+
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
+
+        const caseTitle = 'test-' + uuidv4();
+        await cases.create.openCreateCasePage();
+
+        // verify custom fields on create case page
+        await testSubjects.existOrFail('create-case-custom-fields');
+
+        await cases.create.setTitle(caseTitle);
+        await cases.create.setDescription('this is a test description');
+
+        // submit without touching the custom fields
+        await cases.create.submitCase();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('case-view-title');
+
+        // validate custom fields
+        const textCustomField = await testSubjects.find(
+          `case-text-custom-field-${customFields[0].key}`
+        );
+
+        expect(await textCustomField.getVisibleText()).equal(customFields[0].defaultValue);
+
+        const toggleCustomField = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await toggleCustomField.getAttribute('aria-checked')).equal('true');
       });
     });
   });

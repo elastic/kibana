@@ -22,6 +22,7 @@ import type {
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { InternalStaticAssets } from '@kbn/core-http-server-internal';
 import { firstValueFrom, map, type Observable } from 'rxjs';
 import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
 import { registerBundleRoutes } from './bundle_routes';
@@ -33,6 +34,7 @@ interface CommonRoutesParams {
   httpResources: HttpResources;
   basePath: IBasePath;
   uiPlugins: UiPlugins;
+  staticAssets: InternalStaticAssets;
   onResourceNotFound: (
     req: KibanaRequest,
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
@@ -61,7 +63,7 @@ export class CoreAppsService {
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
       this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
-      this.registerStaticDirs(corePreboot);
+      this.registerStaticDirs(corePreboot, uiPlugins);
     }
   }
 
@@ -69,7 +71,7 @@ export class CoreAppsService {
     this.logger.debug('Setting up core app.');
     const config = await firstValueFrom(this.config$);
     this.registerDefaultRoutes(coreSetup, uiPlugins, config);
-    this.registerStaticDirs(coreSetup);
+    this.registerStaticDirs(coreSetup, uiPlugins);
   }
 
   private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -77,10 +79,11 @@ export class CoreAppsService {
       this.registerCommonDefaultRoutes({
         basePath: corePreboot.http.basePath,
         httpResources: corePreboot.httpResources.createRegistrar(router),
+        staticAssets: corePreboot.http.staticAssets,
         router,
         uiPlugins,
         onResourceNotFound: async (req, res) =>
-          // THe API consumers might call various Kibana APIs (e.g. `/api/status`) when Kibana is still at the preboot
+          // The API consumers might call various Kibana APIs (e.g. `/api/status`) when Kibana is still at the preboot
           // stage, and the main HTTP server that registers API handlers isn't up yet. At this stage we don't know if
           // the API endpoint exists or not, and hence cannot reply with `404`. We also should not reply with completely
           // unexpected response (`200 text/html` for the Core app). The only suitable option is to reply with `503`
@@ -125,6 +128,7 @@ export class CoreAppsService {
     this.registerCommonDefaultRoutes({
       basePath: coreSetup.http.basePath,
       httpResources: resources,
+      staticAssets: coreSetup.http.staticAssets,
       router,
       uiPlugins,
       onResourceNotFound: async (req, res) => res.notFound(),
@@ -210,6 +214,7 @@ export class CoreAppsService {
   private registerCommonDefaultRoutes({
     router,
     basePath,
+    staticAssets,
     uiPlugins,
     onResourceNotFound,
     httpResources,
@@ -259,17 +264,37 @@ export class CoreAppsService {
     registerBundleRoutes({
       router,
       uiPlugins,
+      staticAssets,
       packageInfo: this.env.packageInfo,
-      serverBasePath: basePath.serverBasePath,
     });
   }
 
   // After the package is built and bootstrap extracts files to bazel-bin,
   // assets are exposed at the root of the package and in the package's node_modules dir
-  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
-    core.http.registerStaticDir(
-      '/ui/{path*}',
-      fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
-    );
+  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
+    /**
+     * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+     * Eventually we only want to serve from the sha scoped path
+     */
+    [core.http.staticAssets.prependServerPath('/ui/{path*}'), '/ui/{path*}'].forEach((path) => {
+      core.http.registerStaticDir(
+        path,
+        fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
+      );
+    });
+
+    for (const [pluginName, pluginInfo] of uiPlugins.internal) {
+      if (!pluginInfo.publicAssetsDir) continue;
+      /**
+       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+       * Eventually we only want to serve from the sha scoped path
+       */
+      [
+        core.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
+        `/plugins/${pluginName}/assets/{path*}`,
+      ].forEach((path) => {
+        core.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
+      });
+    }
   }
 }

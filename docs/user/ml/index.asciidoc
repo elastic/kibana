@@ -32,19 +32,19 @@ NOTE: There are limitations in {ml-features} that affect {kib}. For more
 information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
 
 [discrete]
-[[data-comparison-view]]
-== Data comparison
+[[data-drift-view]]
+== Data drift
 
 preview::[]
 
-You can find the data comparison view in **{ml-app}** > *{data-viz}* in {kib}. 
-The data comparison view shows you the differences in each field for two 
+You can find the data drift view in **{ml-app}** > *{data-viz}* in {kib}. 
+The data drift view shows you the differences in each field for two 
 different time ranges in a given {data-source}. The view helps you to visualize 
 the changes in your data over time and enables you to understand its behavior 
 better.
 
 [role="screenshot"]
-image::user/ml/images/ml-data-comparison.png[Data comparison view for {kib} Sample Data Flights ]
+image::user/ml/images/ml-data-drift.png[Data drift view in {kib}]
 
 Select a {data-source} that you want to analyze, then select a time range for 
 the reference and the comparison data in the appearing histogram chart. You can 

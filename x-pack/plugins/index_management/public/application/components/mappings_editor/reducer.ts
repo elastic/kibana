@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-import { Field, NormalizedFields, NormalizedField, State, Action } from './types';
-import {
-  getFieldMeta,
-  getUniqueId,
-  shouldDeleteChildFieldsAfterTypeChange,
-  getAllChildFields,
-  getMaxNestedDepth,
-  normalize,
-  updateFieldsPathAfterFieldNameChange,
-  searchFields,
-} from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
+import {
+  getAllChildFields,
+  getFieldMeta,
+  getMaxNestedDepth,
+  getUniqueId,
+  normalize,
+  searchFields,
+  shouldDeleteChildFieldsAfterTypeChange,
+  updateFieldsPathAfterFieldNameChange,
+} from './lib';
+import {
+  Action,
+  Field,
+  FieldWithSemanticTextInfo,
+  NormalizedField,
+  NormalizedFields,
+  State,
+} from './types';
 
 export const addFieldToState = (field: Field, state: State): State => {
   const updatedFields = { ...state.fields };
@@ -315,6 +322,28 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'field.add': {
       return addFieldToState(action.value, state);
+    }
+    case 'field.addSemanticText': {
+      const addTexFieldWithCopyToActionValue: FieldWithSemanticTextInfo = {
+        name: action.value.referenceField as string,
+        type: 'text',
+        copy_to: [action.value.name],
+      };
+
+      // Add text field to state with copy_to of semantic_text field
+      let updatedState = addFieldToState(addTexFieldWithCopyToActionValue, state);
+
+      const addSemanticTextFieldActionValue: FieldWithSemanticTextInfo = {
+        name: action.value.name,
+        inference_id: action.value.inferenceId,
+        type: 'semantic_text',
+      };
+
+      // Add semantic_text field to state and reset fieldToAddFieldTo
+      updatedState = addFieldToState(addSemanticTextFieldActionValue, updatedState);
+      updatedState.documentFields.fieldToAddFieldTo = undefined;
+
+      return updatedState;
     }
     case 'field.remove': {
       const field = state.fields.byId[action.value];

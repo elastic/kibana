@@ -71,6 +71,7 @@ export const FieldValueCell = React.memo(
                     eventId={eventId}
                     fieldFormat={data.format}
                     fieldName={data.field}
+                    fieldFromBrowserField={fieldFromBrowserField}
                     fieldType={data.type}
                     isAggregatable={fieldFromBrowserField.aggregatable}
                     isDraggable={isDraggable}

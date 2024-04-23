@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useGetAgentPoliciesQuery, useGetAgentsQuery } from '../../../../../hooks';
+import { useAuthz, useGetAgentPoliciesQuery, useGetAgentsQuery } from '../../../../../hooks';
 import { policyHasFleetServer } from '../../../../../services';
 
 interface UseIsFirstTimeAgentUserResponse {
@@ -14,13 +14,19 @@ interface UseIsFirstTimeAgentUserResponse {
 }
 
 export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse => {
+  const authz = useAuthz();
   const {
     data: agentPolicies,
     isLoading: areAgentPoliciesLoading,
     isFetched: areAgentsFetched,
-  } = useGetAgentPoliciesQuery({
-    full: true,
-  });
+  } = useGetAgentPoliciesQuery(
+    {
+      full: true,
+    },
+    {
+      enabled: authz.fleet.readAgentPolicies,
+    }
+  );
 
   // now get all agents that are NOT part of a fleet server policy
   const serverPolicyIdsQuery = (agentPolicies?.items || [])
@@ -44,7 +50,7 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
   );
 
   return {
-    isLoading: areAgentPoliciesLoading || areAgentsLoading,
-    isFirstTimeAgentUser: agents?.data?.total === 0,
+    isLoading: authz.fleet.readAgentPolicies && (areAgentPoliciesLoading || areAgentsLoading),
+    isFirstTimeAgentUser: !authz.fleet.readAgentPolicies && agents?.data?.total === 0,
   };
 };

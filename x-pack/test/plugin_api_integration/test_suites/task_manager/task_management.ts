@@ -791,6 +791,43 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should fail to schedule recurring task with timeout override', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskTimingOut',
+        schedule: { interval: '1s' },
+        timeoutOverride: '30s',
+        params: {},
+      });
+
+      expect(task.timeoutOverride).to.be(undefined);
+    });
+
+    it('should allow timeout override for ad hoc tasks', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleAdHocTaskTimingOut',
+        timeoutOverride: '30s',
+        params: {},
+      });
+
+      expect(task.timeoutOverride).to.be('30s');
+
+      // this task type is set to time out after 1s but the task runner
+      // will wait 15 seconds and then index a document if it hasn't timed out
+      // this test overrides the timeout to 30s and checks if the expected
+      // document was indexed. presence of indexed document means the task
+      // timeout override was respected
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask?.id).to.eql(task.id);
+      });
+
+      await retry.try(async () => {
+        const docs: RawDoc[] = await historyDocs(task.id);
+        expect(docs.length).to.eql(1);
+        expect(docs[0]._source.taskType).to.eql('sampleAdHocTaskTimingOut');
+      });
+    });
+
     it('should bulk update schedules for multiple tasks', async () => {
       const initialTime = Date.now();
       const tasks = await Promise.all([

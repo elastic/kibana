@@ -12,23 +12,33 @@ import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../
 
 import type { ActionStatus } from '../../../../types';
 
-export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity: boolean) {
-  const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
+export function useActionStatus(
+  onAbortSuccess: () => void,
+  refreshAgentActivity: boolean,
+  nActions: number,
+  dateFilter: moment.Moment | null
+) {
   const [isFirstLoading, setIsFirstLoading] = useState(true);
+  const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
+  const [actionCount, setActionCount] = useState(0);
+  const [areActionsFullyLoaded, setAreActionsFullyLoaded] = useState(false);
   const { notifications, overlays } = useStartServices();
 
-  const refreshActions = useCallback(async () => {
+  const loadActions = useCallback(async () => {
     try {
-      const res = await sendGetActionStatus();
+      const res = await sendGetActionStatus({
+        perPage: nActions,
+        date: dateFilter?.format(),
+      });
       setIsFirstLoading(false);
       if (res.error) {
         throw res.error;
       }
-
       if (!res.data) {
         throw new Error('No data');
       }
-
+      setAreActionsFullyLoaded(actionCount < nActions);
+      setActionCount(res.data.items.length);
       setCurrentActions(res.data.items);
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -37,21 +47,22 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
         }),
       });
     }
-  }, [notifications.toasts]);
+  }, [nActions, dateFilter, actionCount, notifications.toasts]);
 
   if (isFirstLoading) {
-    refreshActions();
+    loadActions();
   }
 
   useEffect(() => {
     if (refreshAgentActivity) {
-      refreshActions();
+      loadActions();
     }
-    return () => {
-      setCurrentActions([]);
-      setIsFirstLoading(true);
-    };
-  }, [refreshActions, refreshAgentActivity]);
+  }, [loadActions, refreshAgentActivity]);
+
+  // second useEffect is needed for fetching actions when nAction changes
+  useEffect(() => {
+    loadActions();
+  }, [loadActions, nActions]);
 
   const abortUpgrade = useCallback(
     async (action: ActionStatus) => {
@@ -75,7 +86,7 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
           return;
         }
         await sendPostCancelAction(action.actionId);
-        await Promise.all([refreshActions(), onAbortSuccess()]);
+        await Promise.all([loadActions(), onAbortSuccess()]);
       } catch (err) {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.fleet.currentUpgrade.abortRequestError', {
@@ -84,13 +95,13 @@ export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity
         });
       }
     },
-    [refreshActions, notifications.toasts, overlays, onAbortSuccess]
+    [loadActions, notifications.toasts, overlays, onAbortSuccess]
   );
 
   return {
     currentActions,
-    refreshActions,
     abortUpgrade,
     isFirstLoading,
+    areActionsFullyLoaded,
   };
 }

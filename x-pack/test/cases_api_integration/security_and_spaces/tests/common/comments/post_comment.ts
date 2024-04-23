@@ -46,10 +46,10 @@ import {
   bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -546,7 +546,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('security_solution', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {

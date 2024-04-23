@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 import type { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
-import { HttpService } from './http_service';
+import type { HttpService } from './http_service';
 import { type MlApiServices, mlApiServicesProvider } from './ml_api_service';
 
 export class AnomalyDetectorService {

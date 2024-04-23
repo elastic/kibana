@@ -121,6 +121,7 @@ export class Env {
       branch: pkg.branch,
       buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      buildShaShort: isKibanaDistributable ? pkg.build.sha.slice(0, 12) : 'XXXXXXXXXXXX',
       version: pkg.version,
       dist: isKibanaDistributable,
       buildDate: isKibanaDistributable ? new Date(pkg.build.date) : new Date(),

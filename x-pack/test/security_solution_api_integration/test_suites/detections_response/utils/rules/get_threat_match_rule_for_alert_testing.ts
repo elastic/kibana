@@ -6,7 +6,7 @@
  */
 
 import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getRuleForAlertTesting } from './get_rule_for_alert_testing';
+import { getRuleForAlertTesting } from '../../../../../common/utils/security_solution';
 
 /**
  * This is a typical alert testing rule that is easy for most basic testing of output of Threat Match alerts.
@@ -25,6 +25,7 @@ export const getThreatMatchRuleForAlertTesting = (
   language: 'kuery',
   query: '*:*',
   threat_query: '*:*',
+  threat_language: 'kuery',
   threat_mapping: [
     // We match host.name against host.name
     {

@@ -15,16 +15,16 @@ import type {
   NumericChartData,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
-import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import {
   addSignificantItemsHistogramAction,
   updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
-import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
-import { getHistogramQuery } from '../queries/get_histogram_query';
+import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 
 import {
   MAX_CONCURRENT_QUERIES,
@@ -181,7 +181,7 @@ export const histogramHandlerFactory =
       const significantCategoriesHistogramQueries = significantCategories.map((d) => {
         const histogramQuery = getHistogramQuery(requestBody);
         const categoryQuery = getCategoryQuery(d.fieldName, [
-          { key: `${d.key}`, count: d.doc_count, examples: [] },
+          { key: `${d.key}`, count: d.doc_count, examples: [], regex: '' },
         ]);
         if (Array.isArray(histogramQuery.bool?.filter)) {
           histogramQuery.bool?.filter?.push(categoryQuery);

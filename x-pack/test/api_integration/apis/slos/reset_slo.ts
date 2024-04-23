@@ -6,7 +6,7 @@
  */
 import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
-import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { loadTestData } from './helper/load_test_data';

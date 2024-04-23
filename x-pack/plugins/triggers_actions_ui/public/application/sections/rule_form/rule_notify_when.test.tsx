@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Rule } from '../../../types';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleNotifyWhen } from './rule_notify_when';
 
 describe('rule_notify_when', () => {
@@ -28,7 +28,7 @@ describe('rule_notify_when', () => {
       const initialRule = {
         name: 'test',
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: '1m',
         },

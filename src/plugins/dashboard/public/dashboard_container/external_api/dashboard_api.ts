@@ -8,12 +8,21 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CanDuplicatePanels, CanExpandPanels, TracksOverlays } from '@kbn/presentation-containers';
-import { HasTypeDisplayName, PublishesSavedObjectId } from '@kbn/presentation-publishing';
+import {
+  HasType,
+  HasTypeDisplayName,
+  PublishesUnifiedSearch,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
 // TODO lock down DashboardAPI
-export type DashboardAPI = DashboardContainer;
+export type DashboardAPI = DashboardContainer &
+  Partial<
+    HasType<'dashboard'> & PublishesUnifiedSearch & PublishesPanelTitle & PublishesSavedObjectId
+  >;
 export type AwaitingDashboardAPI = DashboardAPI | null;
 
 export const buildApiFromDashboardContainer = (container?: DashboardContainer) => container ?? null;
@@ -34,7 +43,7 @@ export interface DashboardPluginInternalFunctions {
    * A temporary backdoor to allow some actions access to the Dashboard panels. This should eventually be replaced with a generic version
    * on the PresentationContainer interface.
    */
-  getDashboardPanelFromId: (id: string) => DashboardPanelState;
+  getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
 
   /**
    * A temporary backdoor to allow the filters notification popover to get the data views directly from the dashboard container

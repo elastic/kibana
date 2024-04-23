@@ -26,6 +26,7 @@ export const AppSearchPageTemplate: React.FC<
       }}
       setPageChrome={pageChrome && <SetAppSearchChrome trail={pageChrome} />}
       useEndpointHeaderActions={false}
+      hideEmbeddedConsole
     >
       {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}
       {children}

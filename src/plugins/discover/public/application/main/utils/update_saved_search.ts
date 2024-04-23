@@ -20,6 +20,7 @@ import type { DiscoverGlobalStateContainer } from '../services/discover_global_s
  * @param savedSearch
  * @param dataView
  * @param state
+ * @param globalStateContainer
  * @param services
  * @param useFilterAndQueryServices - when true data services are being used for updating filter + query
  */
@@ -38,9 +39,11 @@ export function updateSavedSearch({
   services: DiscoverServices;
   useFilterAndQueryServices?: boolean;
 }) {
-  if (dataView) {
+  if (dataView && savedSearch.searchSource.getField('index')?.id !== dataView.id) {
     savedSearch.searchSource.setField('index', dataView);
-    savedSearch.usesAdHocDataView = !dataView.isPersisted();
+    if (!dataView.isPersisted()) {
+      savedSearch.usesAdHocDataView = true;
+    }
   }
   if (useFilterAndQueryServices) {
     savedSearch.searchSource
@@ -62,6 +65,7 @@ export function updateSavedSearch({
     }
     savedSearch.hideChart = state.hideChart;
     savedSearch.rowHeight = state.rowHeight;
+    savedSearch.headerRowHeight = state.headerRowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
 

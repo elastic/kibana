@@ -8,7 +8,7 @@
 
 export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
+  for (const [key, value] of Object.entries(obj as any) as any) {
     if (!keys.includes(key)) {
       result[key] = value;
     }

@@ -22,7 +22,7 @@ export type AwsCredentialsTypeFieldMap = {
   [key in AwsCredentialsType]: string[];
 };
 
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
+export type GcpCredentialsType = 'credentials-file' | 'credentials-json' | 'credentials-none';
 
 export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];

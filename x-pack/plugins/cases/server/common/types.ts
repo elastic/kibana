@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { DecoratedError, SavedObject } from '@kbn/core-saved-objects-server';
 import type { SavedObjectError } from '@kbn/core/types';
 import type { KueryNode } from '@kbn/es-query';
 import type {
@@ -51,8 +51,16 @@ export type FileAttachmentRequest = Omit<
 
 export type AttachmentSavedObject = SavedObject<AttachmentAttributes>;
 
-export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes'> & { error: SavedObjectError };
+export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes' | 'error'> & {
+  error: SavedObjectError | DecoratedError;
+};
 
 export interface SavedObjectsBulkResponseWithErrors<T> {
   saved_objects: Array<SavedObject<T> | SOWithErrors<T>>;
+}
+
+export interface CaseErrorResponse {
+  error: string;
+  message: string;
+  status: number;
 }

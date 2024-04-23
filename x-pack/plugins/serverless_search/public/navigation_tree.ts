@@ -22,6 +22,14 @@ export const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
+          id: 'home',
+          title: i18n.translate('xpack.serverlessSearch.nav.home', {
+            defaultMessage: 'Home',
+          }),
+          link: 'serverlessElasticsearch',
+          spaceBefore: 'm',
+        },
+        {
           id: 'dev_tools',
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
@@ -30,7 +38,7 @@ export const navigationTree: NavigationTreeDefinition = {
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },
-          spaceBefore: 'l',
+          spaceBefore: 'm',
         },
         {
           link: 'discover',
@@ -40,19 +48,6 @@ export const navigationTree: NavigationTreeDefinition = {
           link: 'dashboards',
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          link: 'visualize',
-          title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
-            defaultMessage: 'Visualizations',
-          }),
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
           },
         },
         {

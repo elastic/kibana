@@ -10,7 +10,7 @@ import { createFlameGraph } from './flamegraph';
 import { baseFlamegraph } from './__fixtures__/base_flamegraph';
 
 describe('Flamegraph', () => {
-  const flamegraph = createFlameGraph(baseFlamegraph);
+  const flamegraph = createFlameGraph(baseFlamegraph, false);
 
   it('base flamegraph has non-zero total seconds', () => {
     expect(baseFlamegraph.TotalSeconds).toEqual(4.980000019073486);

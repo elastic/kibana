@@ -18,9 +18,9 @@ export function selectColorMode(state: RootState) {
 export function selectSpecialAssignments(state: RootState) {
   return state.colorMapping.specialAssignments;
 }
-export function selectIsAutoAssignmentMode(state: RootState) {
-  return state.colorMapping.assignmentMode === 'auto';
-}
 export function selectColorPickerVisibility(state: RootState) {
   return state.ui.colorPicker;
+}
+export function selectComputedAssignments(state: RootState) {
+  return state.colorMapping.assignments;
 }

@@ -7,16 +7,12 @@
 
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SortFieldTimeline, TimelineType } from '../../../../common/api/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
-import {
-  queryTimelineById,
-  dispatchUpdateTimeline,
-} from '../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
 
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
@@ -37,25 +33,24 @@ interface Props {
 const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
-  const dispatch = useDispatch();
-  const updateIsLoading = useCallback(
-    (payload) => dispatch(dispatchUpdateIsLoading(payload)),
-    [dispatch]
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
   );
-  const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
   const { navigateToApp } = useKibana().services.application;
+
+  const queryTimelineById = useQueryTimelineById();
+
   const onOpenTimeline: OnOpenTimeline = useCallback(
     ({ duplicate, timelineId }) => {
       queryTimelineById({
         duplicate,
         timelineId,
-        updateIsLoading,
-        updateTimeline,
+        unifiedComponentsInTimelineEnabled,
       });
     },
-    [updateIsLoading, updateTimeline]
+    [queryTimelineById, unifiedComponentsInTimelineEnabled]
   );
 
   const goToTimelines = useCallback(

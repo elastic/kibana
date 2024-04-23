@@ -27,9 +27,9 @@
             "signature": [
               "() => Promise<",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -54,6 +54,38 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.AuthorizationServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthorizationServiceSetup",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.AuthorizationServiceSetup.isRoleManagementEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isRoleManagementEnabled",
+            "description": [
+              "\nDetermines if role management is enabled."
+            ],
+            "signature": [
+              "() => boolean | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -118,9 +150,9 @@
               },
               " & Pick<",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -259,6 +291,28 @@
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.SecurityPluginSetup.authz",
+            "type": "Object",
+            "tags": [],
+            "label": "authz",
+            "description": [
+              "\nExposes authorization configuration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.AuthorizationServiceSetup",
+                "text": "AuthorizationServiceSetup"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginSetup.license",
             "type": "Object",
             "tags": [],
@@ -331,6 +385,28 @@
                 "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
                 "section": "def-public.AuthenticationServiceSetup",
                 "text": "AuthenticationServiceSetup"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.SecurityPluginStart.authz",
+            "type": "Object",
+            "tags": [],
+            "label": "authz",
+            "description": [
+              "\nExposes authorization configuration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.AuthorizationServiceSetup",
+                "text": "AuthorizationServiceSetup"
               }
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
@@ -485,6 +561,40 @@
                 "text": "UserProfileData"
               },
               " | null>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.UserProfileAPIClient.userProfileLoaded$",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfileLoaded$",
+            "description": [
+              "\nIndicates if the user profile data has been loaded from the server.\nUseful to distinguish between the case when the user profile data is `null` because the HTTP\nrequest has not finished or because there is no user profile data for the current user."
+            ],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.UserProfileAPIClient.enabled$",
+            "type": "Object",
+            "tags": [],
+            "label": "enabled$",
+            "description": [
+              "Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles."
+            ],
+            "signature": [
+              "Observable",
+              "<boolean>"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
             "deprecated": false,
@@ -749,6 +859,50 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.UserProfileAPIClient.partialUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "partialUpdate",
+            "description": [
+              "\nPartially updates user profile data of the current user, merging the previous data with the provided data."
+            ],
+            "signature": [
+              "<D extends Partial<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">>(data: D) => Promise<void>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.UserProfileAPIClient.partialUpdate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [
+                  "Application data to be merged with existing data."
+                ],
+                "signature": [
+                  "D"
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -913,6 +1067,29 @@
           }
         ],
         "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.AuthorizationServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthorizationServiceStart",
+        "description": [
+          "\nStart has the same contract as Setup for now."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-public",
+            "scope": "public",
+            "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+            "section": "def-public.AuthorizationServiceSetup",
+            "text": "AuthorizationServiceSetup"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

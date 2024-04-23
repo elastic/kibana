@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
   const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Metric threshold rule >', () => {
     let ruleId: string;
@@ -49,17 +50,34 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Default',
         });
         dataForgeConfig = {
-          schedule: [{ template: 'good', start: 'now-15m', end: 'now' }],
+          schedule: [
+            {
+              template: 'good',
+              start: 'now-10m',
+              end: 'now+5m',
+              metrics: [{ name: 'system.cpu.user.pct', method: 'linear', start: 0.9, end: 0.9 }],
+            },
+          ],
           indexing: { dataset: 'fake_hosts' as Dataset },
         };
         dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+        await waitForDocumentInIndex({
+          esClient,
+          indexName: dataForgeIndices.join(','),
+          docCountTarget: 45,
+          retryService,
+          logger,
+        });
         actionId = await createIndexConnector({
           supertest,
           name: 'Index Connector: Metric threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
         const createdRule = await createRule<MetricThresholdParams>({
           supertest,
+          logger,
+          esClient,
           ruleTypeId: InfraRuleType.MetricThreshold,
           consumer: 'infrastructure',
           tags: ['infrastructure'],
@@ -88,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
                   {
                     ruleType: '{{rule.type}}',
                     alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
                   },
                 ],
               },
@@ -125,6 +144,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -134,6 +155,8 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: METRICS_ALERTS_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
         startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
@@ -188,14 +211,23 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should set correct action parameter: ruleType', async () => {
         const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
-        const resp = await waitForDocumentInIndex<{ ruleType: string; alertDetailsUrl: string }>({
+        const resp = await waitForDocumentInIndex<{
+          ruleType: string;
+          alertDetailsUrl: string;
+          reason: string;
+        }>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('metrics.alert.threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `system.cpu.user.pct is 90% in the last 5 mins. Alert when > 50%.`
         );
       });
     });

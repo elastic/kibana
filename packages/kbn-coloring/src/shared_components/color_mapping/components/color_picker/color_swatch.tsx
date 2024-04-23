@@ -29,11 +29,8 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor:
-    | ColorMapping.Config['assignments'][number]['color']
-    | ColorMapping.Config['specialAssignments'][number]['color'];
+  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
   getPaletteFn: ReturnType<typeof getPalette>;
-  canPickColor: boolean;
   index: number;
   total: number;
   palette: ColorMapping.CategoricalPalette;
@@ -46,7 +43,6 @@ export const ColorSwatch = ({
   colorMode,
   assignmentColor,
   getPaletteFn,
-  canPickColor,
   index,
   total,
   palette,
@@ -71,7 +67,7 @@ export const ColorSwatch = ({
   );
   const colorIsDark = isColorDark(...getValidColor(colorHex).rgb());
   const euiTheme = useEuiTheme();
-  return canPickColor && assignmentColor.type !== 'gradient' ? (
+  return assignmentColor.type !== 'gradient' ? (
     <EuiPopover
       panelPaddingSize="none"
       isOpen={colorPickerVisible}
@@ -98,10 +94,10 @@ export const ColorSwatch = ({
               height: 16px;
               border-radius: 50%;
               top: 8px;
-              border: 3px solid white;
+              border: 3px solid ${euiTheme.euiTheme.colors.emptyShade};
               ${euiShadowSmall(euiTheme)};
               backgroundcolor: ${colorHex};
-              cursor: ${canPickColor ? 'pointer' : 'not-allowed'};
+              cursor: pointer;
             `}
           />
         ) : (
@@ -121,7 +117,7 @@ export const ColorSwatch = ({
             style={{
               // the color swatch can't pickup colors written in rgb/css standard
               backgroundColor: colorHex,
-              cursor: canPickColor ? 'pointer' : 'not-allowed',
+              cursor: 'pointer',
               width: 32,
               height: 32,
             }}

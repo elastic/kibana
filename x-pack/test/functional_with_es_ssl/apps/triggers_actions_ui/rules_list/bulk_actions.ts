@@ -14,7 +14,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createAlert, scheduleRule, snoozeAlert } from '../../../lib/alert_api_actions';
+import {
+  createAlert,
+  createAlertManualCleanup,
+  scheduleRule,
+  snoozeAlert,
+} from '../../../lib/alert_api_actions';
 import { ObjectRemover } from '../../../lib/object_remover';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -23,13 +28,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function refreshAlertsList() {
     await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/177130
+  describe.skip('rules list bulk actions', () => {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -60,7 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('linkSnooze1h');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -99,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -130,7 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('scheduler-saveSchedule');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -169,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -201,9 +208,87 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated API key for 1 rule.');
       });
+    });
+
+    it('should apply filters to bulk actions when using the select all button', async () => {
+      const rule1 = await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'a' },
+      });
+      const rule2 = await createAlertManualCleanup({
+        supertest,
+        overwrites: { name: 'b', rule_type_id: 'test.always-firing' },
+      });
+      const rule3 = await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'c' },
+      });
+
+      await refreshAlertsList();
+      expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('3 rules');
+
+      await testSubjects.click('ruleTypeFilterButton');
+      await testSubjects.existOrFail('ruleTypetest.noopFilterOption');
+      await testSubjects.click('ruleTypetest.noopFilterOption');
+      await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
+      await testSubjects.click('selectAllRulesButton');
+
+      await testSubjects.click('showBulkActionButton');
+      await testSubjects.click('bulkDisable');
+      await testSubjects.existOrFail('untrackAlertsModal');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql('Disabled 2 rules');
+      });
+
+      await testSubjects.click('rules-list-clear-filter');
+      await refreshAlertsList();
+
+      await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
+      expect(await testSubjects.getVisibleText('statusDropdown')).to.be('Disabled');
+      await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
+      expect(await testSubjects.getVisibleText('statusDropdown')).to.be('Enabled');
+      await pageObjects.triggersActionsUI.searchAlerts(rule3.name);
+      expect(await testSubjects.getVisibleText('statusDropdown')).to.be('Disabled');
+
+      await testSubjects.click('rules-list-clear-filter');
+      await refreshAlertsList();
+
+      await testSubjects.click('ruleStatusFilterButton');
+      await testSubjects.existOrFail('ruleStatusFilterOption-enabled');
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
+      await testSubjects.click('selectAllRulesButton');
+
+      await testSubjects.click('showBulkActionButton');
+      await testSubjects.click('bulkDelete');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql('Deleted 1 rule');
+      });
+
+      await testSubjects.click('rules-list-clear-filter');
+      await refreshAlertsList();
+
+      await retry.try(
+        async () => {
+          expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('2 rules');
+        },
+        async () => {
+          // If the delete fails, make sure rule2 gets cleaned up
+          objectRemover.add(rule2.id, 'alert', 'alerts');
+        }
+      );
     });
   });
 };

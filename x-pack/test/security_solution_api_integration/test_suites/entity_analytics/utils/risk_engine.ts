@@ -35,7 +35,7 @@ import {
   countDownTest,
   waitFor,
   routeWithNamespace,
-} from '../../detections_response/utils';
+} from '../../../../common/utils/security_solution';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   const {
@@ -488,41 +488,49 @@ export const riskEngineRouteHelpersFactory = (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   namespace?: string
 ) => ({
-  init: async () =>
+  init: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
 
-  getStatus: async () =>
+  getStatus: async (expectStatusCode: number = 200) =>
     await supertest
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
 
-  enable: async () =>
+  enable: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
 
-  disable: async () =>
+  disable: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
-      .expect(200),
+      .expect(expectStatusCode),
+
+  privileges: async (expectStatusCode: number = 200) =>
+    await supertest
+      .get(RISK_ENGINE_PRIVILEGES_URL)
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
 });
 
 interface Credentials {

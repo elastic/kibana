@@ -341,6 +341,28 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "{@link SecurityServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.getStartServices",
             "type": "Function",
             "tags": [],
@@ -839,6 +861,28 @@
                 "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
                 "section": "def-common.PluginsServiceStart",
                 "text": "PluginsServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "{@link SecurityServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceStart",
+                "text": "SecurityServiceStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

@@ -77,6 +77,7 @@ const toEsSearchHit = <T extends object = object>(
     _id: '123',
     _score: 1.0,
     _source: hitSource,
+    sort: ['abc'],
   };
 };
 

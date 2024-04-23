@@ -210,6 +210,38 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.hasTrigger",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTrigger",
+            "description": [],
+            "signature": [
+              "(triggerId: string) => boolean"
+            ],
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.hasTrigger.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.getTrigger",
             "type": "Function",
             "tags": [],
@@ -751,7 +783,7 @@
               },
               {
                 "plugin": "imageEmbeddable",
-                "path": "src/plugins/image_embeddable/public/image_embeddable/image_embeddable_factory.tsx"
+                "path": "src/plugins/image_embeddable/public/components/image_embeddable.tsx"
               },
               {
                 "plugin": "embeddable",
@@ -2158,56 +2190,6 @@
       },
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.RowClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "RowClickContext",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.RowClickContext.embeddable",
-            "type": "Unknown",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.RowClickContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ rowIndex: number; table: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              "; columns?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
         "id": "def-public.Trigger",
         "type": "Interface",
         "tags": [],
@@ -2634,6 +2616,37 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.RowClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RowClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { rowIndex: number; table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; columns?: string[] | undefined; }; }"
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.VISUALIZE_FIELD_TRIGGER",
         "type": "string",
         "tags": [],
@@ -2870,7 +2883,7 @@
           "section": "def-common.Trigger",
           "text": "Trigger"
         },
-        ") => void; readonly getTrigger: (triggerId: string) => ",
+        ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
         "TriggerContract",
         "<object>; readonly registerAction: <Context extends object>(definition: ",
         {

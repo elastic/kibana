@@ -6,8 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import {
   FramePublicAPI,
   OperationDescriptor,
@@ -16,12 +20,7 @@ import {
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditor } from './dimension_editor';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { act } from 'react-dom/test-utils';
-import { PalettePanelContainer } from '../../../shared_components';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
@@ -65,6 +64,7 @@ describe('data table dimension editor', () => {
       },
     };
     setState = jest.fn();
+
     props = {
       accessor: 'foo',
       frame,
@@ -80,33 +80,38 @@ describe('data table dimension editor', () => {
     };
   });
 
+  const renderTableDimensionEditor = (
+    overrideProps?: Partial<
+      VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+        paletteService: PaletteRegistry;
+      }
+    >
+  ) => {
+    return render(<TableDimensionEditor {...props} {...overrideProps} />, {
+      wrapper: ({ children }) => (
+        <>
+          <div ref={props.panelRef} />
+          {children}
+        </>
+      ),
+    });
+  };
+
   it('should render default alignment', () => {
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(instance.find(EuiButtonGroup).prop('idSelected')).toEqual(
-      expect.stringContaining('left')
-    );
+    renderTableDimensionEditor();
+    expect(getSelectedButtonInGroup('lnsDatatable_alignment_groups')()).toHaveTextContent('Left');
   });
 
   it('should render default alignment for number', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_alignment_groups"]')
-        .find(EuiButtonGroup)
-        .prop('idSelected')
-    ).toEqual(expect.stringContaining('right'));
+    renderTableDimensionEditor();
+    expect(getSelectedButtonInGroup('lnsDatatable_alignment_groups')()).toHaveTextContent('Right');
   });
 
   it('should render specific alignment', () => {
     state.columns[0].alignment = 'center';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_alignment_groups"]')
-        .find(EuiButtonGroup)
-        .prop('idSelected')
-    ).toEqual(expect.stringContaining('center'));
+    renderTableDimensionEditor();
+    expect(getSelectedButtonInGroup('lnsDatatable_alignment_groups')()).toHaveTextContent('Center');
   });
 
   it('should set state for the right column', () => {
@@ -118,11 +123,8 @@ describe('data table dimension editor', () => {
         columnId: 'bar',
       },
     ];
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    instance
-      .find('[data-test-subj="lnsDatatable_alignment_groups"]')
-      .find(EuiButtonGroup)
-      .prop('onChange')('center');
+    renderTableDimensionEditor();
+    userEvent.click(screen.getByRole('button', { name: 'Center' }));
     expect(setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -138,44 +140,28 @@ describe('data table dimension editor', () => {
   });
 
   it('should not show the dynamic coloring option for non numeric columns', () => {
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]').exists()).toBe(
-      false
-    );
-    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_palette"]').exists()).toBe(
-      false
-    );
+    renderTableDimensionEditor();
+    expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
   it('should set the dynamic coloring default to "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]')
-        .find(EuiButtonGroup)
-        .prop('idSelected')
-    ).toEqual(expect.stringContaining('none'));
-
-    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_palette"]').exists()).toBe(
-      false
+    renderTableDimensionEditor();
+    expect(getSelectedButtonInGroup('lnsDatatable_dynamicColoring_groups')()).toHaveTextContent(
+      'None'
     );
+    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
   it('should show the dynamic palette display ony when colorMode is different from "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.columns[0].colorMode = 'text';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(
-      instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]')
-        .find(EuiButtonGroup)
-        .prop('idSelected')
-    ).toEqual(expect.stringContaining('text'));
-
-    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_palette"]').exists()).toBe(
-      true
+    renderTableDimensionEditor();
+    expect(getSelectedButtonInGroup('lnsDatatable_dynamicColoring_groups')()).toHaveTextContent(
+      'Text'
     );
+    expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
   });
 
   it('should set the coloring mode to the right column', () => {
@@ -188,11 +174,8 @@ describe('data table dimension editor', () => {
         columnId: 'bar',
       },
     ];
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    instance
-      .find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]')
-      .find(EuiButtonGroup)
-      .prop('onChange')('cell');
+    renderTableDimensionEditor();
+    userEvent.click(screen.getByRole('button', { name: 'Cell' }));
     expect(setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -211,16 +194,10 @@ describe('data table dimension editor', () => {
   it('should open the palette panel when "Settings" link is clicked in the palette input', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.columns[0].colorMode = 'cell';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
 
-    act(() => {
-      instance
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_trigger"]')
-        .first()
-        .simulate('click');
-    });
-
-    expect(instance.find(PalettePanelContainer).exists()).toBe(true);
+    renderTableDimensionEditor();
+    userEvent.click(screen.getByLabelText('Edit colors'));
+    expect(screen.getByTestId('lns-palettePanelFlyout')).toBeInTheDocument();
   });
 
   it('should not show the dynamic coloring option for a bucketed operation', () => {
@@ -230,21 +207,15 @@ describe('data table dimension editor', () => {
       () => ({ isBucketed: true } as OperationDescriptor)
     );
     state.columns[0].colorMode = 'cell';
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
 
-    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_groups"]').exists()).toBe(
-      false
-    );
-    expect(instance.find('[data-test-subj="lnsDatatable_dynamicColoring_palette"]').exists()).toBe(
-      false
-    );
+    renderTableDimensionEditor();
+    expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
-  it('should show the summary field for non numeric columns', () => {
-    const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_function"]').exists()).toBe(
-      false
-    );
-    expect(instance.find('[data-test-subj="lnsDatatable_summaryrow_label"]').exists()).toBe(false);
+  it('should not show the summary field for non numeric columns', () => {
+    renderTableDimensionEditor();
+    expect(screen.queryByTestId('lnsDatatable_summaryrow_function')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lnsDatatable_summaryrow_label')).not.toBeInTheDocument();
   });
 });

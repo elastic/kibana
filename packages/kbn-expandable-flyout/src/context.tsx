@@ -6,52 +6,58 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useContext } from 'react';
-import { useFlyoutMemoryState } from './context/memory_state_provider';
-import { useFlyoutUrlState } from './context/url_state_provider';
-import { type ExpandableFlyoutApi } from './types';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 
-export type { ExpandableFlyoutApi as ExpandableFlyoutContextValue };
+export interface ExpandableFlyoutContext {
+  /**
+   * Unique key to be used as url parameter to store the state of the flyout
+   */
+  urlKey: string | undefined;
+}
 
-type ExpandableFlyoutContextValue = 'memory' | 'url';
-
-export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContextValue | undefined>(
+export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContext | undefined>(
   undefined
 );
 
-/**
- * Retrieve Flyout's api and state
- * @deprecated
- */
-export const useExpandableFlyoutContext = (): ExpandableFlyoutApi => {
-  const contextValue = useContext(ExpandableFlyoutContext);
+export interface ExpandableFlyoutContextProviderProps {
+  /**
+   * Unique key to be used as url parameter to store the state of the flyout
+   */
+  urlKey: string | undefined;
+  /**
+   * React components to render
+   */
+  children: React.ReactNode;
+}
 
-  if (!contextValue) {
+/**
+ * Context used to share the value of the urlKey to the rest of the expandable flyout's code
+ */
+export const ExpandableFlyoutContextProvider = memo<ExpandableFlyoutContextProviderProps>(
+  ({ urlKey, children }) => {
+    const contextValue = useMemo(
+      () => ({
+        urlKey,
+      }),
+      [urlKey]
+    );
+
+    return (
+      <ExpandableFlyoutContext.Provider value={contextValue}>
+        {children}
+      </ExpandableFlyoutContext.Provider>
+    );
+  }
+);
+
+ExpandableFlyoutContextProvider.displayName = 'ExpandableFlyoutContextProvider';
+
+export const useExpandableFlyoutContext = () => {
+  const context = useContext(ExpandableFlyoutContext);
+  if (context === undefined) {
     throw new Error(
       'ExpandableFlyoutContext can only be used within ExpandableFlyoutContext provider'
     );
   }
-
-  const memoryState = useFlyoutMemoryState();
-  const urlState = useFlyoutUrlState();
-
-  return contextValue === 'memory' ? memoryState : urlState;
-};
-
-/**
- * This hook allows you to interact with the flyout, open panels and previews etc.
- */
-export const useExpandableFlyoutApi = () => {
-  const { panels, ...api } = useExpandableFlyoutContext();
-
-  return api;
-};
-
-/**
- * This hook allows you to access the flyout state, read open panels and previews.
- */
-export const useExpandableFlyoutState = () => {
-  const expandableFlyoutApiAndState = useExpandableFlyoutContext();
-
-  return expandableFlyoutApiAndState.panels;
+  return context;
 };

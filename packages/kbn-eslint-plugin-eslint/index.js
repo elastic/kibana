@@ -17,5 +17,6 @@ module.exports = {
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
+    no_unsafe_console: require('./rules/no_unsafe_console'),
   },
 };

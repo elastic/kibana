@@ -11,11 +11,14 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 import { dataViewAdHoc } from './data_view_complex';
+import { dataViewEsql } from './data_view_esql';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',
   title: 'A saved search',
   searchSource: createSearchSourceMock({ index: dataViewMock }),
+  columns: ['default_column'],
+  sort: [],
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeField = {
@@ -30,9 +33,10 @@ export const savedSearchMockWithTimeFieldNew = {
 export const savedSearchMockWithESQL = {
   id: 'the-saved-search-id-esql',
   searchSource: createSearchSourceMock({
-    index: dataViewWithTimefieldMock,
-    query: { esql: 'FROM "the-saved-search-id-esql"' },
+    index: dataViewEsql,
+    query: { esql: 'FROM "index-pattern-esql"' },
   }),
+  isTextBasedQuery: true,
 } as unknown as SavedSearch;
 
 export const savedSearchAdHoc = {

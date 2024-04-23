@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { mockGlobalState } from '../../mock';
+import type { SelectedDataView } from '../../store/sourcerer/model';
 import { initSourcererScope } from '../../store/sourcerer/model';
+import { mockBrowserFields, mockRuntimeMappings } from '../source/mock';
 
 export const mockPatterns = [
   'auditbeat-*',
@@ -17,24 +20,23 @@ export const mockPatterns = [
   'journalbeat-*',
 ];
 
-export const mockSourcererScope = {
+export const mockSourcererScope: SelectedDataView = {
   ...initSourcererScope,
-  scopePatterns: mockPatterns,
   browserFields: {
+    ...mockBrowserFields,
     _id: {
       fields: {
         _id: {
-          __typename: 'IndexField',
           aggregatable: false,
           category: '_id',
           description: 'Each document has an _id that uniquely identifies it',
-          esTypes: null,
+          esTypes: undefined,
           example: 'Y-6TfmcB0WOhS6qyMv3s',
-          format: null,
+          format: undefined,
           indexes: mockPatterns,
           name: '_id',
           searchable: true,
-          subType: null,
+          subType: undefined,
           type: 'string',
         },
       },
@@ -44,16 +46,20 @@ export const mockSourcererScope = {
     fields: [
       {
         aggregatable: false,
-        esTypes: null,
+        esTypes: undefined,
         name: '_id',
         searchable: true,
-        subType: null,
+        subType: undefined,
         type: 'string',
       },
     ],
     title: mockPatterns.join(),
   },
+  sourcererDataView: mockGlobalState.sourcerer.defaultDataView,
   selectedPatterns: mockPatterns,
   indicesExist: true,
   loading: false,
+  dataViewId: mockGlobalState.sourcerer.defaultDataView.id,
+  runtimeMappings: mockRuntimeMappings,
+  patternList: mockPatterns,
 };

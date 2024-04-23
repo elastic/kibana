@@ -8,7 +8,7 @@
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-cross-cluster-api-key.html",
     "availability": {
-      "stack": false,
+      "stack": true,
       "serverless": false
     }
   }

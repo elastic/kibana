@@ -13,7 +13,14 @@ import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_c
 
 type CommonProps = Pick<
   ContentEditorFlyoutContentProps,
-  'item' | 'isReadonly' | 'services' | 'onSave' | 'onCancel' | 'entityName' | 'customValidators'
+  | 'item'
+  | 'isReadonly'
+  | 'readonlyReason'
+  | 'services'
+  | 'onSave'
+  | 'onCancel'
+  | 'entityName'
+  | 'customValidators'
 >;
 
 export type Props = CommonProps;

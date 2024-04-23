@@ -111,6 +111,13 @@ export const SIZE = i18n.translate(
   }
 );
 
+export const LAST_CHECK = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.lastCheckColumn',
+  {
+    defaultMessage: 'Last check',
+  }
+);
+
 export const THIS_INDEX_HAS_NOT_BEEN_CHECKED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.thisIndexHasNotBeenCheckedTooltip',
   {

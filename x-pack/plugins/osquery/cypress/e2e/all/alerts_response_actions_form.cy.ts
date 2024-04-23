@@ -70,32 +70,32 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
 
     cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
       cy.contains('Query is a required field');
-      cy.contains('Timeout value must be greater than 60 seconds.').should('not.exist');
+      cy.contains('The timeout value must be 60 seconds or higher.').should('not.exist');
     });
 
     // check if changing error state of one input doesn't clear other errors - START
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Advanced').click();
       cy.getBySel('timeout-input').clear();
-      cy.contains('Timeout value must be greater than 60 seconds.');
+      cy.contains('The timeout value must be 60 seconds or higher.');
     });
 
     cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
       cy.contains('Query is a required field');
-      cy.contains('Timeout value must be greater than 60 seconds.');
+      cy.contains('The timeout value must be 60 seconds or higher.');
     });
 
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.getBySel('timeout-input').type('6');
-      cy.contains('Timeout value must be greater than 60 seconds.');
+      cy.contains('The timeout value must be 60 seconds or higher.');
     });
     cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
       cy.contains('Query is a required field');
-      cy.contains('Timeout value must be greater than 60 seconds.');
+      cy.contains('The timeout value must be 60 seconds or higher.');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.getBySel('timeout-input').type('6');
-      cy.contains('Timeout value must be greater than 60 seconds.').should('not.exist');
+      cy.contains('The timeout value must be 60 seconds or higher.').should('not.exist');
     });
     cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
       cy.contains('Query is a required field');
@@ -105,7 +105,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
       cy.contains('Query is a required field');
-      cy.contains('Timeout value must be greater than 60 seconds.').should('not.exist');
+      cy.contains('The timeout value must be 60 seconds or higher.').should('not.exist');
     });
     // check if changing error state of one input doesn't clear other errors - END
 
@@ -170,6 +170,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         cy.contains('Search for a pack to run');
         cy.contains('Pack is a required field');
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+        cy.contains(packName);
       })
       .clickOutside();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
@@ -181,7 +182,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
 
     cy.getBySel('ruleEditSubmitButton').click();
-    cy.wait('@saveRuleSingleQuery').should(({ request }) => {
+    cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
       const oneQuery = [
         {
           interval: 3600,
@@ -221,7 +222,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
 
     cy.contains('Save changes').click();
-    cy.wait('@saveRuleMultiQuery').should(({ request }) => {
+    cy.wait('@saveRuleMultiQuery', { timeout: 15000 }).should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,

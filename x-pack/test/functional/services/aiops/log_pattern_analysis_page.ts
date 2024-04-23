@@ -128,7 +128,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
       const row = rows[rowIndex];
       const cells = await row.findAllByClassName('euiTableRowCell');
-      return Number(await cells[0].getVisibleText());
+      return Number(await cells[1].getVisibleText());
     },
 
     async assertDiscoverDocCountExists() {
@@ -144,6 +144,17 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         expect(formattedDocCount).to.eql(
           expectedDocCount,
           `Expected discover document count to be '${expectedDocCount}' (got '${formattedDocCount}')`
+        );
+      });
+    },
+
+    async assertDiscoverDocCountGreaterThan(expectedDocCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const docCount = await testSubjects.getVisibleText('discoverQueryHits');
+        const formattedDocCount = docCount.replaceAll(',', '');
+        expect(formattedDocCount).to.above(
+          expectedDocCount,
+          `Expected discover document count to be above '${expectedDocCount}' (got '${formattedDocCount}')`
         );
       });
     },

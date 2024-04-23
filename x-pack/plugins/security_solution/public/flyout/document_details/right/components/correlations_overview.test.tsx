@@ -99,7 +99,9 @@ describe('<CorrelationsOverview />', () => {
   });
 
   it('should render wrapper component', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: false });
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'event-id' });
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
@@ -115,7 +117,7 @@ describe('<CorrelationsOverview />', () => {
   it('should show component with all rows in expandable panel', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, indices: ['index1'] });
+      .mockReturnValue({ show: true, documentId: 'event-id', indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
@@ -158,7 +160,7 @@ describe('<CorrelationsOverview />', () => {
   it('should hide rows and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, indices: ['index1'] });
+      .mockReturnValue({ show: false, documentId: 'event-id', indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
@@ -178,7 +180,9 @@ describe('<CorrelationsOverview />', () => {
   });
 
   it('should hide rows if values are null', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: true });
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: true, documentId: 'event-id' });
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);

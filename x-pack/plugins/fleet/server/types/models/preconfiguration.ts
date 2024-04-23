@@ -19,7 +19,10 @@ import {
 } from './output';
 
 import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
-import { PackagePolicyNamespaceSchema } from './package_policy';
+import {
+  PackagePolicyNamespaceSchema,
+  SimplifiedPackagePolicyPreconfiguredSchema,
+} from './package_policy';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -103,6 +106,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     id: schema.string(),
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
+    is_internal: schema.maybe(schema.boolean()),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     proxy_id: schema.nullable(schema.string()),
   }),
@@ -138,47 +142,50 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     data_output_id: schema.maybe(schema.string()),
     monitoring_output_id: schema.maybe(schema.string()),
     package_policies: schema.arrayOf(
-      schema.object({
-        id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-        name: schema.string(),
-        package: schema.object({
-          name: schema.string({
-            validate: (value) => {
-              if (value === 'synthetics') {
-                return i18n.translate('xpack.fleet.config.disableSynthetics', {
-                  defaultMessage:
-                    'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
-                });
-              }
-            },
+      schema.oneOf([
+        schema.object({
+          id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+          name: schema.string(),
+          package: schema.object({
+            name: schema.string({
+              validate: (value) => {
+                if (value === 'synthetics') {
+                  return i18n.translate('xpack.fleet.config.disableSynthetics', {
+                    defaultMessage:
+                      'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                  });
+                }
+              },
+            }),
           }),
+          description: schema.maybe(schema.string()),
+          namespace: schema.maybe(PackagePolicyNamespaceSchema),
+          inputs: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                type: schema.string(),
+                enabled: schema.maybe(schema.boolean()),
+                keep_enabled: schema.maybe(schema.boolean()),
+                vars: varsSchema,
+                streams: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      data_stream: schema.object({
+                        type: schema.maybe(schema.string()),
+                        dataset: schema.string(),
+                      }),
+                      enabled: schema.maybe(schema.boolean()),
+                      keep_enabled: schema.maybe(schema.boolean()),
+                      vars: varsSchema,
+                    })
+                  )
+                ),
+              })
+            )
+          ),
         }),
-        description: schema.maybe(schema.string()),
-        namespace: schema.maybe(PackagePolicyNamespaceSchema),
-        inputs: schema.maybe(
-          schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              enabled: schema.maybe(schema.boolean()),
-              keep_enabled: schema.maybe(schema.boolean()),
-              vars: varsSchema,
-              streams: schema.maybe(
-                schema.arrayOf(
-                  schema.object({
-                    data_stream: schema.object({
-                      type: schema.maybe(schema.string()),
-                      dataset: schema.string(),
-                    }),
-                    enabled: schema.maybe(schema.boolean()),
-                    keep_enabled: schema.maybe(schema.boolean()),
-                    vars: varsSchema,
-                  })
-                )
-              ),
-            })
-          )
-        ),
-      })
+        SimplifiedPackagePolicyPreconfiguredSchema,
+      ])
     ),
   }),
   {

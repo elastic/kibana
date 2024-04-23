@@ -74,9 +74,6 @@ const mockLayer = {
   canShowTooltip: () => {
     return true;
   },
-  supportsElasticsearchFilters: () => {
-    return false;
-  },
   getLayerTypeIconName: () => {
     return 'vector';
   },

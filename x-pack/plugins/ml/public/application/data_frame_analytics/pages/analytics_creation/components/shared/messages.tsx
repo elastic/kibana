@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
-import { FormMessage } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { FormMessage } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 interface Props {
   messages: FormMessage[];

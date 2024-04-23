@@ -12,6 +12,8 @@ import { Provider } from 'react-redux';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
+import { of } from 'rxjs';
+
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -25,7 +27,7 @@ import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/ty
 import { PluginsStart, ClientData, ESConfig } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
@@ -66,9 +68,18 @@ export const renderApp = (
     workplaceSearch,
   } = data;
   const { history } = params;
-  const { application, chrome, http, uiSettings } = core;
+  const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+  const {
+    charts,
+    cloud,
+    guidedOnboarding,
+    indexManagement: indexManagementPlugin,
+    lens,
+    security,
+    share,
+    ml,
+  } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -88,7 +99,7 @@ export const renderApp = (
   const store = getContext().store;
   let user: AuthenticatedUser | null = null;
   try {
-    security.authc
+    security?.authc
       .getCurrentUser()
       .then((newUser) => {
         user = newUser;
@@ -99,6 +110,9 @@ export const renderApp = (
   } catch {
     user = null;
   }
+  const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
+
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -106,10 +120,13 @@ export const renderApp = (
     charts,
     cloud,
     config,
-    esConfig,
+    connectorTypes,
+    console: plugins.console,
     data: plugins.data,
+    esConfig,
     guidedOnboarding,
     history,
+    indexMappingComponent,
     isSidebarEnabled,
     lens,
     ml,
@@ -120,6 +137,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
@@ -130,14 +148,14 @@ export const renderApp = (
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
-    license$: plugins.licensing.license$,
+    license$: plugins.licensing?.license$ || of(undefined),
   });
   const unmountHttpLogic = mountHttpLogic({
     errorConnectingMessage,
     http,
     readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
 
   ReactDOM.render(
     <I18nProvider>
@@ -157,7 +175,6 @@ export const renderApp = (
                   searchOAuth={searchOAuth}
                   workplaceSearch={workplaceSearch}
                 />
-                <Toasts />
               </Router>
             </Provider>
           </CloudContext>
@@ -172,7 +189,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
-    plugins.data.search.session.clear();
+    plugins.data?.search.session.clear();
   };
 };
 

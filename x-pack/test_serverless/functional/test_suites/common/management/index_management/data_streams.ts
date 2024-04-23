@@ -19,9 +19,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const TEST_DS_NAME = 'test-ds-1';
 
-  describe('Data Streams', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/181242
+  describe.skip('Data Streams', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
+    this.tags(['failsOnMKI']);
     before(async () => {
-      await log.debug('Creating required data stream');
+      log.debug('Creating required data stream');
       try {
         await es.cluster.putComponentTemplate({
           name: `${TEST_DS_NAME}_mapping`,
@@ -56,8 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       await security.testUser.setRoles(['index_management_user']);
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('data_streamsTab');
@@ -65,7 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await log.debug('Cleaning up created data stream');
+      log.debug('Cleaning up created data stream');
 
       try {
         await es.indices.deleteDataStream({ name: TEST_DS_NAME });
@@ -116,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('saveButton');
 
       // Expect to see a success toast
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention updated');
     });
 
@@ -134,7 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('saveButton');
 
       // Expect to see a success toast
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
     });
   });

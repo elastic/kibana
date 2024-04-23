@@ -181,9 +181,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Check that session is still loading
         await searchSessions.expectState('backgroundLoading');
         await retry.waitFor('session restoration warnings related to other bucket', async () => {
-          return (await toasts.getToastCount()) === 1;
+          return (await toasts.getCount()) === 1;
         });
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
 
         // check that other bucket requested add to a session
         await searchSessions.openPopover();
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchSessionItem.searchesCount).to.be(2);
 
         await searchSessionItem.view();
-        expect(await toasts.getToastCount()).to.be(0); // there should be no warnings
+        expect(await toasts.getCount()).to.be(0); // there should be no warnings
         await searchSessions.expectState('restored', 20000);
         await dashboardExpect.noErrorEmbeddablesPresent();
 

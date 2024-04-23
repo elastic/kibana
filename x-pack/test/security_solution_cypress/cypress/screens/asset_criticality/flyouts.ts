@@ -7,25 +7,23 @@
 
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const HOST_DETAILS_FLYOUT_SECTION_HEADER = getDataTestSubjectSelector('host-details-header');
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR = getDataTestSubjectSelector(
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR = getDataTestSubjectSelector(
   'asset-criticality-selector'
 );
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL =
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL =
   getDataTestSubjectSelector('asset-criticality-level');
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON = getDataTestSubjectSelector(
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON = getDataTestSubjectSelector(
   'asset-criticality-change-btn'
 );
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE = getDataTestSubjectSelector(
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE = getDataTestSubjectSelector(
   'asset-criticality-modal-title'
 );
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT = getDataTestSubjectSelector(
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT = getDataTestSubjectSelector(
   'asset-criticality-modal-select'
 );
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION = getDataTestSubjectSelector(
-  'asset-criticality-modal-select-option'
-);
-export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN = getDataTestSubjectSelector(
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION =
+  getDataTestSubjectSelector('asset-criticality-modal-select-option');
+export const ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN = getDataTestSubjectSelector(
   'asset-criticality-modal-save-btn'
 );
 

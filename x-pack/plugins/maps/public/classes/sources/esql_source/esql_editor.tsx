@@ -17,12 +17,16 @@ import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 interface Props {
   esql: string;
   onESQLChange: ({
+    adhocDataViewId,
     columns,
     dateFields,
+    geoFields,
     esql,
   }: {
+    adhocDataViewId: string;
     columns: ESQLColumn[];
     dateFields: string[];
+    geoFields: string[];
     esql: string;
   }) => void;
 }
@@ -71,20 +75,14 @@ export function ESQLEditor(props: Props) {
               );
             }
             props.onESQLChange({
-              columns: esqlMeta.columns,
-              dateFields: esqlMeta.dateFields,
               esql,
+              ...esqlMeta,
             });
           } catch (err) {
             if (!isMounted()) {
               return;
             }
             setError(err);
-            props.onESQLChange({
-              columns: [],
-              dateFields: [],
-              esql: '',
-            });
           }
 
           setIsLoading(false);

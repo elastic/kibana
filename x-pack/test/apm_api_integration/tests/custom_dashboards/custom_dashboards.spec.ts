@@ -36,6 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177119
   registry.when('Service dashboards when data is loaded', { config: 'basic', archives: [] }, () => {
     const range = timerange(new Date(start).getTime(), new Date(end).getTime());
 

@@ -118,6 +118,18 @@ export type {
   UnauthorizedErrorHandler,
 } from '@kbn/core-elasticsearch-server';
 
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+} from '@kbn/core-security-server';
+export type {
+  User,
+  UserRealm,
+  AuthenticatedUser,
+  AuthenticationProvider,
+} from '@kbn/core-security-common';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
@@ -153,7 +165,7 @@ export type {
   RouteValidationSpec,
   RouteValidationFunction,
   RouteValidatorOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RouteValidationResultFactory,
   RouteValidationError,
   RedirectResponseOptions,
@@ -219,7 +231,7 @@ export type {
   AppenderConfigType,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
-export type { Ecs, EcsEvent } from '@kbn/ecs';
+export type { Ecs, EcsEvent } from '@elastic/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 

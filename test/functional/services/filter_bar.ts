@@ -175,12 +175,12 @@ export class FilterBarService extends FtrService {
 
   public async isFilterPinned(key: string): Promise<boolean> {
     const filter = await this.testSubjects.find(`~filter & ~filter-key-${key}`);
-    return (await filter.getAttribute('data-test-subj')).includes('filter-pinned');
+    return ((await filter.getAttribute('data-test-subj')) ?? '').includes('filter-pinned');
   }
 
   public async isFilterNegated(key: string): Promise<boolean> {
     const filter = await this.testSubjects.find(`~filter & ~filter-key-${key}`);
-    return (await filter.getAttribute('data-test-subj')).includes('filter-negated');
+    return ((await filter.getAttribute('data-test-subj')) ?? '').includes('filter-negated');
   }
 
   public async getFilterCount(): Promise<number> {
@@ -321,7 +321,7 @@ export class FilterBarService extends FtrService {
     await this.addFilterAndSelectDataView(null, filter);
   }
 
-  public async addDslFilter(value: string) {
+  public async addDslFilter(value: string, waitUntilLoadingHasFinished = true) {
     await this.testSubjects.click('addFilter');
     await this.testSubjects.click('editQueryDSL');
     await this.monacoEditor.waitCodeEditorReady('addFilterPopover');
@@ -331,7 +331,9 @@ export class FilterBarService extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.waitForDeleted('saveFilter');
     });
-    await this.header.waitUntilLoadingHasFinished();
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   /**

@@ -30,7 +30,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, {
+      uiSettingsClient: uiSettings,
+      rollupsEnabled: isRollupsEnabled(),
+    });
+
     const {
       pattern,
       meta_fields: metaFields,
@@ -38,13 +42,16 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
+      field_types: fieldTypes,
     } = request.query;
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
+    let parsedFieldTypes: string[] = [];
     try {
-      parsedMetaFields = parseFields(metaFields);
-      parsedFields = parseFields(request.query.fields ?? []);
+      parsedMetaFields = parseFields(metaFields, 'meta_fields');
+      parsedFields = parseFields(request.query.fields ?? [], 'fields');
+      parsedFieldTypes = parseFields(fieldTypes || [], 'field_types');
     } catch (error) {
       return response.badRequest();
     }
@@ -59,6 +66,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
+        fieldTypes: parsedFieldTypes,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 

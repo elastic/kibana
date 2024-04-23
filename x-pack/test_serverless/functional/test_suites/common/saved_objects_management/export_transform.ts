@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -39,7 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
         await kibanaServer.savedObjects.cleanStandardList();
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('allows to mutate the objects during an export', async () => {
@@ -159,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -170,7 +169,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
         await kibanaServer.savedObjects.cleanStandardList();
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('execute export transforms for reference objects', async () => {
@@ -211,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -222,7 +220,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
         await kibanaServer.savedObjects.cleanStandardList();
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('should only export objects returning `true` for `isExportable`', async () => {

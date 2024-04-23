@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { useBatchedPublishingSubjects } from './publishing_batcher';
 export {
-  useStateFromPublishingSubject,
-  usePublishingSubject,
-  type PublishingSubject,
-} from './publishing_subject';
+  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
+} from './publishing_batcher';
+export { useStateFromPublishingSubject, usePublishingSubject } from './publishing_subject';
+export type {
+  PublishingSubject,
+  ValueFromPublishingSubject,
+  UnwrapPublishingSubjectTuple,
+} from './types';

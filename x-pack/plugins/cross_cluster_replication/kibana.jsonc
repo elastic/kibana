@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/cross-cluster-replication-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "crossClusterReplication",
     "server": true,

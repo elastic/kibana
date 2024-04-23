@@ -81,9 +81,6 @@ package-lock.json
 npm-debug.log*
 .tern-project
 .nyc_output
-.ci/pipeline-library/build/
-.ci/runbld
-.ci/bash_standard_lib.sh
 .gradle
 .vagrant
 .envrc
@@ -94,8 +91,8 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
+/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
+/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
@@ -144,4 +141,3 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 # ignore FTR temp directory
 .ftr
 role_users.json
-

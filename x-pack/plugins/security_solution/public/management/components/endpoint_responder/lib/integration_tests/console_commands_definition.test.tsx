@@ -27,6 +27,7 @@ describe('When displaying Endpoint Response Actions', () => {
 
     const endpointMetadata = new EndpointMetadataGenerator().generate();
     const commands = getEndpointConsoleCommands({
+      agentType: 'endpoint',
       endpointAgentId: '123',
       endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
       endpointPrivileges: getEndpointPrivilegesInitialStateMock(),

@@ -9,7 +9,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 
 import { App, HttpContext } from './app';
 
@@ -25,7 +24,7 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
     application.register({
       id: APPLICATION_ID,
       title: APPLICATION_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async ({ element }: AppMountParameters) => {
         const [{ http }] = await getStartServices();
 

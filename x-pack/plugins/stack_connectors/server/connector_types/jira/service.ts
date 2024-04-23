@@ -106,6 +106,10 @@ export const createExternalService = (
       fields = { ...fields, parent: { key: incident.parent } };
     }
 
+    if (incident.otherFields) {
+      fields = { ...fields, ...incident.otherFields };
+    }
+
     return fields;
   };
 
@@ -215,7 +219,6 @@ export const createExternalService = (
         2. Create the issue.
         3. Get the created issue with all the necessary fields.
     */
-
     let issueType = incident.issueType;
 
     if (!incident.issueType) {

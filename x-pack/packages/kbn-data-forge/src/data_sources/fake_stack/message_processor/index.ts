@@ -12,6 +12,7 @@ import { badHost } from './lib/events/bad_host';
 import { weightedSample } from '../common/weighted_sample';
 
 import { Doc, GeneratorFunction, EventFunction, EventTemplate } from '../../../types';
+import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';
 
 let firstRun = true;
 
@@ -31,7 +32,7 @@ function getTemplate(name: string) {
   return GOOD_EVENT_TEMPLATES;
 }
 
-export const generateEvent: GeneratorFunction = (_config, schedule, _index, timestamp) => {
+export const generateEvent: GeneratorFunction = (config, schedule, _index, timestamp) => {
   let startupEvents: Doc[] = [];
   if (firstRun) {
     firstRun = false;
@@ -40,7 +41,10 @@ export const generateEvent: GeneratorFunction = (_config, schedule, _index, time
 
   const template = getTemplate(schedule.template);
   const fn = weightedSample(template) as EventFunction;
-  const events = fn(schedule, timestamp).flat();
+  const events = addEphemeralProjectId(
+    config.indexing.ephemeralProjectIds || 0,
+    fn(schedule, timestamp).flat()
+  );
 
   return [...startupEvents, ...events];
 };

@@ -9,13 +9,13 @@ import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { getExceptionTypeForIndex } from './helpers/exception_types';
 import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-
   const severities = ['critical', 'error', 'warning', 'info', 'debug', 'trace'];
 
   return {
@@ -23,7 +23,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       const transactionName = 'DELETE /api/orders/{id}';
 
       const instance = apm
-        .service({ name: `synth-node`, environment: ENVIRONMENT, agentName: 'nodejs' })
+        .service({
+          name: `synthtrace-high-cardinality-0`,
+          environment: ENVIRONMENT,
+          agentName: 'java',
+        })
         .instance('instance');
 
       const failedTraceEvents = range
@@ -38,7 +42,13 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .duration(1000)
             .failure()
             .errors(
-              instance.error({ message: errorMessage, type: 'My Type' }).timestamp(timestamp + 50)
+              instance
+                .error({
+                  message: errorMessage,
+                  type: getExceptionTypeForIndex(index),
+                  culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
+                })
+                .timestamp(timestamp + 50)
             );
         });
 

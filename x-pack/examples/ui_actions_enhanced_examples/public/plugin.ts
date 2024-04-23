@@ -6,8 +6,8 @@
  */
 
 import { createElement as h } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   AdvancedUiActionsSetup,
@@ -93,7 +93,8 @@ export class UiActionsEnhancedExamplesPlugin
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
-            })
+            }),
+            coreStart
           ),
           {
             ownFocus: true,
@@ -118,7 +119,8 @@ export class UiActionsEnhancedExamplesPlugin
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },
-            })
+            }),
+            coreStart
           ),
           {
             ownFocus: true,
@@ -130,7 +132,7 @@ export class UiActionsEnhancedExamplesPlugin
     core.application.register({
       id: 'ui_actions_enhanced-explorer',
       title: 'UI Actions Enhanced Explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core),
     });
 
@@ -150,7 +152,7 @@ export class UiActionsEnhancedExamplesPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): UiActionsEnhancedExamplesStart {
+  public start(_core: CoreStart, plugins: StartDependencies): UiActionsEnhancedExamplesStart {
     const managerWithoutEmbeddable = new UiActionsEnhancedDynamicActionManager({
       storage: new UiActionsEnhancedMemoryActionStorage(),
       isCompatible: async () => true,

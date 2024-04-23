@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-
-const configSchema = schema.object({
-  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
-});
-
-export type ConfigSchema = TypeOf<typeof configSchema>;
+import { configSchema, type ConfigSchema } from '../common/config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
+  exposeToBrowser: {
+    experimental: true,
+  },
 };

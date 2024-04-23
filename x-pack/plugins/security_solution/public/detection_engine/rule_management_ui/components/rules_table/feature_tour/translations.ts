@@ -28,17 +28,16 @@ export const NEXT_STEP_LABEL = i18n.translate(
   }
 );
 
-export const SEARCH_CAPABILITIES_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.searchCapabilitiesTitle',
+export const UPDATE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle',
   {
-    defaultMessage: 'Enhanced search capabilities',
+    defaultMessage: 'New field view of updates',
   }
 );
 
-export const SEARCH_CAPABILITIES_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.searchCapabilitiesDescription',
+export const UPDATE_TOUR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription',
   {
-    defaultMessage:
-      'It is now possible to search rules by index patterns, like "filebeat-*", or by MITRE ATT&CK™ tactics or techniques, like "Defense Evasion" or "TA0005".',
+    defaultMessage: "Click on a rule's name to view the latest changes.",
   }
 );

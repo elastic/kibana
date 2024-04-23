@@ -32,6 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'visChart',
     'visEditor',
     'vegaChart',
+    'svlCommonPage',
   ]);
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
@@ -42,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('vega chart in visualize app', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();

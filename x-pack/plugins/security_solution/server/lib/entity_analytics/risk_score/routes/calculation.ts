@@ -14,17 +14,17 @@ import {
   RISK_SCORE_CALCULATION_URL,
 } from '../../../../../common/constants';
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
-import type { ExperimentalFeatures } from '../../../../../common';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskScoreAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const riskScoreCalculationRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
 ) => {
   router.versioned
     .post({
@@ -40,8 +40,19 @@ export const riskScoreCalculationRoute = (
         validate: { request: { body: buildRouteValidation(riskScoreCalculationRequestSchema) } },
       },
       async (context, request, response) => {
-        const siemResponse = buildSiemResponse(response);
         const securityContext = await context.securitySolution;
+
+        securityContext.getAuditLogger()?.log({
+          message: 'User triggered custom manual scoring',
+          event: {
+            action: RiskScoreAuditActions.RISK_ENGINE_MANUAL_SCORING,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
+        const siemResponse = buildSiemResponse(response);
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;
@@ -49,9 +60,10 @@ export const riskScoreCalculationRoute = (
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
         const riskScoreDataClient = securityContext.getRiskScoreDataClient();
         const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
+        const securityConfig = await securityContext.getConfig();
         const assetCriticalityService = assetCriticalityServiceFactory({
           assetCriticalityDataClient,
-          experimentalFeatures,
+          uiSettingsClient: coreContext.uiSettings.client,
         });
 
         const riskScoreService = riskScoreServiceFactory({
@@ -83,6 +95,11 @@ export const riskScoreCalculationRoute = (
 
           const afterKeys = userAfterKeys ?? {};
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
+          const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
+            securityConfig.entityAnalytics
+          );
+
+          const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
 
           const result = await riskScoreService.calculateAndPersistScores({
             afterKeys,
@@ -94,6 +111,7 @@ export const riskScoreCalculationRoute = (
             range,
             runtimeMappings,
             weights,
+            alertSampleSizePerShard,
           });
 
           return response.ok({ body: result });

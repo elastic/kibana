@@ -34,6 +34,7 @@ export interface BuildOptions {
   createDockerCloud: boolean;
   createDockerServerless: boolean;
   createDockerContexts: boolean;
+  createDockerFIPS: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   withExamplePlugins: boolean;
@@ -161,6 +162,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
     await run(Tasks.CreateDockerServerless);
+  }
+
+  if (options.createDockerFIPS) {
+    // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
+    await run(Tasks.CreateDockerFIPS);
   }
 
   if (options.createDockerContexts) {

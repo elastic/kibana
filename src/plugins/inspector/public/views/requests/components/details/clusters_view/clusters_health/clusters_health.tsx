@@ -7,16 +7,16 @@
  */
 
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import type { ClusterDetails } from '@kbn/es-types';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ClusterHealth } from './cluster_health';
 import { getHeathBarLinearGradient } from './gradient';
 
 interface Props {
-  clusters: Record<string, ClusterDetails>;
+  clusters: Record<string, estypes.ClusterDetails>;
 }
 
 export function ClustersHealth({ clusters }: Props) {

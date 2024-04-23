@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-http.html",
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "http": {
+          "properties": {
+            "response": {
+              "properties": {
+                "bytes": {
+                  "type": "long"
+                },
+                "status_code": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

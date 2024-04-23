@@ -7,19 +7,23 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+
 import { capabilitiesProvider } from './capabilities_provider';
+import { AdvancedSettingsConfig } from './config';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
+  private readonly config: AdvancedSettingsConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   public setup(core: CoreSetup) {
     this.logger.debug('advancedSettings: Setup');
 
-    core.capabilities.registerProvider(capabilitiesProvider);
+    core.capabilities.registerProvider(() => capabilitiesProvider(this.config));
 
     return {};
   }

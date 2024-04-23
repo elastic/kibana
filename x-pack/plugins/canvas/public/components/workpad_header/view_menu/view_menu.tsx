@@ -6,7 +6,7 @@
  */
 import React, { FC, useCallback, useContext } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { compose, withHandlers } from 'recompose';
+import { compose, withHandlers } from 'react-recompose';
 import { Dispatch } from 'redux';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';

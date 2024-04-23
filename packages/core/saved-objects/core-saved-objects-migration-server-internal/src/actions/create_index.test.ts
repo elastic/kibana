@@ -69,7 +69,7 @@ describe('createIndex', () => {
             "refresh_interval": "1s",
           },
         },
-        "timeout": "60s",
+        "timeout": "300s",
         "wait_for_active_shards": "all",
       }
     `);
@@ -104,7 +104,7 @@ describe('createIndex', () => {
             },
           },
         },
-        "timeout": "60s",
+        "timeout": "300s",
         "wait_for_active_shards": "all",
       }
     `);

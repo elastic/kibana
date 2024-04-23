@@ -31,6 +31,7 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --docker-tag-qualifier="$GIT_COMMIT" \
   --docker-push \
   --skip-docker-ubi \
+  --skip-docker-fips \
   --skip-docker-ubuntu \
   --skip-docker-serverless \
   --skip-docker-contexts

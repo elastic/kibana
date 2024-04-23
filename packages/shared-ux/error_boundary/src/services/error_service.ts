@@ -15,7 +15,7 @@ const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;
 
 interface ErrorServiceError {
   error: Error;
-  errorInfo?: Partial<React.ErrorInfo> | null;
+  errorInfo?: React.ErrorInfo;
   name: string | null;
   isFatal: boolean;
 }
@@ -48,7 +48,7 @@ export class KibanaErrorService {
   /**
    * Derive the name of the component that threw the error
    */
-  private getErrorComponentName(errorInfo: Partial<React.ErrorInfo> | null) {
+  private getErrorComponentName(errorInfo?: React.ErrorInfo) {
     let errorComponentName: string | null = null;
     const stackLines = errorInfo?.componentStack?.split('\n');
     const errorIndicator = /^    at (\S+).*/;
@@ -75,18 +75,28 @@ export class KibanaErrorService {
   /**
    * Creates a decorated error object
    */
-  public registerError(
-    error: Error,
-    errorInfo: Partial<React.ErrorInfo> | null
-  ): ErrorServiceError {
+  public registerError(error: Error, errorInfo?: React.ErrorInfo): ErrorServiceError {
     const isFatal = this.getIsFatal(error);
     const name = this.getErrorComponentName(errorInfo);
 
     try {
-      if (isFatal) {
-        this.analytics?.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
+      if (isFatal && this.analytics) {
+        let componentStack = '';
+        let errorStack = '';
+
+        if (errorInfo && errorInfo.componentStack) {
+          componentStack = errorInfo.componentStack;
+        }
+
+        if (error instanceof Error && typeof error.stack === 'string') {
+          errorStack = error.stack;
+        }
+
+        this.analytics.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
           component_name: name,
+          component_stack: componentStack,
           error_message: error.toString(),
+          error_stack: errorStack,
         });
       }
     } catch (e) {

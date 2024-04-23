@@ -6,14 +6,14 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
   data-test-subj="visNoResult"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+    class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
     data-test-subj="visualization-error"
   >
     <div
-      class="euiEmptyPrompt__main"
+      class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
     >
       <div
-        class="euiEmptyPrompt__icon"
+        class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
       >
         <span
           color="default"
@@ -21,19 +21,15 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
         />
       </div>
       <div
-        class="euiEmptyPrompt__content"
+        class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
       >
         <div
-          class="euiEmptyPrompt__contentInner"
+          class="euiText emotion-euiText-m-euiTextColor-subdued"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiText visualization-error-text emotion-euiText-xs"
           >
-            <div
-              class="euiText visualization-error-text emotion-euiText-xs"
-            >
-              No results found
-            </div>
+            No results found
           </div>
         </div>
       </div>

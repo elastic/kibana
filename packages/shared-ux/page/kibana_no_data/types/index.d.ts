@@ -59,4 +59,6 @@ export interface KibanaNoDataPageProps {
   allowAdHocDataView?: boolean;
   /** Set to true if the kibana is customly branded */
   showPlainSpinner: boolean;
+  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+  onESQLNavigationComplete?: () => void;
 }

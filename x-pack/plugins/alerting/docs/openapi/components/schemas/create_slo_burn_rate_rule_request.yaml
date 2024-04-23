@@ -14,6 +14,8 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   consumer:
     $ref: 'consumer.yaml'
   enabled:
@@ -23,7 +25,7 @@ properties:
   notify_when:
     $ref: 'notify_when.yaml'
   params:
-    $ref:  '../../../../../observability/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
+    $ref:  '../../../../../observability_solution/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
   rule_type_id:
     type: string
     description: The ID of the rule type that you want to call when the rule is scheduled to run.

@@ -39,7 +39,7 @@ export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
     /**
      * The criticality level of the asset.
      */
-    criticality_level: z.enum(['very_important', 'important', 'normal', 'not_important']),
+    criticality_level: z.enum(['low_impact', 'medium_impact', 'high_impact', 'extreme_impact']),
   })
 );
 

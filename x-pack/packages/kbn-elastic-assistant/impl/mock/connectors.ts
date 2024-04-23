@@ -6,7 +6,7 @@
  */
 
 import { ActionType } from '@kbn/actions-plugin/common';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { AIConnector } from '../connectorland/connector_selector';
 
 export const mockActionTypes = [
   {
@@ -31,7 +31,7 @@ export const mockActionTypes = [
   } as ActionType,
 ];
 
-export const mockConnectors: ActionConnector[] = [
+export const mockConnectors: AIConnector[] = [
   {
     id: 'connectorId',
     name: 'Captain Connector',

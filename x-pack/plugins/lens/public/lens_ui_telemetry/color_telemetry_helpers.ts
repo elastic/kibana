@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { ColorMapping, NeutralPalette } from '@kbn/coloring';
-import type {
-  CategoricalColor,
-  ColorCode,
-  GradientColor,
-} from '@kbn/coloring/src/shared_components/color_mapping/config/types';
+import { ColorMapping, NeutralPalette, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
 import { isEqual } from 'lodash';
 import { nonNullable } from '../utils';
 
@@ -24,16 +19,13 @@ export const getColorMappingTelemetryEvents = (
     return [];
   }
 
-  const { assignments, specialAssignments, assignmentMode, colorMode, paletteId } = colorMapping;
+  const { assignments, specialAssignments, colorMode, paletteId } = colorMapping;
   const {
-    assignmentMode: prevAssignmentMode,
     assignments: prevAssignments,
     specialAssignments: prevSpecialAssignments,
     colorMode: prevColorMode,
     paletteId: prevPaletteId,
   } = prevColorMapping || {};
-
-  const assignmentModeData = assignmentMode !== prevAssignmentMode ? assignmentMode : undefined;
 
   const paletteData = prevPaletteId !== paletteId ? `palette_${paletteId}` : undefined;
 
@@ -42,18 +34,16 @@ export const getColorMappingTelemetryEvents = (
 
   const unassignedTermsType = getUnassignedTermsType(specialAssignments, prevSpecialAssignments);
 
-  const diffData = [assignmentModeData, gradientData, paletteData, unassignedTermsType].filter(
-    nonNullable
-  );
+  const diffData = [gradientData, paletteData, unassignedTermsType].filter(nonNullable);
 
-  if (assignmentMode === 'manual') {
+  if (assignments.length > 0) {
     const colorCount =
       assignments.length && !isEqual(assignments, prevAssignments)
         ? `colors_${getRangeText(assignments.length)}`
         : undefined;
 
-    const prevCustomColors = prevAssignments?.filter((a) => isCustomColor(a.color));
-    const customColors = assignments.filter((a) => isCustomColor(a.color));
+    const prevCustomColors = prevAssignments?.filter((a) => a.color.type === 'colorCode');
+    const customColors = assignments.filter((a) => a.color.type === 'colorCode');
     const customColorEvent =
       customColors.length && !isEqual(prevCustomColors, customColors)
         ? `custom_colors_${getRangeText(customColors.length, 1)}`
@@ -67,10 +57,6 @@ export const getColorMappingTelemetryEvents = (
 };
 
 const constructName = (eventName: string) => `${COLOR_MAPPING_PREFIX}${eventName}`;
-
-const isCustomColor = (color: CategoricalColor | ColorCode | GradientColor): color is ColorCode => {
-  return color.type === 'colorCode';
-};
 
 function getRangeText(n: number, min = 2, max = 16) {
   if (n >= min && (n === 1 || n === 2)) {
@@ -92,9 +78,12 @@ const getUnassignedTermsType = (
 ) => {
   return !isEqual(prevSpecialAssignments, specialAssignments)
     ? `unassigned_terms_${
-        isCustomColor(specialAssignments?.[0].color)
+        specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'colorCode'
           ? 'custom'
-          : specialAssignments?.[0].color.paletteId === NeutralPalette.id
+          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'loop'
+          ? 'loop'
+          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
+            NeutralPalette.id
           ? NeutralPalette.id
           : 'palette'
       }`

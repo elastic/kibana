@@ -232,6 +232,40 @@
         "children": [
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "\nUsed for telemetry/performance metrics."
+            ],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.OptInConfig",
+                "text": "OptInConfig"
+              },
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
+              ">; }"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppDependencies.application",
             "type": "Object",
             "tags": [],
@@ -714,8 +748,8 @@
                 "pluginId": "cases",
                 "scope": "public",
                 "docId": "kibCasesPluginApi",
-                "section": "def-public.CasesUiStart",
-                "text": "CasesUiStart"
+                "section": "def-public.CasesPublicStart",
+                "text": "CasesPublicStart"
               },
               " | undefined"
             ],
@@ -1144,22 +1178,6 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisContentWrapperProps.setGlobalState",
-            "type": "Any",
-            "tags": [],
-            "label": "setGlobalState",
-            "description": [
-              "On global timefilter update"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "aiops",
             "id": "def-public.LogRateAnalysisContentWrapperProps.initialAnalysisStart",
             "type": "CompoundType",
             "tags": [],
@@ -1170,9 +1188,9 @@
             "signature": [
               "number | ",
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.WindowParameters",
                 "text": "WindowParameters"
               },
@@ -1457,59 +1475,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "aiops",
-        "id": "def-common.CHANGE_POINT_DETECTION_ENABLED",
-        "type": "boolean",
-        "tags": [],
-        "label": "CHANGE_POINT_DETECTION_ENABLED",
-        "description": [
-          "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Change Point Detection UI\" during development until the first release."
-        ],
-        "signature": [
-          "true"
-        ],
-        "path": "x-pack/plugins/aiops/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "aiops",
-        "id": "def-common.PLUGIN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_ID",
-        "description": [
-          "\nPLUGIN_ID is used as a unique identifier for the aiops plugin"
-        ],
-        "signature": [
-          "\"aiops\""
-        ],
-        "path": "x-pack/plugins/aiops/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "aiops",
-        "id": "def-common.PLUGIN_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_NAME",
-        "description": [
-          "\nPLUGIN_NAME is used as the display name for the aiops plugin"
-        ],
-        "signature": [
-          "\"AIOps\""
-        ],
-        "path": "x-pack/plugins/aiops/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

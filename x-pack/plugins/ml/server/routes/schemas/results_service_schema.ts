@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 const criteriaFieldSchema = schema.object({
   fieldType: schema.maybe(schema.string()),
@@ -144,4 +145,5 @@ export const getAnomalyRecordsSchema = schema.object({
   latestMs: schema.number(),
   criteriaFields: schema.arrayOf(schema.any()),
   interval: schema.string(),
+  functionDescription: schema.maybe(schema.nullable(schema.string())),
 });

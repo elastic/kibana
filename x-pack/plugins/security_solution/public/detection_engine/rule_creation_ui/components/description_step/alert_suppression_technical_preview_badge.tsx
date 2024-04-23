@@ -23,7 +23,13 @@ export const AlertSuppressionTechnicalPreviewBadge = ({ label }: TechnicalPrevie
       <TechnicalPreviewBadge label={label} />
       {alertSuppressionUpsellingMessage && (
         <EuiToolTip position="top" content={alertSuppressionUpsellingMessage}>
-          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+          <EuiIcon
+            type={'warning'}
+            size="l"
+            color="#BD271E"
+            style={{ marginLeft: '8px' }}
+            data-test-subj="alertSuppressionInsufficientLicensingIcon"
+          />
         </EuiToolTip>
       )}
     </>

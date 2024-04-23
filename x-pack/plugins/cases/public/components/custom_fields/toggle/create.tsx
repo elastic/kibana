@@ -15,13 +15,13 @@ const CreateComponent: CustomFieldType<CaseCustomFieldToggle>['Create'] = ({
   customFieldConfiguration,
   isLoading,
 }) => {
-  const { key, label } = customFieldConfiguration;
+  const { key, label, defaultValue } = customFieldConfiguration;
 
   return (
     <UseField
       path={`customFields.${key}`}
       component={ToggleField}
-      defaultValue={false}
+      config={{ defaultValue: defaultValue ? defaultValue : false }}
       key={key}
       label={label}
       componentProps={{

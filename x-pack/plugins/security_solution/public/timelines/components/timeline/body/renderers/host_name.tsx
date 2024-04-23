@@ -17,11 +17,10 @@ import type { ExpandedDetailType } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   contextId: string;
@@ -51,6 +50,9 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
+  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableTimelineFlyoutEnabled'
+  );
   const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
@@ -58,6 +60,7 @@ const HostNameComponent: React.FC<Props> = ({
   const hostName = `${value}`;
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -66,53 +69,63 @@ const HostNameComponent: React.FC<Props> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
+      if (!eventContext || !isInTimelineContext) {
+        return;
+      }
 
-        if (isNewHostDetailsFlyoutEnabled && !isTimelineScope(timelineID)) {
-          openRightPanel({
-            id: HostPanelKey,
-            params: {
-              hostName,
-              contextID: contextId,
-              scopeId: TableId.alertsOnAlertsPage,
-              isDraggable,
-            },
-          });
-        } else {
-          const updatedExpandedDetail: ExpandedDetailType = {
-            panelView: 'hostDetail',
-            params: {
-              hostName,
-            },
-          };
-          const scopedActions = getScopedActions(timelineID);
-          if (scopedActions) {
-            dispatch(
-              scopedActions.toggleDetailPanel({
-                ...updatedExpandedDetail,
-                id: timelineID,
-                tabType: tabType as TimelineTabs,
-              })
-            );
-          }
+      const { timelineID, tabType } = eventContext;
 
-          if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-            activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-          }
+      const openNewFlyout = () =>
+        openRightPanel({
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: contextId,
+            scopeId: TableId.alertsOnAlertsPage,
+            isDraggable,
+          },
+        });
+      const openOldFlyout = () => {
+        const updatedExpandedDetail: ExpandedDetailType = {
+          panelView: 'hostDetail',
+          params: {
+            hostName,
+          },
+        };
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
         }
+      };
+
+      if (
+        (isTimelineScope(timelineID) &&
+          isNewHostDetailsFlyoutEnabled &&
+          expandableTimelineFlyoutEnabled) ||
+        isNewHostDetailsFlyoutEnabled
+      ) {
+        openNewFlyout();
+      } else {
+        openOldFlyout();
       }
     },
     [
-      onClick,
+      contextId,
+      dispatch,
       eventContext,
+      expandableTimelineFlyoutEnabled,
+      hostName,
+      isDraggable,
       isInTimelineContext,
       isNewHostDetailsFlyoutEnabled,
+      onClick,
       openRightPanel,
-      hostName,
-      contextId,
-      isDraggable,
-      dispatch,
     ]
   );
 

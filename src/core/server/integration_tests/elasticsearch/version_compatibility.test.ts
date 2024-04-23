@@ -15,6 +15,7 @@ import { esTestConfig } from '@kbn/test';
 import { firstValueFrom, Subject } from 'rxjs';
 import { CliArgs } from '@kbn/config';
 import Semver from 'semver';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 function nextMinor() {
   return Semver.inc(esTestConfig.getVersion(), 'minor') || '10.0.0';
@@ -36,7 +37,7 @@ describe('Version Compatibility', () => {
   let consoleSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'log');
+    consoleSpy = jest.spyOn(unsafeConsole, 'log');
   });
 
   afterEach(async () => {

@@ -10,8 +10,6 @@ import { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
 import { ReactNode } from 'react';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
-import { LegacyEmbeddableAPI } from '../lib/embeddables/i_embeddable';
-import { EmbeddableComponent } from '../registry/types';
 
 export type LegacyCompatibleEmbeddable = IEmbeddable<
   EmbeddableInput,
@@ -26,5 +24,3 @@ export type EmbeddablePanelProps = Omit<PresentationPanelProps, 'Component'> & {
 export type UnwrappedEmbeddablePanelProps = Omit<EmbeddablePanelProps, 'embeddable'> & {
   embeddable: LegacyCompatibleEmbeddable;
 };
-
-export type LegacyEmbeddableCompatibilityComponent = EmbeddableComponent<LegacyEmbeddableAPI>;

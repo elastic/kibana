@@ -30,6 +30,7 @@ import {
   updateIndexPatterns,
   selectActiveDatasourceId,
   selectFramePublicAPI,
+  selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -86,8 +87,6 @@ export function App({
     http,
     notifications,
     executionContext,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag,
     locator,
     share,
     serverless,
@@ -166,12 +165,8 @@ export function App({
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
-    () =>
-      Boolean(
-        // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
-      ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
+    () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
+    [isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
@@ -303,7 +298,6 @@ export function App({
       chrome.setBreadcrumbs(breadcrumbs);
     }
   }, [
-    dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -509,6 +503,8 @@ export function App({
     [locator, shortUrls]
   );
 
+  const isManaged = useLensSelector(selectIsManaged);
+
   const returnToOriginSwitchLabelForContext =
     initialContext &&
     'isEmbeddable' in initialContext &&
@@ -614,6 +610,7 @@ export function App({
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}
+          managed={isManaged}
           initialContext={initialContext}
           returnToOriginSwitchLabel={
             returnToOriginSwitchLabelForContext ??

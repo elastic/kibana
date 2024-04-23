@@ -9,7 +9,7 @@ import { getAppResultsMock } from './application.test.mocks';
 
 import { EMPTY, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from '@kbn/core/public';
+import { ApplicationStart, AppStatus, PublicAppInfo } from '@kbn/core/public';
 import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
@@ -27,8 +27,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   title: 'App 1',
   appRoute: '/app/app1',
   status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.visible,
-  searchable: true,
+  visibleIn: ['globalSearch'],
   chromeless: false,
   keywords: props.keywords || [],
   deepLinks: [],
@@ -167,13 +166,13 @@ describe('applicationResultProvider', () => {
     it('does not ignore apps with non-visible navlink', async () => {
       application.applications$ = of(
         createAppMap([
-          createApp({ id: 'app1', title: 'App 1', navLinkStatus: AppNavLinkStatus.visible }),
+          createApp({ id: 'app1', title: 'App 1', visibleIn: ['globalSearch'] }),
           createApp({
             id: 'disabled',
             title: 'disabled',
-            navLinkStatus: AppNavLinkStatus.disabled,
+            visibleIn: [],
           }),
-          createApp({ id: 'hidden', title: 'hidden', navLinkStatus: AppNavLinkStatus.hidden }),
+          createApp({ id: 'hidden', title: 'hidden', visibleIn: [] }),
         ])
       );
       const provider = createApplicationResultProvider(Promise.resolve(application));

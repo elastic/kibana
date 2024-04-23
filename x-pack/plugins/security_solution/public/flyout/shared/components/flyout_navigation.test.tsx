@@ -19,18 +19,13 @@ import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
   type ExpandableFlyoutApi,
-  ExpandableFlyoutProvider,
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
 const expandDetails = jest.fn();
 
 const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
-  return (
-    <TestProviders>
-      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-    </TestProviders>
-  );
+  return <TestProviders>{children}</TestProviders>;
 };
 
 jest.mock('@kbn/expandable-flyout', () => ({

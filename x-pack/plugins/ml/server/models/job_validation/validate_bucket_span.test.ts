@@ -7,7 +7,7 @@
 
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
 
-import { JobValidationMessage } from '../../../common/constants/messages';
+import type { JobValidationMessage } from '../../../common/constants/messages';
 // @ts-ignore
 import { validateBucketSpan } from './validate_bucket_span';
 

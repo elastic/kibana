@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiPopover, EuiFilterButton, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FILTER_NAMES } from '../translations';
 import type { FilterName } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -34,6 +35,9 @@ export const ActionsLogFilterPopover = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
 
     const filterGroupPopoverId = useGeneratedHtmlId({
       prefix: 'filterGroupPopover',
@@ -50,7 +54,11 @@ export const ActionsLogFilterPopover = memo(
           hasActiveFilters={hasActiveFilters}
           numActiveFilters={numActiveFilters}
         >
-          {FILTER_NAMES[filterName]}
+          {filterName === 'types'
+            ? isSentinelOneV1Enabled
+              ? FILTER_NAMES.types(2)
+              : FILTER_NAMES.types(1)
+            : FILTER_NAMES[filterName]}
         </EuiFilterButton>
       ),
       [
@@ -58,6 +66,7 @@ export const ActionsLogFilterPopover = memo(
         getTestId,
         hasActiveFilters,
         isPopoverOpen,
+        isSentinelOneV1Enabled,
         numActiveFilters,
         numFilters,
         onButtonClick,

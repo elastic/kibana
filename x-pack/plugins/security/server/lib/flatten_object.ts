@@ -7,7 +7,7 @@
 
 import { compact, isObject } from 'lodash';
 
-// Inspired by x-pack/plugins/apm/public/utils/flatten_object.ts
+// Inspired by x-pack/plugins/observability_solution/apm/public/utils/flatten_object.ts
 // Slighly modified to have key/value exposed as Object.
 export const flattenObject = (
   item: Record<any, any | any[]> | null | undefined,

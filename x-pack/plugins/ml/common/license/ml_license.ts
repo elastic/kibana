@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import { PLUGIN_ID } from '../constants/app';
 

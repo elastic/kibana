@@ -41,7 +41,7 @@ export const PRECONFIGURED_CONNECTOR = i18n.translate(
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel',
   {
-    defaultMessage: 'Conversation Selector',
+    defaultMessage: 'Connector Selector',
   }
 );
 

@@ -40,6 +40,7 @@ interface KBAgentDef {
   spot?: boolean;
   zones?: string[];
   nestedVirtualization?: boolean;
+  serviceAccount?: string;
 }
 type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
 
@@ -50,6 +51,7 @@ interface GobldGCPConfig {
   enableSecureBoot?: boolean;
   enableNestedVirtualization?: boolean;
   image: string;
+  provider: 'gcp';
   localSsds?: number;
   localSsdInterface?: string;
   machineType: string;
@@ -75,16 +77,32 @@ if (!fs.existsSync('data/agents.json')) {
  * rewrites all agent targeting rules from the shorthands to the full targeting syntax
  */
 run(
-  async ({ log, flags }) => {
+  async ({ log, flags, flagsReader }) => {
+    const filterExpressions = flagsReader.getPositionals();
+
     const paths = await globby('.buildkite/**/*.yml', {
       cwd: REPO_ROOT,
       onlyFiles: true,
       gitignore: true,
     });
 
+    const pathsFiltered =
+      filterExpressions.length === 0
+        ? paths
+        : paths.filter((path) => {
+            return filterExpressions.some((expression) => path.includes(expression));
+          });
+
+    if (pathsFiltered.length === 0) {
+      log.warning('No .yml files found to rewrite after filtering.');
+      return;
+    }
+
+    log.info('Applying rewrite to the following paths: \n', pathsFiltered.join('\n'));
+
     const failedRewrites: Array<{ path: string; error: Error }> = [];
 
-    const rewritePromises: Array<Promise<void>> = paths.map((ymlPath) => {
+    const rewritePromises: Array<Promise<void>> = pathsFiltered.map((ymlPath) => {
       return rewriteFile(ymlPath, log).catch((e) => {
         // eslint-disable-next-line no-console
         console.error('Failed to rewrite: ' + ymlPath, e);
@@ -193,13 +211,16 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   return removeNullish({
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
+    provider: 'gcp',
     assignExternalIP: agent.disableExternalIp === true ? false : undefined,
     diskSizeGb: agent.diskSizeGb,
     diskType: agent.diskType,
     enableNestedVirtualization: agent.nestedVirtualization,
     localSsds: agent.localSsds,
+    localSsdInterface: !!agent.localSsds ? 'nvme' : undefined,
     machineType: agent.machineType,
     preemptible: agent.spot,
+    serviceAccount: agent.serviceAccount,
   });
 }
 

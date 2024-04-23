@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
@@ -37,8 +37,8 @@ export const createCopyToClipboardLensAction = ({ order }: { order?: number }) =
     getIconType: () => COPY_TO_CLIPBOARD_ICON,
     getDisplayName: () => COPY_TO_CLIPBOARD,
     isCompatible: async ({ embeddable, data }) =>
-      !isErrorEmbeddable(embeddable) &&
-      isLensEmbeddable(embeddable) &&
+      !isErrorEmbeddable(embeddable as IEmbeddable) &&
+      isLensEmbeddable(embeddable as IEmbeddable) &&
       isDataColumnsValid(data) &&
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {

@@ -228,4 +228,41 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       });
     });
   });
+
+  describe('Embedded Console', () => {
+    it('renders embedded console if available', () => {
+      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
+      const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
+
+      setMockValues({
+        readOnlyMode: false,
+        consolePlugin,
+      });
+
+      const wrapper = shallow(
+        <EnterpriseSearchPageTemplateWrapper>
+          <div className="hello">world</div>
+        </EnterpriseSearchPageTemplateWrapper>
+      );
+
+      expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(true);
+    });
+    it('Hides embedded console if available but page template prop set to hide', () => {
+      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
+      const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
+
+      setMockValues({
+        readOnlyMode: false,
+        consolePlugin,
+      });
+
+      const wrapper = shallow(
+        <EnterpriseSearchPageTemplateWrapper hideEmbeddedConsole>
+          <div className="hello">world</div>
+        </EnterpriseSearchPageTemplateWrapper>
+      );
+
+      expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(false);
+    });
+  });
 });

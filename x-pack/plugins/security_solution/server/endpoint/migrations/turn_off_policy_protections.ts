@@ -5,38 +5,62 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
-  isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isPolicySetToEventCollectionOnly,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyData } from '../../../common/endpoint/types';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
 export const turnOffPolicyProtectionsIfNotSupported = async (
   esClient: ElasticsearchClient,
   fleetServices: EndpointInternalFleetServicesInterface,
-  appFeaturesService: AppFeaturesService,
+  productFeaturesService: ProductFeaturesService,
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('endpoint', 'policyProtections');
 
-  if (appFeaturesService.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections)) {
-    log.info(
-      `App feature [${AppFeatureSecurityKey.endpointPolicyProtections}] is enabled. Nothing to do!`
-    );
+  const isProtectionUpdatesFeatureEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointProtectionUpdates
+  );
 
+  const isPolicyProtectionsEnabled = productFeaturesService.isEnabled(
+    ProductFeatureSecurityKey.endpointPolicyProtections
+  );
+
+  if (isPolicyProtectionsEnabled) {
+    log.info(
+      `App feature [${ProductFeatureSecurityKey.endpointPolicyProtections}] is enabled. Nothing to do!`
+    );
+  }
+
+  if (isProtectionUpdatesFeatureEnabled) {
+    log.info(
+      `App feature [${ProductFeatureSecurityKey.endpointProtectionUpdates}] is enabled. Nothing to do!`
+    );
+  }
+
+  if (isPolicyProtectionsEnabled && isProtectionUpdatesFeatureEnabled) {
     return;
   }
 
-  log.info(
-    `App feature [${AppFeatureSecurityKey.endpointPolicyProtections}] is disabled. Checking endpoint integration policies for compliance`
-  );
+  if (!isPolicyProtectionsEnabled) {
+    log.info(
+      `App feature [${ProductFeatureSecurityKey.endpointPolicyProtections}] is disabled. Checking endpoint integration policies for compliance`
+    );
+  }
+
+  if (!isProtectionUpdatesFeatureEnabled) {
+    log.info(
+      `App feature [${ProductFeatureSecurityKey.endpointProtectionUpdates}] is disabled. Checking endpoint integration policies for compliance`
+    );
+  }
 
   const { packagePolicy, internalSoClient, endpointPolicyKuery } = fleetServices;
   const updates: UpdatePackagePolicy[] = [];
@@ -61,14 +85,35 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
       const integrationPolicy = item as PolicyData;
       const policySettings = integrationPolicy.inputs[0].config.policy.value;
       const { message, isOnlyCollectingEvents } = isPolicySetToEventCollectionOnly(policySettings);
+      const shouldDowngradeProtectionUpdates =
+        !isProtectionUpdatesFeatureEnabled && policySettings.global_manifest_version !== 'latest';
 
-      if (!isOnlyCollectingEvents) {
+      if (!isPolicyProtectionsEnabled && !isOnlyCollectingEvents) {
         messages.push(
           `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to disable protections. Trigger: [${message}]`
         );
 
-        integrationPolicy.inputs[0].config.policy.value =
-          ensureOnlyEventCollectionIsAllowed(policySettings);
+        if (shouldDowngradeProtectionUpdates) {
+          messages.push(
+            `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to downgrade protection updates.`
+          );
+        }
+
+        integrationPolicy.inputs[0].config.policy.value = {
+          ...ensureOnlyEventCollectionIsAllowed(policySettings),
+          ...(shouldDowngradeProtectionUpdates ? { global_manifest_version: 'latest' } : {}),
+        };
+
+        updates.push({
+          ...getPolicyDataForUpdate(integrationPolicy),
+          id: integrationPolicy.id,
+        });
+      } else if (shouldDowngradeProtectionUpdates) {
+        messages.push(
+          `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to downgrade protection updates.`
+        );
+
+        integrationPolicy.inputs[0].config.policy.value.global_manifest_version = 'latest';
 
         updates.push({
           ...getPolicyDataForUpdate(integrationPolicy),

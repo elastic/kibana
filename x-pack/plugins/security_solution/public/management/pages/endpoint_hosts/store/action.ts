@@ -78,6 +78,11 @@ export interface ServerReturnedEndpointAgentPolicies {
   payload: EndpointState['agentPolicies'];
 }
 
+export interface ServerFinishedInitialization {
+  type: 'serverFinishedInitialization';
+  payload: boolean;
+}
+
 export interface ServerReturnedEndpointExistValue {
   type: 'serverReturnedEndpointExistValue';
   payload: boolean;
@@ -170,4 +175,5 @@ export type EndpointAction =
   | EndpointIsolationRequestStateChange
   | EndpointPendingActionsStateChanged
   | LoadMetadataTransformStats
-  | MetadataTransformStatsChanged;
+  | MetadataTransformStatsChanged
+  | ServerFinishedInitialization;

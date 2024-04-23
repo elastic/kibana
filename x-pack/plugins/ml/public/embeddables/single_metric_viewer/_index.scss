@@ -1,0 +1,6 @@
+// ML has it's own variables for coloring
+@import '../../application/variables';
+
+// Protect the rest of Kibana from ML generic namespacing
+@import '../../application/timeseriesexplorer/timeseriesexplorer';
+@import '../../application/timeseriesexplorer/timeseriesexplorer_annotations';

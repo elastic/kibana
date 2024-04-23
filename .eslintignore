@@ -15,7 +15,6 @@ node_modules
 target
 snapshots.js
 
-!/.ci
 !/.eslintrc.js
 !.storybook
 !.buildkite
@@ -40,6 +39,7 @@ snapshots.js
 /packages/kbn-ui-framework/dist
 /packages/kbn-flot-charts/lib
 /packages/kbn-monaco/src/**/antlr
+/packages/kbn-esql-ast/src/**/antlr
 
 # Bazel
 /bazel-*

@@ -118,6 +118,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            sortField: 'throughput',
+            sortDirection: 'desc',
           },
         },
       }),
@@ -153,6 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177387
   registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;

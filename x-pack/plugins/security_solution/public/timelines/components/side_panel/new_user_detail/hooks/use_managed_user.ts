@@ -37,7 +37,7 @@ export const useManagedUser = (
   email: string[] | undefined,
   isLoading?: boolean
 ): ManagedUserData => {
-  const skip = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
+  const skip = !useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
   const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
   const spaceId = useSpaceId();
   const {
@@ -95,9 +95,9 @@ export const useManagedUser = (
   return useMemo(
     () => ({
       data: managedUserData,
-      isLoading: loadingManagedUser || loadingIntegrations,
+      isLoading: skip ? false : loadingManagedUser || loadingIntegrations,
       isIntegrationEnabled,
     }),
-    [isIntegrationEnabled, loadingIntegrations, loadingManagedUser, managedUserData]
+    [isIntegrationEnabled, loadingIntegrations, loadingManagedUser, managedUserData, skip]
   );
 };

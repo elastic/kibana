@@ -15,7 +15,7 @@ import {
   isRegressionAnalysis,
 } from './analytics_utils';
 import { OUTLIER_SCORE } from './constants';
-import { DataFrameAnalyticsConfig } from './types';
+import type { DataFrameAnalyticsConfig } from './types';
 
 /**
  * ES id _id

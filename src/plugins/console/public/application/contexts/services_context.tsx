@@ -32,6 +32,9 @@ export interface ContextValue {
   docLinkVersion: string;
   theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
+  config?: {
+    isMonacoEnabled: boolean;
+  };
 }
 
 interface ContextProps {

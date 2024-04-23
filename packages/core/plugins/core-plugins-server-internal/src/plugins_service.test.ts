@@ -25,7 +25,7 @@ import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config, PluginsConfigType } from './plugins_config';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 
@@ -1165,8 +1165,10 @@ describe('PluginsService', () => {
   });
 
   describe('plugin initialization', () => {
+    let prebootPlugins: PluginWrapper[];
+    let standardPlugins: PluginWrapper[];
     beforeEach(() => {
-      const prebootPlugins = [
+      prebootPlugins = [
         createPlugin('plugin-1-preboot', {
           type: PluginType.preboot,
           path: 'path-1-preboot',
@@ -1178,7 +1180,7 @@ describe('PluginsService', () => {
           version: 'version-2',
         }),
       ];
-      const standardPlugins = [
+      standardPlugins = [
         createPlugin('plugin-1-standard', {
           path: 'path-1-standard',
           version: 'version-1',

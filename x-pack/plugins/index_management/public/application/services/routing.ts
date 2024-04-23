@@ -69,3 +69,12 @@ export const getIndexDetailsLink = (
   }
   return link;
 };
+
+export const getComponentTemplatesLink = (usedByTemplateName?: string) => {
+  let url = '/component_templates';
+  if (usedByTemplateName) {
+    const filter = `usedBy=(${usedByTemplateName})`;
+    url = `${url}?filter=${encodeURIComponent(filter)}`;
+  }
+  return url;
+};

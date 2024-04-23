@@ -12,6 +12,11 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import { FieldDescriptor } from '../..';
 
+// The array will have different values if values vary across indices
+const unitsArrayToFormatter = (unitArr: string[]) => {
+  return unitArr.find((unit) => unitArr[0] !== unit) ? undefined : unitArr[0];
+};
+
 /**
  *  Read the response from the _field_caps API to determine the type and
  *  "aggregatable"/"searchable" status of each field.
@@ -134,7 +139,11 @@ export function readFieldCapsResponse(
         timeSeriesMetricType = 'position';
       }
       const esType = types[0];
-      const field = {
+
+      const defaultFormatter =
+        capsByType[types[0]].meta?.unit && unitsArrayToFormatter(capsByType[types[0]].meta?.unit);
+
+      const field: FieldDescriptor = {
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
         esTypes: types,
@@ -147,6 +156,11 @@ export function readFieldCapsResponse(
         timeSeriesMetric: timeSeriesMetricType,
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };
+
+      if (defaultFormatter) {
+        field.defaultFormatter = defaultFormatter;
+      }
+
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);
       agg.hash[fieldName] = field;

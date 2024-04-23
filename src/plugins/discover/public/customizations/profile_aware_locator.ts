@@ -17,15 +17,19 @@ import type {
   LocatorNavigationParams,
 } from '@kbn/share-plugin/common/url_service';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
+import { History } from 'history';
 import type { DependencyList } from 'react';
 import { getProfile } from '../../common/customizations';
-import { getHistory } from '../kibana_services';
+import { HistoryLocationState } from '../build_services';
 
 export class ProfileAwareLocator<T extends { profile?: string }> implements LocatorPublic<T> {
   id: string;
   migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 
-  constructor(private readonly locator: LocatorPublic<T>) {
+  constructor(
+    private readonly locator: LocatorPublic<T>,
+    private readonly history: History<HistoryLocationState>
+  ) {
     this.id = locator.id;
     this.migrations = locator.migrations;
   }
@@ -35,8 +39,7 @@ export class ProfileAwareLocator<T extends { profile?: string }> implements Loca
       return params;
     }
 
-    const history = getHistory();
-    const { profile } = getProfile(history.location.pathname);
+    const { profile } = getProfile(this.history.location.pathname);
 
     if (profile) {
       params = { ...params, profile };

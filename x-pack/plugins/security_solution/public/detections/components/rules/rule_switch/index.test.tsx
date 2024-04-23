@@ -74,6 +74,33 @@ describe('RuleSwitch', () => {
     expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props().checked).toBeFalsy();
   });
 
+  test('it sets the undefined aria-label for switch if ruleName not passed', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} />, {
+      wrappingComponent: TestProviders,
+    });
+    expect(
+      wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']
+    ).toBeUndefined();
+  });
+
+  test('it sets the correct aria-label for switch if "enabled" is true', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} ruleName={'test'} />, {
+      wrappingComponent: TestProviders,
+    });
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']).toBe(
+      'Switch off "test"'
+    );
+  });
+
+  test('it sets the correct aria-label for switch if "enabled" is false', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={false} id={'7'} ruleName={'test'} />, {
+      wrappingComponent: TestProviders,
+    });
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']).toBe(
+      'Switch on "test"'
+    );
+  });
+
   test('it dispatches error toaster if "enableRules" call rejects', async () => {
     const mockError = new Error('uh oh');
     (performBulkAction as jest.Mock).mockRejectedValue(mockError);

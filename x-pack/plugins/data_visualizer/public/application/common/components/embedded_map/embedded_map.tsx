@@ -8,19 +8,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { INITIAL_LOCATION, LayerDescriptor } from '@kbn/maps-plugin/common';
-import {
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
+import type {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from '@kbn/maps-plugin/public/embeddable';
-import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
-import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
+import type { EmbeddableFactory, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_embedded_map.scss';
 

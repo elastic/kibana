@@ -29,6 +29,12 @@ function help() {
 
       ${availableCommands.join('\n      ')}
 
+    To start a serverless instance use the 'serverless' command with
+    '--projectType' flag or use the '--serverless=<ProjectType>'
+    shortcut, for example:
+
+      es --serverless=es
+
     Global options:
 
       --help
@@ -46,7 +52,16 @@ export async function run(defaults = {}) {
       default: defaults,
     });
     const args = options._;
-    const commandName = args[0];
+    let commandName = args[0];
+
+    // Converting --serverless flag to command
+    // `es --serverless=<projectType>` is just a shortcut for
+    // `es serverless --projectType=<projectType>`
+    if (options.serverless) {
+      const projectType: string = options.serverless;
+      commandName = 'serverless';
+      args.push('--projectType', projectType);
+    }
 
     if (args.length === 0 || (!commandName && options.help)) {
       help();

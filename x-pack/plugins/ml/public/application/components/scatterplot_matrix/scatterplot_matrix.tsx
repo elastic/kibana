@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -24,8 +25,8 @@ import {
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { Query } from '@kbn/data-plugin/common/query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {

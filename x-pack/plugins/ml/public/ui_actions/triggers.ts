@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
+import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 
 export const SWIM_LANE_SELECTION_TRIGGER = 'SWIM_LANE_SELECTION_TRIGGER';
 
@@ -24,4 +28,18 @@ export const entityFieldSelectionTrigger: Trigger = {
   // when this trigger is executed.
   title: '',
   description: 'Entity field selection triggered',
+};
+
+export interface AnomalySwimLaneSelectionTriggerContext extends EmbeddableApiContext {
+  embeddable: AnomalySwimLaneEmbeddableApi;
+  /**
+   * Data provided by swim lane selection
+   */
+  data: AppStateSelectedCells;
+}
+
+export const isAnomalySwimlaneSelectionTriggerContext = (
+  context: unknown
+): context is AnomalySwimLaneSelectionTriggerContext => {
+  return isSwimLaneEmbeddableContext(context) && context.data !== undefined;
 };

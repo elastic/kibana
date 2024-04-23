@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
-import { FieldVisConfig } from '../../types';
+import type { FieldVisConfig } from '../../types';
 import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 100;

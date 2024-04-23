@@ -9,6 +9,7 @@ import type { IEsSearchResponse, SearchRequest, TimeRange } from '@kbn/data-plug
 import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
   RiskQueries,
@@ -37,6 +38,7 @@ export const riskScore: SecuritySolutionFactory<
     response: IEsSearchResponse,
     deps?: {
       spaceId?: string;
+      esClient: IScopedClusterClient;
       ruleDataClient?: IRuleDataClient | null;
     }
   ) => {
@@ -56,6 +58,7 @@ export const riskScore: SecuritySolutionFactory<
             data,
             names,
             nameField,
+            deps.esClient,
             deps.ruleDataClient,
             deps.spaceId,
             options.alertsTimerange
@@ -79,13 +82,14 @@ async function enhanceData(
   data: Array<HostRiskScore | UserRiskScore>,
   names: string[],
   nameField: string,
+  esClient: IScopedClusterClient,
   ruleDataClient?: IRuleDataClient | null,
   spaceId?: string,
   timerange?: TimeRange
 ): Promise<Array<HostRiskScore | UserRiskScore>> {
-  const ruleDataReader = ruleDataClient?.getReader({ namespace: spaceId });
-  const query = getAlertsQueryForEntity(names, nameField, timerange);
-  const response = await ruleDataReader?.search(query);
+  const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId ?? 'default');
+  const query = getAlertsQueryForEntity(names, nameField, timerange, indexPattern);
+  const response = await esClient.asCurrentUser.search(query);
   const buckets: EnhancedDataBucket[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
   const enhancedAlertsDataByEntityName = buckets.reduce<
@@ -106,10 +110,12 @@ async function enhanceData(
 const getAlertsQueryForEntity = (
   names: string[],
   nameField: string,
-  timerange: TimeRange | undefined
+  timerange: TimeRange | undefined,
+  indexPattern: string | undefined
 ): SearchRequest => {
   return {
     size: 0,
+    index: indexPattern,
     query: {
       bool: {
         filter: [

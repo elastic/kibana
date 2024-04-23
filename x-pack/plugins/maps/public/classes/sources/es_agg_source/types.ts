@@ -7,8 +7,15 @@
 
 import { DataView } from '@kbn/data-plugin/common';
 import { AGG_TYPE } from '../../../../common/constants';
-import type { IESSource } from '../es_source';
+import type { IESSource } from '../es_source/types';
 import { IESAggField } from '../../fields/agg';
+
+export function hasESAggSourceMethod(
+  source: IESSource,
+  methodName: keyof IESAggSource
+): source is Pick<IESAggSource, typeof methodName> {
+  return typeof (source as IESAggSource)[methodName] === 'function';
+}
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;

@@ -11,6 +11,7 @@ import { RemoteProvider } from './remote';
 import { FindProvider } from './find';
 import { TestSubjects } from './test_subjects';
 import { BrowserProvider } from './browser';
+import { ToastsService } from './toasts';
 
 export const services = {
   retryOnStale: RetryOnStaleProvider,
@@ -18,4 +19,5 @@ export const services = {
   find: FindProvider,
   testSubjects: TestSubjects,
   browser: BrowserProvider,
+  toasts: ToastsService,
 };

@@ -56,6 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177517
   registry.when('Storage Explorer', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {

@@ -177,3 +177,37 @@ export type ElserVersion = 1 | 2;
 export interface GetModelDownloadConfigOptions {
   version?: ElserVersion;
 }
+
+export type InferenceServiceSettings =
+  | {
+      service: 'elser';
+      service_settings: {
+        num_allocations: number;
+        num_threads: number;
+        model_id: string;
+      };
+    }
+  | {
+      service: 'openai';
+      service_settings: {
+        api_key: string;
+        organization_id: string;
+        url: string;
+      };
+    }
+  | {
+      service: 'hugging_face';
+      service_settings: {
+        api_key: string;
+        url: string;
+      };
+    };
+
+export type InferenceAPIConfigResponse = {
+  // Refers to a deployment id
+  model_id: string;
+  task_type: 'sparse_embedding' | 'text_embedding';
+  task_settings: {
+    model?: string;
+  };
+} & InferenceServiceSettings;

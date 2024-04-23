@@ -13,7 +13,6 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerInternalProps,
 } from './discover_container';
-import type { ScopedHistory } from '@kbn/core-application-browser';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -31,7 +30,7 @@ jest.mock('../../application/main', () => {
 
 jest.mock('@kbn/kibana-react-plugin/public');
 
-const { history } = discoverServiceMock;
+const { getScopedHistory } = discoverServiceMock;
 
 const customizeMock = jest.fn();
 
@@ -40,8 +39,7 @@ const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
     <DiscoverContainerInternal
       overrideServices={props.overrideServices ?? mockOverrideService}
       customizationCallbacks={props.customizationCallbacks ?? [customizeMock]}
-      isDev={props.isDev ?? false}
-      scopedHistory={props.scopedHistory ?? (history() as ScopedHistory<unknown>)}
+      scopedHistory={props.scopedHistory ?? getScopedHistory()!}
       getDiscoverServices={getDiscoverServicesMock}
     />
   );

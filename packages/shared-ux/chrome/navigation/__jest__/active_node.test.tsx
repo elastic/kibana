@@ -35,6 +35,8 @@ describe('Active node', () => {
       return activeNodes$;
     };
 
+    const visibleIn = ['globalSearch' as const];
+
     const navigationBody: ChromeProjectNavigationNode[] = [
       {
         id: 'group1',
@@ -51,6 +53,7 @@ describe('Active node', () => {
               baseUrl: '',
               url: '',
               href: '',
+              visibleIn,
             },
           },
           {
@@ -63,6 +66,7 @@ describe('Active node', () => {
               baseUrl: '',
               url: '',
               href: '',
+              visibleIn,
             },
           },
         ],

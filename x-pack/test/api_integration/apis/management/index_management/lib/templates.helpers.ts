@@ -51,6 +51,7 @@ export function templatesHelpers(getService: FtrProviderContext['getService']) {
         type: 'default',
         hasDatastream: false,
       },
+      allowAutoCreate: 'NO_OVERWRITE',
     };
 
     if (isLegacy) {

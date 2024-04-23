@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup, EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperUpdateButton } from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -13,8 +13,8 @@ import type {
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
-  type DateRangePickerValues,
   ActionLogDateRangePicker,
+  type DateRangePickerValues,
 } from './actions_log_date_range_picker';
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
@@ -26,6 +26,7 @@ export const ActionsLogFilters = memo(
     isDataLoading,
     isFlyout,
     onClick,
+    onChangeAgentTypesFilter,
     onChangeHostsFilter,
     onChangeCommandsFilter,
     onChangeStatusesFilter,
@@ -40,6 +41,7 @@ export const ActionsLogFilters = memo(
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
     isFlyout: boolean;
+    onChangeAgentTypesFilter: (selectedAgentTypes: string[]) => void;
     onChangeHostsFilter: (selectedCommands: string[]) => void;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
@@ -56,6 +58,11 @@ export const ActionsLogFilters = memo(
     const responseActionsEnabled = useIsExperimentalFeatureEnabled(
       'endpointResponseActionsEnabled'
     );
+
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
+
     const filters = useMemo(() => {
       return (
         <>
@@ -79,25 +86,39 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {responseActionsEnabled && (
-            <ActionsLogFilter
-              filterName={'type'}
-              isFlyout={isFlyout}
-              onChangeFilterOptions={onChangeTypeFilter}
-              data-test-subj={dataTestSubj}
-            />
-          )}
+          {isSentinelOneV1Enabled
+            ? responseActionsEnabled && (
+                <ActionsLogFilter
+                  filterName={'types'}
+                  typesFilters={{
+                    agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
+                    actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
+                  }}
+                  isFlyout={isFlyout}
+                  data-test-subj={dataTestSubj}
+                />
+              )
+            : responseActionsEnabled && (
+                <ActionsLogFilter
+                  filterName={'types'}
+                  onChangeFilterOptions={onChangeTypeFilter}
+                  isFlyout={isFlyout}
+                  data-test-subj={dataTestSubj}
+                />
+              )}
         </>
       );
     }, [
-      dataTestSubj,
+      showHostsFilter,
       isFlyout,
-      onChangeCommandsFilter,
+      isSentinelOneV1Enabled,
       onChangeHostsFilter,
-      onChangeTypeFilter,
+      dataTestSubj,
+      onChangeCommandsFilter,
       onChangeStatusesFilter,
       responseActionsEnabled,
-      showHostsFilter,
+      onChangeAgentTypesFilter,
+      onChangeTypeFilter,
     ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);

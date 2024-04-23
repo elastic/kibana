@@ -16,7 +16,8 @@ import { createNoStatsTooltipMessage } from '../../../../../../common/utils/crea
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
 import { useTransformCapabilities } from '../../../../hooks';
-import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
+import { isCompletedBatchTransform } from '../../../../common';
 
 export const scheduleNowActionNameText = i18n.translate(
   'xpack.transform.transformList.scheduleNowActionNameText',

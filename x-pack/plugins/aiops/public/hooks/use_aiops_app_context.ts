@@ -14,6 +14,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
+  AnalyticsServiceStart,
   CoreSetup,
   CoreStart,
   ExecutionContextStart,
@@ -31,7 +32,7 @@ import type {
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
@@ -39,6 +40,10 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
  * AIOps App Dependencies to be provided via React context.
  */
 export interface AiopsAppDependencies {
+  /**
+   * Used for telemetry/performance metrics.
+   */
+  analytics: AnalyticsServiceStart;
   /**
    * Used to check capabilities for links to other plugins.
    * `application.currentAppId$` is used to close the log pattern analysis flyout
@@ -123,7 +128,7 @@ export interface AiopsAppDependencies {
   };
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
-  cases?: CasesUiStart;
+  cases?: CasesPublicStart;
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin?: string;

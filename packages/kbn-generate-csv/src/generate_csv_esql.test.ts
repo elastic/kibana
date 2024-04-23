@@ -8,6 +8,7 @@
 
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
+import { add, type Duration } from 'date-fns';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -21,14 +22,15 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import type { ESQLSearchReponse as ESQLSearchResponse } from '@kbn/es-types';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
-} from './constants';
+} from '../constants';
 import { CsvESQLGenerator, JobParamsCsvESQL } from './generate_csv_esql';
-import type { ESQLSearchReponse } from '@kbn/es-types';
 
 const createMockJob = (
   params: Partial<JobParamsCsvESQL> = { query: { esql: '' } }
@@ -36,6 +38,8 @@ const createMockJob = (
   ...params,
   query: { esql: '' },
 });
+
+const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
@@ -47,20 +51,20 @@ describe('CsvESQLGenerator', () => {
   let content: string;
 
   const getMockRawResponse = (
-    esqlResponse: ESQLSearchReponse = {
+    esqlResponse: ESQLSearchResponse = {
       columns: [],
       values: [],
     }
-  ): ESQLSearchReponse => esqlResponse;
+  ): ESQLSearchResponse => esqlResponse;
 
   const mockDataClientSearchDefault = jest.fn().mockImplementation(
-    (): Rx.Observable<IKibanaSearchResponse<ESQLSearchReponse>> =>
+    (): Rx.Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
       Rx.of({
         rawResponse: getMockRawResponse(),
       })
   );
 
-  const mockSearchResponse = (response: ESQLSearchReponse) => {
+  const mockSearchResponse = (response: ESQLSearchResponse) => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: getMockRawResponse(response),
@@ -93,7 +97,7 @@ describe('CsvESQLGenerator', () => {
       escapeFormulaValues: true,
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
       enablePanelActionDownload: true,
       maxConcurrentShardRequests: 5,
     };
@@ -105,6 +109,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -136,6 +141,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -163,6 +169,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -192,6 +199,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -211,6 +219,189 @@ describe('CsvESQLGenerator', () => {
     `);
   });
 
+  describe('"auto" scroll duration config', () => {
+    const getTaskInstanceFields = (intervalFromNow: Duration) => {
+      const now = new Date(Date.now());
+      return { startedAt: now, retryAt: add(now, intervalFromNow) };
+    };
+
+    let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];
+    let mockDataClientSearchFn: jest.MockedFunction<IScopedSearchClient['search']>;
+
+    beforeEach(() => {
+      mockConfigWithAutoScrollDuration = {
+        ...mockConfig,
+        scroll: {
+          ...mockConfig.scroll,
+          duration: 'auto',
+        },
+      };
+
+      mockDataClientSearchFn = jest.fn();
+
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.useRealTimers();
+
+      mockDataClientSearchFn.mockRestore();
+    });
+
+    it('csv gets generated if search resolves without errors before the computed timeout value passed to the search data client elapses', async () => {
+      const timeFromNowInMs = 4 * 60 * 1000;
+
+      const taskInstanceFields = getTaskInstanceFields({
+        seconds: timeFromNowInMs / 1000,
+      });
+
+      mockDataClientSearchFn.mockImplementation((_, options) => {
+        const getSearchResult = () => {
+          const queuedAt = Date.now();
+
+          return new Promise<IKibanaSearchResponse<ReturnType<typeof getMockRawResponse>>>(
+            (resolve, reject) => {
+              setTimeout(() => {
+                if (
+                  new Date(Date.now()).getTime() - new Date(queuedAt).getTime() >
+                  Number((options?.transport?.requestTimeout! as string).replace(/ms/, ''))
+                ) {
+                  reject(
+                    new esErrors.ResponseError({ statusCode: 408, meta: {} as any, warnings: [] })
+                  );
+                } else {
+                  resolve({
+                    rawResponse: getMockRawResponse({
+                      columns: [{ name: 'message', type: 'string' }],
+                      values: Array(100).fill(['This is a great message!']),
+                    }),
+                  });
+                }
+              }, timeFromNowInMs / 4);
+            }
+          );
+        };
+
+        return Rx.defer(getSearchResult);
+      });
+
+      const generateCsvPromise = new CsvESQLGenerator(
+        createMockJob(),
+        mockConfigWithAutoScrollDuration,
+        taskInstanceFields,
+        {
+          es: mockEsClient,
+          data: {
+            ...mockDataClient,
+            search: mockDataClientSearchFn,
+          },
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      ).generateData();
+
+      await jest.advanceTimersByTimeAsync(timeFromNowInMs);
+
+      expect(await generateCsvPromise).toEqual(
+        expect.objectContaining({
+          warnings: [],
+        })
+      );
+
+      expect(mockDataClientSearchFn).toBeCalledWith(
+        { params: { filter: undefined, locale: 'en', query: '', version: ESQL_LATEST_VERSION } },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: `${timeFromNowInMs}ms`,
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+    });
+
+    it('csv generation errors if search request does not resolve before the computed timeout value passed to the search data client elapses', async () => {
+      const timeFromNowInMs = 4 * 60 * 1000;
+
+      const taskInstanceFields = getTaskInstanceFields({
+        seconds: timeFromNowInMs / 1000,
+      });
+
+      const requestDuration = timeFromNowInMs + 1000;
+
+      mockDataClientSearchFn.mockImplementation((_, options) => {
+        const getSearchResult = () => {
+          const queuedAt = Date.now();
+
+          return new Promise<IKibanaSearchResponse<ReturnType<typeof getMockRawResponse>>>(
+            (resolve, reject) => {
+              setTimeout(() => {
+                if (
+                  new Date(Date.now()).getTime() - new Date(queuedAt).getTime() >
+                  Number((options?.transport?.requestTimeout! as string).replace(/ms/, ''))
+                ) {
+                  reject(
+                    new esErrors.ResponseError({ statusCode: 408, meta: {} as any, warnings: [] })
+                  );
+                } else {
+                  resolve({
+                    rawResponse: getMockRawResponse({
+                      columns: [{ name: 'message', type: 'string' }],
+                      values: Array(100).fill(['This is a great message!']),
+                    }),
+                  });
+                }
+              }, requestDuration);
+            }
+          );
+        };
+
+        return Rx.defer(getSearchResult);
+      });
+
+      const generateCsvPromise = new CsvESQLGenerator(
+        createMockJob(),
+        mockConfigWithAutoScrollDuration,
+        taskInstanceFields,
+        {
+          es: mockEsClient,
+          data: {
+            ...mockDataClient,
+            search: mockDataClientSearchFn,
+          },
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      ).generateData();
+
+      await jest.advanceTimersByTimeAsync(requestDuration);
+
+      expect(await generateCsvPromise).toEqual(
+        expect.objectContaining({
+          warnings: expect.arrayContaining([
+            expect.stringContaining('Received a 408 response from Elasticsearch'),
+          ]),
+        })
+      );
+
+      expect(mockDataClientSearchFn).toBeCalledWith(
+        { params: { filter: undefined, locale: 'en', query: '', version: ESQL_LATEST_VERSION } },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: `${timeFromNowInMs}ms`,
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+    });
+  });
+
   describe('jobParams', () => {
     it('uses columns to select columns', async () => {
       mockSearchResponse({
@@ -225,6 +416,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob({ columns: ['message', 'date', 'something else'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -259,6 +451,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob({ query, filters }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -293,6 +486,7 @@ describe('CsvESQLGenerator', () => {
             },
             locale: 'en',
             query: '',
+            version: ESQL_LATEST_VERSION,
           },
         },
         {
@@ -318,6 +512,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -347,6 +542,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -373,7 +569,7 @@ describe('CsvESQLGenerator', () => {
         escapeFormulaValues: false,
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
-        scroll: { size: 500, duration: '30s' },
+        scroll: { size: 500, duration: '30s', strategy: 'pit' },
         enablePanelActionDownload: true,
         maxConcurrentShardRequests: 5,
       };
@@ -385,6 +581,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -413,6 +610,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -449,6 +647,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,

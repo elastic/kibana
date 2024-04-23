@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/aiops-utils",
-  "owner": "@elastic/ml-ui"
-}

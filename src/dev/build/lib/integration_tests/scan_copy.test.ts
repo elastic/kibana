@@ -70,6 +70,8 @@ it('copies files and directories from source to dest, including dot files, creat
     source: FIXTURES,
     destination,
   });
+  const executableMode = getCommonMode(resolve(FIXTURES, 'bin/world_executable'));
+  const textFileMode = getCommonMode(resolve(FIXTURES, 'foo_dir/bar.txt'));
 
   expect((await getChildPaths(resolve(destination, 'foo_dir'))).sort()).toEqual([
     resolve(destination, 'foo_dir/.bar'),
@@ -78,10 +80,12 @@ it('copies files and directories from source to dest, including dot files, creat
   ]);
 
   expect(getCommonMode(resolve(destination, 'bin/world_executable'))).toBe(
-    IS_WINDOWS ? '666' : '777'
+    IS_WINDOWS ? '666' : executableMode
   );
 
-  expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).toBe(IS_WINDOWS ? '666' : '644');
+  expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).toBe(
+    IS_WINDOWS ? '666' : textFileMode
+  );
 });
 
 it('applies filter function specified', async () => {

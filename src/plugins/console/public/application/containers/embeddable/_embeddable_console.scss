@@ -1,3 +1,8 @@
+.kbnBody--hasEmbeddableConsole .euiPageTemplate main {
+  // Ensure page content is not overlapped by console control bar
+  padding-bottom: $embeddableConsoleInitialHeight;
+}
+
 .embeddableConsole {
   background: $embeddableConsoleBackground;
   color: $embeddableConsoleText;
@@ -8,14 +13,25 @@
   box-shadow: inset 0 $embeddableConsoleInitialHeight 0 $embeddableConsoleBackground, inset 0 600rem 0 $euiPageBackgroundColor;
   bottom: 0;
   right: 0;
-  left: var(--euiCollapsibleNavOffset, 0);
   transform: translateY(0);
   height: $embeddableConsoleInitialHeight;
   max-height: $embeddableConsoleMaxHeight;
 
   &--fixed {
     position: fixed;
-    z-index: $euiZLevel1;
+    z-index: $euiZLevel1 - 2;
+  }
+
+  &--projectChrome {
+    left: var(--euiCollapsibleNavOffset, 0);
+  }
+
+  &--classicChrome {
+    left: var(--kbnSolutionNavOffset, 0);
+  }
+
+  &--unknownChrome {
+    left: 0;
   }
 
   &-isOpen {
@@ -48,11 +64,23 @@
   width: 100%;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   overflow-y: hidden; // Ensures the movement of buttons in :focus don't cause scrollbars
   overflow-x: auto;
+  padding-right: $euiSizeS;
 
   &--button {
-    justify-content: flex-start;
+    flex-grow: 1;
+    width: 100%;
+
+    .euiButtonEmpty__content {
+      justify-content: flex-start;
+    }
+  }
+
+  &--altViewButton-container {
+    margin-left: auto;
+    // padding: $euiSizeS;
   }
 }
 

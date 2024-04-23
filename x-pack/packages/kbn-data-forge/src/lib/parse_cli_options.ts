@@ -75,6 +75,10 @@ export function parseCliOptions(): CliOptions {
       'This will install index patterns, visualizations, and dashboards for the dataset'
     )
     .option(
+      '--align-events-to-interval',
+      'This will index all the events on the interval instead of randomly distributing them.'
+    )
+    .option(
       '--event-template <template>',
       'The name of the event template',
       DEFAULTS.EVENT_TEMPLATE

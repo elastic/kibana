@@ -7,15 +7,8 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
@@ -77,8 +70,7 @@ describe('LensEmbeddable', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore(state);
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);

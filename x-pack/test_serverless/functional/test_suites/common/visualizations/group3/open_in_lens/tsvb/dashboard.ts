@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // save it to library
       const originalPanel = await testSubjects.find('embeddablePanelHeading-');
-      await panelActions.saveToLibrary('My TSVB to Lens viz 2', originalPanel);
+      await panelActions.legacySaveToLibrary('My TSVB to Lens viz 2', originalPanel);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();

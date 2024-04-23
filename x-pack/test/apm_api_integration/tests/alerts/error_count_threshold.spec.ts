@@ -101,6 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(() => synthtraceEsClient.clean());
 
+    // FLAKY: https://github.com/elastic/kibana/issues/176948
     describe('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
@@ -249,6 +250,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/176964
     describe('create rule with kql filter for opbeans-php', () => {
       let ruleId: string;
 

@@ -20,7 +20,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
@@ -29,7 +29,7 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 

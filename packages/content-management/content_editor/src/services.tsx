@@ -93,7 +93,12 @@ export interface ContentEditorKibanaDependencies {
           object: {
             references: SavedObjectsReference[];
           };
-          onClick?: (tag: { name: string; description: string; color: string }) => void;
+          onClick?: (tag: {
+            name: string;
+            description: string;
+            color: string;
+            managed: boolean;
+          }) => void;
         }>;
         SavedObjectSaveModalTagSelector: React.FC<TagSelectorProps>;
       };

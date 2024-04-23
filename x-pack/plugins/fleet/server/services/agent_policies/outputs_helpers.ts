@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { getAllowedOutputTypesForIntegration } from '../../../common/services/output_helpers';
+
 import type { AgentPolicySOAttributes, AgentPolicy } from '../../types';
 import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
@@ -46,7 +48,7 @@ export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,
   newData: Partial<AgentPolicySOAttributes>,
   existingData: Partial<AgentPolicySOAttributes> = {},
-  allowedOutputTypeForPolicy = Object.values(outputType)
+  allowedOutputTypeForPolicy: string[] = Object.values(outputType)
 ) {
   if (
     newData.data_output_id === existingData.data_output_id &&
@@ -91,5 +93,25 @@ export async function validateOutputForPolicy(
     throw new OutputLicenceError(
       `Invalid licence to set per policy output, you need ${LICENCE_FOR_PER_POLICY_OUTPUT} licence`
     );
+  }
+}
+
+export async function validateOutputForNewPackagePolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicy: AgentPolicy,
+  packageName: string
+) {
+  const allowedOutputTypeForPolicy = getAllowedOutputTypesForIntegration(packageName);
+
+  const isOutputTypeRestricted =
+    allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
+
+  if (isOutputTypeRestricted) {
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
+    if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
+      throw new OutputInvalidError(
+        `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
+      );
+    }
   }
 }

@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
+  const toasts = getService('toasts');
 
   describe('Basic functionality', function () {
     this.tags('includeFirefox');
@@ -154,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show toast with error if SSO fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('saml', 'unknown_saml');
 
-      const toastTitle = await PageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Could not perform login.');
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
@@ -163,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show toast with error if anonymous login fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('anonymous', 'anonymous1');
 
-      const toastTitle = await PageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Could not perform login.');
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
@@ -206,6 +207,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Go back to Login Selector.
       await testSubjects.click('loginBackToLoginLink');
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+    });
+
+    it('correctly handles unexpected post-authentication errors', async () => {
+      const supertest = getService('supertest');
+      await PageObjects.security.loginSelector.login('basic', 'basic1');
+
+      await supertest.get('/authentication/app/not_auth_flow').expect(200);
+      await supertest.get('/authentication/app/not_auth_flow?statusCode=400').expect(400);
+      await supertest.get('/authentication/app/not_auth_flow?statusCode=500').expect(500);
+      await browser.navigateTo(
+        `${deployment.getHostPort()}/authentication/app/not_auth_flow?statusCode=401`
+      );
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+
+      await supertest.get('/authentication/app/auth_flow').expect(200);
+      await browser.navigateTo(
+        `${deployment.getHostPort()}/authentication/app/auth_flow?statusCode=400`
+      );
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+
+      await browser.navigateTo(
+        `${deployment.getHostPort()}/authentication/app/auth_flow?statusCode=500`
+      );
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
     });
   });

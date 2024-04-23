@@ -11,8 +11,8 @@ import {
   isOutlierAnalysis,
   isClassificationAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 import {
-  DataFrameAnalyticsListRow,
   isDataFrameAnalyticsStopped,
   isDataFrameAnalyticsFailed,
   getDataFrameAnalyticsProgressPhase,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
-  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -28,6 +28,7 @@ export const PresentationPanelInternal = <
   index,
   hideHeader,
   showShadow,
+  showBorder,
 
   showBadges,
   showNotifications,
@@ -47,27 +48,27 @@ export const PresentationPanelInternal = <
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
   })();
 
-  const {
-    rawViewMode,
+  const [
+    dataLoading,
     blockingError,
     panelTitle,
-    dataLoading,
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    defaultPanelDescription,
+    rawViewMode,
     parentHidePanelTitle,
-  } = useBatchedPublishingSubjects({
-    dataLoading: api?.dataLoading,
-    blockingError: api?.blockingError,
-
-    panelTitle: api?.panelTitle,
-    hidePanelTitle: api?.hidePanelTitle,
-    panelDescription: api?.panelDescription,
-    defaultPanelTitle: api?.defaultPanelTitle,
-
-    rawViewMode: viewModeSubject,
-    parentHidePanelTitle: api?.parentApi?.hidePanelTitle,
-  });
+  ] = useBatchedOptionalPublishingSubjects(
+    api?.dataLoading,
+    api?.blockingError,
+    api?.panelTitle,
+    api?.hidePanelTitle,
+    api?.panelDescription,
+    api?.defaultPanelTitle,
+    api?.defaultPanelDescription,
+    viewModeSubject,
+    api?.parentApi?.hidePanelTitle
+  );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
@@ -92,7 +93,11 @@ export const PresentationPanelInternal = <
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) attrs['data-loading'] = true;
+    if (dataLoading) {
+      attrs['data-loading'] = true;
+    } else {
+      attrs['data-render-complete'] = true;
+    }
     if (blockingError) attrs['data-error'] = true;
     return attrs;
   }, [dataLoading, blockingError]);
@@ -105,9 +110,11 @@ export const PresentationPanelInternal = <
         'embPanel--editing': viewMode === 'edit',
       })}
       hasShadow={showShadow}
+      hasBorder={showBorder}
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
+      {...contentAttrs}
     >
       {!hideHeader && api && (
         <PresentationPanelHeader
@@ -119,9 +126,9 @@ export const PresentationPanelInternal = <
           showBadges={showBadges}
           getActions={getActions}
           actionPredicate={actionPredicate}
-          panelDescription={panelDescription}
           showNotifications={showNotifications}
           panelTitle={panelTitle ?? defaultPanelTitle}
+          panelDescription={panelDescription ?? defaultPanelDescription}
         />
       )}
       {blockingError && api && (
@@ -136,13 +143,14 @@ export const PresentationPanelInternal = <
       )}
       {!initialLoadComplete && <PanelLoader />}
       <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
-        <Component
-          {...(componentProps as React.ComponentProps<typeof Component>)}
-          {...contentAttrs}
-          ref={(newApi) => {
-            if (newApi && !api) setApi(newApi);
-          }}
-        />
+        <EuiErrorBoundary>
+          <Component
+            {...(componentProps as React.ComponentProps<typeof Component>)}
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
+        </EuiErrorBoundary>
       </div>
     </EuiPanel>
   );

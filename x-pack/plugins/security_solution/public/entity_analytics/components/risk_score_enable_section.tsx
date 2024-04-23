@@ -36,12 +36,15 @@ import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mut
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/entity_analytics/risk_engine';
-
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { RiskInformationFlyout } from './risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
+const toastOptions = {
+  toastLifeTimeMs: 5000,
+};
 
 const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
   <>
@@ -189,16 +192,28 @@ const RiskEngineStatusRow: React.FC<{
 export const RiskScoreEnableSection: React.FC<{
   privileges: RiskEngineMissingPrivilegesResponse;
 }> = ({ privileges }) => {
+  const { addSuccess } = useAppToasts();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
+    },
     onSettled: () => {
       setIsModalVisible(false);
     },
   });
 
-  const enableRiskEngineMutation = useEnableRiskEngineMutation();
-  const disableRiskEngineMutation = useDisableRiskEngineMutation();
+  const enableRiskEngineMutation = useEnableRiskEngineMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
+    },
+  });
+  const disableRiskEngineMutation = useDisableRiskEngineMutation({
+    onSuccess: () => {
+      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_OFF, toastOptions);
+    },
+  });
 
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
 

@@ -22,6 +22,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
+  const header = getPageObject('header');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -30,6 +31,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
 
   async function refreshRulesList() {
+    const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
+    if (existsClearFilter) {
+      await testSubjects.click('rules-list-clear-filter');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    }
     await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
     await testSubjects.click('manageRulesPageButton');
   }
@@ -295,6 +301,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
 
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
       await refreshRulesList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
@@ -358,7 +368,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -382,8 +392,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
 
+      await testSubjects.click('confirmModalConfirmButton');
+      await header.waitUntilLoadingHasFinished();
+
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Disabled 1 rule');
       });
@@ -471,7 +484,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -525,6 +538,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(filterErrorOnlyResults[0].status).toEqual('Failed');
         expect(filterErrorOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
       });
+
+      // Clear it again because it is still selected
+      await refreshRulesList();
+      await assertRulesLength(2);
     });
 
     it.skip('should display total rules by status and error banner only when exists rules with status error', async () => {
@@ -673,6 +690,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(filterInventoryRuleOnlyResults[0].interval).toEqual('1 min');
         expect(filterInventoryRuleOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
       });
+
+      // Clear it again because it is still selected
+      await testSubjects.click('rules-list-clear-filter');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
     });
 
     it('should filter rules by the rule status', async () => {
@@ -746,6 +768,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
+
+      // Clear it again because it is still selected
+      await testSubjects.click('rules-list-clear-filter');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(4);
     });
 
     it('should filter rules by the tag', async () => {
@@ -804,6 +831,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleTagFilterOption-c');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
+
+      // Clear it again because it is still selected
+      await testSubjects.click('rules-list-clear-filter');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(5);
     });
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {
@@ -835,12 +867,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ruleIdList = [rule1.id];
 
       await refreshRulesList();
+      await assertRulesLength(1);
 
-      await retry.try(async () => {
-        const actionButton = await testSubjects.find('selectActionButton');
-        const disabled = await actionButton.getAttribute('disabled');
-        expect(disabled).toEqual(null);
-      });
+      const actionButton = await testSubjects.find('selectActionButton');
+      const disabled = await actionButton.getAttribute('disabled');
+      expect(disabled).toEqual(null);
     });
 
     it('should allow rules to be snoozed using the right side dropdown', async () => {
@@ -851,7 +882,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ruleIdList = [rule1.id];
 
       await refreshRulesList();
-      await svlTriggersActionsUI.searchRules(rule1.name);
+      await assertRulesLength(1);
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
@@ -871,7 +902,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ruleIdList = [rule1.id];
 
       await refreshRulesList();
-      await svlTriggersActionsUI.searchRules(rule1.name);
+      await assertRulesLength(1);
+
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeIndefiniteApply');
@@ -895,8 +927,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       await refreshRulesList();
+      await assertRulesLength(1);
 
-      await svlTriggersActionsUI.searchRules(rule1.name);
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeCancel');
@@ -905,12 +937,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
       );
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Rules notification successfully unsnoozed');
       });
-
-      await svlTriggersActionsUI.searchRules(rule1.name);
 
       await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
       await testSubjects.missingOrFail('rulesListNotifyBadge-snoozedIndefinitely');

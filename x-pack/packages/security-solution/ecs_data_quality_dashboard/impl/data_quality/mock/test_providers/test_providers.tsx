@@ -7,6 +7,7 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
@@ -26,8 +27,8 @@ window.scrollTo = jest.fn();
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailable = true }) => {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const { toasts } = notificationServiceMock.createSetupContract();
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockTelemetryEvents = {
@@ -38,6 +39,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
+    hasUpdateAIAssistantAnonymization: true,
     isAssistantEnabled: true,
   };
   const queryClient = new QueryClient({
@@ -61,24 +63,18 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={mockAssistantAvailability}
             augmentMessageCodeBlocks={jest.fn()}
-            baseAllow={[]}
-            baseAllowReplacement={[]}
             basePath={'https://localhost:5601/kbn'}
-            defaultAllow={[]}
-            defaultAllowReplacement={[]}
             docLinks={{
               ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
               DOC_LINK_VERSION: 'current',
             }}
             getComments={mockGetComments}
-            getInitialConversations={mockGetInitialConversations}
-            setConversations={jest.fn()}
-            setDefaultAllow={jest.fn()}
-            setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
+            baseConversations={{}}
           >
             <DataQualityProvider
               httpFetch={http.fetch}
+              toasts={toasts}
               isILMAvailable={isILMAvailable}
               telemetryEvents={mockTelemetryEvents}
             >

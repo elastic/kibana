@@ -11,19 +11,12 @@ import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import type { AlertsTableComponentProps } from './alerts_grouping';
 import { GroupedAlertsTable } from './alerts_grouping';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
-import { createStore } from '../../../common/store';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
@@ -154,22 +147,16 @@ const getMockStorageState = (groups: string[] = ['none']) =>
   });
 
 describe('GroupedAlertsTable', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-  let store: ReturnType<typeof createStore>;
+  let store = createMockStore();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: { options: mockOptions, activeGroups: ['kibana.alert.rule.name'] },
-        },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: { options: mockOptions, activeGroups: ['kibana.alert.rule.name'] },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
@@ -186,9 +173,8 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('calls the proper initial dispatch actions for groups', () => {
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const { getByTestId, queryByTestId } = render(
-      <TestProviders store={store}>
+      <TestProviders store={createMockStore()}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
     );
@@ -260,20 +246,15 @@ describe('GroupedAlertsTable', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name', 'host.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name', 'host.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -292,20 +273,15 @@ describe('GroupedAlertsTable', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId, getAllByTestId } = render(
       <TestProviders store={store}>
@@ -355,20 +331,15 @@ describe('GroupedAlertsTable', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId, rerender } = render(
       <TestProviders store={store}>
@@ -405,20 +376,15 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('resets only most inner group pagination when its parent groups open/close', () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -468,20 +434,15 @@ describe('GroupedAlertsTable', () => {
   });
 
   it(`resets innermost level's current page when that level's page size updates`, () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -521,20 +482,15 @@ describe('GroupedAlertsTable', () => {
   });
 
   it(`resets outermost level's current page when that level's page size updates`, () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId, getAllByTestId } = render(
       <TestProviders store={store}>
@@ -571,6 +527,43 @@ describe('GroupedAlertsTable', () => {
         ).toEqual('true');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
+    });
+  });
+
+  it('sends telemetry data when selected group changes', () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name'],
+        },
+      },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('group-selector-dropdown'));
+    fireEvent.click(getByTestId('panel-user.name'));
+
+    expect(mockedTelemetry.reportAlertsGroupingChanged).toHaveBeenCalledWith({
+      groupByField: 'user.name',
+      tableId: testProps.tableId,
+    });
+
+    fireEvent.click(getByTestId('group-selector-dropdown'));
+    fireEvent.click(getByTestId('panel-host.name'));
+
+    expect(mockedTelemetry.reportAlertsGroupingChanged).toHaveBeenCalledWith({
+      groupByField: 'host.name',
+      tableId: testProps.tableId,
     });
   });
 });

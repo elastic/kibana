@@ -13,7 +13,8 @@ import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { RULE_PARAMETERS_INDEX } from '../constants/field_names';
+import { ANCESTOR_ID, RULE_PARAMETERS_INDEX } from '../constants/field_names';
+import { getField } from '../utils';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
@@ -28,6 +29,14 @@ export interface UseShowRelatedAlertsByAncestryParams {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Id of the event document
+   */
+  eventId: string;
+  /**
+   * Boolean indicating if the flyout is open in preview
+   */
+  isPreview: boolean;
 }
 
 export interface UseShowRelatedAlertsByAncestryResult {
@@ -39,6 +48,10 @@ export interface UseShowRelatedAlertsByAncestryResult {
    * Values of the kibana.alert.rule.parameters.index field
    */
   indices?: string[];
+  /**
+   * Value of the document id for fetching ancestry alerts
+   */
+  documentId: string;
 }
 
 /**
@@ -48,12 +61,16 @@ export const useShowRelatedAlertsByAncestry = ({
   getFieldsData,
   dataAsNestedObject,
   dataFormattedForFieldBrowser,
+  eventId,
+  isPreview,
 }: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
   const hasProcessEntityInfo = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
+  const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
+  const documentId = isPreview ? ancestorId : eventId;
   // can't use getFieldsData here as the kibana.alert.rule.parameters is different and can be nested
   const originalDocumentIndex = useMemo(
     () => find({ category: 'kibana', field: RULE_PARAMETERS_INDEX }, dataFormattedForFieldBrowser),
@@ -70,6 +87,7 @@ export const useShowRelatedAlertsByAncestry = ({
 
   return {
     show,
+    documentId,
     ...(originalDocumentIndex &&
       originalDocumentIndex.values && { indices: originalDocumentIndex.values }),
   };

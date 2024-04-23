@@ -11,6 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON } from '../
  * Open the Graph Analyzer under the Visuablize tab in the document details expandable flyout left section
  */
 export const openGraphAnalyzerTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON).click();
 };

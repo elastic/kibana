@@ -7,7 +7,7 @@
 import { useReducer, useMemo, useCallback } from 'react';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { mapFiltersToKueryNode } from '../lib/rule_api/map_filters_to_kuery_node';
-import { RuleTableItem, RuleStatus } from '../../types';
+import { RuleTableItem, RulesListFilters } from '../../types';
 
 interface BulkEditSelectionState {
   selectedIds: Set<string>;
@@ -73,27 +73,11 @@ const reducer = (state: BulkEditSelectionState, action: Action) => {
 interface UseBulkEditSelectProps {
   totalItemCount: number;
   items: RuleTableItem[];
-  typesFilter?: string[];
-  actionTypesFilter?: string[];
-  tagsFilter?: string[];
-  ruleExecutionStatusesFilter?: string[];
-  ruleLastRunOutcomesFilter?: string[];
-  ruleStatusesFilter?: RuleStatus[];
-  searchText?: string;
+  filters?: RulesListFilters;
 }
 
 export function useBulkEditSelect(props: UseBulkEditSelectProps) {
-  const {
-    totalItemCount = 0,
-    items = [],
-    typesFilter,
-    actionTypesFilter,
-    tagsFilter,
-    ruleExecutionStatusesFilter,
-    ruleLastRunOutcomesFilter,
-    ruleStatusesFilter,
-    searchText,
-  } = props;
+  const { totalItemCount = 0, items = [], filters } = props;
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
@@ -187,15 +171,20 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
 
   const getFilterKueryNode = useCallback(
     (idsToExclude?: string[]) => {
-      const ruleFilterKueryNode = mapFiltersToKueryNode({
-        typesFilter,
-        actionTypesFilter,
-        tagsFilter,
-        ruleExecutionStatusesFilter,
-        ruleLastRunOutcomesFilter,
-        ruleStatusesFilter,
-        searchText,
-      });
+      const ruleFilterKueryNode = mapFiltersToKueryNode(
+        filters
+          ? {
+              typesFilter: filters.types,
+              actionTypesFilter: filters.actionTypes,
+              tagsFilter: filters.tags,
+              ruleExecutionStatusesFilter: filters.ruleExecutionStatuses,
+              ruleLastRunOutcomesFilter: filters.ruleLastRunOutcomes,
+              ruleParamsFilter: filters.ruleParams,
+              ruleStatusesFilter: filters.ruleStatuses,
+              searchText: filters.searchText,
+            }
+          : {}
+      );
 
       if (idsToExclude && idsToExclude.length) {
         const excludeFilter = fromKueryExpression(
@@ -209,15 +198,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
 
       return ruleFilterKueryNode;
     },
-    [
-      typesFilter,
-      actionTypesFilter,
-      tagsFilter,
-      ruleExecutionStatusesFilter,
-      ruleLastRunOutcomesFilter,
-      ruleStatusesFilter,
-      searchText,
-    ]
+    [filters]
   );
 
   const getFilter = useCallback(() => {

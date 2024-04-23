@@ -38,10 +38,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Select all rows',
       description: 'ARIA and displayed label on a checkbox to select all table rows',
     }),
-    'euiBasicTable.selectThisRow': i18n.translate('core.euiBasicTable.selectThisRow', {
-      defaultMessage: 'Select this row',
-      description: 'ARIA and displayed label on a checkbox to select a single table row',
-    }),
+    'euiBasicTable.selectThisRow': ({ index }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.selectThisRow', {
+        defaultMessage: 'Select row {index}',
+        values: { index },
+        description: 'ARIA and displayed label on a checkbox to select a single table row',
+      }),
     'euiBasicTable.tableCaptionWithPagination': ({ tableCaption, page, pageCount }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tableCaptionWithPagination', {
         defaultMessage: '{tableCaption}; Page {page} of {pageCount}.',
@@ -523,6 +525,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{columnId}, column {col}, row {row}',
         values: { columnId, row, col },
       }),
+    'euiDataGridCell.expansionEnterPrompt': i18n.translate(
+      'core.euiDataGridCell.expansionEnterPrompt',
+      { defaultMessage: 'Press the Enter key to expand this cell.' }
+    ),
+    'euiDataGridCell.focusTrapEnterPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapEnterPrompt',
+      { defaultMessage: "Press the Enter key to interact with this cell's contents." }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {
@@ -731,7 +741,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{count} available filters',
         values: { count },
       }),
-    'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
+    'euiFlyoutCloseButton.ariaLabel': i18n.translate('core.euiFlyoutCloseButton.ariaLabel', {
       defaultMessage: 'Close this dialog',
     }),
     'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
@@ -789,6 +799,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiHue.label': i18n.translate('core.euiHue.label', {
       defaultMessage: 'Select the HSV color mode "hue" value',
     }),
+    'euiIconTip.defaultAriaLabel': i18n.translate('core.euiIconTip.defaultAriaLabel', {
+      defaultMessage: 'Info',
+    }),
     'euiImageButton.openFullScreen': i18n.translate('core.euiImageButton.openFullScreen', {
       defaultMessage: 'Click to open this image in fullscreen mode',
     }),
@@ -820,9 +833,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '(opens in a new tab or window)',
       }
     ),
-    'euiLoadingChart.ariaLabel': i18n.translate('core.euiLoadingChart.ariaLabel', {
-      defaultMessage: 'Loading',
-    }),
     'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {
       defaultMessage: 'Loading',
     }),
@@ -1536,6 +1546,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Search for anything...',
       }
     ),
+    'euiSideNav.mobileToggleAriaLabel': i18n.translate('core.euiSideNav.mobileToggleAriaLabel', {
+      defaultMessage: 'Toggle navigation',
+    }),
     'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
       defaultMessage: 'Statistic is loading',
     }),
@@ -1702,13 +1715,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Notification',
       description: 'ARIA label on an element containing a notification',
     }),
-    'euiTourStep.endTour': i18n.translate('core.euiTourStep.endTour', {
+    'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
-    'euiTourStep.skipTour': i18n.translate('core.euiTourStep.skipTour', {
+    'euiTourFooter.skipTour': i18n.translate('core.euiTourFooter.skipTour', {
       defaultMessage: 'Skip tour',
     }),
-    'euiTourStep.closeTour': i18n.translate('core.euiTourStep.closeTour', {
+    'euiTourFooter.closeTour': i18n.translate('core.euiTourFooter.closeTour', {
       defaultMessage: 'Close tour',
     }),
     'euiTourStepIndicator.isActive': i18n.translate('core.euiTourStepIndicator.isActive', {
@@ -1728,11 +1741,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} {status}',
         values: { status, number },
         description: 'Screen reader text describing the state of a tour step',
-      }),
-    'euiTreeView.ariaLabel': ({ nodeLabel, ariaLabel }: EuiValues) =>
-      i18n.translate('core.euiTreeView.ariaLabel', {
-        defaultMessage: '{nodeLabel} child of {ariaLabel}',
-        values: { nodeLabel, ariaLabel },
       }),
     'euiTreeView.listNavigationInstructions': i18n.translate(
       'core.euiTreeView.listNavigationInstructions',

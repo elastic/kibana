@@ -53,6 +53,7 @@ export const TEST_DIR = new Set([
   'stub',
   'e2e',
   'ftr_e2e',
+  'journeys_e2e',
   'storybook',
   '.storybook',
   'integration_tests',

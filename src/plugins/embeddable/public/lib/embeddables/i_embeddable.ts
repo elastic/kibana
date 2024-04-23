@@ -7,22 +7,24 @@
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasEditCapabilities,
   HasType,
+  HasDisableTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
   HasParentApi,
   HasUniqueId,
   PublishesViewMode,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishesPhaseEvents,
+  PublishesSavedObjectId,
+  HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -39,6 +41,7 @@ export type { EmbeddableInput };
  */
 export type LegacyEmbeddableAPI = HasType &
   HasUniqueId &
+  HasDisableTriggers &
   PublishesPhaseEvents &
   PublishesViewMode &
   PublishesDataViews &
@@ -46,13 +49,14 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesDataLoading &
   HasInspectorAdapters &
   PublishesBlockingError &
-  PublishesLocalUnifiedSearch &
+  PublishesUnifiedSearch &
   PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &
-  Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
+  Partial<HasLegacyLibraryTransforms> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
-  EmbeddableHasTimeRange;
+  EmbeddableHasTimeRange &
+  PublishesSavedObjectId;
 
 export interface EmbeddableAppContext {
   /**

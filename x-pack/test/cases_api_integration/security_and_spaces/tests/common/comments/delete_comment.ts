@@ -14,10 +14,10 @@ import {
   getSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
           const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });

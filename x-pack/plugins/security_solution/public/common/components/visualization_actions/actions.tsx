@@ -53,6 +53,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   scopeId = SourcererScopeName.default,
   stackByField,
   withActions = DEFAULT_ACTIONS,
+  casesAttachmentMetadata,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
@@ -121,6 +122,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     inspectActionProps,
     timeRange: timerange,
     withActions,
+    lensMetadata: casesAttachmentMetadata,
   });
 
   const panels = useAsync(
