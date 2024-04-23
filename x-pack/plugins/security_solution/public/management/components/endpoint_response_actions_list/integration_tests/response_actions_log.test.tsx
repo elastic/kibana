@@ -1439,7 +1439,6 @@ describe('Response actions history', () => {
         [...RESPONSE_ACTION_TYPE].length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'Elastic Defend',
         'Triggered by rule',
         'Triggered manually',
       ]);
