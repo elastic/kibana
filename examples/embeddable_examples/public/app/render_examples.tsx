@@ -11,10 +11,10 @@ import React, { useMemo, useState } from 'react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Api, State } from '../react_embeddables/search/types';
 import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiSuperDatePicker, EuiText, OnTimeChangeProps } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSuperDatePicker, EuiSwitch, EuiText, OnTimeChangeProps } from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
-import { useBatchedOptionalPublishingSubjects, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 
 export const RenderExamples = () => {
   const initialState = useMemo(() => {
@@ -41,6 +41,7 @@ export const RenderExamples = () => {
   }, []);
 
   const [api, setApi] = useState<Api | null>(null);
+  const [hidePanelChrome, setHidePanelChrome] = useState<boolean>(false);
   const [dataLoading, timeRange] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
     parentApi.timeRange$
@@ -81,37 +82,17 @@ export const RenderExamples = () => {
   onApiAvailable={(newApi) => {
     setApi(newApi);
   }}
+  hidePanelChrome={hidePanelChrome}
 />`}
           </EuiCodeBlock>
 
           <EuiSpacer size="s" />
 
-          <ReactEmbeddableRenderer<State, Api>
-            type={SEARCH_EMBEDDABLE_ID}
-            state={initialState}
-            parentApi={parentApi}
-            onApiAvailable={(newApi) => {
-              setApi(newApi);
-            }}
+          <EuiSwitch
+            label="Set hidePanelChrome to render embeddable without PresentationPanel wrapper."
+            checked={hidePanelChrome}
+            onChange={(e) => setHidePanelChrome(e.target.checked)}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <p>
-              Use <strong>hidePresentationPanelChrome</strong> prop to render embeddable without presentation panel wrapper.
-            </p>
-          </EuiText>
-          <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-            {`<ReactEmbeddableRenderer<State, Api>
-  type={SEARCH_EMBEDDABLE_ID}
-  state={initialState}
-  parentApi={parentApi}
-  onApiAvailable={(newApi) => {
-    setApi(newApi);
-  }}
-  hidePresentationPanelChrome={true}
-/>`}
-          </EuiCodeBlock>
 
           <EuiSpacer size="s" />
 
@@ -122,7 +103,7 @@ export const RenderExamples = () => {
             onApiAvailable={(newApi) => {
               setApi(newApi);
             }}
-            hidePresentationPanelChrome={true}
+            hidePanelChrome={hidePanelChrome}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

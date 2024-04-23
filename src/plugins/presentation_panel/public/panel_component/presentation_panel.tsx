@@ -23,12 +23,12 @@ export const PresentationPanel = <
   PropsType extends {} = {}
 >(
   props: PresentationPanelProps<ApiType, PropsType> & {
-    hidePresentationPanelChrome?: boolean;
+    hidePanelChrome?: boolean;
   }
 ) => {
-  const { Component, hidePresentationPanelChrome, ...passThroughProps } = props;
+  const { Component, hidePanelChrome, ...passThroughProps } = props;
   const { loading, value, error } = useAsync(async () => {
-    if (hidePresentationPanelChrome) {
+    if (hidePanelChrome) {
       return {
         unwrappedComponent: isPromise(Component) ? await Component : Component
       };
@@ -51,7 +51,7 @@ export const PresentationPanel = <
 
   const Panel = value?.Panel;
   const UnwrappedComponent = value?.unwrappedComponent;
-  const shouldHavePanel = !loading && !hidePresentationPanelChrome;
+  const shouldHavePanel = !loading && !hidePanelChrome;
   const shouldHaveUnwrappedComponent = !loading;
   if (error || (shouldHavePanel && !Panel) || (shouldHaveUnwrappedComponent && !UnwrappedComponent)) {
     return (

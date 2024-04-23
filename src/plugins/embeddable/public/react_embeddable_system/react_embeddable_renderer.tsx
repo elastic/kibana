@@ -34,7 +34,7 @@ export const ReactEmbeddableRenderer = <
   onApiAvailable,
   panelProps,
   onAnyStateChange,
-  hidePresentationPanelChrome,
+  hidePanelChrome,
 }: {
   maybeId?: string;
   type: string;
@@ -50,7 +50,7 @@ export const ReactEmbeddableRenderer = <
     | 'hideHeader'
     | 'hideInspector'
   >;
-  hidePresentationPanelChrome?: boolean;
+  hidePanelChrome?: boolean;
   /**
    * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
    * as it changes. This is **not** expected to change over the lifetime of the component.
@@ -131,5 +131,5 @@ export const ReactEmbeddableRenderer = <
     };
   }, []);
 
-  return <PresentationPanel hidePresentationPanelChrome={hidePresentationPanelChrome} {...panelProps} Component={componentPromise} />;
+  return <PresentationPanel hidePanelChrome={hidePanelChrome} {...panelProps} Component={componentPromise} />;
 };
