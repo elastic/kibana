@@ -90,7 +90,7 @@ export const RenderExamples = () => {
           <EuiSpacer size="s" />
 
           <EuiSwitch
-            label="Set hidePanelChrome to render embeddable without PresentationPanel wrapper."
+            label="Set hidePanelChrome to render embeddable without Panel wrapper."
             checked={hidePanelChrome}
             onChange={(e) => setHidePanelChrome(e.target.checked)}
           />
