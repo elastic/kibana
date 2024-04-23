@@ -783,6 +783,18 @@ describe('#getQueryParams', () => {
           ]);
           expect(simpleQueryClause.query).toBe('foo');
         });
+
+        it('should create multiple nested clauses if there are multiple nested fields', () => {
+          // two registries with at least one nested field
+          // should have two nested clauses
+          expect(false).toBe(true);
+        });
+
+        it('should use one nested clause if there are multiple nested fields in same type', () => {
+          // registry with two nested fields, search by them
+          // should have one nested clause with both fields
+          expect(false).toBe(true);
+        });
       });
     });
   });
