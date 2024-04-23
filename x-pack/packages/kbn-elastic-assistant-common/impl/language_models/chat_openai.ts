@@ -18,7 +18,7 @@ import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
-import { DEFAULT_OPEN_AI_MODEL } from './constants';
+import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import { InvokeAIActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
@@ -35,6 +35,7 @@ interface ActionsClientChatOpenAIParams {
   model?: string;
   temperature?: number;
   signal?: AbortSignal;
+  timeout?: number;
 }
 
 /**
@@ -65,6 +66,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #actionResultData: string;
   #traceId: string;
   #signal?: AbortSignal;
+  #timeout?: number;
+
   constructor({
     actions,
     connectorId,
@@ -76,6 +79,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     model,
     signal,
     temperature,
+    timeout,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
@@ -96,6 +100,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
+    this.#timeout = timeout;
     this.#actionResultData = '';
     this.streaming = true;
     this.#signal = signal;
@@ -201,6 +206,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
             ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
           })),
           signal: this.#signal,
+          // This timeout is large because LangChain prompts can be complicated and take a long time
+          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
         },
       },
       signal: this.#signal,
