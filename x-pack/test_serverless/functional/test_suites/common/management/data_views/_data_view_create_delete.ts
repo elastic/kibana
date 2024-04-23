@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
 
       await supertest
-        .delete(`DATA_VIEW_PATH/${dataViewId}`)
+        .delete(`${DATA_VIEW_PATH}/${dataViewId}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader());
