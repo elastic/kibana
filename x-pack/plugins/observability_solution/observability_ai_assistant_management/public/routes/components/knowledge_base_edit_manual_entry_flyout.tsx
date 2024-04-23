@@ -96,7 +96,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             )}
           >
             <EuiFieldText
-              data-test-subj="knowledgeBaseEditManualEntryFlyoutFieldText"
+              data-test-subj="knowledgeBaseEditManualEntryFlyoutIdInput"
               fullWidth
               value={newEntryId}
               onChange={(e) => setNewEntryId(e.target.value)}
@@ -141,6 +141,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
           )}
         >
           <EuiMarkdownEditor
+            editorId="knowledgeBaseEditManualEntryFlyoutMarkdownEditor"
             aria-label={i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.euiMarkdownEditor.observabilityAiAssistantKnowledgeBaseViewMarkdownEditorLabel',
               { defaultMessage: 'observabilityAiAssistantKnowledgeBaseViewMarkdownEditor' }
