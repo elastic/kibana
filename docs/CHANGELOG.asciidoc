@@ -180,6 +180,15 @@ For more information, refer to ({kibana-issue}179940[#179940]).
 When creating a new control or editing an existing control, selecting a field that has a custom label will cause an error. For more information, refer to ({kibana-issue}180613[#180613]).
 ====
 
+[discrete]
+[[known-177938-8.13]]
+.Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
+[%collapsible]
+====
+*Details* +
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the `allow_auto_create` field is incorrectly set to `false` by default (the default value should be `undefined`). For more information, refer to ({kibana-issue}177938[#177938]).
+====
+
 [float]
 [[breaking-changes-8.13.0]]
 === Breaking changes
@@ -567,6 +576,19 @@ Security::
 == {kib} 8.12.0
 
 For information about the {kib} 8.12.0 release, review the following information.
+
+[float]
+[[known-issues-8.12.0]]
+=== Known issues
+
+[discrete]
+[[known-177938-8.12]]
+.Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
+[%collapsible]
+====
+*Details* +
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the `allow_auto_create` field is incorrectly set to `false` by default (the default value should be `undefined`). For more information, refer to ({kibana-issue}177938[#177938]).
+====
 
 [float]
 [[breaking-changes-8.12.0]]
