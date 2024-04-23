@@ -22,6 +22,7 @@ import type {
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
   NormalizedExternalConnectorClient,
@@ -52,6 +53,8 @@ import type {
   SentinelOneGetFileRequestMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
+  SentinelOneGetFileResponseMeta,
+  SentinelOneActivityDataForType80,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -505,8 +508,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     ResponseActionGetFileOutputContent,
                     SentinelOneGetFileRequestMeta
                   >
-                >,
-                actionType as 'get-file'
+                >
               );
               if (responseDocsForGetFile.length) {
                 addToQueue(...responseDocsForGetFile);
@@ -635,7 +637,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         // due to use of `collapse
         _source: false,
         sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
-        size: 1000,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
       };
 
       this.log.debug(
@@ -717,55 +719,163 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         ResponseActionGetFileOutputContent,
         SentinelOneGetFileRequestMeta
       >
-    >,
-    command: ResponseActionsApiCommandNames & 'get-file'
+    >
   ): Promise<LogsEndpointActionResponse[]> {
-    // implement
-    // todo:pt cleanup
-    // S1 record:
-    // {
-    //             "accountId": "1392053568574369781",
-    //             "accountName": "Elastic",
-    //             "activityType": 80,
-    //             "activityUuid": "1f3bba11-714b-46c3-98a0-7705f91fddba",
-    //             "agentId": "1913920934584665209",
-    //             "agentUpdatedVersion": null,
-    //             "comments": null,
-    //             "createdAt": "2024-04-18T14:15:07.949973Z",
-    //             "data": {
-    //                 "accountName": "Elastic",
-    //                 "commandBatchUuid": "991cc0b6-e8fd-4818-afc3-d0c837f7e08d",
-    //                 "commandId": 1931232896149877374,
-    //                 "computerName": "ptavares-sentinelone-1371",
-    //                 "downloadUrl": "/agents/1913920934584665209/uploads/1931232950197678729",
-    //                 "externalIp": "108.77.84.191",
-    //                 "externalServiceId": null,
-    //                 "filePath": "/agents/1913920934584665209/uploads/1931232950197678729",
-    //                 "filename": "ptavares_sentinelone_1371_2024-04-18_14_15_07.928.zip",
-    //                 "fullScopeDetails": "Group Default Group in Site Default site of Account Elastic",
-    //                 "fullScopeDetailsPath": "Global / Elastic / Default site / Default Group",
-    //                 "groupName": "Default Group",
-    //                 "ipAddress": "108.77.84.191",
-    //                 "realUser": null,
-    //                 "scopeLevel": "Group",
-    //                 "scopeName": "Default Group",
-    //                 "siteName": "Default site",
-    //                 "sourceType": "API",
-    //                 "uploadedFilename": "file_fetch_18-04-24_10_15_07.zip"
-    //             },
-    //             "description": null,
-    //             "groupId": "1392053568591146999",
-    //             "groupName": "Default Group",
-    //             "hash": null,
-    //             "id": "1931232950197678729",
-    //             "osFamily": null,
-    //             "primaryDescription": "Agent ptavares-sentinelone-1371 (108.77.84.191) successfully uploaded ptavares_sentinelone_1371_2024-04-18_14_15_07.928.zip.",
-    //             "secondaryDescription": "IP address: 108.77.84.191",
-    //             "siteId": "1392053568582758390",
-    //             "siteName": "Default site",
-    //             "threatId": null,
-    //             "updatedAt": "2024-04-18T14:15:07.949319Z",
-    //             "userId": null
-    //         },
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+    const actionsByAgentAndBatchId: {
+      [agentIdAndCommandBatchUuid: string]: LogsEndpointAction<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >;
+    } = {};
+    // Utility to create the key to lookup items in the `actionByAgentAndBatchId` grouping above
+    const getLookupKey = (agentId: string, commandBatchUuid: string): string =>
+      `${agentId}:${commandBatchUuid}`;
+    const searchRequestOptions: SearchRequest = {
+      index: SENTINEL_ONE_ACTIVITY_INDEX,
+      size: ACTIONS_SEARCH_PAGE_SIZE,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                // Activity Types can be retrieved from S1 via API: `/web/api/v2.1/activities/types`
+                // {
+                //   "action": "Agent Uploaded Fetched Files",
+                //   "descriptionTemplate": "Agent {{ computer_name }} ({{ external_ip }}) successfully uploaded {{ filename }}.",
+                //   "id": 80
+                // },
+                'sentinel_one.activity.type': 80,
+              },
+            },
+          ],
+          should: actionRequests.reduce((acc, action) => {
+            const s1AgentId = action.meta?.agentId;
+            const s1CommandBatchUUID = action.meta?.commandBatchUuid;
+
+            if (s1AgentId && s1CommandBatchUUID) {
+              actionsByAgentAndBatchId[getLookupKey(s1AgentId, s1CommandBatchUUID)] = action;
+
+              acc.push({
+                bool: {
+                  filter: [
+                    { term: { 'sentinel_one.activity.agent.id': s1AgentId } },
+                    {
+                      term: {
+                        'sentinel_one.activity.data.flattened.commandBatchUuid': s1CommandBatchUUID,
+                      },
+                    },
+                  ],
+                },
+              });
+            } else {
+              // This is an edge case and should never happen. But just in case :-)
+              warnings.push(
+                `get-file response action ID [${action.EndpointActions.action_id}] missing SentinelOne agent ID or commandBatchUuid value(s). Unable to check on it's status - forcing it to complete as a failure.`
+              );
+
+              completedResponses.push(
+                this.buildActionResponseEsDoc<{}, {}>({
+                  actionId: action.EndpointActions.action_id,
+                  agentId: Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id,
+                  data: { command: 'get-file' },
+                  error: {
+                    message: `Unable to very if action completed. SentinelOne agent id or commandBatchUuid missing on action request document!`,
+                  },
+                })
+              );
+            }
+
+            return acc;
+          }, [] as QueryDslQueryContainer[]),
+          minimum_should_match: 1,
+        },
+      },
+    };
+
+    if (Object.keys(actionsByAgentAndBatchId).length) {
+      this.log.debug(
+        `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with:\n${stringify(
+          searchRequestOptions,
+          15
+        )}`
+      );
+
+      const searchResults = await this.options.esClient
+        .search<SentinelOneActivityEsDoc<SentinelOneActivityDataForType80>>(searchRequestOptions)
+        .catch(catchAndWrapError);
+
+      this.log.debug(
+        `Search results for SentinelOne get-file activity documents:\n${stringify(searchResults)}`
+      );
+
+      for (const s1Hit of searchResults.hits.hits) {
+        const s1ActivityDoc = s1Hit._source;
+        const s1AgentId = s1ActivityDoc?.sentinel_one.activity.agent.id;
+        const s1CommandBatchUuid =
+          s1ActivityDoc?.sentinel_one.activity.data.flattened.commandBatchUuid ?? '';
+        const activityLogEntryId = s1ActivityDoc?.sentinel_one.activity.id ?? '';
+
+        if (s1AgentId && s1CommandBatchUuid) {
+          const actionRequest =
+            actionsByAgentAndBatchId[getLookupKey(s1AgentId, s1CommandBatchUuid)];
+          const downloadUrl = s1ActivityDoc?.sentinel_one.activity.data.downloaded.url ?? '';
+          const error = !downloadUrl
+            ? {
+                message: `File retrieval failed (No download URL defined in SentinelOne activity log id [${activityLogEntryId}]`,
+              }
+            : undefined;
+
+          completedResponses.push(
+            this.buildActionResponseEsDoc<
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileResponseMeta
+            >({
+              actionId: actionRequest.EndpointActions.action_id,
+              agentId: Array.isArray(actionRequest.agent.id)
+                ? actionRequest.agent.id[0]
+                : actionRequest.agent.id,
+              data: {
+                command: 'get-file',
+                comment: s1ActivityDoc?.sentinel_one.activity.description.primary ?? '',
+                output: {
+                  type: 'json',
+                  content: {
+                    // code applies only to Endpoint agents
+                    code: '',
+                    // We don't know the file size for S1 retrieved files
+                    zip_size: 0,
+                    // We don't have the contents of the zip file for S1
+                    contents: [],
+                  },
+                },
+              },
+              error,
+              meta: {
+                activityLogEntryId,
+                elasticDocId: s1Hit._id,
+                downloadUrl,
+              },
+            })
+          );
+        }
+      }
+    } else {
+      this.log.debug(`Nothing to search for. No pending get-file actions`);
+    }
+
+    this.log.debug(
+      `${completedResponses.length} get-file action responses generated:\n${stringify(
+        completedResponses
+      )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
   }
 }
