@@ -38,6 +38,7 @@ import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
 import { entityStoreDataClientMock } from '../../../entity_analytics/entity_store/entity_store_data_client.mock';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -116,6 +117,7 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
+  const mockAuditLogger = auditLoggerMock.create();
 
   return {
     core,
@@ -151,6 +153,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreyDataClient),
+    getAuditLogger: jest.fn(() => mockAuditLogger),
   };
 };
 

@@ -148,6 +148,8 @@ export class DashboardContainer
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
+  public readonly executionContext: KibanaExecutionContext;
+
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
@@ -295,6 +297,8 @@ export class DashboardContainer
       string | undefined,
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
+
+    this.executionContext = initialInput.executionContext;
   }
 
   public getAppContext() {

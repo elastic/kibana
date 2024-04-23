@@ -19,7 +19,9 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { EntityType } from '../../../../common/entity_analytics';
+
 import {
   getIndexPatternDataStream,
   getTransformOptions,
@@ -37,6 +39,8 @@ import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
+import { RiskScoreAuditActions } from './audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -44,6 +48,7 @@ interface RiskScoringDataClientOpts {
   esClient: ElasticsearchClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
+  auditLogger?: AuditLogger | undefined;
 }
 
 export class RiskScoreDataClient {
@@ -162,6 +167,16 @@ export class RiskScoreDataClient {
             dest: getRiskScoreLatestIndex(namespace),
             source: [indexPatterns.alias],
           }),
+        },
+      });
+
+      this.options.auditLogger?.log({
+        message: 'System installed risk engine Elasticsearch components',
+        event: {
+          action: RiskScoreAuditActions.RISK_ENGINE_INSTALL,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.SUCCESS,
         },
       });
     } catch (error) {

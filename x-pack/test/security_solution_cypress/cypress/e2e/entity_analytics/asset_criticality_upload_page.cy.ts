@@ -38,7 +38,10 @@ describe(
       uploadAssetCriticalityFile();
 
       cy.get(FILE_PICKER).should('not.visible');
-      cy.get(VALID_LINES_MESSAGE).should('have.text', '4 asset criticalities will be assigned');
+      cy.get(VALID_LINES_MESSAGE).should(
+        'have.text',
+        '4 asset criticality levels will be assigned'
+      );
       cy.get(INVALID_LINES_MESSAGE).should('have.text', "1 line is invalid and won't be assigned");
 
       clickAssignButton();
