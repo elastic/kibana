@@ -70,11 +70,11 @@ import {
   type DiscoverContainerProps,
 } from './components/discover_container';
 import type { DiscoverCustomizationContext } from './customizations';
+import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
   SEARCH_EMBEDDABLE_TYPE,
 } from './embeddable/constants';
-import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import { registerFeature } from './register_feature';
@@ -486,27 +486,5 @@ export class DiscoverPlugin
         discoverServices,
       });
     });
-  }
-
-  /**
-   * Create profile-aware locators for internal use
-   */
-  private async getProfileAwareLocators({
-    locator,
-    contextLocator,
-    singleDocLocator,
-  }: {
-    locator: DiscoverAppLocator;
-    contextLocator: DiscoverContextAppLocator;
-    singleDocLocator: DiscoverSingleDocLocator;
-  }) {
-    const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
-    const history = this.historyService.getHistory();
-
-    return {
-      locator: new ProfileAwareLocator(locator, history),
-      contextLocator: new ProfileAwareLocator(contextLocator, history),
-      singleDocLocator: new ProfileAwareLocator(singleDocLocator, history),
-    };
   }
 }
