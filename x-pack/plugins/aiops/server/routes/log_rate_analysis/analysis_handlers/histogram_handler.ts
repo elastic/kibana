@@ -168,7 +168,7 @@ export const histogramHandlerFactory =
         }
       }, MAX_CONCURRENT_QUERIES);
 
-      fieldValueHistogramQueue.push(significantTerms);
+      await fieldValueHistogramQueue.push(significantTerms);
       await fieldValueHistogramQueue.drain();
     }
 
