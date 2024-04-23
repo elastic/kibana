@@ -9,20 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { MessageRole, type Message } from '../../common';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
+  MessageRole,
+  type Message,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
-} from '../../common/conversation_complete';
-import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-import type {
-  ObservabilityAIAssistantChatService,
-  ObservabilityAIAssistantService,
-} from '../types';
+} from '../../common';
+import {
+  getAssistantSystemMessage,
+  type ObservabilityAIAssistantChatService,
+  type ObservabilityAIAssistantService,
+} from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
+import { useUserPreferredLanguage } from './use_user_preferred_language';
 
 export enum ChatState {
   Ready = 'ready',
@@ -46,7 +49,8 @@ export interface UseChatResult {
   stop: () => void;
 }
 
-export interface UseChatProps {
+interface UseChatPropsWithoutContext {
+  notifications: NotificationsStart;
   initialMessages: Message[];
   initialConversationId?: string;
   service: ObservabilityAIAssistantService;
@@ -57,20 +61,23 @@ export interface UseChatProps {
   onChatComplete?: (messages: Message[]) => void;
 }
 
-export function useChat({
+export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
+
+function useChatWithoutContext({
   initialMessages,
   initialConversationId,
+  notifications,
   service,
   chatService,
   connectorId,
   onConversationUpdate,
   onChatComplete,
   persist,
-}: UseChatProps): UseChatResult {
+}: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
 
   const systemMessage = useMemo(() => {
-    return getAssistantSetupMessage({ contexts: chatService.getContexts() });
+    return getAssistantSystemMessage({ contexts: chatService.getContexts() });
   }, [chatService]);
 
   useOnce(initialMessages);
@@ -85,9 +92,7 @@ export function useChat({
 
   const abortControllerRef = useRef(new AbortController());
 
-  const {
-    services: { notifications },
-  } = useKibana();
+  const { getPreferredLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -156,12 +161,13 @@ export function useChat({
       setChatState(ChatState.Loading);
 
       const next$ = chatService.complete({
-        screenContexts: service.getScreenContexts(),
+        getScreenContexts: () => service.getScreenContexts(),
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
         signal: abortControllerRef.current.signal,
         conversationId,
+        responseLanguage: getPreferredLanguage(),
       });
 
       function getPendingMessages() {
@@ -259,6 +265,7 @@ export function useChat({
       persist,
       service,
       systemMessage,
+      getPreferredLanguage,
     ]
   );
 
@@ -287,5 +294,25 @@ export function useChat({
     stop: () => {
       abortControllerRef.current.abort();
     },
+  };
+}
+
+export function useChat(props: UseChatProps) {
+  const {
+    services: { notifications },
+  } = useKibana();
+
+  return useChatWithoutContext({
+    ...props,
+    notifications,
+  });
+}
+
+export function createUseChat({ notifications }: { notifications: NotificationsStart }) {
+  return (parameters: Omit<UseChatProps, 'notifications'>) => {
+    return useChatWithoutContext({
+      ...parameters,
+      notifications,
+    });
   };
 }

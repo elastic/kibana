@@ -6,7 +6,7 @@
  */
 
 import { stringMatch } from '../../util/string_utils';
-import {
+import type {
   TermClause,
   FieldClause,
   Value,

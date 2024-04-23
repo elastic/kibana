@@ -39,12 +39,22 @@ export const useDatasetQualityTable = () => {
     fullNames: showFullDatasetNames,
     timeRange,
     integrations,
+    namespaces,
     query,
   } = useSelector(service, (state) => state.context.filters);
 
   const flyout = useSelector(service, (state) => state.context.flyout);
 
-  const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const loading = useSelector(
+    service,
+    (state) =>
+      state.matches('datasets.fetching') ||
+      state.matches('integrations.fetching') ||
+      state.matches('degradedDocs.fetching')
+  );
+  const loadingDataStreamStats = useSelector(service, (state) =>
+    state.matches('datasets.fetching')
+  );
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('degradedDocs.fetching')
   );
@@ -103,6 +113,7 @@ export const useDatasetQualityTable = () => {
         fieldFormats,
         selectedDataset: flyout?.dataset,
         openFlyout,
+        loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
         isActiveDataset: isActive,
@@ -111,6 +122,7 @@ export const useDatasetQualityTable = () => {
       fieldFormats,
       flyout?.dataset,
       openFlyout,
+      loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
       isActive,
@@ -133,10 +145,15 @@ export const useDatasetQualityTable = () => {
           })
         : visibleDatasets;
 
+    const filteredByNamespaces =
+      namespaces.length > 0
+        ? filteredByIntegrations.filter((dataset) => namespaces.includes(dataset.namespace))
+        : filteredByIntegrations;
+
     return query
-      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
-      : filteredByIntegrations;
-  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
+      ? filteredByNamespaces.filter((dataset) => dataset.rawName.includes(query))
+      : filteredByNamespaces;
+  }, [showInactiveDatasets, datasets, timeRange, integrations, namespaces, query]);
 
   const pagination = {
     pageIndex: page,

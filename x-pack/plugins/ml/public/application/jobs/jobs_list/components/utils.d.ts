@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
 
 export function stopDatafeeds(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
 export function closeJobs(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;

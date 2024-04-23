@@ -1,0 +1,5 @@
+foo: 1
+
+nested_list:
+  - id: "a"
+    values: ["${KBN_ENV_VAR1}", "${KBN_ENV_VAR2}"]

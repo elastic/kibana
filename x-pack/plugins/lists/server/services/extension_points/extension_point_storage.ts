@@ -17,7 +17,6 @@ import { ExtensionPointStorageClient } from './extension_point_storage_client';
 
 export class ExtensionPointStorage implements ExtensionPointStorageInterface {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();
-  private readonly registeredFrom = new Map<ExtensionPoint, string>();
 
   constructor(private readonly logger: Logger) {}
 
@@ -30,24 +29,11 @@ export class ExtensionPointStorage implements ExtensionPointStorageInterface {
 
     if (extensionPointsForType) {
       extensionPointsForType.add(extension);
-
-      // Capture stack trace from where this extension point was registered, so that it can be used when
-      // errors occur or callbacks don't return the expected result
-      const from = new Error('REGISTERED FROM:').stack ?? 'REGISTERED FROM: unknown';
-      this.registeredFrom.set(
-        extension,
-        from.substring(from.indexOf('REGISTERED FROM:')).concat('\n    ----------------------')
-      );
     }
   }
 
   clear(): void {
     this.store.clear();
-    this.registeredFrom.clear();
-  }
-
-  getExtensionRegistrationSource(extensionPoint: ExtensionPoint): string | undefined {
-    return this.registeredFrom.get(extensionPoint);
   }
 
   get<T extends ExtensionPoint['type']>(

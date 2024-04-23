@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import * as puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
-import { mergeMap, take } from 'rxjs/operators';
+import { mergeMap, take } from 'rxjs';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 import { ConfigType } from '../../../config';
 

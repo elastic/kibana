@@ -30,6 +30,8 @@ export * from './line_style_settings';
 
 export * from './text_decoration_setting';
 
+export * from './chart_switch_trigger';
+
 export type { AccessorConfig } from './dimension_buttons';
 
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';

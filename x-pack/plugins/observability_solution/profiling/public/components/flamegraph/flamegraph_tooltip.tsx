@@ -25,6 +25,7 @@ import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_est
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { asInteger } from '../../utils/formatters/as_integer';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
 
@@ -171,6 +172,7 @@ export function FlameGraphTooltip({
                 ? comparisonCountInclusive * comparisonScaleFactor
                 : undefined
             }
+            formatValue={asInteger}
             showDifference
             formatDifferenceAsPercentage={false}
           />

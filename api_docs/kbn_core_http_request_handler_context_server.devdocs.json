@@ -112,6 +112,26 @@
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.CoreRequestHandlerContext.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.SecurityRequestHandlerContext",
+                "text": "SecurityRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { Results, Anomaly } from '../../../../../common/results_loader';
-import { LineChartPoint } from '../../../../../common/chart_loader';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { Results, Anomaly } from '../../../../../common/results_loader';
+import type { LineChartPoint } from '../../../../../common/chart_loader';
 import { EventRateChart } from '../../../charts/event_rate_chart';
 import { TopCategories } from './top_categories';
 import { CategoryStoppedPartitions } from './category_stopped_partitions';

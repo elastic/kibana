@@ -5,22 +5,48 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import type {
+  CoreStart,
+  CustomRequestHandlerContext,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server/types';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from '../types';
 
-export type ObservabilityAIAssistantRequestHandlerContext = CustomRequestHandlerContext<{
-  rac: RacApiRequestHandlerContext;
-  licensing: LicensingApiRequestHandlerContext;
-  alerting: AlertingApiRequestHandlerContext;
-}>;
+export type ObservabilityAIAssistantRequestHandlerContext = Omit<
+  CustomRequestHandlerContext<{
+    licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
+    // these two are here for compatibility with APM functions
+    rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
+    alerting: {
+      getRulesClient: () => RulesClientApi;
+    };
+  }>,
+  'core' | 'resolve'
+> & {
+  core: Promise<{
+    elasticsearch: {
+      client: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
+    coreStart: CoreStart;
+  }>;
+};
 
 export interface ObservabilityAIAssistantRouteHandlerResources {
   request: KibanaRequest;

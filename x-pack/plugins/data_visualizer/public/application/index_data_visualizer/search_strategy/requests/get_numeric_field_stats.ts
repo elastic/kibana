@@ -7,9 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { find, get } from 'lodash';
-import { catchError, map } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
-import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { catchError, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,

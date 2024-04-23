@@ -7084,6 +7084,16 @@
               }
             }
           }
+        },
+        "casesSystemAction": {
+          "properties": {
+            "totalCasesCreated": {
+              "type": "long"
+            },
+            "totalRules": {
+              "type": "long"
+            }
+          }
         }
       }
     },
@@ -7700,6 +7710,9 @@
               "agent_count": {
                 "type": "long"
               },
+              "is_agentless": {
+                "type": "boolean"
+              },
               "account_type": {
                 "type": "keyword"
               },
@@ -8101,6 +8114,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8135,6 +8154,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8169,6 +8194,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8203,6 +8234,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8241,6 +8278,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8275,6 +8318,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8309,6 +8358,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8343,6 +8398,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8388,6 +8449,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8422,6 +8489,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8456,6 +8529,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8490,6 +8569,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8528,6 +8613,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8562,6 +8653,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8596,6 +8693,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8630,6 +8733,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8890,6 +8999,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8924,6 +9039,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8958,6 +9079,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8992,6 +9119,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -9030,6 +9163,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9064,6 +9203,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9098,6 +9243,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9132,6 +9283,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -9177,6 +9334,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9211,6 +9374,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9245,6 +9414,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9279,6 +9454,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -9317,6 +9498,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9351,6 +9538,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9385,6 +9578,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9419,6 +9618,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -10741,3121 +10946,11 @@
     },
     "reporting": {
       "properties": {
-        "csv_searchsource": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "csv_searchsource_immediate": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "csv_v2": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "csv_rows": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "PNG": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "png_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "png_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                },
-                "browser_could_not_launch_error": {
-                  "type": "long"
-                },
-                "browser_unexpectedly_closed_error": {
-                  "type": "long"
-                },
-                "browser_screenshot_error": {
-                  "type": "long"
-                },
-                "visual_reporting_soft_disabled_error": {
-                  "type": "long"
-                },
-                "invalid_layout_parameters_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "PNGV2": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "png_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "png_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                },
-                "browser_could_not_launch_error": {
-                  "type": "long"
-                },
-                "browser_unexpectedly_closed_error": {
-                  "type": "long"
-                },
-                "browser_screenshot_error": {
-                  "type": "long"
-                },
-                "visual_reporting_soft_disabled_error": {
-                  "type": "long"
-                },
-                "invalid_layout_parameters_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "printable_pdf": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "pdf_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "pdf_worker_out_of_memory_error": {
-                  "type": "long"
-                },
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                },
-                "browser_could_not_launch_error": {
-                  "type": "long"
-                },
-                "browser_unexpectedly_closed_error": {
-                  "type": "long"
-                },
-                "browser_screenshot_error": {
-                  "type": "long"
-                },
-                "visual_reporting_soft_disabled_error": {
-                  "type": "long"
-                },
-                "invalid_layout_parameters_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "printable_pdf_v2": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "execution_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
-                }
-              }
-            },
-            "metrics": {
-              "properties": {
-                "pdf_cpu": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_memory": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "pdf_pages": {
-                  "properties": {
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "error_codes": {
-              "properties": {
-                "pdf_worker_out_of_memory_error": {
-                  "type": "long"
-                },
-                "authentication_expired_error": {
-                  "type": "long"
-                },
-                "queue_timeout_error": {
-                  "type": "long"
-                },
-                "unknown_error": {
-                  "type": "long"
-                },
-                "kibana_shutting_down_error": {
-                  "type": "long"
-                },
-                "browser_could_not_launch_error": {
-                  "type": "long"
-                },
-                "browser_unexpectedly_closed_error": {
-                  "type": "long"
-                },
-                "browser_screenshot_error": {
-                  "type": "long"
-                },
-                "visual_reporting_soft_disabled_error": {
-                  "type": "long"
-                },
-                "invalid_layout_parameters_error": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "_all": {
-          "type": "long"
-        },
-        "status": {
-          "properties": {
-            "completed": {
-              "type": "long"
-            },
-            "completed_with_warnings": {
-              "type": "long"
-            },
-            "failed": {
-              "type": "long"
-            },
-            "pending": {
-              "type": "long"
-            },
-            "processing": {
-              "type": "long"
-            }
-          }
-        },
-        "statuses": {
-          "properties": {
-            "completed": {
-              "properties": {
-                "csv_searchsource": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource_immediate": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNGV2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "completed_with_warnings": {
-              "properties": {
-                "csv_searchsource": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource_immediate": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNGV2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "failed": {
-              "properties": {
-                "csv_searchsource": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource_immediate": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNGV2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "pending": {
-              "properties": {
-                "csv_searchsource": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource_immediate": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNGV2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "processing": {
-              "properties": {
-                "csv_searchsource": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource_immediate": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNGV2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf_v2": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "output_size": {
-          "properties": {
-            "1.0": {
-              "type": "long"
-            },
-            "5.0": {
-              "type": "long"
-            },
-            "25.0": {
-              "type": "long"
-            },
-            "50.0": {
-              "type": "long"
-            },
-            "75.0": {
-              "type": "long"
-            },
-            "95.0": {
-              "type": "long"
-            },
-            "99.0": {
-              "type": "long"
-            }
-          }
-        },
-        "queue_times": {
-          "properties": {
-            "min": {
-              "type": "long"
-            },
-            "max": {
-              "type": "long"
-            },
-            "avg": {
-              "type": "float"
-            }
-          }
-        },
         "available": {
           "type": "boolean"
         },
         "enabled": {
           "type": "boolean"
-        },
-        "last7Days": {
-          "properties": {
-            "csv_searchsource": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "csv_searchsource_immediate": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "csv_v2": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "csv_rows": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "PNG": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "png_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "png_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    },
-                    "browser_could_not_launch_error": {
-                      "type": "long"
-                    },
-                    "browser_unexpectedly_closed_error": {
-                      "type": "long"
-                    },
-                    "browser_screenshot_error": {
-                      "type": "long"
-                    },
-                    "visual_reporting_soft_disabled_error": {
-                      "type": "long"
-                    },
-                    "invalid_layout_parameters_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "PNGV2": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "png_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "png_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    },
-                    "browser_could_not_launch_error": {
-                      "type": "long"
-                    },
-                    "browser_unexpectedly_closed_error": {
-                      "type": "long"
-                    },
-                    "browser_screenshot_error": {
-                      "type": "long"
-                    },
-                    "visual_reporting_soft_disabled_error": {
-                      "type": "long"
-                    },
-                    "invalid_layout_parameters_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "printable_pdf": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "pdf_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "pdf_worker_out_of_memory_error": {
-                      "type": "long"
-                    },
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    },
-                    "browser_could_not_launch_error": {
-                      "type": "long"
-                    },
-                    "browser_unexpectedly_closed_error": {
-                      "type": "long"
-                    },
-                    "browser_screenshot_error": {
-                      "type": "long"
-                    },
-                    "visual_reporting_soft_disabled_error": {
-                      "type": "long"
-                    },
-                    "invalid_layout_parameters_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "printable_pdf_v2": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "output_size": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "execution_times": {
-                  "properties": {
-                    "min": {
-                      "type": "long"
-                    },
-                    "max": {
-                      "type": "long"
-                    },
-                    "avg": {
-                      "type": "float"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "metrics": {
-                  "properties": {
-                    "pdf_cpu": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_memory": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "pdf_pages": {
-                      "properties": {
-                        "50.0": {
-                          "type": "long"
-                        },
-                        "75.0": {
-                          "type": "long"
-                        },
-                        "95.0": {
-                          "type": "long"
-                        },
-                        "99.0": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "error_codes": {
-                  "properties": {
-                    "pdf_worker_out_of_memory_error": {
-                      "type": "long"
-                    },
-                    "authentication_expired_error": {
-                      "type": "long"
-                    },
-                    "queue_timeout_error": {
-                      "type": "long"
-                    },
-                    "unknown_error": {
-                      "type": "long"
-                    },
-                    "kibana_shutting_down_error": {
-                      "type": "long"
-                    },
-                    "browser_could_not_launch_error": {
-                      "type": "long"
-                    },
-                    "browser_unexpectedly_closed_error": {
-                      "type": "long"
-                    },
-                    "browser_screenshot_error": {
-                      "type": "long"
-                    },
-                    "visual_reporting_soft_disabled_error": {
-                      "type": "long"
-                    },
-                    "invalid_layout_parameters_error": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "_all": {
-              "type": "long"
-            },
-            "status": {
-              "properties": {
-                "completed": {
-                  "type": "long"
-                },
-                "completed_with_warnings": {
-                  "type": "long"
-                },
-                "failed": {
-                  "type": "long"
-                },
-                "pending": {
-                  "type": "long"
-                },
-                "processing": {
-                  "type": "long"
-                }
-              }
-            },
-            "statuses": {
-              "properties": {
-                "completed": {
-                  "properties": {
-                    "csv_searchsource": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource_immediate": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNGV2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "completed_with_warnings": {
-                  "properties": {
-                    "csv_searchsource": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource_immediate": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNGV2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "failed": {
-                  "properties": {
-                    "csv_searchsource": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource_immediate": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNGV2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "pending": {
-                  "properties": {
-                    "csv_searchsource": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource_immediate": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNGV2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "processing": {
-                  "properties": {
-                    "csv_searchsource": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource_immediate": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNGV2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf_v2": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "output_size": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "queue_times": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
         }
       }
     },

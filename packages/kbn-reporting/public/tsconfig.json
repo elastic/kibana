@@ -30,5 +30,6 @@
     "@kbn/screenshotting-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-mount",
   ]
 }

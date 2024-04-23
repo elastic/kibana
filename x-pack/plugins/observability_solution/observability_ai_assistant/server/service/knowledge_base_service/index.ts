@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import type { QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
 import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -14,8 +13,9 @@ import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
-import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
@@ -147,10 +147,13 @@ export class KnowledgeBaseService {
         model_id: elserModelId,
       });
 
-      if (
-        response.trained_model_stats[0]?.deployment_stats?.allocation_status.state ===
-        'fully_allocated'
-      ) {
+      const isReady = response.trained_model_stats.some((stats) =>
+        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+          (node) => node.routing_state.routing_state === 'started'
+        )
+      );
+
+      if (isReady) {
         return Promise.resolve();
       }
 
@@ -303,7 +306,7 @@ export class KnowledgeBaseService {
     queries: string[];
     categories?: string[];
     namespace: string;
-    user: { name: string };
+    user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
     const query = {
@@ -314,7 +317,7 @@ export class KnowledgeBaseService {
               model_text: text,
               model_id: modelId,
             },
-          } as unknown as QueryDslTextExpansionQuery,
+          },
         })),
         filter: [
           ...getAccessQuery({
@@ -385,7 +388,7 @@ export class KnowledgeBaseService {
                     model_text: query,
                     model_id: modelId,
                   },
-                } as unknown as QueryDslTextExpansionQuery,
+                },
               },
             ],
             filter: [
@@ -430,7 +433,7 @@ export class KnowledgeBaseService {
   }: {
     queries: string[];
     categories?: string[];
-    user: { name: string };
+    user?: { name: string };
     namespace: string;
     asCurrentUser: ElasticsearchClient;
   }): Promise<{
@@ -491,6 +494,45 @@ export class KnowledgeBaseService {
     return {
       entries: returnedEntries,
     };
+  };
+
+  getInstructions = async (
+    namespace: string,
+    user?: { name: string }
+  ): Promise<UserInstruction[]> => {
+    try {
+      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+        index: this.dependencies.resources.aliases.kb,
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'labels.category.keyword': {
+                    value: 'instruction',
+                  },
+                },
+              },
+            ],
+            filter: getAccessQuery({
+              user,
+              namespace,
+            }),
+          },
+        },
+        size: 500,
+        _source: ['doc_id', 'text'],
+      });
+
+      return response.hits.hits.map((hit) => ({
+        doc_id: hit._source?.doc_id ?? '',
+        text: hit._source?.text ?? '',
+      }));
+    } catch (error) {
+      this.dependencies.logger.error('Failed to load instructions from knowledge base');
+      this.dependencies.logger.error(error);
+      return [];
+    }
   };
 
   getEntries = async ({

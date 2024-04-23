@@ -12,10 +12,8 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
-import { DEFAULT_PAGE_SIZE } from '../constants';
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
-
-const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();
@@ -43,8 +41,9 @@ export const HostsTable = () => {
       />
       <EuiBasicTable
         data-test-subj={`hostsView-table-${loading ? 'loading' : 'loaded'}`}
+        // This table has a lot of columns, so break down into mobile view sooner
+        responsiveBreakpoint="xl"
         itemId="id"
-        isSelectable
         selection={selection}
         pagination={{
           pageIndex: pagination.pageIndex ?? 0,

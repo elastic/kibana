@@ -6,12 +6,13 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
-import { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
 import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common/constants';
 
 interface FileTooLargeProps {

@@ -44,7 +44,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share, serverless, discover } = _pluginsSetup;
+    const { share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -85,10 +85,6 @@ export class ObservabilityLogsExplorerPlugin
         return renderObservabilityLogsExplorerRedirect(coreStart, appMountParams);
       },
     });
-
-    if (serverless) {
-      discover.showLogsExplorerTabs();
-    }
 
     // Register Locators
     const allDatasetsLocator = share.url.locators.create(

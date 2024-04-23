@@ -158,6 +158,12 @@
     "@kbn/server-http-tools",
     "@kbn/security-hardening",
     "@kbn/core-base-server-mocks",
+    "@kbn/core-security-server",
+    "@kbn/core-security-common",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-browser-mocks",
+    "@kbn/core-execution-context-server-internal",
   ],
   "exclude": [
     "target/**/*",

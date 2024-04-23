@@ -33,7 +33,7 @@ import {
   VULNERABILITY_FIELDS,
 } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { VULNERABILITIES_UNIT, groupingTitle } from '../translations';
+import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
 
 const getTermAggregation = (key: keyof VulnerabilitiesGroupingAggregation, field: string) => ({
   [key]: {
@@ -147,6 +147,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
     groupingLevel,
+    groupsUnit: VULNERABILITIES_GROUPS_UNIT,
   });
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);

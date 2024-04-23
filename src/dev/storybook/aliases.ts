@@ -50,6 +50,8 @@ export const storybookAliases = {
   observability: 'x-pack/plugins/observability_solution/observability/.storybook',
   observability_ai_assistant:
     'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
+  observability_ai_assistant_app:
+    'x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   text_based_editor: 'packages/kbn-text-based-editor/.storybook',
@@ -57,6 +59,7 @@ export const storybookAliases = {
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',
+  slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',

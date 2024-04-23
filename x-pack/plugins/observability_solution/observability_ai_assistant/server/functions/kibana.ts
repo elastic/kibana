@@ -8,13 +8,16 @@
 import axios from 'axios';
 import { format, parse } from 'url';
 import { castArray, first, pick, pickBy } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({
-  registerFunction,
+  functions,
   resources,
-}: FunctionRegistrationParameters) {
-  registerFunction(
+}: FunctionRegistrationParameters & {
+  resources: { request: KibanaRequest };
+}) {
+  functions.registerFunction(
     {
       name: 'kibana',
       contexts: ['core'],
@@ -23,7 +26,6 @@ export function registerKibanaFunction({
       descriptionForUser: 'Call Kibana APIs on behalf of the user',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           method: {
             type: 'string',
@@ -37,9 +39,6 @@ export function registerKibanaFunction({
           query: {
             type: 'object',
             description: 'The query parameters, as an object',
-            additionalProperties: {
-              type: 'string',
-            },
           },
           body: {
             type: 'object',
@@ -64,7 +63,7 @@ export function registerKibanaFunction({
           '/internal/observability_ai_assistant/chat/complete',
           pathname
         ),
-        query,
+        query: query ? (query as Record<string, string>) : undefined,
       };
 
       const copiedHeaderNames = [

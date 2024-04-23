@@ -5,27 +5,22 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { noop } from 'lodash';
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+import { ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils/builders';
 
 export const mockChatService: ObservabilityAIAssistantChatService = {
-  analytics: {
-    optIn: () => {},
-    reportEvent: () => {},
-    telemetryCounter$: new Observable(),
-  },
+  sendAnalyticsEvent: noop,
   chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   getContexts: () => [],
@@ -48,48 +43,41 @@ export const mockService: ObservabilityAIAssistantService = {
     return mockChatService;
   },
   callApi: {} as ObservabilityAIAssistantAPIClient,
-  getCurrentUser: async (): Promise<AuthenticatedUser> => ({
-    username: 'user',
-    roles: [],
-    enabled: true,
-    authentication_realm: { name: 'foo', type: '' },
-    lookup_realm: { name: 'foo', type: '' },
-    authentication_provider: { name: '', type: '' },
-    authentication_type: '',
-    elastic_cloud_user: false,
-  }),
-  getLicense: () => new Observable(),
-  getLicenseManagementLocator: () =>
-    ({
-      url: {},
-      navigate: () => {},
-    } as unknown as SharePluginStart),
   register: () => {},
   setScreenContext: () => noop,
   getScreenContexts: () => [],
+  conversations: {
+    openNewConversation: noop,
+    predefinedConversation$: new Observable(),
+  },
+  navigate: async () => of(),
 };
 
-function createSetupContract(): ObservabilityAIAssistantPluginSetup {
+function createSetupContract(): ObservabilityAIAssistantPublicSetup {
   return {};
 }
 
-function createStartContract(): ObservabilityAIAssistantPluginStart {
+function createStartContract(): ObservabilityAIAssistantPublicStart {
   return {
     service: mockService,
-
-    ObservabilityAIAssistantActionMenuItem: (() => (
-      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-      <div>Im a button</div>
-    )) as unknown as ObservabilityAIAssistantPluginStart['ObservabilityAIAssistantActionMenuItem'],
-    ObservabilityAIAssistantContextualInsight: (
-      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-      <div>I give insight</div>
-    ) as unknown as ObservabilityAIAssistantPluginStart['ObservabilityAIAssistantContextualInsight'],
+    ObservabilityAIAssistantContextualInsight: (() => <></>) as any,
+    ObservabilityAIAssistantChatServiceContext: React.createContext<any>(undefined),
+    ObservabilityAIAssistantMultipaneFlyoutContext: React.createContext<any>(undefined),
+    useChat: () => ({} as any),
+    useObservabilityAIAssistantChatService: () => mockChatService,
     useGenAIConnectors: () => ({
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
     }),
+    useUserPreferredLanguage: () => ({
+      LANGUAGE_OPTIONS: [{ label: 'English' }],
+      selectedLanguage: 'English',
+      setSelectedLanguage: () => {},
+      getPreferredLanguage: () => 'English',
+    }),
+    getContextualInsightMessages: () => [],
+    createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),
   };
 }
 

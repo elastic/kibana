@@ -74,7 +74,7 @@ describe('<ComponentTemplateEdit />', () => {
   const COMPONENT_TEMPLATE_NAME = 'comp-1';
   const COMPONENT_TEMPLATE_TO_EDIT = {
     name: COMPONENT_TEMPLATE_NAME,
-    isDeprecated: true,
+    deprecated: true,
     template: {
       settings: { number_of_shards: 1 },
     },

@@ -10,6 +10,7 @@ const { times } = require('lodash');
 const yargs = require('yargs');
 const path = require('path');
 const childProcess = require('child_process');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { argv } = yargs(process.argv.slice(2))
   .option('server', {
@@ -73,10 +74,10 @@ if (server) {
 const cmd = [
   'node',
   ...(inspect ? ['--inspect-brk'] : []),
-  `../../../../../scripts/${ftrScript}`,
+  `${REPO_ROOT}/scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
-  `--config ../../../../test/profiling_api_integration/${license}/config.ts`,
+  `--config ${REPO_ROOT}/x-pack/test/profiling_api_integration/${license}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

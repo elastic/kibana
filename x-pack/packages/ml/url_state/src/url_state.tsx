@@ -21,8 +21,9 @@ import { isEqual } from 'lodash';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {

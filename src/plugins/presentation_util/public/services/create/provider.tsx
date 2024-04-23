@@ -16,9 +16,11 @@ import { PluginServiceFactory } from './factory';
  * The `StartParameters` generic determines what parameters are expected to
  * start the service.
  */
-export type PluginServiceProviders<Services, StartParameters = {}> = {
+export type PluginServiceProviders<
+  Services extends Record<keyof Services, {}>,
+  StartParameters = {}
+> = {
   [K in keyof Services]: PluginServiceProvider<
-    // @ts-expect-error upgrade typescript v4.9.5
     Services[K],
     StartParameters,
     Services,

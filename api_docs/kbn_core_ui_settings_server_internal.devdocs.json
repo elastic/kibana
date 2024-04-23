@@ -139,7 +139,7 @@
             "label": "setMany",
             "description": [],
             "signature": [
-              "(changes: Record<string, any>) => Promise<void>"
+              "(changes: Record<string, any>, options?: { validateKeys?: boolean | undefined; }) => Promise<void>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
             "deprecated": false,
@@ -159,6 +159,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server-internal",
+                "id": "def-common.UiSettingsGlobalClient.setMany.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-ui-settings-server-internal",
+                    "id": "def-common.UiSettingsGlobalClient.setMany.$2.validateKeys",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "validateKeys",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/clients/ui_settings_global_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []

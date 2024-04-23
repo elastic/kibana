@@ -39,7 +39,7 @@
             "label": "number",
             "description": [],
             "signature": [
-              "Partial<{ [key: string]: NumberFormatOptions<\"currency\" | \"percent\" | \"decimal\">; currency: NumberFormatOptions<\"currency\">; percent: NumberFormatOptions<\"percent\">; }> | undefined"
+              "Partial<{ [key: string]: NumberFormatOptions<\"percent\" | \"currency\" | \"decimal\">; currency: NumberFormatOptions<\"currency\">; percent: NumberFormatOptions<\"percent\">; }> | undefined"
             ],
             "path": "packages/kbn-i18n/src/core/formats.ts",
             "deprecated": false,

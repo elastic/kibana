@@ -21,6 +21,8 @@ const readline = require('readline');
 // Directories to iterate over
 const FTR_SERVERLESS =
   'x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture';
+const FTR_SERVERLESS_API_INTEGRATION =
+  'x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture';
 const FTR_API_INTEGRATION = 'x-pack/test/api_integration/apis/cloud_security_posture';
 const FTR_CSP_API = 'x-pack/test/cloud_security_posture_api';
 const FTR_CSP_FUNCTIONAL = 'x-pack/test/cloud_security_posture_functional';
@@ -28,6 +30,7 @@ const UNIT_TEST_CSP = 'x-pack/plugins/cloud_security_posture';
 
 const directoryPaths = [
   FTR_SERVERLESS,
+  FTR_SERVERLESS_API_INTEGRATION,
   FTR_API_INTEGRATION,
   FTR_CSP_API,
   FTR_CSP_FUNCTIONAL,
@@ -75,6 +78,7 @@ const getTags = (filePath, testSuits) => {
 
   if (
     filePath.startsWith(FTR_SERVERLESS) ||
+    filePath.startsWith(FTR_SERVERLESS_API_INTEGRATION) ||
     filePath.startsWith(FTR_API_INTEGRATION) ||
     filePath.startsWith(FTR_CSP_API) ||
     filePath.startsWith(FTR_CSP_FUNCTIONAL)
@@ -82,7 +86,15 @@ const getTags = (filePath, testSuits) => {
     tags.push('FTR');
   }
 
-  if (filePath.startsWith(FTR_API_INTEGRATION) || filePath.startsWith(FTR_CSP_API)) {
+  if (filePath.startsWith(FTR_SERVERLESS) || filePath.startsWith(FTR_SERVERLESS_API_INTEGRATION)) {
+    tags.push('SERVERLESS');
+  }
+
+  if (
+    filePath.startsWith(FTR_API_INTEGRATION) ||
+    filePath.startsWith(FTR_CSP_API) ||
+    filePath.startsWith(FTR_SERVERLESS_API_INTEGRATION)
+  ) {
     tags.push('API INTEGRATION');
   }
 
@@ -278,6 +290,7 @@ const groupTestsByDirectory = (testLogs) => {
 const tagShieldsColors = {
   FTR: 'blue',
   UT: 'brightgreen',
+  SERVERLESS: 'pink',
   'HAS SKIP': 'yellow',
   'HAS TODO': 'green',
   'API INTEGRATION': 'purple',
@@ -358,9 +371,10 @@ process.on('exit', () => {
     console.log('🌟 Cloud Security Posture tests were processed successfully! ✨');
     console.log(`ℳ  MD file: file://${path.resolve(MD_FILE_PATH)}`);
     console.log(`📄 Logs file: file://${path.resolve(CSP_TEST_LOGS_FILE_PATH)}`);
-    console.log('📊 Copy Logs file content to the dedicated app\'s "data.json" for visualization.');
-    console.log('⬛️ Dedicated app sandbox: https://codesandbox.io/p/sandbox/zen-smoke-vxgs2c');
     console.log('🚀 Dedicated app: https://vxgs2c.csb.app/');
+    console.log(
+      '⬆️ The app will be automatically updated with the latest logs file from elastic/kibana/main'
+    );
   } else {
     console.error(`Logs generation has failed`);
   }

@@ -46,9 +46,11 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-import { AGENTLESS_POLICY_ID } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
-import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
+import {
+  AGENTLESS_POLICY_ID,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';

@@ -55,7 +55,8 @@ import { resultsServiceRoutes } from './routes/results_service';
 import { modelManagementRoutes } from './routes/model_management';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
-import { createSharedServices, SharedServices } from './shared_services';
+import type { SharedServices } from './shared_services';
+import { createSharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
@@ -74,6 +75,7 @@ import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
+import { inferenceModelRoutes } from './routes/inference_models';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -257,6 +259,7 @@ export class MlServerPlugin
     }
 
     // Register Miscellaneous routes
+    inferenceModelRoutes(routeInit, plugins.cloud);
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);

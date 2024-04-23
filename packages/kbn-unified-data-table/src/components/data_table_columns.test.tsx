@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import React from 'react';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import {
   deserializeHeaderRowHeight,
   getEuiGridColumns,
@@ -124,11 +125,14 @@ describe('Data table columns', function () {
 
   describe('canPrependTimeFieldColumn', () => {
     function buildColumnTypes(dataView: DataView) {
-      const columnTypes: Record<string, string> = {};
+      const columnsMeta: Record<
+        string,
+        { type: DatatableColumnType; esType?: string | undefined }
+      > = {};
       for (const field of dataView.fields) {
-        columnTypes[field.name] = field.type;
+        columnsMeta[field.name] = { type: field.type as DatatableColumnType };
       }
-      return columnTypes;
+      return columnsMeta;
     }
 
     describe('dataView with timeField', () => {
@@ -190,16 +194,16 @@ describe('Data table columns', function () {
 
       it('should return false if _source column is passed but time field is not returned, text-based datasource', () => {
         // ... | DROP @timestamp test case
-        const columnTypes = buildColumnTypes(dataViewWithTimefieldMock);
+        const columnsMeta = buildColumnTypes(dataViewWithTimefieldMock);
         if (dataViewWithTimefieldMock.timeFieldName) {
-          delete columnTypes[dataViewWithTimefieldMock.timeFieldName];
+          delete columnsMeta[dataViewWithTimefieldMock.timeFieldName];
         }
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewWithTimefieldMock.timeFieldName,
-              columnTypes,
+              columnsMeta,
               showTimeCol,
               true
             )
@@ -294,9 +298,9 @@ describe('Data table columns', function () {
     it('returns eui grid columns with tokens for custom column types', async () => {
       const actual = getEuiGridColumns({
         showColumnTokens: true,
-        columnTypes: {
-          extension: 'number',
-          message: 'keyword',
+        columnsMeta: {
+          extension: { type: 'number' },
+          message: { type: 'string', esType: 'keyword' },
         },
         columns,
         settings: {},
@@ -343,14 +347,14 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnTypes: {
-          var_test: 'number',
+        columnsMeta: {
+          var_test: { type: 'number' },
         },
       });
       expect(gridColumns[1].schema).toBe('string');
     });
 
-    it('returns eui grid with in memory sorting for text based languages and columns not on the columnTypes', async () => {
+    it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {
       const columnsNotInDataview = getVisibleColumns(
         ['var_test'],
         dataViewWithTimefieldMock,
@@ -373,8 +377,8 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnTypes: {
-          var_test: 'number',
+        columnsMeta: {
+          var_test: { type: 'number' },
         },
       });
       expect(gridColumns[1].schema).toBe('numeric');

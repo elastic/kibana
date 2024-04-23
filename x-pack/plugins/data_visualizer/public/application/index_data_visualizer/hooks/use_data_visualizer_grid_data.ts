@@ -20,7 +20,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { useTimeBuckets } from '../../common/hooks/use_time_buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -43,8 +43,12 @@ import type { OverallStatsSearchStrategyParams } from '../../../../common/types/
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
-import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
-import { getDefaultPageState } from '../constants/index_data_visualizer_viewer';
+import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
+import {
+  DATA_VISUALIZER_INDEX_VIEWER_ID,
+  getDefaultPageState,
+} from '../constants/index_data_visualizer_viewer';
+import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
 
 const defaults = getDefaultPageState();
 
@@ -103,27 +107,30 @@ export const useDataVisualizerGridData = (
     return seed;
   }, [security]);
 
-  const {
-    currentSavedSearch,
-    currentDataView,
-    currentQuery,
-    currentFilters,
-    visibleFieldNames,
-    fieldsToFetch,
-    samplingOption,
-  } = useMemo(
-    () => ({
-      currentSavedSearch: input?.savedSearch,
-      currentDataView: input.dataView,
-      currentQuery: input?.query,
-      visibleFieldNames: input?.visibleFieldNames ?? [],
-      currentFilters: input?.filters,
-      fieldsToFetch: input?.fieldsToFetch,
-      /** By default, use random sampling **/
-      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-    }),
-    [input]
-  );
+  const { currentSavedSearch, currentDataView, currentQuery, currentFilters, samplingOption } =
+    useMemo(
+      () => ({
+        currentSavedSearch: input?.savedSearch,
+        currentDataView: input.dataView,
+        currentQuery: input?.query,
+        currentFilters: input?.filters,
+        /** By default, use random sampling **/
+        samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
+      }),
+      [input]
+    );
+  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
+
+  const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
+    // Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
+    // For example, adding {field} will also add {field.keyword} if it exists
+    return getFieldsWithSubFields({
+      input,
+      currentDataView,
+      shouldGetSubfields: input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
@@ -174,7 +181,7 @@ export const useDataVisualizerGridData = (
     data.query.filterManager,
   ]);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentDataView?.timeFieldName !== undefined,
@@ -240,7 +247,6 @@ export const useDataVisualizerGridData = (
           }
         }
       });
-
       return {
         earliest,
         latest,
@@ -253,7 +259,6 @@ export const useDataVisualizerGridData = (
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
-        fieldsToFetch,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
         embeddableExecutionContext,
@@ -282,7 +287,6 @@ export const useDataVisualizerGridData = (
     lastRefresh,
     dataVisualizerListState.probability
   );
-
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
@@ -347,8 +351,6 @@ export const useDataVisualizerGridData = (
       timeUpdateSubscription.unsubscribe();
     };
   });
-
-  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];

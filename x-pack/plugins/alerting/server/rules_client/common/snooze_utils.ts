@@ -28,12 +28,12 @@ export function getSnoozeAttributes(
       snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
     };
   }
+
   return {
     snoozeSchedule: (snoozeId
       ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
       : clearUnscheduledSnoozeAttributes(attributes)
     ).concat(snoozeSchedule),
-    muteAll: false,
   };
 }
 
@@ -117,7 +117,7 @@ export function clearUnscheduledSnooze<Params extends RuleParams>(rule: RuleDoma
 
 export function clearScheduledSnoozesAttributesById(attributes: RuleAttributes, ids: string[]) {
   return attributes.snoozeSchedule
-    ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
+    ? attributes.snoozeSchedule.filter((s) => !(s.id && ids.includes(s.id)))
     : [];
 }
 

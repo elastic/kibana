@@ -16,12 +16,12 @@ import {
   type DataFrameAnalysisConfigType,
   type FeatureProcessor,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
 import { defaultSearchQuery } from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
+import type { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',

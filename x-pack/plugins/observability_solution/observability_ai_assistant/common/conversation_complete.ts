@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Message } from './types';
+import { TokenCount as TokenCountType, type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -15,6 +15,7 @@ export enum StreamingChatResponseEventType {
   MessageAdd = 'messageAdd',
   ChatCompletionError = 'chatCompletionError',
   BufferFlush = 'bufferFlush',
+  TokenCount = 'tokenCount',
 }
 
 type StreamingChatResponseEventBase<
@@ -45,6 +46,7 @@ export type ConversationCreateEvent = StreamingChatResponseEventBase<
       id: string;
       title: string;
       last_updated: string;
+      token_count?: TokenCountType;
     };
   }
 >;
@@ -56,6 +58,7 @@ export type ConversationUpdateEvent = StreamingChatResponseEventBase<
       id: string;
       title: string;
       last_updated: string;
+      token_count?: TokenCountType;
     };
   }
 >;
@@ -84,6 +87,17 @@ export type BufferFlushEvent = StreamingChatResponseEventBase<
   }
 >;
 
+export type TokenCountEvent = StreamingChatResponseEventBase<
+  StreamingChatResponseEventType.TokenCount,
+  {
+    tokens: {
+      completion: number;
+      prompt: number;
+      total: number;
+    };
+  }
+>;
+
 export type StreamingChatResponseEvent =
   | ChatCompletionChunkEvent
   | ConversationCreateEvent
@@ -100,6 +114,8 @@ export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
   NotFoundError = 'notFoundError',
   TokenLimitReachedError = 'tokenLimitReachedError',
+  FunctionNotFoundError = 'functionNotFoundError',
+  FunctionLimitExceededError = 'functionLimitExceededError',
 }
 
 interface ErrorMetaAttributes {
@@ -109,6 +125,8 @@ interface ErrorMetaAttributes {
     tokenLimit?: number;
     tokenCount?: number;
   };
+  [ChatCompletionErrorCode.FunctionNotFoundError]: {};
+  [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
 }
 
 export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
@@ -148,12 +166,35 @@ export function createInternalServerError(
   return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
 }
 
+export function createFunctionNotFoundError(name: string) {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.FunctionNotFoundError,
+    `Function ${name} called but was not available`
+  );
+}
+
+export function createFunctionLimitExceededError() {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.FunctionLimitExceededError,
+    `Function limit exceeded`
+  );
+}
+
 export function isTokenLimitReachedError(
   error: Error
 ): error is ChatCompletionError<ChatCompletionErrorCode.TokenLimitReachedError> {
   return (
     error instanceof ChatCompletionError &&
     error.code === ChatCompletionErrorCode.TokenLimitReachedError
+  );
+}
+
+export function isFunctionNotFoundError(
+  error: Error
+): error is ChatCompletionError<ChatCompletionErrorCode.FunctionNotFoundError> {
+  return (
+    error instanceof ChatCompletionError &&
+    error.code === ChatCompletionErrorCode.FunctionNotFoundError
   );
 }
 

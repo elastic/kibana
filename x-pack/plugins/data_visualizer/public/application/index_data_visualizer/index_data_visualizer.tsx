@@ -6,7 +6,8 @@
  */
 import '../_index.scss';
 import { pick } from 'lodash';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
@@ -15,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -29,6 +30,9 @@ import {
   UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -84,6 +88,22 @@ export const getLocatorParams = (params: {
 };
 
 const DataVisualizerESQLStateContextProvider = () => {
+  const { services } = useDataVisualizerKibana();
+  const isEsqlEnabled = useMemo(() => services.uiSettings.get(ENABLE_ESQL), [services.uiSettings]);
+
+  if (!isEsqlEnabled) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.dataVisualizer.esqlNotEnabledCalloutTitle"
+            defaultMessage="ES|QL is not enabled"
+          />
+        }
+      />
+    );
+  }
+
   return (
     <UrlStateProvider>
       <IndexDataVisualizerESQL />
@@ -272,7 +292,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   );
 };
 
-interface Props {
+export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
@@ -299,6 +319,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     unifiedSearch,
   } = getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
@@ -311,8 +332,8 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
-    ...coreStart,
   };
+
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,

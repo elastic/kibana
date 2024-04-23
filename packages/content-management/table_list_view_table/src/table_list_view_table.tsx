@@ -446,16 +446,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           edit: {
             enabled: false,
             reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-              defaultMessage: 'This item is managed by Elastic. Clone it before making changes.',
+              defaultMessage: 'Elastic manages this item. Clone it to make changes.',
             }),
           },
           ...ret[item.id],
-          delete: {
-            enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemNoDelete', {
-              defaultMessage: 'This item is managed by Elastic. It cannot be deleted.',
-            }),
-          },
         };
       }
 

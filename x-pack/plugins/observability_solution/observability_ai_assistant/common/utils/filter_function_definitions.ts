@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FunctionDefinition } from '../types';
+import type { FunctionDefinition } from '../functions/types';
 
 export function filterFunctionDefinitions({
   contexts,

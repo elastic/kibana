@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -22,7 +23,8 @@ export const GeoPointContentWithMap: FC<{
   dataView: DataView | undefined;
   combinedQuery?: CombinedQuery;
   esql?: string;
-}> = ({ config, dataView, combinedQuery, esql }) => {
+  timeFieldName?: string;
+}> = ({ config, dataView, combinedQuery, esql, timeFieldName }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
@@ -71,7 +73,7 @@ export const GeoPointContentWithMap: FC<{
                 },
               ],
               dataViewId: dataView.id,
-              dateField: dataView.timeFieldName,
+              dateField: dataView.timeFieldName ?? timeFieldName,
               geoField: config.fieldName,
               esql,
               narrowByGlobalSearch: true,

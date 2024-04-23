@@ -29,7 +29,7 @@ export function LinkDashboard({
         <EuiButtonEmpty
           color="text"
           size="s"
-          iconType={'plusInCircle'}
+          iconType="plusInCircle"
           data-test-subj="apmLinkServiceDashboardMenu"
           onClick={() => setIsModalVisible(true)}
         >
@@ -38,10 +38,7 @@ export function LinkDashboard({
           })}
         </EuiButtonEmpty>
       ) : (
-        <EuiButton
-          data-test-subj="apmAddServiceDashboard"
-          onClick={() => setIsModalVisible(true)}
-        >
+        <EuiButton data-test-subj="apmAddServiceDashboard" onClick={() => setIsModalVisible(true)}>
           {i18n.translate('xpack.apm.serviceDashboards.linkButtonLabel', {
             defaultMessage: 'Link dashboard',
           })}

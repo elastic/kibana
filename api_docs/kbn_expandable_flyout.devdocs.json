@@ -13,7 +13,7 @@
           "\nExpandable flyout UI React component.\nDisplays 3 sections (right, left, preview) depending on the panels in the context.\n\nThe behavior expects that the left and preview sections should only be displayed is a right section\nis already rendered."
         ],
         "signature": [
-          "{ ({ registeredPanels, ...flyoutProps }: React.PropsWithChildren<",
+          "{ ({ customStyles, registeredPanels, ...flyoutProps }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/expandable-flyout",
             "scope": "public",
@@ -32,7 +32,7 @@
             "id": "def-public.ExpandableFlyout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  registeredPanels,\n  ...flyoutProps\n}",
+            "label": "{\n  customStyles,\n  registeredPanels,\n  ...flyoutProps\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -545,6 +545,31 @@
             "signature": [
               "Panel",
               "[]"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutProps.customStyles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "customStyles",
+            "description": [
+              "\nAllows for custom styles to be passed to the EuiFlyout component"
+            ],
+            "signature": [
+              "InterpolationPrimitive",
+              " | ",
+              "ArrayInterpolation",
+              "<",
+              "Theme",
+              "> | ",
+              "FunctionInterpolation",
+              "<",
+              "Theme",
+              ">"
             ],
             "path": "packages/kbn-expandable-flyout/src/index.tsx",
             "deprecated": false,

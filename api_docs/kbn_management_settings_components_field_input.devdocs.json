@@ -176,7 +176,7 @@
               "The {@link FieldDefinition} for the component."
             ],
             "signature": [
-              "{ type: T; id: string; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
+              "{ id: string; type: T; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
             ],
             "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
@@ -417,7 +417,7 @@
             "label": "field",
             "description": [],
             "signature": [
-              "{ type: T; id: string; defaultValue?: ",
+              "{ id: string; type: T; defaultValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
                 "scope": "common",

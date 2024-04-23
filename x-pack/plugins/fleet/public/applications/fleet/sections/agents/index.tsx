@@ -24,7 +24,7 @@ import { NoAccessPage } from './error_pages/no_access';
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const { agents } = useConfig();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
   const fleetStatus = useFleetStatus();
   const flyoutContext = useFlyoutContext();
 
@@ -54,7 +54,8 @@ export const AgentsApp: React.FunctionComponent = () => {
     fleetStatus.missingRequirements[0] === 'fleet_server';
 
   const displayInstructions =
-    fleetStatus.forceDisplayInstructions || hasOnlyFleetServerMissingRequirement;
+    authz.fleet.allAgents &&
+    (fleetStatus.forceDisplayInstructions || hasOnlyFleetServerMissingRequirement);
 
   if (
     !hasOnlyFleetServerMissingRequirement &&
@@ -63,7 +64,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) {
     return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
-  if (!hasFleetAllPrivileges) {
+  if (!authz.fleet.readAgents) {
     return <NoAccessPage />;
   }
 

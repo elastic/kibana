@@ -86,6 +86,7 @@ const mockConfig: ConfigSchema = {
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
     profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
   },
   serverless: { enabled: false },
 };
@@ -172,9 +173,7 @@ export const mockApmPluginContextValue = {
     getTriggerCompatibleActions: () => Promise.resolve([]),
   },
   observabilityAIAssistant: {
-    service: {
-      setScreenContext: jest.fn().mockImplementation(() => noop),
-    },
+    service: { setScreenContext: jest.fn().mockImplementation(() => noop) },
   },
 };
 

@@ -9,6 +9,7 @@
 
 const yargs = require('yargs');
 const childProcess = require('child_process');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { argv } = yargs(process.argv.slice(2))
   .option('server', {
@@ -61,17 +62,17 @@ function executeSyntheticsRunner(dirPath, config = './synthetics_run.ts') {
 
   if (server) {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config}  ${kbnInstallDir}`,
+      `node ${REPO_ROOT}/scripts/${ftrScript} --config ${config}  ${kbnInstallDir}`,
       options
     );
   } else if (runner) {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config} ${kbnInstallDir}  --headless ${headless} --bail ${pauseOnError} ${grepArg}`,
+      `node ${REPO_ROOT}/scripts/${ftrScript} --config ${config} ${kbnInstallDir}  --headless ${headless} --bail ${pauseOnError} ${grepArg}`,
       options
     );
   } else {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config}  ${kbnInstallDir} ${grepArg}`,
+      `node ${REPO_ROOT}/scripts/${ftrScript} --config ${config}  ${kbnInstallDir} ${grepArg}`,
       options
     );
   }

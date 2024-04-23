@@ -65,7 +65,9 @@ export const FieldList: React.FC<FieldListProps> = ({
         />
       )}
       {!!prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
-      <EuiFlexItem grow={true}>{children}</EuiFlexItem>
+      <EuiFlexItem className="unifiedFieldListSidebar__accordionContainer" grow={true}>
+        {children}
+      </EuiFlexItem>
       {!!append && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
     </EuiFlexGroup>
   );

@@ -47,6 +47,7 @@ interface FieldCapsApiParams {
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
+  fieldTypes?: string[];
   includeEmptyFields?: boolean;
 }
 
@@ -73,6 +74,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     },
     fields = ['*'],
     expandWildcards,
+    fieldTypes,
     includeEmptyFields,
   } = params;
   try {
@@ -83,7 +85,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         ignore_unavailable: true,
         index_filter: indexFilter,
         expand_wildcards: expandWildcards,
-        // @ts-expect-error
+        types: fieldTypes,
         include_empty_fields: includeEmptyFields ?? true,
         ...fieldCapsOptions,
       },

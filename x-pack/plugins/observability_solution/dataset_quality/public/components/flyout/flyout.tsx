@@ -26,15 +26,31 @@ import { DegradedDocs } from './degraded_docs_trend/degraded_docs';
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
-  const { dataStreamStat, dataStreamDetails, dataStreamDetailsLoading, fieldFormats, timeRange } =
-    useDatasetQualityFlyout();
+  const {
+    dataStreamStat,
+    dataStreamDetails,
+    dataStreamDetailsLoading,
+    fieldFormats,
+    timeRange,
+    breakdownField,
+  } = useDatasetQualityFlyout();
 
   return (
-    <EuiFlyout onClose={closeFlyout} ownFocus={false} data-component-name={'datasetQualityFlyout'}>
+    <EuiFlyout
+      outsideClickCloses={false}
+      onClose={closeFlyout}
+      ownFocus={true}
+      data-component-name={'datasetQualityFlyout'}
+      data-test-subj="datasetQualityFlyout"
+    >
       <>
         <Header dataStreamStat={dataset} />
-        <EuiFlyoutBody>
-          <DegradedDocs dataStream={dataStreamStat?.rawName} timeRange={timeRange} />
+        <EuiFlyoutBody data-test-subj="datasetQualityFlyoutBody">
+          <DegradedDocs
+            dataStream={dataStreamStat?.rawName}
+            timeRange={timeRange}
+            breakdownField={breakdownField}
+          />
 
           <EuiSpacer />
 

@@ -79,15 +79,26 @@ describe('utils', () => {
   });
 
   describe('getFieldMeta', () => {
+    test('returns "canHaveMultiFields:true" for text data type', () => {
+      expect(getFieldMeta({ name: 'text_field', type: 'text' }).canHaveMultiFields).toEqual(true);
+    });
+    test('returns "canHaveMultiFields:true" for keyword data type', () => {
+      expect(getFieldMeta({ name: 'keyword_field', type: 'keyword' }).canHaveMultiFields).toEqual(
+        true
+      );
+    });
     test('returns "canHaveMultiFields:true" for IP data type', () => {
-      expect(getFieldMeta({ name: 'ip_field', type: 'ip' })).toEqual({
-        canHaveChildFields: false,
-        canHaveMultiFields: true,
-        childFieldsName: 'fields',
-        hasChildFields: false,
-        hasMultiFields: false,
-        isExpanded: false,
-      });
+      expect(getFieldMeta({ name: 'ip_field', type: 'ip' }).canHaveMultiFields).toEqual(true);
+    });
+    test('returns "canHaveMultiFields:true" for wildcard data type', () => {
+      expect(getFieldMeta({ name: 'wildcard_field', type: 'wildcard' }).canHaveMultiFields).toEqual(
+        true
+      );
+    });
+    test('returns "canHaveMultiFields:false" for flattened data type', () => {
+      expect(
+        getFieldMeta({ name: 'flattened_field', type: 'flattened' }).canHaveMultiFields
+      ).toEqual(false);
     });
   });
 });

@@ -35,6 +35,24 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
+export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchIntegrationDashboardsFailed', {
+      defaultMessage: "We couldn't get your integration dashboards.",
+    }),
+    text: error.message,
+  });
+};
+
+export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchIntegrationsFailed', {
+      defaultMessage: "We couldn't get your integrations.",
+    }),
+    text: error.message,
+  });
+};
+
 export const noDatasetSelected = i18n.translate(
   'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
   {

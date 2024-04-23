@@ -9,11 +9,14 @@ import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
+import type { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
-import { CommonResponseStatusSchema, TransformIdsSchema } from '../../../common/api_schemas/common';
-import { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';
-import { ResetTransformsResponseSchema } from '../../../common/api_schemas/reset_transforms';
+import type {
+  CommonResponseStatusSchema,
+  TransformIdsSchema,
+} from '../../../common/api_schemas/common';
+import type { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';
+import type { ResetTransformsResponseSchema } from '../../../common/api_schemas/reset_transforms';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 

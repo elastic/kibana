@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin-types-public';
 
 import type {
@@ -25,6 +25,8 @@ export { ALL_SPACES_ID } from '../common/constants';
 export type {
   AuthenticationServiceStart,
   AuthenticationServiceSetup,
+  AuthorizationServiceStart,
+  AuthorizationServiceSetup,
   SecurityNavControlServiceStart,
   UserMenuLink,
   UserProfileBulkGetParams,
@@ -38,3 +40,6 @@ export const plugin: PluginInitializer<
   PluginSetupDependencies,
   PluginStartDependencies
 > = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
+
+// services needed for rendering React using shared modules
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;

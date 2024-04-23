@@ -32,24 +32,6 @@ export const useHostCount = () => {
       const filters: QueryDslQueryContainer = {
         bool: {
           ...query.bool,
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      'event.module': 'system',
-                    },
-                  },
-                  {
-                    term: {
-                      'metricset.module': 'system', // Needed for hosts where metricbeat version < 8
-                    },
-                  },
-                ],
-              },
-            },
-          ],
           filter: [
             ...query.bool.filter,
             {

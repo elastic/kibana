@@ -17,7 +17,7 @@ import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
 import { IndexPattern } from '../../../../../types';
 import { TermsIndexPatternColumn } from '../terms';
-import { MovingAverageIndexPatternColumn } from '../calculations';
+import type { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
@@ -43,6 +43,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   terms: createOperationDefinitionMock('terms', {}, { scale: 'ordinal' }),
   sum: createOperationDefinitionMock('sum', { filterable: true }),
   last_value: createOperationDefinitionMock('last_value', {
+    input: 'field',
     getPossibleOperationForField: jest.fn(({ type }) => ({
       scale: type === 'string' ? 'ordinal' : 'ratio',
       isBucketed: false,
@@ -54,14 +55,14 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     filterable: true,
     canReduceTimeRange: true,
   }),
-  derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
-  moving_average: createOperationDefinitionMock('moving_average', {
-    // @ts-expect-error upgrade typescript v4.9.5
+  derivative: createOperationDefinitionMock('derivative', {
+    input: 'fullReference',
+  }),
+  moving_average: createOperationDefinitionMock<MovingAverageIndexPatternColumn>('moving_average', {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
     getErrorMessage: jest.fn(() => ['mock error']),
-    // @ts-expect-error upgrade typescript v4.9.5
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',
@@ -74,7 +75,9 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       filter: getFilter(undefined, columnsParams),
     }),
   }),
-  cumulative_sum: createOperationDefinitionMock('cumulative_sum', { input: 'fullReference' }),
+  cumulative_sum: createOperationDefinitionMock('cumulative_sum', {
+    input: 'fullReference',
+  }),
   interval: createOperationDefinitionMock('interval', {
     input: 'managedReference',
     usedInMath: true,

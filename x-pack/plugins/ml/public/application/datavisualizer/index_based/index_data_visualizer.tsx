@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -16,6 +17,7 @@ import type {
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -25,7 +27,6 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge/technical_preview_badge';
-
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -48,12 +49,17 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null
   );
-
+  const isMounted = useMountedState();
   useEffect(() => {
     if (dataVisualizer !== undefined) {
       const { getIndexDataVisualizerComponent } = dataVisualizer;
-      getIndexDataVisualizerComponent().then(setIndexDataVisualizer);
+      getIndexDataVisualizerComponent().then((component) => {
+        if (isMounted()) {
+          setIndexDataVisualizer(component);
+        }
+      });
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

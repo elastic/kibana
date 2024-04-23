@@ -18,6 +18,7 @@ export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',
   INVOKE_STREAM = 'invokeStream',
+  INVOKE_ASYNC_ITERATOR = 'invokeAsyncIterator',
   STREAM = 'stream',
   DASHBOARD = 'getDashboard',
   TEST = 'test',
@@ -27,6 +28,8 @@ export enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
 }
+
+export const DEFAULT_TIMEOUT_MS = 120000;
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-4';
 

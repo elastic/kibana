@@ -13,30 +13,31 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, last } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import { cloneDeep, isArray, last, once } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
-import { sendEvent, TELEMETRY } from '../../analytics';
-import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
+import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { useFlyoutState } from '../../hooks/use_flyout_state';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
-import { ChatFlyout } from '../chat/chat_flyout';
-import { FeedbackButtons } from '../feedback_buttons';
+import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
+import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -56,6 +57,8 @@ function ChatContent({
 
   const initialMessagesRef = useRef(initialMessages);
 
+  const { flyoutState } = useFlyoutState();
+
   const { messages, next, state, stop } = useChat({
     service,
     chatService,
@@ -64,13 +67,14 @@ function ChatContent({
     persist: false,
   });
 
-  const lastAssistantResponse = getLastMessageOfType(messages, MessageRole.Assistant);
+  const lastAssistantResponse = getLastMessageOfType(
+    messages.slice(initialMessagesRef.current.length + 1),
+    MessageRole.Assistant
+  );
 
   useEffect(() => {
     next(initialMessagesRef.current);
   }, [next]);
-
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -95,8 +99,8 @@ function ChatContent({
               <FeedbackButtons
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
-                    sendEvent(chatService.analytics, {
-                      type: TELEMETRY.observability_ai_assistant_insight_feedback,
+                    chatService.sendAnalyticsEvent({
+                      type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
                         message: lastAssistantResponse,
@@ -114,23 +118,18 @@ function ChatContent({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <StartChatButton
+                  disabled={flyoutState.isOpen}
                   onClick={() => {
-                    setIsOpen(() => true);
+                    service.conversations.openNewConversation({
+                      messages,
+                      title: defaultTitle,
+                    });
                   }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           )
         }
-      />
-      <ChatFlyout
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
-        initialMessages={messages}
-        initialTitle={defaultTitle}
-        startedFrom="contextualInsight"
       />
     </>
   );
@@ -194,20 +193,75 @@ function PromptEdit({
 }
 
 export interface InsightProps {
-  messages: Message[];
+  messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
 }
 
-export function Insight({ messages, title, dataTestSubj }: InsightProps) {
-  const [initialMessages, setInitialMessages] = useState(messages);
+enum FETCH_STATUS {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NOT_INITIATED = 'not_initiated',
+}
+
+export function Insight({
+  messages: initialMessagesOrCallback,
+  title,
+  dataTestSubj,
+}: InsightProps) {
+  const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
+    messages: [],
+    status: FETCH_STATUS.NOT_INITIATED,
+  });
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
 
-  const connectors = useGenAIConnectors();
+  const updateInitialMessages = useCallback(async () => {
+    if (isArray(initialMessagesOrCallback)) {
+      setMessages({
+        messages: initialMessagesOrCallback,
+        status: FETCH_STATUS.SUCCESS,
+      });
+      return;
+    }
 
+    setMessages({
+      messages: [],
+      status: FETCH_STATUS.LOADING,
+    });
+
+    try {
+      const data = await initialMessagesOrCallback();
+      setMessages({
+        messages: data ?? [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+    } catch (e) {
+      setMessages({
+        messages: [],
+        status: FETCH_STATUS.FAILURE,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log('could not load insight messages', e);
+    }
+  }, [initialMessagesOrCallback]);
+
+  const updateInitialMessagesOnce = useMemo(
+    () => once(updateInitialMessages),
+    [updateInitialMessages]
+  );
+
+  useEffect(() => {
+    if (isInsightOpen) {
+      updateInitialMessagesOnce();
+    }
+  }, [updateInitialMessagesOnce, isInsightOpen]);
+
+  const connectors = useGenAIConnectors();
   const service = useObservabilityAIAssistant();
 
   const chatService = useAbortableAsync(
@@ -217,14 +271,14 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     [service]
   );
 
-  const handleSend = (newPrompt: string) => {
-    const clonedMessages = cloneDeep(messages);
+  const onEditPrompt = (newPrompt: string) => {
+    const clonedMessages = cloneDeep(messages.messages);
     const userMessage = getLastMessageOfType(clonedMessages, MessageRole.User);
     if (!userMessage) return false;
 
     userMessage.message.content = newPrompt;
     setIsPromptUpdated(true);
-    setInitialMessages(clonedMessages);
+    setMessages({ messages: clonedMessages, status: FETCH_STATUS.SUCCESS });
     setEditingPrompt(false);
     return true;
   };
@@ -243,7 +297,8 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
   if (
     connectors.selectedConnector &&
-    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt))
+    ((!isInsightOpen && hasOpened) ||
+      (isInsightOpen && !isEditingPrompt && messages.status === FETCH_STATUS.SUCCESS))
   ) {
     children = (
       <>
@@ -264,7 +319,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
                     setIsPromptUpdated(false);
                     setHasOpened(false);
                     setInsightOpen(false);
-                    setInitialMessages(messages);
+                    updateInitialMessages();
                   }}
                 >
                   <EuiText size="xs">
@@ -283,7 +338,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
         <ChatContent
           title={title}
-          initialMessages={initialMessages}
+          initialMessages={messages.messages}
           connectorId={connectors.selectedConnector}
         />
       </>
@@ -292,15 +347,29 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     children = (
       <PromptEdit
         initialPrompt={
-          getLastMessageOfType(initialMessages, MessageRole.User)?.message.content || ''
+          getLastMessageOfType(messages.messages, MessageRole.User)?.message.content || ''
         }
-        onSend={handleSend}
+        onSend={onEditPrompt}
         onCancel={handleCancel}
       />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+    );
+  } else if (messages.status === FETCH_STATUS.FAILURE) {
+    children = (
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',
+          {
+            defaultMessage: 'Could not fetch prompt messages',
+          }
+        )}
+        color="danger"
+        iconType="error"
+      />
     );
   }
 
@@ -328,9 +397,9 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
       isOpen={isInsightOpen}
     >
       {chatService.value ? (
-        <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+        <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
           {children}
-        </ObservabilityAIAssistantChatServiceProvider>
+        </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : null}
     </InsightBase>
   );

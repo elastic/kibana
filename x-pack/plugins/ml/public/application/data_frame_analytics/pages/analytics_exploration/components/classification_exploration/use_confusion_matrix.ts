@@ -18,11 +18,8 @@ import {
 
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
-import {
-  isClassificationEvaluateResponse,
-  ResultsSearchQuery,
-  ClassificationMetricItem,
-} from '../../../../common/analytics';
+import type { ResultsSearchQuery, ClassificationMetricItem } from '../../../../common/analytics';
+import { isClassificationEvaluateResponse } from '../../../../common/analytics';
 
 import { loadEvalData, loadDocsCount } from '../../../../common';
 

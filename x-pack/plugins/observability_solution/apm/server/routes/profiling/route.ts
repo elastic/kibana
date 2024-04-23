@@ -8,209 +8,25 @@
 import { isoToEpochSecsRt, toNumberRt } from '@kbn/io-ts-utils';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
-import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  HOST_NAME,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_PROFILER_STACK_TRACE_IDS,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
-import {
-  mergeKueries,
-  toKueryFilterFormat,
-} from '../../../common/utils/kuery_utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  serviceTransactionDataSourceRt,
-} from '../default_api_types';
-import { getServiceHostNames } from './get_service_host_names';
-import { environmentQuery } from '../../../common/utils/environment_query';
+import { environmentRt, kueryRt } from '../default_api_types';
+import { fetchFlamegraph } from './fetch_flamegraph';
+import { fetchFunctions } from './fetch_functions';
+import { TRANSACTION_PROFILER_STACK_TRACE_IDS } from '../../../common/es_fields/apm';
 
-const profilingFlamegraphRoute = createApmServerRoute({
+const servicesFlamegraphRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
-      rangeRt,
-      environmentRt,
-      serviceTransactionDataSourceRt,
-      kueryRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<
-    { flamegraph: BaseFlameGraph; hostNames: string[] } | undefined
-  > => {
-    const { context, plugins, params } = resources;
-    const core = await context.core;
-    const [esClient, apmEventClient, profilingDataAccessStart] =
-      await Promise.all([
-        core.elasticsearch.client,
-        await getApmEventClient(resources),
-        await plugins.profilingDataAccess?.start(),
-      ]);
-    if (profilingDataAccessStart) {
-      const { start, end, environment, documentType, rollupInterval, kuery } =
-        params.query;
-      const { serviceName } = params.path;
-
-      const serviceHostNames = await getServiceHostNames({
-        apmEventClient,
-        start,
-        end,
-        environment,
-        serviceName,
-        documentType,
-        rollupInterval,
-      });
-
-      if (!serviceHostNames.length) {
-        return undefined;
-      }
-      const startSecs = start / 1000;
-      const endSecs = end / 1000;
-
-      const flamegraph =
-        await profilingDataAccessStart?.services.fetchFlamechartData({
-          core,
-          esClient: esClient.asCurrentUser,
-          totalSeconds: endSecs - startSecs,
-          query: {
-            bool: {
-              filter: [
-                ...kqlQuery(
-                  mergeKueries([
-                    `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
-                    kuery,
-                  ])
-                ),
-                {
-                  range: {
-                    ['@timestamp']: {
-                      gte: String(startSecs),
-                      lt: String(endSecs),
-                      format: 'epoch_second',
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        });
-
-      return { flamegraph, hostNames: serviceHostNames };
-    }
-
-    return undefined;
-  },
-});
-
-const profilingFunctionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      serviceTransactionDataSourceRt,
-      t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
-      kueryRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ functions: TopNFunctions; hostNames: string[] } | undefined> => {
-    const { context, plugins, params } = resources;
-    const core = await context.core;
-    const [esClient, apmEventClient, profilingDataAccessStart] =
-      await Promise.all([
-        core.elasticsearch.client,
-        await getApmEventClient(resources),
-        await plugins.profilingDataAccess?.start(),
-      ]);
-    if (profilingDataAccessStart) {
-      const {
-        start,
-        end,
-        environment,
-        startIndex,
-        endIndex,
-        documentType,
-        rollupInterval,
-        kuery,
-      } = params.query;
-      const { serviceName } = params.path;
-
-      const serviceHostNames = await getServiceHostNames({
-        apmEventClient,
-        start,
-        end,
-        environment,
-        serviceName,
-        documentType,
-        rollupInterval,
-      });
-
-      if (!serviceHostNames.length) {
-        return undefined;
-      }
-
-      const startSecs = start / 1000;
-      const endSecs = end / 1000;
-
-      const functions = await profilingDataAccessStart?.services.fetchFunction({
-        core,
-        esClient: esClient.asCurrentUser,
-        startIndex,
-        endIndex,
-        totalSeconds: endSecs - startSecs,
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(
-                mergeKueries([
-                  `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
-                  kuery,
-                ])
-              ),
-              {
-                range: {
-                  ['@timestamp']: {
-                    gte: String(startSecs),
-                    lt: String(endSecs),
-                    format: 'epoch_second',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-      return { functions, hostNames: serviceHostNames };
-    }
-
-    return undefined;
-  },
-});
-
-const transactionsFlamegraphRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/flamegraph',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
       kueryRt,
       environmentRt,
-      t.type({
+      t.partial({
         transactionName: t.string,
+      }),
+      t.type({
         start: isoToEpochSecsRt,
         end: isoToEpochSecsRt,
         transactionType: t.string,
@@ -221,53 +37,30 @@ const transactionsFlamegraphRoute = createApmServerRoute({
   handler: async (resources): Promise<BaseFlameGraph | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
-    const [esClient, profilingDataAccessStart, apmEventClient] =
-      await Promise.all([
-        core.elasticsearch.client,
-        await plugins.profilingDataAccess?.start(),
-        getApmEventClient(resources),
-      ]);
+    const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+    ]);
     if (profilingDataAccessStart) {
       const { serviceName } = params.path;
-      const {
+      const { start, end, kuery, transactionName, transactionType, environment } = params.query;
+
+      const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
+
+      return fetchFlamegraph({
+        profilingDataAccessStart,
+        core,
+        esClient: esClient.asCurrentUser,
         start,
         end,
         kuery,
+        serviceName,
         transactionName,
-        transactionType,
         environment,
-      } = params.query;
-
-      const indices = apmEventClient.getIndicesFromProcessorEvent(
-        ProcessorEvent.transaction
-      );
-
-      return await profilingDataAccessStart?.services.fetchFlamechartData({
-        core,
-        esClient: esClient.asCurrentUser,
+        transactionType,
         indices,
         stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
-        totalSeconds: end - start,
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...termQuery(TRANSACTION_NAME, transactionName),
-              ...environmentQuery(environment),
-              ...termQuery(TRANSACTION_TYPE, transactionType),
-              {
-                range: {
-                  ['@timestamp']: {
-                    gte: String(start),
-                    lt: String(end),
-                    format: 'epoch_second',
-                  },
-                },
-              },
-            ],
-          },
-        },
       });
     }
 
@@ -275,18 +68,20 @@ const transactionsFlamegraphRoute = createApmServerRoute({
   },
 });
 
-const transactionsFunctionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/functions',
+const servicesFunctionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
       environmentRt,
+      t.partial({
+        transactionName: t.string,
+      }),
       t.type({
         start: isoToEpochSecsRt,
         end: isoToEpochSecsRt,
         startIndex: toNumberRt,
         endIndex: toNumberRt,
-        transactionName: t.string,
         transactionType: t.string,
       }),
       kueryRt,
@@ -297,12 +92,11 @@ const transactionsFunctionsRoute = createApmServerRoute({
     const { context, plugins, params } = resources;
     const core = await context.core;
 
-    const [esClient, profilingDataAccessStart, apmEventClient] =
-      await Promise.all([
-        core.elasticsearch.client,
-        await plugins.profilingDataAccess?.start(),
-        getApmEventClient(resources),
-      ]);
+    const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+    ]);
     if (profilingDataAccessStart) {
       const {
         start,
@@ -316,38 +110,23 @@ const transactionsFunctionsRoute = createApmServerRoute({
       } = params.query;
       const { serviceName } = params.path;
 
-      const indices = apmEventClient.getIndicesFromProcessorEvent(
-        ProcessorEvent.transaction
-      );
+      const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
 
-      return profilingDataAccessStart?.services.fetchFunction({
+      return fetchFunctions({
+        profilingDataAccessStart,
         core,
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
         indices,
         stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
-        totalSeconds: end - start,
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...termQuery(TRANSACTION_NAME, transactionName),
-              ...environmentQuery(environment),
-              ...termQuery(TRANSACTION_TYPE, transactionType),
-              {
-                range: {
-                  ['@timestamp']: {
-                    gte: String(start),
-                    lt: String(end),
-                    format: 'epoch_second',
-                  },
-                },
-              },
-            ],
-          },
-        },
+        start,
+        end,
+        kuery,
+        serviceName,
+        transactionName,
+        environment,
+        transactionType,
       });
     }
 
@@ -369,9 +148,7 @@ const profilingStatusRoute = createApmServerRoute({
         const response = await profilingDataAccessStart?.services.getStatus({
           esClient,
           soClient: (await context.core).savedObjects.client,
-          spaceId: (
-            await plugins.spaces?.start()
-          )?.spacesService.getSpaceId(resources.request),
+          spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(resources.request),
         });
 
         return { initialized: response.has_setup };
@@ -386,9 +163,7 @@ const profilingStatusRoute = createApmServerRoute({
 });
 
 export const profilingRouteRepository = {
-  ...profilingFlamegraphRoute,
+  ...servicesFlamegraphRoute,
   ...profilingStatusRoute,
-  ...profilingFunctionsRoute,
-  ...transactionsFlamegraphRoute,
-  ...transactionsFunctionsRoute,
+  ...servicesFunctionsRoute,
 };

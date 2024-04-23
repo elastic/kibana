@@ -81,7 +81,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
                 </div>
               </div>
               <hr
-                class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+                class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
               />
               <button
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
@@ -192,7 +192,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
                 </div>
               </div>
               <hr
-                class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+                class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
               />
               <button
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"

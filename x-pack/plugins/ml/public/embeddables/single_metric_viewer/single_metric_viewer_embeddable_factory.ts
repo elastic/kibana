@@ -11,15 +11,13 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/app';
-import {
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-  SingleMetricViewerEmbeddableInput,
-  SingleMetricViewerEmbeddableServices,
-} from '..';
+import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerEmbeddableServices } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
+import type { ISingleMetricViewerEmbeddable } from './single_metric_viewer_embeddable';
 
 export class SingleMetricViewerEmbeddableFactory
   implements EmbeddableFactoryDefinition<SingleMetricViewerEmbeddableInput>
@@ -61,11 +59,16 @@ export class SingleMetricViewerEmbeddableFactory
       const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
         './single_metric_viewer_setup_flyout'
       );
-      return await resolveEmbeddableSingleMetricViewerUserInput(
+      const userInput = await resolveEmbeddableSingleMetricViewerUserInput(
         coreStart,
         pluginStart,
-        singleMetricServices
+        singleMetricServices.mlApiServices
       );
+
+      return {
+        ...userInput,
+        title: userInput.panelTitle,
+      };
     } catch (e) {
       return Promise.reject();
     }
@@ -145,7 +148,10 @@ export class SingleMetricViewerEmbeddableFactory
     ];
   }
 
-  public async create(initialInput: SingleMetricViewerEmbeddableInput, parent?: IContainer) {
+  public async create(
+    initialInput: SingleMetricViewerEmbeddableInput,
+    parent?: IContainer
+  ): Promise<InstanceType<ISingleMetricViewerEmbeddable>> {
     const services = await this.getServices();
     const { SingleMetricViewerEmbeddable } = await import('./single_metric_viewer_embeddable');
     return new SingleMetricViewerEmbeddable(initialInput, services, parent);

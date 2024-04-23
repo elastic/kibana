@@ -53,6 +53,11 @@ export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 export const PLUGIN_NAME = 'DataViews';
 
 /**
+ * Max length for the custom field description
+ */
+export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
+
+/**
  * Fields for wildcard path.
  * @public
  */
@@ -71,3 +76,5 @@ export const FIELDS_PATH = '/internal/data_views/fields';
 export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
 
 export const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';
+
+export const DEFAULT_DATA_VIEW_ID = 'defaultIndex';

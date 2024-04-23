@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '../../plugin';
 
-export interface HasDynamicActions {
-  enhancements: {
-    dynamicActions: DynamicActionManager;
-  };
-}
+export type HasDynamicActions = Partial<{
+  enhancements: { dynamicActions: DynamicActionManager };
+  setDynamicActions: (newState: DynamicActionsSerializedState['enhancements']) => void;
+  dynamicActionsState$: PublishingSubject<DynamicActionsSerializedState['enhancements']>;
+}>;
 
-export const apiHasDynamicActions = (api: unknown): api is HasDynamicActions => {
+export const apiHasDynamicActions = (api: unknown): api is Required<HasDynamicActions> => {
+  const apiMaybeHasDynamicActions = api as Required<HasDynamicActions>;
   return Boolean(
-    api && typeof (api as HasDynamicActions).enhancements?.dynamicActions === 'object'
+    apiMaybeHasDynamicActions &&
+      apiMaybeHasDynamicActions.enhancements &&
+      typeof apiMaybeHasDynamicActions.enhancements.dynamicActions === 'object' &&
+      typeof apiMaybeHasDynamicActions.setDynamicActions === 'function' &&
+      apiMaybeHasDynamicActions.dynamicActionsState$
   );
 };

@@ -6,6 +6,7 @@
  */
 
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
 import {
   Aggregators,
@@ -23,7 +24,11 @@ import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { InfraConfig } from '../../../../common/plugin_config_types';
-import { ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -82,7 +87,7 @@ const mockOptions = {
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
+  return jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
 describe('The metric threshold rule type', () => {
@@ -147,7 +152,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: '*',
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -169,7 +174,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: '*',
         conditions: [
-          { metric: 'test.metric.1', threshold: ['1.5'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [1.5], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -191,7 +196,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: '*',
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -213,7 +218,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: '*',
         conditions: [
-          { metric: 'test.metric.1', threshold: ['1.5'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [1.5], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -235,7 +240,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: '*',
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0', '1.5'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0, 1.5], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -257,7 +262,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: '*',
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0', '0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0, 0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -334,7 +339,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertIdA,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -345,7 +350,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(2, {
         id: alertIdB,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -389,7 +394,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertIdA,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['1.5'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [1.5], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -728,6 +733,148 @@ describe('The metric threshold rule type', () => {
       );
       expect(stateResult3.missingGroups).toEqual(expect.arrayContaining([]));
     });
+
+    test('should remove a group from previous missing groups if the related alert is untracked', async () => {
+      setEvaluationResults([
+        {
+          a: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.2',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.2',
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'b' },
+          },
+          c: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.2',
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'c' },
+          },
+        },
+      ]);
+      const { state: stateResult1 } = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.2'
+      );
+      expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
+      setEvaluationResults([
+        {
+          a: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: true,
+            bucketKey: { groupBy0: 'b' },
+          },
+          c: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: false,
+            shouldWarn: false,
+            isNoData: true,
+            bucketKey: { groupBy0: 'c' },
+          },
+        },
+      ]);
+      const { state: stateResult2 } = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult1
+      );
+      expect(stateResult2.missingGroups).toEqual([
+        { key: 'b', bucketKey: { groupBy0: 'b' } },
+        { key: 'c', bucketKey: { groupBy0: 'c' } },
+      ]);
+      const mockedEvaluateRule = setEvaluationResults([
+        {
+          a: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'a' },
+          },
+          b: {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: null,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: true,
+            bucketKey: { groupBy0: 'b' },
+          },
+        },
+      ]);
+      // Consider c as untracked
+      services.alertsClient.isTrackedAlert.mockImplementation((id: string) => id !== 'c');
+      const { state: stateResult3 } = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.1',
+        stateResult2
+      );
+      expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
+      expect(mockedEvaluateRule.mock.calls[2][8]).toEqual([
+        { bucketKey: { groupBy0: 'b' }, key: 'b' },
+      ]);
+    });
   });
 
   describe('querying with a groupBy parameter host.name and rule tags', () => {
@@ -801,7 +948,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertIdA,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -812,7 +959,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(2, {
         id: alertIdB,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '3', evaluation_value: 3 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '3', evaluation_value: 3 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -876,7 +1023,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.75'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -953,8 +1100,8 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['1'], value: '1', evaluation_value: 1 },
-          { metric: 'test.metric.2', threshold: ['3'], value: '3', evaluation_value: 3 },
+          { metric: 'test.metric.1', threshold: [1], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.2', threshold: [3], value: '3', evaluation_value: 3 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -1047,8 +1194,8 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertIdA,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['1'], value: '1', evaluation_value: 1 },
-          { metric: 'test.metric.2', threshold: ['3'], value: '3', evaluation_value: 3 },
+          { metric: 'test.metric.1', threshold: [1], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.2', threshold: [3], value: '3', evaluation_value: 3 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -1099,7 +1246,7 @@ describe('The metric threshold rule type', () => {
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
-        conditions: [{ metric: 'count', threshold: ['0.9'], value: '1', evaluation_value: 1 }],
+        conditions: [{ metric: 'count', threshold: [0.9], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'count is 1 in the last 1 min. Alert when > 0.9.',
@@ -1216,7 +1363,7 @@ describe('The metric threshold rule type', () => {
         testNAlertsReported(2);
         testAlertReported(1, {
           id: alertIdA,
-          conditions: [{ metric: 'count', threshold: ['0'], value: '0', evaluation_value: 0 }],
+          conditions: [{ metric: 'count', threshold: [0], value: '0', evaluation_value: 0 }],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
           reason: 'count is 0 in the last 1 min for a. Alert when <= 0.',
@@ -1225,7 +1372,7 @@ describe('The metric threshold rule type', () => {
         });
         testAlertReported(2, {
           id: alertIdB,
-          conditions: [{ metric: 'count', threshold: ['0'], value: '0', evaluation_value: 0 }],
+          conditions: [{ metric: 'count', threshold: [0], value: '0', evaluation_value: 0 }],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
           reason: 'count is 0 in the last 1 min for b. Alert when <= 0.',
@@ -1275,9 +1422,7 @@ describe('The metric threshold rule type', () => {
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
-        conditions: [
-          { metric: 'test.metric.2', threshold: ['1'], value: '3', evaluation_value: 3 },
-        ],
+        conditions: [{ metric: 'test.metric.2', threshold: [1], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.2 is 3 in the last 1 min. Alert when > 1.',
@@ -1347,7 +1492,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['0.25'], value: '1', evaluation_value: 1 },
+          { metric: 'test.metric.1', threshold: [0.25], value: '1', evaluation_value: 1 },
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
@@ -1419,7 +1564,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.3', threshold: ['1'], value: '[NO DATA]', evaluation_value: null },
+          { metric: 'test.metric.3', threshold: [1], value: '[NO DATA]', evaluation_value: null },
         ],
         actionGroup: NO_DATA_ACTIONS.id,
         alertState: 'NO DATA',
@@ -1498,8 +1643,15 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.3', threshold: ['1'], value: '[NO DATA]', evaluation_value: null },
-          { metric: 'count', threshold: [30], value: 0 },
+          {
+            metric: 'test.metric.3',
+            threshold: [1],
+            formattedThreshold: ['1'],
+            value: '[NO DATA]',
+            evaluation_value: null,
+          },
+          // Threshold will not be formatted because there is no result for the second condition
+          { metric: 'count', threshold: [30], formattedThreshold: [30], value: 0 },
         ],
         actionGroup: NO_DATA_ACTIONS.id,
         alertState: 'NO DATA',
@@ -1566,7 +1718,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.3', threshold: ['0'], value: '[NO DATA]', evaluation_value: null },
+          { metric: 'test.metric.3', threshold: [0], value: '[NO DATA]', evaluation_value: null },
         ],
         actionGroup: NO_DATA_ACTIONS.id,
         alertState: 'NO DATA',
@@ -1596,7 +1748,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(2, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.3', threshold: ['0'], value: '[NO DATA]', evaluation_value: null },
+          { metric: 'test.metric.3', threshold: [0], value: '[NO DATA]', evaluation_value: null },
         ],
         actionGroup: NO_DATA_ACTIONS.id,
         alertState: 'NO DATA',
@@ -1637,9 +1789,7 @@ describe('The metric threshold rule type', () => {
       testNAlertsReported(4);
       testAlertReported(3, {
         id: alertIdA,
-        conditions: [
-          { metric: 'test.metric.1', threshold: ['0'], value: '1', evaluation_value: 1 },
-        ],
+        conditions: [{ metric: 'test.metric.1', threshold: [0], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when > 0.',
@@ -1648,9 +1798,7 @@ describe('The metric threshold rule type', () => {
       });
       testAlertReported(4, {
         id: alertIdB,
-        conditions: [
-          { metric: 'test.metric.1', threshold: ['0'], value: '3', evaluation_value: 3 },
-        ],
+        conditions: [{ metric: 'test.metric.1', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when > 0.',
@@ -1698,7 +1846,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertIdA,
         conditions: [
-          { metric: 'test.metric.3', threshold: ['0'], value: '[NO DATA]', evaluation_value: null },
+          { metric: 'test.metric.3', threshold: [0], value: '[NO DATA]', evaluation_value: null },
         ],
         actionGroup: NO_DATA_ACTIONS.id,
         alertState: 'NO DATA',
@@ -1709,7 +1857,7 @@ describe('The metric threshold rule type', () => {
       testAlertReported(2, {
         id: alertIdB,
         conditions: [
-          { metric: 'test.metric.3', threshold: ['0'], value: '[NO DATA]', evaluation_value: null },
+          { metric: 'test.metric.3', threshold: [0], value: '[NO DATA]', evaluation_value: null },
         ],
         actionGroup: NO_DATA_ACTIONS.id,
         alertState: 'NO DATA',
@@ -1764,9 +1912,7 @@ describe('The metric threshold rule type', () => {
       testNAlertsReported(3);
       testAlertReported(1, {
         id: alertIdA,
-        conditions: [
-          { metric: 'test.metric.2', threshold: ['0'], value: '3', evaluation_value: 3 },
-        ],
+        conditions: [{ metric: 'test.metric.2', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.2 is 3 in the last 1 min for a. Alert when > 0.',
@@ -1775,9 +1921,7 @@ describe('The metric threshold rule type', () => {
       });
       testAlertReported(2, {
         id: alertIdB,
-        conditions: [
-          { metric: 'test.metric.2', threshold: ['0'], value: '1', evaluation_value: 1 },
-        ],
+        conditions: [{ metric: 'test.metric.2', threshold: [0], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.2 is 1 in the last 1 min for b. Alert when > 0.',
@@ -1786,9 +1930,7 @@ describe('The metric threshold rule type', () => {
       });
       testAlertReported(3, {
         id: alertIdC,
-        conditions: [
-          { metric: 'test.metric.2', threshold: ['0'], value: '3', evaluation_value: 3 },
-        ],
+        conditions: [{ metric: 'test.metric.2', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.2 is 3 in the last 1 min for c. Alert when > 0.',
@@ -1828,9 +1970,7 @@ describe('The metric threshold rule type', () => {
       testNAlertsReported(5);
       testAlertReported(4, {
         id: alertIdA,
-        conditions: [
-          { metric: 'test.metric.1', threshold: ['0'], value: '1', evaluation_value: 1 },
-        ],
+        conditions: [{ metric: 'test.metric.1', threshold: [0], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when > 0.',
@@ -1839,9 +1979,7 @@ describe('The metric threshold rule type', () => {
       });
       testAlertReported(5, {
         id: alertIdB,
-        conditions: [
-          { metric: 'test.metric.1', threshold: ['0'], value: '3', evaluation_value: 3 },
-        ],
+        conditions: [{ metric: 'test.metric.1', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when > 0.',
@@ -1947,7 +2085,7 @@ describe('The metric threshold rule type', () => {
         testAlertReported(1, {
           id: alertIdA,
           conditions: [
-            { metric: 'test.metric.1', threshold: ['0'], value: '1', evaluation_value: 1 },
+            { metric: 'test.metric.1', threshold: [0], value: '1', evaluation_value: 1 },
           ],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
@@ -1958,7 +2096,7 @@ describe('The metric threshold rule type', () => {
         testAlertReported(2, {
           id: alertIdB,
           conditions: [
-            { metric: 'test.metric.1', threshold: ['0'], value: '3', evaluation_value: 3 },
+            { metric: 'test.metric.1', threshold: [0], value: '3', evaluation_value: 3 },
           ],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
@@ -2007,7 +2145,7 @@ describe('The metric threshold rule type', () => {
           conditions: [
             {
               metric: 'test.metric.3',
-              threshold: ['0'],
+              threshold: [0],
               value: '[NO DATA]',
               evaluation_value: null,
             },
@@ -2023,7 +2161,7 @@ describe('The metric threshold rule type', () => {
           conditions: [
             {
               metric: 'test.metric.3',
-              threshold: ['0'],
+              threshold: [0],
               value: '[NO DATA]',
               evaluation_value: null,
             },
@@ -2062,9 +2200,7 @@ describe('The metric threshold rule type', () => {
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
-        conditions: [
-          { metric: 'test.metric.1', threshold: ['0'], value: '3', evaluation_value: 3 },
-        ],
+        conditions: [{ metric: 'test.metric.1', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ERROR',
         reason:
@@ -2086,7 +2222,7 @@ describe('The metric threshold rule type', () => {
             {
               ...baseNonCountCriterion,
               comparator: Comparator.GT,
-              threshold: [9999],
+              threshold: [9.999],
             },
           ],
         },
@@ -2127,7 +2263,13 @@ describe('The metric threshold rule type', () => {
       testAlertReported(1, {
         id: alertID,
         conditions: [
-          { metric: 'test.metric.1', threshold: ['9,999'], value: '2.5', evaluation_value: 2.5 },
+          {
+            metric: 'test.metric.1',
+            threshold: [9.999],
+            formattedThreshold: ['9,999'],
+            value: '2.5',
+            evaluation_value: 2.5,
+          },
         ],
         actionGroup: WARNING_ACTIONS.id,
         alertState: 'WARNING',
@@ -2156,7 +2298,8 @@ describe('The metric threshold rule type', () => {
         conditions: [
           {
             metric: 'test.metric.1',
-            threshold: ['999,900%'],
+            threshold: [9.999],
+            formattedThreshold: ['999,900%'],
             value: '82%',
             evaluation_value: 0.82,
           },
@@ -2191,7 +2334,8 @@ describe('The metric threshold rule type', () => {
       groupByKeys?: any;
       conditions: Array<{
         metric: string;
-        threshold: Array<number | string>;
+        threshold: number[];
+        formattedThreshold?: Array<number | string>;
         value: string | number;
         evaluation_value?: number | null;
       }>;
@@ -2231,7 +2375,13 @@ describe('The metric threshold rule type', () => {
         ...(alertState !== 'ERROR'
           ? {
               threshold: conditions.reduce((acc, curr, ndx) => {
-                set(acc, `condition${ndx}`, curr.threshold);
+                set(
+                  acc,
+                  `condition${ndx}`,
+                  curr.formattedThreshold
+                    ? curr.formattedThreshold
+                    : curr.threshold.map((t) => String(t))
+                );
                 return acc;
               }, {}),
             }
@@ -2242,6 +2392,7 @@ describe('The metric threshold rule type', () => {
         ...(alertState !== 'ERROR'
           ? {
               [ALERT_EVALUATION_VALUES]: conditions.map((c) => c.evaluation_value),
+              [ALERT_EVALUATION_THRESHOLD]: getThresholds(conditions),
             }
           : {}),
         [ALERT_REASON]: reason,
@@ -2273,6 +2424,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     logThresholdAlertRuleEnabled: true,
     alertsAndRulesDropdownEnabled: true,
     profilingEnabled: false,
+    ruleFormV2Enabled: false,
   },
   enabled: true,
   sources,

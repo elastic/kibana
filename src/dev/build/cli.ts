@@ -43,6 +43,7 @@ if (showHelp) {
         --docker-cross-compile               {dim Produce arm64 and amd64 Docker images}
         --docker-contexts                    {dim Only build the Docker build contexts}
         --skip-canvas-shareable-runtime      {dim Don't build the Canvas shareable runtime}
+        --skip-cdn-assets                    {dim Don't build CDN assets}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-ubuntu                 {dim Don't build the docker ubuntu image}
         --skip-docker-fips                   {dim Don't build the docker fips image}

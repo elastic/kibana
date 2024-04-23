@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiSpacer,
@@ -15,7 +17,6 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiSkeletonText,
 } from '@elastic/eui';
@@ -27,9 +28,8 @@ import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
-
-import type { Category } from '../../../common/api/log_categorization/types';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';

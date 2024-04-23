@@ -21,14 +21,14 @@ type OperationByInputType<Input extends GenericOperationDefinition['input']> = E
   { input: Input }
 >;
 
-export function createOperationDefinitionMock(
+export function createOperationDefinitionMock<T extends GenericIndexPatternColumn>(
   operation: string,
   {
     input = 'field',
     getErrorMessage,
     buildColumn,
     ...params
-  }: Partial<GenericOperationDefinition> = {},
+  }: Partial<GenericOperationDefinition<T>> = {},
   {
     label = operation,
     dataType = 'number',
@@ -81,13 +81,11 @@ export function createOperationDefinitionMock(
     return {
       buildColumn:
         buildColumn ??
-        jest.fn(({ referenceIds }, columnParams: PartialColumnParams) => ({
+        jest.fn(({ referenceIds }, columnParams: PartialColumnParams | undefined) => ({
           references: referenceIds,
           filter: getFilter(undefined, columnParams),
           ...sharedColumnParams,
         })),
-      onFieldChange: jest.fn(),
-      toEsAggsFn: jest.fn(),
       getPossibleOperation: jest.fn(() => ({
         scale: 'ratio',
         dataType: 'number',

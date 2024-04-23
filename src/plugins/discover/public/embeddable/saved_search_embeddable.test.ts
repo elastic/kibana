@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement } from 'react';
-import { SearchInput } from '..';
-import { DiscoverServices } from '../build_services';
-import { discoverServiceMock } from '../__mocks__/services';
-import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
-import { render } from 'react-dom';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { Observable, throwError } from 'rxjs';
-import { ReactWrapper } from 'enzyme';
-import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import { VIEW_MODE } from '../../common/constants';
-import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import { act } from 'react-dom/test-utils';
-import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import { dataViewAdHoc } from '../__mocks__/data_view_complex';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import { ReactWrapper } from 'enzyme';
+import { ReactElement } from 'react';
+import { render } from 'react-dom';
+import { act } from 'react-dom/test-utils';
+import { Observable, throwError } from 'rxjs';
+import { SearchInput } from '..';
+import { VIEW_MODE } from '../../common/constants';
+import { DiscoverServices } from '../build_services';
+import { dataViewAdHoc } from '../__mocks__/data_view_complex';
+import { discoverServiceMock } from '../__mocks__/services';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 
 jest.mock('./get_discover_locator_params', () => {
   const actual = jest.requireActual('./get_discover_locator_params');
@@ -418,16 +418,13 @@ describe('saved search embeddable', () => {
         .spyOn(servicesMock.core.http.basePath, 'remove')
         .mockClear()
         .mockReturnValueOnce('/mock-url');
-      const { embeddable, searchInput, savedSearch } = createEmbeddable({ dataView, byValue });
-      const getLocatorParamsArgs = {
-        input: searchInput,
-        savedSearch,
-      };
-      const locatorParams = getDiscoverLocatorParams(getLocatorParamsArgs);
+      const { embeddable } = createEmbeddable({ dataView, byValue });
+
+      const locatorParams = getDiscoverLocatorParams(embeddable);
       (getDiscoverLocatorParams as jest.Mock).mockClear();
       await waitOneTick();
       expect(getDiscoverLocatorParams).toHaveBeenCalledTimes(1);
-      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(getLocatorParamsArgs);
+      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(embeddable);
       expect(servicesMock.locator.getUrl).toHaveBeenCalledTimes(1);
       expect(servicesMock.locator.getUrl).toHaveBeenCalledWith(locatorParams);
       expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
@@ -459,19 +456,15 @@ describe('saved search embeddable', () => {
         .spyOn(servicesMock.core.http.basePath, 'remove')
         .mockClear()
         .mockReturnValueOnce('/mock-url');
-      const { embeddable, searchInput, savedSearch } = createEmbeddable({
+      const { embeddable } = createEmbeddable({
         dataView: dataViewAdHoc,
         byValue: true,
       });
-      const getLocatorParamsArgs = {
-        input: searchInput,
-        savedSearch,
-      };
-      const locatorParams = getDiscoverLocatorParams(getLocatorParamsArgs);
+      const locatorParams = getDiscoverLocatorParams(embeddable);
       (getDiscoverLocatorParams as jest.Mock).mockClear();
       await waitOneTick();
       expect(getDiscoverLocatorParams).toHaveBeenCalledTimes(1);
-      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(getLocatorParamsArgs);
+      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(embeddable);
       expect(servicesMock.locator.getRedirectUrl).toHaveBeenCalledTimes(1);
       expect(servicesMock.locator.getRedirectUrl).toHaveBeenCalledWith(locatorParams);
       expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);

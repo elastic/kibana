@@ -13,11 +13,7 @@ import { useKibana } from '../../../../utils/kibana_react';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const {
-    http,
-    theme,
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-  } = useKibana().services;
+  const { http, theme } = useKibana().services;
 
   const { appMountParameters } = usePluginContext();
 
@@ -27,11 +23,6 @@ export function HeaderMenu(): React.ReactElement | null {
       theme$={theme.theme$}
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
-        {ObservabilityAIAssistantActionMenuItem && (
-          <EuiFlexItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiFlexItem>
-        )}
         <EuiFlexItem>
           <EuiHeaderLinks>
             <EuiHeaderLink

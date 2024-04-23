@@ -26,8 +26,7 @@ export function DashboardSelector({
 }: Props) {
   const history = useHistory();
 
-  const [selectedDashboard, setSelectedDashboard] =
-    useState<MergedServiceDashboard>();
+  const [selectedDashboard, setSelectedDashboard] = useState<MergedServiceDashboard>();
 
   useMount(() => {
     if (!currentDashboardId) {
@@ -43,8 +42,7 @@ export function DashboardSelector({
 
   useEffect(() => {
     const preselectedDashboard = serviceDashboards.find(
-      ({ dashboardSavedObjectId }) =>
-        dashboardSavedObjectId === currentDashboardId
+      ({ dashboardSavedObjectId }) => dashboardSavedObjectId === currentDashboardId
     );
     // preselect dashboard
     if (preselectedDashboard) {
@@ -67,18 +65,12 @@ export function DashboardSelector({
     <EuiComboBox
       compressed
       style={{ minWidth: '200px' }}
-      placeholder={i18n.translate(
-        'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-        {
-          defaultMessage: 'Select dashboard',
-        }
-      )}
-      prepend={i18n.translate(
-        'xpack.apm.serviceDashboards.selectDashboard.prepend',
-        {
-          defaultMessage: 'Dashboard',
-        }
-      )}
+      placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
+        defaultMessage: 'Select dashboard',
+      })}
+      prepend={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.prepend', {
+        defaultMessage: 'Dashboard',
+      })}
       singleSelection={{ asPlainText: true }}
       options={serviceDashboards.map(({ dashboardSavedObjectId, title }) => {
         return {
@@ -90,8 +82,8 @@ export function DashboardSelector({
         selectedDashboard
           ? [
               {
-                value: selectedDashboard?.dashboardSavedObjectId,
-                label: selectedDashboard?.title,
+                value: selectedDashboard.dashboardSavedObjectId,
+                label: selectedDashboard.title,
               },
             ]
           : []

@@ -6,10 +6,12 @@
  */
 
 import type {
+  AnalyticsServiceStart,
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
   HttpStart,
+  I18nStart,
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
@@ -20,7 +22,7 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
@@ -42,12 +44,14 @@ export interface ObservabilityAppServices {
   lens: LensPublicStart;
   navigation: NavigationPublicPluginStart;
   notifications: NotificationsStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   overlays: OverlayStart;
   savedObjectsClient: SavedObjectsStart['client'];
   share: SharePluginStart;
   stateTransfer: EmbeddableStateTransfer;
   storage: IStorageWrapper;
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
   theme: ThemeServiceStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;

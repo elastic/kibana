@@ -7,20 +7,23 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
+import { embeddableOutputToSubject } from '@kbn/embeddable-plugin/public';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
 } from '..';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
 
@@ -40,12 +43,30 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
+  // API
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
+  public entityFields: BehaviorSubject<MlEntityField[] | undefined>;
+
+  private apiSubscriptions = new Subscription();
+
   constructor(
     initialInput: AnomalyChartsEmbeddableInput,
     public services: [CoreStart, MlDependencies, AnomalyChartsServices],
     parent?: IContainer
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
+
+    this.jobIds = embeddableInputToSubject<JobId[], AnomalyChartsEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'jobIds'
+    );
+
+    this.entityFields = embeddableOutputToSubject<MlEntityField[], AnomalyChartsEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'entityFields'
+    );
   }
 
   public onLoading() {
@@ -108,6 +129,9 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
 
   public destroy() {
     super.destroy();
+
+    this.apiSubscriptions.unsubscribe();
+
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }

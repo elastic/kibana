@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import {
-  EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
-  IContainer,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import {
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type {
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
   EmbeddableChangePointType,
-} from '../../common/constants';
+} from '@kbn/aiops-change-point-detection/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
-import {
-  EmbeddableChangePointChart,
-  EmbeddableChangePointChartInput,
-} from './embeddable_change_point_chart';
+import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
 
 export interface EmbeddableChangePointChartStartServices {
   data: DataPublicPluginStart;

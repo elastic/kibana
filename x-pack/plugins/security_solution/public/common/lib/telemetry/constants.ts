@@ -45,6 +45,10 @@ export enum TelemetryEventTypes {
   AssistantMessageSent = 'Assistant Message Sent',
   AssistantQuickPrompt = 'Assistant Quick Prompt',
   AssistantSettingToggled = 'Assistant Setting Toggled',
+  AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
+  AssetCriticalityFileSelected = 'Asset Criticality File Selected',
+  AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
+  InsightsGenerated = 'Insights Generated',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
@@ -56,6 +60,11 @@ export enum TelemetryEventTypes {
   AnomaliesCountClicked = 'Anomalies Count Clicked',
   DataQualityIndexChecked = 'Data Quality Index Checked',
   DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
+  DetailsFlyoutOpened = 'Details Flyout Opened',
+  DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
+  OnboardingHubStepOpen = 'Onboarding Hub Step Open',
+  OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
+  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

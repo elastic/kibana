@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -13,7 +14,7 @@ import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { useCurrentThemeVars, useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { Controls, Cytoscape, JobMapLegend } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { EuiThemeType } from '../../../components/color_range_legend';
+import type { EuiThemeType } from '../../../components/color_range_legend';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';

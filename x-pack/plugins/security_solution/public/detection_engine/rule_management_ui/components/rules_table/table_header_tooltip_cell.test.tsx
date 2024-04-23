@@ -12,7 +12,7 @@ import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 describe('Component TableHeaderTooltipCell', () => {
-  it('shoud render text with icon and tooltip', async () => {
+  it('should render text with icon and tooltip', async () => {
     render(<TableHeaderTooltipCell title="test title" tooltipContent="test tooltip content" />);
 
     expect(screen.getByText('test title')).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe('Component TableHeaderTooltipCell', () => {
     expect(await screen.findByText('test tooltip content')).toBeInTheDocument();
   });
 
-  it('shoud render test element as custom tooltip', () => {
+  it('should render test element as custom tooltip', () => {
     render(
       <TableHeaderTooltipCell
         title="test title"

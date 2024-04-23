@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
+import type { FC } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import type { Category } from '../../../../common/api/log_categorization/types';
+
+import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+
 import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../format_category';
 
 interface ExpandedRowProps {

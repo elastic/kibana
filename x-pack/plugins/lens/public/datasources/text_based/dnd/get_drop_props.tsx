@@ -10,7 +10,7 @@ import { isOperation } from '../../../types';
 import type { TextBasedPrivateState } from '../types';
 import type { GetDropPropsArgs } from '../../../types';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
-import { canColumnBeDroppedInMetricDimension } from '../utils';
+import { canColumnBeDroppedInMetricDimension, isNotNumeric } from '../utils';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
 export const getDropProps = (
@@ -28,7 +28,7 @@ export const getDropProps = (
 
   if (isDraggedField(source)) {
     const nextLabel = source.humanData.label;
-    if (target?.isMetricDimension && sourceField?.meta?.type !== 'number') {
+    if (target?.isMetricDimension && sourceField && isNotNumeric(sourceField)) {
       return;
     }
     return {

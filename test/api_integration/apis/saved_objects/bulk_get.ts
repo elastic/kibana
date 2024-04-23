@@ -230,10 +230,10 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'dashboard',
                 namespaces: ['default'],
                 migrationVersion: {
-                  dashboard: '8.9.0',
+                  dashboard: '10.2.0',
                 },
                 coreMigrationVersion: '8.8.0',
-                typeMigrationVersion: '8.9.0',
+                typeMigrationVersion: '10.2.0',
                 updated_at: '2015-01-01T00:00:00.000Z',
                 created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_objects[3].version,

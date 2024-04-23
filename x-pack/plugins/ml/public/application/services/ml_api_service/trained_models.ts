@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
@@ -26,7 +26,6 @@ import type {
   NodesOverviewResponse,
   MemoryUsageInfo,
 } from '../../../../common/types/trained_models';
-
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;

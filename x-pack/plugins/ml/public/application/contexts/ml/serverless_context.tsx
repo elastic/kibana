@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useContext, useMemo } from 'react';
-import type { MlFeatures } from '../../../../common/constants/app';
+import type { FC } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
   showNodeInfo: boolean;
@@ -15,6 +16,7 @@ export interface EnabledFeatures {
   isADEnabled: boolean;
   isDFAEnabled: boolean;
   isNLPEnabled: boolean;
+  showRuleFormV2: boolean;
 }
 export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
@@ -28,20 +30,25 @@ export const EnabledFeaturesContext = createContext({
 interface Props {
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  showMLNavMenu?: boolean;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export const EnabledFeaturesContextProvider: FC<Props> = ({
   children,
   isServerless,
+  showMLNavMenu = true,
   mlFeatures,
+  experimentalFeatures,
 }) => {
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
-    showMLNavMenu: !isServerless,
+    showMLNavMenu,
     showLicenseInfo: !isServerless,
     isADEnabled: mlFeatures.ad,
     isDFAEnabled: mlFeatures.dfa,
     isNLPEnabled: mlFeatures.nlp,
+    showRuleFormV2: experimentalFeatures?.ruleFormV2 ?? false,
   };
 
   return (

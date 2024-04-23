@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
-import { css, SerializedStyles } from '@emotion/react';
-import type { Category } from '../../../common/api/log_categorization/types';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useIsDarkTheme } from '../../hooks/use_eui_theme';
 
 interface Props {

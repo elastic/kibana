@@ -10,6 +10,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import { FIELDS_FOR_WILDCARD_PATH as BASE_URI } from '@kbn/data-views-plugin/common/constants';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(BASE_URI)
         .query({
           pattern: 'basic_index',
-          type: 'rollup',
+          type: DataViewType.ROLLUP,
           rollup_index: 'bar',
         })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)

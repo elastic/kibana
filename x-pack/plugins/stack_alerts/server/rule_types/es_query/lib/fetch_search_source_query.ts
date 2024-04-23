@@ -202,11 +202,14 @@ export async function generateLink(
   }
 
   // make new adhoc data view
-  const newDataView = await dataViews.create({
-    ...dataViewToUpdate.toSpec(false),
-    version: undefined,
-    id: undefined,
-  });
+  const newDataView = await dataViews.create(
+    {
+      ...dataViewToUpdate.toSpec(false),
+      version: undefined,
+      id: undefined,
+    },
+    true
+  );
   const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
@@ -248,5 +251,5 @@ export function updateFilterReferences(
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  return dataView.toMinimalSpec();
+  return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }

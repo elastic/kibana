@@ -10,9 +10,9 @@ import { KnowledgeBaseEntryRole } from '../../common';
 
 export function registerSummarizationFunction({
   client,
-  registerFunction,
+  functions,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'summarize',
       contexts: ['core'],
@@ -22,7 +22,6 @@ export function registerSummarizationFunction({
         'This function allows the Elastic Assistant to summarize things from the conversation.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           id: {
             type: 'string',

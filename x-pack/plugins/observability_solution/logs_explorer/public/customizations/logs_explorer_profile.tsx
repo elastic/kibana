@@ -20,6 +20,8 @@ import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
+import { smartFields } from './custom_field_list';
+import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
@@ -65,6 +67,7 @@ export const createLogsExplorerProfileCustomizations =
           <KibanaContextProviderForPlugin>
             <LazyCustomDataSourceSelector
               controller={controller}
+              core={core}
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
               logsExplorerControllerStateService={service}
@@ -90,6 +93,16 @@ export const createLogsExplorerProfileCustomizations =
         module.createCustomControlColumnsConfiguration(service)
       ),
     });
+
+    customizations.set({
+      id: 'field_list',
+      additionalFieldGroups: {
+        smartFields,
+      },
+    });
+
+    // Fix bug where filtering on histogram does not work
+    customizations.set(createCustomUnifiedHistogram(data));
 
     /**
      * Hide New, Open and Save settings to prevent working with saved views.

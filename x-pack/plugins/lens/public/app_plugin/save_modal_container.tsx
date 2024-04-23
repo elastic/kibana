@@ -41,7 +41,6 @@ export type SaveModalContainerProps = {
     | 'attributeService'
     | 'savedObjectsTagging'
     | 'application'
-    | 'dashboardFeatureFlag'
     | 'notifications'
     | 'http'
     | 'chrome'
@@ -97,7 +96,7 @@ export function SaveModalContainer({
     });
   }
 
-  const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
+  const { attributeService, savedObjectsTagging, application } = lensServices;
 
   useEffect(() => {
     setLastKnownDoc(initLastKnownDoc);
@@ -170,7 +169,6 @@ export function SaveModalContainer({
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
-      allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
       onSave={(saveProps, options) => {
@@ -227,7 +225,6 @@ export const runSaveLensVisualization = async (
       | 'overlays'
       | 'notifications'
       | 'stateTransfer'
-      | 'dashboardFeatureFlag'
       | 'attributeService'
       | 'savedObjectsTagging'
     >,
@@ -248,7 +245,6 @@ export const runSaveLensVisualization = async (
     redirectToOrigin,
     onAppLeave,
     redirectTo,
-    dashboardFeatureFlag,
     textBasedLanguageSave,
     switchDatasource,
     application,
@@ -338,7 +334,6 @@ export const runSaveLensVisualization = async (
         embeddableInput: newInput,
         dashboardId: saveProps.dashboardId,
         stateTransfer,
-        dashboardFeatureFlag,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
       });

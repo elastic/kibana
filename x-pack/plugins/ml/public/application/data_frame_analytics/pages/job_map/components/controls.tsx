@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useContext, useCallback, useMemo } from 'react';
-import cytoscape from 'cytoscape';
+import type { FC } from 'react';
+import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
+import type cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDescriptionList,
-  EuiDescriptionListProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,

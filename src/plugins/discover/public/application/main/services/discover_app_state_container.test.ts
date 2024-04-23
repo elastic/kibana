@@ -11,14 +11,14 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { History } from 'history';
-
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import {
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
+  isEqualState,
 } from './discover_app_state_container';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 let history: History;
 let state: DiscoverAppStateContainer;
@@ -159,6 +159,68 @@ describe('Test discover app state container', () => {
           viewMode: undefined,
         })
       );
+    });
+  });
+
+  describe('isEqualState', () => {
+    const initialState = {
+      index: 'the-index',
+      columns: ['the-column'],
+      sort: [],
+      query: { query: 'the-query', language: 'kuery' },
+      filters: [],
+      interval: 'auto',
+      hideChart: true,
+      sampleSize: 100,
+      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      savedQuery: undefined,
+      hideAggregatedPreview: true,
+      rowHeight: 25,
+      headerRowHeight: 25,
+      grid: {},
+      breakdownField: 'the-breakdown-field',
+    };
+
+    test('returns true if the states are equal', () => {
+      expect(isEqualState(initialState, { ...initialState })).toBeTruthy();
+    });
+
+    test('handles the special filter change case correctly ', () => {
+      // this is some sort of legacy behavior, especially for the filter case
+      const previousState = { initialState, filters: [{ index: 'test', meta: {} }] };
+      const nextState = {
+        initialState,
+        filters: [{ index: 'test', meta: {}, $$hashKey: 'hi' }],
+      };
+      expect(isEqualState(previousState, nextState)).toBeTruthy();
+    });
+
+    test('returns true if the states are not equal', () => {
+      const changedParams = [
+        { index: 'the-new-index' },
+        { columns: ['newColumns'] },
+        { sort: [['column', 'desc']] },
+        { query: { query: 'ok computer', language: 'pirate-english' } },
+        { filters: [{ index: 'test', meta: {} }] },
+        { interval: 'eternity' },
+        { hideChart: undefined },
+        { sampleSize: 1 },
+        { viewMode: undefined },
+        { savedQuery: 'sdsd' },
+        { hideAggregatedPreview: false },
+        { rowHeight: 100 },
+        { headerRowHeight: 1 },
+        { grid: { test: 'test' } },
+        { breakdownField: 'new-breakdown-field' },
+      ];
+      changedParams.forEach((param) => {
+        expect(isEqualState(initialState, { ...initialState, ...param })).toBeFalsy();
+      });
+    });
+    test('allows to exclude variables from comparison', () => {
+      expect(
+        isEqualState(initialState, { ...initialState, index: undefined }, ['index'])
+      ).toBeTruthy();
     });
   });
 });

@@ -7,41 +7,42 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import {
-  DefaultEmbeddableApi,
-  ReactEmbeddable,
-  ReactEmbeddableFactory,
-  ReactEmbeddableRegistration,
-} from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
 
-const registry: { [key: string]: ReactEmbeddableFactory<any, any> } = {};
+const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any>> } = {};
 
+/**
+ * Registers a new React embeddable factory. This should be called at plugin start time.
+ *
+ * @param type The key to register the factory under. This should be the same as the `type` key in the factory definition.
+ * @param getFactory an async function that gets the factory definition for this key. This should always async import the
+ * actual factory definition file to avoid polluting page load.
+ */
 export const registerReactEmbeddableFactory = <
-  StateType extends unknown = unknown,
-  APIType extends DefaultEmbeddableApi = DefaultEmbeddableApi
+  StateType extends object = object,
+  APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 >(
-  key: string,
-  factory: ReactEmbeddableFactory<StateType, APIType>
+  type: string,
+  getFactory: () => Promise<ReactEmbeddableFactory<StateType, APIType>>
 ) => {
-  if (registry[key] !== undefined)
+  if (registry[type] !== undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryAlreadyExistsError', {
         defaultMessage: 'An embeddable factory for for type: {key} is already registered.',
-        values: { key },
+        values: { key: type },
       })
     );
-  registry[key] = factory;
+  registry[type] = getFactory;
 };
 
 export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== undefined;
 
-export const getReactEmbeddableFactory = <
-  StateType extends unknown = unknown,
-  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
+export const getReactEmbeddableFactory = async <
+  StateType extends object = object,
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 >(
   key: string
-): ReactEmbeddableFactory<StateType, ApiType> => {
+): Promise<ReactEmbeddableFactory<StateType, ApiType>> => {
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
@@ -49,13 +50,5 @@ export const getReactEmbeddableFactory = <
         values: { key },
       })
     );
-  return registry[key];
+  return registry[key]();
 };
-
-/**
- * A helper function which transforms a component into an Embeddable component by forwarding a ref which
- * should be used with `useEmbeddableApiHandle` to expose an API for your component.
- */
-export const RegisterReactEmbeddable: <ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi>(
-  component: ReactEmbeddableRegistration<ApiType>
-) => ReactEmbeddable<ApiType> = (component) => React.forwardRef((_, apiRef) => component(apiRef));

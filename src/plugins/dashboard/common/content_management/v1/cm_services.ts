@@ -14,7 +14,16 @@ import {
   createResultSchema,
 } from '@kbn/content-management-utils';
 
-const dashboardAttributesSchema = schema.object(
+export const controlGroupInputSchema = schema
+  .object({
+    panelsJSON: schema.maybe(schema.string()),
+    controlStyle: schema.maybe(schema.string()),
+    chainingSystem: schema.maybe(schema.string()),
+    ignoreParentSettingsJSON: schema.maybe(schema.string()),
+  })
+  .extends({}, { unknowns: 'ignore' });
+
+export const dashboardAttributesSchema = schema.object(
   {
     // General
     title: schema.string(),
@@ -39,14 +48,7 @@ const dashboardAttributesSchema = schema.object(
     ),
 
     // Dashboard Content
-    controlGroupInput: schema.maybe(
-      schema.object({
-        panelsJSON: schema.maybe(schema.string()),
-        controlStyle: schema.maybe(schema.string()),
-        chainingSystem: schema.maybe(schema.string()),
-        ignoreParentSettingsJSON: schema.maybe(schema.string()),
-      })
-    ),
+    controlGroupInput: schema.maybe(controlGroupInputSchema),
     panelsJSON: schema.string({ defaultValue: '[]' }),
     optionsJSON: schema.string({ defaultValue: '{}' }),
 
@@ -57,7 +59,7 @@ const dashboardAttributesSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
+export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
 const searchOptionsSchema = schema.maybe(
   schema.object(

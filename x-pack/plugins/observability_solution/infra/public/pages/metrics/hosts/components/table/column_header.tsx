@@ -14,10 +14,11 @@ interface Props {
   label: string;
   toolTip?: string;
   formula?: string;
+  showDocumentationLink?: boolean;
 }
 
-export const ColumnHeader = React.memo(({ label, toolTip, formula }: Props) => {
-  return (
+export const ColumnHeader = React.memo(
+  ({ label, toolTip, formula, showDocumentationLink = true }: Props) => (
     <EuiFlexGroup gutterSize="xs">
       <div
         css={css`
@@ -33,9 +34,13 @@ export const ColumnHeader = React.memo(({ label, toolTip, formula }: Props) => {
 
       {toolTip && (
         <Popover>
-          <TooltipContent formula={formula} description={toolTip} showDocumentationLink />
+          <TooltipContent
+            formula={formula}
+            description={toolTip}
+            showDocumentationLink={showDocumentationLink}
+          />
         </Popover>
       )}
     </EuiFlexGroup>
-  );
-});
+  )
+);

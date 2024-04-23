@@ -13,4 +13,5 @@ export {
   getJobsItemsFromEmbeddable,
   isCompatibleVisualizationType,
   redirectToADJobWizards,
+  getChartInfoFromVisualization,
 } from './utils';

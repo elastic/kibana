@@ -6,10 +6,13 @@
  */
 
 import { CreateSLOInput, FindSLODefinitionsResponse } from '@kbn/slo-schema';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
+import { waitForIndexToBeEmpty } from '../apis/slos/helper/wait_for_index_state';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esClient = getService('es');
 
   return {
     async create(params: CreateSLOInput) {
@@ -44,6 +47,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
           .send()
           .expect(204);
       }
+      await waitForIndexToBeEmpty({ esClient, indexName: SLO_SUMMARY_DESTINATION_INDEX_NAME });
     },
   };
 }

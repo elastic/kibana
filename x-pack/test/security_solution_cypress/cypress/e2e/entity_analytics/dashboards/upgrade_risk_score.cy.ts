@@ -54,8 +54,8 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-      cy.task('esArchiverUnload', 'risk_hosts');
-      cy.task('esArchiverUnload', 'risk_users');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
     });
 
     it('shows upgrade panel', () => {
@@ -77,8 +77,8 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
-      cy.task('esArchiverUnload', 'risk_users');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       deleteRiskEngineConfiguration();

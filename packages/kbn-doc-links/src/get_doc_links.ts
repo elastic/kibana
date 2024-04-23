@@ -157,6 +157,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
+      connectorsClientDeploy: `${ENTERPRISE_SEARCH_DOCS}deploy-connector-client.html`,
+      connectorsMappings: `${ENTERPRISE_SEARCH_DOCS}connectors-usage.html#connectors-usage-index-create-configure-existing-index`,
       connectorsAzureBlobStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-azure-blob.html`,
       connectorsBox: `${ENTERPRISE_SEARCH_DOCS}connectors-box.html`,
       connectorsClients: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-build`,
@@ -204,6 +206,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       machineLearningStart: `${ELASTICSEARCH_DOCS}nlp-example.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
+      playground: `${KIBANA_DOCS}playground.html`,
       mlDocumentEnrichment: `${ELASTICSEARCH_DOCS}ingest-pipeline-search-inference.html`,
       searchApplicationsTemplates: `${ELASTICSEARCH_DOCS}search-application-api.html`,
       searchApplicationsSearchApi: `${ELASTICSEARCH_DOCS}search-application-security.html`,
@@ -215,6 +218,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html`,
       syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
+      syncRulesAdvanced: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html#sync-rules-advanced`,
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
@@ -481,6 +485,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
         userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
         entityRiskScoring: `${SECURITY_SOLUTION_DOCS}entity-risk-scoring.html`,
+        assetCriticality: `${SECURITY_SOLUTION_DOCS}asset-criticality.html`,
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
     },
@@ -599,7 +604,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       actionTypes: isServerless
         ? `${SERVERLESS_DOCS}action-connectors`
         : `${KIBANA_DOCS}action-types.html`,
-      apmRules: `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesErrorCount: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-error-count-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesTransactionDuration: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-latency-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesTransactionError: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-failed-transaction-rate-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesAnomaly: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-anomaly-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
       emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
@@ -822,6 +838,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
       remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
+      scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
