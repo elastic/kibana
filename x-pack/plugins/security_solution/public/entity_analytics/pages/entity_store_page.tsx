@@ -21,10 +21,14 @@ import {
   EuiTitle,
   EuiText,
   EuiHealth,
+  EuiTabs,
+  EuiTab,
+  EuiAccordion,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
+import _ from 'lodash';
 import type { RiskLevels } from '../../../common/entity_analytics';
 import { RiskQueries } from '../../../common/search_strategy';
 import type { FillColor } from '../../common/components/charts/donutchart';
@@ -58,6 +62,101 @@ const useViewEntityFlyout = () => {
 };
 
 const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void }) => {
+  const tabs = [
+    {
+      id: 'host',
+      name: 'Host',
+      content: (
+        <>
+          {data.host && (
+            <>
+              <EuiSpacer />
+              <EuiAccordion
+                id="observed"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <EuiText>{'Observed'}</EuiText>
+                  </EuiTitle>
+                }
+              >
+                <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+                  {JSON.stringify(_.omit(data.host, ['agent', 'risk', 'asset']), null, 2)}
+                </EuiCodeBlock>
+              </EuiAccordion>
+            </>
+          )}
+          {data.host?.agent && (
+            <>
+              <EuiSpacer />
+              <EuiAccordion
+                id="agent"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <EuiText>{'Agent'}</EuiText>
+                  </EuiTitle>
+                }
+              >
+                <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+                  {JSON.stringify(data.host.agent, null, 2)}
+                </EuiCodeBlock>
+              </EuiAccordion>
+            </>
+          )}
+          {data.host?.risk && (
+            <>
+              <EuiSpacer />
+              <EuiAccordion
+                id="risk"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <EuiText>{'Risk'}</EuiText>
+                  </EuiTitle>
+                }
+              >
+                <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+                  {JSON.stringify(data.host.risk, null, 2)}
+                </EuiCodeBlock>
+              </EuiAccordion>
+            </>
+          )}
+          {data.host?.asset && (
+            <>
+              <EuiSpacer />
+              <EuiAccordion
+                id="asset_criticality"
+                buttonContent={
+                  <EuiTitle size="xs">
+                    <EuiText>{'Asset Criticality'}</EuiText>
+                  </EuiTitle>
+                }
+              >
+                <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+                  {JSON.stringify(data.host.asset, null, 2)}
+                </EuiCodeBlock>
+              </EuiAccordion>
+            </>
+          )}
+        </>
+      ),
+    },
+    {
+      id: 'raw',
+      name: 'Raw Data',
+      content: (
+        <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+          {JSON.stringify(data, null, 2)}
+        </EuiCodeBlock>
+      ),
+    },
+    {
+      id: 'history',
+      name: 'History',
+      content: <EuiText>{'History here'}</EuiText>,
+    },
+  ];
+
+  const [selectedTabId, setSelectedTabId] = React.useState(tabs[0].id);
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId);
   return (
     <EuiFlyout ownFocus onClose={onClose} size="m">
       <EuiFlyoutHeader>
@@ -66,9 +165,18 @@ const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void })
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiCodeBlock isCopyable language="json" fontSize="m">
-          {JSON.stringify(data, null, 2)}
-        </EuiCodeBlock>
+        <EuiTabs>
+          {tabs.map((tab) => (
+            <EuiTab
+              onClick={() => setSelectedTabId(tab.id)}
+              isSelected={tab.id === selectedTabId}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        {selectedTab?.content}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
