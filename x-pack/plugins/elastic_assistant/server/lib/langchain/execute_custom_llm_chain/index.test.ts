@@ -17,9 +17,12 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
 
-jest.mock('@kbn/elastic-assistant-common/impl/llm', () => ({
+jest.mock('@kbn/elastic-assistant-common/impl/language_models', () => ({
   ActionsClientChatOpenAI: jest.fn(),
   ActionsClientLlm: jest.fn(),
 }));
@@ -141,6 +144,7 @@ describe('callAgentExecutor', () => {
         maxRetries: 0,
         request: mockRequest,
         streaming: false,
+        temperature: 0.2,
         llmType: 'openai',
       });
     });
@@ -179,6 +183,7 @@ describe('callAgentExecutor', () => {
         maxRetries: 0,
         request: mockRequest,
         streaming: true,
+        temperature: 0.2,
         llmType: 'openai',
       });
     });
