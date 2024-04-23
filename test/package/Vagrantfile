@@ -47,6 +47,7 @@ Vagrant.configure("2") do |config|
     fips.vm.provision "shell", inline: <<-SHELL
       echo "export OPENSSL_MODULES=/usr/local/lib64/ossl-modules" >> /etc/profile.d/kibana-fips-env.sh
       echo "export TEST_BROWSER_HEADLESS=1" >> /etc/profile.d/kibana-fips-env.sh
+      # TODO: possibly don't need after OpenSSL issue      
       echo "export ES_TMPDIR=/home/vagrant/kibana/.es/tmp" >> /etc/profile.d/kibana-fips-env.sh
     SHELL
     fips.vm.provision "ansible" do |ansible|
