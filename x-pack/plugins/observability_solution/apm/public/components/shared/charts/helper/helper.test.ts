@@ -25,8 +25,7 @@ describe('Chart helper', () => {
     it('pushes a new history with time range converted to ISO', () => {
       onBrushEnd({ x: [1593409448167, 1593415727797], history });
       expect(history.push).toBeCalledWith({
-        search:
-          'rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
+        search: 'rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
       });
     });
 
@@ -34,8 +33,7 @@ describe('Chart helper', () => {
       history.location.search = '?foo=bar';
       onBrushEnd({ x: [1593409448167, 1593415727797], history });
       expect(history.push).toBeCalledWith({
-        search:
-          'foo=bar&rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
+        search: 'foo=bar&rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
       });
     });
   });

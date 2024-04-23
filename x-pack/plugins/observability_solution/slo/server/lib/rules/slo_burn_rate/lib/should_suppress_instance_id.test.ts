@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO } from '../../../../domain/models';
+import { SLODefinition } from '../../../../domain/models';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BurnRateRuleParams } from '../types';
 import { shouldSuppressInstanceId } from './should_suppress_instance_id';
@@ -15,7 +15,7 @@ describe('shouldSuppressInstanceId', () => {
   it('should suppress when supressAll is encountered', () => {
     const results = [
       {
-        slo: {} as unknown as SLO,
+        slo: {} as unknown as SLODefinition,
         rule: {} as unknown as Rule<BurnRateRuleParams>,
         suppressAll: true,
         instanceIdsToSuppress: [],
@@ -27,7 +27,7 @@ describe('shouldSuppressInstanceId', () => {
   it('should suppress when instanceId is ALL_VALUE and any instanceId matches', () => {
     const results = [
       {
-        slo: {} as unknown as SLO,
+        slo: {} as unknown as SLODefinition,
         rule: {} as unknown as Rule<BurnRateRuleParams>,
         suppressAll: false,
         instanceIdsToSuppress: ['foo'],
@@ -38,7 +38,7 @@ describe('shouldSuppressInstanceId', () => {
   it('should suppress when instanceId is matching the same instanceId in the results', () => {
     const results = [
       {
-        slo: {} as unknown as SLO,
+        slo: {} as unknown as SLODefinition,
         rule: {} as unknown as Rule<BurnRateRuleParams>,
         suppressAll: false,
         instanceIdsToSuppress: ['foo'],

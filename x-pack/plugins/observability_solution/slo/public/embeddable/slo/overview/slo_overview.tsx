@@ -24,6 +24,7 @@ import { SingleSloProps } from './types';
 export function SloOverview({
   sloId,
   sloInstanceId,
+  remoteName,
   onRenderComplete,
   reloadSubject,
 }: SingleSloProps) {
@@ -45,6 +46,7 @@ export function SloOverview({
     isRefetching,
   } = useFetchSloDetails({
     sloId,
+    remoteName,
     instanceId: sloInstanceId,
   });
 
@@ -57,7 +59,7 @@ export function SloOverview({
   });
 
   const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
-    list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
+    sloList: slo ? [slo] : [],
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
