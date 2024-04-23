@@ -31,7 +31,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
-    label: 'Defend Workflows Cypress Tests on Serverless'
+    label: 'MKI Defend Workflows Cypress Tests on Serverless'
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
