@@ -18,19 +18,38 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditorField } from '@kbn/code-editor';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
-
+const READ_ONLY_BOILERPLATE = `{
+  "read-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["read"]
+      }
+    ]
+  }
+}`;
+const WRITE_ONLY_BOILERPLATE = `{
+  "write-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["write"]
+      }
+    ]
+  }
+}`;
 interface SecurityPrivilegesFormProps {
   onChangeRoleDescriptors: (roleDescriptors: string) => void;
   error?: React.ReactNode | React.ReactNode[];
-  codeEditorContent: string;
-  setShowReadOnlyBoilerplate: (value: boolean | undefined) => void;
+  roleDescriptors: string;
 }
 
 export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
   onChangeRoleDescriptors,
   error,
-  codeEditorContent,
-  setShowReadOnlyBoilerplate,
+  roleDescriptors,
 }) => {
   return (
     <div data-test-subj="create-api-role-descriptors-code-editor-container">
@@ -64,7 +83,7 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="serverlessSearchSecurityPrivilegesFormReadOnlyButton"
-              onClick={() => setShowReadOnlyBoilerplate(true)}
+              onClick={() => onChangeRoleDescriptors(READ_ONLY_BOILERPLATE)}
             >
               {i18n.translate(
                 'xpack.serverlessSearch.apiKey.privileges.boilerplate.readOnlyLabel',
@@ -77,7 +96,7 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="serverlessSearchSecurityPrivilegesFormWriteOnlyButton"
-              onClick={() => setShowReadOnlyBoilerplate(false)}
+              onClick={() => onChangeRoleDescriptors(WRITE_ONLY_BOILERPLATE)}
             >
               {i18n.translate(
                 'xpack.serverlessSearch.apiKey.privileges.boilerplate.writeOnlyLabel',
@@ -96,7 +115,7 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
         languageId="json"
         isCopyable
         onChange={(e) => onChangeRoleDescriptors(e)}
-        value={codeEditorContent}
+        value={roleDescriptors}
       />
     </div>
   );
