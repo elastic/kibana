@@ -18,16 +18,17 @@ import { Logger } from '../lib/utils/create_logger';
 
 const scenario: Scenario<ApmFields> = async ({
   logger,
-  'assume-package-version': assumePackageVersion,
+  versionOverride,
 }: RunOptions & { logger: Logger }) => {
-  const isLegacy = assumePackageVersion ? semver.lt(assumePackageVersion, '8.7.0') : false;
+  const version = versionOverride as string;
+  const isLegacy = version ? semver.lt(version as string, '8.7.0') : false;
   return {
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
         apmEsClient.pipeline((base: Readable) => {
-          const defaultPipeline = apmEsClient.getDefaultPipeline()(
-            base
-          ) as unknown as NodeJS.ReadableStream;
+          const defaultPipeline = apmEsClient.getDefaultPipeline({
+            versionOverride: version,
+          })(base) as unknown as NodeJS.ReadableStream;
 
           return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
             if (err) {

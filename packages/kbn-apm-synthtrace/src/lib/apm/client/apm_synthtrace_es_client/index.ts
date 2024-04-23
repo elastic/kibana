@@ -68,12 +68,12 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
   getDefaultPipeline(
     {
       includeSerialization,
-      overrideVersion,
+      versionOverride,
     }: {
       includeSerialization?: boolean;
-      overrideVersion?: string;
+      versionOverride?: string;
     } = { includeSerialization: true }
   ) {
-    return apmPipeline(this.logger, overrideVersion ?? this.version, includeSerialization);
+    return apmPipeline(this.logger, versionOverride ?? this.version, includeSerialization);
   }
 }
