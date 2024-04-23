@@ -24,7 +24,6 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
 elif [[ "$TEST_PACKAGE" == "fips" ]]; then
   download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   download_artifact kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  KIBANA_IP_ADDRESS="192.168.56.8"
 fi
 cd ..
 
