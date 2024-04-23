@@ -267,7 +267,15 @@ export const getMaxClauseCountErrorValue = (
       console.error('tempVal', tempVal);
 
       // minus 1 since the max clause count value is exclusive
-      const val = Math.ceil((tempVal - 1) / (2 * (threatEntriesCount + 1))); // 10); // INDICATOR_PER_PAGE);
+      // multiplying by two because we need to account for the
+      // threat fields and event fields. A single threat entries count
+      // is comprised of two fields, one field from the threat index
+      // and another field from the event index. so we need to multiply by 2
+      // to cover the fact that the nested clause error happens
+      // because we are searching over event and threat fields.
+      // so we need to make this smaller than a single 'failed to create query'
+      // max clause count error.
+      const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1))); // 10); // INDICATOR_PER_PAGE);
       console.error('WHAT IS VAL', val);
       // throw Error('OOPS');
       return val;
@@ -275,7 +283,9 @@ export const getMaxClauseCountErrorValue = (
       console.error('MULTIPLE');
       const tempVal = parseInt(foundMaxClauseCountValue, 10);
       // minus 1 since the max clause count value is exclusive
-      const val = (tempVal - 1) / (threatEntriesCount + 1);
+      // and we add 1 to threatEntries to increase the number of "buckets"
+      // that our searches are spread over, smaller buckets means less clauses
+      const val = Math.floor((tempVal - 1) / (threatEntriesCount + 1));
       // throw Error('OOPS 2');
 
       return val;
