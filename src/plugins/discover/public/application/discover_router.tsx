@@ -65,7 +65,7 @@ export const DiscoverRouter = ({
               <ViewAlertRoute />
             </Route>
             <Route path={'/view/:id'}>
-              <DiscoverMainRoute {...routeProps} />
+              <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
             </Route>
             <Route path="/">
               <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
