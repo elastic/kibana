@@ -13,6 +13,7 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
@@ -20,18 +21,21 @@ import { CONTENT_ID } from '../../common';
 import { Link, LinksAttributes } from '../../common/content_management';
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
-  DefaultEmbeddableApi &
+  DefaultEmbeddableApi<LinksSerializedState> &
   HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
   HasEditCapabilities &
   HasLibraryTransforms<LinksSerializedState> & {
-    attributes$: BehaviorSubject<LinksAttributes>;
+    attributes$: BehaviorSubject<LinksAttributes | undefined>;
     resolvedLinks$: BehaviorSubject<ResolvedLink[]>;
     savedObjectId$: BehaviorSubject<string | undefined>;
   };
 
-export interface LinksSerializedState extends SerializedTitles, Partial<LinksAttributes> {
+export interface LinksSerializedState
+  extends SerializedTitles,
+    Partial<DynamicActionsSerializedState> {
   attributes?: LinksAttributes;
   savedObjectId?: string;
+  disabledActions?: string[];
 }
 
 export type ResolvedLink = Link & {
@@ -39,8 +43,3 @@ export type ResolvedLink = Link & {
   description?: string;
   error?: Error;
 };
-
-// export interface DashboardItem {
-//   id: string;
-//   attributes: DashboardAttributes;
-// }

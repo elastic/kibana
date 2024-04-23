@@ -12,14 +12,12 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
 import React, { createContext, useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { extract, inject } from '../../common/embeddable';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
+  LinksAttributes,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
@@ -29,6 +27,8 @@ import { LinksApi, LinksSerializedState } from './types';
 import { APP_NAME } from '../../common';
 import { intializeLibraryTransforms } from './initialize_library_transforms';
 import { initializeLinks } from './initialize_links';
+import { extractReferences, injectReferences } from '../../common/persistable_state';
+
 import '../components/links_component.scss';
 
 export const LinksContext = createContext<LinksApi | null>(null);
@@ -37,13 +37,23 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<LinksSerializedState, LinksApi> = {
     type: CONTENT_ID,
     deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState) as EmbeddableStateWithType;
+      const serializedState = cloneDeep(state.rawState) as LinksSerializedState;
       if (serializedState === undefined) return {};
-      const deserializedState = inject(
-        serializedState,
-        state.references ?? []
-      ) as unknown as LinksSerializedState;
-      return deserializedState;
+
+      // by-reference embeddable
+      if (!('attributes' in serializedState) || serializedState.attributes === undefined) {
+        return serializedState;
+      }
+
+      const { attributes: attributesWithInjectedIds } = injectReferences({
+        attributes: serializedState.attributes as unknown as LinksAttributes,
+        references: state.references ?? [],
+      });
+
+      return {
+        ...serializedState,
+        attributes: attributesWithInjectedIds,
+      };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
@@ -54,13 +64,24 @@ export const getLinksEmbeddableFactory = () => {
       );
 
       const serializeState = (): SerializedPanelState<LinksSerializedState> => {
-        const { state: rawState, references } = extract({
+        const newState = {
           ...state,
           ...serializeTitles(),
           ...serializeLinks(),
+        };
+        // by-reference embeddable
+        if (!('attributes' in newState) || newState.attributes === undefined) {
+          // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
+          return { rawState: newState, references: [] };
+        }
+
+        // by-value embeddable
+        const { attributes, references } = extractReferences({
+          attributes: newState.attributes,
         });
+
         return {
-          rawState: rawState as unknown as LinksSerializedState,
+          rawState: { ...state, attributes },
           references,
         };
       };
@@ -83,10 +104,12 @@ export const getLinksEmbeddableFactory = () => {
       );
 
       const Component = () => {
-        const [resolvedLinks, { layout }] = useBatchedPublishingSubjects(
+        const [resolvedLinks, attributes] = useBatchedPublishingSubjects(
           api.resolvedLinks$,
           api.attributes$
         );
+
+        const layout = attributes?.layout ?? LINKS_VERTICAL_LAYOUT;
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
           return resolvedLinks.reduce((prev, currentLink) => {
@@ -99,14 +122,14 @@ export const getLinksEmbeddableFactory = () => {
                     <DashboardLinkComponent
                       key={currentLink.id}
                       link={currentLink}
-                      layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      layout={layout}
                       api={api}
                     />
                   ) : (
                     <ExternalLinkComponent
                       key={currentLink.id}
                       link={currentLink}
-                      layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                      layout={layout}
                     />
                   ),
               },

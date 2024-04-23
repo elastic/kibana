@@ -11,7 +11,7 @@ import { BehaviorSubject, distinctUntilKeyChanged, filter, switchMap } from 'rxj
 import { StateComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
-import { LinksDocument } from '../services/attribute_service';
+import { LinksAttributes } from '../../common/content_management';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
@@ -73,7 +73,7 @@ export async function initializeLinks(
   };
 
   const getLinksComparators = (): StateComparators<LinksSerializedState> => {
-    if (savedObjectId$.getValue()) {
+    if (savedObjectId$.value) {
       return {
         savedObjectId: [
           savedObjectId$,
@@ -84,7 +84,7 @@ export async function initializeLinks(
     return {
       attributes: [
         attributes$,
-        (nextAttributes?: LinksDocument) => attributes$.next(nextAttributes ?? { title: '' }),
+        (nextAttributes?: LinksAttributes) => attributes$.next(nextAttributes ?? {}),
         fastIsEqual,
       ],
     };

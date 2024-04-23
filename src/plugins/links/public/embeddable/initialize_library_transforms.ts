@@ -13,7 +13,7 @@ import { coreServices } from '../services/kibana_services';
 import { LinksSerializedState } from './types';
 
 export function intializeLibraryTransforms(
-  attributes: Partial<LinksAttributes>,
+  attributes: Partial<LinksAttributes> | undefined,
   serializeState: () => SerializedPanelState<LinksSerializedState>,
   isByReference: boolean
 ) {
