@@ -46,30 +46,46 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
 
     const tourAnchor = useMemo(
-      () => (isAlert ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
+      () =>
+        isAlert
+          ? {
+              'tour-step': getTourAnchor(
+                AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+                SecurityStepId.alertsCases
+              ),
+            }
+          : {},
       [isAlert]
     );
 
-    const renderTabs = tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        key={index}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {isAlert ? (
-          <GuidedOnboardingTourStep
-            isTourAnchor={isAlert}
-            step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
-            tourId={SecurityStepId.alertsCases}
+    const renderTabs = tabs.map((tab, index) =>
+      isAlert ? (
+        <GuidedOnboardingTourStep
+          isTourAnchor={isAlert}
+          step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
+          tourId={SecurityStepId.alertsCases}
+        >
+          <EuiTab
+            onClick={() => onSelectedTabChanged(tab.id)}
+            isSelected={tab.id === selectedTabId}
+            key={index}
+            data-test-subj={tab['data-test-subj']}
+            {...tourAnchor}
           >
-            <span {...tourAnchor}>{tab.name}</span>
-          </GuidedOnboardingTourStep>
-        ) : (
-          tab.name
-        )}
-      </EuiTab>
-    ));
+            {tab.name}
+          </EuiTab>
+        </GuidedOnboardingTourStep>
+      ) : (
+        <EuiTab
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          key={index}
+          data-test-subj={tab['data-test-subj']}
+        >
+          {tab.name}
+        </EuiTab>
+      )
+    );
 
     return (
       <FlyoutHeader>
