@@ -112,6 +112,7 @@ export const useHostIsolationAction = ({
       return sentinelOneAgentStatus?.isolated;
     }
     if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert) {
+      return false;
       // return crowdstrikeAgentStatus?.isolated;
     }
 
@@ -220,11 +221,11 @@ export const useHostIsolationAction = ({
     }
 
     if (
-      crowdstrikeAgentId &&
       isCrowdstrikeAlert &&
       crowdstrikeManualHostActionsEnabled &&
-      hasActionsAllPrivileges &&
-      (canIsolateHost || (isHostIsolated && !canUnIsolateHost))
+      crowdstrikeAgentId &&
+      // status &&
+      hasActionsAllPrivileges
     ) {
       return menuItems;
     }
