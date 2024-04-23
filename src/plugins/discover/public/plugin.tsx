@@ -69,7 +69,7 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
-import type { DiscoverCustomizationContext } from './customizations';
+import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
 import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,

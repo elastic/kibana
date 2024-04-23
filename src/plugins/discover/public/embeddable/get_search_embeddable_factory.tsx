@@ -86,11 +86,7 @@ export const getSearchEmbeddableFactory = ({
         };
       };
 
-      const appTarget$ = new BehaviorSubject<{ app: string; path: string } | undefined>(undefined);
-      const appTargetSubscription = merge([
-        searchEmbeddableApi.savedObjectId,
-        searchEmbeddableApi.savedSearch$,
-      ]).subscribe(async () => {
+      const getAppTarget = async () => {
         const savedObjectId = searchEmbeddableApi.savedObjectId.getValue();
         const dataView = searchEmbeddableApi.savedSearch$.getValue().searchSource.getField('index');
         const locatorParams = getDiscoverLocatorParams(searchEmbeddableApi);
@@ -103,8 +99,8 @@ export const getSearchEmbeddableFactory = ({
           : await discoverServices.locator.getUrl(locatorParams);
         const editPath = discoverServices.core.http.basePath.remove(editUrl);
         const editApp = useRedirect ? 'r' : 'discover';
-        appTarget$.next({ app: editApp, path: editPath });
-      });
+        return { path: editPath, app: editApp };
+      };
 
       const api = buildApi(
         {
@@ -115,7 +111,7 @@ export const getSearchEmbeddableFactory = ({
           onEdit: async () => {
             const stateTransfer = discoverServices.embeddable.getStateTransfer();
             const parentApiContext = (api.parentApi as DashboardContainer).getAppContext();
-            const appTarget = appTarget$.getValue();
+            const appTarget = await getAppTarget();
 
             if (stateTransfer && parentApiContext && appTarget) {
               const valueInput = serializeState();
@@ -131,7 +127,9 @@ export const getSearchEmbeddableFactory = ({
               });
             }
           },
-          getEditHref: () => appTarget$.getValue()?.path,
+          getEditHref: async () => {
+            return (await getAppTarget())?.path;
+          },
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
               defaultMessage: 'search',
