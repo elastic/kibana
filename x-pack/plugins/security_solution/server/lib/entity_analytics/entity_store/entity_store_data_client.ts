@@ -13,22 +13,69 @@ import type {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import _ from 'lodash';
+import jsonDiff from 'json-diff';
+import flat from 'flat';
 import type {
   EntityStoreEntity,
   NewEntityStoreEntity,
+  EntityHistoryDocument,
 } from '../../../../common/entity_analytics/entity_store/types';
-import { getEntityStoreIndex } from '../../../../common/entity_analytics/entity_store';
-import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { entityStoreFieldMap, FIELD_HISTORY_MAX_SIZE } from './constants';
+import {
+  getEntityStoreIndex,
+  getEntityStoreHistoryIndex,
+} from '../../../../common/entity_analytics/entity_store';
+import { createOrUpdateIndex, createOrUpdateDatastream } from '../utils/create_or_update_index';
+import {
+  entityStoreFieldMap,
+  entityHistoryFieldMap,
+  FIELD_HISTORY_MAX_SIZE,
+  ENTITY_HISTORY_INDEX_PATTERN,
+  ENTITY_HISTORY_INDEX_TEMPLATE_NAME,
+} from './constants';
 import { startEntityStoreTask } from './tasks';
 import { maybeCreateAndStartEntityTransform } from './transform';
 import type { EntityAnalyticsConfig } from '../types';
-
 interface EntityStoreClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
 }
+
+function getChangedFieldsPathsFromDiff(
+  obj: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  basePath: string = '',
+  pathsIn: string[] = []
+) {
+  const paths = pathsIn;
+  for (const key in obj) {
+    if (key.endsWith('__deleted')) {
+      // do nothing, we don't care about deleted fields as updates are partial
+    } else if (key.endsWith('__added')) {
+      const realKey = key.slice(0, -7);
+      paths.push(`${basePath}${realKey}`);
+    } else if (Array.isArray(obj[key])) {
+      paths.push(`${basePath}${key}`);
+    } else if (obj[key] === undefined) {
+      paths.push(`${basePath}${key}`);
+    } else if (typeof obj[key] === 'object' && (obj[key].__old || obj[key].__new)) {
+      paths.push(`${basePath}${key}`);
+    } else {
+      getChangedFieldsPathsFromDiff(obj[key], `${basePath}${key}.`, paths);
+    }
+  }
+  return paths;
+}
+
+function removeArrayIndexesFromFlatPaths(paths: string[]) {
+  return _.uniq(paths.map((path) => path.replace(/\.\d+\./g, '.')));
+}
+
+type EntityStoreBulkOperations = BulkRequest<EntityStoreEntity, NewEntityStoreEntity>['operations'];
+
+type EntityHistoryStoreBulkOperations = BulkRequest<
+  EntityHistoryDocument,
+  EntityHistoryDocument
+>['operations'];
 
 export class EntityStoreDataClient {
   constructor(private readonly options: EntityStoreClientOpts) {}
@@ -49,12 +96,12 @@ export class EntityStoreDataClient {
     return {
       ...entityA,
       ...entityB,
-      first_seen: entityA.first_seen,
-      last_seen: entityB.last_seen,
+      first_seen: entityA.first_seen || entityB.first_seen,
+      last_seen: entityB.last_seen || entityA.last_seen,
       host: {
         ...entityA.host,
         ...entityB.host,
-        ip_history: uniqueLimitedIpHistory,
+        ip_history: uniqueLimitedIpHistory ? uniqueLimitedIpHistory : undefined,
       },
     };
   }
@@ -64,24 +111,38 @@ export class EntityStoreDataClient {
   public async init({
     taskManager,
     config,
-    logger,
   }: {
     taskManager: TaskManagerStartContract;
     config: EntityAnalyticsConfig['entityStore'];
-    logger: Logger;
   }) {
     const demoMode = config.demoMode;
 
     if (demoMode) {
-      logger.warn('Initializing entity store in demo mode');
+      this.options.logger.warn('Initializing entity store in demo mode');
     }
 
+    // entities index
     await createOrUpdateIndex({
       esClient: this.options.esClient,
       logger: this.options.logger,
       options: {
         index: getEntityStoreIndex(this.options.namespace),
         mappings: mappingFromFieldMap(entityStoreFieldMap, true),
+      },
+    });
+
+    // entity history datastream
+    await createOrUpdateDatastream({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      name: getEntityStoreHistoryIndex(this.options.namespace),
+      template: {
+        name: ENTITY_HISTORY_INDEX_TEMPLATE_NAME,
+        index_patterns: [ENTITY_HISTORY_INDEX_PATTERN],
+        data_stream: {},
+        template: {
+          mappings: mappingFromFieldMap(entityHistoryFieldMap, true),
+        },
       },
     });
 
@@ -105,11 +166,19 @@ export class EntityStoreDataClient {
   public async bulkUpsertEntities({ entities }: { entities: NewEntityStoreEntity[] }) {
     const existingEntitiesByHostName = await this.getExistingEntitiesByHostname(entities);
 
-    const operations: BulkRequest<EntityStoreEntity, NewEntityStoreEntity>['operations'] = [];
-
-    // wanted to use flatMap here but the types are not working as expected
+    const operations: EntityStoreBulkOperations = [];
+    const historyOperations: EntityHistoryStoreBulkOperations = [];
     entities.forEach((entity) => {
       const existingEntity = existingEntitiesByHostName[entity.host.name];
+      const entityHistoryOperations = this.getEntityHistoryOperations(
+        entity,
+        existingEntity?._source
+      );
+
+      if (entityHistoryOperations) {
+        historyOperations.push(...entityHistoryOperations);
+      }
+
       if (existingEntity?._source) {
         const mergedEntity = EntityStoreDataClient.mergeEntities(existingEntity._source, entity);
 
@@ -155,9 +224,19 @@ export class EntityStoreDataClient {
       };
     }
 
-    const result = await this.options.esClient.bulk({
-      operations,
-    });
+    // maybe we dont want history to block?
+    const [result, historyResult] = await Promise.all([
+      this.options.esClient.bulk<EntityStoreEntity, NewEntityStoreEntity>({
+        body: operations,
+      }),
+      this.options.esClient.bulk<EntityHistoryDocument>({
+        body: historyOperations,
+      }),
+    ]);
+
+    this.options.logger.debug(
+      `Entity store hisotry bulk upsert result: ${JSON.stringify(historyResult)}`
+    );
 
     return {
       errors: result.errors
@@ -168,6 +247,48 @@ export class EntityStoreDataClient {
       created: result.items.filter((item) => wasSuccessfulOp(item.create)).length,
       updated: result.items.filter((item) => wasSuccessfulOp(item.update)).length,
     };
+  }
+
+  private createEntityHistoryDocument(
+    entity: EntityStoreEntity,
+    previousEntity?: EntityStoreEntity
+  ): EntityHistoryDocument {
+    if (!previousEntity) {
+      return {
+        '@timestamp': entity['@timestamp'],
+        entity,
+        created: true,
+      };
+    }
+
+    const diff = jsonDiff.diff(previousEntity, entity);
+    // diff only gives us partial paths, e.g if a whole object is replaced, we only get the top level key
+    const changedFields = getChangedFieldsPathsFromDiff(diff);
+    const previousValues = _.pick(previousEntity, changedFields);
+    // now we can use the previous values to get the full paths
+    const allFieldsChanged = removeArrayIndexesFromFlatPaths(Object.keys(flat(entity)));
+    return {
+      '@timestamp': entity['@timestamp'],
+      entity,
+      fields_changed: allFieldsChanged,
+      previous_values: previousValues,
+    };
+  }
+
+  private getEntityHistoryOperations(
+    entity: EntityStoreEntity,
+    previousEntity?: EntityStoreEntity
+  ): EntityHistoryStoreBulkOperations {
+    const document = this.createEntityHistoryDocument(entity, previousEntity);
+
+    return [
+      {
+        create: {
+          _index: getEntityStoreHistoryIndex(this.options.namespace),
+        },
+      },
+      document,
+    ];
   }
 
   private async getExistingEntitiesByHostname(

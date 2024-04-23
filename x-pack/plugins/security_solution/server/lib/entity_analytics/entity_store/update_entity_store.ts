@@ -607,8 +607,8 @@ function buildEntityFromAgent(agent: Agent): NewEntityStoreEntity {
     entity_type: 'host',
     host: {
       name: agent.local_metadata.host.name,
+      agent,
     },
-    agent,
     first_seen: agent.enrolled_at,
     last_seen: agent.last_checkin || now,
   };
@@ -621,9 +621,6 @@ async function getNewAssetCriticalitiesAndEntityAssetCriticalities(
   lastProcessedCriticalityId?: string
 ): Promise<Record<string, AssetCriticalityRecord>> {
   try {
-    if (hostNames.length > 0) {
-      console.log('getting asset criticalities for hostNames', hostNames);
-    }
     const newAssetCriticalities = await getNextAssetCriticalities({
       assetCriticalityService,
       fromTimestamp: lastProcessedCriticalityTimestamp,
@@ -745,9 +742,6 @@ async function getNewAgentRecords(
   lastProcessedAgentCheckinTimestamp?: string,
   lastProcessedAgentId?: string
 ): Promise<Record<string, Agent>> {
-  if (hostNames.length > 0) {
-    console.log('getting agents for hostNames', hostNames);
-  }
   const hostNamesFilter = hostNames.length
     ? hostNames.map((hostName) => `local_metadata.host.name: '${hostName}'`).join(' or ')
     : '';
@@ -768,10 +762,6 @@ async function getNewAgentRecords(
     sortField: 'last_checkin',
     sortOrder: 'desc',
   });
-
-  if (agents.length > 0) {
-    console.log('got agents for hostNames', agents);
-  }
 
   if (!lastProcessedAgentId || !lastProcessedAgentCheckinTimestamp || !agents.length) {
     return _.keyBy(agents, 'local_metadata.host.name');

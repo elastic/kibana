@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ConfigType } from '../../../../config';
@@ -16,8 +16,7 @@ import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/transla
 export const entityStoreInitRoute = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>,
-  config: ConfigType,
-  logger: Logger
+  config: ConfigType
 ) => {
   router.versioned
     .post({
@@ -47,7 +46,6 @@ export const entityStoreInitRoute = (
           await entityStoreDataClient.init({
             taskManager,
             config: config.entityAnalytics.entityStore,
-            logger,
           });
 
           return response.ok({

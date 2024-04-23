@@ -40,8 +40,8 @@ export interface EntityStoreEntity {
     asset?: {
       criticality?: string;
     };
+    agent?: Agent;
   };
-  agent?: Agent;
   cloud?: {
     provider?: string[];
     region?: string[];
@@ -49,3 +49,18 @@ export interface EntityStoreEntity {
 }
 
 export type NewEntityStoreEntity = Omit<EntityStoreEntity, 'id'>;
+
+interface BaseEntityHistoryDocument {
+  '@timestamp': string;
+  entity: EntityStoreEntity;
+}
+export interface EntityHistoryCreatedDocument extends BaseEntityHistoryDocument {
+  created: true;
+}
+
+export interface EntityHistoryUpdatedDocument extends BaseEntityHistoryDocument {
+  fields_changed: string[];
+  previous_values: Partial<EntityStoreEntity>;
+}
+
+export type EntityHistoryDocument = EntityHistoryCreatedDocument | EntityHistoryUpdatedDocument;

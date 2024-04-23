@@ -10,6 +10,8 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 export const FIELD_HISTORY_MAX_SIZE = 10;
 
 export const COMPOSITES_INDEX_PATTERN = '.entities.entity-composites.*';
+export const ENTITY_HISTORY_INDEX_PATTERN = '.entities.entity-history-*';
+export const ENTITY_HISTORY_INDEX_TEMPLATE_NAME = '.entities.entity-history';
 export const MAX_COMPOSITE_SIZE = 1000;
 export const MAX_CRITICALITY_SIZE = 500;
 
@@ -121,3 +123,32 @@ export const entityStoreFieldMap: FieldMap = {
     required: false,
   },
 } as const;
+
+const prefixAllTopLevelKeysWith = (prefix: string, obj: FieldMap): FieldMap => {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    return {
+      ...acc,
+      [`${prefix}.${key}`]: value,
+    };
+  }, {} as FieldMap);
+};
+
+export const entityHistoryFieldMap: FieldMap = {
+  '@timestamp': {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  ...prefixAllTopLevelKeysWith('entity', entityStoreFieldMap),
+  created: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  fields_changed: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  ...prefixAllTopLevelKeysWith('previous_values', entityStoreFieldMap),
+};

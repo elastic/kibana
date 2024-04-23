@@ -9,3 +9,6 @@ export const entityStoreBaseIndexName = '.entities';
 
 export const getEntityStoreIndex = (spaceId = 'default') =>
   `${entityStoreBaseIndexName}.entities-${spaceId}`;
+
+export const getEntityStoreHistoryIndex = (spaceId = 'default') =>
+  `${entityStoreBaseIndexName}.entity-history-${spaceId}`;

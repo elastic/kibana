@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   IndicesCreateRequest,
   IndicesCreateResponse,
+  IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -56,6 +57,41 @@ export const createOrUpdateIndex = async ({
   } catch (err) {
     const error = transformError(err);
     const fullErrorMessage = `Failed to create index: ${options.index}: ${error.message}`;
+    logger.error(fullErrorMessage);
+    throw new Error(fullErrorMessage);
+  }
+};
+
+export const createOrUpdateDatastream = async ({
+  esClient,
+  logger,
+  template,
+  name,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  template: IndicesPutIndexTemplateRequest;
+  name: string;
+}): Promise<{
+  created: boolean;
+}> => {
+  console.log(JSON.stringify(template));
+  if (!template?.index_patterns?.length) {
+    throw new Error('Datastream template must have at least one index pattern');
+  }
+  try {
+    await esClient.indices.putIndexTemplate(template);
+
+    const createResult = await esClient.indices.createDataStream({
+      name,
+    });
+
+    return {
+      created: createResult.acknowledged,
+    };
+  } catch (err) {
+    const error = transformError(err);
+    const fullErrorMessage = `Failed to create datastream: ${name}: ${error.message}`;
     logger.error(fullErrorMessage);
     throw new Error(fullErrorMessage);
   }
