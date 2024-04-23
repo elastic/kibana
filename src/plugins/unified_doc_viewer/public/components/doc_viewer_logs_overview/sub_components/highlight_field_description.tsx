@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { EcsFlat } from '@elastic/ecs';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
@@ -18,12 +18,8 @@ export function HighlightFieldDescription({ fieldName }: { fieldName: string }) 
 
   const title = (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      {type && (
-        <EuiFlexItem grow={false}>
-          <FieldIcon type={type} size="s" />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>{fieldName}</EuiFlexItem>
+      {type && <FieldIcon type={type} size="s" />}
+      {fieldName}
     </EuiFlexGroup>
   );
 

@@ -9,7 +9,7 @@
 import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getDocumentOverview } from '@kbn/discover-utils';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
@@ -35,6 +35,7 @@ export function LogsOverview({
     >
       <EuiSpacer size="m" />
       <LogsOverviewHeader doc={parsedDoc} />
+      <EuiHorizontalRule margin="xs" />
       <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
     </FieldActionsProvider>
   );

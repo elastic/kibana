@@ -31,10 +31,10 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
 });
 
 export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
-  const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
   const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
-  const hasBadges = hasTimestamp || hasLogLevel;
+  const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
   const { field, value } = getMessageFieldWithFallbacks(doc);
+  const hasBadges = hasTimestamp || hasLogLevel;
   const hasMessageField = field && value;
   const hasFlyoutHeader = hasMessageField || hasBadges;
 
@@ -48,67 +48,38 @@ export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
     </EuiTitle>
   );
 
-  const logLevelAndTimestamp = (
-    <EuiFlexItem grow={false}>
-      {hasBadges && (
-        <EuiFlexGroup responsive={false} gutterSize="m" justifyContent="flexEnd">
-          {doc[fieldConstants.LOG_LEVEL_FIELD] && (
-            <HoverActionPopover
-              value={doc[fieldConstants.LOG_LEVEL_FIELD]}
-              field={fieldConstants.LOG_LEVEL_FIELD}
-            >
-              <EuiFlexItem grow={false}>
-                <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
-              </EuiFlexItem>
-            </HoverActionPopover>
-          )}
-          {hasTimestamp && (
-            <EuiFlexItem grow={false}>
-              <Timestamp timestamp={doc[fieldConstants.TIMESTAMP_FIELD]} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+  const logLevelAndTimestamp = hasBadges && (
+    <EuiFlexGroup responsive={false} gutterSize="m">
+      {doc[fieldConstants.LOG_LEVEL_FIELD] && (
+        <HoverActionPopover
+          value={doc[fieldConstants.LOG_LEVEL_FIELD]}
+          field={fieldConstants.LOG_LEVEL_FIELD}
+        >
+          <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
+        </HoverActionPopover>
       )}
-    </EuiFlexItem>
+      {hasTimestamp && <Timestamp timestamp={doc[fieldConstants.TIMESTAMP_FIELD]} />}
+    </EuiFlexGroup>
   );
 
   const contentField = hasMessageField && (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        data-test-subj="unifiedDocViewLogsOverviewMessage"
-      >
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs">
-                {field}
-              </EuiText>
-            </EuiFlexItem>
-            {logLevelAndTimestamp}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <HoverActionPopover
-            value={value}
-            field={field}
-            anchorPosition="downCenter"
-            display="block"
-          >
-            <EuiCodeBlock
-              overflowHeight={100}
-              paddingSize="m"
-              isCopyable
-              language="txt"
-              fontSize="m"
-            >
-              {value}
-            </EuiCodeBlock>
-          </HoverActionPopover>
-        </EuiFlexItem>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="unifiedDocViewLogsOverviewMessage"
+    >
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
+        <EuiText color="subdued" size="xs">
+          {field}
+        </EuiText>
+        <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlexItem>
+      <HoverActionPopover value={value} field={field} anchorPosition="downCenter" display="block">
+        <EuiCodeBlock overflowHeight={100} paddingSize="m" isCopyable language="txt" fontSize="m">
+          {value}
+        </EuiCodeBlock>
+      </HoverActionPopover>
+    </EuiFlexGroup>
   );
 
   return hasFlyoutHeader ? (
@@ -119,13 +90,7 @@ export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
       initialIsOpen={true}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        data-test-subj="unifiedDocViewLogsOverviewDetail"
-      >
-        {hasMessageField ? contentField : logLevelAndTimestamp}
-      </EuiFlexGroup>
+      {hasMessageField ? contentField : logLevelAndTimestamp}
     </EuiAccordion>
   ) : null;
 }

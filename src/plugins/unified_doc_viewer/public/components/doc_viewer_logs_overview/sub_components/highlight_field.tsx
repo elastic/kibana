@@ -6,90 +6,67 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTextTruncate,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { ReactNode } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { HoverActionPopover } from './hover_popover_action';
 
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));
 
 interface HighlightFieldProps {
-  useBadge?: boolean;
   field: string;
-  formattedValue: string;
+  formattedValue?: string;
   icon?: ReactNode;
   label: string;
+  useBadge?: boolean;
   value?: unknown;
-  width: number;
 }
 
 export function HighlightField({
-  useBadge = false,
   field,
   formattedValue,
   icon,
   label,
+  useBadge = false,
   value,
-  width,
   ...props
 }: HighlightFieldProps) {
-  const { euiTheme } = useEuiTheme();
-
   return formattedValue && value ? (
-    <EuiFlexGroup direction="column" gutterSize="none" {...props}>
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiTitle
-              css={css`
-                color: ${euiTheme.colors.darkShade};
-              `}
-              size="xxxs"
-            >
-              <span>{label}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <HighlightFieldDescription fieldName={field} />
-          </EuiFlexItem>
+    <div {...props}>
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiTitle css={fieldNameStyle} size="xxxs">
+          <span>{label}</span>
+        </EuiTitle>
+        <HighlightFieldDescription fieldName={field} />
+      </EuiFlexGroup>
+      <HoverActionPopover title={value} value={value} field={field}>
+        <EuiFlexGroup
+          responsive={false}
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="xs"
+        >
+          {icon}
+          {useBadge ? (
+            <EuiBadge className="eui-textTruncate" color="hollow">
+              {formattedValue}
+            </EuiBadge>
+          ) : (
+            <EuiText
+              className="eui-textTruncate"
+              size="s"
+              // Value returned from formatFieldValue is always sanitized
+              dangerouslySetInnerHTML={{ __html: formattedValue }}
+            />
+          )}
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <HoverActionPopover title={value} value={value} field={field}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="xs"
-          >
-            {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
-            <EuiFlexItem grow={false}>
-              <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
-                {(truncatedText: string) =>
-                  useBadge ? (
-                    <EuiBadge color="hollow">{truncatedText}</EuiBadge>
-                  ) : (
-                    <EuiText
-                      size="s"
-                      // Value returned from formatFieldValue is always sanitized
-                      dangerouslySetInnerHTML={{ __html: truncatedText }}
-                    />
-                  )
-                }
-              </EuiTextTruncate>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </HoverActionPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </HoverActionPopover>
+    </div>
   ) : null;
 }
+
+const fieldNameStyle = css`
+  color: ${euiThemeVars.euiColorDarkShade};
+`;

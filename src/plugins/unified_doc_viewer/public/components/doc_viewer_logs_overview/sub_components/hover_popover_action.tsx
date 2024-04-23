@@ -55,7 +55,7 @@ export const HoverActionPopover = ({
   };
 
   return (
-    <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <EuiPopover
         button={children}
         isOpen={isPopoverOpen}
@@ -84,7 +84,7 @@ export const HoverActionPopover = ({
           ))}
         </EuiFlexGroup>
       </EuiPopover>
-    </div>
+    </span>
   );
 };
 
