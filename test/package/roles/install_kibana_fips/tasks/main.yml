@@ -6,6 +6,22 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
+- name: fix /tmp permissions for ES
+  become: yes
+  file:
+    path: /tmp
+    state: directory
+    recurse: true
+    mode: "1777"
+
+- name: fix /var/log permissions for kibana
+  become: yes
+  file:
+    path: /var/log
+    state: directory
+    recurse: true
+    mode: "0777"
+
 - name: slurp kibana node version
   slurp:
     src: "{{ kibana_src_path }}/.node-version"
@@ -128,22 +144,6 @@
   become: yes
   shell:
     cmd: ldconfig /usr/local/lib64/
-
-- name: fix /tmp permissions for ES
-  become: yes
-  file:
-    path: /tmp
-    state: directory
-    recurse: true
-    mode: "1777"
-
-- name: fix /var/log permissions for kibana
-  become: yes
-  file:
-    path: /var/log
-    state: directory
-    recurse: true
-    mode: "0777"
 
 - name: sleep
   shell:
