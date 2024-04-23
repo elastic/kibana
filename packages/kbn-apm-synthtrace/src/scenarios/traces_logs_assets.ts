@@ -97,7 +97,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         return [...successfulTraceEvents, ...failedTraceEvents, ...metricsets];
       };
 
-      const logs = range
+      const logsWithTraces = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -138,11 +138,52 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             });
         });
 
+      const logsOnly = range
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const { message, level } = {
+                message: 'A simple log with something random <random> in the middle',
+                level: 'info',
+              };
+              const CLUSTER = {
+                clusterId: generateShortId(),
+                clusterName: 'synth-cluster-2',
+                namespace: 'production',
+              };
+
+              return log
+                .create()
+                .message(message.replace('<random>', generateShortId()))
+                .logLevel(level)
+                .service('synth-java')
+                .defaults({
+                  'trace.id': generateShortId(),
+                  'agent.name': 'nodejs',
+                  'orchestrator.cluster.name': CLUSTER.clusterName,
+                  'orchestrator.cluster.id': CLUSTER.clusterId,
+                  'orchestrator.namespace': CLUSTER.namespace,
+                  'container.name': `synth-java-${generateShortId()}`,
+                  'orchestrator.resource.id': generateShortId(),
+                  'cloud.provider': 'gcp',
+                  'cloud.region': 'eu-central-1',
+                  'cloud.availability_zone': 'eu-central-1a',
+                  'cloud.project.id': generateShortId(),
+                  'cloud.instance.id': generateShortId(),
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                })
+                .timestamp(timestamp);
+            });
+        });
+
       function* createGeneratorFromArray(arr: Array<Serializable<any>>) {
         yield* arr;
       }
 
-      const logsValuesArray = [...logs];
+      const logsValuesArray = [...logsWithTraces, ...logsOnly];
       const logsGen = createGeneratorFromArray(logsValuesArray);
       const logsGenAssets = createGeneratorFromArray(logsValuesArray);
 
