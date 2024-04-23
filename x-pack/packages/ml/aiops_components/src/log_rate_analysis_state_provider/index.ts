@@ -6,7 +6,16 @@
  */
 
 export {
-  useLogRateAnalysisStateContext,
-  LogRateAnalysisStateProvider,
-} from './log_rate_analysis_state_provider';
+  useAutoRunAnalysis,
+  useInitialAnalysisStart,
+  usePinnedGroup,
+  useSelectedGroup,
+  usePinnedSignificantItem,
+  useSelectedSignificantItem,
+  useLogRateAnalysisReduxActions,
+  useStickyHistogram,
+  LogRateAnalysisReduxProvider,
+} from './state';
+export { useCurrentSelectedGroup } from './use_current_selected_group';
+export { useCurrentSelectedSignificantItem } from './use_current_selected_significant_item';
 export type { GroupTableItem, GroupTableItemGroup, TableItemAction } from './types';

@@ -16,8 +16,11 @@ import { type SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import {
-  useLogRateAnalysisStateContext,
   useLogRateAnalysisReduxActions,
+  usePinnedGroup,
+  useSelectedGroup,
+  usePinnedSignificantItem,
+  useSelectedSignificantItem,
 } from '@kbn/aiops-components';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
@@ -57,8 +60,11 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const { pinnedGroup, pinnedSignificantItem, selectedGroup, selectedSignificantItem } =
-    useLogRateAnalysisStateContext();
+  const pinnedGroup = usePinnedGroup();
+  const selectedGroup = useSelectedGroup();
+  const pinnedSignificantItem = usePinnedSignificantItem();
+  const selectedSignificantItem = useSelectedSignificantItem();
+
   const { setPinnedSignificantItem, setSelectedSignificantItem } = useLogRateAnalysisReduxActions();
 
   const [pageIndex, setPageIndex] = useState(0);

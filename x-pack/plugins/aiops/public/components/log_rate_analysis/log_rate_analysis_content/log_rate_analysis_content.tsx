@@ -26,7 +26,9 @@ import {
 } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import {
-  useLogRateAnalysisStateContext,
+  useAutoRunAnalysis,
+  useCurrentSelectedGroup,
+  useCurrentSelectedSignificantItem,
   useLogRateAnalysisReduxActions,
   type GroupTableItem,
 } from '@kbn/aiops-components';
@@ -133,8 +135,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
-  const { autoRunAnalysis, currentSelectedSignificantItem, currentSelectedGroup } =
-    useLogRateAnalysisStateContext();
+  const autoRunAnalysis = useAutoRunAnalysis();
+  const currentSelectedGroup = useCurrentSelectedGroup();
+  const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
   const {
     setAutoRunAnalysis,
     setInitialAnalysisStart,

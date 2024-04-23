@@ -37,9 +37,8 @@ import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
-import { useLogRateAnalysisReduxActions } from '@kbn/aiops-components';
+import { useLogRateAnalysisReduxActions, useStickyHistogram } from '@kbn/aiops-components';
 
-import { useStickyHistogram } from '../../application/redux/use_sticky_histogram';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import {

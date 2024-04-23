@@ -18,9 +18,8 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
+import { LogRateAnalysisReduxProvider } from '@kbn/aiops-components';
 
-import { LogRateAnalysisReduxProvider } from '../../../application/redux/state';
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
@@ -91,23 +90,20 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch: null }}>
-          <LogRateAnalysisReduxProvider>
-            <LogRateAnalysisStateProvider initialAnalysisStart={initialAnalysisStart}>
-              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                <DatePickerContextProvider {...datePickerDeps}>
-                  <LogRateAnalysisContent
-                    timeRange={timeRange}
-                    esSearchQuery={esSearchQuery}
-                    barColorOverride={barColorOverride}
-                    barHighlightColorOverride={barHighlightColorOverride}
-                    onAnalysisCompleted={onAnalysisCompleted}
-                    embeddingOrigin={embeddingOrigin}
-                  />
-                </DatePickerContextProvider>
-              </StorageContextProvider>
-            </LogRateAnalysisStateProvider>
+          <LogRateAnalysisReduxProvider initialAnalysisStart={initialAnalysisStart}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <LogRateAnalysisContent
+                  timeRange={timeRange}
+                  esSearchQuery={esSearchQuery}
+                  barColorOverride={barColorOverride}
+                  barHighlightColorOverride={barHighlightColorOverride}
+                  onAnalysisCompleted={onAnalysisCompleted}
+                  embeddingOrigin={embeddingOrigin}
+                />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
           </LogRateAnalysisReduxProvider>
-          ={' '}
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>

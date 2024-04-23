@@ -31,8 +31,9 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
 import {
-  useLogRateAnalysisStateContext,
+  usePinnedGroup,
   useLogRateAnalysisReduxActions,
+  useSelectedGroup,
   type GroupTableItem,
 } from '@kbn/aiops-components';
 
@@ -94,7 +95,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const { pinnedGroup, selectedGroup } = useLogRateAnalysisStateContext();
+  const pinnedGroup = usePinnedGroup();
+  const selectedGroup = useSelectedGroup();
   const { setPinnedGroup, setSelectedGroup } = useLogRateAnalysisReduxActions();
   const dataViewId = dataView.id;
   const isMounted = useMountedState();

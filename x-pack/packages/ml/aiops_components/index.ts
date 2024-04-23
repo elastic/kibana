@@ -15,8 +15,17 @@ export {
 } from './src/document_count_chart';
 export type { DocumentCountChartProps } from './src/document_count_chart';
 export {
-  useLogRateAnalysisStateContext,
-  LogRateAnalysisStateProvider,
+  useAutoRunAnalysis,
+  useInitialAnalysisStart,
+  usePinnedGroup,
+  useSelectedGroup,
+  usePinnedSignificantItem,
+  useSelectedSignificantItem,
+  useCurrentSelectedGroup,
+  useCurrentSelectedSignificantItem,
+  useLogRateAnalysisReduxActions,
+  useStickyHistogram,
+  LogRateAnalysisReduxProvider,
   type GroupTableItem,
   type GroupTableItemGroup,
   type TableItemAction,

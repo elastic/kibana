@@ -18,7 +18,11 @@ import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
+import {
+  useCurrentSelectedSignificantItem,
+  useCurrentSelectedGroup,
+  useLogRateAnalysisReduxActions,
+} from '@kbn/aiops-components';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -40,8 +44,9 @@ export const LogRateAnalysisPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { currentSelectedSignificantItem, currentSelectedGroup, setInitialAnalysisStart } =
-    useLogRateAnalysisStateContext();
+  const currentSelectedGroup = useCurrentSelectedGroup();
+  const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
+  const { setInitialAnalysisStart } = useLogRateAnalysisReduxActions();
 
   const [stateFromUrl, setUrlState] = usePageUrlState<LogRateAnalysisPageUrlState>(
     'logRateAnalysis',

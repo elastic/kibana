@@ -40,7 +40,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
 
-import { useLogRateAnalysisStateContext } from '../log_rate_analysis_state_provider';
+import {
+  useInitialAnalysisStart,
+  useLogRateAnalysisReduxActions,
+} from '../log_rate_analysis_state_provider';
 
 import { BrushBadge } from './brush_badge';
 
@@ -559,7 +562,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 
 /**
  * Functional component that renders a `DocumentCountChart` with additional properties
- * managed by the log rate analysis state. It leverages the `useLogRateAnalysisStateContext`
+ * managed by the log rate analysis state. It leverages the `LogRateAnalysisReduxProvider`
  * to acquire state variables like `initialAnalysisStart` and functions such as
  * `setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.
  *
@@ -567,7 +570,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
  * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
  */
 export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
-  const { initialAnalysisStart, setAutoRunAnalysis } = useLogRateAnalysisStateContext();
+  const { setAutoRunAnalysis } = useLogRateAnalysisReduxActions();
+  const initialAnalysisStart = useInitialAnalysisStart();
 
   return (
     <DocumentCountChart
