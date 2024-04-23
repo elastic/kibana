@@ -1801,6 +1801,10 @@ describe('validation logic', () => {
         `from a_index | eval result = case(false, 0, 1) | stats sum(result)`,
         []
       );
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)`,
+        []
+      );
       testErrorsAndWarnings(`from a_index | eval round(case(false, 0, 1))`, []);
 
       describe('date math', () => {
@@ -2309,6 +2313,9 @@ describe('validation logic', () => {
         `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
         []
       );
+
+      testErrorsAndWarnings(`from a_index | stats sum(case(false, 0, 1))`, []);
+      testErrorsAndWarnings(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
     });
 
     describe('sort', () => {
