@@ -122,7 +122,6 @@ export class ExplorerChartDistribution extends React.Component {
       chartElement.select('svg').remove();
 
       const svgWidth = element.clientWidth;
-      console.log('svgWidth', svgWidth);
       const svgHeight = chartHeight + margin.top + margin.bottom;
 
       const svg = chartElement
@@ -361,7 +360,6 @@ export class ExplorerChartDistribution extends React.Component {
       // emphasis section, and the selected area spans the whole chart.
       const useAutoTicks =
         tooManyBuckets === true || interval >= config.plotLatest - config.plotEarliest;
-      console.log('useAutoTicks', useAutoTicks);
       if (useAutoTicks === false) {
         const tickValues = getTickValues(
           tickValuesStart,
@@ -369,10 +367,8 @@ export class ExplorerChartDistribution extends React.Component {
           config.plotEarliest,
           config.plotLatest
         );
-        console.log('tickValues', tickValues);
         xAxis.tickValues(tickValues);
       } else {
-        console.log('numTicksForDateFormat', numTicksForDateFormat(vizWidth, xAxisTickFormat));
         xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
       }
 
