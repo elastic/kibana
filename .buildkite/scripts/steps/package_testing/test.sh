@@ -3,8 +3,6 @@
 set -euo pipefail
 
 source "$(dirname "$0")/../../common/util.sh"
-source .buildkite/scripts/steps/artifacts/env.sh
-
 .buildkite/scripts/bootstrap.sh
 
 # temporary adding this to get screenshots
