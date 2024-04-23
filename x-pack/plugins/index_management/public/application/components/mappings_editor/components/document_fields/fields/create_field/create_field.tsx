@@ -27,7 +27,7 @@ import { ReferenceFieldSelects } from '../../field_parameters/reference_field_se
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
-import { useSemanticText } from './use_semantic_text';
+import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
 export interface InferenceToModelIdMap {

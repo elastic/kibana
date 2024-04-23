@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { useComponentTemplatesContext } from '../../../../../component_templates/component_templates_context';
-import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
-import { FormHook } from '../../../../shared_imports';
-import { Field } from '../../../../types';
+import { useComponentTemplatesContext } from '../../../../../../component_templates/component_templates_context';
+import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
+import { FormHook } from '../../../../../shared_imports';
+import { Field } from '../../../../../types';
 
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
