@@ -390,7 +390,8 @@ describe('migration actions', () => {
     });
   });
 
-  describe('waitForIndexStatus', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152677
+  describe.skip('waitForIndexStatus', () => {
     afterEach(async () => {
       try {
         await client.indices.delete({ index: 'red_then_yellow_index' });

@@ -7,7 +7,14 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, compareFilters, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
@@ -146,6 +153,7 @@ export const legacyEmbeddableToApi = (
   const panelDescription = inputKeyToSubject<string>('description');
 
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
+  const defaultPanelDescription = outputKeyToSubject<string>('defaultDescription');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
   function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
@@ -202,7 +210,13 @@ export const legacyEmbeddableToApi = (
 
       subscriptions.add(
         embeddable.getInput$().subscribe(() => {
-          if (!compareFilters(embeddable.filters$.getValue() ?? [], embeddable.getFilters())) {
+          if (
+            !compareFilters(
+              embeddable.filters$.getValue() ?? [],
+              embeddable.getFilters(),
+              COMPARE_ALL_OPTIONS
+            )
+          ) {
             filters$.next(embeddable.getFilters());
           }
           if (!deepEqual(embeddable.query$.getValue() ?? [], embeddable.getQuery())) {
@@ -262,6 +276,7 @@ export const legacyEmbeddableToApi = (
 
       setPanelDescription,
       panelDescription,
+      defaultPanelDescription,
 
       canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
       linkToLibrary: () => linkLegacyEmbeddable(embeddable),

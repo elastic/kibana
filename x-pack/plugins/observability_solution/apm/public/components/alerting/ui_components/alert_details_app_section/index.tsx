@@ -12,6 +12,7 @@ import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -38,7 +39,6 @@ import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 export function AlertDetailsAppSection({
   rule,
@@ -67,10 +67,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Actual value"
           />
         ),
-        value: formatAlertEvaluationValue(
-          alertRuleTypeId,
-          alertEvaluationValue
-        ),
+        value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationValue),
       },
       {
         label: (
@@ -79,10 +76,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Expected value"
           />
         ),
-        value: formatAlertEvaluationValue(
-          alertRuleTypeId,
-          alertEvaluationThreshold
-        ),
+        value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationThreshold),
       },
       {
         label: (
@@ -129,10 +123,7 @@ export function AlertDetailsAppSection({
 
   const params = rule.params;
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
-  const timeRange = getPaddedAlertTimeRange(
-    alert.fields[ALERT_START]!,
-    alert.fields[ALERT_END]
-  );
+  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
   const historicalRange = useMemo(() => {
     return {
@@ -166,8 +157,6 @@ export function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <AlertDetailContextualInsights alert={alert} />
-
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}
@@ -220,10 +209,12 @@ export function AlertDetailsAppSection({
           <EuiFlexItem grow={false}>
             <LatencyAlertsHistoryChart
               ruleId={alert.fields[ALERT_RULE_UUID]}
+              alertInstanceId={alert.fields[ALERT_INSTANCE_ID]}
               serviceName={serviceName}
               start={historicalRange.start}
               end={historicalRange.end}
               transactionType={transactionType}
+              transactionName={transactionName}
               latencyAggregationType={latencyAggregationType}
               environment={environment}
               timeZone={timeZone}

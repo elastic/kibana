@@ -124,6 +124,7 @@ class DocLinks {
   public licenseManagement: string;
   public machineLearningStart: string;
   public mlDocumentEnrichment: string;
+  public playground: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public restApis: string;
@@ -141,6 +142,7 @@ class DocLinks {
   public start: string;
   public supportedNlpModels: string;
   public syncRules: string;
+  public syncRulesAdvanced: string;
   public trainedModels: string;
   public textEmbedding: string;
   public workplaceSearchApiKeys: string;
@@ -300,6 +302,7 @@ class DocLinks {
     this.licenseManagement = '';
     this.machineLearningStart = '';
     this.mlDocumentEnrichment = '';
+    this.playground = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.restApis = '';
@@ -317,6 +320,7 @@ class DocLinks {
     this.start = '';
     this.supportedNlpModels = '';
     this.syncRules = '';
+    this.syncRulesAdvanced = '';
     this.trainedModels = '';
     this.textEmbedding = '';
     this.workplaceSearchApiKeys = '';
@@ -478,6 +482,7 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
+    this.playground = docLinks.links.enterpriseSearch.playground;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.restApis = docLinks.links.apis.restApis;
@@ -495,6 +500,7 @@ class DocLinks {
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
+    this.syncRulesAdvanced = docLinks.links.enterpriseSearch.syncRulesAdvanced;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
     this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
     this.workplaceSearchGatedFormBlog = docLinks.links.workplaceSearch.gatedFormBlog;

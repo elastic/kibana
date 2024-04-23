@@ -13,6 +13,7 @@ import { ResponseActionsNotSupportedError } from '../errors';
 import type { SentinelOneActionsClientOptionsMock } from './mocks';
 import { sentinelOneMock } from './mocks';
 import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
@@ -28,6 +29,9 @@ import type {
   SentinelOneIsolationRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
+import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
+import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -58,22 +62,14 @@ describe('SentinelOneActionsClient class', () => {
     s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
   });
 
-  it.each([
-    'killProcess',
-    'suspendProcess',
-    'runningProcesses',
-    'getFile',
-    'execute',
-    'upload',
-  ] as Array<keyof ResponseActionsClient>)(
-    'should throw an un-supported error for %s',
-    async (methodName) => {
-      // @ts-expect-error Purposely passing in empty object for options
-      await expect(s1ActionsClient[methodName]({})).rejects.toBeInstanceOf(
-        ResponseActionsNotSupportedError
-      );
-    }
-  );
+  it.each(['killProcess', 'suspendProcess', 'runningProcesses', 'execute', 'upload'] as Array<
+    keyof ResponseActionsClient
+  >)('should throw an un-supported error for %s', async (methodName) => {
+    // @ts-expect-error Purposely passing in empty object for options
+    await expect(s1ActionsClient[methodName]({})).rejects.toBeInstanceOf(
+      ResponseActionsNotSupportedError
+    );
+  });
 
   it('should error if multiple agent ids are received', async () => {
     const payload = createS1IsolationOptions();
@@ -99,7 +95,67 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes', async () => {
+    it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Disabled', async () => {
+      await s1ActionsClient.isolate(createS1IsolationOptions());
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
+        1,
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'isolate',
+                comment: 'test comment',
+                parameters: undefined,
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: { command: 'isolate' },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+            completed_at: expect.any(String),
+          },
+          agent: { id: ['1-2-3'] },
+          error: undefined,
+        },
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Enabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        true;
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -170,7 +226,66 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes', async () => {
+    it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Disabled', async () => {
+      await s1ActionsClient.release(createS1IsolationOptions());
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
+        1,
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'unisolate',
+                comment: 'test comment',
+                parameters: undefined,
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: { command: 'unisolate' },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+            completed_at: expect.any(String),
+          },
+          agent: { id: ['1-2-3'] },
+          error: undefined,
+        },
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('should write action request (only) to endpoint indexes when `` is Enabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        true;
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -438,6 +553,220 @@ describe('SentinelOneActionsClient class', () => {
           sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
         });
       });
+    });
+  });
+
+  describe('#getFile()', () => {
+    let getFileReqOptions: ResponseActionGetFileRequestBody;
+
+    beforeEach(() => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+
+      getFileReqOptions = responseActionsClientMock.createGetFileOptions();
+    });
+
+    it('should error if feature flag is not enabled', async () => {
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
+
+      await expect(s1ActionsClient.getFile(getFileReqOptions)).rejects.toHaveProperty(
+        'message',
+        'get-file not supported for sentinel_one agent type. Feature disabled'
+      );
+    });
+
+    it('should call the fetch agent files connector method with expected params', async () => {
+      await s1ActionsClient.getFile(getFileReqOptions);
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: SUB_ACTION.FETCH_AGENT_FILES,
+          subActionParams: {
+            agentUUID: '1-2-3',
+            files: [getFileReqOptions.parameters.path],
+            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+          },
+        },
+      });
+    });
+
+    it('should throw if sentinelone api generated an error (manual mode)', async () => {
+      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+      const err = new Error('oh oh');
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.FETCH_AGENT_FILES) {
+          throw err;
+        }
+        return executeMockFn!(options);
+      });
+
+      await expect(s1ActionsClient.getFile(getFileReqOptions)).rejects.toEqual(err);
+      await expect(connectorActionsMock.execute).not.toHaveBeenCalledWith({
+        params: expect.objectContaining({
+          subAction: SUB_ACTION.GET_ACTIVITIES,
+        }),
+      });
+    });
+
+    it('should create failed response action when calling sentinelone api generated an error (automated mode)', async () => {
+      const subActionsClient = sentinelOneMock.createConnectorActionsClient();
+      classConstructorOptions = sentinelOneMock.createConstructorOptions();
+      classConstructorOptions.isAutomated = true;
+      classConstructorOptions.connectorActions =
+        responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
+      connectorActionsMock = classConstructorOptions.connectorActions;
+      // @ts-expect-error readonly prop assignment
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+      s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
+
+      const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
+      const err = new Error('oh oh');
+      (subActionsClient.execute as jest.Mock).mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.FETCH_AGENT_FILES) {
+          throw err;
+        }
+        return executeMockFn!.call(SentinelOneActionsClient.prototype, options);
+      });
+
+      await expect(s1ActionsClient.getFile(getFileReqOptions)).resolves.toBeTruthy();
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'get-file',
+                comment: 'test comment',
+                parameters: {
+                  path: '/some/file',
+                },
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            error: {
+              // The error message here is "not supported" because `get-file` is not currently supported
+              // for automated response actions. if that changes in the future the message below should
+              // be changed to `err.message` (`err` is defined and used in the mock setup above)
+              message: 'Action [get-file] not supported',
+            },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+    });
+
+    it('should query for the activity log entry record after successful submit of action', async () => {
+      await s1ActionsClient.getFile(getFileReqOptions);
+
+      expect(connectorActionsMock.execute).toHaveBeenNthCalledWith(3, {
+        params: {
+          subAction: SUB_ACTION.GET_ACTIVITIES,
+          subActionParams: {
+            activityTypes: '81',
+            limit: 1,
+            sortBy: 'createdAt',
+            sortOrder: 'asc',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            createdAt__gte: expect.any(String),
+            agentIds: '1845174760470303882',
+          },
+        },
+      });
+    });
+
+    it('should create action request ES document with expected meta content', async () => {
+      await s1ActionsClient.getFile(getFileReqOptions);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'get-file',
+                comment: 'test comment',
+                parameters: {
+                  path: '/some/file',
+                },
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+              activityId: '1929937418124016884',
+              commandBatchUuid: '7011777f-77e7-4a01-a674-e5f767808895',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
+      );
+    });
+
+    it('should return action details', async () => {
+      await expect(s1ActionsClient.getFile(getFileReqOptions)).resolves.toEqual(
+        // Only validating that a ActionDetails is returned. The data is mocked,
+        // so it does not make sense to validate the property values
+        {
+          action: expect.any(String),
+          agentState: expect.any(Object),
+          agentType: expect.any(String),
+          agents: expect.any(Array),
+          command: expect.any(String),
+          comment: expect.any(String),
+          createdBy: expect.any(String),
+          hosts: expect.any(Object),
+          id: expect.any(String),
+          isCompleted: expect.any(Boolean),
+          isExpired: expect.any(Boolean),
+          outputs: expect.any(Object),
+          startedAt: expect.any(String),
+          status: expect.any(String),
+          wasSuccessful: expect.any(Boolean),
+        }
+      );
+    });
+
+    it('should update cases', async () => {
+      await s1ActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({ case_ids: ['case-1'] })
+      );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
   });
 });
