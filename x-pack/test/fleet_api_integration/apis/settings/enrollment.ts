@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should respond with empty enrollment settings on empty cluster', async function () {
       const response = await supertest
-        .get(`/api/fleet/settings/enrollment`)
+        .get(`/internal/fleet/settings/enrollment`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('when there are multiple fleet server policies and an active host', async function () {
         const response = await supertest
-          .get(`/api/fleet/settings/enrollment`)
+          .get(`/internal/fleet/settings/enrollment`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
@@ -99,7 +99,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('when a fleet server policy is scoped', async function () {
         const response = await supertest
-          .get(`/api/fleet/settings/enrollment?agentPolicyId=fleet-server-policy-2`)
+          .get(`/internal/fleet/settings/enrollment?agentPolicyId=fleet-server-policy-2`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
@@ -143,7 +143,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('when a normal agent policy is scoped', async function () {
         const response = await supertest
-          .get(`/api/fleet/settings/enrollment?agentPolicyId=policy1`)
+          .get(`/internal/fleet/settings/enrollment?agentPolicyId=policy1`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 

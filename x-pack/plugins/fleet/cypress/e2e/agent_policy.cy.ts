@@ -98,7 +98,7 @@ describe('Edit agent policy', () => {
     cy.intercept('/api/fleet/enrollment_api_keys/key-1', {
       item: apiKey,
     });
-    cy.intercept('/api/fleet/settings/enrollment', {
+    cy.intercept('/internal/fleet/settings/enrollment', {
       fleet_server: {
         agent_policies: [
           {
@@ -121,7 +121,7 @@ describe('Edit agent policy', () => {
         },
       },
     });
-    cy.intercept('/api/fleet/settings/enrollment?agentPolicyId=policy-1', {
+    cy.intercept('/internal/fleet/settings/enrollment?agentPolicyId=policy-1', {
       fleet_server: {
         agent_policies: [],
         has_active: true,

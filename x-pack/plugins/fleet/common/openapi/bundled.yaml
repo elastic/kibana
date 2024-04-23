@@ -11,6 +11,7 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: http://KIBANA_HOST:5601/api/fleet
+    description: Public and supported Fleet API
 paths:
   /health_check:
     post:
@@ -116,6 +117,9 @@ paths:
           $ref: '#/components/responses/error'
       operationId: update-settings
   /settings/enrollment:
+    servers:
+      - url: http://KIBANA_HOST:5601/internal/fleet
+        description: Used for Fleet internals and not supported
     get:
       summary: Get enrollment settings
       tags:

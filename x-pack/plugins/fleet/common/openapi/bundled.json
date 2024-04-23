@@ -15,7 +15,8 @@
   },
   "servers": [
     {
-      "url": "http://KIBANA_HOST:5601/api/fleet"
+      "url": "http://KIBANA_HOST:5601/api/fleet",
+      "description": "Public and supported Fleet API"
     }
   ],
   "paths": {
@@ -189,6 +190,12 @@
       }
     },
     "/settings/enrollment": {
+      "servers": [
+        {
+          "url": "http://KIBANA_HOST:5601/internal/fleet",
+          "description": "Used for Fleet internals and not supported"
+        }
+      ],
       "get": {
         "summary": "Get enrollment settings",
         "tags": [

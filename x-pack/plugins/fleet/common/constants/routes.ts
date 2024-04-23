@@ -120,7 +120,7 @@ export const FLEET_PROXY_API_ROUTES = {
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
   UPDATE_PATTERN: `${API_ROOT}/settings`,
-  ENROLLMENT_INFO_PATTERN: `${API_ROOT}/settings/enrollment`,
+  ENROLLMENT_INFO_PATTERN: `${INTERNAL_ROOT}/settings/enrollment`,
 };
 
 // App API routes

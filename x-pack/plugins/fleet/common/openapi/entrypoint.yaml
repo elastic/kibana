@@ -11,6 +11,7 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: 'http://KIBANA_HOST:5601/api/fleet'
+    description: Public and supported Fleet API
 paths:
   # Fleet internals
   /health_check:
@@ -20,6 +21,9 @@ paths:
   /settings:
     $ref: paths/settings.yaml
   /settings/enrollment:
+    servers:
+      - url: 'http://KIBANA_HOST:5601/internal/fleet'
+        description: Used for Fleet internals and not supported
     $ref: paths/settings_enrollment.yaml
   /service-tokens:
     $ref: paths/service_tokens_deprecated.yaml

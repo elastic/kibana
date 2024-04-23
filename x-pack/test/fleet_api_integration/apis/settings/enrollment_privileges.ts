@@ -61,12 +61,12 @@ export default function (providerContext: FtrProviderContext) {
   const ROUTES = [
     {
       method: 'GET',
-      path: '/api/fleet/settings/enrollment',
+      path: '/internal/fleet/settings/enrollment',
       scenarios: READ_SCENARIOS,
     },
     {
       method: 'GET',
-      path: '/api/fleet/settings/enrollment?agentPolicyId=policy1',
+      path: '/internal/fleet/settings/enrollment?agentPolicyId=policy1',
       scenarios: READ_SCENARIOS,
     },
   ];
