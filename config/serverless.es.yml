@@ -44,3 +44,6 @@ xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
+
+# Search Playground
+xpack.searchPlayground.ui.enabled: true
