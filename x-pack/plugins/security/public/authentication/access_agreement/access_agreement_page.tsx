@@ -30,9 +30,9 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { parseNextURL } from '@kbn/std';
 
 import type { StartServices } from '../..';
-import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
@@ -59,7 +59,7 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
       try {
         setIsLoading(true);
         await http.post('/internal/security/access_agreement/acknowledge');
-        window.location.href = parseNext(window.location.href, http.basePath.serverBasePath);
+        window.location.href = parseNextURL(window.location.href, http.basePath.serverBasePath);
       } catch (err) {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.security.accessAgreement.acknowledgeErrorMessage', {

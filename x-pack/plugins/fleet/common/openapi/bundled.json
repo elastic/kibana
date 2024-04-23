@@ -1,6 +1,5 @@
 {
   "openapi": "3.0.0",
-  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -18,6 +17,12 @@
       "url": "http://KIBANA_HOST:5601/api/fleet"
     }
   ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -5228,6 +5233,10 @@
                   "is_internal": {
                     "type": "boolean"
                   },
+                  "proxy_id": {
+                    "description": "The ID of the proxy to use for this fleet server host. See the proxies API for more information.",
+                    "type": "string"
+                  },
                   "host_urls": {
                     "type": "array",
                     "items": {
@@ -5342,6 +5351,11 @@
                   },
                   "is_internal": {
                     "type": "boolean"
+                  },
+                  "proxy_id": {
+                    "description": "The ID of the proxy to use for this fleet server host. See the proxies API for more information.",
+                    "type": "string",
+                    "nullable": true
                   },
                   "host_urls": {
                     "type": "array",
@@ -9121,6 +9135,9 @@
           "is_preconfigured": {
             "type": "boolean"
           },
+          "proxy_id": {
+            "type": "string"
+          },
           "host_urls": {
             "type": "array",
             "items": {
@@ -9168,10 +9185,5 @@
         ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ]
+  }
 }
