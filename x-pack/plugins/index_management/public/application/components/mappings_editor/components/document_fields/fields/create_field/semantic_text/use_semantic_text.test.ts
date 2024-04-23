@@ -20,6 +20,13 @@ const mlMock: any = {
     },
   },
 };
+
+const mockFieldData = {
+  name: 'name',
+  type: 'semantic_text',
+  inferenceId: 'elser_model_2',
+} as Field;
+
 const mockDispatch = jest.fn();
 
 jest.mock('../../../../../mappings_state_context', () => ({
@@ -81,12 +88,6 @@ describe('useSemanticText', () => {
       useSemanticText({ form, setErrorsInTrainedModelDeployment: jest.fn(), ml: mlMock })
     );
 
-    const mockFieldData = {
-      name: 'name',
-      type: 'semantic_text',
-      inferenceId: 'elser_model_2',
-    } as Field;
-
     await act(async () => {
       result.current.handleSemanticText(mockFieldData);
     });
@@ -108,5 +109,24 @@ describe('useSemanticText', () => {
       type: 'field.addSemanticText',
       value: mockFieldData,
     });
+  });
+
+  it('handles errors correctly', async () => {
+    const mockError = new Error('Test error');
+    mlMock.mlApi.inferenceModels.createInferenceEndpoint.mockImplementationOnce(() => {
+      throw mockError;
+    });
+
+    const setErrorsInTrainedModelDeployment = jest.fn();
+
+    const { result } = renderHook(() =>
+      useSemanticText({ form, setErrorsInTrainedModelDeployment, ml: mlMock })
+    );
+
+    await act(async () => {
+      result.current.handleSemanticText(mockFieldData);
+    });
+
+    expect(setErrorsInTrainedModelDeployment).toHaveBeenCalledWith(expect.any(Function));
   });
 });
