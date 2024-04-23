@@ -7,7 +7,6 @@
  */
 
 import { Entity } from '../entity';
-import { ServiceAsset } from '../oam/service_assets';
 import { ApmFields } from './apm_fields';
 import { Instance } from './instance';
 
@@ -17,20 +16,6 @@ export class Service extends Entity<ApmFields> {
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
-    });
-  }
-
-  asset() {
-    return new ServiceAsset({
-      'asset.id': this.fields['service.name']!,
-      'asset.first_seen': '',
-      'asset.identifying_metadata': ['service.name'],
-      'asset.last_seen': '',
-      'asset.signalTypes': ['traces'],
-      'service.name': this.fields['service.name']!,
-      'service.environment': this.fields['service.environment']!,
-      'service.language.name': '',
-      'service.node.name': '',
     });
   }
 }
