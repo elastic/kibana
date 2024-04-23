@@ -5,34 +5,36 @@
  * 2.0.
  */
 
-import { OVERVIEW_ROUTE } from '../../../common/constants';
-import { uptimeOverviewNavigatorParams } from './overview';
+import { OVERVIEW_ROUTE } from '../../common/constants';
+import { UptimeOverviewLocatorDefinition } from './overview';
 
 describe('uptimeOverviewNavigatorParams', () => {
+  const uptimeOverviewNavigator = new UptimeOverviewLocatorDefinition();
+
   it('supplies the correct app name', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({});
+    const location = await uptimeOverviewNavigator.getLocation({});
     expect(location.app).toEqual('uptime');
   });
 
   it('creates the expected path when no params specified', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({});
+    const location = await uptimeOverviewNavigator.getLocation({});
     expect(location.path).toEqual(OVERVIEW_ROUTE);
   });
 
   it('creates a path with expected search when ip is specified', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({ ip: '127.0.0.1' });
+    const location = await uptimeOverviewNavigator.getLocation({ ip: '127.0.0.1' });
     expect(location.path).toEqual(
       `${OVERVIEW_ROUTE}?search=host.ip: "127.0.0.1" OR monitor.ip: "127.0.0.1"`
     );
   });
 
   it('creates a path with expected search when hostname is specified', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({ host: 'elastic.co' });
+    const location = await uptimeOverviewNavigator.getLocation({ host: 'elastic.co' });
     expect(location.path).toEqual(`${OVERVIEW_ROUTE}?search=host.name: "elastic.co"`);
   });
 
   it('creates a path with expected search when multiple host keys are specified', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({
+    const location = await uptimeOverviewNavigator.getLocation({
       host: 'elastic.co',
       ip: '127.0.0.1',
     });
@@ -42,7 +44,7 @@ describe('uptimeOverviewNavigatorParams', () => {
   });
 
   it('creates a path with expected search when multiple kubernetes pod is specified', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({
+    const location = await uptimeOverviewNavigator.getLocation({
       pod: 'foo',
       ip: '10.0.0.1',
     });
@@ -52,7 +54,7 @@ describe('uptimeOverviewNavigatorParams', () => {
   });
 
   it('creates a path with expected search when docker container is specified', async () => {
-    const location = await uptimeOverviewNavigatorParams.getLocation({
+    const location = await uptimeOverviewNavigator.getLocation({
       container: 'foo',
     });
     expect(location.path).toEqual(`${OVERVIEW_ROUTE}?search=container.id: "foo"`);
