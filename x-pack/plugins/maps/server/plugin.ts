@@ -158,7 +158,7 @@ export class MapsPlugin implements Plugin {
 
     const emsSettings = plugins.mapsEms.createEMSSettings();
 
-    initRoutes(core, this._logger);
+    initRoutes(core, this._logger).catch(() => {}); // it's not supposed to reject, but just in case
 
     if (home) {
       this._initHomeData(home, core.http.basePath.prepend, emsSettings);
