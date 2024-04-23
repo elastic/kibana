@@ -6,9 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -19,13 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const supertest = getService('supertest');
-  const svlCommonApi = getService('svlCommonApi');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
-    let dataViewId = '';
-
     before(async function () {
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
@@ -36,22 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         'x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern'
       );
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-
-      const response = await supertest
-        .post(DATA_VIEW_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        .set(svlCommonApi.getInternalRequestHeader())
-        .send({
-          data_view: {
-            fieldFormats:
-              '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
-            timeFieldName: 'timestamp',
-            title: 'kibana_sample_data_flights',
-          },
-        });
-
-      dataViewId = response.body.data_view.id;
 
       await kibanaServer.uiSettings.replace({});
       // TODO: Navigation to Data View Management is different in Serverless
@@ -62,17 +43,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
+
       await esArchiver.unload(
         'x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern'
       );
-
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-
-      await supertest
-        .delete(`${DATA_VIEW_PATH}/${dataViewId}`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
     });
 
     describe('can open and close editor', function () {
