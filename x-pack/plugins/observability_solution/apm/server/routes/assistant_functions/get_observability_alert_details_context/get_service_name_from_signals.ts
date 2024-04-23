@@ -88,7 +88,6 @@ async function getServiceNameFromLogs({
   coreContext: CoreRequestHandlerContext;
 }) {
   const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
-
   const res = await typedSearch<{ service: { name: string } }, any>(esClient, {
     index,
     ...params,
@@ -104,7 +103,7 @@ async function getServiceNameFromTraces({
   params: APMEventESSearchRequest['body'];
   apmEventClient: APMEventClient;
 }) {
-  const res = await apmEventClient.search('get_service_name', {
+  const res = await apmEventClient.search('get_service_name_from_traces', {
     apm: {
       sources: [
         {

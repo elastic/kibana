@@ -50,14 +50,14 @@ export async function getContainerIdFromSignals({
     query: {
       bool: {
         filter: [
-          { exists: { field: 'container.id' } },
           { term: { 'service.name': query['service.name'] } },
+          { exists: { field: 'container.id' } },
           ...rangeQuery(start, end),
         ],
       },
     },
   };
-  const containerId = await getContainerIdFromTrace({
+  const containerId = await getContainerIdFromTraces({
     params,
     apmEventClient,
   });
@@ -79,7 +79,6 @@ async function getContainerIdFromLogs({
   coreContext: CoreRequestHandlerContext;
 }) {
   const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
-
   const res = await typedSearch<{ container: { id: string } }, any>(esClient, {
     index,
     ...params,
@@ -88,14 +87,14 @@ async function getContainerIdFromLogs({
   return res.hits.hits[0]?._source?.container?.id;
 }
 
-async function getContainerIdFromTrace({
+async function getContainerIdFromTraces({
   params,
   apmEventClient,
 }: {
   params: APMEventESSearchRequest['body'];
   apmEventClient: APMEventClient;
 }) {
-  const res = await apmEventClient.search('get_container_id', {
+  const res = await apmEventClient.search('get_container_id_from_traces', {
     apm: {
       sources: [
         {
