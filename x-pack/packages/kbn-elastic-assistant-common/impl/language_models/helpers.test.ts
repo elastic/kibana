@@ -86,9 +86,7 @@ describe('helpers', () => {
       );
     });
 
-    it('should remove extra spaces when there is no prompt content or prompt conext', () => {
-      const customGetAnonymizedValue = jest.fn((args) => `ANONYMIZED(${args.rawValue})`);
-
+    it('should remove extra spaces when there is no prompt content or system prompt', () => {
       const result = getCombinedMessage({
         ...defaultProps,
         selectedPromptContexts: {},
