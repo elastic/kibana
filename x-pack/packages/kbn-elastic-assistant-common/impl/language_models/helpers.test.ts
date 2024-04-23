@@ -86,6 +86,26 @@ describe('helpers', () => {
       );
     });
 
+    it('should return the correct combined message for a new chat without prompt context', () => {
+      const result = getCombinedMessage({
+        ...defaultProps,
+        selectedPromptContexts: {},
+      });
+
+      expect(result.content).toEqual(`This is a system prompt\n\nThis is a user prompt`);
+    });
+
+    it('should return the correct combined message for a new chat without system context', () => {
+      const result = getCombinedMessage({
+        ...defaultProps,
+        selectedSystemPrompt: { ...mockPrompt, content: '' },
+      });
+
+      expect(result.content).toEqual(
+        `CONTEXT:\n\"\"\"\nThis is raw data for context 1\n\"\"\"\n,CONTEXT:\n\"\"\"\nThis is raw data for context 2\n\"\"\"\n\nThis is a user prompt`
+      );
+    });
+
     it('should remove extra spaces when there is no prompt content or system prompt', () => {
       const result = getCombinedMessage({
         ...defaultProps,
