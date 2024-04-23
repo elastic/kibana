@@ -19,7 +19,7 @@ import { CustomCard } from './types';
 
 interface Props {
   /**
-   * A subset of either existing card names to feature, or generated
+   * A subset of either existing card names to feature, or virtual
    * cards to display. The inclusion of CustomCards will override the default
    * list functionality.
    */
@@ -32,6 +32,8 @@ interface Props {
   packageListRef?: React.Ref<HTMLDivElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  flowCategory?: string | null;
+  flowSearch?: string;
   /**
    * When enabled, custom and integration cards are joined into a single list.
    */
@@ -52,6 +54,8 @@ const PackageListGridWrapper = ({
   searchQuery,
   setSearchQuery,
   customCards,
+  flowCategory,
+  flowSearch,
   joinCardLists = false,
 }: WrapperProps) => {
   const customMargin = useCustomMargin();
@@ -63,6 +67,8 @@ const PackageListGridWrapper = ({
     filteredCards,
     selectedCategory,
     customCards,
+    flowCategory,
+    flowSearch,
     joinCardLists
   );
 
