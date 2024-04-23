@@ -19,3 +19,4 @@ export const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
 export const DEFAULT_OPEN_AI_MODEL = 'gpt-4';
 const DEFAULT_BEDROCK_TEMPERATURE = 0;
 const DEFAULT_BEDROCK_STOP_SEQUENCES = ['\n\nHuman:', '\nObservation:'];
+export const DEFAULT_TIMEOUT = 180000;
