@@ -85,7 +85,17 @@ export const getAggregationByCloudSecuritySolution = (
     return {
       asset_count_groups: {
         terms: {
-          field: 'cloud_defend.block_action_enabled',
+          script: {
+            source: `
+              if (doc.containsKey('cloud_defend.block_action_enabled') && !doc['cloud_defend.block_action_enabled'].empty) {
+                return doc['cloud_defend.block_action_enabled'].value;
+              } else if (doc.containsKey('block_action_enabled') && !doc['block_action_enabled'].empty) {
+                return doc['block_action_enabled'].value;
+              } else {
+                return 'none';  // Default value
+              }
+            `,
+          },
         },
         aggs: {
           unique_assets: {
