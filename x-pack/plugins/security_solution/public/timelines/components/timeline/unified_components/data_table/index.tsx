@@ -13,8 +13,6 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
@@ -22,7 +20,7 @@ import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
@@ -45,8 +43,6 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/right';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -105,13 +101,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
   }) {
     const dispatch = useDispatch();
 
-    const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-      'expandableTimelineFlyoutEnabled'
-    );
-
-    const { openFlyout } = useExpandableFlyoutApi();
-    const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
-
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
       timelineID: timelineId,
@@ -154,43 +143,22 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           panelView: 'eventDetail',
           params: {
             eventId: eventData.id,
-            indexName: eventData.raw._index ?? '', // TODO: fix type error
+            indexName: eventData._index ?? '', // TODO: fix type error
             refetch,
           },
         };
 
-        if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
-          openFlyout({
-            right: {
-              id: DocumentDetailsRightPanelKey,
-              params: {
-                id: eventData._id,
-                indexName: eventData.raw._index ?? '',
-                scopeId: timelineId,
-              },
-            },
-          });
-        } else {
-          dispatch(
-            timelineActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              tabType: activeTab,
-              id: timelineId,
-            })
-          );
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            ...updatedExpandedDetail,
+            tabType: activeTab,
+            id: timelineId,
+          })
+        );
 
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
+        activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
       },
-      [
-        activeTab,
-        dispatch,
-        expandableTimelineFlyoutEnabled,
-        isSecurityFlyoutEnabled,
-        openFlyout,
-        refetch,
-        timelineId,
-      ]
+      [activeTab, dispatch, refetch, timelineId]
     );
 
     const handleOnPanelClosed = useCallback(() => {
