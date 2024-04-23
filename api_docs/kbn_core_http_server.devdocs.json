@@ -3866,10 +3866,6 @@
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
               },
@@ -4608,6 +4604,10 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -6456,10 +6456,6 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/create_tag.ts"
               },
@@ -7106,6 +7102,10 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -14720,6 +14720,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
               },
               {
                 "plugin": "metricsDataAccess",
