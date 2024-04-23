@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
+import { SerializableRecord } from '@kbn/utility-types';
+import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
 import { useHostIpToName } from './use_host_ip_to_name';
-import { getFromFromLocation, getToFromLocation } from './query_params';
 import { LoadingPage } from '../../components/loading_page';
 import { Error } from '../error';
 import { useSourceContext } from '../../containers/metrics_source';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { getSearchParams } from './redirect_to_node_detail';
 
 type RedirectToHostDetailType = RouteComponentProps<{
   hostIp: string;
@@ -27,11 +29,33 @@ export const RedirectToHostDetailViaIP = ({
   location,
 }: RedirectToHostDetailType) => {
   const { source } = useSourceContext();
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
+  const baseLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
   const { error, name } = useHostIpToName(
     hostIp,
     (source && source.configuration && source.configuration.metricAlias) || null
   );
+
+  useEffect(() => {
+    if (name) {
+      const queryParams = new URLSearchParams(location.search);
+      const search = getSearchParams('host', queryParams);
+
+      baseLocator?.navigate({
+        ...search,
+        assetType: 'host',
+        assetId: name,
+        state: location.state as SerializableRecord,
+      });
+    }
+  }, [baseLocator, location.search, location.state, name]);
+
+  if (name) {
+    return null;
+  }
 
   if (error) {
     return (
@@ -42,15 +66,6 @@ export const RedirectToHostDetailViaIP = ({
         })}
       />
     );
-  }
-
-  const searchString = replaceMetricTimeInQueryString(
-    getFromFromLocation(location),
-    getToFromLocation(location)
-  )('');
-
-  if (name) {
-    return <Redirect to={`/detail/host/${name}?${searchString}`} />;
   }
 
   return (
