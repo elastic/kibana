@@ -154,11 +154,13 @@ $BUILDKITE_PULL_REQUEST
 Caused by $GITHUB_PR_TRIGGER_USER using the github label in $BUILDKITE_REPO/pull/$BUILDKITE_PULL_REQUEST
 EOF
 
+  GH_TOKEN="$KIBANA_CI_GITHUB_TOKEN" \
   gh issue create \
     --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$BUILDKITE_PULL_REQUEST" \
     --body-file ".issue-body" \
     --label 'deploy-custom-kibana-serverless' \
-    --repo 'elastic/observability-test-environments'
+    --repo 'elastic/observability-test-environments' \
+    --assignee "$GITHUB_PR_OWNER"
 }
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
