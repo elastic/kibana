@@ -2985,12 +2985,12 @@
       "warning": []
     },
     {
-      "query": "row var = to_ip(\"a\") > to_ip(\"a\")",
+      "query": "row var = to_ip(\"127.0.0.1\") > to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") > to_datetime(\"2020-10-1\")",
+      "query": "row var = now() > now()",
       "error": [],
       "warning": []
     },
@@ -3032,12 +3032,12 @@
       "warning": []
     },
     {
-      "query": "row var = to_ip(\"a\") >= to_ip(\"a\")",
+      "query": "row var = to_ip(\"127.0.0.1\") >= to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") >= to_datetime(\"2020-10-1\")",
+      "query": "row var = now() >= now()",
       "error": [],
       "warning": []
     },
@@ -3079,12 +3079,12 @@
       "warning": []
     },
     {
-      "query": "row var = to_ip(\"a\") < to_ip(\"a\")",
+      "query": "row var = to_ip(\"127.0.0.1\") < to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") < to_datetime(\"2020-10-1\")",
+      "query": "row var = now() < now()",
       "error": [],
       "warning": []
     },
@@ -3126,12 +3126,12 @@
       "warning": []
     },
     {
-      "query": "row var = to_ip(\"a\") <= to_ip(\"a\")",
+      "query": "row var = to_ip(\"127.0.0.1\") <= to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") <= to_datetime(\"2020-10-1\")",
+      "query": "row var = now() <= now()",
       "error": [],
       "warning": []
     },
@@ -3173,12 +3173,12 @@
       "warning": []
     },
     {
-      "query": "row var = to_ip(\"a\") == to_ip(\"a\")",
+      "query": "row var = to_ip(\"127.0.0.1\") == to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") == to_datetime(\"2020-10-1\")",
+      "query": "row var = now() == now()",
       "error": [],
       "warning": []
     },
@@ -3217,12 +3217,12 @@
       "warning": []
     },
     {
-      "query": "row var = to_ip(\"a\") != to_ip(\"a\")",
+      "query": "row var = to_ip(\"127.0.0.1\") != to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") != to_datetime(\"2020-10-1\")",
+      "query": "row var = now() != now()",
       "error": [],
       "warning": []
     },
@@ -3242,7 +3242,7 @@
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") + to_datetime(\"2020-10-1\")",
+      "query": "row var = now() + now()",
       "error": [],
       "warning": []
     },
@@ -3257,7 +3257,7 @@
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") - to_datetime(\"2020-10-1\")",
+      "query": "row var = now() - now()",
       "error": [],
       "warning": []
     },
@@ -3272,10 +3272,10 @@
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") * to_datetime(\"2020-10-1\")",
+      "query": "row var = now() * now()",
       "error": [
-        "Argument of [*] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]",
-        "Argument of [*] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -3290,10 +3290,10 @@
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") / to_datetime(\"2020-10-1\")",
+      "query": "row var = now() / now()",
       "error": [
-        "Argument of [/] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]",
-        "Argument of [/] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -3308,10 +3308,10 @@
       "warning": []
     },
     {
-      "query": "row var = to_datetime(\"2020-10-1\") % to_datetime(\"2020-10-1\")",
+      "query": "row var = now() % now()",
       "error": [
-        "Argument of [%] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]",
-        "Argument of [%] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -12058,7 +12058,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(\"2020-10-1\") + to_datetime(\"2020-10-1\")",
+      "query": "from a_index | eval now() + now()",
       "error": [],
       "warning": []
     },
@@ -12078,7 +12078,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(\"2020-10-1\") - to_datetime(\"2020-10-1\")",
+      "query": "from a_index | eval now() - now()",
       "error": [],
       "warning": []
     },
@@ -12098,10 +12098,10 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(\"2020-10-1\") * to_datetime(\"2020-10-1\")",
+      "query": "from a_index | eval now() * now()",
       "error": [
-        "Argument of [*] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]",
-        "Argument of [*] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]"
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -12121,10 +12121,10 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(\"2020-10-1\") / to_datetime(\"2020-10-1\")",
+      "query": "from a_index | eval now() / now()",
       "error": [
-        "Argument of [/] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]",
-        "Argument of [/] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]"
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -12144,10 +12144,10 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval to_datetime(\"2020-10-1\") % to_datetime(\"2020-10-1\")",
+      "query": "from a_index | eval now() % now()",
       "error": [
-        "Argument of [%] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]",
-        "Argument of [%] must be [number], found value [to_datetime(\"2020-10-1\")] type [date]"
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [now()] type [date]"
       ],
       "warning": []
     },

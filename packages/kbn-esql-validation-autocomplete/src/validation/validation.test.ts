@@ -664,11 +664,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`row var = "a" ${op} 0`, [
           `Argument of [${op}] must be [number], found value ["a"] type [string]`,
         ]);
-        testErrorsAndWarnings(`row var = to_ip("a") ${op} to_ip("a")`, []);
-        testErrorsAndWarnings(
-          `row var = to_datetime("2020-10-1") ${op} to_datetime("2020-10-1")`,
-          []
-        );
+        testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
+        testErrorsAndWarnings(`row var = now() ${op} now()`, []);
         testErrorsAndWarnings(
           `row var = false ${op} false`,
           ['==', '!='].includes(op)
@@ -683,12 +680,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
         testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
         testErrorsAndWarnings(
-          `row var = to_datetime("2020-10-1") ${op} to_datetime("2020-10-1")`,
+          `row var = now() ${op} now()`,
           ['+', '-'].includes(op)
             ? []
             : [
-                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
-                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
               ]
         );
       }
@@ -1694,12 +1691,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 1`, []);
         testErrorsAndWarnings(
-          `from a_index | eval to_datetime("2020-10-1") ${op} to_datetime("2020-10-1")`,
+          `from a_index | eval now() ${op} now()`,
           ['+', '-'].includes(op)
             ? []
             : [
-                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
-                `Argument of [${op}] must be [number], found value [to_datetime("2020-10-1")] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
               ]
         );
       }
