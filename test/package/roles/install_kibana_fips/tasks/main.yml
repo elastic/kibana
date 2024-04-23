@@ -140,7 +140,7 @@
 - name: fix /var/log permissions for kibana
   become: yes
   file:
-    path: /tmp
+    path: /var/log
     state: directory
     recurse: true
     mode: "0777"
