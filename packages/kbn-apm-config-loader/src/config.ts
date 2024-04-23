@@ -82,8 +82,9 @@ export class ApmConfiguration {
     const { servicesOverrides = {} } = merge(kibanaConfig, this.getConfigFromEnv(kibanaConfig));
 
     let baseConfig = {
-      ...this.getBaseConfig(),
+      // allow overriding serviceName from the configuration
       serviceName,
+      ...this.getBaseConfig(),
     };
 
     const serviceOverride = servicesOverrides[serviceName];

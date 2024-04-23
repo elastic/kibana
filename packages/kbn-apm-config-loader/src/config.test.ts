@@ -41,6 +41,34 @@ describe('ApmConfiguration', () => {
     expect(config.getConfig('myservice').serviceVersion).toBe('9.2.1');
   });
 
+  it('allows overriding the service name via root config', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          serviceName: "serviceNameOverride"
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('myservice').serviceName).toBe('serviceNameOverride');
+  });
+
+  it('allows overriding the service name via service override', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          servicesOverrides: {
+            myservice: {
+              serviceName: "serviceNameOverride"
+            }
+          }
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('myservice').serviceName).toBe('serviceNameOverride');
+  });
+
   it('sets the git revision from `git rev-parse` command in non distribution mode', () => {
     gitRevExecMock.mockReturnValue('some-git-rev');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
