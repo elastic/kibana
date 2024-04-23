@@ -11,6 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Api, State } from '../react_embeddables/search/types';
 import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
+import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSuperDatePicker, EuiSwitch, EuiText, OnTimeChangeProps } from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
@@ -97,6 +98,7 @@ export const RenderExamples = () => {
           <EuiSpacer size="s" />
 
           <ReactEmbeddableRenderer<State, Api>
+            key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
             type={SEARCH_EMBEDDABLE_ID}
             state={initialState}
             parentApi={parentApi}
@@ -104,6 +106,26 @@ export const RenderExamples = () => {
               setApi(newApi);
             }}
             hidePanelChrome={hidePanelChrome}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiText>
+            <p>
+              To avoid leaking embeddable details, wrap ReactEmbeddableRenderer in a component.
+            </p>
+          </EuiText>
+
+          <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
+            {`<SearchEmbeddableRenderer
+  timeRange={timeRange}
+/>`}
+          </EuiCodeBlock>
+
+          <EuiSpacer size="s" />
+
+          <SearchEmbeddableRenderer
+            timeRange={timeRange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
