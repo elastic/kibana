@@ -34,7 +34,10 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
 
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
