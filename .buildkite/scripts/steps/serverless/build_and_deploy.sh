@@ -153,10 +153,8 @@ $BUILDKITE_PULL_REQUEST
 
 ### Further details
 
-Caused by $GITHUB_PR_TRIGGER_USER using the github label in $BUILDKITE_REPO/pull/$BUILDKITE_PULL_REQUEST
+Caused by @$GITHUB_PR_TRIGGER_USER using the github label in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
 EOF
-
-  GH_TOKEN="$GITHUB_TOKEN" gh auth status || true
 
   GH_TOKEN="$GITHUB_TOKEN" \
   gh issue create \
