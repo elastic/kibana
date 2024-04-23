@@ -356,7 +356,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       dispatch(setSelectedGroup(null));
       dispatch(setPinnedGroup(null));
     },
-    [dispatch]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   useEffect(

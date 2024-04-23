@@ -184,8 +184,8 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       dispatch(setSelectedSignificantItem(null));
       dispatch(setPinnedSignificantItem(null));
     },
-
-    [dispatch]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const getRowStyle = (significantItem: SignificantItem) => {
