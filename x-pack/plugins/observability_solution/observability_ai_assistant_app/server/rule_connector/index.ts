@@ -32,6 +32,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
@@ -186,6 +187,18 @@ async function executor(
       kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
       instructions: [backgroundInstruction],
       messages: [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.System,
+            content: getSystemMessageFromInstructions({
+              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+              registeredInstructions: functionClient.getInstructions(),
+              knowledgeBaseInstructions: [],
+              requestInstructions: [],
+            }),
+          },
+        },
         {
           '@timestamp': new Date().toISOString(),
           message: {
