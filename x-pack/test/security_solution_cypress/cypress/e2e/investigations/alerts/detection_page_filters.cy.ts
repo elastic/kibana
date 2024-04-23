@@ -26,11 +26,11 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL, CASES_URL } from '../../../urls/navigation';
 import {
-  closePageFilterPopover,
   markAcknowledgedFirstAlert,
   openPageFilterPopover,
   resetFilters,
   selectCountTable,
+  selectPageFilterValue,
   togglePageFilterPopover,
   visitAlertsPageWithCustomFilters,
   waitForAlerts,
@@ -129,7 +129,9 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
         expect(sub.length).lt(4);
       });
 
+      // ================================================
       cy.log('should be able to add a new control');
+      // ================================================
 
       addNewFilterGroupControlValues({
         fieldName,
@@ -139,7 +141,9 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
 
+      // ================================================
       cy.log('should be able to edit an existing control');
+      // ================================================
 
       editFilterGroupControls();
       editFilterGroupControl({ idx: 3, fieldName, label });
@@ -223,8 +227,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
           const originalAlertCount = noOfAlerts.split(' ')[0];
           markAcknowledgedFirstAlert();
           waitForAlerts();
-          openPageFilterPopover(0);
-          cy.get(OPTION_SELECTABLE(0, 'acknowledged')).click();
+          selectPageFilterValue(0, 'acknowledged');
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .should((newAlertCount) => {
@@ -235,12 +238,11 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it(`should update URL when filters are updated`, () => {
-    openPageFilterPopover(1);
-    cy.get(OPTION_SELECTABLE(1, 'high')).click();
-    closePageFilterPopover(1);
+    selectPageFilterValue(1, 'high');
 
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
       return {
+        hideActionBar: false,
         ...filter,
         selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
       };
@@ -250,8 +252,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it(`should restore Filters from localstorage when user navigates back to the page.`, () => {
-    openPageFilterPopover(1);
-    cy.get(OPTION_SELECTABLE(1, 'high')).click();
+    selectPageFilterValue(1, 'high');
 
     // high should be successfully selected.
     cy.get(OPTION_LIST_VALUES(1)).contains('high');

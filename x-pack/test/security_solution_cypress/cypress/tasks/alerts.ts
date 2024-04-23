@@ -206,7 +206,8 @@ export const clearAllSelections = (filterIndex: number) => {
     },
     ($el) => $el.is(':visible')
   );
-  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).should('be.visible').trigger('click');
+  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).scrollIntoView();
+  cy.get(OPTION_LIST_CLEAR_BTN).eq(filterIndex).click();
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
@@ -214,7 +215,7 @@ export const selectPageFilterValue = (filterIndex: number, ...values: string[]) 
   clearAllSelections(filterIndex);
   openPageFilterPopover(filterIndex);
   values.forEach((value) => {
-    cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+    cy.get(OPTION_SELECTABLE(filterIndex, value)).click();
   });
   closePageFilterPopover(filterIndex);
   waitForAlerts();
