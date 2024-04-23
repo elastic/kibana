@@ -38,7 +38,7 @@ import {
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
 } from '@kbn/data-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
@@ -55,7 +55,7 @@ import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { getTheme } from '../services';
+import { getAnalytics, getI18n, getTheme } from '../services';
 import './query_string_input.scss';
 
 export const strings = {
@@ -563,7 +563,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>,
-            { theme$: getTheme().theme$ }
+            { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme() }
           ),
         });
       }
@@ -666,7 +666,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       : getQueryLog(uiSettings, this.props.deps.storage, appName, this.props.query.language);
   };
 
-  public onMouseEnterSuggestion = (suggestion: QuerySuggestion, index: number) => {
+  public onMouseEnterSuggestion = (_suggestion: QuerySuggestion, index: number) => {
     this.setState({ index });
   };
 

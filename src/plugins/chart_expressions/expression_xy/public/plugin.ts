@@ -53,7 +53,7 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 export class ExpressionXyPlugin {
   public setup(
     core: CoreSetup<XYPluginStartDependencies>,
-    { expressions, charts }: SetupDeps
+    { expressions, charts: _charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(dataDecorationConfigFunction);
@@ -98,13 +98,14 @@ export class ExpressionXyPlugin {
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),
+        startServices: coreStart,
       };
     };
 
     expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));
   }
 
-  public start(core: CoreStart): ExpressionXyPluginStart {}
+  public start(_core: CoreStart): ExpressionXyPluginStart {}
 
   public stop() {}
 }
