@@ -6,12 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { App } from './components/app';
 import { PlaygroundToolbar } from './embeddable';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export const ChatPlaygroundOverview: React.FC = () => {
   return (
@@ -20,25 +21,17 @@ export const ChatPlaygroundOverview: React.FC = () => {
         indices: [],
       }}
     >
-      <KibanaPageTemplate
-        pageChrome={[
-          i18n.translate('xpack.searchPlayground.breadcrumb', {
+      <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlPlaygroundPage">
+        <EuiPageTemplate.Header
+          pageTitle={i18n.translate('xpack.searchPlayground.pageTitle', {
             defaultMessage: 'Playground',
-          }),
-        ]}
-        pageHeader={{
-          pageTitle: i18n.translate('xpack.searchPlayground.pageTitle', {
-            defaultMessage: 'Playground',
-          }),
-          rightSideItems: [<PlaygroundToolbar />],
-        }}
-        pageViewTelemetry="Playground"
-        data-test-subj="svlPlaygroundPage"
-        bottomBorder="extended"
-        restrictWidth
-      >
+          })}
+          data-test-subj="svlPlaygroundPageTitle"
+          restrictWidth
+          rightSideItems={[<PlaygroundHeaderDocs />, <PlaygroundToolbar />]}
+        />
         <App />
-      </KibanaPageTemplate>
+      </EuiPageTemplate>
     </PlaygroundProvider>
   );
 };
