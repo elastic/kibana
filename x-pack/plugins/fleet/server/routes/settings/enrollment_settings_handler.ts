@@ -16,7 +16,10 @@ import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '..
 import { defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService, packagePolicyService, downloadSourceService } from '../../services';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
-import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
+import {
+  getFleetServerHostsForAgentPolicy,
+  getDefaultFleetServerHost,
+} from '../../services/fleet_server_host';
 import { getFleetProxy } from '../../services/fleet_proxies';
 
 export const getEnrollmentSettingsHandler: FleetRequestHandler<
@@ -67,21 +70,23 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       scopedAgentPolicy.download_source_id ?? undefined
     );
 
-    // If there is at least one active fleet server,
-    // get associated fleet server host or default one and
-    // get associated proxy if any
+    // If there is at least one active fleet server, get associated fleet server host
     if (settingsResponse.fleet_server.has_active) {
       settingsResponse.fleet_server.host = await getFleetServerHostsForAgentPolicy(
         soClient,
         scopedAgentPolicy
       );
+    } // if there is no active fleet server associated with a policy, return the default fleet server host
+    else if (!settingsResponse.fleet_server.has_active) {
+      settingsResponse.fleet_server.host = (await getDefaultFleetServerHost(soClient)) ?? undefined;
+    }
 
-      if (settingsResponse.fleet_server.host.proxy_id) {
-        settingsResponse.fleet_server.host_proxy = await getFleetProxy(
-          soClient,
-          settingsResponse.fleet_server.host.proxy_id
-        );
-      }
+    // if a fleet server host was found, get associated fleet server host proxy if any
+    if (settingsResponse.fleet_server.host?.proxy_id) {
+      settingsResponse.fleet_server.host_proxy = await getFleetProxy(
+        soClient,
+        settingsResponse.fleet_server.host.proxy_id
+      );
     }
 
     return response.ok({ body: settingsResponse });
