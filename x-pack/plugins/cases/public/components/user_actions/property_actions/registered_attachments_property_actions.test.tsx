@@ -96,14 +96,14 @@ for (let i = 0; i < 200; i++) {
       });
     });
 
-    it('does not show the property actions without delete permissions', async () => {
+    it('does not show the property actions without delete permissions', () => {
       appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
       appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
       expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
     });
 
-    it('does not show the property actions when hideDefaultActions is enabled', async () => {
+    it('does not show the property actions when hideDefaultActions is enabled', () => {
       appMock.render(<RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />);
 
       expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
