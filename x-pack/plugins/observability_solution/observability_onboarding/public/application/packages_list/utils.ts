@@ -7,7 +7,7 @@
 
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
-export const QUICKSTART_FLOWS = ['kubernetes', 'nginx', 'system-logs-generated'];
+export const QUICKSTART_FLOWS = ['system-logs-generated', 'custom-logs-generated'];
 
 export const toCustomCard = (card: IntegrationCardItem) => ({
   ...card,
