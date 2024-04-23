@@ -13,7 +13,6 @@ import React, { useEffect, useState } from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';
 import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
-import { TechnicalPreviewBadge } from '../../technical_preview_badge';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -66,20 +65,15 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.slo.burnRate.title', {
-                    defaultMessage: 'Burn rate',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <TechnicalPreviewBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.slo.burnRate.title', {
+                  defaultMessage: 'Burn rate',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
