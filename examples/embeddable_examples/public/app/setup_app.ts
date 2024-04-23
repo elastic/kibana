@@ -26,6 +26,6 @@ export function setupApp(core: CoreSetup<StartDeps>, developerExamples: Develope
   developerExamples.register({
     appId: APP_ID,
     title,
-    description: `Learn about embeddables  and how to create a new embeddable types and use embeddables in your application.`,
+    description: `Learn how to create new embeddable types and use embeddables in your application.`,
   });
 }
