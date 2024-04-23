@@ -90,7 +90,6 @@ export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> =
           compressed={true}
           rowHeader="label"
           columns={columns}
-          responsive
         />
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">
