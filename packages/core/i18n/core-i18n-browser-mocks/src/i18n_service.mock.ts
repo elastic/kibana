@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { I18nService } from '@kbn/core-i18n-browser-internal';
+import type { I18nService } from '@kbn/core-i18n-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-
-const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
+import { I18nProviderMock } from './i18n_context_mock';
 
 const createStartContractMock = () => {
   const setupContract: jest.Mocked<I18nStart> = {
-    // By default mock the Context component so it simply renders all children
-    Context: jest.fn().mockImplementation(PassThroughComponent),
+    // Stubbed provider returning the default message or id
+    Context: jest.fn().mockImplementation(I18nProviderMock),
   };
   return setupContract;
 };

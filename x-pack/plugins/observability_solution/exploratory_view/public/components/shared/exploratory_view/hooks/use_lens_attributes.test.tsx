@@ -19,7 +19,7 @@ import * as useAppDataViewHook from './use_app_data_view';
 import * as theme from '@kbn/observability-shared-plugin/public/hooks/use_theme';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_config';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import * as lensHook from './use_lens_formula_helper';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
@@ -76,6 +76,7 @@ describe('useExpViewTimeRange', function () {
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={jest.fn()}
         theme$={themeServiceMock.createTheme$()}
+        {...coreMock.createStart()}
       >
         <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>
       </ExploratoryViewContextProvider>

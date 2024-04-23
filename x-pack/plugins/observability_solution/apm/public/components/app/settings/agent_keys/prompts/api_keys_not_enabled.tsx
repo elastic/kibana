@@ -19,12 +19,9 @@ export function ApiKeysNotEnabled() {
     <EuiEmptyPrompt
       title={
         <h2>
-          {i18n.translate(
-            'xpack.apm.settings.agentKeys.apiKeysDisabledErrorTitle',
-            {
-              defaultMessage: 'API keys not enabled in Elasticsearch',
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.agentKeys.apiKeysDisabledErrorTitle', {
+            defaultMessage: 'API keys not enabled in Elasticsearch',
+          })}
         </h2>
       }
       iconType="warning"
@@ -40,12 +37,9 @@ export function ApiKeysNotEnabled() {
                   href={docLinks?.links.security.apiKeyServiceSettings}
                   target="_blank"
                 >
-                  {i18n.translate(
-                    'xpack.apm.settings.agentKeys.apiKeysDisabledErrorLinkText',
-                    {
-                      defaultMessage: 'docs',
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.settings.agentKeys.apiKeysDisabledErrorLinkText', {
+                    defaultMessage: 'docs',
+                  })}
                 </EuiLink>
               ),
             }}
