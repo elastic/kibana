@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { render } from '@testing-library/react';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
@@ -14,6 +15,8 @@ import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+
+const chance = new Chance();
 
 jest.mock('../common/api/use_setup_status_api', () => ({
   useCspSetupStatusApi: jest.fn(),
