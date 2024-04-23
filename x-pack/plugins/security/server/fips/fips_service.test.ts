@@ -204,7 +204,6 @@ describe('FipsService', () => {
         });
 
         it('should not log.fatal if license change to not allowFips and `fipsMode.enabled` is `false`', () => {
-          console.log('Test');
           mockFeaturesSubject.next({});
           expect(logger.fatal).not.toHaveBeenCalled();
         });

@@ -42,9 +42,6 @@ export class FipsService {
 
     license.features$.subscribe({
       next: (features) => {
-        console.log(config?.fipsMode.enabled);
-        console.log(!features.allowFips);
-
         if (license.isLicenseAvailable() && config?.fipsMode.enabled && !features.allowFips) {
           this.logger.fatal(
             `${errorMessage} Kibana will not be able to restart. Please upgrade your license to Platinum or higher.`
