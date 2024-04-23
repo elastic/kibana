@@ -43,6 +43,7 @@ export const DocCountChart: FC<{
 
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
   const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
+  const [dataReady, setDataReady] = useState(false);
 
   const loadFullData = useRef(false);
 
@@ -91,6 +92,10 @@ export const DocCountChart: FC<{
           ? data
           : [...eventRateChartData].splice(0, lastNonZeroTimeMs?.index ?? 0).concat(data);
 
+      if (dataReady === false && newData.some((d) => d.value > 0)) {
+        setDataReady(true);
+      }
+
       setEventRateChartData(newData);
       setLastNonZeroTimeMs(findLastTimestamp(newData, BACK_FILL_BUCKETS));
     } catch (error) {
@@ -104,6 +109,7 @@ export const DocCountChart: FC<{
     timeBuckets,
     lastNonZeroTimeMs,
     dataStart,
+    dataReady,
     eventRateChartData,
     recordFailure,
   ]);
@@ -179,7 +185,8 @@ export const DocCountChart: FC<{
     statuses.indexCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     errorAttempts === 0 ||
-    eventRateChartData.length === 0
+    eventRateChartData.length === 0 ||
+    dataReady === false
   ) {
     return null;
   }
