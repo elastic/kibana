@@ -298,10 +298,7 @@ export class DashboardContainer
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
-    this.executionContext = {
-      type: DASHBOARD_CONTAINER_TYPE,
-      description: initialInput.title,
-    };
+    this.executionContext = initialInput.executionContext;
   }
 
   public getAppContext() {

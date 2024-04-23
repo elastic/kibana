@@ -32,6 +32,7 @@ import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { map, distinctUntilChanged, startWith } from 'rxjs';
 import { v4 } from 'uuid';
+import { DASHBOARD_CONTAINER_TYPE } from '../../..';
 import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import {
@@ -238,7 +239,7 @@ export const initializeDashboard = async ({
   }
 
   initialDashboardInput.executionContext = {
-    type: 'dashboard',
+    type: DASHBOARD_CONTAINER_TYPE,
     description: initialDashboardInput.title,
   };
 
