@@ -121,7 +121,6 @@ describe('CrowdstrikeActionsClient class', () => {
             },
             agent: { id: ['1-2-3'] },
             meta: {
-              agentId: '1-2-3',
               hostName: 'Crowdstrike-1460',
             },
             user: { id: 'foo' },
@@ -193,7 +192,6 @@ describe('CrowdstrikeActionsClient class', () => {
             },
             agent: { id: ['1-2-3'] },
             meta: {
-              agentId: '1-2-3',
               hostName: 'Crowdstrike-1460',
             },
             user: { id: 'foo' },

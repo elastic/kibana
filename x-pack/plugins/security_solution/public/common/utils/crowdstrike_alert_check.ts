@@ -22,7 +22,9 @@ export const isTimelineEventItemAnAlert = (
 
 export const CROWDSTRIKE_AGENT_ID_FIELD = 'crowdstrike.event.DeviceId';
 
-export const getCrowdstrikeAgentId = (data: TimelineEventsDetailsItem[] | null) => {
+export const getCrowdstrikeAgentId = (
+  data: TimelineEventsDetailsItem[] | null
+): string | undefined => {
   return (
     getFieldValue({ category: 'crowdstrike', field: CROWDSTRIKE_AGENT_ID_FIELD }, data) || undefined
   );

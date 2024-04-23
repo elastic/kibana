@@ -35,12 +35,6 @@ export const HostIsolationPanel = React.memo(
     const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
     const crowdstrikeAgentId = useMemo(() => {
       return getCrowdstrikeAgentId(details);
-      // let id = getCrowdstrikeAgentId(details);
-      // // HARDCODED agent id for testing purposes - remove this IF statement when the agent id is available in the alert
-      // if (id) {
-      //   id = 'xxxxx';
-      // }
-      // return id;
     }, [details]);
 
     const hostName = useMemo(

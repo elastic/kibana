@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
+import { i18n } from '@kbn/i18n';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -598,3 +599,9 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
 export const getActionRequestExpiration = (): string => {
   return moment().add(2, 'weeks').toISOString();
 };
+
+export const ELASTIC_RESPONSE_ACTION_MESSAGE = (username?: string, responseActionId?: string) =>
+  i18n.translate('xpack.securitySolution.responseActions.comment.message', {
+    values: { username, responseActionId },
+    defaultMessage: `Action triggered from Elastic Security by user {username} for action {responseActionId}`,
+  });

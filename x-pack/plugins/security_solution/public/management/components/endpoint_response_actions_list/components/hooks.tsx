@@ -181,21 +181,28 @@ const useTypesFilterInitialState = ({
     'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
 
-  const getFilterOptions = ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
-    key,
-    label,
-    isGroupLabel: false,
-    checked,
-    'data-test-subj': `types-filter-option`,
-  });
+  const getFilterOptions = useCallback(
+    ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
+      key,
+      label,
+      isGroupLabel: false,
+      checked,
+      'data-test-subj': `types-filter-option`,
+    }),
+    []
+  );
 
   // action types filter options
-  const defaultFilterOptions = RESPONSE_ACTION_TYPE.map((type) =>
-    getFilterOptions({
-      key: type,
-      label: getTypeDisplayName(type),
-      checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
-    })
+  const defaultFilterOptions = useMemo(
+    () =>
+      RESPONSE_ACTION_TYPE.map((type) =>
+        getFilterOptions({
+          key: type,
+          label: getTypeDisplayName(type),
+          checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+        })
+      ),
+    [getFilterOptions, isFlyout, types]
   );
 
   // v8.13 onwards

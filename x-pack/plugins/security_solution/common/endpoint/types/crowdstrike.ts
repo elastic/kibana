@@ -6,8 +6,6 @@
  */
 
 export interface CrowdstrikeActionRequestCommonMeta {
-  /** The Crowdstrike agent id */
-  agentId: string;
   /** The host name */
   hostName: string;
 }
