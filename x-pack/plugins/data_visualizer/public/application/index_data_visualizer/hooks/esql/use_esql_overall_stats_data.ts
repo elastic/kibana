@@ -14,7 +14,7 @@ import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancell
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { getESQLWithSafeLimit, ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { getESQLWithSafeLimit, ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type {
@@ -82,14 +82,17 @@ const getESQLDocumentCountStats = async (
   let latestMs = -Infinity;
 
   if (timeFieldName) {
-    const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
-      timeFieldName
-    )}))
-    | stats rows = count(*) by _timestamp_`;
+    const aggQuery = appendToESQLQuery(
+      esqlBaseQuery,
+      ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
+        timeFieldName
+      )}))
+    | stats rows = count(*) by _timestamp_`
+    );
 
     const request = {
       params: {
-        query: esqlBaseQuery + aggQuery,
+        query: aggQuery,
         ...(filter ? { filter } : {}),
         version: ESQL_LATEST_VERSION,
       },
@@ -135,7 +138,7 @@ const getESQLDocumentCountStats = async (
     //  If not time field, get the total count
     const request = {
       params: {
-        query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
+        query: appendToESQLQuery(esqlBaseQuery, ' | STATS _count_ = COUNT(*)  | LIMIT 1'),
         ...(filter ? { filter } : {}),
         version: ESQL_LATEST_VERSION,
       },
