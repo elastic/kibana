@@ -44,10 +44,10 @@ export function streamReducer(
         const cpHistogram = action.payload.find(
           (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
         );
-        if (cpHistogram) {
-          cp.histogram = cpHistogram.histogram;
-        }
-        return cp;
+        return {
+          ...cp,
+          ...(cpHistogram ? { histogram: cpHistogram.histogram } : {}),
+        };
       });
       return { ...state, significantItems };
     case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP:
