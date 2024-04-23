@@ -47,9 +47,11 @@ function createComparisonDefinition(
   {
     name,
     description,
+    extraSignatures = [],
   }: {
     name: string;
     description: string;
+    extraSignatures?: FunctionDefinition['signatures'];
   },
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -82,6 +84,14 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
+      {
+        params: [
+          { name: 'left', type: 'ip' },
+          { name: 'right', type: 'ip' },
+        ],
+        returnType: 'boolean',
+      },
+      ...extraSignatures,
     ],
   };
 }
@@ -180,6 +190,15 @@ export const builtinFunctions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
         defaultMessage: 'Equal to',
       }),
+      extraSignatures: [
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+      ],
     },
     {
       name: '!=',
@@ -189,6 +208,15 @@ export const builtinFunctions: FunctionDefinition[] = [
           defaultMessage: 'Not equal to',
         }
       ),
+      extraSignatures: [
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+      ],
     },
     {
       name: '<',
