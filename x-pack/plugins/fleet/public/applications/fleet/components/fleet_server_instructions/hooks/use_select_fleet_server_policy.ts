@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 import { useGetEnrollmentSettings } from '../../../hooks';
 
@@ -15,18 +15,26 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   );
   const { isLoading, isInitialRequest, data, resendRequest } = useGetEnrollmentSettings();
 
+  const eligibleFleetServerPolicies = useMemo(
+    () =>
+      data?.fleet_server?.agent_policies
+        ? data?.fleet_server?.agent_policies?.filter((item) => !item.is_managed)
+        : [],
+    [data?.fleet_server?.agent_policies]
+  );
+
   useEffect(() => {
     // Default to the first policy found with a fleet server integration installed
-    if (data?.fleet_server?.agent_policies.length === 1 && !fleetServerPolicyId) {
-      setFleetServerPolicyId(data?.fleet_server?.agent_policies[0].id);
+    if (eligibleFleetServerPolicies.length === 1 && !fleetServerPolicyId) {
+      setFleetServerPolicyId(eligibleFleetServerPolicies[0].id);
     }
-  }, [data?.fleet_server, fleetServerPolicyId]);
+  }, [eligibleFleetServerPolicies, fleetServerPolicyId]);
 
   return {
     isSelectFleetServerPolicyLoading: isLoading && isInitialRequest,
     fleetServerPolicyId,
     setFleetServerPolicyId,
-    eligibleFleetServerPolicies: data?.fleet_server?.agent_policies || [],
+    eligibleFleetServerPolicies: eligibleFleetServerPolicies || [],
     refreshEligibleFleetServerPolicies: resendRequest,
   };
 };
