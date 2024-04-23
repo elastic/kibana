@@ -88,7 +88,6 @@ export function getEsQueryFromSavedSearch({
   const userFilters = filters;
 
   if (filterManager && userFilters) {
-    // @todo fix filterManager
     filterManager.addFilters(userFilters);
   }
 
@@ -118,7 +117,6 @@ export function getEsQueryFromSavedSearch({
       queryLanguage: userQuery.language as SearchQueryLanguage,
     };
   }
-
   // If no saved search available, use user's query and filters
   if (
     !savedSearch &&
@@ -127,7 +125,7 @@ export function getEsQueryFromSavedSearch({
     const combinedQuery = buildEsQuery(
       dataView,
       userQuery ?? [],
-      filterManager?.getFilters() ?? [],
+      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 
@@ -145,12 +143,12 @@ export function getEsQueryFromSavedSearch({
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     const currentFilters =
       userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
-    // @odo if (filterManager) filterManager.addFilters(currentFilters);
+    if (filterManager) filterManager.addFilters(currentFilters);
 
     const combinedQuery = buildEsQuery(
       dataView,
       currentQuery,
-      filterManager ? filterManager?.getFilters() : currentFilters,
+      filterManager ? [...filterManager?.getFilters(), ...currentFilters] : currentFilters,
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 

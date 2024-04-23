@@ -214,9 +214,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         dataView,
         savedSearch,
         query,
-        filters,
         visibleFieldNames: columns,
-        // onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
         totalDocuments,
@@ -250,37 +248,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     }
   }, [showPreviewByDefault, embeddableState$]);
 
-  // useEffect(() => {
-  //   let unmounted = false;
-  //   const loadEmbeddable = async () => {
-  //     if (services.embeddable) {
-  //       const factory = .getEmservices.embeddablebeddableFactory<
-  //         DataVisualizerGridEmbeddableInput,
-  //         DataVisualizerGridEmbeddableOutput
-  //       >('data_visualizer_grid');
-  //       if (factory) {
-  //         // Initialize embeddable with information available at mount
-  //         const initializedEmbeddable = await factory.create({
-  //           id: 'discover_data_visualizer_grid',
-  //           dataView,
-  //           savedSearch,
-  //           query,
-  //           showPreviewByDefault,
-  //           onAddFilter,
-  //         });
-  //         if (!unmounted) {
-  //           setEmbeddable(initializedEmbeddable);
-  //         }
-  //       }
-  //     }
-  //   };
-  //   loadEmbeddable();
-  //   return () => {
-  //     unmounted = true;
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [services.embeddable, showPreviewByDefault]);
-
   useEffect(() => {
     trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
 
@@ -289,8 +256,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
   const parentApi = useMemo(() => {
-    // @TODO: remove
-    console.log(`--@@parentApi updated`);
     return {
       embeddableState$,
       overrideServices: { data: { ...services.data, id: 'overriden' } },

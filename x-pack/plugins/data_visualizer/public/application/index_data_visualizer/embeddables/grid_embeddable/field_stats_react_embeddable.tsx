@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { type UnifiedFieldListSidebarContainerProps } from '@kbn/unified-field-list';
-import { cloneDeep } from 'lodash';
-import React, { useEffect, Suspense } from 'react';
-import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
-import {
-  apiHasParentApi,
-  apiPublishesTimeRange,
-  initializeTimeRange,
-  initializeTitles,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import React, { Suspense } from 'react';
+import { initializeTitles } from '@kbn/presentation-publishing';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
@@ -57,35 +46,15 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       const id = uuid.toString();
 
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState); // @TODO: remove
-      console.log(
-        `--@@titlesApi, titleComparators, serializeTitles`,
-        titlesApi,
-        titleComparators,
-        serializeTitles
-      );
       const api = buildApi(
         {
           ...titlesApi,
           ...titleComparators,
-          // dataViews: dataViews$,
           serializeState: () => {
-            // const dataViewId = selectedDataViewId$.getValue();
-            // const references: Reference[] = dataViewId
-            //   ? [
-            //       {
-            //         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-            //         name: FIELD_STATS_DATA_VIEW_REF_NAME,
-            //         id: dataViewId,
-            //       },
-            //     ]
-            //   : [];
             return {
               rawState: {
                 ...serializeTitles(),
-                // // here we skip serializing the dataViewId, because the reference contains that information.
-                // selectedFieldNames: selectedFieldNames$.getValue(),
               },
-              // references,
             };
           },
         },
@@ -97,10 +66,8 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       const startServices = await core.getStartServices();
 
       const I18nContext = startServices[0].i18n.Context;
-      const servicesToOverride = parentApi.overrideServices ?? {};
-      // @TODO: remove
-      console.log(`--@@servicesToOverride`, servicesToOverride);
 
+      const servicesToOverride = parentApi.overrideServices ?? {};
       const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };
       const datePickerDeps = {
         ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -110,13 +77,6 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       return {
         api,
         Component: () => {
-          // const [renderDataViews, selectedFieldNames] = useBatchedPublishingSubjects(
-          //   dataViews$,
-          //   selectedFieldNames$
-          // );
-
-          // const selectedDataView = renderDataViews?.[0];
-
           return (
             <I18nContext>
               <KibanaThemeProvider theme$={services.theme.theme$}>
@@ -126,7 +86,6 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
                       <LazyFieldStatsEmbeddableWrapper
                         id={uuid}
                         embeddableState$={parentApi.embeddableState$}
-                        onOutputChange={(output) => console.log(output)}
                         onAddFilter={parentApi.onAddFilter}
                       />
                     </Suspense>
