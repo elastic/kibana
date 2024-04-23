@@ -40,6 +40,10 @@ import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 import { registerAssistantFunctions } from './assistant_functions';
+import { getRandomSampler } from './lib/helpers/get_random_sampler';
+import { getApmEventClient } from './lib/helpers/get_apm_event_client';
+import { getApmAlertsClient } from './lib/helpers/get_apm_alerts_client';
+import { getMlClient } from './lib/helpers/get_ml_client';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -217,6 +221,58 @@ export class APMPlugin
         plugins: resourcePlugins,
         ruleDataClient,
       })
+    );
+
+    plugins.observability.alertDetailsContextService.registerHandler(
+      async (requestContext, query) => {
+        const resources = {
+          getApmIndices: async () => {
+            const coreContext = await requestContext.core;
+            return plugins.apmDataAccess.getApmIndices(coreContext.savedObjects.client);
+          },
+          request: requestContext.request,
+          params: { query: { _inspect: false } },
+          plugins: resourcePlugins,
+          context: {
+            core: requestContext.core,
+            licensing: Promise.resolve(requestContext.licensing),
+            alerting: resourcePlugins.alerting!.start().then((startContract) => {
+              return {
+                getRulesClient() {
+                  return startContract.getRulesClientWithRequest(requestContext.request);
+                },
+              };
+            }),
+            rac: resourcePlugins.ruleRegistry.start().then((startContract) => {
+              return {
+                getAlertsClient() {
+                  return startContract.getRacClientWithRequest(requestContext.request);
+                },
+              };
+            }),
+          },
+        };
+
+        const [apmEventClient, annotationsClient, apmAlertsClient, coreContext, mlClient] =
+          await Promise.all([
+            getApmEventClient(resources),
+            resourcePlugins.observability.setup.getScopedAnnotationsClient(
+              resources.context,
+              requestContext.request
+            ),
+            getApmAlertsClient(resources),
+            requestContext.core,
+            getMlClient(resources),
+            getRandomSampler({
+              security: resourcePlugins.security,
+              probability: 1,
+              request: requestContext.request,
+            }),
+          ]);
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+        return '';
+      }
     );
 
     return { config$ };
