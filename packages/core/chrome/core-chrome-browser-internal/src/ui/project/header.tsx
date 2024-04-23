@@ -73,7 +73,7 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   redirectAppLinksContainer: css`
     min-width: 0; // needed to enable breadcrumbs truncation
   `,
-  navcontrols: css`
+  leftNavcontrols: css`
     .navcontrols__separator {
       display: flex;
       margin-right: ${size.xs};
@@ -224,7 +224,7 @@ export const ProjectHeader = ({
                 />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem css={headerCss.navcontrols}>
+              <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
                 <HeaderNavControls
                   side="left"
                   navControls$={observables.navControlsLeft$}
