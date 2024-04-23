@@ -16,8 +16,7 @@ steps:
   # - wait
 
   - command: TEST_PACKAGE=fips .buildkite/scripts/steps/package_testing/test.sh
-    label: 'Smoke testing for FIPS'
+    label: "Smoke testing for FIPS"
     agents:
       queue: n2-4-virt
-    timeout_in_minutes: 60
     soft_fail: true
