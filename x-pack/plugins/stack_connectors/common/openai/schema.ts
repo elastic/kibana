@@ -30,6 +30,7 @@ export const RunActionParamsSchema = schema.object({
   body: schema.string(),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 const AIMessage = schema.object({
@@ -98,6 +99,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   temperature: schema.maybe(schema.number()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -118,6 +120,7 @@ export const StreamActionParamsSchema = schema.object({
   stream: schema.boolean({ defaultValue: false }),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const StreamingResponseSchema = schema.any();

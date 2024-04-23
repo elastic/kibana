@@ -58,6 +58,19 @@ Object {
       ],
       "type": "any",
     },
+    "timeout": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
   },
   "preferences": Object {
     "stripUnknown": Object {
@@ -159,6 +172,19 @@ Object {
         },
       ],
       "type": "any",
+    },
+    "timeout": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
     },
   },
   "preferences": Object {
@@ -331,6 +357,19 @@ Object {
       ],
       "type": "number",
     },
+    "timeout": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
   },
   "preferences": Object {
     "stripUnknown": Object {
@@ -490,6 +529,19 @@ Object {
       "type": "string",
     },
     "temperature": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
+    "timeout": Object {
       "flags": Object {
         "default": [Function],
         "error": [Function],
