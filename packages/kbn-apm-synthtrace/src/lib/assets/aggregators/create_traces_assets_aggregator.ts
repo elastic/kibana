@@ -8,9 +8,9 @@
 
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { identity, noop } from 'lodash';
-import { assetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
+import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
 
-export const createAssetsAggregator = assetsAggregatorFactory<ApmFields>();
+export const createAssetsAggregator = createAssetsAggregatorFactory<ApmFields>();
 
 const KEY_FIELDS: Array<keyof ApmFields> = ['service.name'];
 
@@ -18,7 +18,6 @@ export function createTracesAssetsAggregator() {
   return createAssetsAggregator(
     {
       filter: (event) => event['processor.event'] === 'transaction',
-
       getAggregateKey: (event) => {
         // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event as ApmFields, KEY_FIELDS as Array<keyof ApmFields>);
