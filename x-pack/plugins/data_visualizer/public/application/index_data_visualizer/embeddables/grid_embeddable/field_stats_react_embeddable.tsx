@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { type UnifiedFieldListSidebarContainerProps } from '@kbn/unified-field-list';
 import { cloneDeep } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
 import {
   apiHasParentApi,
@@ -21,8 +21,13 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { FIELD_STATS_DATA_VIEW_REF_NAME, FIELD_STATS_ID } from './constants';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { pick } from 'lodash';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { FIELD_STATS_EMBED_ID } from './constants';
 import type { FieldListApi, FieldListSerializedStateState } from './types';
+import { EmbeddableLoading } from './embeddable_loading_fallback';
 
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
   return {
@@ -35,78 +40,23 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
   };
 };
 
-export const getFieldStatsTableFactory = (
-  core: CoreStart,
-  plugins: DataVisualizerStartDependencies
-) => {
+const LazyFieldStatsEmbeddableWrapper = React.lazy(
+  () => import('./field_stats_embeddable_wrapper')
+);
+
+export const getFieldStatsTableFactory = (core: CoreStart) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
     FieldListSerializedStateState,
     FieldListApi
   > = {
-    type: FIELD_STATS_ID,
+    type: FIELD_STATS_EMBED_ID,
     deserializeState: (state) => {
-      // @TODO: remove
-      console.log(`--@@state`, state.rawState);
       return state.rawState;
-      // const serializedState = cloneDeep(state.rawState) as FieldListSerializedStateState;
-      // // inject the reference
-      // const dataViewIdRef = state.references?.find(
-      //   (ref) => ref.name === FIELD_STATS_DATA_VIEW_REF_NAME
-      // );
-      // // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-      // if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
-      //   serializedState.dataViewId = dataViewIdRef?.id;
-      // }
-      // return serializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
-      console.log(
-        '--@@initialState, buildAp, uuid, parentApi',
-        initialState,
-        buildApi,
-        uuid,
-        parentApi
-      );
-      console.log('--@@getFieldStatsTableFactory plugins ', plugins);
+      const id = uuid.toString();
 
-      const subscriptions = new Subscription();
-      // const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
-
-      // const dataViews = plugins.data.dataViews;
-      // // set up data views
-      // const [allDataViews, defaultDataViewId] = await Promise.all([
-      //   dataViews.getIdsWithTitle(),
-      //   dataViews.getDefaultId(),
-      // ]);
-      // if (!defaultDataViewId || allDataViews.length === 0) {
-      //   throw new Error(
-      //     i18n.translate('embeddableExamples.unifiedFieldList.noDefaultDataViewErrorMessage', {
-      //       defaultMessage: 'The field list must be used with at least one Data View present',
-      //     })
-      //   );
-      // }
-      // const initialDataViewId = initialState.dataViewId ?? defaultDataViewId;
-      // const initialDataView = await dataViews.get(initialDataViewId);
-      // const selectedDataViewId$ = new BehaviorSubject<string | undefined>(initialDataViewId);
-      // const dataViews$ = new BehaviorSubject<DataView[] | undefined>([initialDataView]);
-
-      // subscriptions.add(
-      //   selectedDataViewId$
-      //     .pipe(
-      //       skip(1),
-      //       switchMap((dataViewId) => dataViews.get(dataViewId ?? defaultDataViewId))
-      //     )
-      //     .subscribe((nextSelectedDataView) => {
-      //       dataViews$.next([nextSelectedDataView]);
-      //     })
-      // );
-
-      // const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
-      //   initialState.selectedFieldNames
-      // );
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
-
-      // @TODO: remove
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState); // @TODO: remove
       console.log(
         `--@@titlesApi, titleComparators, serializeTitles`,
         titlesApi,
@@ -144,8 +94,19 @@ export const getFieldStatsTableFactory = (
         }
       );
 
+      const startServices = await core.getStartServices();
+
+      const I18nContext = startServices[0].i18n.Context;
+      const servicesToOverride = parentApi.overrideServices ?? {};
       // @TODO: remove
-      console.log(`--@@api`, api);
+      console.log(`--@@servicesToOverride`, servicesToOverride);
+
+      const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };
+      const datePickerDeps = {
+        ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+        uiSettingsKeys: UI_SETTINGS,
+      };
+
       return {
         api,
         Component: () => {
@@ -156,17 +117,23 @@ export const getFieldStatsTableFactory = (
 
           // const selectedDataView = renderDataViews?.[0];
 
-          // On destroy
-          useEffect(() => {
-            return () => {
-              subscriptions.unsubscribe();
-            };
-          }, []);
-
           return (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <div>Test</div>
-            </EuiFlexGroup>
+            <I18nContext>
+              <KibanaThemeProvider theme$={services.theme.theme$}>
+                <KibanaContextProvider services={services}>
+                  <DatePickerContextProvider {...datePickerDeps}>
+                    <Suspense fallback={<EmbeddableLoading />}>
+                      <LazyFieldStatsEmbeddableWrapper
+                        id={uuid}
+                        embeddableState$={parentApi.embeddableState$}
+                        onOutputChange={(output) => console.log(output)}
+                        onAddFilter={parentApi.onAddFilter}
+                      />
+                    </Suspense>
+                  </DatePickerContextProvider>
+                </KibanaContextProvider>
+              </KibanaThemeProvider>
+            </I18nContext>
           );
         },
       };

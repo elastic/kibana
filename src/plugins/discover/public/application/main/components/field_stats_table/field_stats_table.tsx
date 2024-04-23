@@ -13,9 +13,6 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
-  ErrorEmbeddable,
-  IEmbeddable,
-  isErrorEmbeddable,
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -23,9 +20,11 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
@@ -61,6 +60,24 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   totalDocuments?: number;
   samplingOption?: SamplingOption;
 }
+
+export interface FieldStatisticTableEmbeddableState {
+  dataView: DataView;
+  savedSearch?: SavedSearch;
+  query?: Query | AggregateQuery;
+  visibleFieldNames?: string[];
+  filters?: Filter[];
+  showPreviewByDefault?: boolean;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
+  fieldsToFetch?: string[];
+  totalDocuments?: number;
+  samplingOption?: SamplingOption;
+}
+
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
 }
@@ -111,6 +128,20 @@ export interface FieldStatisticsTableProps {
   searchSessionId?: string;
 }
 
+const statsTableCss = css({
+  width: '100%',
+  height: '100%',
+  overflowY: 'auto',
+  '.kbnDocTableWrapper': {
+    overflowX: 'hidden',
+  },
+});
+
+const embeddableEuiPanelCss = css({
+  height: 'auto',
+  minHeight: 'auto',
+});
+
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     dataView,
@@ -127,11 +158,12 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
 
   const services = useDiscoverServices();
-  const [embeddable, setEmbeddable] = useState<
-    | ErrorEmbeddable
-    | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
-    | undefined
-  >();
+
+  const embeddableState$ = useMemo(
+    () => new BehaviorSubject<FieldStatisticTableEmbeddableState | undefined>(),
+    []
+  );
+
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
@@ -141,81 +173,88 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
   useEffect(() => {
     const availableFields$ = stateContainer?.dataState.data$.availableFields$;
-    const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-      if (output.showDistributions !== undefined && stateContainer) {
-        stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
-      }
-    });
+    // @todo
+    // const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
+    //   if (output.showDistributions !== undefined && stateContainer) {
+    //     stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
+    //   }
+    // });
 
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
-      if (embeddable && !isErrorEmbeddable(embeddable)) {
-        embeddable.updateInput({ lastReloadRequestTime: Date.now() });
+      if (embeddableState$) {
+        embeddableState$.next({
+          ...embeddableState$.getValue(),
+          lastReloadRequestTime: Date.now(),
+        });
       }
     });
 
     const fields = availableFields$?.subscribe(() => {
-      if (embeddable && !isErrorEmbeddable(embeddable) && !availableFields$?.getValue().error) {
-        embeddable.updateInput({ fieldsToFetch: availableFields$?.getValue().fields });
+      if (embeddableState$ && !availableFields$?.getValue().error) {
+        embeddableState$.next({
+          ...embeddableState$.getValue(),
+          fieldsToFetch: availableFields$?.getValue().fields,
+        });
       }
     });
 
     return () => {
-      sub?.unsubscribe();
+      // sub?.unsubscribe();
       refetch?.unsubscribe();
       fields?.unsubscribe();
+      embeddableState$?.unsubscribe();
     };
-  }, [embeddable, stateContainer]);
+  }, [embeddableState$, stateContainer]);
 
-  // useEffect(() => {
-  //   if (embeddable && !isErrorEmbeddable(embeddable)) {
-  //     // Update embeddable whenever one of the important input changes
-  //     embeddable.updateInput({
-  //       dataView,
-  //       savedSearch,
-  //       query,
-  //       filters,
-  //       visibleFieldNames: columns,
-  //       onAddFilter,
-  //       sessionId: searchSessionId,
-  //       fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
-  //       totalDocuments,
-  //       samplingOption: {
-  //         mode: 'normal_sampling',
-  //         shardSize: 5000,
-  //         seed: searchSessionId,
-  //       } as NormalSamplingOption,
-  //     });
-  //     embeddable.reload();
-  //   }
-  // }, [
-  //   embeddable,
-  //   dataView,
-  //   savedSearch,
-  //   query,
-  //   columns,
-  //   filters,
-  //   onAddFilter,
-  //   searchSessionId,
-  //   totalDocuments,
-  //   stateContainer,
-  // ]);
+  const [state, setState] = useState();
+  useEffect(() => {
+    if (embeddableState$) {
+      // Update embeddable whenever one of the important input changes
+      embeddableState$.next({
+        dataView,
+        savedSearch,
+        query,
+        filters,
+        visibleFieldNames: columns,
+        // onAddFilter,
+        sessionId: searchSessionId,
+        fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
+        totalDocuments,
+        samplingOption: {
+          mode: 'normal_sampling',
+          shardSize: 5000,
+          seed: searchSessionId,
+        } as NormalSamplingOption,
+      });
+    }
+  }, [
+    embeddableState$,
+    dataView,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    onAddFilter,
+    searchSessionId,
+    totalDocuments,
+    stateContainer,
+  ]);
 
-  // useEffect(() => {
-  //   if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
-  //     // Update embeddable whenever one of the important input changes
-  //     embeddable.updateInput({
-  //       showPreviewByDefault,
-  //     });
-
-  //     embeddable.reload();
-  //   }
-  // }, [showPreviewByDefault, embeddable]);
+  useEffect(() => {
+    if (showPreviewByDefault && embeddableState$) {
+      // Update embeddable whenever one of the important input changes
+      embeddableState$.next({
+        ...embeddableState$.getValue(),
+        showPreviewByDefault,
+      });
+    }
+  }, [showPreviewByDefault, embeddableState$]);
 
   // useEffect(() => {
   //   let unmounted = false;
   //   const loadEmbeddable = async () => {
   //     if (services.embeddable) {
-  //       const factory = services.embeddable.getEmbeddableFactory<
+  //       const factory = .getEmservices.embeddablebeddableFactory<
   //         DataVisualizerGridEmbeddableInput,
   //         DataVisualizerGridEmbeddableOutput
   //       >('data_visualizer_grid');
@@ -242,29 +281,22 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [services.embeddable, showPreviewByDefault]);
 
-  // // We can only render after embeddable has already initialized
-  // useEffect(() => {
-  //   if (embeddableRoot.current && embeddable) {
-  //     embeddable.render(embeddableRoot.current);
+  useEffect(() => {
+    trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
 
-  //     trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
-  //   }
+    return () => {};
+  }, [trackUiMetric]);
 
-  //   return () => {
-  //     // Clean up embeddable upon unmounting
-  //     embeddable?.destroy();
-  //   };
-  // }, [embeddable, embeddableRoot, trackUiMetric]);
-
-  const statsTableCss = css`
-    overflow-y: auto;
-
-    .kbnDocTableWrapper {
-      overflow-x: hidden;
-    }
-  `;
-  const rawState = {};
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
+  const parentApi = useMemo(() => {
+    // @TODO: remove
+    console.log(`--@@parentApi updated`);
+    return {
+      embeddableState$,
+      overrideServices: { data: { ...services.data, id: 'overriden' } },
+      onAddFilter,
+    };
+  }, [embeddableState$, services.data, onAddFilter]);
 
   return (
     <EuiFlexItem css={statsTableCss}>
@@ -272,11 +304,18 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         maybeId={'discover_data_visualizer_grid'}
         type={'data_visualizer_grid'}
         state={{
-          rawState,
+          rawState: embeddableState$.getValue() ?? {},
         }}
-        // parentApi={parentApi}
+        parentApi={parentApi}
         onApiAvailable={(api) => {
           embeddableApi.current = api;
+        }}
+        panelProps={{
+          css: embeddableEuiPanelCss,
+          hideHeader: true,
+          hideInspector: true,
+          showShadow: false,
+          showBorder: false,
         }}
       />
     </EuiFlexItem>

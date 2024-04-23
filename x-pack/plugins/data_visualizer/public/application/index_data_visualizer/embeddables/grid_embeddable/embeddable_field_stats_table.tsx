@@ -23,9 +23,11 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 export const EmbeddableFieldStatsTableWrapper = ({
   input,
   onOutputChange,
+  onAddFilter,
 }: {
   input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>;
   onOutputChange?: (ouput: any) => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -64,7 +66,7 @@ export const EmbeddableFieldStatsTableWrapper = ({
               item={item}
               dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={input.onAddFilter}
+              onAddFilter={onAddFilter}
               totalDocuments={input.totalDocuments}
             />
           );
@@ -72,7 +74,7 @@ export const EmbeddableFieldStatsTableWrapper = ({
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [input, searchQueryLanguage, searchString]
+    [input, searchQueryLanguage, searchString, onAddFilter]
   );
 
   if (progress === 100 && configs.length === 0) {

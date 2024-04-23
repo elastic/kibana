@@ -15,8 +15,8 @@ import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_ho
 import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 import type { ConfigSchema } from '../common/app';
-import { FIELD_STATS_ID } from './application/index_data_visualizer/embeddables/grid_embeddable/constants';
-import { createFieldStatsGridAction } from './application/index_data_visualizer/embeddables/grid_embeddable/ui_actions/create_field_stats_embeddable_ui_action';
+import { FIELD_STATS_EMBED_ID } from './application/index_data_visualizer/embeddables/grid_embeddable/constants';
+import { registerFieldStatsUIActions } from './application/index_data_visualizer/embeddables/grid_embeddable/ui_actions/create_field_stats_embeddable_ui_action';
 import type {
   DataVisualizerCoreSetup,
   DataVisualizerPluginSetup,
@@ -53,11 +53,15 @@ export class DataVisualizerPlugin
     }
 
     if (plugins.uiActions) {
-      const createFieldStatsAction = createFieldStatsGridAction(core.getStartServices);
-      plugins.uiActions.registerAction(createFieldStatsAction);
+      registerFieldStatsUIActions(core, plugins.uiActions);
     }
 
-    // registerEmbeddables(plugins.embeddable, core);
+    registerReactEmbeddableFactory(FIELD_STATS_EMBED_ID, async () => {
+      const { getFieldStatsTableFactory } = await import(
+        './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_react_embeddable'
+      );
+      return getFieldStatsTableFactory(core);
+    });
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 
@@ -68,20 +72,6 @@ export class DataVisualizerPlugin
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
     } = getComponents(this.resultsLinks);
-    // registerCreateFieldListAction(deps.uiActions);
-    // registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
-    //   const { getFieldListFactory } = await import(
-    //     './react_embeddables/field_list/field_list_react_embeddable'
-    //   );
-    //   return getFieldListFactory(core, deps);
-    // });
-
-    registerReactEmbeddableFactory(FIELD_STATS_ID, async () => {
-      const { getFieldStatsTableFactory } = await import(
-        './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_react_embeddable'
-      );
-      return getFieldStatsTableFactory(core, plugins);
-    });
 
     return {
       getFileDataVisualizerComponent,

@@ -11,17 +11,17 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { DataVisualizerCoreSetup } from '../../../../common/types/data_visualizer_plugin';
-import { FIELD_STATS_ID } from '../constants';
+import { FIELD_STATS_EMBED_ID, CREATE_FIELD_STATS_ACTION_ID } from '../constants';
+
 export const PLUGIN_ID = 'ml';
 export const PLUGIN_ICON = 'machineLearningApp';
 export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
   defaultMessage: 'Machine Learning',
 });
 
-export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
-
-export type CreateSwimlanePanelActionContext = EmbeddableApiContext & {
-  // embeddable: AnomalySwimLaneEmbeddableApi;
+export type CreateFieldStatsPanelActionContext = EmbeddableApiContext & {
+  // @todo
+  // embeddable: FieldStatisticEmbeddableApi;
 };
 
 const parentApiIsCompatible = async (
@@ -32,58 +32,11 @@ const parentApiIsCompatible = async (
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
-export function createFieldStatsGridAction(
+function createFieldStatsGridAction(
   getStartServices: DataVisualizerCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateSwimlanePanelActionContext> {
-  // @TODO: remove
-  console.log(`--@@createFieldStatsGridAction called`, {
-    id: 'create-field-stats-table',
-    grouping: [
-      {
-        id: PLUGIN_ID,
-        getDisplayName: () => ML_APP_NAME,
-        getIconType: () => PLUGIN_ICON,
-      },
-    ],
-    getDisplayName: () =>
-      i18n.translate('xpack.dataVisualizer.fieldStatsTable.displayName', {
-        defaultMessage: 'Field statistics',
-      }),
-    getDisplayNameTooltip: () =>
-      i18n.translate('xpack.dataVisualizer.fieldStatsTable.description', {
-        defaultMessage: 'Visualize field statistics.',
-      }),
-    async isCompatible(context: EmbeddableApiContext) {
-      // @todo fix logic
-      return Boolean(true);
-    },
-    async execute(context) {
-      // const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
-      // if (!presentationContainerParent) throw new IncompatibleActionError();
-
-      // const [coreStart, deps] = await getStartServices();
-
-      try {
-        // const { resolveAnomalySwimlaneUserInput } = await import(
-        //   '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-        // );
-
-        // const initialState = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
-        const initialState = {};
-        presentationContainerParent.addNewPanel({
-          panelType: FIELD_STATS_ID,
-          initialState: {
-            ...initialState,
-            title: initialState.panelTitle,
-          },
-        });
-      } catch (e) {
-        return Promise.reject();
-      }
-    },
-  });
+): UiActionsActionDefinition<CreateFieldStatsPanelActionContext> {
   return {
-    id: 'create-field-stats-table',
+    id: CREATE_FIELD_STATS_ACTION_ID,
     grouping: [
       {
         id: PLUGIN_ID,
@@ -101,31 +54,35 @@ export function createFieldStatsGridAction(
       }),
     async isCompatible(context: EmbeddableApiContext) {
       // @todo fix logic
-      return Boolean(true);
+      return true;
     },
     async execute(context) {
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      // const [coreStart, deps] = await getStartServices();
-
       try {
-        // const { resolveAnomalySwimlaneUserInput } = await import(
-        //   '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-        // );
-
-        // const initialState = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
         const initialState = {};
         presentationContainerParent.addNewPanel({
-          panelType: 'ml_anomaly_swimlane',
+          panelType: FIELD_STATS_EMBED_ID,
           initialState: {
             ...initialState,
             title: initialState.panelTitle,
           },
         });
       } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
         return Promise.reject();
       }
     },
   };
+}
+
+export function registerFieldStatsUIActions(
+  core: DataVisualizerCoreSetup['getStartServices'],
+  uiActions: UiActionsPublicStart
+): UiActionsActionDefinition<CreateFieldStatsPanelActionContext> {
+  const createFieldStatsAction = createFieldStatsGridAction(core.getStartServices);
+  uiActions.registerAction(createFieldStatsAction);
+  uiActions.attachAction('ADD_PANEL_TRIGGER', CREATE_FIELD_STATS_ACTION_ID);
 }

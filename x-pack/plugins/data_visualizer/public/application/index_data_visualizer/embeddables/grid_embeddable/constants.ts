@@ -6,6 +6,5 @@
  */
 
 export const DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE = 'data_visualizer_grid';
-export const FIELD_STATS_ID = 'data_visualizer_grid';
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
-export const FIELD_STATS_DATA_VIEW_REF_NAME = 'data_visualizer_grid__data_view_id';
+export const FIELD_STATS_EMBED_ID = 'data_visualizer_grid';
+export const CREATE_FIELD_STATS_ACTION_ID = 'create-field-stats-table';

@@ -8,6 +8,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -30,6 +31,7 @@ export const GeoPointContentWithMap: FC<{
   const {
     services: { maps: mapsPlugin, data },
   } = useDataVisualizerKibana();
+  const isMounted = useMountedState();
 
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
@@ -83,16 +85,19 @@ export const GeoPointContentWithMap: FC<{
               type: 'ESQL',
               applyForceRefresh: true,
             };
-
-            setLayerList([
-              ...layerList,
-              {
-                ...searchLayerDescriptor,
-                sourceDescriptor: esqlSourceDescriptor,
-              },
-            ]);
+            if (isMounted()) {
+              setLayerList([
+                ...layerList,
+                {
+                  ...searchLayerDescriptor,
+                  sourceDescriptor: esqlSourceDescriptor,
+                },
+              ]);
+            }
           } else {
-            setLayerList([...layerList, searchLayerDescriptor]);
+            if (isMounted()) {
+              setLayerList([...layerList, searchLayerDescriptor]);
+            }
           }
         }
       }

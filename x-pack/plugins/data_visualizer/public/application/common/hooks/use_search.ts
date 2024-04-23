@@ -26,6 +26,8 @@ export const useSearch = (
     },
   } = useDataVisualizerKibana().services;
 
+  // @TODO: remove
+  console.log(`--@@filterManager`, filterManager);
   useEffect(
     function clearFiltersOnLeave() {
       return () => {

@@ -88,6 +88,7 @@ export function getEsQueryFromSavedSearch({
   const userFilters = filters;
 
   if (filterManager && userFilters) {
+    // @todo fix filterManager
     filterManager.addFilters(userFilters);
   }
 
@@ -144,7 +145,7 @@ export function getEsQueryFromSavedSearch({
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     const currentFilters =
       userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
-    if (filterManager) filterManager.addFilters(currentFilters);
+    // @odo if (filterManager) filterManager.addFilters(currentFilters);
 
     const combinedQuery = buildEsQuery(
       dataView,
