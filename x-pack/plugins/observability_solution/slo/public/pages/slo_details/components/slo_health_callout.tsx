@@ -59,6 +59,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 <EuiCopy textToCopy={getSLOTransformId(slo.id, slo.revision)}>
                   {(copy) => (
                     <EuiButtonIcon
+                      data-test-subj="sloSloHealthCalloutButton"
                       aria-label="Copy text to clipboard"
                       color="text"
                       iconType="copy"
@@ -74,6 +75,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 <EuiCopy textToCopy={getSLOSummaryTransformId(slo.id, slo.revision)}>
                   {(copy) => (
                     <EuiButtonIcon
+                      data-test-subj="sloSloHealthCalloutButton"
                       aria-label="Copy text to clipboard"
                       color="text"
                       iconType="copy"
@@ -87,6 +89,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="sloSloHealthCalloutInspectTransformButton"
             color="warning"
             fill
             href={http?.basePath.prepend('/app/management/data/transform')}
