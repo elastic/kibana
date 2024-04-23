@@ -209,7 +209,7 @@ describe('createFilterInActionFactory', () => {
 
 describe('addFilterIn', () => {
   describe('negate is provided', () => {
-    it('should create a negate fillter if negate is true', () => {
+    it('should create a negate filter if negate is true', () => {
       addFilterIn({
         filterManager: mockFilterManager,
         fieldName,
