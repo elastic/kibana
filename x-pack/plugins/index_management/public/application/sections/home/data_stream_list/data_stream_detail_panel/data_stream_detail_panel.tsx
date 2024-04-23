@@ -8,6 +8,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { omit } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -221,7 +222,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       </EuiLink>
     );
 
-    const defaultDetails = [
+    let defaultDetails = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
           defaultMessage: 'Health',
@@ -310,7 +311,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
-          defaultMessage: 'Data retention',
+          defaultMessage: 'Effective data retention',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
           defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.`,
@@ -326,6 +327,27 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         dataTestSubj: 'dataRetentionDetail',
       },
     ];
+
+    // If both rentention types are available, we wanna surface to the user both
+    if (lifecycle?.effective_retention && lifecycle?.data_retention) {
+      defaultDetails.push({
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTitle', {
+          defaultMessage: 'Data retention',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTooltip', {
+          defaultMessage: `This is the data retention defined by you, but the effective retention is the one being enforced.`,
+        }),
+        content: (
+          <ConditionalWrap
+            condition={isDataStreamFullyManagedByILM(dataStream)}
+            wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
+          >
+            <>{getLifecycleValue(omit(lifecycle, ['effective_retention']))}</>
+          </ConditionalWrap>
+        ),
+        dataTestSubj: 'dataRetentionDetail',
+      });
+    }
 
     const managementDetails = getManagementDetails();
     const details = [...defaultDetails, ...managementDetails];
