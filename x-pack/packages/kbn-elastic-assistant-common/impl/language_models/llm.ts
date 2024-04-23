@@ -10,14 +10,12 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
 import { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
-
-const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
-const DEFAULT_TEMPERATURE = 0;
 
 interface ActionsClientLlmParams {
   actions: ActionsPluginStart;
@@ -27,6 +25,7 @@ interface ActionsClientLlmParams {
   request: KibanaRequest;
   model?: string;
   temperature?: number;
+  timeout?: number;
   traceId?: string;
   traceOptions?: TraceOptions;
 }
@@ -37,6 +36,7 @@ export class ActionsClientLlm extends LLM {
   #logger: Logger;
   #request: KibanaRequest;
   #traceId: string;
+  #timeout?: number;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -54,6 +54,7 @@ export class ActionsClientLlm extends LLM {
     model,
     request,
     temperature,
+    timeout,
     traceOptions,
   }: ActionsClientLlmParams) {
     super({
@@ -66,6 +67,7 @@ export class ActionsClientLlm extends LLM {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
+    this.#timeout = timeout;
     this.model = model;
     this.temperature = temperature;
   }
@@ -98,9 +100,9 @@ export class ActionsClientLlm extends LLM {
         subActionParams: {
           model: this.model,
           messages: [assistantMessage], // the assistant message
-          ...(this.llmType === 'openai'
-            ? { n: 1, stop: null, temperature: this.temperature ?? DEFAULT_OPEN_AI_TEMPERATURE }
-            : { temperature: this.temperature ?? DEFAULT_TEMPERATURE, stopSequences: [] }),
+          ...getDefaultArguments(this.llmType, this.temperature),
+          // This timeout is large because LangChain prompts can be complicated and take a long time
+          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
         },
       },
     };
