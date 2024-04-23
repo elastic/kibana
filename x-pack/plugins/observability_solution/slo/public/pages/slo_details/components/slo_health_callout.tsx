@@ -49,11 +49,11 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           <FormattedMessage
             id="xpack.slo.sloDetails.healthCallout.description"
             defaultMessage="The following {count, plural, one {transform is} other {transforms are}
-          } in a bad state, please investigate the error on the transform management page."
+          } in an unhealthy state:"
             values={{ count }}
           />
           <ul>
-            {health.rollup !== 'unhealthy' && (
+            {health.rollup === 'unhealthy' && (
               <li>
                 {getSLOTransformId(slo.id, slo.revision)}
                 <EuiCopy textToCopy={getSLOTransformId(slo.id, slo.revision)}>
@@ -68,7 +68,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 </EuiCopy>
               </li>
             )}
-            {health.summary !== 'unhealthy' && (
+            {health.summary === 'unhealthy' && (
               <li>
                 {getSLOSummaryTransformId(slo.id, slo.revision)}
                 <EuiCopy textToCopy={getSLOSummaryTransformId(slo.id, slo.revision)}>
@@ -93,7 +93,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           >
             <FormattedMessage
               id="xpack.slo.sloDetails.healthCallout.buttonTransformLabel"
-              defaultMessage="Inspect"
+              defaultMessage="Inspect transform"
             />
           </EuiButton>
         </EuiFlexItem>
