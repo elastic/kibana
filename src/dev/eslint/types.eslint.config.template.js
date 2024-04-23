@@ -23,6 +23,15 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',
-    '@typescript-eslint/no-floating-promises': 'error',
   },
+  overrides: [
+    {
+      files: ['server/**/*'],
+      rules: {
+        // Let's focus on server-side errors first to avoid server crashes.
+        // We'll tackle /public eventually.
+        '@typescript-eslint/no-floating-promises': 'error',
+      },
+    },
+  ],
 };
