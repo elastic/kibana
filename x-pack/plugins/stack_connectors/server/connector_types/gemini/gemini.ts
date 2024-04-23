@@ -7,8 +7,10 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-// import aws from 'aws4';
 import { AxiosError, Method } from 'axios';
+import axios from 'axios';
+// import { VertexAI } from '@google-cloud/vertexai';
+
 // import { IncomingMessage } from 'http';
 // import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -38,22 +40,26 @@ import {
 } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
+interface Part {
+  text: string;
+}
 
-interface GeminiRequestBody {
-  contents: {
+interface Content {
+  parts: Part[];
+  role: string;
+}
+
+interface Candidate {
+  content: {
     parts: {
       text: string;
     }[];
-  }[];
+  };
 }
 
-
-// interface SignedRequest {
-//   host: string;
-//   headers: Record<string, string>;
-//   body: string;
-//   path: string;
-// }
+interface Data {
+  candidates: Candidate[];
+}
 
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -123,38 +129,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
   }
 
   /**
-   * provides the AWS signature to the external API endpoint
-   * @param body The request body to be signed.
-   * @param path The path of the request URL.
-   */
-  // private signRequest(body: string, path: string, stream: boolean) {
-  //   const { host } = new URL(this.url);
-  //   return aws.sign(
-  //     {
-  //       host,
-  //       headers: stream
-  //         ? {
-  //             accept: 'application/vnd.amazon.eventstream',
-  //             'Content-Type': 'application/json',
-  //             'x-amzn-gemini-accept': '*/*',
-  //           }
-  //         : {
-  //             'Content-Type': 'application/json',
-  //             Accept: '*/*',
-  //           },
-  //       body,
-  //       path,
-  //       // Despite AWS docs, this value does not always get inferred. We need to always send it
-  //       service: 'gemini',
-  //     },
-  //     {
-  //       secretAccessKey: this.secrets.secret,
-  //       accessKeyId: this.secrets.accessKey,
-  //     }
-  //   ) as SignedRequest;
-  // }
-
-  /**
    *  retrieves a dashboard from the Kibana server and checks if the
    *  user has the necessary privileges to access it.
    * @param dashboardId The ID of the dashboard to retrieve.
@@ -190,29 +164,61 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     return { available: response.success };
   }
 
-  private async runApiDeprecated(
-    params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
-  ): Promise<RunActionResponse> {
-    const response = await this.request(params);
-    return response.data;
-  }
-
   private async runApiLatest(
     params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
-    const response = await this.request(params);
-    console.log('RESPONSE', response);
-    // keeping the response the same as claude 2 for our APIs
-    // adding the usage object for better token tracking
-    return {
-      completion: parseContent(response.data.content)
+
+    /** Call via the JS SDK
+     
+        const genAI = new GoogleGenerativeAI(this.secrets.apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-pro"});  
+        const prompt = 'Write a story about a magic backpack';
+        
+        let text = 'Testing this function!';
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        text = response.text();
+        console.log('TEXT', text);
+     */
+    
+    
+    /** REST call with error handling
       
-    };
-    // return {
-    //   completion: parseContent(response.data.content),
-    //   stop_reason: response.data.stop_reason,
-    //   usage: response.data.usage,
-    // };
+    * try {
+            const response = await axios.request(params);
+            console.log('Response:', response.data);
+        } catch (error) {
+            // Check if the error is an AxiosError
+            if (axios.isAxiosError(error)) {
+                // Retrieve detailed error information
+                const axiosError = error as AxiosError;
+                if (axiosError.response) {
+                    // The request was made and the server responded with a status code
+                    console.error('Response data:', axiosError.response.data);
+                    console.error('Status code:', axiosError.response.status);
+                    console.error('Headers:', axiosError.response.headers);
+                    console.error('Message:', axiosError.message);
+                } else if (axiosError.request) {
+                    // The request was made but no response was received
+                    console.error('Request:', axiosError.request);
+                } else {
+                    // Something happened in setting up the request that triggered an error
+                    console.error('Error:', axiosError.message);
+                }
+            } else {
+                // Other types of errors (e.g., network error)
+                console.error('Error:', error.message);
+            }
+        }
+    */
+
+    const response = await this.request(params);
+    const candidate = response.data.candidates[0];
+    const completionText = candidate.content.parts[0].text;
+    console.log("Content:", candidate.content.parts[0].text);
+
+    return { completion: completionText }
   }
 
   /**
@@ -223,193 +229,39 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     // const currentModel = reqModel ?? this.model;
-    const apiKey = this.apiKey
-//     const generationConfig = {
-//       stopSequences: ["red"],
-//       maxOutputTokens: 200,
-//       temperature: 0,
-//       topP: 0.1,
-//       topK: 16,
-//     };
-
-//     // Access your API key as an environment variable (see "Set up your API key" above)
-//     const genAI = new GoogleGenerativeAI(apiKey);
-//     // For text-only input, use the gemini-pro model
-//     const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig});
-
-//     const prompt = "Write a story about a magic backpack."
-// // 
-//     const result = await model.generateContent(prompt);
-//     const response = await result.response;
-//     const text = response.text();
-//     return {
-//       completion: text
-//     };
-    
-  const requestBody: GeminiRequestBody = {
-    contents: [
-      {
-        parts: [
-          {
-            text: "Write a story about a magic backpack"
-          }
-        ]
-      }
-    ]
-  };
+    const apiKey = this.secrets.apiKey
+    console.log('API_KEY', apiKey);
 
     const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`
-    // const path = `/model/${currentModel}/invoke`;
-    // const signed = this.signRequest(body, path, false);
     const requestArgs = {
-      // ...signed,
       url: `${this.url}${path}`,
       method: 'post' as Method,
-      data: requestBody,
+      data: body,
+      headers: { 
+        'Content-Type': 'application/json'
+      },
       // give up to 2 minutes for response
       timeout: 120000,
     };
-    // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
-    // if (usesDeprecatedArguments(body)) {
-    //   return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
-    // }
+    
     return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
-  /**
-   *  NOT INTENDED TO BE CALLED DIRECTLY
-   *  call invokeStream instead
-   *  responsible for making a POST request to a specified URL with a given request body.
-   *  The response is then processed based on whether it is a streaming response or a regular response.
-   * @param body The stringified request body to be sent in the POST request.
-   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
-   */
-  // private async streamApi({
-  //   body,
-  //   model: reqModel,
-  // }: StreamActionParams): Promise<StreamingResponse> {
-  //   // set model on per request basis
-  //   const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
-  //   const signed = this.signRequest(body, path, true);
-
-  //   const response = await this.request({
-  //     ...signed,
-  //     url: `${this.url}${path}`,
-  //     method: 'post',
-  //     responseSchema: StreamingResponseSchema,
-  //     data: body,
-  //     responseType: 'stream',
-  //   });
-
-  //   return response.data.pipe(new PassThrough());
-  // }
-
-  /**
-   *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
-   *  request to the Gemini API with the formatted messages and model. It then returns a Transform stream
-   *  that pipes the response from the API through the transformToString function,
-   *  which parses the proprietary response into a string of the response text alone
-   * @param messages An array of messages to be sent to the API
-   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
-   */
-  // public async invokeStream({
-  //   messages,
-  //   model,
-  //   stopSequences,
-  //   system,
-  //   temperature,
-  // }: InvokeAIActionParams): Promise<IncomingMessage> {
-  //   const res = (await this.streamApi({
-  //     body: JSON.stringify(formatGeminiBody({ messages, stopSequences, system, temperature })),
-  //     model,
-  //   })) as unknown as IncomingMessage;
-  //   return res;
-  // }
-
-  /**
-   * Deprecated. Use invokeStream instead.
-   * TODO: remove once streaming work is implemented in langchain mode for security solution
-   * tracked here: https://github.com/elastic/security-team/issues/7363
-   */
   public async invokeAI({
     messages,
     model,
-    stopSequences,
-    system,
-    temperature,
+    // stopSequences,
+    // system,
+    // temperature,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+    console.log('BEFORE RUN_API CALL');
     const res = await this.runApi({
-      body: JSON.stringify(formatGeminiBody({ messages, stopSequences, system, temperature })),
+      body: JSON.stringify({ messages }),
       model,
     });
-    return { message: res.completion.trim() };
+    console.log('AFTER RUN_API CALL');
+    return { message: res.completion };
   }
 }
 
 
-
-
-const formatGeminiBody = ({
-  messages,
-  stopSequences,
-  temperature = 0,
-  system,
-}: {
-  messages: Array<{ role: string; content: string }>;
-  stopSequences?: string[];
-  temperature?: number;
-  // optional system message to be sent to the API
-  system?: string;
-}) => ({
-  gemini_version: 'Gemini-2023-05-31',
-  ...ensureMessageFormat(messages, system),
-  max_tokens: DEFAULT_TOKEN_LIMIT,
-  stop_sequences: stopSequences,
-  temperature,
-});
-
-/**
- * Ensures that the messages are in the correct format for the Bedrock API
- * Bedrock only accepts assistant and user roles.
- * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
- * We combine the messages into a single message to avoid this error
- * @param messages
- */
-const ensureMessageFormat = (
-  messages: Array<{ role: string; content: string }>,
-  systemPrompt?: string
-): { messages: Array<{ role: string; content: string }>; system?: string } => {
-  let system = systemPrompt ? systemPrompt : '';
-
-  const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
-    const lastMessage = acc[acc.length - 1];
-    if (lastMessage && lastMessage.role === m.role) {
-      // Bedrock only accepts assistant and user roles.
-      // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
-      return [
-        ...acc.slice(0, -1),
-        { content: `${lastMessage.content}\n${m.content}`, role: m.role },
-      ];
-    }
-    if (m.role === 'system') {
-      system = `${system.length ? `${system}\n` : ''}${m.content}`;
-      return acc;
-    }
-
-    // force role outside of system to ensure it is either assistant or user
-    return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
-  }, []);
-  return system.length ? { system, messages: newMessages } : { messages: newMessages };
-};
-
-function parseContent(content: Array<{ text?: string; type: string }>): string {
-  let parsedContent = '';
-  if (content.length === 1 && content[0].type === 'text' && content[0].text) {
-    parsedContent = content[0].text;
-  } else if (content.length > 1) {
-    parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
-  }
-  return parsedContent;
-}
-
-const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
