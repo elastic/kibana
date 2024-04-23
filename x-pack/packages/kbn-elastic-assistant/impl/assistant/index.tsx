@@ -358,7 +358,12 @@ const AssistantComponent: React.FC<Props> = ({
     }
     // when scrollHeight changes, parent is scrolled to bottom
     parent.scrollTop = parent.scrollHeight;
-  });
+
+    if (isFlyoutMode) {
+      // @ts-expect-error
+      commentsContainerRef.current?.childNodes[0].childNodes[0].lastElementChild?.scrollIntoView();
+    }
+  }, [isFlyoutMode]);
 
   const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
     isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
