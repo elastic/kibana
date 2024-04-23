@@ -267,15 +267,16 @@ export const getMaxClauseCountErrorValue = (
       console.error('tempVal', tempVal);
 
       // minus 1 since the max clause count value is exclusive
-      // const val = (tempVal - 1) / (threatEntriesCount + 1);
-      const val = Math.ceil((tempVal - 1) / 10); // INDICATOR_PER_PAGE);
+      const val = Math.ceil((tempVal - 1) / (2 * threatEntriesCount)); // 10); // INDICATOR_PER_PAGE);
       console.error('WHAT IS VAL', val);
+      // throw Error('OOPS');
       return val;
     } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
       console.error('MULTIPLE');
       const tempVal = parseInt(foundMaxClauseCountValue, 10);
       // minus 1 since the max clause count value is exclusive
-      const val = (tempVal - 1) / (threatEntriesCount + 1);
+      const val = (tempVal - 1) / threatEntriesCount;
+      // throw Error('OOPS 2');
 
       return val;
     } else {

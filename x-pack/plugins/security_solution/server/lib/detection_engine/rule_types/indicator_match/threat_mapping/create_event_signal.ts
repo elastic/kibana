@@ -97,20 +97,33 @@ export const createEventSignal = async ({
 
     // console.error('THREAT SEARCH PARAMS', JSON.stringify(threatSearchParams.threatFilters));
 
-    // let signalsQueryMap;
-    // try {
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
-      threatSearchParams,
-      eventsCount: currentEventList.length,
-      signalValueMap: getSignalValueMap({
-        eventList: currentEventList, //.slice(0, 99),
-        threatMatchedFields,
-      }),
-      termsQueryAllowed: true,
-    });
-    // } catch (exc) {
-    //   console.error('WHAT WAS THE GET SIGNALS QUERY MAP ERROR', exc);
-    // }
+    let signalsQueryMap;
+    try {
+      signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+        threatSearchParams,
+        eventsCount: currentEventList.length,
+        signalValueMap: getSignalValueMap({
+          eventList: currentEventList, //.slice(0, 99),
+          threatMatchedFields,
+        }),
+        termsQueryAllowed: true,
+      });
+    } catch (exc) {
+      console.error('WHAT WAS THE GET SIGNALS QUERY MAP ERROR', exc);
+      // we receive an error if the event list count < threat list count
+      // which puts us into the create_event_signal which differs from create threat signal
+      // in that we call getSignalsQueryMapFromThreatIndex which can *throw* an error
+      // rather than *return* one.
+      console.error('ERROR CAUGHT', exc);
+      if (
+        exc.message.includes('Query contains too many nested clauses; maxClauseCount is set to')
+      ) {
+        // @ts-expect-error
+        return { errors: [exc.message] };
+      } else {
+        throw exc;
+      }
+    }
 
     const ids = Array.from(signalsQueryMap.keys());
     const indexFilter = {

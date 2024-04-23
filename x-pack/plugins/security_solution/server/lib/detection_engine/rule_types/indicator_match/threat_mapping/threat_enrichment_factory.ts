@@ -51,6 +51,8 @@ export const threatEnrichmentFactory = ({
         },
       };
 
+      console.error('CALLING GET THREAT LIST 3');
+
       const threatResponse = await getThreatList({
         ...threatSearchParams,
         threatListConfig: {

@@ -10,6 +10,8 @@ import { firstValueFrom } from 'rxjs';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { uniq, chunk } from 'lodash/fp';
+import { isEmpty } from 'lodash';
+
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import type {
@@ -73,6 +75,7 @@ export const createThreatSignals = async ({
   experimentalFeatures,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
+  console.error('WHAT ARE THREAT MATCH FIELDS', JSON.stringify(threatMatchedFields, null, 2));
   const threatFieldsLength = threatMatchedFields.threat.length;
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
     services,
@@ -178,6 +181,7 @@ export const createThreatSignals = async ({
   }) => {
     let list;
     try {
+      console.error('ABOUT TO CALL GET DOCUMENT LIST (getThreatList)');
       list = await getDocumentList({ searchAfter: undefined });
     } catch (exc) {
       console.error('WAS THERE AN EXC', exc);
@@ -193,8 +197,10 @@ export const createThreatSignals = async ({
       ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
-
+      console.error('LOOPING CONCURRENT SEARCHES');
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
+
+      // console.error('SEARCHES PERFORMED', searchesPerformed);
 
       // Did our searches fail with an error containing the maxClauseCount
       // error message?
@@ -294,9 +300,13 @@ export const createThreatSignals = async ({
           break;
         }
 
-        list = await getDocumentList({
-          searchAfter: sortIds,
-        });
+        try {
+          list = await getDocumentList({
+            searchAfter: sortIds,
+          });
+        } catch (exc) {
+          console.error('ANOTHER ERROR', exc);
+        }
       }
     }
   };
@@ -313,6 +323,10 @@ export const createThreatSignals = async ({
   // at the same time, there are concerns on performance of IM rule when sorting is set to asc, as it may lead to longer rule runs, since it will
   // first go through alerts that might ve been processed in earlier executions, when look back interval set to large values (it can't be larger than 24h)
   const sortOrder = isAlertSuppressionConfigured ? 'asc' : 'desc';
+
+  console.error(
+    `WHAT IS EVENT COUNT: ${eventCount} and what is threatListCount: ${threatListCount}`
+  );
 
   if (eventCount < threatListCount) {
     await createSignals({

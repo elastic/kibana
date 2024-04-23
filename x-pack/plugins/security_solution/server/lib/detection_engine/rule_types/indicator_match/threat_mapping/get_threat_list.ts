@@ -58,10 +58,22 @@ export const getThreatList = async ({
   );
 
   // threat filters is really big for some reason.
-  // console.error('WHAT ARE THREAT FILTERS', JSON.stringify(threatFilters, null, 2));
+  // console.error('WHAT ARE THREAT FILTERS', JSON.stringify(threatFilters));
   // console.error('WHAT IS THE QUERY', JSON.stringify(query, null, 2));
 
-  // console.error('WHAT IS THE QUERYFILTER', queryFilter);
+  console.error(
+    'WHAT ARE THREAT FILTERS 1 ',
+    JSON.stringify(threatFilters?.[1]?.query?.bool?.should?.[0].bool.should.length)
+  );
+
+  console.error(
+    'WHAT ARE THREAT FILTERS 2',
+    JSON.stringify(threatFilters?.[1]?.query?.bool?.should?.length)
+  );
+
+  console.error('WHAT IS THE QUERYFILTER', queryFilter.bool.filter.length);
+  // console.error('WHAT IS THE QUERYFILTER', queryFilter.query.bool.should[0].bool.filter.length);
+  // console.error('WHAT IS THE QUERYFILTER', queryFilter.query.bool.should.length);
 
   // try {
   const response = await esClient.search<
@@ -89,7 +101,7 @@ export const getThreatList = async ({
 
   return response;
   // } catch (exc) {
-  //   console.error('GET THREAT LIST EXC', exc);
+  // console.error('GET THREAT LIST EXC', exc);
   // }
 };
 

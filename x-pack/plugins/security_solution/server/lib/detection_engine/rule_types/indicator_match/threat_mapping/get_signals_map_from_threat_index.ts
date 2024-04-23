@@ -86,6 +86,8 @@ export async function getSignalsQueryMapFromThreatIndex(
     }
   };
 
+  console.error('CALLING GET THREAT LIST 1');
+
   threatList = await getThreatList({ ...threatSearchParams, searchAfter: undefined });
 
   while (maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0) {
@@ -126,6 +128,8 @@ export async function getSignalsQueryMapFromThreatIndex(
         }
       });
     });
+
+    console.error('CALLING GET THREAT LIST 2');
 
     threatList = await getThreatList({
       ...threatSearchParams,

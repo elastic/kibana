@@ -12,6 +12,7 @@ import { singleSearchAfter } from '../../utils/single_search_after';
 import { buildEventsSearchQuery } from '../../utils/build_events_query';
 
 export const MAX_PER_PAGE = 9000;
+// export const MAX_PER_PAGE = 5000;
 
 export const getEventList = async ({
   services,
