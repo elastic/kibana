@@ -99,9 +99,7 @@ describe('Service overview page', () => {
         cy.visitKibana(apmMobileServiceOverview);
 
         cy.location().should((loc) => {
-          expect(loc.pathname).to.eq(
-            '/app/apm/mobile-services/synth-ios/overview'
-          );
+          expect(loc.pathname).to.eq('/app/apm/mobile-services/synth-ios/overview');
         });
       });
     });
@@ -119,9 +117,7 @@ describe('Service overview page', () => {
         cy.visitKibana(apmMobileServiceOverview);
 
         cy.location().should((loc) => {
-          expect(loc.pathname).to.eq(
-            '/app/apm/mobile-services/synth-android/overview'
-          );
+          expect(loc.pathname).to.eq('/app/apm/mobile-services/synth-android/overview');
         });
       });
     });

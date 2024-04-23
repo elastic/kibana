@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-import { HostAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 import { pod } from './pod';

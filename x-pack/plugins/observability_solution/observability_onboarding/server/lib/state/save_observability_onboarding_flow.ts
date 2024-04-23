@@ -22,10 +22,7 @@ export async function saveObservabilityOnboardingFlow({
   observabilityOnboardingState,
   savedObjectId,
 }: Options): Promise<SavedObservabilityOnboardingFlow> {
-  let savedObject: Omit<
-    SavedObject<ObservabilityOnboardingFlow>,
-    'attributes' | 'references'
-  >;
+  let savedObject: Omit<SavedObject<ObservabilityOnboardingFlow>, 'attributes' | 'references'>;
   if (savedObjectId) {
     savedObject = await savedObjectsClient.update<ObservabilityOnboardingFlow>(
       OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
