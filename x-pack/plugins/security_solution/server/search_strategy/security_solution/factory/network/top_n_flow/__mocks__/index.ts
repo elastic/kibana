@@ -1092,14 +1092,8 @@ export const expectedDsl = {
       },
     },
     _source: false,
-    fields: [
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };
 
@@ -1137,7 +1131,7 @@ export const expectedCountDsl = {
       },
     },
     _source: false,
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };
