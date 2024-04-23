@@ -44,7 +44,6 @@ else
   while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 fi
 
-# TODO add fips logs
 function echoKibanaLogs {
   if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
     echo "--- /var/log/kibana/kibana.log "
@@ -63,9 +62,6 @@ if [[ "$TEST_PACKAGE" == "fips" ]]; then
   set +e
   vagrant ssh $TEST_PACKAGE -t -c "/home/vagrant/kibana/.buildkite/scripts/steps/fips/smoke_test.sh"
   set -e
-
-  # TODO: Remove
-  sleep 1h
 else
   vagrant provision "$TEST_PACKAGE"
 
