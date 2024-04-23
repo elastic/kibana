@@ -23,9 +23,7 @@ export interface ObservabilityOnboardingRouteHandlerResources {
   plugins: {
     [key in keyof ObservabilityOnboardingPluginSetupDependencies]: {
       setup: Required<ObservabilityOnboardingPluginSetupDependencies>[key];
-      start: () => Promise<
-        Required<ObservabilityOnboardingPluginStartDependencies>[key]
-      >;
+      start: () => Promise<Required<ObservabilityOnboardingPluginStartDependencies>[key]>;
     };
   };
   core: {

@@ -8,10 +8,7 @@
 import type { SearchHit } from '@kbn/es-types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
@@ -43,14 +40,12 @@ export async function findExactConfiguration({
     },
   };
 
-  const agentConfig = await internalESClient.search<
-    AgentConfiguration,
-    typeof params
-  >('find_exact_agent_configuration', params);
+  const agentConfig = await internalESClient.search<AgentConfiguration, typeof params>(
+    'find_exact_agent_configuration',
+    params
+  );
 
-  const hit = agentConfig.hits.hits[0] as
-    | SearchHit<AgentConfiguration>
-    | undefined;
+  const hit = agentConfig.hits.hits[0] as SearchHit<AgentConfiguration> | undefined;
 
   if (!hit) {
     return;
@@ -79,10 +74,7 @@ async function getIsAppliedByAgent({
     return true;
   }
 
-  const appliedEtags = await getAgentConfigEtagMetrics(
-    apmEventClient,
-    agentConfiguration.etag
-  );
+  const appliedEtags = await getAgentConfigEtagMetrics(apmEventClient, agentConfiguration.etag);
 
   return appliedEtags.includes(agentConfiguration.etag);
 }

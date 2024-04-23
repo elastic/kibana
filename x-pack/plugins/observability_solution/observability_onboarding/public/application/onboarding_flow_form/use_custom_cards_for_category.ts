@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  reactRouterNavigate,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { CustomCard, FeaturedCard } from '../packages_list/types';
@@ -26,14 +23,8 @@ export function useCustomCardsForCategory(
   const location = useLocation();
   const getUrlForApp = useKibana()?.services.application?.getUrlForApp;
 
-  const { href: systemLogsUrl } = reactRouterNavigate(
-    history,
-    `/systemLogs/${location.search}`
-  );
-  const { href: customLogsUrl } = reactRouterNavigate(
-    history,
-    `/customLogs/${location.search}`
-  );
+  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
 
   switch (category) {
     case 'apm':
@@ -42,8 +33,7 @@ export function useCustomCardsForCategory(
           id: 'apm-generated',
           type: 'generated',
           title: 'Elastic APM',
-          description:
-            'Collect distributed traces from your applications with Elastic APM',
+          description: 'Collect distributed traces from your applications with Elastic APM',
           name: 'apm',
           categories: ['observability'],
           icons: [
@@ -97,8 +87,7 @@ export function useCustomCardsForCategory(
           id: 'aws-generated',
           type: 'generated',
           title: 'AWS',
-          description:
-            'Collect logs and metrics from Amazon Web Services (AWS)',
+          description: 'Collect logs and metrics from Amazon Web Services (AWS)',
           name: 'aws',
           categories: ['observability'],
           icons: [],
@@ -129,8 +118,7 @@ export function useCustomCardsForCategory(
           id: 'system-logs',
           type: 'generated',
           title: 'Stream host system logs',
-          description:
-            'The quickest path to onboard log data from your own machine or server',
+          description: 'The quickest path to onboard log data from your own machine or server',
           name: 'system-logs-generated',
           categories: ['observability'],
           icons: [
@@ -144,12 +132,11 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         {
-          id: 'logs-logs',
+          id: 'custom-logs',
           type: 'generated',
           title: 'Stream log files',
-          description:
-            'Stream any logs into Elastic in a simple way and explore their data',
-          name: 'logs-logs-generated',
+          description: 'Stream any logs into Elastic in a simple way and explore their data',
+          name: 'custom-logs-generated',
           categories: ['observability'],
           icons: [
             {

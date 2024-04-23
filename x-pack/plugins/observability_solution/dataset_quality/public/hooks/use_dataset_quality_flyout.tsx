@@ -20,6 +20,7 @@ export const useDatasetQualityFlyout = () => {
     dataset: dataStreamStat,
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
+    breakdownField,
   } = useSelector(service, (state) => state.context.flyout);
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
@@ -36,5 +37,6 @@ export const useDatasetQualityFlyout = () => {
     dataStreamDetailsLoading,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
+    breakdownField,
   };
 };

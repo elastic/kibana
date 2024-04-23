@@ -24,8 +24,7 @@ export function FilmstripTransition({
         position: 'relative',
         zIndex: 0,
         transitionTimingFunction: 'ease-in-out',
-        transition:
-          transition !== 'ready' ? `transform ${duration}ms` : undefined,
+        transition: transition !== 'ready' ? `transform ${duration}ms` : undefined,
         transform:
           transition === 'ready'
             ? 'translateX(0)'
@@ -54,8 +53,7 @@ export function FilmstripFrame({
               position: 'absolute',
               width: '100%',
               height: '100%',
-              transform:
-                position === 'left' ? 'translateX(-200%)' : 'translateX(200%)',
+              transform: position === 'left' ? 'translateX(-200%)' : 'translateX(200%)',
               pointerEvents: 'none',
             }
           : undefined
