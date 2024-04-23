@@ -12441,6 +12441,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval round(case(false, 0, 1))",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval 1 anno",
       "error": [
         "EVAL does not support [date_period] in expression [1 anno]"

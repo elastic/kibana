@@ -1804,6 +1804,7 @@ describe('validation logic', () => {
         `from a_index | eval result = case(false, 0, 1) | stats sum(result)`,
         []
       );
+      testErrorsAndWarnings(`from a_index | eval round(case(false, 0, 1))`, []);
 
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [

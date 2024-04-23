@@ -380,7 +380,9 @@ export function isEqualType(
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
-      return fnDef.signatures.some((signature) => argType === signature.returnType);
+      return fnDef.signatures.some(
+        (signature) => signature.returnType === 'any' || argType === signature.returnType
+      );
     }
   }
   if (arg.type === 'timeInterval') {
