@@ -34,7 +34,8 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/logging",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/doc-links"
   ],
   "exclude": [
     "target/**/*",
