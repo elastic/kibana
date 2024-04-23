@@ -247,6 +247,10 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       if (globalFilters) {
         filterManager?.addFilters(globalFilters);
       }
+      return () => {
+        filterManager?.removeAll();
+        queryString.clearQuery();
+      };
     },
     [requestParamsFromUrl.filters, requestParamsFromUrl.query, filterManager, queryString]
   );
