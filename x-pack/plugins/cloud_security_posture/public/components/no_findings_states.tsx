@@ -30,7 +30,7 @@ import {
 } from './test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails, PostureTypes } from '../../common/types_old';
+import type { IndexDetails, PostureTypes, CspStatusCode } from '../../common/types_old';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
@@ -169,7 +169,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
   />
 );
 
-const ConfigurationFindingsInstalledEmptyPrompt = ({
+const EmptySecurityFindingsPrompt = ({
   kspmIntegrationLink,
   cspmIntegrationLink,
 }: {
@@ -242,6 +242,37 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
   );
 };
 
+const NoFindingsStatesNotification = ({
+  postureType,
+  status,
+  unprivilegedIndices,
+  isNotInstalled,
+  kspmIntegrationLink,
+  cspmIntegrationLink,
+}: {
+  postureType: PostureTypes;
+  status: CspStatusCode | undefined;
+  unprivilegedIndices: string[] | undefined;
+  isNotInstalled: boolean;
+  kspmIntegrationLink?: string;
+  cspmIntegrationLink?: string;
+}) => {
+  if (status === 'unprivileged')
+    return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />;
+  if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />;
+  if (status === 'index-timeout') return <IndexTimeout />;
+  if (isNotInstalled)
+    return (
+      <EmptySecurityFindingsPrompt
+        kspmIntegrationLink={kspmIntegrationLink}
+        cspmIntegrationLink={cspmIntegrationLink}
+      />
+    );
+  if (status === 'not-deployed') return <NotDeployed postureType={postureType} />;
+
+  return null;
+};
+
 /**
  * This component will return the render states based on cloud posture setup status API
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
@@ -254,7 +285,7 @@ export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes })
   const statusCspm = getSetupStatus.data?.cspm?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
   const status = postureType === 'cspm' ? statusCspm : statusKspm;
-  const showConfigurationInstallPrompt =
+  const isNotInstalled =
     getSetupStatus.data?.kspm?.status === 'not-installed' &&
     getSetupStatus.data?.cspm?.status === 'not-installed';
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
@@ -266,24 +297,19 @@ export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes })
       .filter((idxDetails) => idxDetails.status === 'unprivileged')
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
-  const render = () => {
-    if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />; // agent added, index timeout hasn't passed since installation
-    if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
-    if (status === 'unprivileged')
-      return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
-    if (showConfigurationInstallPrompt)
-      return (
-        <ConfigurationFindingsInstalledEmptyPrompt
-          kspmIntegrationLink={kspmIntegrationLink}
-          cspmIntegrationLink={cspmIntegrationLink}
-        />
-      );
-    if (status === 'not-deployed') return <NotDeployed postureType={postureType} />; // integration installed, but no agents added
-  };
 
   return (
     <CloudPosturePage query={getSetupStatus}>
-      <FullSizeCenteredPage>{render()}</FullSizeCenteredPage>
+      <FullSizeCenteredPage>
+        <NoFindingsStatesNotification
+          postureType={postureType}
+          status={status}
+          unprivilegedIndices={unprivilegedIndices}
+          isNotInstalled={isNotInstalled}
+          kspmIntegrationLink={kspmIntegrationLink}
+          cspmIntegrationLink={cspmIntegrationLink}
+        />
+      </FullSizeCenteredPage>
     </CloudPosturePage>
   );
 };
