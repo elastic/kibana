@@ -97,5 +97,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/slo-plugin",
   ]
 }
