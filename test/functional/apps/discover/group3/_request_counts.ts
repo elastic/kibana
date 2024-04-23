@@ -62,7 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .getEntries()
           .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
       );
-      return requests.filter((entry) => entry.name.includes(`/internal/search/${type}`)).length;
+      return requests.filter((entry) =>
+        type === 'esql'
+          ? entry.name.includes(`/internal/search/${type}`)
+          : entry.name.endsWith(`/internal/search/${type}`)
+      ).length;
     };
 
     const waitForLoadingToFinish = async () => {
