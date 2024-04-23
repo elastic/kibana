@@ -16,11 +16,10 @@ import { type SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import {
-  useLogRateAnalysisReduxActions,
-  usePinnedGroup,
-  useSelectedGroup,
-  usePinnedSignificantItem,
-  useSelectedSignificantItem,
+  setPinnedSignificantItem,
+  setSelectedSignificantItem,
+  useAppDispatch,
+  useAppSelector,
 } from '@kbn/aiops-components';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
@@ -60,12 +59,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = usePinnedGroup();
-  const selectedGroup = useSelectedGroup();
-  const pinnedSignificantItem = usePinnedSignificantItem();
-  const selectedSignificantItem = useSelectedSignificantItem();
+  const pinnedGroup = useAppSelector((s) => s.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.selectedGroup);
+  const pinnedSignificantItem = useAppSelector((s) => s.pinnedSignificantItem);
+  const selectedSignificantItem = useAppSelector((s) => s.selectedSignificantItem);
 
-  const { setPinnedSignificantItem, setSelectedSignificantItem } = useLogRateAnalysisReduxActions();
+  const dispatch = useAppDispatch();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -156,7 +155,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       selectedGroup === null &&
       pinnedGroup === null
     ) {
-      setSelectedSignificantItem(pageOfItems[0]);
+      dispatch(setSelectedSignificantItem(pageOfItems[0]));
     }
 
     // If a user switched pages and a pinned row is no longer visible
@@ -167,13 +166,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       selectedGroup === null &&
       pinnedGroup === null
     ) {
-      setPinnedSignificantItem(null);
+      dispatch(setPinnedSignificantItem(null));
     }
   }, [
+    dispatch,
     selectedGroup,
     selectedSignificantItem,
-    setSelectedSignificantItem,
-    setPinnedSignificantItem,
     pageOfItems,
     pinnedGroup,
     pinnedSignificantItem,
@@ -183,11 +181,11 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   // make sure to reset any hovered or pinned rows.
   useEffect(
     () => () => {
-      setSelectedSignificantItem(null);
-      setPinnedSignificantItem(null);
+      dispatch(setSelectedSignificantItem(null));
+      dispatch(setPinnedSignificantItem(null));
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+
+    [dispatch]
   );
 
   const getRowStyle = (significantItem: SignificantItem) => {
@@ -241,18 +239,18 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
               significantItem.fieldName === pinnedSignificantItem?.fieldName &&
               significantItem.fieldValue === pinnedSignificantItem?.fieldValue
             ) {
-              setPinnedSignificantItem(null);
+              dispatch(setPinnedSignificantItem(null));
             } else {
-              setPinnedSignificantItem(significantItem);
+              dispatch(setPinnedSignificantItem(significantItem));
             }
           },
           onMouseEnter: () => {
             if (pinnedSignificantItem === null) {
-              setSelectedSignificantItem(significantItem);
+              dispatch(setSelectedSignificantItem(significantItem));
             }
           },
           onMouseLeave: () => {
-            setSelectedSignificantItem(null);
+            dispatch(setSelectedSignificantItem(null));
           },
           style: getRowStyle(significantItem),
         };

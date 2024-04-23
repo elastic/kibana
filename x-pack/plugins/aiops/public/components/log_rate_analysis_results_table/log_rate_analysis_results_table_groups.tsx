@@ -31,9 +31,10 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
 import {
-  usePinnedGroup,
-  useLogRateAnalysisReduxActions,
-  useSelectedGroup,
+  setPinnedGroup,
+  setSelectedGroup,
+  useAppDispatch,
+  useAppSelector,
   type GroupTableItem,
 } from '@kbn/aiops-components';
 
@@ -95,9 +96,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = usePinnedGroup();
-  const selectedGroup = useSelectedGroup();
-  const { setPinnedGroup, setSelectedGroup } = useLogRateAnalysisReduxActions();
+  const pinnedGroup = useAppSelector((s) => s.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.selectedGroup);
+  const dispatch = useAppDispatch();
   const dataViewId = dataView.id;
   const isMounted = useMountedState();
 
@@ -338,25 +339,24 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       pinnedGroup === null &&
       pageOfItems.length > 0
     ) {
-      setSelectedGroup(pageOfItems[0]);
+      dispatch(setSelectedGroup(pageOfItems[0]));
     }
 
     // If a user switched pages and a pinned row is no longer visible
     // on the current page, set the status of pinned rows back to `null`.
     if (pinnedGroup !== null && !pageOfItems.some((item) => isEqual(item, pinnedGroup))) {
-      setPinnedGroup(null);
+      dispatch(setPinnedGroup(null));
     }
-  }, [selectedGroup, setSelectedGroup, setPinnedGroup, pageOfItems, pinnedGroup]);
+  }, [dispatch, selectedGroup, pageOfItems, pinnedGroup]);
 
   // When the analysis results table unmounts,
   // make sure to reset any hovered or pinned rows.
   useEffect(
     () => () => {
-      setSelectedGroup(null);
-      setPinnedGroup(null);
+      dispatch(setSelectedGroup(null));
+      dispatch(setPinnedGroup(null));
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [dispatch]
   );
 
   useEffect(
@@ -420,18 +420,18 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           'data-test-subj': `aiopsLogRateAnalysisResultsGroupsTableRow row-${group.id}`,
           onClick: () => {
             if (group.id === pinnedGroup?.id) {
-              setPinnedGroup(null);
+              dispatch(setPinnedGroup(null));
             } else {
-              setPinnedGroup(group);
+              dispatch(setPinnedGroup(group));
             }
           },
           onMouseEnter: () => {
             if (pinnedGroup === null) {
-              setSelectedGroup(group);
+              dispatch(setSelectedGroup(group));
             }
           },
           onMouseLeave: () => {
-            setSelectedGroup(null);
+            dispatch(setSelectedGroup(null));
           },
           style: getRowStyle(group),
         };

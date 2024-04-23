@@ -41,8 +41,9 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DualBrush, DualBrushAnnotation } from '../..';
 
 import {
-  useInitialAnalysisStart,
-  useLogRateAnalysisReduxActions,
+  setAutoRunAnalysis,
+  useAppSelector,
+  useAppDispatch,
 } from '../log_rate_analysis_state_provider';
 
 import { BrushBadge } from './brush_badge';
@@ -129,7 +130,7 @@ export interface DocumentCountChartProps {
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
   /** Callback to set the autoRunAnalysis flag */
-  setAutoRunAnalysis?: SetAutoRunAnalysisFn;
+  setAutoRunAnalysisFn?: SetAutoRunAnalysisFn;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
   /** Optional style to override bar chart */
@@ -193,7 +194,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     interval,
     chartPointsSplitLabel,
     isBrushCleared,
-    setAutoRunAnalysis,
+    setAutoRunAnalysisFn,
     autoAnalysisStart,
     barColorOverride,
     barStyleAccessor,
@@ -318,7 +319,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          if (setAutoRunAnalysis) {
+          if (setAutoRunAnalysisFn) {
             const autoRun =
               typeof startRange !== 'number' ||
               (typeof startRange === 'number' &&
@@ -326,7 +327,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
                 startRange >= changePoint.startTs &&
                 startRange <= changePoint.endTs);
 
-            setAutoRunAnalysis(autoRun);
+            setAutoRunAnalysisFn(autoRun);
           }
 
           const wp = getWindowParametersForTrigger(
@@ -357,7 +358,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       timeRangeLatest,
       snapTimestamps,
       originalWindowParameters,
-      setAutoRunAnalysis,
+      setAutoRunAnalysisFn,
       setWindowParameters,
       brushSelectionUpdateHandler,
       adjustedChartPoints,
@@ -570,14 +571,14 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
  * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
  */
 export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
-  const { setAutoRunAnalysis } = useLogRateAnalysisReduxActions();
-  const initialAnalysisStart = useInitialAnalysisStart();
+  const dispatch = useAppDispatch();
+  const initialAnalysisStart = useAppSelector((s) => s.initialAnalysisStart);
 
   return (
     <DocumentCountChart
       {...props}
       autoAnalysisStart={initialAnalysisStart}
-      setAutoRunAnalysis={setAutoRunAnalysis}
+      setAutoRunAnalysisFn={(d: boolean) => dispatch(setAutoRunAnalysis(d))}
     />
   );
 };

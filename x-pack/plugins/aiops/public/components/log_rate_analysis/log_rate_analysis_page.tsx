@@ -19,9 +19,10 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import {
+  useAppDispatch,
   useCurrentSelectedSignificantItem,
   useCurrentSelectedGroup,
-  useLogRateAnalysisReduxActions,
+  setInitialAnalysisStart,
 } from '@kbn/aiops-components';
 
 import { useDataSource } from '../../hooks/use_data_source';
@@ -46,7 +47,7 @@ export const LogRateAnalysisPage: FC = () => {
 
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-  const { setInitialAnalysisStart } = useLogRateAnalysisReduxActions();
+  const dispatch = useAppDispatch();
 
   const [stateFromUrl, setUrlState] = usePageUrlState<LogRateAnalysisPageUrlState>(
     'logRateAnalysis',
@@ -146,7 +147,7 @@ export const LogRateAnalysisPage: FC = () => {
 
   useEffect(
     () => {
-      setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp));
+      dispatch(setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp)));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

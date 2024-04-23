@@ -26,10 +26,13 @@ import {
 } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import {
-  useAutoRunAnalysis,
+  clearAllRowState,
+  setAutoRunAnalysis,
+  setInitialAnalysisStart,
+  useAppDispatch,
+  useAppSelector,
   useCurrentSelectedGroup,
   useCurrentSelectedSignificantItem,
-  useLogRateAnalysisReduxActions,
   type GroupTableItem,
 } from '@kbn/aiops-components';
 
@@ -135,17 +138,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
-  const autoRunAnalysis = useAutoRunAnalysis();
+  const autoRunAnalysis = useAppSelector((s) => s.autoRunAnalysis);
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-  const {
-    setAutoRunAnalysis,
-    setInitialAnalysisStart,
-    setPinnedSignificantItem,
-    setPinnedGroup,
-    setSelectedSignificantItem,
-    setSelectedGroup,
-  } = useLogRateAnalysisReduxActions();
+  const dispatch = useAppDispatch();
 
   const { documentStats, earliest, latest } = useData(
     dataView,
@@ -178,12 +174,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   function clearSelection() {
     setWindowParameters(undefined);
-    setPinnedSignificantItem(null);
-    setPinnedGroup(null);
-    setSelectedSignificantItem(null);
-    setSelectedGroup(null);
     setIsBrushCleared(true);
-    setInitialAnalysisStart(undefined);
+
+    dispatch(clearAllRowState());
+    dispatch(setInitialAnalysisStart(undefined));
   }
 
   const barStyle = {
@@ -207,8 +201,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       : undefined;
 
   const triggerAnalysisForManualSelection = useCallback(() => {
-    setAutoRunAnalysis(true);
-  }, [setAutoRunAnalysis]);
+    dispatch(setAutoRunAnalysis(true));
+  }, [dispatch]);
 
   const triggerAnalysisForChangePoint = useCallback(() => {
     if (documentCountStats) {
@@ -227,10 +221,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
         triggerAnalysisForManualSelection();
-        setInitialAnalysisStart(wpSnap);
+        dispatch(setInitialAnalysisStart(wpSnap));
       }
     }
-  }, [documentCountStats, setInitialAnalysisStart, triggerAnalysisForManualSelection]);
+  }, [documentCountStats, dispatch, triggerAnalysisForManualSelection]);
 
   const showDocumentCountContent = documentCountStats !== undefined;
 

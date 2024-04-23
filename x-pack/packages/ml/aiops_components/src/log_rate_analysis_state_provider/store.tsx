@@ -8,8 +8,7 @@
 import React, { useMemo, type FC, type PropsWithChildren } from 'react';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
-import { useDispatch, useSelector, Provider } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { Provider } from 'react-redux';
 import useMount from 'react-use/lib/useMount';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -80,6 +79,18 @@ const logRateAnalysisSlice = createSlice({
   },
 });
 
+// Action creators are generated for each case reducer function
+export const {
+  clearAllRowState,
+  setAutoRunAnalysis,
+  setInitialAnalysisStart,
+  setPinnedGroup,
+  setPinnedSignificantItem,
+  setSelectedGroup,
+  setSelectedSignificantItem,
+  setStickyHistogram,
+} = logRateAnalysisSlice.actions;
+
 const getReduxStore = () =>
   configureStore({
     reducer: logRateAnalysisSlice.reducer,
@@ -99,19 +110,11 @@ export const LogRateAnalysisReduxProvider: FC<
       store.dispatch(logRateAnalysisSlice.actions.setInitialAnalysisStart(initialAnalysisStart));
     }
   });
+
   return <Provider store={store}>{children}</Provider>;
 };
 
-export const useLogRateAnalysisReduxActions = () => {
-  const dispatch = useDispatch();
-  return useMemo(() => bindActionCreators(logRateAnalysisSlice.actions, dispatch), [dispatch]);
-};
-
-export const useAutoRunAnalysis = () => useSelector((s: State) => s.autoRunAnalysis);
-export const useInitialAnalysisStart = () => useSelector((s: State) => s.initialAnalysisStart);
-export const usePinnedGroup = () => useSelector((s: State) => s.pinnedGroup);
-export const useSelectedGroup = () => useSelector((s: State) => s.selectedGroup);
-export const usePinnedSignificantItem = () => useSelector((s: State) => s.pinnedSignificantItem);
-export const useSelectedSignificantItem = () =>
-  useSelector((s: State) => s.selectedSignificantItem);
-export const useStickyHistogram = () => useSelector((s: State) => s.stickyHistogram);
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type AppStore = ReturnType<typeof getReduxStore>;
+export type RootState = ReturnType<AppStore['getState']>;
+export type AppDispatch = AppStore['dispatch'];

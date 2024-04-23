@@ -8,10 +8,10 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
-import type { State } from './state';
+import type { RootState } from './store';
 
-const selectSelectedSignificantItem = (s: State) => s.selectedSignificantItem;
-const selectPinnedSignificantItem = (s: State) => s.pinnedSignificantItem;
+const selectSelectedSignificantItem = (s: RootState) => s.selectedSignificantItem;
+const selectPinnedSignificantItem = (s: RootState) => s.pinnedSignificantItem;
 const selectCurrentSelectedSignificantItem = createSelector(
   selectSelectedSignificantItem,
   selectPinnedSignificantItem,

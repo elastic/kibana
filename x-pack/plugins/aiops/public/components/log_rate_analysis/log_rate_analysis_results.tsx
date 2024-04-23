@@ -37,7 +37,7 @@ import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
-import { useLogRateAnalysisReduxActions, useStickyHistogram } from '@kbn/aiops-components';
+import { clearAllRowState, useAppDispatch, useAppSelector } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -172,13 +172,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
-  const stickyHistogram = useStickyHistogram();
+  const stickyHistogram = useAppSelector((s) => s.stickyHistogram);
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
 
-  const { clearAllRowState } = useLogRateAnalysisReduxActions();
+  const dispatch = useAppDispatch();
 
   const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
@@ -199,7 +199,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setGroupResults(optionId === resultsGroupedOnId);
 
     // When toggling the group switch, clear all row selections
-    clearAllRowState();
+    dispatch(clearAllRowState());
   };
 
   const onFieldsFilterChange = (skippedFields: string[]) => {
@@ -320,7 +320,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     if (resetGroupButton) {
       setGroupResults(false);
       setToggleIdSelected(resultsGroupedOffId);
-      clearAllRowState();
+      dispatch(clearAllRowState());
     }
 
     setCurrentAnalysisType(analysisType);
