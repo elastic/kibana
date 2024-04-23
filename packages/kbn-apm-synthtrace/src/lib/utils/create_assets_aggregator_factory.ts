@@ -7,7 +7,7 @@
  */
 
 import { appendHash, Fields } from '@kbn/apm-synthtrace-client';
-import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/oam/service_assets';
+import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_assets';
 import { Duplex, PassThrough } from 'stream';
 
 export function assetsAggregatorFactory<TFields extends Fields>() {
