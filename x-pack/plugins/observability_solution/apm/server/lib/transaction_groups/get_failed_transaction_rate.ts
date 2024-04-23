@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
@@ -36,7 +36,7 @@ export async function getFailedTransactionRate({
 }: {
   environment: string;
   kuery: string;
-  filters?: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionTypes: string[];
   transactionName?: string;
@@ -64,9 +64,9 @@ export async function getFailedTransactionRate({
     ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
-    ...filters.filter,
+    ...(filters?.filter || []),
   ];
-  const mustNot = filters.must_not;
+  const mustNot = filters?.must_not || [];
 
   const outcomes = getOutcomeAggregation(documentType);
 

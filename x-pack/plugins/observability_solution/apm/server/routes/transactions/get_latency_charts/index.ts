@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
@@ -46,7 +46,7 @@ function searchLatency({
 }: {
   environment: string;
   kuery: string;
-  filters?: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -89,9 +89,9 @@ function searchLatency({
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(FAAS_ID, serverlessId),
-            ...(filters.filter ?? []),
+            ...(filters?.filter || []),
           ],
-          must_not: [...(filters.must_not ?? [])],
+          must_not: filters?.must_not || [],
         },
       },
       aggs: {
@@ -132,7 +132,7 @@ export async function getLatencyTimeseries({
 }: {
   environment: string;
   kuery: string;
-  filters?: string;
+  filters?: BoolQuery;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -218,7 +218,7 @@ export async function getLatencyPeriods({
   apmEventClient: APMEventClient;
   latencyAggregationType: LatencyAggregationType;
   kuery: string;
-  filters?: string;
+  filters?: BoolQuery;
   environment: string;
   start: number;
   end: number;
