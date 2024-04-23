@@ -112,7 +112,7 @@ const alertsCasesConfig: StepConfig[] = [
     anchor: `[tour-step="${getTourAnchor(
       AlertsCasesTourSteps.reviewAlertDetailsFlyout,
       SecurityStepId.alertsCases
-    )}"] span.euiTab__content`,
+    )}"]`,
     offset: 20,
     anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(

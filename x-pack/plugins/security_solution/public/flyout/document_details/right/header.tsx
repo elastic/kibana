@@ -7,7 +7,7 @@
 
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -16,6 +16,12 @@ import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useRightPanelContext } from './context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import {
+  AlertsCasesTourSteps,
+  getTourAnchor,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 
 export interface PanelHeaderProps {
   /**
@@ -38,6 +44,12 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
     const { dataFormattedForFieldBrowser } = useRightPanelContext();
     const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
+
+    const tourAnchor = useMemo(
+      () => (isAlert ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
+      [isAlert]
+    );
+
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
         onClick={() => onSelectedTabChanged(tab.id)}
@@ -45,7 +57,17 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
         key={index}
         data-test-subj={tab['data-test-subj']}
       >
-        {tab.name}
+        {isAlert ? (
+          <GuidedOnboardingTourStep
+            isTourAnchor={isAlert}
+            step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
+            tourId={SecurityStepId.alertsCases}
+          >
+            <span {...tourAnchor}>{tab.name}</span>
+          </GuidedOnboardingTourStep>
+        ) : (
+          tab.name
+        )}
       </EuiTab>
     ));
 

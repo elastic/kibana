@@ -19,18 +19,26 @@ import { DocumentDetailsRightPanelKey } from '..';
 import { DocumentDetailsLeftPanelKey } from '../../left';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour/tour';
+import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 /**
  * Guided tour for the right panel in details flyout
  */
 export const RightPanelTour: FC = memo(() => {
+  const { isTourShown: isGuidedOnboardingTourShown } = useTourContext();
+
   const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, getFieldsData } = useRightPanelContext();
 
   const eventKind = getField(getFieldsData('event.kind'));
   const isAlert = eventKind === EventKind.signal;
   const isTimelineFlyoutOpen = useIsTimelineFlyoutOpen();
-  const showTour = isAlert && !isPreview && !isTimelineFlyoutOpen;
+  const showTour =
+    isAlert &&
+    !isPreview &&
+    !isTimelineFlyoutOpen &&
+    !isGuidedOnboardingTourShown(SecurityStepId.alertsCases);
 
   const goToLeftPanel = useCallback(() => {
     openLeftPanel({
