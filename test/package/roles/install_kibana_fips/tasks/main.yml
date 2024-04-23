@@ -38,10 +38,6 @@
 #     chdir: "{{ kibana_src_path }}"
 #     cmd: "yarn kbn reset && yarn kbn bootstrap"
 
-# /var/log/kibana
-# es temp dir
-# sudo / yum broken
-
 - name: "ensure {{ kibana_dist_path }} dir exists"
   become: yes
   file:
@@ -133,6 +129,16 @@
   shell:
     cmd: ldconfig /usr/local/lib64/
 
+- name: fix /tmp permissions for ES
+  become: yes
+  file:
+    path: /tmp
+    state: directory
+    recurse: true
+    mode: "1777"
+
 - name: sleep
   shell:
     cmd: sleep 10h
+# /var/log/kibana
+# sudo / yum broken
