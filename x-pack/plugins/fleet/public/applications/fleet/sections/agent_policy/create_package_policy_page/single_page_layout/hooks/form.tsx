@@ -238,8 +238,6 @@ export function useOnSubmit({
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);
 
-  const currentAgentPolicyCount = selectedPolicyTab === SelectedPolicyTab.NEW ? 0 : agentCount;
-
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
     queryParamsPolicyId,
@@ -261,7 +259,7 @@ export function useOnSubmit({
         return;
       }
       if (
-        currentAgentPolicyCount !== 0 &&
+        agentCount !== 0 &&
         !isAgentlessPolicyId(packagePolicy?.policy_id) &&
         formState !== 'CONFIRM'
       ) {
@@ -331,19 +329,19 @@ export function useOnSubmit({
 
       if (hasFleetAddAgentsPrivileges) {
         if (hasAzureArmTemplate) {
-          setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
         } else {
-          setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
         }
         if (hasCloudFormation) {
-          setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
         } else {
-          setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
         }
         if (hasGoogleCloudShell) {
-          setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
         } else {
-          setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
         }
       } else {
         setFormState('SUBMITTED');
@@ -353,7 +351,7 @@ export function useOnSubmit({
         setSavedPackagePolicy(data!.item);
 
         const promptForAgentEnrollment =
-          !(currentAgentPolicyCount && agentPolicy) && hasFleetAddAgentsPrivileges;
+          !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
         if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
@@ -423,7 +421,7 @@ export function useOnSubmit({
       onSaveNavigate,
       confirmForceInstall,
       hasFleetAddAgentsPrivileges,
-      currentAgentPolicyCount,
+      agentCount,
     ]
   );
 

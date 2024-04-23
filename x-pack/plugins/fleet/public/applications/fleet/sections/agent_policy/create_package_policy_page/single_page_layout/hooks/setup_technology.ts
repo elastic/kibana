@@ -36,7 +36,7 @@ export function useSetupTechnology({
 }: {
   updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicy: (policy: AgentPolicy) => void;
+  updateAgentPolicy: (policy: AgentPolicy | undefined) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { isAgentlessEnabled } = useAgentlessPolicy();
@@ -44,6 +44,7 @@ export function useSetupTechnology({
     SetupTechnology.AGENT_BASED
   );
   const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
+  const [currentAgentPolicy, setCurrentAgentPolicy] = useState<AgentPolicy | undefined>();
 
   useEffect(() => {
     const fetchAgentlessPolicy = async () => {
@@ -52,6 +53,7 @@ export function useSetupTechnology({
 
       if (isAgentlessAvailable) {
         setAgentlessPolicy(data.item);
+        setCurrentAgentPolicy(data.item);
       }
     };
 
@@ -68,20 +70,23 @@ export function useSetupTechnology({
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (agentlessPolicy) {
-          updateAgentPolicy(agentlessPolicy);
+          setCurrentAgentPolicy(agentlessPolicy);
+          updateAgentPolicy(currentAgentPolicy || agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
+        updateAgentPolicy(undefined);
+        setCurrentAgentPolicy(undefined);
       }
-
       setSelectedSetupTechnology(setupTechnology);
     },
     [
       isAgentlessEnabled,
       selectedSetupTechnology,
       agentlessPolicy,
+      currentAgentPolicy,
       updateAgentPolicy,
       setSelectedPolicyTab,
       updateNewAgentPolicy,

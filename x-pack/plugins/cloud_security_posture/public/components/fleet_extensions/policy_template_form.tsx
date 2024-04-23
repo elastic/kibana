@@ -545,7 +545,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
+    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
       agentPolicy,
       agentlessPolicy,
@@ -763,7 +763,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           <SetupTechnologySelector
             disabled={isEditPage}
             setupTechnology={setupTechnology}
-            onSetupTechnologyChange={setSetupTechnology}
+            onSetupTechnologyChange={updateSetupTechnology}
           />
         )}
 
