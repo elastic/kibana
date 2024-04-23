@@ -9,7 +9,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ActionsClientLlm } from './actions_client_llm';
+import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from '../mock/mock_action_response';
 
 const connectorId = 'mock-connector-id';
