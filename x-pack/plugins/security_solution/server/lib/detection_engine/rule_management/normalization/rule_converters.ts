@@ -492,7 +492,6 @@ export const convertPatchAPIToInternalSchema = (
 export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
-    // required_fields?: RequiredFieldArray;
   },
   immutable = false,
   defaultEnabled = true

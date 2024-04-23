@@ -213,7 +213,6 @@ const CreateRulePageComponent: React.FC = () => {
   const esqlIndex = useEsqlIndex(
     defineStepData.queryBar.query.query,
     ruleType,
-    // defineStepForm.isValid
     defineStepForm.getErrors().length === 0
   );
 
