@@ -267,7 +267,7 @@ export const getMaxClauseCountErrorValue = (
       console.error('tempVal', tempVal);
 
       // minus 1 since the max clause count value is exclusive
-      const val = Math.ceil((tempVal - 1) / (2 * threatEntriesCount)); // 10); // INDICATOR_PER_PAGE);
+      const val = Math.ceil((tempVal - 1) / (2 * (threatEntriesCount + 1))); // 10); // INDICATOR_PER_PAGE);
       console.error('WHAT IS VAL', val);
       // throw Error('OOPS');
       return val;
@@ -275,7 +275,7 @@ export const getMaxClauseCountErrorValue = (
       console.error('MULTIPLE');
       const tempVal = parseInt(foundMaxClauseCountValue, 10);
       // minus 1 since the max clause count value is exclusive
-      const val = (tempVal - 1) / threatEntriesCount;
+      const val = (tempVal - 1) / (threatEntriesCount + 1);
       // throw Error('OOPS 2');
 
       return val;
