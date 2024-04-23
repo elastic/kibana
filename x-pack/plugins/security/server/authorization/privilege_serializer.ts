@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PRIVILEGES_ALL_WILDCARD } from '../../common/constants';
+
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const reservedPrefix = 'reserved_';
@@ -24,7 +26,9 @@ interface FeaturePrivilege {
 
 export class PrivilegeSerializer {
   public static isSerializedGlobalBasePrivilege(privilegeName: string) {
-    return globalBasePrivileges.includes(privilegeName);
+    return globalBasePrivileges.includes(
+      PrivilegeSerializer.normalizeBasePrivilageName(privilegeName)
+    );
   }
 
   public static isSerializedSpaceBasePrivilege(privilegeName: string) {
@@ -40,11 +44,13 @@ export class PrivilegeSerializer {
   }
 
   public static serializeGlobalBasePrivilege(privilegeName: string) {
-    if (!globalBasePrivileges.includes(privilegeName)) {
+    const normalizedPrivilageName = PrivilegeSerializer.normalizeBasePrivilageName(privilegeName);
+
+    if (!globalBasePrivileges.includes(normalizedPrivilageName)) {
       throw new Error('Unrecognized global base privilege');
     }
 
-    return privilegeName;
+    return normalizedPrivilageName;
   }
 
   public static serializeSpaceBasePrivilege(privilegeName: string) {
@@ -97,5 +103,17 @@ export class PrivilegeSerializer {
     }
 
     return privilege.slice(reservedPrefix.length);
+  }
+
+  /**
+   * Used to convert application privilege wildcard to 'all'.
+   * UI understands only 'all' and 'read' base privilege.
+   */
+  private static normalizeBasePrivilageName(privilegeName: string) {
+    if (privilegeName === PRIVILEGES_ALL_WILDCARD) {
+      return 'all';
+    }
+
+    return privilegeName;
   }
 }
