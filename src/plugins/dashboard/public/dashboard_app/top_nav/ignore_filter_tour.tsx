@@ -43,9 +43,12 @@ export const IgnoreFilterTour = ({ dataViews = [] }: { dataViews: DataView[] }) 
       anchor='[data-test-subj="addFilter"]'
       title={
         <>
-          <EuiIcon type="warning" color="warning" />
-          &nbsp;
-          {filterTourStrings.title}
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="warning" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{filterTourStrings.title}</EuiFlexItem>
+          </EuiFlexGroup>
         </>
       }
       isOpen={dataViews.length > 1 && isTourOpen}
