@@ -23,7 +23,8 @@ let importResolverCache: ImportResolver | undefined;
  */
 export function getImportResolver(context: Rule.RuleContext): ImportResolver {
   if (RUNNING_IN_EDITOR) {
-    return (context.sourceCode.parserServices.kibanaImportResolver ||= ImportResolver.create(REPO_ROOT));
+    return (context.sourceCode.parserServices.kibanaImportResolver ||=
+      ImportResolver.create(REPO_ROOT));
   }
 
   return (importResolverCache ||= ImportResolver.create(REPO_ROOT));
