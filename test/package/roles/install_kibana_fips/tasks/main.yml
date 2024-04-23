@@ -132,3 +132,7 @@
   become: yes
   shell:
     cmd: ldconfig /usr/local/lib64/
+
+- name: sleep
+  shell:
+    cmd: sleep 10h
