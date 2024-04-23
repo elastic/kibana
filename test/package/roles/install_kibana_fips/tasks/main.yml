@@ -137,6 +137,14 @@
     recurse: true
     mode: "1777"
 
+- name: fix /var/log permissions for kibana
+  become: yes
+  file:
+    path: /tmp
+    state: directory
+    recurse: true
+    mode: "0777"
+
 - name: sleep
   shell:
     cmd: sleep 10h
