@@ -123,7 +123,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   const sourceTable = (
-    <EuiTable responsive={false} tableLayout="auto">
+    <EuiTable responsiveBreakpoint={false} tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SOURCE_TABLE_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>

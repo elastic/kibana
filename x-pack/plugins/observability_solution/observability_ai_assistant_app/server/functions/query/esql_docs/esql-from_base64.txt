@@ -1,0 +1,10 @@
+FROM_BASE64
+
+Syntax
+Parameters
+string
+A base64 string.
+DescriptionDecode a base64 string.Supported types
+Example
+row a = "ZWxhc3RpYw=="
+| eval d = from_base64(a)

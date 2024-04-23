@@ -15,13 +15,18 @@ import {
   RISK_SCORE_PREVIEW_URL,
 } from '../../../../../common/constants';
 import { riskScorePreviewRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskScoreAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
-export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskScorePreviewRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -100,6 +105,16 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
             runtimeMappings,
             weights,
             alertSampleSizePerShard,
+          });
+
+          securityContext.getAuditLogger()?.log({
+            message: 'User triggered custom manual scoring',
+            event: {
+              action: RiskScoreAuditActions.RISK_ENGINE_PREVIEW,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CHANGE,
+              outcome: AUDIT_OUTCOME.SUCCESS,
+            },
           });
 
           return response.ok({ body: result });

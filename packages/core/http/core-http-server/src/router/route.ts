@@ -240,7 +240,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidator<P, Q, B> | false;
+  validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

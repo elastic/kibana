@@ -14,13 +14,18 @@ import {
   RISK_SCORE_CALCULATION_URL,
 } from '../../../../../common/constants';
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskScoreAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
-export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskScoreCalculationRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .post({
       path: RISK_SCORE_CALCULATION_URL,
@@ -35,8 +40,19 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
         validate: { request: { body: buildRouteValidation(riskScoreCalculationRequestSchema) } },
       },
       async (context, request, response) => {
-        const siemResponse = buildSiemResponse(response);
         const securityContext = await context.securitySolution;
+
+        securityContext.getAuditLogger()?.log({
+          message: 'User triggered custom manual scoring',
+          event: {
+            action: RiskScoreAuditActions.RISK_ENGINE_MANUAL_SCORING,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
+        const siemResponse = buildSiemResponse(response);
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;

@@ -22,6 +22,7 @@ import {
 import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
 
 const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
@@ -112,6 +113,9 @@ const mockContext = {
       appendConversationMessages:
         appendConversationMessages.mockResolvedValue(existingConversation),
     }),
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+      findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+    }),
   },
   core: {
     elasticsearch: {
@@ -130,6 +134,7 @@ const mockRequest = {
     isEnabledKnowledgeBase: true,
     isEnabledRAGAlerts: false,
     replacements: {},
+    model: 'gpt-4',
   },
   events: {
     aborted$: NEVER,
@@ -269,6 +274,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -287,8 +295,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       ...mockRequest,
       body: {
         ...mockRequest.body,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -304,6 +314,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -323,8 +336,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       body: {
         ...mockRequest.body,
         isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -338,6 +353,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               await handler(mockContext, req, mockResponse);
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: true,
               });
@@ -370,6 +388,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               await handler(mockContext, req, mockResponse);
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: false,
               });
@@ -402,6 +423,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -436,6 +460,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -456,8 +483,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       body: {
         ...mockRequest.body,
         isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -474,6 +503,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -543,6 +575,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };

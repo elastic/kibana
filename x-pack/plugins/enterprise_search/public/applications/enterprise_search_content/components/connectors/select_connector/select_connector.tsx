@@ -37,13 +37,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CONNECTOR_CLIENTS_TYPE, CONNECTOR_NATIVE_TYPE } from '../../../../../../common/constants';
 
 import connectorLogo from '../../../../../assets/images/connector_logo_network_drive_version.svg';
-import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { parseQueryParams } from '../../../../shared/query_params';
 
-import { NEW_CONNECTOR_PATH, NEW_INDEX_PATH } from '../../../routes';
+import { NEW_CONNECTOR_PATH } from '../../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 
 import { connectorsBreadcrumbs } from '../connectors';
@@ -296,6 +295,8 @@ export const SelectConnector: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="entSearchContent-connectors-selectConnector-searchInput"
+            data-telemetry-id="entSearchContent-connectors-selectConnector-searchInput"
             aria-label={i18n.translate(
               'xpack.enterpriseSearch.content.indices.selectConnector.search.ariaLabel',
               { defaultMessage: 'Search through connectors' }
@@ -366,6 +367,8 @@ export const SelectConnector: React.FC = () => {
                   />
                 </p>
                 <EuiButton
+                  data-test-subj="entSearchContent-connectors-selectConnector-cloudCallout-trialButton"
+                  data-telemetry-id="entSearchContent-connectors-selectConnector-cloudCallout-trialButton"
                   color="primary"
                   fill
                   href="https://www.elastic.co/cloud/cloud-trial-overview"
@@ -381,20 +384,6 @@ export const SelectConnector: React.FC = () => {
               </EuiCallOut>
             </>
           )}
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <span>
-                <EuiButton
-                  data-telemetry-id="entSearchContent-connector-selectConnector-backButton"
-                  color="primary"
-                  onClick={() => KibanaLogic.values.navigateToUrl(NEW_INDEX_PATH)}
-                >
-                  {BACK_BUTTON_LABEL}
-                </EuiButton>
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>
