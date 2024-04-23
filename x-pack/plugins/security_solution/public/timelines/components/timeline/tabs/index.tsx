@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType, Dispatch, SetStateAction } from 'react';
@@ -13,7 +13,6 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
@@ -44,7 +43,6 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 import { initializeTimelineSettings } from '../../../store/actions';
-import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -112,6 +110,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
+    const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -215,7 +214,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {hasAssistantPrivilege ? getAssistantTab() : null}
+        {hasAssistantPrivilege && !aiAssistantFlyoutMode ? getAssistantTab() : null}
       </>
     );
   }
@@ -225,15 +224,6 @@ ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const CountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  vertical-align: middle;
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-
-  &:hover {
-    cursor: pointer;
-  }
 `;
 
 const StyledEuiTab = styled(EuiTab)`
@@ -268,6 +258,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineDescription,
 }) => {
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
+  const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
@@ -391,17 +382,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               key={TimelineTabs.esql}
             >
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
-              <StyledEuiBetaBadge
-                label={DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW}
-                size="s"
-                iconType="beaker"
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip"
-                    defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
-                  />
-                }
-              />
             </StyledEuiTab>
           )}
           {timelineType === TimelineType.default && (
@@ -464,7 +444,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          {hasAssistantPrivilege && (
+          {hasAssistantPrivilege && !aiAssistantFlyoutMode && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
               onClick={setSecurityAssistantAsActiveTab}

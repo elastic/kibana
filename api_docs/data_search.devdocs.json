@@ -11905,7 +11905,7 @@
         "label": "aggregateQueryToAst",
         "description": [],
         "signature": [
-          "(query: ",
+          "({ query, timeField, titleForInspector, descriptionForInspector, }: { query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -11913,7 +11913,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          ", timeField?: string | undefined) => ",
+          "; timeField?: string | undefined; titleForInspector?: string | undefined; descriptionForInspector?: string | undefined; }) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -11930,38 +11930,71 @@
           {
             "parentPluginId": "data",
             "id": "def-common.aggregateQueryToAst.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "query",
+            "label": "{\n  query,\n  timeField,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
-            "signature": [
+            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.query",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "{ sql: string; } | { esql: string; }"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.timeField",
+                "type": "string",
+                "tags": [],
+                "label": "timeField",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.titleForInspector",
+                "type": "string",
+                "tags": [],
+                "label": "titleForInspector",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.descriptionForInspector",
+                "type": "string",
+                "tags": [],
+                "label": "descriptionForInspector",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
-            ],
-            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.aggregateQueryToAst.$2",
-            "type": "string",
-            "tags": [],
-            "label": "timeField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
+            ]
           }
         ],
         "returnComment": [],
@@ -28280,6 +28313,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.retrieveResults",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retrieveResults",
+            "description": [
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.ISearchOptions.executionContext",
             "type": "Object",
             "tags": [],
@@ -34002,7 +34051,7 @@
             "section": "def-common.KibanaExecutionContext",
             "text": "KibanaExecutionContext"
           },
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,

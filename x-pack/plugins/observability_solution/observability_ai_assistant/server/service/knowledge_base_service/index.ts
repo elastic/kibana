@@ -306,7 +306,7 @@ export class KnowledgeBaseService {
     queries: string[];
     categories?: string[];
     namespace: string;
-    user: { name: string };
+    user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
     const query = {
@@ -433,7 +433,7 @@ export class KnowledgeBaseService {
   }: {
     queries: string[];
     categories?: string[];
-    user: { name: string };
+    user?: { name: string };
     namespace: string;
     asCurrentUser: ElasticsearchClient;
   }): Promise<{
@@ -497,8 +497,8 @@ export class KnowledgeBaseService {
   };
 
   getInstructions = async (
-    user: { name: string },
-    namespace: string
+    namespace: string,
+    user?: { name: string }
   ): Promise<UserInstruction[]> => {
     try {
       const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({

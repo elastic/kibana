@@ -407,9 +407,7 @@ export async function getAggregatedCriticalPath({
     },
   });
 
-  logger.debug(
-    `Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`
-  );
+  logger.debug(`Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`);
 
   if (!response.aggregations) {
     return {
@@ -417,8 +415,7 @@ export async function getAggregatedCriticalPath({
     };
   }
 
-  const criticalPath = response.aggregations?.critical_path
-    .value as CriticalPathResponse;
+  const criticalPath = response.aggregations?.critical_path.value as CriticalPathResponse;
 
   return {
     criticalPath,

@@ -413,13 +413,16 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       },
       () => {
         if (this.props.onQuerySubmit) {
-          this.props.onQuerySubmit({
-            query: query as QT,
-            dateRange: {
-              from: this.state.dateRangeFrom,
-              to: this.state.dateRangeTo,
+          this.props.onQuerySubmit(
+            {
+              query: query as QT,
+              dateRange: {
+                from: this.state.dateRangeFrom,
+                to: this.state.dateRangeTo,
+              },
             },
-          });
+            this.isDirty()
+          );
         }
       }
     );
@@ -437,13 +440,16 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       },
       () => {
         if (this.props.onQuerySubmit) {
-          this.props.onQuerySubmit({
-            query: this.state.query,
-            dateRange: {
-              from: this.state.dateRangeFrom,
-              to: this.state.dateRangeTo,
+          this.props.onQuerySubmit(
+            {
+              query: this.state.query,
+              dateRange: {
+                from: this.state.dateRangeFrom,
+                to: this.state.dateRangeTo,
+              },
             },
-          });
+            this.isDirty()
+          );
         }
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
