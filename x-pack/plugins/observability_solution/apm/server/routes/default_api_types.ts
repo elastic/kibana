@@ -51,9 +51,16 @@ export const transactionDataSourceRt = t.type({
   ]),
 });
 
+const BoolQueryRt = t.type({
+  should: t.array(t.unknown),
+  must: t.array(t.unknown),
+  must_not: t.array(t.unknown),
+  filter: t.array(t.unknown),
+});
+
 export const filtersRt = new t.Type<BoolQuery, string, unknown>(
   'BoolQuery',
-  (input: unknown): input is BoolQuery => input instanceof BoolQuery,
+  BoolQueryRt.is,
   (input: unknown, context: t.Context) =>
     either.chain(t.string.validate(input, context), (value: string) => {
       try {
