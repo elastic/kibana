@@ -7,8 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
 import {
   aHitFromSummaryIndex,

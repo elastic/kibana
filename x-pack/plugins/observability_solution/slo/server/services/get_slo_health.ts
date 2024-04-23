@@ -8,17 +8,17 @@
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  getSLOSummaryTransformId,
-  getSLOTransformId,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '@kbn/slo-plugin/common/constants';
-import {
   FetchSLOHealthParams,
   FetchSLOHealthResponse,
   fetchSLOHealthResponseSchema,
 } from '@kbn/slo-schema';
 import { differenceInMinutes } from 'date-fns';
 import { Dictionary, groupBy, keyBy } from 'lodash';
+import {
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { HealthStatus, State } from '../domain/models/health';
 import { SLORepository } from './slo_repository';
