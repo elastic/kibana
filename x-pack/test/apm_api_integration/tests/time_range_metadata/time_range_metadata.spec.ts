@@ -643,7 +643,7 @@ function getTransactionEvents({
   ];
 
   const apmPipeline = (base: Readable) => {
-    const defaultPipeline = synthtrace.getDefaultPipeline({ overrideVersion: '8.5.0' })(
+    const defaultPipeline = synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(
       base
     ) as unknown as NodeJS.ReadableStream;
 
