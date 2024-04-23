@@ -7,10 +7,7 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../../common/environment_filter_values';
 
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments

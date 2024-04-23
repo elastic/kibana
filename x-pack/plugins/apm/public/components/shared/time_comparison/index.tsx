@@ -27,8 +27,7 @@ const PrependContainer = euiStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ theme }) =>
-    theme.eui.euiFormInputGroupLabelBackground};
+  background-color: ${({ theme }) => theme.eui.euiFormInputGroupLabelBackground};
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
@@ -42,8 +41,7 @@ function getDateFormat({
   const momentPreviousPeriodStart = moment(previousPeriodStart);
   const momentCurrentPeriodEnd = moment(currentPeriodEnd);
   const isDifferentYears =
-    momentPreviousPeriodStart.get('year') !==
-    momentCurrentPeriodEnd.get('year');
+    momentPreviousPeriodStart.get('year') !== momentCurrentPeriodEnd.get('year');
   return isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
 }
 
@@ -197,9 +195,7 @@ export function TimeComparison() {
               }
               urlHelpers.push(history, {
                 query: {
-                  comparisonEnabled: Boolean(
-                    nextComparisonEnabledValue
-                  ).toString(),
+                  comparisonEnabled: Boolean(nextComparisonEnabledValue).toString(),
                 },
               });
             }}

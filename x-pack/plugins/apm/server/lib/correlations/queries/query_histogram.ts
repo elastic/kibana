@@ -48,9 +48,7 @@ export const fetchTransactionDurationHistogram = async (
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchTransactionDurationHistogram failed, did not return aggregations.'
-    );
+    throw new Error('fetchTransactionDurationHistogram failed, did not return aggregations.');
   }
 
   return (

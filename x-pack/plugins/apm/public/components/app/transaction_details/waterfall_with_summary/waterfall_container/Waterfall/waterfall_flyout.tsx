@@ -18,15 +18,9 @@ interface Props {
   toggleFlyout: ({ history }: { history: History }) => void;
 }
 
-export function WaterfallFlyout({
-  waterfallItemId,
-  waterfall,
-  toggleFlyout,
-}: Props) {
+export function WaterfallFlyout({ waterfallItemId, waterfall, toggleFlyout }: Props) {
   const history = useHistory();
-  const currentItem = waterfall.items.find(
-    (item) => item.id === waterfallItemId
-  );
+  const currentItem = waterfall.items.find((item) => item.id === waterfallItemId);
 
   if (!currentItem) {
     return null;
@@ -35,9 +29,7 @@ export function WaterfallFlyout({
   switch (currentItem.docType) {
     case 'span':
       const parentTransaction =
-        currentItem.parent?.docType === 'transaction'
-          ? currentItem.parent?.doc
-          : undefined;
+        currentItem.parent?.docType === 'transaction' ? currentItem.parent?.doc : undefined;
 
       return (
         <SpanFlyout
@@ -52,9 +44,7 @@ export function WaterfallFlyout({
         <TransactionFlyout
           transaction={currentItem.doc}
           onClose={() => toggleFlyout({ history })}
-          rootTransactionDuration={
-            waterfall.rootTransaction?.transaction.duration.us
-          }
+          rootTransactionDuration={waterfall.rootTransaction?.transaction.duration.us}
           errorCount={waterfall.getErrorCount(currentItem.id)}
         />
       );

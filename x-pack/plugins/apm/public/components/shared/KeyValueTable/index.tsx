@@ -6,13 +6,7 @@
  */
 import { castArray } from 'lodash';
 import React, { TableHTMLAttributes } from 'react';
-import {
-  EuiTable,
-  EuiTableProps,
-  EuiTableBody,
-  EuiTableRow,
-  EuiTableRowCell,
-} from '@elastic/eui';
+import { EuiTable, EuiTableProps, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { FormattedValue } from './FormattedValue';
 import { KeyValuePair } from '../../../utils/flattenObject';
 
@@ -46,9 +40,7 @@ export function KeyValueTable({
               <EuiTableRowCell>
                 <strong data-test-subj="dot-key">{key}</strong>
               </EuiTableRowCell>
-              <EuiTableRowCell data-test-subj="value">
-                {valueList}
-              </EuiTableRowCell>
+              <EuiTableRowCell data-test-subj="value">{valueList}</EuiTableRowCell>
             </EuiTableRow>
           );
         })}

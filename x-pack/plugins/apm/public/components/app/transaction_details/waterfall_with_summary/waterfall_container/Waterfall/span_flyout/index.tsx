@@ -88,12 +88,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function SpanFlyout({
-  span,
-  parentTransaction,
-  totalDuration,
-  onClose,
-}: Props) {
+export function SpanFlyout({ span, parentTransaction, totalDuration, onClose }: Props) {
   if (!span) {
     return null;
   }
@@ -115,12 +110,9 @@ export function SpanFlyout({
             <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
-                    {
-                      defaultMessage: 'Span details',
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
+                    defaultMessage: 'Span details',
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -181,29 +173,26 @@ export function SpanFlyout({
                   />
                 )}
                 <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.spanType',
-                    { defaultMessage: 'Type' }
-                  )}
+                  content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanType', {
+                    defaultMessage: 'Type',
+                  })}
                 >
                   <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
                 </EuiToolTip>
                 {spanTypes.spanSubtype && (
                   <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
-                      { defaultMessage: 'Subtype' }
-                    )}
+                    content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanSubtype', {
+                      defaultMessage: 'Subtype',
+                    })}
                   >
                     <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
                   </EuiToolTip>
                 )}
                 {spanTypes.spanAction && (
                   <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.apm.transactionDetails.spanFlyout.spanAction',
-                      { defaultMessage: 'Action' }
-                    )}
+                    content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanAction', {
+                      defaultMessage: 'Action',
+                    })}
                   >
                     <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
                   </EuiToolTip>
@@ -221,30 +210,21 @@ export function SpanFlyout({
             tabs={[
               {
                 id: 'stack-trace',
-                name: i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-                  {
-                    defaultMessage: 'Stack Trace',
-                  }
-                ),
+                name: i18n.translate('xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel', {
+                  defaultMessage: 'Stack Trace',
+                }),
                 content: (
                   <Fragment>
                     <EuiSpacer size="l" />
-                    <Stacktrace
-                      stackframes={stackframes}
-                      codeLanguage={codeLanguage}
-                    />
+                    <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
                   </Fragment>
                 ),
               },
               {
                 id: 'metadata',
-                name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.metadataLabel',
-                  {
-                    defaultMessage: 'Metadata',
-                  }
-                ),
+                name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+                  defaultMessage: 'Metadata',
+                }),
                 content: (
                   <Fragment>
                     <EuiSpacer size="m" />

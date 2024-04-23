@@ -6,10 +6,7 @@
  */
 
 import { getServiceNodes } from '.';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
 import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';

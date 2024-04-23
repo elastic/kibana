@@ -12,9 +12,7 @@ import { PromiseReturnType } from '../../../../../../observability/typings/commo
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
-export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
-  typeof getEnvironments
->;
+export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<typeof getEnvironments>;
 
 export async function getEnvironments({
   serviceName,

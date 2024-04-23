@@ -62,12 +62,7 @@ export function ApmServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({
-  title,
-  children,
-  selectedTab,
-  searchBarOptions,
-}: Props) {
+function TemplateWithContext({ title, children, selectedTab, searchBarOptions }: Props) {
   const {
     path: { serviceName },
     query,
@@ -98,17 +93,11 @@ function TemplateWithContext({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">
-                      {serviceName}
-                    </h1>
+                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ServiceIcons
-                    serviceName={serviceName}
-                    start={start}
-                    end={end}
-                  />
+                  <ServiceIcons serviceName={serviceName} start={start} end={end} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -164,13 +153,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
 
-  const query = omit(
-    queryFromUrl,
-    'page',
-    'pageSize',
-    'sortField',
-    'sortDirection'
-  );
+  const query = omit(queryFromUrl, 'page', 'pageSize', 'sortField', 'sortDirection');
 
   const tabs: Tab[] = [
     {
@@ -202,8 +185,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
     },
     {
       key: 'errors',
@@ -256,8 +238,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
     },
     {
       key: 'profiling',
@@ -277,17 +258,13 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
-                {
-                  defaultMessage: 'Experimental',
-                }
-              )}
+              label={i18n.translate('xpack.apm.serviceDetails.profilingTabExperimentalLabel', {
+                defaultMessage: 'Experimental',
+              })}
               tooltipContent={i18n.translate(
                 'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
                 {
-                  defaultMessage:
-                    'Profiling is highly experimental and for internal use only.',
+                  defaultMessage: 'Profiling is highly experimental and for internal use only.',
                 }
               )}
             />

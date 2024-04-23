@@ -42,9 +42,7 @@ type ServiceInstanceSystemMetricStatistics<T> = T extends true
   ? ServiceInstanceSystemMetricComparisonStatistics
   : ServiceInstanceSystemMetricPrimaryStatistics;
 
-export async function getServiceInstancesSystemMetricStatistics<
-  T extends true | false
->({
+export async function getServiceInstancesSystemMetricStatistics<T extends true | false>({
   environment,
   kuery,
   setup,
@@ -86,9 +84,7 @@ export async function getServiceInstancesSystemMetricStatistics<
 
   const cpuUsageFilter = { exists: { field: METRIC_PROCESS_CPU_PERCENT } };
 
-  function withTimeseries<TParams extends AggregationOptionsByType['avg']>(
-    agg: TParams
-  ) {
+  function withTimeseries<TParams extends AggregationOptionsByType['avg']>(agg: TParams) {
     return {
       ...(isComparisonSearch
         ? {
@@ -125,82 +121,72 @@ export async function getServiceInstancesSystemMetricStatistics<
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_instances_system_metric_statistics',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...(isComparisonSearch && serviceNodeIds
-                ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
-                : []),
-            ],
-            should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
-            minimum_should_match: 1,
-          },
-        },
-        aggs: {
-          [SERVICE_NODE_NAME]: {
-            terms: {
-              field: SERVICE_NODE_NAME,
-              missing: SERVICE_NODE_NAME_MISSING,
-              ...(size ? { size } : {}),
-              ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
-            },
-            aggs: subAggs,
-          },
+  const response = await apmEventClient.search('get_service_instances_system_metric_statistics', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...(isComparisonSearch && serviceNodeIds
+              ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
+              : []),
+          ],
+          should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
+          minimum_should_match: 1,
         },
       },
-    }
-  );
+      aggs: {
+        [SERVICE_NODE_NAME]: {
+          terms: {
+            field: SERVICE_NODE_NAME,
+            missing: SERVICE_NODE_NAME_MISSING,
+            ...(size ? { size } : {}),
+            ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
+          },
+          aggs: subAggs,
+        },
+      },
+    },
+  });
 
   return (
-    (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
-      (serviceNodeBucket) => {
-        const serviceNodeName = String(serviceNodeBucket.key);
-        const hasCGroupData =
-          serviceNodeBucket.memory_usage_cgroup.avg.value !== null;
+    (response.aggregations?.[SERVICE_NODE_NAME].buckets.map((serviceNodeBucket) => {
+      const serviceNodeName = String(serviceNodeBucket.key);
+      const hasCGroupData = serviceNodeBucket.memory_usage_cgroup.avg.value !== null;
 
-        const memoryMetricsKey = hasCGroupData
-          ? 'memory_usage_cgroup'
-          : 'memory_usage_system';
+      const memoryMetricsKey = hasCGroupData ? 'memory_usage_cgroup' : 'memory_usage_system';
 
-        const cpuUsage =
-          // Timeseries is available when isComparisonSearch is true
-          'timeseries' in serviceNodeBucket.cpu_usage
-            ? serviceNodeBucket.cpu_usage.timeseries.buckets.map(
-                (dateBucket) => ({
-                  x: dateBucket.key,
-                  y: dateBucket.avg.value,
-                })
-              )
-            : serviceNodeBucket.cpu_usage.avg.value;
+      const cpuUsage =
+        // Timeseries is available when isComparisonSearch is true
+        'timeseries' in serviceNodeBucket.cpu_usage
+          ? serviceNodeBucket.cpu_usage.timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.avg.value,
+            }))
+          : serviceNodeBucket.cpu_usage.avg.value;
 
-        const memoryUsageValue = serviceNodeBucket[memoryMetricsKey];
-        const memoryUsage =
-          // Timeseries is available when isComparisonSearch is true
-          'timeseries' in memoryUsageValue
-            ? memoryUsageValue.timeseries.buckets.map((dateBucket) => ({
-                x: dateBucket.key,
-                y: dateBucket.avg.value,
-              }))
-            : serviceNodeBucket[memoryMetricsKey].avg.value;
+      const memoryUsageValue = serviceNodeBucket[memoryMetricsKey];
+      const memoryUsage =
+        // Timeseries is available when isComparisonSearch is true
+        'timeseries' in memoryUsageValue
+          ? memoryUsageValue.timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.avg.value,
+            }))
+          : serviceNodeBucket[memoryMetricsKey].avg.value;
 
-        return {
-          serviceNodeName,
-          cpuUsage,
-          memoryUsage,
-        };
-      }
-    ) as Array<ServiceInstanceSystemMetricStatistics<T>>) || []
+      return {
+        serviceNodeName,
+        cpuUsage,
+        memoryUsage,
+      };
+    }) as Array<ServiceInstanceSystemMetricStatistics<T>>) || []
   );
 }

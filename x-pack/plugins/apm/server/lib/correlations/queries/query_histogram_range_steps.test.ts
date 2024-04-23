@@ -100,10 +100,7 @@ describe('query_histogram_range_steps', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationHistogramRangeSteps(
-        esClientMock,
-        params
-      );
+      const resp = await fetchTransactionDurationHistogramRangeSteps(esClientMock, params);
 
       expect(resp.length).toEqual(100);
       expect(resp[0]).toEqual(9);

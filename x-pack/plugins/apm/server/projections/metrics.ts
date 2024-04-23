@@ -6,10 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import {
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-} from '../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../common/elasticsearch_fieldnames';
 import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { environmentQuery } from '../../common/utils/environment_query';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';

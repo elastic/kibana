@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
 import type { Story } from '@storybook/react';
 import React from 'react';
 import { AGENT_NAMES } from '../../../../common/agent_name';
@@ -35,10 +29,7 @@ export const List: Story = (_args, { globals }) => {
               icon={
                 <>
                   <p>
-                    <EuiToolTip
-                      position="top"
-                      content="Icon rendered with `EuiImage`"
-                    >
+                    <EuiToolTip position="top" content="Icon rendered with `EuiImage`">
                       <EuiImage
                         size="s"
                         hasShadow
@@ -52,10 +43,7 @@ export const List: Story = (_args, { globals }) => {
               title={agentName}
               description={
                 <div>
-                  <EuiToolTip
-                    position="bottom"
-                    content="Icon rendered with `AgentIcon`"
-                  >
+                  <EuiToolTip position="bottom" content="Icon rendered with `AgentIcon`">
                     <AgentIcon agentName={agentName} />
                   </EuiToolTip>
                 </div>

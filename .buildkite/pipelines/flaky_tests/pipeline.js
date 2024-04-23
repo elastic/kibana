@@ -10,6 +10,34 @@ const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>}
   require('./groups.json').groups
 );
 
+// TODO: remove this after https://github.com/elastic/kibana-operations/issues/15 is finalized
+/** This function bridges the agent targeting between gobld and kibana-buildkite agent targeting */
+const getAgentRule = (queueName = 'n2-4-spot') => {
+  if (
+    process.env.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld' ||
+    process.env.BUILDKITE_AGENT_META_DATA_PROVIDER === 'k8s'
+  ) {
+    const [kind, cores, addition] = queueName.split('-');
+    const additionalProps =
+      {
+        spot: { preemptible: true },
+        virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+      }[addition] || {};
+
+    return {
+      provider: 'gcp',
+      image: 'family/kibana-ubuntu-2004',
+      imageProject: 'elastic-images-qa',
+      machineType: `${kind}-standard-${cores}`,
+      ...additionalProps,
+    };
+  } else {
+    return {
+      queue: queueName,
+    };
+  }
+};
+
 const stepInput = (key, nameOfSuite) => {
   return {
     key: `ftsr-suite/${key}`,
@@ -51,9 +79,7 @@ const pipeline = {
     {
       command: '.buildkite/pipelines/flaky_tests/runner.sh',
       label: 'Create pipeline',
-      agents: {
-        queue: 'kibana-default',
-      },
+      agents: getAgentRule('n2-4'),
     },
   ],
 };

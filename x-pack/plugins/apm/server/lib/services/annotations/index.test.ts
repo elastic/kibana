@@ -9,10 +9,7 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import {
-  inspectSearchParams,
-  SearchParamsMock,
-} from '../../../utils/test_helpers';
+import { inspectSearchParams, SearchParamsMock } from '../../../utils/test_helpers';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import multipleVersions from './__fixtures__/multiple_versions.json';
 import noVersions from './__fixtures__/no_versions.json';
@@ -84,11 +81,7 @@ describe('getServiceAnnotations', () => {
 
   describe('with more than 1 version', () => {
     it('returns two annotations', async () => {
-      const responses = [
-        multipleVersions,
-        versionsFirstSeen,
-        versionsFirstSeen,
-      ];
+      const responses = [multipleVersions, versionsFirstSeen, versionsFirstSeen];
       mock = await inspectSearchParams(
         (setup) =>
           getDerivedServiceAnnotations({

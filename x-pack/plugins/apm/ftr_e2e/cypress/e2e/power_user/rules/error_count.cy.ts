@@ -29,10 +29,8 @@ function deleteAllRules() {
 describe('Rules', () => {
   describe('Error count', () => {
     const ruleName = 'Error count threshold';
-    const comboBoxInputSelector =
-      '.euiPopover__panel-isOpen [data-test-subj=comboBoxSearchInput]';
-    const confirmModalButtonSelector =
-      '.euiModal button[data-test-subj=confirmModalConfirmButton]';
+    const comboBoxInputSelector = '.euiPopover__panel-isOpen [data-test-subj=comboBoxSearchInput]';
+    const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
 
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {

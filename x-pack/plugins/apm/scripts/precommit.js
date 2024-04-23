@@ -39,9 +39,7 @@ const tasks = new Listr(
           [
             resolve(
               __dirname,
-              useOptimizedTsConfig
-                ? './optimize-tsconfig.js'
-                : './unoptimize-tsconfig.js'
+              useOptimizedTsConfig ? './optimize-tsconfig.js' : './unoptimize-tsconfig.js'
             ),
           ],
           execaOpts

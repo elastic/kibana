@@ -26,16 +26,9 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  LazyAlertsFlyout,
-  useChartTheme,
-} from '../../../../../observability/public';
+import { LazyAlertsFlyout, useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import {
-  Coordinate,
-  RectCoordinate,
-  TimeSeries,
-} from '../../../../typings/timeseries';
+import { Coordinate, RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
@@ -65,9 +58,7 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: ReturnType<
-    typeof getLatencyChartSelector
-  >['anomalyTimeseries'];
+  anomalyTimeseries?: ReturnType<typeof getLatencyChartSelector>['anomalyTimeseries'];
   customTheme?: Record<string, unknown>;
   alerts?: APMServiceAlert[];
 }
@@ -92,9 +83,7 @@ export function TimeseriesChart({
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
-  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(undefined);
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
@@ -110,18 +99,11 @@ export function TimeseriesChart({
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
-    <ChartContainer
-      hasData={!isEmpty}
-      height={height}
-      status={fetchStatus}
-      id={id}
-    >
+    <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus} id={id}>
       <Chart ref={chartRef} id={id}>
         <Settings
           tooltip={{ stickTo: 'top' }}
-          onBrushEnd={(event) =>
-            onBrushEnd({ x: (event as XYBrushEvent).x, history })
-          }
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={{
             ...chartTheme,
             areaSeriesStyle: {
@@ -195,9 +177,7 @@ export function TimeseriesChart({
               curve={CurveType.CURVE_MONOTONE_X}
               hideInLegend={serie.hideLegend}
               fit={serie.fit ?? undefined}
-              filterSeriesInTooltip={
-                serie.hideTooltipValue ? () => false : undefined
-              }
+              filterSeriesInTooltip={serie.hideTooltipValue ? () => false : undefined}
               stackAccessors={serie.stackAccessors ?? undefined}
               areaSeriesStyle={serie.areaSeriesStyle}
               lineSeriesStyle={serie.lineSeriesStyle}

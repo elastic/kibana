@@ -56,9 +56,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     const config = await findExactConfiguration({ service, setup });
 
     if (!config) {
-      logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
-      );
+      logger.info(`Config was not found for ${service.name}/${service.environment}`);
 
       throw Boom.notFound();
     }
@@ -86,16 +84,12 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
     const config = await findExactConfiguration({ service, setup });
     if (!config) {
-      logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
-      );
+      logger.info(`Config was not found for ${service.name}/${service.environment}`);
 
       throw Boom.notFound();
     }
 
-    logger.info(
-      `Deleting config ${service.name}/${service.environment} (${config._id})`
-    );
+    logger.info(`Deleting config ${service.name}/${service.environment} (${config._id})`);
 
     const deleteConfigurationResult = await deleteConfiguration({
       configurationId: config._id,
@@ -148,9 +142,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     }
 
     logger.info(
-      `${config ? 'Updating' : 'Creating'} config ${body.service.name}/${
-        body.service.environment
-      }`
+      `${config ? 'Updating' : 'Creating'} config ${body.service.name}/${body.service.environment}`
     );
 
     await createOrUpdateConfiguration({
@@ -166,9 +158,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
         setup,
         telemetryUsageCounter,
       });
-      logger.info(
-        `Saved latest agent settings to Fleet integration policy for APM.`
-      );
+      logger.info(`Saved latest agent settings to Fleet integration policy for APM.`);
     }
   },
 });
@@ -190,11 +180,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   handler: async (resources) => {
     const { params, logger } = resources;
 
-    const {
-      service,
-      etag,
-      mark_as_applied_by_agent: markAsAppliedByAgent,
-    } = params.body;
+    const { service, etag, mark_as_applied_by_agent: markAsAppliedByAgent } = params.body;
 
     const setup = await setupRequest(resources);
     const config = await searchConfigurations({
@@ -213,8 +199,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     // It will be set to true of the etags match or if `markAsAppliedByAgent=true`
     // `markAsAppliedByAgent=true` means "force setting it to true regardless of etag". This is needed for Jaeger agent that doesn't have etags
     const willMarkAsApplied =
-      (markAsAppliedByAgent || etag === config._source.etag) &&
-      !config._source.applied_by_agent;
+      (markAsAppliedByAgent || etag === config._source.etag) && !config._source.applied_by_agent;
 
     logger.debug(
       `[Central configuration] Config was found for:
@@ -252,9 +237,7 @@ const listAgentConfigurationServicesRoute = createApmServerRoute({
       start,
       end,
     });
-    const size = await resources.context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await resources.context.core.uiSettings.client.get<number>(maxSuggestions);
     const serviceNames = await getServiceNames({
       searchAggregatedTransactions,
       setup,
@@ -284,9 +267,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       start,
       end,
     });
-    const size = await context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await context.core.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getEnvironments({
       serviceName,
       setup,
@@ -314,13 +295,12 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
-export const agentConfigurationRouteRepository =
-  createApmServerRouteRepository()
-    .add(agentConfigurationRoute)
-    .add(getSingleAgentConfigurationRoute)
-    .add(deleteAgentConfigurationRoute)
-    .add(createOrUpdateAgentConfigurationRoute)
-    .add(agentConfigurationSearchRoute)
-    .add(listAgentConfigurationServicesRoute)
-    .add(listAgentConfigurationEnvironmentsRoute)
-    .add(agentConfigurationAgentNameRoute);
+export const agentConfigurationRouteRepository = createApmServerRouteRepository()
+  .add(agentConfigurationRoute)
+  .add(getSingleAgentConfigurationRoute)
+  .add(deleteAgentConfigurationRoute)
+  .add(createOrUpdateAgentConfigurationRoute)
+  .add(agentConfigurationSearchRoute)
+  .add(listAgentConfigurationServicesRoute)
+  .add(listAgentConfigurationEnvironmentsRoute)
+  .add(agentConfigurationAgentNameRoute);

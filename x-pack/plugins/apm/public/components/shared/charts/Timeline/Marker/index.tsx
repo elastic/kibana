@@ -26,11 +26,7 @@ export function Marker({ mark, x }: Props) {
   const legendWidth = 11;
   return (
     <MarkerContainer style={{ left: x - legendWidth / 2 }}>
-      {mark.type === 'errorMark' ? (
-        <ErrorMarker mark={mark} />
-      ) : (
-        <AgentMarker mark={mark} />
-      )}
+      {mark.type === 'errorMark' ? <ErrorMarker mark={mark} /> : <AgentMarker mark={mark} />}
     </MarkerContainer>
   );
 }

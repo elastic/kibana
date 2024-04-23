@@ -18,15 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import {
-  Filter,
-  FilterKey,
-} from '../../../../../../../common/custom_link/custom_link_types';
-import {
-  DEFAULT_OPTION,
-  FILTER_SELECT_OPTIONS,
-  getSelectOptions,
-} from './helper';
+import { Filter, FilterKey } from '../../../../../../../common/custom_link/custom_link_types';
+import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 
 export function FiltersSection({
   filters,
@@ -35,11 +28,7 @@ export function FiltersSection({
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
 }) {
-  const onChangeFilter = (
-    key: Filter['key'],
-    value: Filter['value'],
-    idx: number
-  ) => {
+  const onChangeFilter = (key: Filter['key'], value: Filter['value'], idx: number) => {
     const newFilters = [...filters];
     newFilters[idx] = { key, value };
     onChangeFilters(newFilters);
@@ -67,23 +56,17 @@ export function FiltersSection({
     <>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.flyout.filters.title',
-            {
-              defaultMessage: 'Filters',
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.filters.title', {
+            defaultMessage: 'Filters',
+          })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s">
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle',
-          {
-            defaultMessage:
-              'Use the filter options to scope them to only appear for specific services.',
-          }
-        )}
+        {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle', {
+          defaultMessage:
+            'Use the filter options to scope them to only appear for specific services.',
+        })}
       </EuiText>
 
       <EuiSpacer size="s" />
@@ -107,13 +90,8 @@ export function FiltersSection({
                     defaultMessage: 'Field',
                   }
                 )}
-                onChange={(e) =>
-                  onChangeFilter(e.target.value as FilterKey, value, idx)
-                }
-                isInvalid={
-                  !isEmpty(value) &&
-                  (isEmpty(key) || key === DEFAULT_OPTION.value)
-                }
+                onChange={(e) => onChangeFilter(e.target.value as FilterKey, value, idx)}
+                isInvalid={!isEmpty(value) && (isEmpty(key) || key === DEFAULT_OPTION.value)}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -151,25 +129,12 @@ export function FiltersSection({
   );
 }
 
-function AddFilterButton({
-  onClick,
-  isDisabled,
-}: {
-  onClick: () => void;
-  isDisabled: boolean;
-}) {
+function AddFilterButton({ onClick, isDisabled }: { onClick: () => void; isDisabled: boolean }) {
   return (
-    <EuiButtonEmpty
-      iconType="plusInCircle"
-      onClick={onClick}
-      disabled={isDisabled}
-    >
-      {i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter',
-        {
-          defaultMessage: 'Add another filter',
-        }
-      )}
+    <EuiButtonEmpty iconType="plusInCircle" onClick={onClick} disabled={isDisabled}>
+      {i18n.translate('xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter', {
+        defaultMessage: 'Add another filter',
+      })}
     </EuiButtonEmpty>
   );
 }

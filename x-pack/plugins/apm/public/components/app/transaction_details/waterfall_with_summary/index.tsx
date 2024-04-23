@@ -34,12 +34,7 @@ interface Props {
   traceSamples: TraceSample[];
 }
 
-export function WaterfallWithSummary({
-  urlParams,
-  waterfall,
-  isLoading,
-  traceSamples,
-}: Props) {
+export function WaterfallWithSummary({ urlParams, waterfall, isLoading, traceSamples }: Props) {
   const history = useHistory();
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -129,11 +124,7 @@ export function WaterfallWithSummary({
       />
       <EuiSpacer size="s" />
 
-      <TransactionTabs
-        transaction={entryTransaction}
-        urlParams={urlParams}
-        waterfall={waterfall}
-      />
+      <TransactionTabs transaction={entryTransaction} urlParams={urlParams} waterfall={waterfall} />
     </>
   );
 }

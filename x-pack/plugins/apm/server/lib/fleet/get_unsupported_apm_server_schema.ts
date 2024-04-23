@@ -10,10 +10,7 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import {
-  apmConfigMapping,
-  preprocessLegacyFields,
-} from './get_apm_package_policy_definition';
+import { apmConfigMapping, preprocessLegacyFields } from './get_apm_package_policy_definition';
 
 export async function getUnsupportedApmServerSchema({
   savedObjectsClient,

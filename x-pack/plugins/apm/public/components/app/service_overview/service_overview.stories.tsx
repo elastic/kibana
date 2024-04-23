@@ -56,9 +56,7 @@ const stories: Meta<{}> = {
           ]}
         >
           <KibanaReactContext.Provider>
-            <MockApmPluginContextWrapper
-              value={{ core: mockCore } as ApmPluginContextValue}
-            >
+            <MockApmPluginContextWrapper value={{ core: mockCore } as ApmPluginContextValue}>
               <APMServiceContext.Provider value={serviceContextValue}>
                 <StoryComponent />
               </APMServiceContext.Provider>

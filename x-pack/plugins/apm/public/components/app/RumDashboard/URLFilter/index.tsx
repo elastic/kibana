@@ -28,9 +28,7 @@ export function URLFilter() {
           removeUndefinedProps({
             ...search,
             [name]: value?.length ? value.join(',') : undefined,
-            [nameExcluded]: excludedValue?.length
-              ? excludedValue.join(',')
-              : undefined,
+            [nameExcluded]: excludedValue?.length ? excludedValue.join(',') : undefined,
           })
         ),
       });
@@ -58,10 +56,7 @@ export function URLFilter() {
 
   return (
     <span data-cy="csmUrlFilter">
-      <URLSearch
-        onChange={setFilterValue}
-        updateSearchTerm={updateSearchTerm}
-      />
+      <URLSearch onChange={setFilterValue} updateSearchTerm={updateSearchTerm} />
     </span>
   );
 }

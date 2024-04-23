@@ -17,10 +17,7 @@ import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../types';
+import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { UxUIFilters } from '../../typings/ui_filters';
 
@@ -33,19 +30,14 @@ export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
 export interface APMRouteCreateOptions {
   options: {
     tags: Array<
-      | 'access:apm'
-      | 'access:apm_write'
-      | 'access:ml:canGetJobs'
-      | 'access:ml:canCreateJob'
+      'access:apm' | 'access:apm_write' | 'access:ml:canGetJobs' | 'access:ml:canCreateJob'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
   };
 }
 
-export type TelemetryUsageCounter = ReturnType<
-  UsageCollectionSetup['createUsageCounter']
->;
+export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
 
 export interface APMRouteHandlerResources {
   request: KibanaRequest;

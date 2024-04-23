@@ -6,10 +6,7 @@
  */
 
 import { rangeQuery } from '../../../../../observability/server';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
@@ -31,8 +28,7 @@ export async function getTransactionErrorRateChartPreview({
   alertParams: AlertParams;
 }) {
   const { apmEventClient } = setup;
-  const { serviceName, environment, transactionType, interval, start, end } =
-    alertParams;
+  const { serviceName, environment, transactionType, interval, start, end } = alertParams;
 
   const searchAggregatedTransactions = await getSearchAggregatedTransactions({
     ...setup,
@@ -45,11 +41,7 @@ export async function getTransactionErrorRateChartPreview({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -57,14 +49,10 @@ export async function getTransactionErrorRateChartPreview({
         bool: {
           filter: [
             ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-            ...(transactionType
-              ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-              : []),
+            ...(transactionType ? [{ term: { [TRANSACTION_TYPE]: transactionType } }] : []),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...getDocumentTypeFilterForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
+            ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
           ],
         },
       },
@@ -85,10 +73,7 @@ export async function getTransactionErrorRateChartPreview({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_transaction_error_rate_chart_preview',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_error_rate_chart_preview', params);
 
   if (!resp.aggregations) {
     return [];

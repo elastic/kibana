@@ -7,10 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import {
-  AlertType,
-  APM_SERVER_FEATURE_ID,
-} from '../../../../common/alert_types';
+import { AlertType, APM_SERVER_FEATURE_ID } from '../../../../common/alert_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useServiceName } from '../../../hooks/use_service_name';
@@ -36,10 +33,8 @@ export function AlertingFlyout(props: Props) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
-  const environment =
-    'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
-  const transactionType =
-    'transactionType' in query ? query.transactionType : undefined;
+  const environment = 'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
+  const transactionType = 'transactionType' in query ? query.transactionType : undefined;
 
   const { services } = useKibana<ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(alertType, serviceName);

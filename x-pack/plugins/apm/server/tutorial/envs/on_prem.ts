@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { APMConfig } from '../..';
-import {
-  INSTRUCTION_VARIANT,
-  InstructionsSchema,
-} from '../../../../../../src/plugins/home/server';
+import { INSTRUCTION_VARIANT, InstructionsSchema } from '../../../../../../src/plugins/home/server';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,
@@ -82,38 +79,22 @@ export function onPremInstructions({
           },
         ],
         statusCheck: {
-          title: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.title',
-            {
-              defaultMessage: 'Agent status',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.text',
-            {
-              defaultMessage:
-                'Make sure your application is running and the agents are sending data.',
-            }
-          ),
-          btnLabel: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.btnLabel',
-            {
-              defaultMessage: 'Check agent status',
-            }
-          ),
-          success: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.successMessage',
-            {
-              defaultMessage:
-                'Data successfully received from one or more agents',
-            }
-          ),
-          error: i18n.translate(
-            'xpack.apm.tutorial.apmAgents.statusCheck.errorMessage',
-            {
-              defaultMessage: 'No data has been received from agents yet',
-            }
-          ),
+          title: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.title', {
+            defaultMessage: 'Agent status',
+          }),
+          text: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.text', {
+            defaultMessage:
+              'Make sure your application is running and the agents are sending data.',
+          }),
+          btnLabel: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.btnLabel', {
+            defaultMessage: 'Check agent status',
+          }),
+          success: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.successMessage', {
+            defaultMessage: 'Data successfully received from one or more agents',
+          }),
+          error: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.errorMessage', {
+            defaultMessage: 'No data has been received from agents yet',
+          }),
           esHitsCheck: {
             index: [
               apmConfig.indices.error,

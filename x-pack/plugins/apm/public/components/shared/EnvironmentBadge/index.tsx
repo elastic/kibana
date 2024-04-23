@@ -37,8 +37,7 @@ export function EnvironmentBadge({ environments = [] }: Props) {
       <EuiBadge>
         {i18n.translate('xpack.apm.servicesTable.environmentCount', {
           values: { environmentCount: environments.length },
-          defaultMessage:
-            '{environmentCount, plural, one {1 environment} other {# environments}}',
+          defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',
         })}
       </EuiBadge>
     </EuiToolTip>

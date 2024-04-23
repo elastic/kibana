@@ -18,8 +18,7 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
+    endpoint: '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
     name: 'latencyChartRequest',
   },
   {
@@ -27,18 +26,15 @@ const apisToIntercept = [
     name: 'throughputChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
+    endpoint: '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
     name: 'errorRateChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*',
     name: 'transactionGroupsDetailedRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/error_groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-java/error_groups/detailed_statistics?*',
     name: 'errorGroupsDetailedRequest',
   },
   {
@@ -82,25 +78,21 @@ describe('Service overview: Time Comparison', () => {
       const comparisonStartEnd =
         'comparisonStart=2021-08-02T06%3A50%3A00.000Z&comparisonEnd=2021-08-02T07%3A20%3A15.910Z';
       // When the page loads it fetches all APIs with comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).include(comparisonStartEnd);
-          });
-        }
-      );
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then((interceptions) => {
+        interceptions.map((interception) => {
+          expect(interception.request.url).include(comparisonStartEnd);
+        });
+      });
 
       // toggles off comparison
       cy.contains('Comparison').click();
       cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
       // When comparison is disabled APIs are called withou comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).not.include(comparisonStartEnd);
-          });
-        }
-      );
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then((interceptions) => {
+        interceptions.map((interception) => {
+          expect(interception.request.url).not.include(comparisonStartEnd);
+        });
+      });
     });
   });
 
@@ -137,29 +129,14 @@ describe('Service overview: Time Comparison', () => {
 
     cy.changeTimeRange('Last 7 days');
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'week');
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'contain.text',
-      'Week before'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Day before'
-    );
+    cy.get('[data-test-subj="comparisonSelect"]').should('contain.text', 'Week before');
+    cy.get('[data-test-subj="comparisonSelect"]').should('not.contain.text', 'Day before');
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 30 days');
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'have.value',
-      'period'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Day before'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Week before'
-    );
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'period');
+    cy.get('[data-test-subj="comparisonSelect"]').should('not.contain.text', 'Day before');
+    cy.get('[data-test-subj="comparisonSelect"]').should('not.contain.text', 'Week before');
   });
 
   it('hovers over throughput chart shows previous and current period', () => {

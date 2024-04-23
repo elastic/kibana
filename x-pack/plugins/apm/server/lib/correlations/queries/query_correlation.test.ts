@@ -42,9 +42,7 @@ describe('query_correlation', () => {
 
       expect(query.index).toBe(params.index);
 
-      expect(query?.body?.aggs?.latency_ranges?.range?.field).toBe(
-        'transaction.duration.us'
-      );
+      expect(query?.body?.aggs?.latency_ranges?.range?.field).toBe('transaction.duration.us');
       expect(query?.body?.aggs?.latency_ranges?.range?.ranges).toEqual(ranges);
 
       expect(
@@ -59,9 +57,9 @@ describe('query_correlation', () => {
         doc_count: totalDocCount,
       });
 
-      expect(
-        (query?.body?.aggs?.ks_test as any)?.bucket_count_ks_test?.fractions
-      ).toEqual(fractions);
+      expect((query?.body?.aggs?.ks_test as any)?.bucket_count_ks_test?.fractions).toEqual(
+        fractions
+      );
     });
   });
 

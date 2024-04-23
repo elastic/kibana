@@ -32,11 +32,7 @@ interface Props {
   rootTransactionDuration?: number;
 }
 
-function TransactionPropertiesTable({
-  transaction,
-}: {
-  transaction: Transaction;
-}) {
+function TransactionPropertiesTable({ transaction }: { transaction: Transaction }) {
   return (
     <div>
       <EuiTitle size="s">

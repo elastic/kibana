@@ -10,7 +10,5 @@ import { Maybe } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 
 export function getErrorName({ error }: { error: Maybe<APMError['error']> }) {
-  return (
-    error?.log?.message || error?.exception?.[0]?.message || NOT_AVAILABLE_LABEL
-  );
+  return error?.log?.message || error?.exception?.[0]?.message || NOT_AVAILABLE_LABEL;
 }

@@ -20,30 +20,25 @@ import { AlertingFlyout } from '../../alerting/alerting_flyout';
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts and rules',
 });
-const transactionDurationLabel = i18n.translate(
-  'xpack.apm.home.alertsMenu.transactionDuration',
-  { defaultMessage: 'Latency' }
-);
-const transactionErrorRateLabel = i18n.translate(
-  'xpack.apm.home.alertsMenu.transactionErrorRate',
-  { defaultMessage: 'Failed transaction rate' }
-);
+const transactionDurationLabel = i18n.translate('xpack.apm.home.alertsMenu.transactionDuration', {
+  defaultMessage: 'Latency',
+});
+const transactionErrorRateLabel = i18n.translate('xpack.apm.home.alertsMenu.transactionErrorRate', {
+  defaultMessage: 'Failed transaction rate',
+});
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
   defaultMessage: 'Error count',
 });
-const createThresholdAlertLabel = i18n.translate(
-  'xpack.apm.home.alertsMenu.createThresholdAlert',
-  { defaultMessage: 'Create threshold rule' }
-);
+const createThresholdAlertLabel = i18n.translate('xpack.apm.home.alertsMenu.createThresholdAlert', {
+  defaultMessage: 'Create threshold rule',
+});
 const createAnomalyAlertAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createAnomalyAlert',
   { defaultMessage: 'Create anomaly rule' }
 );
 
-const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID =
-  'create_transaction_duration_panel';
-const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID =
-  'create_transaction_error_rate_panel';
+const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID = 'create_transaction_duration_panel';
+const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID = 'create_transaction_error_rate_panel';
 const CREATE_ERROR_COUNT_ALERT_PANEL_ID = 'create_error_count_panel';
 
 interface Props {
@@ -99,10 +94,9 @@ export function AlertingPopoverAndFlyout({
         ...(canReadAlerts
           ? [
               {
-                name: i18n.translate(
-                  'xpack.apm.home.alertsMenu.viewActiveAlerts',
-                  { defaultMessage: 'Manage rules' }
-                ),
+                name: i18n.translate('xpack.apm.home.alertsMenu.viewActiveAlerts', {
+                  defaultMessage: 'Manage rules',
+                }),
                 href: basePath.prepend(
                   '/app/management/insightsAndAlerting/triggersActions/alerts'
                 ),

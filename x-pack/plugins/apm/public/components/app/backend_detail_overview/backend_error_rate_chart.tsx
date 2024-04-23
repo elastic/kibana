@@ -19,11 +19,7 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function BackendFailedTransactionRateChart({
-  height,
-}: {
-  height: number;
-}) {
+export function BackendFailedTransactionRateChart({ height }: { height: number }) {
   const theme = useTheme();
 
   const {
@@ -76,10 +72,9 @@ export function BackendFailedTransactionRateChart({
         data: data.comparisonTimeseries,
         type: 'area',
         color: theme.eui.euiColorMediumShade,
-        title: i18n.translate(
-          'xpack.apm.backendErrorRateChart.previousPeriodLabel',
-          { defaultMessage: 'Previous period' }
-        ),
+        title: i18n.translate('xpack.apm.backendErrorRateChart.previousPeriodLabel', {
+          defaultMessage: 'Previous period',
+        }),
       });
     }
 

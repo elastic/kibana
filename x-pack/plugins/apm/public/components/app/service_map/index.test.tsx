@@ -54,9 +54,7 @@ function createWrapper(license: License | null) {
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <LicenseContext.Provider value={license || undefined}>
-            <MockApmPluginContextWrapper history={history}>
-              {children}
-            </MockApmPluginContextWrapper>
+            <MockApmPluginContextWrapper history={history}>{children}</MockApmPluginContextWrapper>
           </LicenseContext.Provider>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>

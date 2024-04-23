@@ -24,10 +24,7 @@ import { isEqual, pull, merge, castArray } from 'lodash';
  );
 */
 
-type JoinedReturnType<
-  T extends Record<string, any>,
-  U extends UnionToIntersection<T>
-> = Array<
+type JoinedReturnType<T extends Record<string, any>, U extends UnionToIntersection<T>> = Array<
   Partial<U> & {
     [k in keyof T]: T[k];
   }
@@ -52,14 +49,11 @@ export function joinByKey<
 export function joinByKey(
   items: Array<Record<string, any>>,
   key: string | string[],
-  mergeFn: Function = (a: Record<string, any>, b: Record<string, any>) =>
-    merge({}, a, b)
+  mergeFn: Function = (a: Record<string, any>, b: Record<string, any>) => merge({}, a, b)
 ) {
   const keys = castArray(key);
   return items.reduce<Array<Record<string, any>>>((prev, current) => {
-    let item = prev.find((prevItem) =>
-      keys.every((k) => isEqual(prevItem[k], current[k]))
-    );
+    let item = prev.find((prevItem) => keys.every((k) => isEqual(prevItem[k], current[k])));
 
     if (!item) {
       item = { ...current };

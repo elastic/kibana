@@ -48,13 +48,7 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
 
 Cypress.Commands.add(
   'expectAPIsToHaveBeenCalledWith',
-  ({
-    apisIntercepted,
-    value,
-  }: {
-    apisIntercepted: string[];
-    value: string;
-  }) => {
+  ({ apisIntercepted, value }: { apisIntercepted: string[]; value: string }) => {
     cy.wait(apisIntercepted).then((interceptions) => {
       if (Array.isArray(interceptions)) {
         interceptions.map((interception) => {

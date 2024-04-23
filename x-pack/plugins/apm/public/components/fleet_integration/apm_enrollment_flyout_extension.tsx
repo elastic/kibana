@@ -33,10 +33,9 @@ function StepComponent() {
       <EuiSpacer size="m" />
 
       <EuiButton fill href={installApmAgentLink}>
-        {i18n.translate(
-          'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText',
-          { defaultMessage: 'Install APM Agent' }
-        )}
+        {i18n.translate('xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText', {
+          defaultMessage: 'Install APM Agent',
+        })}
       </EuiButton>
     </>
   );
@@ -47,12 +46,9 @@ export function getApmEnrollmentFlyoutData(): Pick<
   'title' | 'Component'
 > {
   return {
-    title: i18n.translate(
-      'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentTitle',
-      {
-        defaultMessage: 'Install APM Agent',
-      }
-    ),
+    title: i18n.translate('xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentTitle', {
+      defaultMessage: 'Install APM Agent',
+    }),
     Component: StepComponent,
   };
 }

@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  Logger,
-} from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { PackagePolicy } from '../../../../fleet/common';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../../types';
+import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
 import { Setup } from '../helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';

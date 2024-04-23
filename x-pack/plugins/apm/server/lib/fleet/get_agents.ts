@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'kibana/server';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 
@@ -23,11 +19,9 @@ export async function getFleetAgents({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
   // @ts-ignore
-  const savedObjectsClient: SavedObjectsClientContract =
-    await getInternalSavedObjectsClient(core.setup);
-
-  return await fleetPluginStart.agentPolicyService.getByIds(
-    savedObjectsClient,
-    policyIds
+  const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
+    core.setup
   );
+
+  return await fleetPluginStart.agentPolicyService.getByIds(savedObjectsClient, policyIds);
 }

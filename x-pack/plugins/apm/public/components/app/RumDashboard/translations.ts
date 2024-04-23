@@ -32,33 +32,21 @@ export const I18LABELS = {
   pageLoadTimes: i18n.translate('xpack.apm.rum.dashboard.pageLoadTimes.label', {
     defaultMessage: 'Page load times',
   }),
-  pageLoadDuration: i18n.translate(
-    'xpack.apm.rum.dashboard.pageLoadDuration.label',
-    {
-      defaultMessage: 'Page load duration',
-    }
-  ),
+  pageLoadDuration: i18n.translate('xpack.apm.rum.dashboard.pageLoadDuration.label', {
+    defaultMessage: 'Page load duration',
+  }),
   pageLoad: i18n.translate('xpack.apm.rum.dashboard.pageLoad.label', {
     defaultMessage: 'Page load',
   }),
-  pageLoadDistribution: i18n.translate(
-    'xpack.apm.rum.dashboard.pageLoadDistribution.label',
-    {
-      defaultMessage: 'Page load distribution',
-    }
-  ),
-  jsErrors: i18n.translate(
-    'xpack.apm.rum.dashboard.impactfulMetrics.jsErrors',
-    {
-      defaultMessage: 'JavaScript errors',
-    }
-  ),
-  highTrafficPages: i18n.translate(
-    'xpack.apm.rum.dashboard.impactfulMetrics.highTrafficPages',
-    {
-      defaultMessage: 'High traffic pages',
-    }
-  ),
+  pageLoadDistribution: i18n.translate('xpack.apm.rum.dashboard.pageLoadDistribution.label', {
+    defaultMessage: 'Page load distribution',
+  }),
+  jsErrors: i18n.translate('xpack.apm.rum.dashboard.impactfulMetrics.jsErrors', {
+    defaultMessage: 'JavaScript errors',
+  }),
+  highTrafficPages: i18n.translate('xpack.apm.rum.dashboard.impactfulMetrics.highTrafficPages', {
+    defaultMessage: 'High traffic pages',
+  }),
   resetZoom: i18n.translate('xpack.apm.rum.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
   }),
@@ -80,24 +68,18 @@ export const I18LABELS = {
   browser: i18n.translate('xpack.apm.rum.visitorBreakdown.browser', {
     defaultMessage: 'Browser',
   }),
-  operatingSystem: i18n.translate(
-    'xpack.apm.rum.visitorBreakdown.operatingSystem',
-    {
-      defaultMessage: 'Operating system',
-    }
-  ),
+  operatingSystem: i18n.translate('xpack.apm.rum.visitorBreakdown.operatingSystem', {
+    defaultMessage: 'Operating system',
+  }),
   metrics: i18n.translate('xpack.apm.ux.metrics', {
     defaultMessage: 'Metrics',
   }),
   median: i18n.translate('xpack.apm.ux.median', {
     defaultMessage: 'median',
   }),
-  avgPageLoadDuration: i18n.translate(
-    'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
-    {
-      defaultMessage: 'Average page load duration',
-    }
-  ),
+  avgPageLoadDuration: i18n.translate('xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration', {
+    defaultMessage: 'Average page load duration',
+  }),
   pageLoadDurationByRegion: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
     {
@@ -136,12 +118,9 @@ export const I18LABELS = {
   errorMessage: i18n.translate('xpack.apm.rum.jsErrors.errorMessage', {
     defaultMessage: 'Error message',
   }),
-  impactedPageLoads: i18n.translate(
-    'xpack.apm.rum.jsErrors.impactedPageLoads',
-    {
-      defaultMessage: 'Impacted page loads',
-    }
-  ),
+  impactedPageLoads: i18n.translate('xpack.apm.rum.jsErrors.impactedPageLoads', {
+    defaultMessage: 'Impacted page loads',
+  }),
   percentile: i18n.translate('xpack.apm.ux.percentile.label', {
     defaultMessage: 'Percentile',
   }),
@@ -164,15 +143,11 @@ export const I18LABELS = {
     defaultMessage: 'No data.',
   }),
   // Helper tooltips
-  totalPageLoadTooltip: i18n.translate(
-    'xpack.apm.rum.dashboard.tooltips.totalPageLoad',
-    {
-      defaultMessage: 'Total represents the full page load duration',
-    }
-  ),
+  totalPageLoadTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.totalPageLoad', {
+    defaultMessage: 'Total represents the full page load duration',
+  }),
   frontEndTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.frontEnd', {
-    defaultMessage:
-      'Frontend time represents the total page load duration minus the backend time',
+    defaultMessage: 'Frontend time represents the total page load duration minus the backend time',
   }),
   backEndTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.backEnd', {
     defaultMessage:
@@ -180,9 +155,6 @@ export const I18LABELS = {
   }),
 };
 
-export const VisitorBreakdownLabel = i18n.translate(
-  'xpack.apm.rum.visitorBreakdown',
-  {
-    defaultMessage: 'Visitor breakdown',
-  }
-);
+export const VisitorBreakdownLabel = i18n.translate('xpack.apm.rum.visitorBreakdown', {
+  defaultMessage: 'Visitor breakdown',
+});

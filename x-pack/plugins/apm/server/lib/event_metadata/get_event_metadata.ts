@@ -6,11 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import {
-  ERROR_ID,
-  SPAN_ID,
-  TRANSACTION_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { ERROR_ID, SPAN_ID, TRANSACTION_ID } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import type { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 

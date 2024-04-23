@@ -42,9 +42,7 @@ interface Props {
 }
 
 function FrameHeading({ codeLanguage, stackframe, isLibraryFrame }: Props) {
-  const FileDetail: ComponentType = isLibraryFrame
-    ? LibraryFrameFileDetail
-    : AppFrameFileDetail;
+  const FileDetail: ComponentType = isLibraryFrame ? LibraryFrameFileDetail : AppFrameFileDetail;
   let Renderer: ComponentType<FrameHeadingRendererProps>;
   switch (codeLanguage?.toString().toLowerCase()) {
     case 'c#':

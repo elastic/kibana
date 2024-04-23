@@ -28,10 +28,7 @@ type LocationWithQuery = Partial<
   }
 >;
 
-function getNextLocation(
-  history: History,
-  locationWithQuery: LocationWithQuery
-) {
+function getNextLocation(history: History, locationWithQuery: LocationWithQuery) {
   const { query, ...rest } = locationWithQuery;
   return {
     ...history.location,
@@ -43,10 +40,7 @@ function getNextLocation(
   };
 }
 
-export function replace(
-  history: History,
-  locationWithQuery: LocationWithQuery
-) {
+export function replace(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
   return history.replace(location);
 }
@@ -56,10 +50,7 @@ export function push(history: History, locationWithQuery: LocationWithQuery) {
   return history.push(location);
 }
 
-export function createHref(
-  history: History,
-  locationWithQuery: LocationWithQuery
-) {
+export function createHref(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
   return history.createHref(location);
 }

@@ -93,17 +93,12 @@ const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
   defaultMessage: 'Service Map',
 });
 
-const dependenciesTitle = i18n.translate(
-  'xpack.apm.navigation.dependenciesTitle',
-  {
-    defaultMessage: 'Dependencies',
-  }
-);
+const dependenciesTitle = i18n.translate('xpack.apm.navigation.dependenciesTitle', {
+  defaultMessage: 'Dependencies',
+});
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
-  constructor(
-    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
-  ) {
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -178,13 +173,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const { fetchObservabilityOverviewPageData, getHasData } = await import(
         './services/rest/apm_observability_overview_fetchers'
       );
-      const { hasFleetApmIntegrations } = await import(
-        './tutorial/tutorial_apm_fleet_check'
-      );
+      const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
 
-      const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
-      );
+      const { createCallApmApi } = await import('./services/rest/createCallApmApi');
 
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
@@ -237,9 +228,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const { fetchUxOverviewDate, hasRumData } = await import(
         './components/app/RumDashboard/ux_overview_fetchers'
       );
-      const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
-      );
+      const { createCallApmApi } = await import('./services/rest/createCallApmApi');
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
 
@@ -301,9 +290,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-      navLinkStatus: config.ui.enabled
-        ? AppNavLinkStatus.default
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: config.ui.enabled ? AppNavLinkStatus.default : AppNavLinkStatus.hidden,
       keywords: [
         'RUM',
         'Real User Monitoring',
@@ -374,9 +361,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-edit-tabs',
-        tabs: [
-          { title: 'APM Agents', Component: getLazyApmAgentsTabExtension() },
-        ],
+        tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
   }

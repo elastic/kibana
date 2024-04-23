@@ -7,10 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { rangeQuery } from '../../../../../observability/server';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import {
@@ -29,15 +26,8 @@ export async function getTransactionDurationChartPreview({
   setup: Setup;
 }) {
   const { apmEventClient } = setup;
-  const {
-    aggregationType,
-    environment,
-    serviceName,
-    transactionType,
-    interval,
-    start,
-    end,
-  } = alertParams;
+  const { aggregationType, environment, serviceName, transactionType, interval, start, end } =
+    alertParams;
   const searchAggregatedTransactions = await getSearchAggregatedTransactions({
     ...setup,
     kuery: '',
@@ -47,22 +37,17 @@ export async function getTransactionDurationChartPreview({
     bool: {
       filter: [
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
-        ...(transactionType
-          ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
-          : []),
+        ...(transactionType ? [{ term: { [TRANSACTION_TYPE]: transactionType } }] : []),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...getDocumentTypeFilterForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
       ] as QueryDslQueryContainer[],
     },
   };
 
-  const transactionDurationField =
-    getTransactionDurationFieldForAggregatedTransactions(
-      searchAggregatedTransactions
-    );
+  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
 
   const aggs = {
     timeseries: {
@@ -90,18 +75,11 @@ export async function getTransactionDurationChartPreview({
   };
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
     },
     body: { size: 0, query, aggs },
   };
-  const resp = await apmEventClient.search(
-    'get_transaction_duration_chart_preview',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_duration_chart_preview', params);
 
   if (!resp.aggregations) {
     return [];
@@ -113,9 +91,7 @@ export async function getTransactionDurationChartPreview({
     const y =
       aggregationType === 'avg'
         ? (bucket.agg as { value: number | null }).value
-        : (bucket.agg as { values: Record<string, number | null> }).values[
-            percentilesKey
-          ];
+        : (bucket.agg as { values: Record<string, number | null> }).values[percentilesKey];
 
     return { x, y };
   });

@@ -54,10 +54,7 @@ export async function getServiceInstancesMainStatistics(
       }),
     ]);
 
-    const stats = joinByKey(
-      [...transactionStats, ...systemMetricStats],
-      'serviceNodeName'
-    );
+    const stats = joinByKey([...transactionStats, ...systemMetricStats], 'serviceNodeName');
 
     return stats;
   });

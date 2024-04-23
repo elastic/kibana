@@ -10,15 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 import { ApmIndicesConfigName } from '..';
 
-const properties: { [Property in ApmIndicesConfigName]: { type: 'keyword' } } =
-  {
-    sourcemap: { type: 'keyword' },
-    error: { type: 'keyword' },
-    onboarding: { type: 'keyword' },
-    span: { type: 'keyword' },
-    transaction: { type: 'keyword' },
-    metric: { type: 'keyword' },
-  };
+const properties: { [Property in ApmIndicesConfigName]: { type: 'keyword' } } = {
+  sourcemap: { type: 'keyword' },
+  error: { type: 'keyword' },
+  onboarding: { type: 'keyword' },
+  span: { type: 'keyword' },
+  transaction: { type: 'keyword' },
+  metric: { type: 'keyword' },
+};
 
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',

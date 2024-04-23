@@ -60,19 +60,14 @@ export const fetchKeywordFieldStats = async (
   field: FieldValuePair,
   termFilters?: FieldValuePair[]
 ): Promise<KeywordFieldStats> => {
-  const request = getKeywordFieldStatsRequest(
-    params,
-    field.fieldName,
-    termFilters
-  );
+  const request = getKeywordFieldStatsRequest(params, field.fieldName, termFilters);
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as unknown as {
     sample: {
       sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
     };
   };
-  const topValues: TopValueBucket[] =
-    aggregations?.sample.sampled_top?.buckets ?? [];
+  const topValues: TopValueBucket[] = aggregations?.sample.sampled_top?.buckets ?? [];
 
   const stats = {
     fieldName: field.fieldName,

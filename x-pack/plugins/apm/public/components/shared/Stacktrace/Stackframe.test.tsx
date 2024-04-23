@@ -17,16 +17,12 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
-      wrapper = mountWithTheme(
-        <StackframeComponent id="test" stackframe={stackframe} />
-      );
+      wrapper = mountWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
     });
 
     it('renders', () => {
       expect(() =>
-        mountWithTheme(
-          <StackframeComponent id="test" stackframe={stacktracesMock[0]} />
-        )
+        mountWithTheme(<StackframeComponent id="test" stackframe={stacktracesMock[0]} />)
       ).not.toThrowError();
     });
 
@@ -45,9 +41,7 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = { line: {} } as Stackframe;
-      wrapper = mountWithTheme(
-        <StackframeComponent id="test" stackframe={stackframe} />
-      );
+      wrapper = mountWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
     });
 
     it('should render only FrameHeading', () => {

@@ -57,21 +57,10 @@ const getRegisterRouteDependencies = () => {
 };
 
 const getRepository = () =>
-  createServerRouteRepository<
-    APMRouteHandlerResources,
-    APMRouteCreateOptions
-  >();
+  createServerRouteRepository<APMRouteHandlerResources, APMRouteCreateOptions>();
 
 const initApi = (
-  routes: Array<
-    ServerRoute<
-      any,
-      t.Any,
-      APMRouteHandlerResources,
-      any,
-      APMRouteCreateOptions
-    >
-  >
+  routes: Array<ServerRoute<any, t.Any, APMRouteHandlerResources, any, APMRouteCreateOptions>>
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
 
@@ -277,9 +266,7 @@ describe('createApi', () => {
         const {
           simulateRequest,
           mocks: { response },
-        } = initApi([
-          { endpoint: 'GET /foo', options: { tags: [] }, handler: handlerMock },
-        ]);
+        } = initApi([{ endpoint: 'GET /foo', options: { tags: [] }, handler: handlerMock }]);
         await simulateRequest({
           method: 'get',
           pathname: '/foo',

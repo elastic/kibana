@@ -9,13 +9,7 @@ import moment from 'moment';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { getDateDifference } from '../../../../common/utils/formatters';
 
-export function getComparisonTypes({
-  start,
-  end,
-}: {
-  start?: string;
-  end?: string;
-}) {
+export function getComparisonTypes({ start, end }: { start?: string; end?: string }) {
   const momentStart = moment(start).startOf('second');
   const momentEnd = moment(end).startOf('second');
 
@@ -28,10 +22,7 @@ export function getComparisonTypes({
 
   // Less than or equals to one day
   if (dateDiff <= 1) {
-    return [
-      TimeRangeComparisonEnum.DayBefore,
-      TimeRangeComparisonEnum.WeekBefore,
-    ];
+    return [TimeRangeComparisonEnum.DayBefore, TimeRangeComparisonEnum.WeekBefore];
   }
 
   // Less than or equals to one week

@@ -18,12 +18,7 @@ interface AggregationParams {
   end: number;
 }
 
-export const getHealthStatuses = async ({
-  environment,
-  setup,
-  start,
-  end,
-}: AggregationParams) => {
+export const getHealthStatuses = async ({ environment, setup, start, end }: AggregationParams) => {
   if (!setup.ml) {
     return [];
   }

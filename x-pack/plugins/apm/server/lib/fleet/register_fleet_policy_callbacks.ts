@@ -10,10 +10,7 @@ import {
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../../../../fleet/server';
-import {
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../../../../fleet/common';
+import { NewPackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';
@@ -81,9 +78,7 @@ function registerPackagePolicyExternalCallback({
   config: NonNullable<APMPlugin['currentConfig']>;
   logger: NonNullable<APMPlugin['logger']>;
 }) {
-  const callbackFn:
-    | PostPackagePolicyCreateCallback
-    | PutPackagePolicyUpdateCallback = async (
+  const callbackFn: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = async (
     packagePolicy: PackagePolicy,
     context: Context,
     request: Request

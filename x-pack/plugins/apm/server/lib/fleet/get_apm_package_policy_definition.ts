@@ -16,9 +16,7 @@ interface GetApmPackagePolicyDefinitionOptions {
   apmServerSchema: Record<string, any>;
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
 }
-export function getApmPackagePolicyDefinition(
-  options: GetApmPackagePolicyDefinitionOptions
-) {
+export function getApmPackagePolicyDefinition(options: GetApmPackagePolicyDefinitionOptions) {
   const { apmServerSchema, cloudPluginSetup } = options;
   return {
     name: 'Elastic APM',
@@ -93,18 +91,18 @@ function getApmPackageInputVars(options: GetApmPackagePolicyDefinitionOptions) {
     })
   );
 
-  const inputVars: Record<string, { type: string; value: any }> =
-    apmServerConfigs.reduce((acc, { key, name, type, getValue, frozen }) => {
+  const inputVars: Record<string, { type: string; value: any }> = apmServerConfigs.reduce(
+    (acc, { key, name, type, getValue, frozen }) => {
       const apmServerSchemaValue = apmServerSchema[key];
       const value =
-        (getValue
-          ? getValue(options, apmServerSchemaValue)
-          : apmServerSchemaValue) ?? ''; // defaults to an empty string to be edited in Fleet UI
+        (getValue ? getValue(options, apmServerSchemaValue) : apmServerSchemaValue) ?? ''; // defaults to an empty string to be edited in Fleet UI
       return {
         ...acc,
         [name]: { type, value, frozen },
       };
-    }, {});
+    },
+    {}
+  );
   return inputVars;
 }
 
@@ -113,10 +111,7 @@ export const apmConfigMapping: Record<
   {
     name: string;
     type: string;
-    getValue?: (
-      options: GetApmPackagePolicyDefinitionOptions,
-      value?: any
-    ) => any;
+    getValue?: (options: GetApmPackagePolicyDefinitionOptions, value?: any) => any;
     frozen?: boolean;
   }
 > = {

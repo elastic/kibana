@@ -16,9 +16,7 @@ describe('getApmIndexPatternTitle', () => {
       error: 'apm-*-error-*',
       metric: 'apm-*-metrics-*',
     } as ApmIndicesConfig);
-    expect(title).toBe(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
-    );
+    expect(title).toBe('apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*');
   });
 
   it('removes duplicates', () => {

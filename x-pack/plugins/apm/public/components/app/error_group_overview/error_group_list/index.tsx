@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiIconTip,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -73,13 +68,10 @@ function ErrorGroupList({ items, serviceName }: Props) {
               iconProps={{
                 className: 'eui-alignTop',
               }}
-              content={i18n.translate(
-                'xpack.apm.errorsTable.groupIdColumnDescription',
-                {
-                  defaultMessage:
-                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
-                }
-              )}
+              content={i18n.translate('xpack.apm.errorsTable.groupIdColumnDescription', {
+                defaultMessage:
+                  'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+              })}
             />
           </>
         ),
@@ -118,34 +110,22 @@ function ErrorGroupList({ items, serviceName }: Props) {
         },
       },
       {
-        name: i18n.translate(
-          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
-          {
-            defaultMessage: 'Error message and culprit',
-          }
-        ),
+        name: i18n.translate('xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel', {
+          defaultMessage: 'Error message and culprit',
+        }),
         field: 'message',
         sortable: false,
         width: '50%',
         render: (_, item: ErrorGroupItem) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip
-                id="error-message-tooltip"
-                content={item.message || NOT_AVAILABLE_LABEL}
-              >
-                <MessageLink
-                  serviceName={serviceName}
-                  errorGroupId={item.groupId}
-                >
+              <EuiToolTip id="error-message-tooltip" content={item.message || NOT_AVAILABLE_LABEL}>
+                <MessageLink serviceName={serviceName} errorGroupId={item.groupId}>
                   {item.message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
               <br />
-              <EuiToolTip
-                id="error-culprit-tooltip"
-                content={item.culprit || NOT_AVAILABLE_LABEL}
-              >
+              <EuiToolTip id="error-culprit-tooltip" content={item.culprit || NOT_AVAILABLE_LABEL}>
                 <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
               </EuiToolTip>
             </MessageAndCulpritCell>
@@ -174,19 +154,14 @@ function ErrorGroupList({ items, serviceName }: Props) {
         sortable: true,
         dataType: 'number',
         render: (_, { occurrenceCount }) =>
-          occurrenceCount
-            ? numeral(occurrenceCount).format('0.[0]a')
-            : NOT_AVAILABLE_LABEL,
+          occurrenceCount ? numeral(occurrenceCount).format('0.[0]a') : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'latestOccurrenceAt',
         sortable: true,
-        name: i18n.translate(
-          'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
-          {
-            defaultMessage: 'Latest occurrence',
-          }
-        ),
+        name: i18n.translate('xpack.apm.errorsTable.latestOccurrenceColumnLabel', {
+          defaultMessage: 'Latest occurrence',
+        }),
         align: RIGHT_ALIGNMENT,
         render: (_, { latestOccurrenceAt }) =>
           latestOccurrenceAt ? (

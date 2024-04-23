@@ -48,11 +48,7 @@ function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
 }
 
-export async function listArtifacts({
-  fleetPluginStart,
-}: {
-  fleetPluginStart: FleetPluginStart;
-}) {
+export async function listArtifacts({ fleetPluginStart }: { fleetPluginStart: FleetPluginStart }) {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
   const artifacts = await apmArtifactClient.listArtifacts({
     kuery: 'type: sourcemap',
@@ -146,13 +142,7 @@ export async function updateSourceMapsOnFleetPolicies({
 
   return Promise.all(
     apmFleetPolicies.items.map(async (item) => {
-      const {
-        id,
-        revision,
-        updated_at: updatedAt,
-        updated_by: updatedBy,
-        ...packagePolicy
-      } = item;
+      const { id, revision, updated_at: updatedAt, updated_by: updatedBy, ...packagePolicy } = item;
 
       const updatedPackagePolicy = getPackagePolicyWithSourceMap({
         packagePolicy,

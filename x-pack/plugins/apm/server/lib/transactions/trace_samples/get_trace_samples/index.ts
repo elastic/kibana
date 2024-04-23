@@ -79,10 +79,7 @@ export async function getTraceSamples({
         body: {
           query: {
             bool: {
-              filter: [
-                ...commonFilters,
-                { term: { [TRANSACTION_SAMPLED]: true } },
-              ],
+              filter: [...commonFilters, { term: { [TRANSACTION_SAMPLED]: true } }],
               should: [
                 { term: { [TRACE_ID]: traceId } },
                 { term: { [TRANSACTION_ID]: transactionId } },

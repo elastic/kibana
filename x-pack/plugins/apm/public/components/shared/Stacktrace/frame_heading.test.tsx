@@ -10,16 +10,9 @@ import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { FrameHeading } from './frame_heading';
 
-function getRenderedStackframeText(
-  stackframe: Stackframe,
-  codeLanguage: string
-) {
+function getRenderedStackframeText(stackframe: Stackframe, codeLanguage: string) {
   const result = renderWithTheme(
-    <FrameHeading
-      codeLanguage={codeLanguage}
-      isLibraryFrame={false}
-      stackframe={stackframe}
-    />
+    <FrameHeading codeLanguage={codeLanguage} isLibraryFrame={false} stackframe={stackframe} />
   );
 
   return result.getByTestId('FrameHeading').textContent;
@@ -73,13 +66,10 @@ describe('FrameHeading', () => {
             {
               classname: 'OpbeansDotnet.Controllers.CustomersController',
               exclude_from_grouping: false,
-              filename:
-                '/src/opbeans-dotnet/Controllers/CustomersController.cs',
-              abs_path:
-                '/src/opbeans-dotnet/Controllers/CustomersController.cs',
+              filename: '/src/opbeans-dotnet/Controllers/CustomersController.cs',
+              abs_path: '/src/opbeans-dotnet/Controllers/CustomersController.cs',
               line: { number: 23 },
-              module:
-                'opbeans-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null',
+              module: 'opbeans-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null',
               function: 'Get',
             },
             'C#'
@@ -144,9 +134,7 @@ describe('FrameHeading', () => {
             },
             'javascript'
           )
-        ).toEqual(
-          'at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)'
-        );
+        ).toEqual('at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)');
       });
     });
 
@@ -245,9 +233,7 @@ describe('FrameHeading', () => {
           },
           'javascript'
         )
-      ).toEqual(
-        'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)'
-      );
+      ).toEqual('at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)');
     });
   });
 });

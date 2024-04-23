@@ -36,11 +36,7 @@ interface Props<T> {
   hidePerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
-  sortFn?: (
-    items: T[],
-    sortField: string,
-    sortDirection: 'asc' | 'desc'
-  ) => T[];
+  sortFn?: (items: T[], sortField: string, sortDirection: 'asc' | 'desc') => T[];
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
@@ -158,8 +154,6 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   );
 }
 
-const ManagedTable = React.memo(
-  UnoptimizedManagedTable
-) as typeof UnoptimizedManagedTable;
+const ManagedTable = React.memo(UnoptimizedManagedTable) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };

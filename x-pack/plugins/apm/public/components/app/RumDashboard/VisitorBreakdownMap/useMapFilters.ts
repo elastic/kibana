@@ -49,11 +49,7 @@ const getMatchFilter = (field: string, value: string): Filter => {
   };
 };
 
-const getMultiMatchFilter = (
-  field: string,
-  values: string[],
-  negate = false
-): Filter => {
+const getMultiMatchFilter = (field: string, values: string[], negate = false): Filter => {
   return {
     meta: {
       index: APM_STATIC_INDEX_PATTERN_ID,
@@ -133,22 +129,16 @@ export const useMapFilters = (): Filter[] => {
       filters.push(getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, true));
     }
     if (deviceExcluded) {
-      filters.push(
-        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, true)
-      );
+      filters.push(getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, true));
     }
     if (osExcluded) {
       filters.push(getMultiMatchFilter(USER_AGENT_OS, osExcluded, true));
     }
     if (locationExcluded) {
-      filters.push(
-        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, true)
-      );
+      filters.push(getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, true));
     }
     if (transactionUrlExcluded) {
-      filters.push(
-        getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, true)
-      );
+      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, true));
     }
     if (searchTerm) {
       filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm));

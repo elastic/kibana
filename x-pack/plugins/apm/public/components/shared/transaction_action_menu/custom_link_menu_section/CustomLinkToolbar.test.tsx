@@ -13,10 +13,7 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../../../utils/testHelpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/testHelpers';
 import { CustomLinkToolbar } from './CustomLinkToolbar';
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
@@ -44,9 +41,7 @@ describe('CustomLinkToolbar', () => {
     const component = render(<CustomLinkToolbar onClickCreate={jest.fn()} />, {
       wrapper: Wrapper,
     });
-    expect(
-      component.getByLabelText('Custom links settings page')
-    ).toBeInTheDocument();
+    expect(component.getByLabelText('Custom links settings page')).toBeInTheDocument();
     expectTextsInDocument(component, ['Create']);
   });
 
@@ -55,9 +50,7 @@ describe('CustomLinkToolbar', () => {
       <CustomLinkToolbar onClickCreate={jest.fn()} showCreateButton={false} />,
       { wrapper: Wrapper }
     );
-    expect(
-      component.getByLabelText('Custom links settings page')
-    ).toBeInTheDocument();
+    expect(component.getByLabelText('Custom links settings page')).toBeInTheDocument();
     expectTextsNotInDocument(component, ['Create']);
   });
 

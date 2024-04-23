@@ -51,9 +51,7 @@ const stories: Meta<Args> = {
       createCallApmApi(coreMock);
 
       return (
-        <MemoryRouter
-          initialEntries={['/service-map?rangeFrom=now-15m&rangeTo=now']}
-        >
+        <MemoryRouter initialEntries={['/service-map?rangeFrom=now-15m&rangeTo=now']}>
           <KibanaReactContext.Provider>
             <MockUrlParamsContextProvider>
               <MockApmPluginContextWrapper>

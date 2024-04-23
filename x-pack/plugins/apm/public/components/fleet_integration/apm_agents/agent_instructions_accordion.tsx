@@ -16,23 +16,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateAgentInstructions } from './agent_instructions_mappings';
-import {
-  Markdown,
-  useKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { Markdown, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
 import { NewPackagePolicy } from '../apm_policy_form/typings';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
 import { replaceTemplateStrings } from './replace_template_strings';
 
-function AccordionButtonContent({
-  agentName,
-  title,
-}: {
-  agentName: AgentName;
-  title: string;
-}) {
+function AccordionButtonContent({ agentName, title }: { agentName: AgentName; title: string }) {
   return (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -48,14 +39,10 @@ function AccordionButtonContent({
           <EuiFlexItem>
             <EuiText size="s">
               <p>
-                {i18n.translate(
-                  'xpack.apm.fleet_integration.settings.apmAgent.description',
-                  {
-                    defaultMessage:
-                      'Configure instrumentation for {title} applications.',
-                    values: { title },
-                  }
-                )}
+                {i18n.translate('xpack.apm.fleet_integration.settings.apmAgent.description', {
+                  defaultMessage: 'Configure instrumentation for {title} applications.',
+                  values: { title },
+                })}
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -119,22 +106,11 @@ export function AgentInstructionsAccordion({
   return (
     <EuiAccordion
       id={agentName}
-      buttonContent={
-        <AccordionButtonContent agentName={agentName} title={title} />
-      }
+      buttonContent={<AccordionButtonContent agentName={agentName} title={title} />}
     >
       <EuiSpacer />
       {steps.map(
-        (
-          {
-            title: stepTitle,
-            textPre,
-            textPost,
-            customComponentName,
-            commands,
-          },
-          index
-        ) => {
+        ({ title: stepTitle, textPre, textPost, customComponentName, commands }, index) => {
           const commandBlock = replaceTemplateStrings(
             Array.isArray(commands) ? commands.join('\n') : commands || '',
             docLinks
@@ -147,9 +123,7 @@ export function AgentInstructionsAccordion({
               <EuiSpacer size="s" />
               <EuiText color="subdued" size="s">
                 {textPre && (
-                  <InstructionsContent
-                    markdown={replaceTemplateStrings(textPre, docLinks)}
-                  />
+                  <InstructionsContent markdown={replaceTemplateStrings(textPre, docLinks)} />
                 )}
                 {commandBlock && (
                   <>
@@ -176,9 +150,7 @@ export function AgentInstructionsAccordion({
                 {textPost && (
                   <>
                     <EuiSpacer />
-                    <InstructionsContent
-                      markdown={replaceTemplateStrings(textPost, docLinks)}
-                    />
+                    <InstructionsContent markdown={replaceTemplateStrings(textPost, docLinks)} />
                   </>
                 )}
               </EuiText>

@@ -14,20 +14,11 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiButtonEmpty } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  euiPaletteColorBlind,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useChartTheme } from '../../../../../observability/public';
-import {
-  getValueTypeConfig,
-  ProfilingValueType,
-} from '../../../../common/profiling';
+import { getValueTypeConfig, ProfilingValueType } from '../../../../common/profiling';
 
 type ProfilingTimelineItem = {
   x: number;
@@ -72,9 +63,7 @@ export function ServiceProfilingTimeline({
 
   const specs = [
     getSeriesForValueType('unknown'),
-    ...Object.values(ProfilingValueType).map((type) =>
-      getSeriesForValueType(type)
-    ),
+    ...Object.values(ProfilingValueType).map((type) => getSeriesForValueType(type)),
   ]
     .filter((spec) => spec.data.some((coord) => coord.y > 0))
     .map((spec, index) => {
@@ -129,9 +118,7 @@ export function ServiceProfilingTimeline({
                   >
                     <EuiText
                       size="xs"
-                      color={
-                        spec.id === selectedValueType ? 'default' : 'subdued'
-                      }
+                      color={spec.id === selectedValueType ? 'default' : 'subdued'}
                     >
                       {spec.name}
                     </EuiText>

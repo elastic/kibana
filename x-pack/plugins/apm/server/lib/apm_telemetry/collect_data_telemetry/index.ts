@@ -33,10 +33,7 @@ type TelemetryTaskExecutor = (params: {
       total?: number;
     };
   }>;
-  transportRequest: (params: {
-    path: string;
-    method: 'get';
-  }) => Promise<unknown>;
+  transportRequest: (params: { path: string; method: 'get' }) => Promise<unknown>;
 }) => Promise<APMDataTelemetry>;
 
 export interface TelemetryTask {

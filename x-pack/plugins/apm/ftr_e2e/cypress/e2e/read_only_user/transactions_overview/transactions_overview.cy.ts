@@ -22,19 +22,10 @@ describe('Transactions Overview', () => {
 
   it('persists transaction type selected when navigating to Overview tab', () => {
     cy.visit(serviceOverviewHref);
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'request'
-    );
+    cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'request');
     cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'Worker'
-    );
+    cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'Worker');
     cy.get('a[href*="/app/apm/services/opbeans-node/overview"]').click();
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'Worker'
-    );
+    cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'Worker');
   });
 });
