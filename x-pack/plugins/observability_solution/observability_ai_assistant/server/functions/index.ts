@@ -54,66 +54,64 @@ export const registerFunctions: RegistrationCallback = async ({
   }.
   If the user asks how to change the language, reply in the same language the user asked in.`);
 
-  return client.getKnowledgeBaseStatus().then((response) => {
-    const isReady = response.ready;
+  const { ready: isReady } = await client.getKnowledgeBaseStatus();
 
-    functions.registerInstruction(({ availableFunctionNames }) => {
-      const instructions: string[] = [];
+  functions.registerInstruction(({ availableFunctionNames }) => {
+    const instructions: string[] = [];
 
-      if (availableFunctionNames.includes('get_dataset_info')) {
-        instructions.push(`You MUST use the get_dataset_info function ${
-          functions.hasFunction('get_apm_dataset_info') ? 'or get_apm_dataset_info' : ''
-        } function before calling the "query" or "changes" function.
+    if (availableFunctionNames.includes('get_dataset_info')) {
+      instructions.push(`You MUST use the get_dataset_info function ${
+        functions.hasFunction('get_apm_dataset_info') ? 'or get_apm_dataset_info' : ''
+      } function before calling the "query" or "changes" function.
         
         If a function requires an index, you MUST use the results from the dataset info functions.`);
-      }
+    }
 
-      if (availableFunctionNames.includes('get_data_on_screen')) {
-        instructions.push(`You have access to data on the screen by calling the "get_data_on_screen" function.
+    if (availableFunctionNames.includes('get_data_on_screen')) {
+      instructions.push(`You have access to data on the screen by calling the "get_data_on_screen" function.
         Use it to help the user understand what they are looking at. A short summary of what they are looking at is available in the return of the "context" function.
         Data that is compact enough automatically gets included in the response for the "context" function.`);
-      }
-
-      if (isReady) {
-        if (availableFunctionNames.includes('summarize')) {
-          instructions.push(`You can use the "summarize" functions to store new information you have learned in a knowledge database.
-          Only use this function when the user asks for it.
-          All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
-        }
-
-        if (availableFunctionNames.includes('context')) {
-          instructions.push(
-            `Additionally, you can use the "context" function to retrieve relevant information from the knowledge database.`
-          );
-        }
-      } else {
-        instructions.push(
-          `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`
-        );
-      }
-      return instructions.map((instruction) => dedent(instruction));
-    });
+    }
 
     if (isReady) {
-      registerSummarizationFunction(registrationParameters);
+      if (availableFunctionNames.includes('summarize')) {
+        instructions.push(`You can use the "summarize" functions to store new information you have learned in a knowledge database.
+          Only use this function when the user asks for it.
+          All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
+      }
+
+      if (availableFunctionNames.includes('context')) {
+        instructions.push(
+          `Additionally, you can use the "context" function to retrieve relevant information from the knowledge database.`
+        );
+      }
+    } else {
+      instructions.push(
+        `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`
+      );
     }
-
-    registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
-
-    registerElasticsearchFunction(registrationParameters);
-    const request = registrationParameters.resources.request;
-
-    if ('id' in request) {
-      registerKibanaFunction({
-        ...registrationParameters,
-        resources: {
-          ...registrationParameters.resources,
-          request,
-        },
-      });
-    }
-    registerGetDatasetInfoFunction(registrationParameters);
-
-    registerExecuteConnectorFunction(registrationParameters);
+    return instructions.map((instruction) => dedent(instruction));
   });
+
+  if (isReady) {
+    registerSummarizationFunction(registrationParameters);
+  }
+
+  registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
+
+  registerElasticsearchFunction(registrationParameters);
+  const request = registrationParameters.resources.request;
+
+  if ('id' in request) {
+    registerKibanaFunction({
+      ...registrationParameters,
+      resources: {
+        ...registrationParameters.resources,
+        request,
+      },
+    });
+  }
+  registerGetDatasetInfoFunction(registrationParameters);
+
+  registerExecuteConnectorFunction(registrationParameters);
 };
