@@ -22,7 +22,7 @@ export function createLogsAssetsAggregator() {
         // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event as LogDocument, KEY_FIELDS as Array<keyof LogDocument>);
       },
-      init: (event) => {
+      init: (event, firstSeen, lastSeen) => {
         return {
           'asset.id': event['service.name']!,
           'asset.type': 'service',
@@ -30,9 +30,9 @@ export function createLogsAssetsAggregator() {
           'asset.signalTypes': ['logs'],
           'service.environment': '',
           'service.name': event['service.name']!,
-          'service.node.name': 'foo',
-          'asset.first_seen': '',
-          'asset.last_seen': '',
+          'service.node.name': '',
+          'asset.first_seen': firstSeen,
+          'asset.last_seen': lastSeen,
           'service.language.name': '',
         };
       },

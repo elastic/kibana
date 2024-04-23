@@ -18,7 +18,7 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
     }: {
       filter: (event: TFields) => boolean;
       getAggregateKey: (event: TFields) => string;
-      init: (event: TFields) => TAsset;
+      init: (event: TFields, firstSeen: string, lastSeen: string) => TAsset;
     },
     reduce: (asset: TAsset, event: TFields) => void,
     serialize: (asset: TAsset) => TOutput
@@ -54,15 +54,21 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
       callback?.();
     }
 
+    let timeRanges: number[] = [];
+
     return new PassThrough({
       objectMode: true,
       read() {
+        timeRanges = [];
         flush(this, false, cb);
       },
       final(callback) {
         flush(this, true, callback);
       },
       write(event: TFields, encoding, callback) {
+        timeRanges.push(event['@timestamp']!);
+        const firstSeen = new Date(Math.min(...timeRanges)).toISOString();
+        const lastSeen = new Date(Math.max(...timeRanges)).toISOString();
         if (!filter(event)) {
           callback();
           return;
@@ -72,8 +78,11 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
 
         let asset = assets.get(key);
 
-        if (!asset) {
-          asset = init({ ...event });
+        if (asset) {
+          // @ts-ignore
+          asset['asset.last_seen'] = lastSeen;
+        } else {
+          asset = init({ ...event }, firstSeen, lastSeen);
           assets.set(key, asset);
         }
 

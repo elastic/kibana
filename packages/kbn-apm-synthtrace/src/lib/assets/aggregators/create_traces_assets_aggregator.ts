@@ -23,7 +23,7 @@ export function createTracesAssetsAggregator() {
         // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event as ApmFields, KEY_FIELDS as Array<keyof ApmFields>);
       },
-      init: (event) => {
+      init: (event, firstSeen, lastSeen) => {
         return {
           'asset.id': event['service.name']!,
           'asset.type': 'service',
@@ -31,10 +31,10 @@ export function createTracesAssetsAggregator() {
           'asset.signalTypes': ['traces'],
           'service.environment': event['service.environment']!,
           'service.name': event['service.name']!,
-          'service.node.name': 'foo',
-          'asset.first_seen': '',
-          'asset.last_seen': '',
-          'service.language.name': event['service.language.name']!,
+          'service.node.name': event['service.node.name'] || '',
+          'asset.first_seen': firstSeen,
+          'asset.last_seen': lastSeen,
+          'service.language.name': event['service.language.name'] || '',
         };
       },
     },
