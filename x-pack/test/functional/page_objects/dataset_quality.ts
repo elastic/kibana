@@ -116,7 +116,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilTableLoaded() {
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
     async waitUntilSummaryPanelLoaded() {
@@ -348,7 +348,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await timeUnitSelect.focus();
       await timeUnitSelect.type(unit);
 
-      (await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)).click();
+      await (
+        await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)
+      ).click();
 
       return testSubjects.missingOrFail(testSubjectSelectors.superDatePickerQuickMenu);
     },

@@ -35,7 +35,6 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     dataStreamDetails,
     fieldFormats,
     timeRange,
-    breakdownField,
     loadingState,
   } = useDatasetQualityFlyout();
 
