@@ -966,7 +966,11 @@ describe('utils', () => {
         },
       ];
 
-      const noMaxClauseCountErrorFound = getMaxClauseCountErrorValue(searchesPerformed, 2);
+      const noMaxClauseCountErrorFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        undefined
+      );
       expect(noMaxClauseCountErrorFound).toEqual(Number.NEGATIVE_INFINITY);
     });
 
@@ -991,7 +995,11 @@ describe('utils', () => {
         },
       ];
 
-      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(searchesPerformed, 2);
+      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        undefined
+      );
 
       const newPageSize = (4096 - 1) / (threatEntries + 1); // 1365
       expect(maxClauseCountErrorValueFound).toEqual(newPageSize);
