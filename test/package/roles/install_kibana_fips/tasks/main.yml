@@ -14,6 +14,11 @@
     recurse: true
     mode: "0777"
 
+- name: create tmp dir for ES
+  file:
+    path: "{{ kibana_src_path }}/.es/tmp"
+    state: directory
+
 - name: slurp kibana node version
   slurp:
     src: "{{ kibana_src_path }}/.node-version"
@@ -50,12 +55,6 @@
   become: yes
   file:
     path: "{{ kibana_dist_path }}"
-    state: directory
-
-- name: create tmp dir for ES
-  become: yes
-  file:
-    path: "{{ kibana_dist_path }}/.es/tmp"
     state: directory
 
 - name: find kibana distribution
