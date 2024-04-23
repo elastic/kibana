@@ -170,7 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
             sloId,
             indexName: SLO_DESTINATION_INDEX_PATTERN,
           });
-          if (sloRollupDataAfterDeletion.hits.hits.length > numberOfRollupDocumentsBeforeDeletion) {
+          if (
+            sloRollupDataAfterDeletion.hits.hits.length >= numberOfRollupDocumentsBeforeDeletion
+          ) {
             throw new Error('SLO rollup data not deleted yet');
           }
           return true;
