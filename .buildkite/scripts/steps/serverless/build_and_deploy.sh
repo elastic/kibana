@@ -142,7 +142,8 @@ create_github_issue_oblt_test_environments() {
 
 echo "--- Create GitHub issue for deploying in the oblt test env"
 
-cat <<EOF > .issue-body
+GITHUB_ISSUE=$(mktemp --suffix ".md") 
+cat <<EOF > "$GITHUB_ISSUE"
 ### Kibana image
 
 $KIBANA_IMAGE
@@ -159,7 +160,7 @@ EOF
   GH_TOKEN="$GITHUB_TOKEN" \
   gh issue create \
     --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$BUILDKITE_PULL_REQUEST" \
-    --body-file ".issue-body" \
+    --body-file "${GITHUB_ISSUE}" \
     --label 'deploy-custom-kibana-serverless' \
     --repo 'elastic/observability-test-environments' \
     --assignee "$GITHUB_PR_OWNER"
