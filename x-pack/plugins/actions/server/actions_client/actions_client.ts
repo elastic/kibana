@@ -681,6 +681,24 @@ export class ActionsClient {
     return additionalPrivileges;
   }
 
+  public async getActionTypeId(actionId: string): Promise<string | undefined> {
+    const inMemoryConnector = this.context.inMemoryConnectors.find(
+      (connector) => connector.id === actionId
+    );
+
+    if (inMemoryConnector) return inMemoryConnector.actionTypeId;
+
+    try {
+      const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+        'action',
+        actionId
+      );
+      return attributes.actionTypeId;
+    } catch (err) {
+      return undefined;
+    }
+  }
+
   public async execute({
     actionId,
     params,
@@ -689,34 +707,25 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
-    const log = this.context.logger;
+    const actionTypeId = await this.getActionTypeId(actionId);
+    if (!actionTypeId) {
+      const message = `Action type not found for action [${actionId}]`;
+      return { actionId, status: 'error', message };
+    }
+
+    try {
+      this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    } catch (err) {
+      const message = `Attempting to execute a disabled action type ${err}`;
+      this.context.logger.warn(message);
+      return { actionId, status: 'error', message };
+    }
 
     if (
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
-      let actionTypeId: string | undefined;
-
-      try {
-        if (this.isPreconfigured(actionId) || this.isSystemAction(actionId)) {
-          const connector = this.context.inMemoryConnectors.find(
-            (inMemoryConnector) => inMemoryConnector.id === actionId
-          );
-
-          actionTypeId = connector?.actionTypeId;
-        } else {
-          // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
-          const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-            'action',
-            actionId
-          );
-
-          actionTypeId = attributes.actionTypeId;
-        }
-      } catch (err) {
-        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
-      }
 
       await this.context.authorization.ensureAuthorized({
         operation: 'execute',

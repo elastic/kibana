@@ -133,6 +133,21 @@ const actionTypeIdFromSavedObjectMock = (actionTypeId: string = 'my-action-type'
   } as SavedObject;
 };
 
+function registerMyActionType() {
+  actionTypeRegistry.register({
+    id: 'my-action-type',
+    name: 'My action type',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
+    executor,
+  });
+}
+
 beforeEach(() => {
   jest.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
@@ -227,18 +242,7 @@ describe('create()', () => {
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      registerMyActionType();
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -2680,6 +2684,7 @@ describe('execute()', () => {
       (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return AuthorizationMode.RBAC;
       });
+      registerMyActionType();
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
       await actionsClient.execute({
         actionId: 'action-id',
@@ -2703,6 +2708,7 @@ describe('execute()', () => {
         new Error(`Unauthorized to execute all actions`)
       );
 
+      registerMyActionType();
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
       await expect(
@@ -2722,7 +2728,35 @@ describe('execute()', () => {
       });
     });
 
+    test('throws when license is not valid for the type of action', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      registerMyActionType();
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+      mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
+        throw new Error('license issue');
+      });
+
+      const result = await actionsClient.execute({
+        actionId: 'action-id',
+        params: {
+          name: 'my name',
+        },
+        source: asHttpRequestExecutionSource(request),
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "actionId": "action-id",
+          "message": "Attempting to execute a disabled action type Error: license issue",
+          "status": "error",
+        }
+      `);
+    });
+
     test('tracks legacy RBAC', async () => {
+      registerMyActionType();
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
       (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return AuthorizationMode.Legacy;
       });
@@ -2856,6 +2890,7 @@ describe('execute()', () => {
         executor,
       });
 
+      registerMyActionType();
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
       await actionsClient.execute({
@@ -2942,7 +2977,10 @@ describe('execute()', () => {
   test('calls the actionExecutor with the appropriate parameters', async () => {
     const actionId = uuidv4();
     const actionExecutionId = uuidv4();
+    registerMyActionType();
+    unsecuredSavedObjectsClient.get.mockResolvedValue(actionTypeIdFromSavedObjectMock());
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
+
     await expect(
       actionsClient.execute({
         actionId,
