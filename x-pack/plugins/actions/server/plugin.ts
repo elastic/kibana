@@ -100,7 +100,11 @@ import {
   ConnectorWithOptionalDeprecation,
 } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
-import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import {
+  ICaseServiceAbstract,
+  IServiceAbstract,
+  SubActionConnectorType,
+} from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
 import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -128,7 +132,12 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
 
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
-  getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets, Incident, GetIncidentResponse>() => ICaseServiceAbstract<
+    Config,
+    Secrets,
+    Incident,
+    GetIncidentResponse
+  >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;

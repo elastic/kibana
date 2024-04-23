@@ -13,3 +13,7 @@
 
 ## enable OpenSSL 3 legacy provider
 --openssl-legacy-provider
+
+# Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
+--heapsnapshot-signal=SIGUSR2
+--diagnostic-dir=./data

@@ -18,7 +18,13 @@ export const AwsInputVarFields = ({
   onChange,
   packageInfo,
 }: {
-  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
+  fields: Array<
+    AwsOptions[keyof AwsOptions]['fields'][number] & {
+      value: string;
+      id: string;
+      dataTestSubj: string;
+    }
+  >;
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
 }) => {
@@ -55,6 +61,7 @@ export const AwsInputVarFields = ({
                     errors={[]}
                     forceShowErrors={false}
                     isEditPage={true}
+                    data-test-subj={field.dataTestSubj}
                   />
                 </Suspense>
               </div>
@@ -74,6 +81,7 @@ export const AwsInputVarFields = ({
                 fullWidth
                 value={field.value || ''}
                 onChange={(event) => onChange(field.id, event.target.value)}
+                data-test-subj={field.dataTestSubj}
               />
             </EuiFormRow>
           )}
