@@ -68,8 +68,11 @@ export function DegradedDocsChart({
           ) : (
             <lens.EmbeddableComponent
               id="datasetQualityFlyoutDegradedDocsTrend"
-              style={{ height: CHART_HEIGHT }}
               css={lensEmbeddableComponentStyles}
+              style={{ height: CHART_HEIGHT }}
+              overrides={{
+                settings: { legendAction: 'ignore' },
+              }}
               viewMode={ViewMode.VIEW}
               hidePanelTitles={true}
               disabledActions={DISABLED_ACTIONS}
