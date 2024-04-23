@@ -97,6 +97,35 @@ export default ({ getService }: FtrProviderContext) => {
         expect(patchedRule).toMatchObject(expectedRule);
       });
 
+      it('should patch defaultable fields', async () => {
+        const expectedRule = {
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
+
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+        });
+
+        const { body: patchedRuleResponse } = await securitySolutionApi
+          .patchRule({
+            body: {
+              rule_id: 'rule-1',
+              required_fields: [{ name: '@timestamp', type: 'date' }],
+            },
+          })
+          .expect(200);
+
+        expect(patchedRuleResponse.required_fields).to.eql(expectedRule.required_fields);
+
+        const { body: patchedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(patchedRule.required_fields).to.eql(expectedRule.required_fields);
+      });
+
       it('@skipInServerless should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 

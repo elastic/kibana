@@ -98,6 +98,37 @@ export default ({ getService }: FtrProviderContext) => {
         expect(patchedRule).toMatchObject(expectedRule);
       });
 
+      it('should patch defaultable fields', async () => {
+        const expectedRule = {
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
+
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+        });
+
+        const { body: patchedRulesBulkResponse } = await securitySolutionApi
+          .bulkPatchRules({
+            body: [
+              {
+                rule_id: 'rule-1',
+                required_fields: [{ name: '@timestamp', type: 'date' }],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(patchedRulesBulkResponse[0].required_fields).to.eql(expectedRule.required_fields);
+
+        const { body: patchedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(patchedRule.required_fields).to.eql(expectedRule.required_fields);
+      });
+
       it('should patch two rule properties of name using the two rules rule_id', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
         await createRule(supertest, log, getSimpleRule('rule-2'));

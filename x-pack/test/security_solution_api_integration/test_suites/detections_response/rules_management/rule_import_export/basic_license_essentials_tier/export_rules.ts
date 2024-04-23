@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
@@ -57,8 +58,33 @@ export default ({ getService }: FtrProviderContext): void => {
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
           setup: '# some setup markdown',
+          required_fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'my-non-ecs-field', type: 'keyword' },
+          ],
         };
+
         const ruleToExport = getCustomQueryRuleParams(defaultableFields);
+
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule).toMatchObject({
+          required_fields: [
+            { name: '@timestamp', type: 'date', ecs: true },
+            { name: 'my-non-ecs-field', type: 'keyword', ecs: false },
+          ],
+        });
+      });
+
+      it('should have export summary reflecting a number of rules', async () => {
+        await createRule(supertest, log, getCustomQueryRuleParams());
 
         await securitySolutionApi.createRule({ body: ruleToExport });
 
