@@ -140,6 +140,8 @@ EOF
 # This is the integration with the observability-test-environments
 create_github_issue_oblt_test_environments() {
 
+echo "--- Create GitHub issue for deploying in the oblt test env"
+
 cat <<EOF > .issue-body
 ### Kibana image
 
@@ -154,7 +156,9 @@ $BUILDKITE_PULL_REQUEST
 Caused by $GITHUB_PR_TRIGGER_USER using the github label in $BUILDKITE_REPO/pull/$BUILDKITE_PULL_REQUEST
 EOF
 
-  GH_TOKEN="$KIBANA_CI_GITHUB_TOKEN" \
+  GH_TOKEN="$GITHUB_TOKEN" gh auth status || true
+
+  GH_TOKEN="$GITHUB_TOKEN" \
   gh issue create \
     --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$BUILDKITE_PULL_REQUEST" \
     --body-file ".issue-body" \
@@ -166,6 +170,7 @@ EOF
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   create_github_issue_oblt_test_environments
+  echo "--- Deploy observability with Kibana CI"
   deploy "observability"
 fi
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
