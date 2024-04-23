@@ -13,7 +13,6 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { Maybe } from '../../../typings/common';
-import { parseEsFiltersOrThrow } from '../../utils/parse_es_filters_or_throw';
 
 interface Options {
   environment: string;
@@ -54,8 +53,6 @@ export async function getThroughput({
     offset,
   });
 
-  const parsedFilters = parseEsFiltersOrThrow(filters);
-
   const params = {
     apm: {
       sources: [{ documentType, rollupInterval }],
@@ -72,9 +69,9 @@ export async function getThroughput({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...termQuery(TRANSACTION_NAME, transactionName),
-            ...(parsedFilters.filter ?? []),
+            ...(filters.filter ?? []),
           ],
-          must_not: [...(parsedFilters.must_not ?? [])],
+          must_not: [...(filters.must_not ?? [])],
         },
       },
       aggs: {

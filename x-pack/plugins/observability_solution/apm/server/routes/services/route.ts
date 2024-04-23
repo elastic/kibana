@@ -33,6 +33,7 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  filtersRt,
   kueryRt,
   probabilityRt,
   rangeRt,
@@ -77,7 +78,6 @@ import {
   ServiceTransactionTypesResponse,
 } from './get_service_transaction_types';
 import { getThroughput, ServiceThroughputResponse } from './get_throughput';
-import { BadRequestError } from '../typings';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -496,7 +496,7 @@ const serviceThroughputRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string, filters: t.string }),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
@@ -537,36 +537,29 @@ const serviceThroughputRoute = createApmServerRoute({
       bucketSizeInSeconds,
     };
 
-    try {
-      const [currentPeriod, previousPeriod] = await Promise.all([
-        getThroughput({
-          ...commonProps,
-          start,
-          end,
-        }),
-        offset
-          ? getThroughput({
-              ...commonProps,
-              start,
-              end,
-              offset,
-            })
-          : [],
-      ]);
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getThroughput({
+        ...commonProps,
+        start,
+        end,
+      }),
+      offset
+        ? getThroughput({
+            ...commonProps,
+            start,
+            end,
+            offset,
+          })
+        : [],
+    ]);
 
-      return {
-        currentPeriod,
-        previousPeriod: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: currentPeriod,
-          previousPeriodTimeseries: previousPeriod,
-        }),
-      };
-    } catch (error) {
-      if (error instanceof BadRequestError) {
-        throw Boom.badRequest(error.message);
-      }
-      throw error;
-    }
+    return {
+      currentPeriod,
+      previousPeriod: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: currentPeriod,
+        previousPeriodTimeseries: previousPeriod,
+      }),
+    };
   },
 });
 

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -23,6 +22,7 @@ import {
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  filtersRt,
   kueryRt,
   rangeRt,
   serviceTransactionDataSourceRt,
@@ -44,7 +44,6 @@ import {
 } from './get_failed_transaction_rate_periods';
 import { getLatencyPeriods, TransactionLatencyResponse } from './get_latency_charts';
 import { getTraceSamples, TransactionTraceSamplesResponse } from './trace_samples';
-import { BadRequestError } from '../typings';
 
 export interface MergedServiceTransactionGroupsResponse
   extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
@@ -222,7 +221,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
         bucketSizeInSeconds: toNumberRt,
         useDurationSummary: toBooleanRt,
       }),
-      t.partial({ transactionName: t.string, filters: t.string }),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       serviceTransactionDataSourceRt,
     ]),
@@ -266,18 +265,11 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       useDurationSummary,
     };
 
-    try {
-      return await getLatencyPeriods({
-        ...options,
-        latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-        offset,
-      });
-    } catch (error) {
-      if (error instanceof BadRequestError) {
-        throw Boom.badRequest(error.message);
-      }
-      throw error;
-    }
+    return getLatencyPeriods({
+      ...options,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+      offset,
+    });
   },
 });
 
@@ -382,7 +374,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string, filters: t.string }),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
@@ -406,28 +398,21 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       bucketSizeInSeconds,
     } = params.query;
 
-    try {
-      return await getFailedTransactionRatePeriods({
-        environment,
-        kuery,
-        filters,
-        serviceName,
-        transactionType,
-        transactionName,
-        apmEventClient,
-        start,
-        end,
-        offset,
-        documentType,
-        rollupInterval,
-        bucketSizeInSeconds,
-      });
-    } catch (error) {
-      if (error instanceof BadRequestError) {
-        throw Boom.badRequest(error.message);
-      }
-      throw error;
-    }
+    return getFailedTransactionRatePeriods({
+      environment,
+      kuery,
+      filters,
+      serviceName,
+      transactionType,
+      transactionName,
+      apmEventClient,
+      start,
+      end,
+      offset,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
+    });
   },
 });
 

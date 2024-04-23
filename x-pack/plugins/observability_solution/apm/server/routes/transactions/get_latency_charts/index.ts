@@ -25,7 +25,6 @@ import {
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
-import { parseEsFiltersOrThrow } from '../../../utils/parse_es_filters_or_throw';
 
 function searchLatency({
   environment,
@@ -73,8 +72,6 @@ function searchLatency({
     useDurationSummary
   );
 
-  const parsedFilters = parseEsFiltersOrThrow(filters);
-
   const params = {
     apm: {
       sources: [{ documentType, rollupInterval }],
@@ -92,9 +89,9 @@ function searchLatency({
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(FAAS_ID, serverlessId),
-            ...(parsedFilters.filter ?? []),
+            ...(filters.filter ?? []),
           ],
-          must_not: [...(parsedFilters.must_not ?? [])],
+          must_not: [...(filters.must_not ?? [])],
         },
       },
       aggs: {
