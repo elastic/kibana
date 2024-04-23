@@ -18,6 +18,11 @@ export const UNKNOWN_SPACE = '?';
 export const APPLICATION_PREFIX = 'kibana-';
 
 /**
+ * The wildcard identifier for all application privileges.
+ */
+export const PRIVILEGES_ALL_WILDCARD = '*';
+
+/**
  * Reserved application privileges are always assigned to this "wildcard" application.
  * This allows them to be applied to any Kibana "tenant" (`kibana.index`). Since reserved privileges are always assigned to reserved (built-in) roles,
  * it's not possible to know the tenant ahead of time.

@@ -8,7 +8,7 @@
 import { PrivilegeSerializer } from './privilege_serializer';
 
 describe(`#isSerializedGlobalBasePrivilege`, () => {
-  ['all', 'read'].forEach((validValue) => {
+  ['all', 'read', '*'].forEach((validValue) => {
     test(`returns true for '${validValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedGlobalBasePrivilege(validValue)).toBe(true);
     });
@@ -81,6 +81,11 @@ describe('#serializeGlobalBasePrivilege', () => {
     expect(() =>
       PrivilegeSerializer.serializeGlobalBasePrivilege('foo')
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('returns * modified to all', () => {
+    const wildcardResult = PrivilegeSerializer.serializeGlobalBasePrivilege('*');
+    expect(wildcardResult).toBe('all');
   });
 
   test('returns all unmodified', () => {
