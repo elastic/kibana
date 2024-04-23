@@ -9,7 +9,7 @@ import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ESQLSearchReponse } from '@kbn/es-types';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
@@ -100,8 +100,10 @@ const getESQLOverallStatsInChunk = async ({
 
     let countQuery = fieldsToFetch.length > 0 ? '| STATS ' : '';
     countQuery += fieldsToFetch.map((field) => field.query).join(',');
-
-    const query = esqlBaseQueryWithLimit + (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery;
+    const query = appendToESQLQuery(
+      esqlBaseQueryWithLimit,
+      (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery
+    );
 
     const request = {
       params: {
