@@ -51,109 +51,117 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(testPkgName, testPkgVersion);
     });
     const expectedYml = `inputs:
-  - id: logfile-apache.access
-    type: logfile
-    data_stream:
-      dataset: apache.access
-      type: logs
-    paths:
-      - /var/log/apache2/access.log*
-      - /var/log/apache2/other_vhosts_access.log*
-      - /var/log/httpd/access_log*
-    exclude_files:
-      - .gz$
-    processors:
-      - add_fields:
-          target: ''
-          fields:
-            ecs.version: 1.5.0
-  - id: logfile-apache.error
-    type: logfile
-    data_stream:
-      dataset: apache.error
-      type: logs
-    paths:
-      - /var/log/apache2/error.log*
-      - /var/log/httpd/error_log*
-    exclude_files:
-      - .gz$
-    processors:
-      - add_locale: null
-      - add_fields:
-          target: ''
-          fields:
-            ecs.version: 1.5.0
-  - id: apache/metrics-apache.status
-    type: apache/metrics
-    data_stream:
-      dataset: apache.status
-      type: metrics
-    metricsets:
-      - status
-    hosts:
-      - 'http://127.0.0.1'
-    period: 10s
-    server_status_path: /server-status
+  - id: logfile-apache
+    streams:
+      - id: logfile-apache.access
+        data_stream:
+          dataset: apache.access
+          type: logs
+        paths:
+          - /var/log/apache2/access.log*
+          - /var/log/apache2/other_vhosts_access.log*
+          - /var/log/httpd/access_log*
+        exclude_files:
+          - .gz$
+        processors:
+          - add_fields:
+              target: ''
+              fields:
+                ecs.version: 1.5.0
+      - id: logfile-apache.error
+        data_stream:
+          dataset: apache.error
+          type: logs
+        paths:
+          - /var/log/apache2/error.log*
+          - /var/log/httpd/error_log*
+        exclude_files:
+          - .gz$
+        processors:
+          - add_locale: null
+          - add_fields:
+              target: ''
+              fields:
+                ecs.version: 1.5.0
+  - id: apache/metrics-apache
+    streams:
+      - id: apache/metrics-apache.status
+        data_stream:
+          dataset: apache.status
+          type: metrics
+        metricsets:
+          - status
+        hosts:
+          - 'http://127.0.0.1'
+        period: 10s
+        server_status_path: /server-status
 `;
     const expectedJson = [
       {
-        id: 'logfile-apache.access',
-        type: 'logfile',
-        data_stream: {
-          type: 'logs',
-          dataset: 'apache.access',
-        },
-        paths: [
-          '/var/log/apache2/access.log*',
-          '/var/log/apache2/other_vhosts_access.log*',
-          '/var/log/httpd/access_log*',
-        ],
-        exclude_files: ['.gz$'],
-        processors: [
+        id: 'logfile-apache',
+        streams: [
           {
-            add_fields: {
-              target: '',
-              fields: {
-                'ecs.version': '1.5.0',
-              },
+            id: 'logfile-apache.access',
+            data_stream: {
+              dataset: 'apache.access',
+              type: 'logs',
             },
+            paths: [
+              '/var/log/apache2/access.log*',
+              '/var/log/apache2/other_vhosts_access.log*',
+              '/var/log/httpd/access_log*',
+            ],
+            exclude_files: ['.gz$'],
+            processors: [
+              {
+                add_fields: {
+                  fields: {
+                    'ecs.version': '1.5.0',
+                  },
+                  target: '',
+                },
+              },
+            ],
+          },
+          {
+            id: 'logfile-apache.error',
+            data_stream: {
+              dataset: 'apache.error',
+              type: 'logs',
+            },
+            paths: ['/var/log/apache2/error.log*', '/var/log/httpd/error_log*'],
+            exclude_files: ['.gz$'],
+            processors: [
+              {
+                add_locale: null,
+              },
+              {
+                add_fields: {
+                  fields: {
+                    'ecs.version': '1.5.0',
+                  },
+                  target: '',
+                },
+              },
+            ],
           },
         ],
       },
       {
-        id: 'logfile-apache.error',
-        type: 'logfile',
-        data_stream: {
-          type: 'logs',
-          dataset: 'apache.error',
-        },
-        paths: ['/var/log/apache2/error.log*', '/var/log/httpd/error_log*'],
-        exclude_files: ['.gz$'],
-        processors: [
+        id: 'apache/metrics-apache',
+        streams: [
           {
-            add_locale: null,
-          },
-          {
-            add_fields: {
-              target: '',
-              fields: {
-                'ecs.version': '1.5.0',
-              },
+            data_stream: {
+              dataset: 'apache.status',
+              type: 'metrics',
             },
+            hosts: ['http://127.0.0.1'],
+            id: 'apache/metrics-apache.status',
+            metricsets: ['status'],
+            period: '10s',
+            server_status_path: '/server-status',
           },
         ],
-      },
-      {
-        id: 'apache/metrics-apache.status',
-        type: 'apache/metrics',
-        data_stream: {
-          type: 'metrics',
-          dataset: 'apache.status',
-        },
-        metricsets: ['status'],
-        hosts: ['http://127.0.0.1'],
-        period: '10s',
-        server_status_path: '/server-status',
       },
     ];
 
@@ -162,7 +170,6 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/fleet/epm/templates/${testPkgName}/${testPkgVersion}/inputs?format=json`)
         .expect(200);
       const inputs = res.body.inputs;
-
       expect(inputs).to.eql(expectedJson);
     });
 
