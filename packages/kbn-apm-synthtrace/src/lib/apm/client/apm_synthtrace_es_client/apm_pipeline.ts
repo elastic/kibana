@@ -25,18 +25,18 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
   return (base: Readable) => {
     const aggregators = [
       createTransactionMetricsAggregator('1m'),
-      createTransactionMetricsAggregator('10m'),
-      createTransactionMetricsAggregator('60m'),
       ...(!version || semver.gte(semver.coerce(version)?.version ?? version, '8.7.0')
         ? [
+            createTransactionMetricsAggregator('10m'),
+            createTransactionMetricsAggregator('60m'),
             createServiceMetricsAggregator('1m'),
             createServiceMetricsAggregator('10m'),
             createServiceMetricsAggregator('60m'),
+            createServiceSummaryMetricsAggregator('1m'),
+            createServiceSummaryMetricsAggregator('10m'),
+            createServiceSummaryMetricsAggregator('60m'),
           ]
         : []),
-      createServiceSummaryMetricsAggregator('1m'),
-      createServiceSummaryMetricsAggregator('10m'),
-      createServiceSummaryMetricsAggregator('60m'),
       createSpanMetricsAggregator('1m'),
       createSpanMetricsAggregator('10m'),
       createSpanMetricsAggregator('60m'),

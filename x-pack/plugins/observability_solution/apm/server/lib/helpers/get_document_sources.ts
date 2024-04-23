@@ -24,7 +24,7 @@ interface DocumentTypeData {
   rollupInterval: RollupInterval;
   hasDocBefore: boolean;
   hasDocAfter: boolean;
-  allHaveDurationSummary: boolean;
+  canUseDurationSummary: boolean;
 }
 
 const getRequest = ({
@@ -147,7 +147,7 @@ const getDocumentTypesInfo = async ({
       rollupInterval,
       hasDocBefore: docTypeResponses[QUERY_INDEX.BEFORE].hits.total.value > 0,
       hasDocAfter: docTypeResponses[QUERY_INDEX.CURRENT].hits.total.value > 0,
-      allHaveDurationSummary: docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
+      canUseDurationSummary: docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
         ? docTypeResponses[QUERY_INDEX.DURATION_SUMMARY].hits.total.value === 0
         : // ServiceTransactionMetric docs always have duration summary field
           documentType === ApmDocumentType.ServiceTransactionMetric,
@@ -204,7 +204,7 @@ const getDocumentTypeRequestsFn =
 
 const mapToSources = (sources: DocumentTypeData[], hasAnySourceDocBefore: boolean) => {
   return sources.map((source) => {
-    const { documentType, hasDocAfter, hasDocBefore, rollupInterval, allHaveDurationSummary } =
+    const { documentType, hasDocAfter, hasDocBefore, rollupInterval, canUseDurationSummary } =
       source;
 
     // To return that serviceTransactionMetric docType is available,
@@ -227,7 +227,7 @@ const mapToSources = (sources: DocumentTypeData[], hasAnySourceDocBefore: boolea
       documentType,
       rollupInterval,
       hasDocs: isDataSourceAvailable,
-      hasDurationSummaryField: isDataSourceAvailable && allHaveDurationSummary,
+      hasDurationSummaryField: isDataSourceAvailable && canUseDurationSummary,
     };
   });
 };
