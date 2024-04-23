@@ -60,10 +60,10 @@ export const initializeSwimLaneControls = (
   };
 
   const swimLaneComparators: StateComparators<AnomalySwimLaneControlsState> = {
-    jobIds: [jobIds, jobIds.next, fastIsEqual],
-    swimlaneType: [swimlaneType, swimlaneType.next],
-    viewBy: [viewBy, viewBy.next],
-    perPage: [perPage, perPage.next],
+    jobIds: [jobIds, jobIds.next.bind(jobIds), fastIsEqual],
+    swimlaneType: [swimlaneType, swimlaneType.next.bind(swimlaneType)],
+    viewBy: [viewBy, viewBy.next.bind(viewBy)],
+    perPage: [perPage, perPage.next.bind(perPage)],
   };
 
   return {
