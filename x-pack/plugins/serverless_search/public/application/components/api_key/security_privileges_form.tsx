@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+  EuiPanel,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditorField } from '@kbn/code-editor';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 
 interface SecurityPrivilegesFormProps {
-  roleDescriptors: string;
   onChangeRoleDescriptors: (roleDescriptors: string) => void;
   error?: React.ReactNode | React.ReactNode[];
+  codeEditorContent: string;
+  setShowReadOnlyBoilerplate: (value: boolean | undefined) => void;
 }
 
 export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
-  roleDescriptors,
   onChangeRoleDescriptors,
   error,
+  codeEditorContent,
+  setShowReadOnlyBoilerplate,
 }) => {
   return (
     <div data-test-subj="create-api-role-descriptors-code-editor-container">
@@ -39,6 +49,46 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
           <p>{error}</p>
         </EuiText>
       )}
+      <EuiPanel hasShadow={false} color="subdued">
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="baseline">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <h4>
+                {i18n.translate('xpack.serverlessSearch.apiKey.privileges.boilerplate.label', {
+                  defaultMessage: 'Replace with boilerplate:',
+                })}
+              </h4>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="serverlessSearchSecurityPrivilegesFormReadOnlyButton"
+              onClick={() => setShowReadOnlyBoilerplate(true)}
+            >
+              {i18n.translate(
+                'xpack.serverlessSearch.apiKey.privileges.boilerplate.readOnlyLabel',
+                {
+                  defaultMessage: 'Read-only',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="serverlessSearchSecurityPrivilegesFormWriteOnlyButton"
+              onClick={() => setShowReadOnlyBoilerplate(false)}
+            >
+              {i18n.translate(
+                'xpack.serverlessSearch.apiKey.privileges.boilerplate.writeOnlyLabel',
+                {
+                  defaultMessage: 'Write-only',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
       <CodeEditorField
         allowFullScreen
         fullWidth
@@ -46,7 +96,7 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
         languageId="json"
         isCopyable
         onChange={(e) => onChangeRoleDescriptors(e)}
-        value={roleDescriptors}
+        value={codeEditorContent}
       />
     </div>
   );

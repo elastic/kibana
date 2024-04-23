@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -56,7 +56,28 @@ const DEFAULT_ROLE_DESCRIPTORS = `{
 const DEFAULT_METADATA = `{
   "application": "myapp"
 }`;
-
+const READ_ONLY_BOILERPLATE = `{
+  "read-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["read"]
+      }
+    ]
+  }
+}`;
+const WRITE_ONLY_BOILERPLATE = `{
+  "write-only-role": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": ["*"],
+        "privileges": ["write"]
+      }
+    ]
+  }
+}`;
 interface CreateApiKeyFlyoutProps {
   onClose: () => void;
   setApiKey: (apiKey: CreateApiKeyResponse) => void;
@@ -82,8 +103,14 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   const { euiTheme } = useEuiTheme();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
+  const [isShowingReadOnlyBoilerplate, setShowReadOnlyBoilerplate] = useState<boolean | undefined>(
+    undefined
+  );
+  const [readOnlyBoilerplate, setReadOnlyBoilerplate] = useState<string>(READ_ONLY_BOILERPLATE);
+  const [writeOnlyBoilerplate, setWriteOnlyBoilerplate] = useState<string>(WRITE_ONLY_BOILERPLATE);
+
   const [roleDescriptors, setRoleDescriptors] = useState(DEFAULT_ROLE_DESCRIPTORS);
-  const [roleDescriptorsError, setRoleDescriptorsError] = useState<string | undefined>(undefined);
+  const [codeEditorError, setCodeEditorError] = useState<string | undefined>(undefined);
   const [metadata, setMetadata] = useState(DEFAULT_METADATA);
   const [metadataError, setMetadataError] = useState<string | undefined>(undefined);
   const [privilegesEnabled, setPrivilegesEnabled] = useState<boolean>(false);
@@ -95,8 +122,13 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
     const enabled = e.target.checked;
     setPrivilegesEnabled(enabled);
     setPrivilegesOpen(enabled ? 'open' : 'closed');
-    // Reset role descriptors to default
-    if (enabled) setRoleDescriptors(DEFAULT_ROLE_DESCRIPTORS);
+    // Reset role descriptors and boilerplate to default
+    if (enabled) {
+      setRoleDescriptors(DEFAULT_ROLE_DESCRIPTORS);
+      setShowReadOnlyBoilerplate(undefined);
+      setReadOnlyBoilerplate(READ_ONLY_BOILERPLATE);
+      setWriteOnlyBoilerplate(WRITE_ONLY_BOILERPLATE);
+    }
   };
   const toggleMetadata = (e: EuiSwitchEvent) => {
     const enabled = e.target.checked;
@@ -105,18 +137,41 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
     // Reset metadata to default
     if (enabled) setMetadata(DEFAULT_METADATA);
   };
+  const codeEditorContent = useMemo(() => {
+    if (isShowingReadOnlyBoilerplate !== undefined) {
+      if (isShowingReadOnlyBoilerplate) return readOnlyBoilerplate;
+      else return writeOnlyBoilerplate;
+    } else return roleDescriptors;
+  }, [isShowingReadOnlyBoilerplate, roleDescriptors, readOnlyBoilerplate, writeOnlyBoilerplate]);
+
+  const onCodeEditorContentChange = useCallback(
+    (value) => {
+      if (isShowingReadOnlyBoilerplate !== undefined) {
+        if (isShowingReadOnlyBoilerplate) setReadOnlyBoilerplate(value);
+        else setWriteOnlyBoilerplate(value);
+      } else setRoleDescriptors(value);
+    },
+    [isShowingReadOnlyBoilerplate]
+  );
   const onCreateClick = () => {
-    let parsedRoleDescriptors: Record<string, any> | undefined;
+    let parsedCodeEditorValue: Record<string, any> | undefined;
     if (privilegesEnabled) {
       try {
-        parsedRoleDescriptors =
-          roleDescriptors.length > 0 ? JSON.parse(roleDescriptors) : undefined;
+        let codeEditorValue = '';
+        if (isShowingReadOnlyBoilerplate !== undefined) {
+          if (isShowingReadOnlyBoilerplate) codeEditorValue = readOnlyBoilerplate;
+          else codeEditorValue = writeOnlyBoilerplate;
+        } else {
+          codeEditorValue = roleDescriptors;
+        }
+        parsedCodeEditorValue =
+          codeEditorValue.length > 0 ? JSON.parse(codeEditorValue) : undefined;
       } catch (e) {
-        setRoleDescriptorsError(INVALID_JSON_ERROR);
+        setCodeEditorError(INVALID_JSON_ERROR);
         return;
       }
     }
-    if (roleDescriptorsError) setRoleDescriptorsError(undefined);
+    if (codeEditorError) setCodeEditorError(undefined);
     let parsedMetadata: Record<string, any> | undefined;
     if (metadataEnabled) {
       try {
@@ -133,7 +188,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       expiration,
       metadata: parsedMetadata,
       name,
-      role_descriptors: parsedRoleDescriptors,
+      role_descriptors: parsedCodeEditorValue,
     });
   };
 
@@ -269,9 +324,10 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
           >
             <EuiSpacer size="s" />
             <SecurityPrivilegesForm
-              roleDescriptors={roleDescriptors}
-              onChangeRoleDescriptors={setRoleDescriptors}
-              error={roleDescriptorsError}
+              codeEditorContent={codeEditorContent}
+              onChangeRoleDescriptors={onCodeEditorContentChange}
+              error={codeEditorError}
+              setShowReadOnlyBoilerplate={setShowReadOnlyBoilerplate}
             />
           </EuiAccordion>
         </EuiPanel>

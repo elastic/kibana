@@ -68,6 +68,8 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
       },
       async expectRoleDescriptorsEditorToExist() {
         await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
+        await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormReadOnlyButton')
+        await testSubjects.existOrFail('serverlessSearchSecurityPrivilegesFormWriteOnlyButton')
       },
       async setRoleDescriptorsValue(value: string) {
         await testSubjects.existOrFail('create-api-role-descriptors-code-editor-container');
