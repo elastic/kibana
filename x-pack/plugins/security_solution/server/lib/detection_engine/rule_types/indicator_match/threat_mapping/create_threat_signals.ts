@@ -105,12 +105,6 @@ export const createThreatSignals = async ({
   };
 
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
-  // console.error(
-  //   'WHAT IS INDICATOR MAPPING FILTER',
-  //   JSON.stringify(indicatorMappingFilter, null, 2)
-  // );
-
-  // console.error('WHAT IS threatFilters', JSON.stringify(threatFilters, null, 2));
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
 

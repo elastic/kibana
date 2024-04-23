@@ -26,7 +26,6 @@ import { ThreatMatchQueryType } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
 export const MAX_CHUNK_SIZE = 1024;
-// export const MAX_CHUNK_SIZE = 10000;
 
 export const buildThreatMappingFilter = ({
   threatMapping,
@@ -36,9 +35,9 @@ export const buildThreatMappingFilter = ({
   allowedFieldsForTermsQuery,
 }: BuildThreatMappingFilterOptions): Filter => {
   const computedChunkSize = chunkSize ?? MAX_CHUNK_SIZE;
-  // if (computedChunkSize > 1024) {
-  //   throw new TypeError('chunk sizes cannot exceed 1024 in size');
-  // }
+  if (computedChunkSize > 1024) {
+    throw new TypeError('chunk sizes cannot exceed 1024 in size');
+  }
   const query = buildEntriesMappingFilter({
     threatMapping,
     threatList,

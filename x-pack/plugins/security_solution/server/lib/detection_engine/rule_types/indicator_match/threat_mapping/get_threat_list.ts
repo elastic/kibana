@@ -37,7 +37,6 @@ export const getThreatList = async ({
   indexFields,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
-
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }

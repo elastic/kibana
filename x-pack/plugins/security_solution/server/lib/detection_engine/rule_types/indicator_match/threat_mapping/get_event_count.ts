@@ -12,7 +12,6 @@ import { singleSearchAfter } from '../../utils/single_search_after';
 import { buildEventsSearchQuery } from '../../utils/build_events_query';
 
 export const MAX_PER_PAGE = 9000;
-// export const MAX_PER_PAGE = 5000;
 
 export const getEventList = async ({
   services,
@@ -102,7 +101,6 @@ export const getEventCount = async ({
     searchAfterSortIds: undefined,
     runtimeMappings: undefined,
   }).body.query;
-
   const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },
     ignore_unavailable: true,
