@@ -7,7 +7,6 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { PodAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 import { container } from './container';
@@ -23,15 +22,6 @@ export class Pod extends Entity<PodDocument> {
     return new PodMetrics({
       ...this.fields,
       'kubernetes.pod.cpu.usage.limit.pct': 46,
-    });
-  }
-
-  asset() {
-    return new PodAsset({
-      'asset.kind': 'pod',
-      'asset.id': this.fields['kubernetes.pod.uid'],
-      'asset.name': this.fields['kubernetes.pod.uid'],
-      'asset.ean': `pod:${this.fields['kubernetes.pod.uid']}`,
     });
   }
 

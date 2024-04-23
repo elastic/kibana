@@ -90,15 +90,6 @@ class Host extends Entity<HostDocument> {
     });
   }
 
-  asset() {
-    return new HostAsset({
-      'asset.kind': 'host',
-      'asset.id': this.fields['host.hostname'],
-      'asset.name': this.fields['host.hostname'],
-      'asset.ean': `host:${this.fields['host.hostname']}`,
-    });
-  }
-
   pod(uid: string) {
     return pod(uid, this.fields['host.hostname']);
   }
