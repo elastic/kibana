@@ -19,6 +19,7 @@ import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/li
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 
 import type { Readable } from 'stream';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -46,6 +47,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
+  getAuditLogger: () => AuditLogger | undefined;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
