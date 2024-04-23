@@ -16,6 +16,8 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const assetCriticalityPrivilegesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -44,6 +46,17 @@ export const assetCriticalityPrivilegesRoute = (
 
           const [_, { security }] = await getStartServices();
           const body = await getUserAssetCriticalityPrivileges(request, security);
+
+          const securitySolution = await context.securitySolution;
+          securitySolution.getAuditLogger()?.log({
+            message: 'User checked if they have the required privileges to use asset criticality',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_PRIVILEGE_GET,
+              category: AUDIT_CATEGORY.AUTHENTICATION,
+              type: AUDIT_TYPE.ACCESS,
+              outcome: AUDIT_OUTCOME.UNKNOWN,
+            },
+          });
 
           return response.ok({
             body,
