@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Query type rules', () => {
+  describe('@ess @serverless @serverlessQA Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
@@ -2373,7 +2373,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // TODO: Ask YARA
-    describe('@brokenInServerless legacy investigation_fields', () => {
+    describe('@skipInServerless legacy investigation_fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
 
       beforeEach(async () => {
