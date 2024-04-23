@@ -37,6 +37,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       settings: settingsService,
       autocompleteInfo,
     },
+    docLinkVersion,
   } = useServicesContext();
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
@@ -52,6 +53,10 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
     return curl ?? '';
   }, [esHostService]);
+
+  const getDocumenationLink = useCallback(async () => {
+    return actionsProvider.current!.getDocumentationLink(docLinkVersion);
+  }, [docLinkVersion]);
 
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
@@ -103,9 +108,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         <EuiFlexItem>
           <ConsoleMenu
             getCurl={getCurlCallback}
-            getDocumentation={() => {
-              return Promise.resolve(null);
-            }}
+            getDocumentation={getDocumenationLink}
             autoIndent={() => {}}
             notifications={notifications}
           />

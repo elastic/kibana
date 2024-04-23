@@ -68,10 +68,7 @@ export async function getErrorEventRate({
   ).map((fetchedSerie) => {
     return {
       ...fetchedSerie,
-      value:
-        fetchedSerie.value !== null
-          ? fetchedSerie.value / rangeInMinutes
-          : null,
+      value: fetchedSerie.value !== null ? fetchedSerie.value / rangeInMinutes : null,
       data: fetchedSerie.data.map((bucket) => {
         return {
           x: bucket.key,
