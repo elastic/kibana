@@ -10,6 +10,8 @@ import { StorageMock } from './storage.mock';
 import { EmbeddableConsoleInfo } from './embeddable_console';
 
 describe('EmbeddableConsoleInfo', () => {
+  jest.useFakeTimers();
+
   let eConsole: EmbeddableConsoleInfo;
   let storage: StorageMock;
   beforeEach(() => {
@@ -65,8 +67,15 @@ describe('EmbeddableConsoleInfo', () => {
     });
   });
   describe('setConsoleHeight', () => {
-    it('stores value  in storage', () => {
+    it('stores value in storage', () => {
+      // setConsoleHeight calls are debounced
+      eConsole.setConsoleHeight('120');
+      eConsole.setConsoleHeight('110');
       eConsole.setConsoleHeight('100');
+
+      jest.runAllTimers();
+
+      expect(storage.set).toHaveBeenCalledTimes(1);
       expect(storage.set).toHaveBeenCalledWith('embeddedConsoleHeight', '100');
     });
   });
