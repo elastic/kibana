@@ -12,7 +12,12 @@ import { registerTranslationsRoute } from './translations';
 describe('registerTranslationsRoute', () => {
   test('registers route with expected options', () => {
     const router = mockRouter.create();
-    registerTranslationsRoute(router, 'en');
+    registerTranslationsRoute({
+      router,
+      locale: 'en',
+      isDist: true,
+      translationHash: 'XXX',
+    });
     expect(router.get).toHaveBeenCalledTimes(1);
     expect(router.get).toHaveBeenNthCalledWith(
       1,
