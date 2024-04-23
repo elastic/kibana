@@ -6,10 +6,20 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { FormHook } from '../../../../../shared_imports';
 import { Field } from '../../../../../types';
 import { useSemanticText } from './use_semantic_text';
+import { act } from 'react-dom/test-utils';
 
+const mlMock: any = {
+  mlApi: {
+    inferenceModels: {
+      createInferenceEndpoint: jest.fn(),
+    },
+    trainedModels: {
+      startModelAllocation: jest.fn(),
+    },
+  },
+};
 const mockDispatch = jest.fn();
 
 jest.mock('../../../../../mappings_state_context', () => ({
@@ -23,7 +33,7 @@ jest.mock('../../../../../mappings_state_context', () => ({
       },
       elser_model_2: {
         defaultInferenceEndpoint: true,
-        isDeployed: true,
+        isDeployed: false,
         isDeployable: true,
         trainedModelId: '.elser_model_2',
       },
@@ -52,17 +62,51 @@ describe('useSemanticText', () => {
         type: { value: [{ value: 'semantic_text' }] },
         inferenceId: { value: 'e5' },
       }),
-    } as unknown as FormHook<Field, Field>;
+    };
   });
 
   it('should populate the values from the form', () => {
     const { result } = renderHook(() =>
-      useSemanticText({ form, setErrorsInTrainedModelDeployment: jest.fn(), ml: undefined })
+      useSemanticText({ form, setErrorsInTrainedModelDeployment: jest.fn(), ml: mlMock })
     );
 
     expect(result.current.referenceFieldComboValue).toBe('title');
     expect(result.current.nameValue).toBe('sem');
     expect(result.current.inferenceIdComboValue).toBe('e5');
     expect(result.current.semanticFieldType).toBe('semantic_text');
+  });
+
+  it('should handle semantic text correctly', async () => {
+    const { result } = renderHook(() =>
+      useSemanticText({ form, setErrorsInTrainedModelDeployment: jest.fn(), ml: mlMock })
+    );
+
+    const mockFieldData = {
+      name: 'name',
+      type: 'semantic_text',
+      inferenceId: 'elser_model_2',
+    } as Field;
+
+    await act(async () => {
+      result.current.handleSemanticText(mockFieldData);
+    });
+
+    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
+      'elser_model_2',
+      'text_embedding',
+      {
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: '.elser_model_2',
+        },
+      }
+    );
+    expect(mlMock.mlApi.trainedModels.startModelAllocation).toHaveBeenCalledWith('.elser_model_2');
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'field.addSemanticText',
+      value: mockFieldData,
+    });
   });
 });
