@@ -53,6 +53,7 @@
     state: directory
 
 - name: create tmp dir for ES
+  become: yes
   file:
     path: "{{ kibana_dist_path }}/.es/tmp"
     state: directory
