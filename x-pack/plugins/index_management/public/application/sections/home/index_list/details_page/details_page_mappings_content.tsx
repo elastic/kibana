@@ -35,11 +35,7 @@ import { DocumentFieldsSearch } from '../../../../components/mappings_editor/com
 import { FieldsList } from '../../../../components/mappings_editor/components/document_fields/fields';
 import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 import { MultipleMappingsWarning } from '../../../../components/mappings_editor/components/multiple_mappings_warning';
-import {
-  deNormalize,
-  extractMappingsDefinition,
-  searchFields,
-} from '../../../../components/mappings_editor/lib';
+import { deNormalize, searchFields } from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
 import {
   useDispatch,
@@ -56,6 +52,7 @@ import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
+import { parseMappings } from '../../../../shared/parse_mappings';
 
 const getFieldsFromState = (state: State) => {
   const getField = (fieldId: string) => {
@@ -123,49 +120,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     setIsJSONVisible(!isJSONVisible);
   };
 
-  const mappingsDefinition = extractMappingsDefinition(jsonData);
-  const { parsedDefaultValue, multipleMappingsDeclared } =
-    useMemo<MappingsEditorParsedMetadata>(() => {
-      if (mappingsDefinition === null) {
-        return { multipleMappingsDeclared: true };
-      }
-
-      const {
-        _source,
-        _meta,
-        _routing,
-        _size,
-        dynamic,
-        properties,
-        runtime,
-        /* eslint-disable @typescript-eslint/naming-convention */
-        numeric_detection,
-        date_detection,
-        dynamic_date_formats,
-        dynamic_templates,
-        /* eslint-enable @typescript-eslint/naming-convention */
-      } = mappingsDefinition;
-
-      const parsed = {
-        configuration: {
-          _source,
-          _meta,
-          _routing,
-          _size,
-          dynamic,
-          numeric_detection,
-          date_detection,
-          dynamic_date_formats,
-        },
-        fields: properties,
-        templates: {
-          dynamic_templates,
-        },
-        runtime,
-      };
-
-      return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
-    }, [mappingsDefinition]);
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
+    () => parseMappings(jsonData),
+    [jsonData]
+  );
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
   const { fetchInferenceToModelIdMap, pendingDeployments } = useDetailsPageMappingsModelManagement(
