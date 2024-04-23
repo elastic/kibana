@@ -775,7 +775,12 @@ describe('#getQueryParams', () => {
           ]);
 
           const simpleQueryClause = mustClause[1].simple_query_string;
-          expect(simpleQueryClause.fields).toEqual(['saved.title', 'pending.title']);
+          // TODO: clarify if it's an issue that nestedtype.title is in here altough we alreay cover it in the nested query
+          expect(simpleQueryClause.fields).toEqual([
+            'nestedtype.title',
+            'saved.title',
+            'pending.title',
+          ]);
           expect(simpleQueryClause.query).toBe('foo');
         });
       });

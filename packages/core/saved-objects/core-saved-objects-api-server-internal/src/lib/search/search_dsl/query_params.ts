@@ -370,13 +370,15 @@ const getSearchStringQuery = ({
     searchFields.length > 0 &&
     !(searchFields.length === 1 && searchFields[0] === '*')
   ) {
-    searchFields.forEach((field) => {
-      const key = `${types[0]}.${field}`;
-      if (getProperty(mappings, key)?.type === 'nested') {
-        nestedFields.push(key);
-      } else {
-        fields.push(field);
-      }
+    types.forEach((type) => {
+      searchFields.forEach((field) => {
+        const key = `${type}.${field}`;
+        if (getProperty(mappings, key)?.type === 'nested') {
+          nestedFields.push(key);
+        } else if (!fields.includes(field)) {
+          fields.push(field);
+        }
+      });
     });
   } else {
     // this is the searchFields empty, searchFields = ['*'] use case
@@ -399,7 +401,7 @@ const getSearchStringQuery = ({
 
   // TODO: what if nestedFields is empty?
   const nestedQuery = getNestedQueryStringClause({
-    path: nestedFields[0], // `${types[0]}`, // TODO: the path would be cases.customFields. We need to create one per nestedFields value
+    path: nestedFields[0], // TODO: the path would be cases.customFields. We need to create one per nestedFields value
     search,
     fields: nestedFields,
   });
