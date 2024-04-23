@@ -7,12 +7,21 @@
 
 import React from 'react';
 
-import { PlaygroundHeaderDocs } from '@kbn/search-playground/public/components/playground_header_docs';
+import { useValues } from 'kea';
+
+import { KibanaLogic } from '../../../shared/kibana';
 
 import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 
-export const PlaygroundHeaderDocsAction: React.FC = () => (
-  <EndpointsHeaderAction>
-    <PlaygroundHeaderDocs />
-  </EndpointsHeaderAction>
-);
+export const PlaygroundHeaderDocsAction: React.FC = () => {
+  const { searchPlayground } = useValues(KibanaLogic);
+
+  if (!searchPlayground) {
+    return null;
+  }
+  return (
+    <EndpointsHeaderAction>
+      <searchPlayground.PlaygroundHeaderDocs />
+    </EndpointsHeaderAction>
+  );
+};

@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { docLinks } from '../common/doc_links';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
 import {
   AppPluginStartDependencies,
@@ -41,7 +42,6 @@ export class SearchPlaygroundPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        docLinks.setDocLinks(coreStart.docLinks.links);
 
         return renderApp(
           coreStart,
@@ -58,10 +58,12 @@ export class SearchPlaygroundPlugin
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
+    docLinks.setDocLinks(core.docLinks.links);
     return {
       PlaygroundProvider: getPlaygroundProvider(core, deps),
       PlaygroundToolbar,
       Playground,
+      PlaygroundHeaderDocs,
     };
   }
 
