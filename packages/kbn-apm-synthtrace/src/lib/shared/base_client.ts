@@ -76,10 +76,11 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async refresh() {
-    this.logger.info(`Refreshing ${this.dataStreams.join(',')}`);
+    const allIndices = this.dataStreams.concat(this.indices);
+    this.logger.info(`Refreshing "${allIndices.join(',')}"`);
 
     return this.client.indices.refresh({
-      index: this.dataStreams,
+      index: allIndices,
       allow_no_indices: true,
       ignore_unavailable: true,
       expand_wildcards: ['open', 'hidden'],
