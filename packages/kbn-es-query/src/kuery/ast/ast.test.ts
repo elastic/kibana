@@ -301,6 +301,16 @@ describe('kuery AST API', () => {
         const opsPerSec = NUM_RUNS / (elapsed / 1000);
         expect(opsPerSec).toBeGreaterThan(100);
       });
+
+      it('with many subqueries', () => {
+        const start = performance.now();
+        for (let i = 0; i < NUM_RUNS; i++) {
+          fromKueryExpression(`((((((((((foo))))))))))`);
+        }
+        const elapsed = performance.now() - start;
+        const opsPerSec = NUM_RUNS / (elapsed / 1000);
+        expect(opsPerSec).toBeGreaterThan(1000);
+      });
     });
   });
 
