@@ -7,12 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { VersionedRouteValidation } from '@kbn/core-http-server';
+import { RouteValidator } from '@kbn/core-http-server';
 import { prepareResponseValidation } from './util';
 
 describe('prepareResponseValidation', () => {
-  it('wraps only expected values on "once"', () => {
-    const validation: VersionedRouteValidation<unknown, unknown, unknown> = {
+  it('wraps only expected values in "once"', () => {
+    const validation: RouteValidator<unknown, unknown, unknown> = {
       request: {},
       response: {
         200: {

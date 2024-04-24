@@ -11,6 +11,7 @@ import { getResponseValidation } from '@kbn/core-http-server';
 import {
   versionHandlerResolvers,
   ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION,
+  unwrapResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
 import type {
   CoreVersionedRouter,
@@ -114,7 +115,9 @@ const extractVersionedResponses = (
     if (!schemas?.response) return acc;
     const statusCodes = Object.keys(schemas.response);
     for (const statusCode of statusCodes) {
-      const maybeSchema = schemas.response[statusCode as unknown as number].body();
+      const maybeSchema = unwrapResponseBodyValidation(
+        schemas.response[statusCode as unknown as number].body
+      );
       const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
