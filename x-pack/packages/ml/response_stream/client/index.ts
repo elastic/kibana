@@ -6,3 +6,4 @@
  */
 
 export { useFetchStream } from './use_fetch_stream';
+export { useFetchStreamRedux } from './use_fetch_stream_redux';
