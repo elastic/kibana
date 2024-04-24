@@ -79,7 +79,7 @@ export class DocViewsRegistry {
   }
 
   clone() {
-    return new DocViewsRegistry(this.getAll().map(this.createDocView));
+    return new DocViewsRegistry(this.getAll());
   }
 
   private sortDocViews() {
