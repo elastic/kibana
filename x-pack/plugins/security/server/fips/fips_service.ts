@@ -21,9 +21,11 @@ export interface FipsServiceSetupInternal {
 
 export class FipsService {
   private readonly logger: Logger;
+  private isInitialLicenseLoaded: boolean;
 
   constructor(logger: Logger) {
     this.logger = logger;
+    this.isInitialLicenseLoaded = false;
   }
 
   setup({ config, license }: FipsServiceSetupParams): FipsServiceSetupInternal {
@@ -33,18 +35,27 @@ export class FipsService {
   }
 
   private validateLicenseForFips(config: ConfigType, license: SecurityLicense) {
-    const errorMessage = `Your current license level is ${license.getLicenseType()} and does not support running in FIPS mode.`;
-
-    if (config?.fipsMode.enabled && !license.getFeatures().allowFips) {
-      this.logger.fatal(errorMessage);
-      throw new Error(errorMessage);
-    }
-
     license.features$.subscribe({
       next: (features) => {
-        if (license.isLicenseAvailable() && config?.fipsMode.enabled && !features.allowFips) {
-          this.logger.fatal(
-            `${errorMessage} Kibana will not be able to restart. Please upgrade your license to Platinum or higher.`
+        const errorMessage = `Your current license level is ${license.getLicenseType()} and does not support running in FIPS mode.`;
+
+        if (license.isLicenseAvailable() && !this.isInitialLicenseLoaded) {
+          if (config?.fipsMode.enabled && !license.getFeatures().allowFips) {
+            this.logger.error(errorMessage);
+            process.exit(78);
+          }
+
+          this.isInitialLicenseLoaded = true;
+        }
+
+        if (
+          this.isInitialLicenseLoaded &&
+          license.isLicenseAvailable() &&
+          config?.fipsMode.enabled &&
+          !features.allowFips
+        ) {
+          this.logger.error(
+            `${errorMessage} Kibana will not be able to restart. Please upgrade your license to platinum or higher.`
           );
         }
       },
