@@ -152,11 +152,11 @@ export const downloadCsvShareProvider = ({
               helpText: (
                 <FormattedMessage
                   id="xpack.lens.share.helpText"
-                  defaultMessage="Export a PDF, PNG, or CSV of this visualization."
+                  defaultMessage="Export a CSV of this visualization."
                 />
               ),
-              generateReportButton: (
-                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
+              generateExportButton: (
+                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate export" />
               ),
               renderLayoutOptionSwitch: false,
               getJobParams: undefined,
@@ -171,7 +171,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateReportButton: (
+              generateExportButton: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
               showRadios: false,

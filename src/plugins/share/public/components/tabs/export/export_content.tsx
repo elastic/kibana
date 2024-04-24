@@ -35,74 +35,6 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
   intl: InjectedIntl;
 };
 
-interface ICopyPOSTUrlProps {
-  unsavedChangesExist: boolean;
-  postUrl?: string;
-}
-
-const CopyPOSTUrlButton = ({ unsavedChangesExist, postUrl }: ICopyPOSTUrlProps) => {
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            unsavedChangesExist ? (
-              <FormattedMessage
-                id="share.modalContent.unsavedStateErrorText"
-                defaultMessage="Save your work before copying this URL."
-              />
-            ) : (
-              <FormattedMessage
-                id="share.modalContent.savedStateErrorText"
-                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-              />
-            )
-          }
-        >
-          <EuiCopy textToCopy={postUrl ?? ''}>
-            {(copy) => (
-              <EuiButtonEmpty
-                iconType="copy"
-                onClick={copy}
-                data-test-subj="shareReportingCopyURL"
-                flush="both"
-              >
-                <FormattedMessage
-                  id="share.modalContent.copyUrlButtonLabel"
-                  defaultMessage="Post URL"
-                />
-              </EuiButtonEmpty>
-            )}
-          </EuiCopy>
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            <EuiText size="s">
-              <FormattedMessage
-                id="share.postURLWatcherMessage"
-                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-              />
-              {unsavedChangesExist && (
-                <>
-                  <EuiSpacer size="s" />
-                  <FormattedMessage
-                    id="share.postURLWatcherMessage.unsavedChanges"
-                    defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
-                  />
-                </>
-              )}
-            </EuiText>
-          }
-        >
-          <EuiIcon type="questionInCircle" />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
 const ExportContentUi = ({
   isDirty,
   objectType,
@@ -204,7 +136,66 @@ const ExportContentUi = ({
 
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
-      return <CopyPOSTUrlButton unsavedChangesExist={isDirty} postUrl={absoluteUrl} />;
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                isDirty ? (
+                  <FormattedMessage
+                    id="share.modalContent.unsavedStateErrorText"
+                    defaultMessage="Save your work before copying this URL."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="share.modalContent.savedStateErrorText"
+                    defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+                  />
+                )
+              }
+            >
+              <EuiCopy textToCopy={absoluteUrl ?? ''}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    iconType="copy"
+                    onClick={copy}
+                    data-test-subj="shareReportingCopyURL"
+                    flush="both"
+                  >
+                    <FormattedMessage
+                      id="share.modalContent.copyUrlButtonLabel"
+                      defaultMessage="Post URL"
+                    />
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="share.postURLWatcherMessage"
+                    defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+                  />
+                  {isDirty && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <FormattedMessage
+                        id="share.postURLWatcherMessage.unsavedChanges"
+                        defaultMessage="Unsaved changes: URL may change if you upgrade Kibana"
+                      />
+                    </>
+                  )}
+                </EuiText>
+              }
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
   }, [absoluteUrl, isDirty, renderCopyURLButton]);
 
   const renderGenerateReportButton = useCallback(() => {
@@ -239,34 +230,19 @@ const ExportContentUi = ({
     }
   };
 
-  const getHelpText = () => {
-    if (objectType === 'lens' && generateExport !== undefined) {
-      return helpText;
-    } else if (objectType === 'lens') {
-      return (
-        <FormattedMessage
-          id="share.helpText.goldLicense.roleNotPDFPNG"
-          defaultMessage="Export a CSV of this visualization."
-        />
-      );
-    } else {
-      return helpText;
-    }
-  };
-
   return (
     <>
       <EuiForm>
         <EuiSpacer size="l" />
-        {getHelpText()}
+        <>{helpText}</>
         <EuiSpacer size="m" />
-        {renderRadioOptions()}
+        <>{renderRadioOptions()}</>
         <EuiSpacer size="xl" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        {renderLayoutOptionsSwitch()}
-        {showCopyURLButton()}
-        {renderGenerateReportButton()}
+        <>{renderLayoutOptionsSwitch()}</>
+        <>{showCopyURLButton()}</>
+        <>{renderGenerateReportButton()}</>
       </EuiFlexGroup>
     </>
   );

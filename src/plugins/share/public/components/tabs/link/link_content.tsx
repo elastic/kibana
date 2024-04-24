@@ -164,11 +164,9 @@ export const LinkContent = ({
       setUrl(urlToCopy);
     }
 
-    setUrl(() => {
-      copyToClipboard(urlToCopy);
-      setTextCopied(true);
-      return urlToCopy;
-    });
+    copyToClipboard(urlToCopy);
+    setUrl(urlToCopy);
+    setTextCopied(true);
   }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl, url]);
 
   const lensOnClick = () => {
