@@ -33,7 +33,7 @@ export async function getObservabilityAlertDetailsContext({
   mlClient,
   query,
 }: {
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'elasticsearch' | 'uiSettings'>;
   annotationsClient?: ScopedAnnotationsClient;
   apmAlertsClient: ApmAlertsClient;
   apmEventClient: APMEventClient;
