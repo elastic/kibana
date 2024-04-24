@@ -13,6 +13,7 @@ import useMount from 'react-use/lib/useMount';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { logRateAnalysisResultsSlice } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type { GroupTableItem } from './types';
 
@@ -93,7 +94,10 @@ export const {
 
 const getReduxStore = () =>
   configureStore({
-    reducer: logRateAnalysisSlice.reducer,
+    reducer: {
+      logRateAnalysisResults: logRateAnalysisResultsSlice.reducer,
+      logRateAnalysis: logRateAnalysisSlice.reducer,
+    },
   });
 
 interface LogRateAnalysisReduxProviderProps {

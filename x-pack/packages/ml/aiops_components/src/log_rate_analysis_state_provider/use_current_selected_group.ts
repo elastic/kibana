@@ -10,8 +10,8 @@ import { useSelector } from 'react-redux';
 
 import type { RootState } from './store';
 
-const selectSelectedGroup = (s: RootState) => s.selectedGroup;
-const selectPinnedGroup = (s: RootState) => s.pinnedGroup;
+const selectSelectedGroup = (s: RootState) => s.logRateAnalysis.selectedGroup;
+const selectPinnedGroup = (s: RootState) => s.logRateAnalysis.pinnedGroup;
 const selectCurrentSelectedGroup = createSelector(
   selectSelectedGroup,
   selectPinnedGroup,

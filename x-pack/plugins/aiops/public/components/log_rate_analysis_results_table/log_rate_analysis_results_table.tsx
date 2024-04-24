@@ -59,10 +59,10 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = useAppSelector((s) => s.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.selectedGroup);
-  const pinnedSignificantItem = useAppSelector((s) => s.pinnedSignificantItem);
-  const selectedSignificantItem = useAppSelector((s) => s.selectedSignificantItem);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysis.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysis.selectedGroup);
+  const pinnedSignificantItem = useAppSelector((s) => s.logRateAnalysis.pinnedSignificantItem);
+  const selectedSignificantItem = useAppSelector((s) => s.logRateAnalysis.selectedSignificantItem);
 
   const dispatch = useAppDispatch();
 

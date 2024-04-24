@@ -572,7 +572,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
  */
 export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
   const dispatch = useAppDispatch();
-  const initialAnalysisStart = useAppSelector((s) => s.initialAnalysisStart);
+  const initialAnalysisStart = useAppSelector((s) => s.logRateAnalysis.initialAnalysisStart);
 
   return (
     <DocumentCountChart

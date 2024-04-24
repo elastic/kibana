@@ -138,7 +138,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
-  const autoRunAnalysis = useAppSelector((s) => s.autoRunAnalysis);
+  const autoRunAnalysis = useAppSelector((s) => s.logRateAnalysis.autoRunAnalysis);
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
   const dispatch = useAppDispatch();

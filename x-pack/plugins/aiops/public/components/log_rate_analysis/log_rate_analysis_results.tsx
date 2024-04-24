@@ -172,12 +172,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
-  const stickyHistogram = useAppSelector((s) => s.stickyHistogram);
+  const stickyHistogram = useAppSelector((s) => s.logRateAnalysis.stickyHistogram);
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
 
+  const data = useAppSelector((s) => s.logRateAnalysisResults);
   const dispatch = useAppDispatch();
 
   const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
@@ -222,7 +223,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const {
     cancel,
     start,
-    data,
     isRunning,
     errors: streamErrors,
   } = useFetchStream<AiopsLogRateAnalysisSchema<'2'>, typeof streamReducer>(
@@ -252,7 +252,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       sampleProbability,
     },
     { reducer: streamReducer, initialState: getDefaultState() },
-    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
+    dispatch,
+    true
   );
 
   const { significantItems, zeroDocsFallback } = data;

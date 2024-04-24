@@ -96,8 +96,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = useAppSelector((s) => s.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.selectedGroup);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysis.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysis.selectedGroup);
   const dispatch = useAppDispatch();
   const dataViewId = dataView.id;
   const isMounted = useMountedState();

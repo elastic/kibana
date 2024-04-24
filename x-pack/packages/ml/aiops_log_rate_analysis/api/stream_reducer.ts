@@ -37,7 +37,7 @@ export const getDefaultState = (): StreamState => ({
   zeroDocsFallback: false,
 });
 
-const logRateAnalysisResultsSlice = createSlice({
+export const logRateAnalysisResultsSlice = createSlice({
   name: 'logRateAnalysisResults',
   initialState: getDefaultState(),
   reducers: {
