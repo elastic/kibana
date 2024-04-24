@@ -21,7 +21,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
@@ -226,7 +226,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, theme, uiSettings, chrome, application, notifications, i18n: i18nStart }: CoreStart,
+    {
+      analytics,
+      http,
+      theme,
+      uiSettings,
+      chrome,
+      application,
+      notifications,
+      i18n: i18nStart,
+    }: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -245,6 +254,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
     const warningsServices = {
+      analytics,
       i18n: i18nStart,
       inspector,
       notifications,
@@ -303,7 +313,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               tourDisabled: screenshotMode.isScreenshotMode(),
             })
           ),
-          { theme$: theme.theme$ }
+          { analytics, i18n: i18nStart, theme }
         ),
       });
     }

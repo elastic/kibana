@@ -651,10 +651,7 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <KibanaRenderContextProvider
-          theme={searchProps.services.core.theme}
-          i18n={searchProps.services.core.i18n}
-        >
+        <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <FieldStatisticsTable
               dataView={searchProps.dataView}
@@ -694,10 +691,7 @@ export class SavedSearchEmbeddable
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
 
       ReactDOM.render(
-        <KibanaRenderContextProvider
-          theme={searchProps.services.core.theme}
-          i18n={searchProps.services.core.i18n}
-        >
+        <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
               <SavedSearchEmbeddableComponent

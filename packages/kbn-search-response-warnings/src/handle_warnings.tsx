@@ -9,7 +9,11 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { estypes } from '@elastic/elasticsearch';
-import type { NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  NotificationsStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -26,6 +30,7 @@ import {
 } from './components/search_response_warnings/i18n_utils';
 
 interface Services {
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   inspector: InspectorStart;
   notifications: NotificationsStart;
@@ -94,7 +99,7 @@ export function handleWarnings({
           {viewDetailsLabel}
         </EuiButtonEmpty>
       </>,
-      { theme: services.theme, i18n: services.i18n }
+      services
     ),
   });
 }
