@@ -67,7 +67,6 @@ import {
   uptimeAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
 import { setStartServices } from './kibana_services';
-import { UptimeOverviewLocatorDefinition } from './locators/overview';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -242,6 +241,7 @@ export class UptimePlugin
 function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
   async function getUptimeSections() {
     if (coreStart.application.capabilities.uptime?.show) {
+      const { UptimeOverviewLocatorDefinition } = await import('./locators/overview');
       plugins.share.url.locators.create(new UptimeOverviewLocatorDefinition());
 
       return [
