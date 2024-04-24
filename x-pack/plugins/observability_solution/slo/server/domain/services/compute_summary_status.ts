@@ -9,10 +9,10 @@ import { ErrorBudget, Objective, Status } from '../models';
 
 export function computeSummaryStatus(
   objective: Objective,
-  sliValue: number,
+  sliValue: number | null,
   errorBudget: ErrorBudget
 ): Status {
-  if (sliValue === -1) {
+  if (sliValue === null) {
     return 'NO_DATA';
   }
 

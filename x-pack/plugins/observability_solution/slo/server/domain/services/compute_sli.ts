@@ -7,11 +7,9 @@
 
 import { toHighPrecision } from '../../utils/number';
 
-const NO_DATA = -1;
-
-export function computeSLI(good: number, total: number): number {
+export function computeSLI(good: number, total: number): number | null {
   if (total === 0) {
-    return NO_DATA;
+    return null;
   }
 
   return toHighPrecision(good / total);

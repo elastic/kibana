@@ -9,7 +9,7 @@ import { computeSLI } from './compute_sli';
 
 describe('computeSLI', () => {
   it('returns -1 when no total events', () => {
-    expect(computeSLI(100, 0)).toEqual(-1);
+    expect(computeSLI(100, 0)).toEqual(null);
   });
 
   it('returns the sli value', () => {

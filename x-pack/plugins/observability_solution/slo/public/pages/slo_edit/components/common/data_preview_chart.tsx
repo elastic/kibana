@@ -94,7 +94,8 @@ export function DataPreviewChart({
     isError,
   } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range || defaultRange);
 
-  const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
+  const isMoreThan100 =
+    !ignoreMoreThan100 && previewData?.find((row) => row.sliValue && row.sliValue > 1) != null;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -339,7 +340,7 @@ export function DataPreviewChart({
                 yAccessors={['value']}
                 data={(previewData ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
-                  value: datum.sliValue >= 0 ? datum.sliValue : null,
+                  value: datum.sliValue,
                   events: datum.events,
                 }))}
               />

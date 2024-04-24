@@ -129,11 +129,11 @@ export class DefaultSummaryClient implements SummaryClient {
         slo.objective.timesliceWindow!
       );
       const consumedErrorBudget =
-        sliValue < 0 ? 0 : (total - good) / (totalSlices * initialErrorBudget);
+        sliValue === null ? 0 : (total - good) / (totalSlices * initialErrorBudget);
 
       errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
     } else {
-      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+      const consumedErrorBudget = sliValue === null ? 0 : (1 - sliValue) / initialErrorBudget;
       errorBudget = toErrorBudget(
         initialErrorBudget,
         consumedErrorBudget,

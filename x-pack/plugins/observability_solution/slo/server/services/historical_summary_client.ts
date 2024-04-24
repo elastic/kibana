@@ -157,7 +157,7 @@ function handleResultForCalendarAlignedAndOccurrences(
     const good = bucket.cumulative_good?.value ?? 0;
     const total = bucket.cumulative_total?.value ?? 0;
     const sliValue = computeSLI(good, total);
-    const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+    const consumedErrorBudget = sliValue === null ? 0 : (1 - sliValue) / initialErrorBudget;
     const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget, true);
 
     return {
@@ -211,7 +211,7 @@ function handleResultForRolling(
       const good = bucket.cumulative_good?.value ?? 0;
       const total = bucket.cumulative_total?.value ?? 0;
       const sliValue = computeSLI(good, total);
-      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+      const consumedErrorBudget = sliValue === null ? 0 : (1 - sliValue) / initialErrorBudget;
       const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
       return {

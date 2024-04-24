@@ -21,7 +21,7 @@ export function formatHistoricalData(
       case 'error_budget_remaining':
         return data.errorBudget.remaining;
       default:
-        return data.sliValue;
+        return data.sliValue === null ? undefined : data.sliValue;
     }
   }
 

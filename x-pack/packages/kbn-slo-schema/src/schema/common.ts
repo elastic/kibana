@@ -45,7 +45,7 @@ const statusSchema = t.union([
 
 const summarySchema = t.type({
   status: statusSchema,
-  sliValue: t.number,
+  sliValue: t.union([t.number, t.null]),
   errorBudget: errorBudgetSchema,
 });
 
