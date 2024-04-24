@@ -282,12 +282,8 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           <UseField
             path="dataRetentionEnabled"
             component={ToggleField}
+            data-test-subj="dataRetentionEnabledField"
             css={!dslConfig?.canDisableDataRetention ? { display: 'none !important' } : {}}
-            data-test-subj={
-              !dslConfig?.canDisableDataRetention
-                ? 'dataRetentionEnabledFieldDisabled'
-                : 'dataRetentionEnabledField'
-            }
           />
 
           <UseField

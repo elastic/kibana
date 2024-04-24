@@ -128,7 +128,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('manageDataStreamButton');
       await testSubjects.click('editDataRetentionButton');
 
-      expect(await testSubjects.exists('dataRetentionEnabledFieldDisabled')).to.be(true);
+      expect(await testSubjects.exists('dataRetentionEnabledField')).to.be(false);
     });
   });
 };

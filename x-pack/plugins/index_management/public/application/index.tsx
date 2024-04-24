@@ -33,8 +33,10 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 export interface IndexManagementAppContextProps {
   core: CoreStart;
   dependencies: AppDependencies;
-  dslConfig$: BehaviorSubject<DSLConfigSubject>;
+  dslConfig$?: BehaviorSubject<DSLConfigSubject>;
 }
+
+const emptyObservable = new BehaviorSubject(null);
 
 export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps> = ({
   children,
@@ -42,7 +44,8 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
   dependencies,
   dslConfig$,
 }) => {
-  const dslConfig = useObservable(dslConfig$);
+  // dslConfig might not be present if coming from embedable index mappings
+  const dslConfig = useObservable(dslConfig$ || emptyObservable);
   const { docLinks, notifications, application, executionContext, overlays, theme } = core;
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
@@ -74,7 +77,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     <KibanaRenderContextProvider {...core}>
       <KibanaReactContextProvider>
         <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={{ ...dependencies, dslConfig }}>
+          <AppContextProvider value={dslConfig ? { ...dependencies, dslConfig } : dependencies}>
             <MappingsEditorProvider>
               <ComponentTemplatesProvider value={componentTemplateProviderValues}>
                 <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
