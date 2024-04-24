@@ -218,23 +218,38 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('with data modification', () => {
-    it(`should update alert status list when the alerts are updated`, () => {
-      // mark status of one alert to be acknowledged
-      selectCountTable();
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((noOfAlerts) => {
-          const originalAlertCount = noOfAlerts.split(' ')[0];
-          markAcknowledgedFirstAlert();
-          waitForAlerts();
-          selectPageFilterValue(0, 'acknowledged');
-          cy.get(ALERTS_COUNT)
-            .invoke('text')
-            .should((newAlertCount) => {
-              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
-            });
-        });
-    });
+    /*
+     *
+     * default scrollBehavior is true, which scrolls the element into view automatically without any scroll Margin
+     * if an element has some hover actions above the element, they get hidden on top of the window.
+     * So, we need to set scrollBehavior to false to avoid scrolling the element into view and we can scroll ourselves
+     * when needed.
+     *
+     * Ref : https://docs.cypress.io/guides/core-concepts/interacting-with-elements#Scrolling
+     */
+    it(
+      `should update alert status list when the alerts are updated`,
+      {
+        scrollBehavior: false,
+      },
+      () => {
+        // mark status of one alert to be acknowledged
+        selectCountTable();
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((noOfAlerts) => {
+            const originalAlertCount = noOfAlerts.split(' ')[0];
+            markAcknowledgedFirstAlert();
+            waitForAlerts();
+            selectPageFilterValue(0, 'acknowledged');
+            cy.get(ALERTS_COUNT)
+              .invoke('text')
+              .should((newAlertCount) => {
+                expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
+              });
+          });
+      }
+    );
   });
 
   it(`should update URL when filters are updated`, () => {
