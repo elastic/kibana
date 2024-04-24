@@ -16,7 +16,13 @@ export type Props = Record<string, Type<any>>;
 
 export type NullableProps = Record<string, Type<any> | undefined | null>;
 
-export type TypeOf<RT extends Type<any>> = RT['type'];
+export type TypeOrLazyType = Type<any> | (() => Type<any>);
+
+export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
+  ? ReturnType<RT>['type']
+  : RT extends Type<any>
+  ? RT['type']
+  : never;
 
 type OptionalProperties<Base extends Props> = Pick<
   Base,
