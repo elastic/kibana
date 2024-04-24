@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 interface IncludeCitationsFieldProps {
   checked: boolean;
@@ -17,14 +18,22 @@ interface IncludeCitationsFieldProps {
 export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
   checked,
   onChange,
-}) => (
-  <EuiFormRow>
-    <EuiSwitch
-      label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {
-        defaultMessage: 'Include citations',
-      })}
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-    />
-  </EuiFormRow>
-);
+}) => {
+  const usageTracker = useUsageTracker();
+  const handleChange = (value: boolean) => {
+    onChange(value);
+    usageTracker.click(`include_citations_${String(value)}`);
+  };
+
+  return (
+    <EuiFormRow>
+      <EuiSwitch
+        label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {
+          defaultMessage: 'Include citations',
+        })}
+        checked={checked}
+        onChange={(e) => handleChange(e.target.checked)}
+      />
+    </EuiFormRow>
+  );
+};

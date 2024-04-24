@@ -17,6 +17,13 @@ const render = (children: React.ReactNode) =>
 
 jest.mock('../hooks/use_kibana');
 jest.mock('../hooks/use_load_connectors');
+jest.mock('../hooks/use_usage_tracker', () => ({
+  useUsageTracker: () => ({
+    count: jest.fn(),
+    load: jest.fn(),
+    click: jest.fn(),
+  }),
+}));
 
 const mockConnectors = {
   '1': { title: 'Connector 1' },

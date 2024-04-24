@@ -8,11 +8,13 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AIMessage as AIMessageType, Doc } from '../../types';
 
 type CitationsTableProps = Pick<AIMessageType, 'citations'>;
 
 export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => {
+  const usageTracker = useUsageTracker();
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
@@ -28,10 +30,13 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
 
     if (itemIdToExpandedRowMapValues[citation.metadata._id]) {
       delete itemIdToExpandedRowMapValues[citation.metadata._id];
+
+      usageTracker.click(`citation_details_collapsed`);
     } else {
       itemIdToExpandedRowMapValues[citation.metadata._id] = (
         <EuiText size="s">{citation.content}</EuiText>
       );
+      usageTracker.click(`citation_details_expanded`);
     }
 
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);

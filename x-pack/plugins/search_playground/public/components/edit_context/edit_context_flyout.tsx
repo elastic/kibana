@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -26,6 +26,7 @@ import {
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
@@ -35,6 +36,7 @@ interface EditContextFlyoutProps {
 }
 
 export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
+  const usageTracker = useUsageTracker();
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);
@@ -62,13 +64,23 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
+    usageTracker.click('edit_context_field_toggled');
   };
 
   const saveSourceFields = () => {
+    usageTracker.click('edit_context_save');
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
+  const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    usageTracker.click('edit_context_doc_size_changed');
+    setDocSize(Number(e.target.value));
+  };
+
+  useEffect(() => {
+    usageTracker.load('edit_context_flyout_opened');
+  }, [usageTracker]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} size="s">
@@ -118,7 +130,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                     },
                   ]}
                   value={docSize}
-                  onChange={(e) => setDocSize(Number(e.target.value))}
+                  onChange={handleDocSizeChange}
                 />
               </EuiFlexItem>
               <EuiText>

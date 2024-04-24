@@ -24,18 +24,27 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
-import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  IndexFields,
+  SUGGESTED_BM25_FIELDS,
+  SUGGESTED_DENSE_VECTOR_FIELDS,
+  SUGGESTED_SPARSE_FIELDS,
+} from '../../utils/create_query';
 
 interface ViewQueryFlyoutProps {
   onClose: () => void;
 }
 
 export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => {
+  const usageTracker = useUsageTracker();
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);
@@ -48,7 +57,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     defaultValue: defaultFields,
   });
 
-  const [tempQueryFields, setTempQueryFields] = useState(queryFields);
+  const [tempQueryFields, setTempQueryFields] = useState<IndexFields>(queryFields);
 
   const {
     field: { onChange: elasticsearchQueryChange },
@@ -68,13 +77,38 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       ...tempQueryFields,
       [index]: newFields,
     });
+    usageTracker.count('view_query_fields_updated', newFields.length);
   };
 
   const saveQuery = () => {
     queryFieldsOnChange(tempQueryFields);
     elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
+
+    usageTracker.click('view_query_save');
+    usageTracker.count(
+      'view_query_sparse_fields',
+      Object.values(tempQueryFields)
+        .flat()
+        .filter((field) => SUGGESTED_SPARSE_FIELDS.includes(field)).length
+    );
+    usageTracker.count(
+      'view_query_bm25_fields',
+      Object.values(tempQueryFields)
+        .flat()
+        .filter((field) => SUGGESTED_BM25_FIELDS.includes(field)).length
+    );
+    usageTracker.count(
+      'view_query_dense_vector_fields',
+      Object.values(tempQueryFields)
+        .flat()
+        .filter((field) => SUGGESTED_DENSE_VECTOR_FIELDS.includes(field)).length
+    );
   };
+
+  useEffect(() => {
+    usageTracker.load('view_query_flyout_opened');
+  }, [usageTracker]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} size="l">

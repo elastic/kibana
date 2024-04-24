@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
   EuiButtonEmpty,
@@ -29,10 +29,10 @@ import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
-import { StartNewChat } from './start_new_chat';
 
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 
 const buildFormData = (formData: ChatForm): ChatRequestData => ({
   connector_id: formData[ChatFormFields.summarizationModel].connectorId!,
@@ -46,7 +46,6 @@ const buildFormData = (formData: ChatForm): ChatRequestData => ({
 });
 
 export const Chat = () => {
-  const [showStartPage, setShowStartPage] = useState(true);
   const { euiTheme } = useEuiTheme();
   const {
     control,
@@ -58,9 +57,9 @@ export const Chat = () => {
   } = useFormContext<ChatForm>();
   const { messages, append, stop: stopRequest, setMessages, reload, error } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
-  const messagesRef = useAutoBottomScroll([showStartPage]);
+  const messagesRef = useAutoBottomScroll();
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
-
+  const usageTracker = useUsageTracker();
   const onSubmit = async (data: ChatForm) => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
@@ -68,8 +67,13 @@ export const Chat = () => {
         data: buildFormData(data),
       }
     );
+    usageTracker.click('chat_question_sent');
 
     resetField(ChatFormFields.question);
+  };
+  const handleStopRequest = () => {
+    stopRequest();
+    usageTracker.click('chat_request_stopped');
   };
   const chatMessages = useMemo(
     () => [
@@ -95,11 +99,17 @@ export const Chat = () => {
       data: buildFormData(formData),
     });
     setIsRegenerating(false);
+
+    usageTracker.click('chat_regenerate_messages');
+  };
+  const handleClearChat = () => {
+    setMessages([]);
+    usageTracker.click('chat_cleared');
   };
 
-  if (showStartPage) {
-    return <StartNewChat onStartClick={() => setShowStartPage(false)} />;
-  }
+  useEffect(() => {
+    usageTracker.load('chat_page_loaded');
+  }, [usageTracker]);
 
   return (
     <EuiForm
@@ -156,9 +166,7 @@ export const Chat = () => {
                   <EuiButtonEmpty
                     iconType="refresh"
                     disabled={isToolBarActionsDisabled}
-                    onClick={() => {
-                      setMessages([]);
-                    }}
+                    onClick={handleClearChat}
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.clearChatBtn"
@@ -195,7 +203,7 @@ export const Chat = () => {
                           display="base"
                           size="s"
                           iconType="stop"
-                          onClick={stopRequest}
+                          onClick={handleStopRequest}
                         />
                       ) : (
                         <EuiButtonIcon
