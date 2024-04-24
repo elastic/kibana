@@ -31,8 +31,8 @@ export const securitySolutionSearchStrategyProvider = (
 
       const queryFactory = securitySolutionFactory[parsedRequest.factoryQueryType];
 
-      const dsl = queryFactory.buildDsl(parsedRequest);
-      return es.search({ ...request, params: dsl }, options, deps).pipe(
+      const searchRequestParams = queryFactory.buildDsl(parsedRequest, { request: deps.request });
+      return es.search({ ...request, params: searchRequestParams }, options, deps).pipe(
         map((response) => {
           return {
             ...response,
@@ -47,6 +47,7 @@ export const securitySolutionSearchStrategyProvider = (
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
             request: deps.request,
+            searchRequestParams,
             spaceId: getSpaceId && getSpaceId(deps.request),
             ruleDataClient,
           })

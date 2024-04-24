@@ -30,15 +30,18 @@ interface AggregationsAggregationWithFieldsContainer extends AggregationsAggrega
   };
 }
 
-export const buildTopNFlowQuery = ({
-  defaultIndex,
-  filterQuery,
-  flowTarget,
-  sort,
-  pagination,
-  timerange,
-  ip,
-}: NetworkTopNFlowRequestOptions): ISearchRequestParams => {
+export const buildTopNFlowQuery = (
+  {
+    defaultIndex,
+    filterQuery,
+    flowTarget,
+    sort,
+    pagination,
+    timerange,
+    ip,
+  }: NetworkTopNFlowRequestOptions,
+  extraParams?: Partial<ISearchRequestParams>
+): ISearchRequestParams => {
   const querySize = pagination?.querySize ?? 10;
   const query = getQuery({ filterQuery, flowTarget, timerange, ip });
 
@@ -59,17 +62,15 @@ export const buildTopNFlowQuery = ({
       size: 0,
     },
     track_total_hits: false,
+    ...extraParams,
   };
   return dslQuery;
 };
 
-export const buildTopNFlowCountQuery = ({
-  defaultIndex,
-  filterQuery,
-  flowTarget,
-  timerange,
-  ip,
-}: NetworkTopNFlowCountRequestOptions): ISearchRequestParams => {
+export const buildTopNFlowCountQuery = (
+  { defaultIndex, filterQuery, flowTarget, timerange, ip }: NetworkTopNFlowCountRequestOptions,
+  extraParams?: Partial<ISearchRequestParams>
+): ISearchRequestParams => {
   const query = getQuery({ filterQuery, flowTarget, timerange, ip });
   const dslQuery = {
     allow_no_indices: true,
@@ -82,6 +83,7 @@ export const buildTopNFlowCountQuery = ({
       size: 0,
     },
     track_total_hits: false,
+    ...extraParams,
   };
   return dslQuery;
 };

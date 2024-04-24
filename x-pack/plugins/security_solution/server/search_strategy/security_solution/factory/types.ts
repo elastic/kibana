@@ -20,7 +20,10 @@ import type {
 import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
-  buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
+  buildDsl: (
+    options: StrategyRequestType<T>,
+    deps: { request: KibanaRequest }
+  ) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
@@ -29,6 +32,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
       request: KibanaRequest;
+      searchRequestParams: ISearchRequestParams;
       spaceId?: string;
       ruleDataClient?: IRuleDataClient | null;
     }

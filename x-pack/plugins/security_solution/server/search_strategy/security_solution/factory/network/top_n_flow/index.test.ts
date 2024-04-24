@@ -15,6 +15,7 @@ import {
   mockCountStrategyResponse,
   formattedCountStrategyResponse,
 } from './__mocks__';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 describe('Network TopNFlow search strategy', () => {
   describe('networkTopNFlow', () => {
@@ -25,8 +26,9 @@ describe('Network TopNFlow search strategy', () => {
     });
 
     describe('buildDsl', () => {
+      const requestMock = httpServerMock.createKibanaRequest();
       test('should build dsl query', () => {
-        networkTopNFlow.buildDsl(mockOptions);
+        networkTopNFlow.buildDsl(mockOptions, { request: requestMock });
         expect(buildTopNFlowQuery).toHaveBeenCalledWith(mockOptions);
       });
     });
@@ -47,8 +49,9 @@ describe('Network TopNFlow search strategy', () => {
     });
 
     describe('buildDsl', () => {
+      const requestMock = httpServerMock.createKibanaRequest();
       test('should build dsl query', () => {
-        networkTopNFlowCount.buildDsl(mockCountOptions);
+        networkTopNFlowCount.buildDsl(mockCountOptions, { request: requestMock });
         expect(buildTopNFlowCountQuery).toHaveBeenCalledWith(mockCountOptions);
       });
     });

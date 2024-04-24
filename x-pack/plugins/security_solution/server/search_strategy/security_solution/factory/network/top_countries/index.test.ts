@@ -12,8 +12,10 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 describe('networkTopCountries search strategy', () => {
+  const requestMock = httpServerMock.createKibanaRequest();
   const buildTopCountriesQuery = jest.spyOn(buildQuery, 'buildTopCountriesQuery');
 
   afterEach(() => {
@@ -22,7 +24,7 @@ describe('networkTopCountries search strategy', () => {
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
-      networkTopCountries.buildDsl(mockOptions);
+      networkTopCountries.buildDsl(mockOptions, { request: requestMock });
       expect(buildTopCountriesQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
