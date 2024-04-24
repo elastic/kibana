@@ -495,7 +495,8 @@ ${JSON.stringify(argv, null, 2)}
         !process.env.KIBANA_MKI_USE_LATEST_COMMIT ||
         process.env.KIBANA_MKI_USE_LATEST_COMMIT !== '1'
       ) {
-        cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless';
+        cypressConfigFile.env.grepTags =
+          '@serverlessQA --@skipInServerless --@skipInServerlessMKI ';
       }
 
       if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
