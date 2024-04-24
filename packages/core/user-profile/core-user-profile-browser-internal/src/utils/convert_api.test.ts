@@ -43,7 +43,7 @@ describe('convertUserProfileAPI', () => {
 
   describe('bulkGet', () => {
     it('calls the API from the source with the correct parameters', () => {
-      const params = { uids: new Set<string>() };
+      const params = { uids: new Set<string>(['fake-uid-1', 'fake-uid-2', 'fake-uid-3']) };
       output.bulkGet(params);
       expect(source.bulkGet).toHaveBeenCalledTimes(1);
       expect(source.bulkGet).toHaveBeenCalledWith(params);

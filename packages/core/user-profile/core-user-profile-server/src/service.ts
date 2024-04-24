@@ -24,7 +24,8 @@ export interface UserProfileService {
    * @param params Get current user profile operation parameters.
    * @param params.request User request instance to get user profile for.
    * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+   * optional "dataPath" parameter can be used to return personal data for the requested user
+   * profiles (within `kibana` namespace only).
    */
   getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
     params: UserProfileGetCurrentParams
@@ -35,7 +36,8 @@ export interface UserProfileService {
    * @param params Bulk get operation parameters.
    * @param params.uids List of user profile identifiers.
    * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+   * optional "dataPath" parameter can be used to return personal data for the requested user
+   * profiles (within `kibana` namespace only).
    */
   bulkGet<D extends UserProfileData>(
     params: UserProfileBulkGetParams
