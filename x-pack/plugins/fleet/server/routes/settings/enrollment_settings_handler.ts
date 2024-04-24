@@ -39,8 +39,8 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
   try {
     // Get all possible fleet server or scoped normal agent policies
-    const { fleetServerAgentPolicies, scopedAgentPolicy: scopedAgentPolicyResponse } =
-      await getFleetServerAgentPolicies(soClient, agentPolicyId);
+    const { fleetServerPolicies, scopedAgentPolicy: scopedAgentPolicyResponse } =
+      await getFleetServerPolicies(soClient, agentPolicyId);
     const scopedAgentPolicy = scopedAgentPolicyResponse || {
       id: undefined,
       name: undefined,
@@ -49,12 +49,12 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
     };
 
     // Check if there is any active fleet server enrolled into the fleet server policies policies
-    if (fleetServerAgentPolicies) {
-      settingsResponse.fleet_server.policies = fleetServerAgentPolicies;
-      settingsResponse.fleet_server.has_active = await hasActiveFleetServersForAgentPolicies(
+    if (fleetServerPolicies) {
+      settingsResponse.fleet_server.policies = fleetServerPolicies;
+      settingsResponse.fleet_server.has_active = await hasActiveFleetServersForPolicies(
         esClient,
         soClient,
-        fleetServerAgentPolicies.map((p) => p.id)
+        fleetServerPolicies.map((p) => p.id)
       );
     }
 
@@ -99,11 +99,11 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   }
 };
 
-const getFleetServerAgentPolicies = async (
+export const getFleetServerPolicies = async (
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string
 ): Promise<{
-  fleetServerAgentPolicies?: EnrollmentSettingsFleetServerPolicy[];
+  fleetServerPolicies?: EnrollmentSettingsFleetServerPolicy[];
   scopedAgentPolicy?: EnrollmentSettingsFleetServerPolicy;
 }> => {
   const mapPolicy = (policy: AgentPolicy) => ({
@@ -122,7 +122,7 @@ const getFleetServerAgentPolicies = async (
     if (agentPolicy) {
       if (agentPolicy.package_policies?.find((p) => p.package?.name === FLEET_SERVER_PACKAGE)) {
         return {
-          fleetServerAgentPolicies: [mapPolicy(agentPolicy)],
+          fleetServerPolicies: [mapPolicy(agentPolicy)],
           scopedAgentPolicy: mapPolicy(agentPolicy),
         };
       } else {
@@ -136,9 +136,7 @@ const getFleetServerAgentPolicies = async (
 
   // If an agent policy is not specified, perform default behavior to retrieve all fleet server policies
   const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE} ${
-      agentPolicyId ? `and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_id:${agentPolicyId}` : ``
-    }`,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
   });
 
   // Extract associated fleet server agent policy IDs
@@ -152,11 +150,11 @@ const getFleetServerAgentPolicies = async (
     : [];
 
   return {
-    fleetServerAgentPolicies: fleetServerAgentPolicies.map(mapPolicy),
+    fleetServerPolicies: fleetServerAgentPolicies.map(mapPolicy),
   };
 };
 
-const hasActiveFleetServersForAgentPolicies = async (
+export const hasActiveFleetServersForPolicies = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyIds: string[]
@@ -174,12 +172,13 @@ const hasActiveFleetServersForAgentPolicies = async (
   return false;
 };
 
-const getDownloadSource = async (
+export const getDownloadSource = async (
   soClient: SavedObjectsClientContract,
   downloadSourceId?: string
 ): Promise<Promise<GetEnrollmentSettingsResponse['download_source']>> => {
   const sources = await downloadSourceService.list(soClient);
-  return downloadSourceId
+  const foundSource = downloadSourceId
     ? sources.items.find((s) => s.id === downloadSourceId)
-    : sources.items.find((s) => s.is_default);
+    : undefined;
+  return foundSource || sources.items.find((s) => s.is_default);
 };
