@@ -33,6 +33,9 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
+            .defaults({
+              'url.domain': 'foo.bar',
+            })
             .duration(1000)
             .success()
             .children(
