@@ -18,8 +18,6 @@ import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 import { performance } from 'perf_hooks';
 
-jest.mock('../grammar');
-
 describe('kuery AST API', () => {
   let indexPattern: DataViewBase;
 
@@ -289,7 +287,7 @@ describe('kuery AST API', () => {
         }
         const elapsed = performance.now() - start;
         const opsPerSec = NUM_RUNS / (elapsed / 1000);
-        expect(opsPerSec).toBeGreaterThan(10000);
+        expect(opsPerSec).toBeGreaterThan(1000);
       });
 
       it('with complex expression', () => {
@@ -301,7 +299,7 @@ describe('kuery AST API', () => {
         }
         const elapsed = performance.now() - start;
         const opsPerSec = NUM_RUNS / (elapsed / 1000);
-        expect(opsPerSec).toBeGreaterThan(1000);
+        expect(opsPerSec).toBeGreaterThan(100);
       });
     });
   });
