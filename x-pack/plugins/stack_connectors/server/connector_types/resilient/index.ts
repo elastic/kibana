@@ -22,6 +22,7 @@ import * as i18n from './translations';
 import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  PushToServiceParamsExtendedSchema,
 } from './schema';
 import { ResilientConnector } from './resilient';
 
@@ -32,7 +33,7 @@ export const getResilientConnectorType = (): SubActionConnectorType<
   id: RESILIENT_CONNECTOR_ID,
   minimumLicenseRequired: 'platinum',
   name: i18n.NAME,
-  getService: (params) => new ResilientConnector(params),
+  getService: (params) => new ResilientConnector(params, PushToServiceParamsExtendedSchema),
   schema: {
     config: ExternalIncidentServiceConfigurationSchema,
     secrets: ExternalIncidentServiceSecretConfigurationSchema,

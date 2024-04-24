@@ -43,6 +43,13 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   ),
 });
 
+export const PushToServiceParamsExtendedSchema = {
+  name: schema.string(),
+  description: schema.nullable(schema.string()),
+  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
+  severityCode: schema.nullable(schema.number()),
+};
+
 // Reserved for future implementation
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ExecutorSubActionGetIncidentTypesParamsSchema = schema.object({});
@@ -91,3 +98,11 @@ export const ExternalServiceIncidentResponseSchema = schema.object({
   url: schema.string(),
   pushedDate: schema.string(),
 });
+
+export const GetIncidentResponseSchema = schema.object(
+  {
+    id: schema.number(),
+    inc_last_modified_date: schema.number(),
+  },
+  { unknowns: 'allow' }
+);

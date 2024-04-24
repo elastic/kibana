@@ -14,6 +14,7 @@ import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   ExternalServiceIncidentResponseSchema,
+  GetIncidentResponseSchema,
 } from './schema';
 
 export interface ExternalServiceCredentials {
@@ -90,3 +91,4 @@ export type ResilientSecrets = TypeOf<typeof ExternalIncidentServiceSecretConfig
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
 export type ExternalServiceIncidentResponse = TypeOf<typeof ExternalServiceIncidentResponseSchema>;
+export type GetIncidentResponse = TypeOf<typeof GetIncidentResponseSchema>;

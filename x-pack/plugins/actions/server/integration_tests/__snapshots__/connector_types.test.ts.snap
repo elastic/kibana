@@ -6161,9 +6161,46 @@ Object {
         },
         "error": [Function],
         "presence": "optional",
-        "unknown": true,
       },
       "keys": Object {
+        "description": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
         "externalId": Object {
           "flags": Object {
             "default": null,
@@ -6185,6 +6222,89 @@ Object {
                   },
                 ],
                 "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+        "incidentTypes": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "items": Array [
+                  Object {
+                    "flags": Object {
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "type": "number",
+                  },
+                ],
+                "type": "array",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+        "name": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "severityCode": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "type": "number",
               },
             },
             Object {

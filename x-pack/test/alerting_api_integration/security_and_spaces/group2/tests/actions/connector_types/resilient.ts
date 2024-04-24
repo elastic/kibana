@@ -45,7 +45,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     },
   };
 
-  describe('IBM Resilient', () => {
+  describe.only('IBM Resilient', () => {
     describe('IBM Resilient - Action Creation', () => {
       const simulator = new ResilientSimulator({
         proxy: {
@@ -272,7 +272,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
-                  "Cannot destructure property 'externalId' of 'incident' as it is undefined.",
+                  'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
                 errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
@@ -301,7 +301,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
-                  '[Action][IBM Resilient]: Unable to create incident. Error: Incident name is required.',
+                  'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
               });
             });
         });

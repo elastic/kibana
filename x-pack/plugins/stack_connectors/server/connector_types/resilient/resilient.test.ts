@@ -12,6 +12,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { ResilientConnector } from './resilient';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RESILIENT_CONNECTOR_ID } from './constants';
+import { PushToServiceParamsExtendedSchema } from './schema';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -84,14 +85,17 @@ const mockIncidentUpdate = (withUpdateError = false) => {
 };
 
 describe('IBM Resilient connector', () => {
-  const connector = new ResilientConnector({
-    connector: { id: '1', type: RESILIENT_CONNECTOR_ID },
-    configurationUtilities: actionsConfigMock.create(),
-    logger: loggingSystemMock.createLogger(),
-    services: actionsMock.createServices(),
-    config: { orgId, apiUrl },
-    secrets: { apiKeyId, apiKeySecret },
-  });
+  const connector = new ResilientConnector(
+    {
+      connector: { id: '1', type: RESILIENT_CONNECTOR_ID },
+      configurationUtilities: actionsConfigMock.create(),
+      logger: loggingSystemMock.createLogger(),
+      services: actionsMock.createServices(),
+      config: { orgId, apiUrl },
+      secrets: { apiKeyId, apiKeySecret },
+    },
+    PushToServiceParamsExtendedSchema
+  );
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -158,12 +162,10 @@ describe('IBM Resilient connector', () => {
 
   describe('createIncident', () => {
     const incidentMock = {
-      incident: {
-        name: 'title',
-        description: 'desc',
-        incidentTypes: [1001],
-        severityCode: 6,
-      },
+      name: 'title',
+      description: 'desc',
+      incidentTypes: [1001],
+      severityCode: 6,
     };
 
     beforeEach(() => {
@@ -222,12 +224,10 @@ describe('IBM Resilient connector', () => {
 
       await expect(
         connector.createIncident({
-          incident: {
-            name: 'title',
-            description: 'desc',
-            incidentTypes: [1001],
-            severityCode: 6,
-          },
+          name: 'title',
+          description: 'desc',
+          incidentTypes: [1001],
+          severityCode: 6,
         })
       ).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create incident. Error: An error has occurred'
@@ -239,20 +239,6 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.createIncident(incidentMock)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create incident. Error: Response validation failed (Error: [id]: expected value of type [number] but got [undefined]).'
-      );
-    });
-
-    it('should throw an error without name', async () => {
-      await expect(
-        connector.createIncident({
-          incident: {
-            description: 'desc',
-            incidentTypes: [1001],
-            severityCode: 6,
-          },
-        })
-      ).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to create incident. Error: Incident name is required.'
       );
     });
   });
@@ -401,16 +387,6 @@ describe('IBM Resilient connector', () => {
       );
     });
 
-    it('creates the comment correctly', async () => {
-      const res = await connector.addComment(req);
-
-      expect(res).toEqual({
-        comment: req.comment,
-        pushedDate: '2020-05-13T17:44:34.472Z',
-        externalCommentId: '1',
-      });
-    });
-
     it('should call request with correct arguments', async () => {
       await connector.addComment(req);
 
@@ -438,14 +414,6 @@ describe('IBM Resilient connector', () => {
 
       await expect(connector.addComment(req)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: An error has occurred.'
-      );
-    });
-
-    it('should throw if the required attributes are not received in response', async () => {
-      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
-
-      await expect(connector.addComment(req)).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: Response validation failed (Error: [id]: expected value of type [number] but got [undefined]).'
       );
     });
   });

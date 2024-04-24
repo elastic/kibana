@@ -8,11 +8,12 @@
 import { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
 import { CaseConnector, ServiceParams } from '@kbn/actions-plugin/server';
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   CreateIncidentData,
   ExternalServiceIncidentResponse,
+  GetIncidentResponse,
   GetIncidentTypesResponse,
   GetSeverityResponse,
   Incident,
@@ -29,12 +30,18 @@ import {
   GetCommonFieldsResponseSchema,
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
+  GetIncidentResponseSchema,
 } from './schema';
 import { formatUpdateRequest } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
-export class ResilientConnector extends CaseConnector<ResilientConfig, ResilientSecrets> {
+export class ResilientConnector extends CaseConnector<
+  ResilientConfig,
+  ResilientSecrets,
+  Incident,
+  GetIncidentResponse
+> {
   private urls: {
     incidentTypes: string;
     incident: string;
@@ -42,8 +49,11 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
     severity: string;
   };
 
-  constructor(params: ServiceParams<ResilientConfig, ResilientSecrets>) {
-    super(params);
+  constructor(
+    params: ServiceParams<ResilientConfig, ResilientSecrets>,
+    PushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+  ) {
+    super(params, PushToServiceParamsExtendedSchema);
 
     this.urls = {
       incidentTypes: `${this.getIncidentFieldsUrl()}/incident_type_ids`,
@@ -109,43 +119,36 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
     return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   }
 
-  public async createIncident({
-    incident,
-  }: Record<string, unknown>): Promise<ExternalServiceIncidentResponse> {
+  public async createIncident(incident: Incident): Promise<ExternalServiceIncidentResponse> {
     try {
-      const incidentData = incident as Incident;
-      if (!incidentData?.name) {
-        throw new Error('Incident name is required');
-      }
-
       let data: CreateIncidentData = {
-        name: incidentData.name,
+        name: incident.name,
         discovered_date: Date.now(),
       };
 
-      if (incidentData?.description) {
+      if (incident?.description) {
         data = {
           ...data,
           description: {
             format: 'html',
-            content: incidentData.description ?? '',
+            content: incident.description ?? '',
           },
         };
       }
 
-      if (incidentData?.incidentTypes) {
+      if (incident?.incidentTypes) {
         data = {
           ...data,
-          incident_type_ids: incidentData.incidentTypes.map((id: number | string) => ({
+          incident_type_ids: incident.incidentTypes.map((id: number | string) => ({
             id: Number(id),
           })),
         };
       }
 
-      if (incidentData?.severityCode) {
+      if (incident?.severityCode) {
         data = {
           ...data,
-          severity_code: { id: Number(incidentData.severityCode) },
+          severity_code: { id: Number(incident.severityCode) },
         };
       }
 
@@ -221,26 +224,13 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
 
   public async addComment({ incidentId, comment }: { incidentId: string; comment: string }) {
     try {
-      const res = await this.request({
+      await this.request({
         method: 'POST',
         url: this.urls.comment.replace('{inc_id}', incidentId),
         data: { text: { format: 'text', content: comment } },
         headers: this.getAuthHeaders(),
-        responseSchema: schema.object(
-          {
-            id: schema.number(),
-            create_date: schema.number(),
-            comment: schema.object({}, { unknowns: 'allow' }),
-          },
-          { unknowns: 'allow' }
-        ),
+        responseSchema: schema.object({}, { unknowns: 'allow' }),
       });
-
-      return {
-        comment,
-        externalCommentId: res.data.id,
-        pushedDate: new Date(res.data.create_date).toISOString(),
-      };
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -251,7 +241,7 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
     }
   }
 
-  public async getIncident({ id }: { id: string }) {
+  public async getIncident({ id }: { id: string }): Promise<GetIncidentResponse> {
     try {
       const res = await this.request({
         method: 'GET',
@@ -260,13 +250,7 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
           text_content_output_format: 'objects_convert',
         },
         headers: this.getAuthHeaders(),
-        responseSchema: schema.object(
-          {
-            id: schema.number(),
-            inc_last_modified_date: schema.number(),
-          },
-          { unknowns: 'allow' }
-        ),
+        responseSchema: GetIncidentResponseSchema,
       });
 
       return res.data;
