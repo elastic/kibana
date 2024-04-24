@@ -7,6 +7,7 @@
 
 import { filter } from 'rxjs';
 import { get } from 'lodash';
+import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -293,7 +294,7 @@ async function getBackgroundProcessInstruction(
 ) {
   const getAlertGroupDetails = async (alertGroup: Array<Record<string, any>>) => {
     const formattedDetails = await Promise.all(
-      alerts.new.map(async (alert) => {
+      alertGroup.map(async (alert) => {
         return `- ${JSON.stringify(
           alert
         )}. The following contextual information is available:\n${await getAlertContext(alert)}`;
@@ -316,11 +317,11 @@ async function getBackgroundProcessInstruction(
       alerts.recovered.length
     } alerts have recovered\n: ${await getAlertGroupDetails(alerts.recovered)}\n`;
   }
-  instruction +=
-    ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
-  instruction +=
-    ' input if tasked to execute actions. You can generate multiple responses in a row.';
-  instruction += ' If available, include the link of the conversation at the end of your answer.';
+  instruction += dedent(
+    `As a background process you are not interacting with a user. Because of that DO NOT ask for user
+    input if tasked to execute actions. You can generate multiple responses in a row.
+    If available, include the link of the conversation at the end of your answer.`
+  );
 
   return instruction;
 }
