@@ -290,7 +290,7 @@ describe('#transformElasticsearchRoleToRole', () => {
     ]
   );
 
-  it('#When application privilege is set to * transforms it to all', () => {
+  it('#When application privilege is set to * return it correctly', () => {
     const role = {
       name: 'global-all',
       cluster: [],
@@ -321,7 +321,7 @@ describe('#transformElasticsearchRoleToRole', () => {
     const [basePrivilege] = privilege.base;
     const [spacePrivilege] = privilege.spaces;
 
-    expect(basePrivilege).toBe('all');
+    expect(basePrivilege).toBe('*');
     expect(spacePrivilege).toBe('*');
   });
 });
