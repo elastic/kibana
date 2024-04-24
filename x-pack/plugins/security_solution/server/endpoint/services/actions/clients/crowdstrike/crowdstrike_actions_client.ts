@@ -235,10 +235,12 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         try {
           await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
+            actionParameters: {
+              comment: reqIndexOptions.comment
+                ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
+                : actionCommentMessage,
+            },
             command: 'contain',
-            comment: reqIndexOptions.comment
-              ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-              : actionCommentMessage,
           });
         } catch (err) {
           error = err;
