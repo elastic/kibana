@@ -13,8 +13,8 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
@@ -109,7 +109,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     showTimeline,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
+    const { isESQLTabInTimelineEnabled } = useEsqlAvailability();
     const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -177,7 +177,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {showTimeline && isEsqlSettingEnabled && activeTimelineTab === TimelineTabs.esql && (
+        {showTimeline && isESQLTabInTimelineEnabled && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
             $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
@@ -257,9 +257,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
-  const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
+  const { isESQLTabInTimelineEnabled } = useEsqlAvailability();
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -373,7 +372,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {!isEsqlTabInTimelineDisabled && isEsqlSettingEnabled && (
+          {isESQLTabInTimelineEnabled && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
               onClick={setEsqlAsActiveTab}
