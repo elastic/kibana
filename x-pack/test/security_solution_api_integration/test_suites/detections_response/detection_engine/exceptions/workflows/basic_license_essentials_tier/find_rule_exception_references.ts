@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess find_rule_exception_references', () => {
+  describe('@serverless @serverlessQA @ess find_rule_exception_references', () => {
     before(async () => {
       await createAlertsIndex(supertest, log);
     });

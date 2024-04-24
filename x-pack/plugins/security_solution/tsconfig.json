@@ -198,6 +198,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/management-plugin"
+    "@kbn/management-plugin",
+    "@kbn/security-plugin-types-server"
   ]
 }

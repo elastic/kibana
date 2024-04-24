@@ -346,7 +346,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@brokenInServerless t1_analyst', () => {
+      describe('@skipInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -525,7 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless missing timestamps', () => {
+    describe('@skipInServerless missing timestamps', () => {
       beforeEach(async () => {
         await es.indices.delete({ index: 'myfakeindex-1', ignore_unavailable: true });
         await es.indices.create({
@@ -604,7 +604,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless per-action frequencies', () => {
+    describe('@skipInServerless per-action frequencies', () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
