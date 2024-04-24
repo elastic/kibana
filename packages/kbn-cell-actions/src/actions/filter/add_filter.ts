@@ -36,3 +36,6 @@ export const addExistsFilter = ({
 }: AddExistsFilterParams) => {
   filterManager.addFilters(createExistsFilter({ key, negate, dataViewId }));
 };
+
+export const isEmptyFilterValue = (value: Array<string | number | boolean>) =>
+  value.length === 0 || value.every((v) => v === '');
