@@ -78,8 +78,8 @@ export function withPerformanceMetrics<P>(
         );
 
         return () => {
-          performance.clearMeasures();
           // TODO clear marks
+          // performance.clearMeasures();
         };
       }
 

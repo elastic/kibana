@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -177,6 +178,7 @@ function useServicesDetailedStatisticsFetcher({
 
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
+  const { onPageReady } = usePerformanceContext();
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
@@ -281,6 +283,15 @@ export function ServiceInventory() {
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
+  useEffect(() => {
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      comparisonFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady();
+    }
+  }, [mainStatisticsStatus, comparisonFetch.status]);
+
   const { fields, isSaving, saveSingleSetting } = useEditableSettings([
     apmEnableServiceInventoryTableSearchBar,
   ]);
@@ -320,10 +331,7 @@ export function ServiceInventory() {
               saveSingleSetting(apmEnableServiceInventoryTableSearchBar, !isTableSearchBarEnabled);
             }}
             target="apm.services.table.services.list"
-            onMeasureComplete={
-              mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-              comparisonFetch.status === FETCH_STATUS.SUCCESS
-            }
+            onMeasureComplete={mainStatisticsStatus === FETCH_STATUS.SUCCESS}
             onMarkUpdate={mainStatisticsStatus === FETCH_STATUS.LOADING}
           />
         </EuiFlexItem>

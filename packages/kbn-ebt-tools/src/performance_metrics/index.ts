@@ -8,4 +8,5 @@
 
 export { withPerformanceMetrics, perfomanceMarks } from './with_performance_metrics';
 export type { WithPerformanceMetricsProps } from './types';
-export { MarkPerformanceNavigation } from './mark_performance_navigation';
+export { PerformanceContextProvider } from './context/performance_context';
+export { usePerformanceContext } from './context/use_performance_context';

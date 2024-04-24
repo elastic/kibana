@@ -77,6 +77,7 @@ export const LensWrapper = ({
   const handleOnLoad = useCallback(
     (isLoading: boolean) => {
       if (!embeddableLoaded) {
+        console.log('isLoading test', props);
         setEmbeddableLoaded(true);
       }
 

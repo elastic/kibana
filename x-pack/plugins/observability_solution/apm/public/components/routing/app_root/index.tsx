@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MarkPerformanceNavigation } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
@@ -73,7 +73,7 @@ export function ApmAppRoot({
               <i18nCore.Context>
                 <TimeRangeIdContextProvider>
                   <RouterProvider history={history} router={apmRouter as any}>
-                    <MarkPerformanceNavigation>
+                    <PerformanceContextProvider>
                       <ApmErrorBoundary>
                         <RedirectDependenciesToDependenciesInventory>
                           <RedirectWithDefaultEnvironment>
@@ -103,7 +103,7 @@ export function ApmAppRoot({
                           </RedirectWithDefaultEnvironment>
                         </RedirectDependenciesToDependenciesInventory>
                       </ApmErrorBoundary>
-                    </MarkPerformanceNavigation>
+                    </PerformanceContextProvider>
                   </RouterProvider>
                 </TimeRangeIdContextProvider>
               </i18nCore.Context>

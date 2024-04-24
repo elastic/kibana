@@ -14,10 +14,12 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
     observer: PerformanceObserver,
     droppedEntriesCount: number
   ) {
-    list.getEntries().forEach((entry) => {
+    list.getEntries().forEach((entry: PerformanceEntry) => {
       if (entry.entryType === 'measure') {
         const target = entry?.name;
         const duration = entry.duration;
+
+        console.log(entry)
 
         if (isDevMode) {
           if (!target) {
@@ -39,7 +41,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
 
         try {
           reportPerformanceMetricEvent(analytics, {
-            eventName: 'time_to_render',
+            eventName: entry.detail.eventName ?? 'time_to_render',
             duration,
             meta: {
               target

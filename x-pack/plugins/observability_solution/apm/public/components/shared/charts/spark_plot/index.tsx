@@ -72,7 +72,7 @@ export function SparkPlot({
           comparisonSeriesColor={comparisonSeriesColor}
           compact={compact}
           onMeasureComplete={!isLoading}
-          measureName="apm.services.table.column.sparkline"
+          target="apm.services.table.column.sparkline"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
