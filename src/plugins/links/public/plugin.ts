@@ -82,7 +82,7 @@ export class LinksPlugin
                 editor: {
                   onEdit: async (savedObjectId: string) => {
                     const { openEditorFlyout } = await import('./editor/open_editor_flyout');
-                    openEditorFlyout({ initialState: { savedObjectId } });
+                    await openEditorFlyout({ initialState: { savedObjectId } });
                   },
                 },
                 description,

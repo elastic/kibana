@@ -24,7 +24,7 @@ import {
 
 export type LinksCrudTypes = ContentManagementCrudTypes<
   LinksContentType,
-  LinksAttributes,
+  Omit<LinksAttributes, 'title'> & { title: string }, // saved object attributes always have a title
   Pick<SavedObjectCreateOptions, 'references'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
   {

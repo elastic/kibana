@@ -10,7 +10,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, distinctUntilKeyChanged, filter, switchMap } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
-import { i18n } from '@kbn/i18n';
+import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
 import { LinksAttributes } from '../../common/content_management';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
@@ -26,13 +26,7 @@ export async function initializeLinks(
   uuid: string,
   parentApi: unknown
 ) {
-  if (!isParentApiCompatible(parentApi)) {
-    throw new Error(
-      i18n.translate('links.errors.incompatibleAction', {
-        defaultMessage: 'Parent is incompatible',
-      })
-    );
-  }
+  if (!isParentApiCompatible(parentApi)) throw new PanelIncompatibleError();
   const { attributes } = state.savedObjectId ? await loadFromLibrary(state.savedObjectId) : state;
 
   const error$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -61,12 +55,14 @@ export async function initializeLinks(
         initialState: state,
         parentDashboard: parentApi,
       });
-      if (parentApi) {
-        parentApi.replacePanel(uuid, {
+      parentApi
+        .replacePanel(uuid, {
           panelType: CONTENT_ID,
           initialState: newState,
+        })
+        .catch((e) => {
+          error$.next(e);
         });
-      }
     } catch {
       // do nothing, user cancelled
     }

@@ -30,7 +30,7 @@ export const registerCreateLinksPanelAction = () => {
         parentDashboard: embeddable,
       });
 
-      embeddable.addNewPanel({
+      await embeddable.addNewPanel({
         panelType: CONTENT_ID,
         initialState,
       });

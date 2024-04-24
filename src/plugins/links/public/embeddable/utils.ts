@@ -40,7 +40,6 @@ export async function resolveLinks(links: Link[] = []) {
     })
   );
   return getOrderedLinkList(resolvedLinkInfos);
-  // return await Promise.reject(new Error('boom'));
 }
 
 export async function resolveLinkInfo(
