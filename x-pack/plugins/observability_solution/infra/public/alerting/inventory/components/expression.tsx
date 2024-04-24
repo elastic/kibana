@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   builtInComparators,
-  COMPARATORS,
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
