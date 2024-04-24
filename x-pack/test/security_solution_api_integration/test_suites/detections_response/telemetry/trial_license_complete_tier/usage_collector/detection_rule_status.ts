@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(stats?.detection_rules.detection_rule_usage).to.eql(expectedRuleUsage);
       });
 
-      it('@skipInQA should have zero values for "detection_rule_status.all_rules" rules that are not query based', () => {
+      it('@skipInServerlessMKI should have zero values for "detection_rule_status.all_rules" rules that are not query based', () => {
         expect(stats?.detection_rules.detection_rule_status.all_rules.eql).to.eql(
           getInitialSingleEventMetric()
         );
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('@skipInQA should have non zero values for "index_duration"', () => {
+      it('@skipInServerlessMKI should have non zero values for "index_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.index_duration.max
         ).to.be.above(1);
@@ -208,11 +208,11 @@ export default ({ getService }: FtrProviderContext) => {
         ).to.be.above(1);
       });
 
-      it('@skipInQA should have non zero values for "succeeded"', () => {
+      it('@skipInServerlessMKI should have non zero values for "succeeded"', () => {
         expect(stats?.detection_rules.detection_rule_status.custom_rules.query.succeeded).to.eql(1);
       });
 
-      it('@skipInQA should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
+      it('@skipInServerlessMKI should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.index_duration.max
         ).to.be.above(1);
