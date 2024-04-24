@@ -41,10 +41,10 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('should respond with correct enrollment settings', async function () {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/fleet-server');
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/fleet_server');
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/fleet-server');
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/fleet_server');
       });
 
       it('when there are multiple fleet server policies and an active host', async function () {
