@@ -41,7 +41,7 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { BasicFields } from '@kbn/alerting-types';
+import { BasicFields } from '../../common/search_strategy';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
