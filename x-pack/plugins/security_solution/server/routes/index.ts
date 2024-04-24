@@ -61,7 +61,10 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
-import { entityStoreInitRoute } from '../lib/entity_analytics/entity_store/routes';
+import {
+  entityStoreInitRoute,
+  entityStoreGetHistoryRoute,
+} from '../lib/entity_analytics/entity_store/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -150,5 +153,6 @@ export const initRoutes = (
   getFleetManagedIndexTemplatesRoute(router);
   if (config.experimentalFeatures.entityStoreEnabled) {
     entityStoreInitRoute(router, getStartServices, config);
+    entityStoreGetHistoryRoute(router);
   }
 };

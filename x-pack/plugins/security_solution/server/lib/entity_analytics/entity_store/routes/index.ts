@@ -6,3 +6,4 @@
  */
 
 export { entityStoreInitRoute } from './init';
+export { entityStoreGetHistoryRoute } from './get_entity_history';

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { EntityHistoryDocument } from '../../../common/entity_analytics/entity_store/types';
 import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
@@ -21,6 +22,7 @@ import {
   RISK_SCORE_INDEX_STATUS_API_URL,
   RISK_ENGINE_SETTINGS_URL,
   ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ENTITY_STORE_ENTITY_HISTORY_URL,
 } from '../../../common/constants';
 
 import type {
@@ -205,6 +207,15 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    const fetchEntityHistory = (params: Pick<AssetCriticality, 'idField' | 'idValue'>) =>
+      http.fetch<{
+        history: EntityHistoryDocument[];
+      }>(ENTITY_STORE_ENTITY_HISTORY_URL, {
+        version: '1',
+        method: 'POST',
+        query: { id_value: params.idValue, id_field: params.idField },
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -219,6 +230,7 @@ export const useEntityAnalyticsRoutes = () => {
       uploadAssetCriticalityFile,
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
+      fetchEntityHistory,
     };
   }, [http]);
 };

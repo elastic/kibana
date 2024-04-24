@@ -26,7 +26,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import type { RiskLevels } from '../../../common/entity_analytics';
@@ -40,6 +40,7 @@ import { useSearchStrategy } from '../../common/containers/use_search_strategy';
 import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { AssetCriticalityBadge } from '../components/asset_criticality/asset_criticality_badge';
 import { RiskScoreLevel } from '../components/severity/common';
+import { useEntityHistory } from '../api/hooks/use_get_entity_history';
 const useViewEntityFlyout = () => {
   const [isViewEntityPanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
   const [viewEntityPanelData, setViewEntityPanelData] = React.useState<any | null>(null);
@@ -62,6 +63,71 @@ const useViewEntityFlyout = () => {
 };
 
 const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void }) => {
+  const { isLoading: isLoadingHistoryData, data: historyData } = useEntityHistory({
+    idField: 'host.name',
+    idValue: data.host.name,
+  });
+
+  const historyContent = useMemo(() => {
+    if (isLoadingHistoryData) {
+      return <EuiText>{'Loading...'}</EuiText>;
+    }
+
+    if (!historyData) {
+      return <EuiText>{'No history data found'}</EuiText>;
+    }
+
+    return (
+      <>
+        {historyData.history.map((history, index) => (
+          <>
+            <EuiSpacer />
+            <EuiAccordion
+              id={`history-${index}`}
+              key={`history-${index}`}
+              buttonContent={
+                <EuiTitle size="xs">
+                  <EuiText>
+                    {'created' in history ? 'Created ' : 'Updated '}
+                    {moment(history['@timestamp']).fromNow()}
+                  </EuiText>
+                </EuiTitle>
+              }
+            >
+              <EuiPanel>
+                <EuiAccordion
+                  id={`history-${index}-entity`}
+                  buttonContent={
+                    <EuiTitle size="xs">
+                      <EuiText>{'Entity'}</EuiText>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+                    {JSON.stringify(history.entity, null, 2)}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+                <EuiSpacer />
+                <EuiAccordion
+                  id={`history-${index}-change`}
+                  buttonContent={
+                    <EuiTitle size="xs">
+                      <EuiText>{'Change'}</EuiText>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
+                    {JSON.stringify(_.omit(history, 'entity'), null, 2)}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+              </EuiPanel>
+            </EuiAccordion>
+          </>
+        ))}
+      </>
+    );
+  }, [historyData, isLoadingHistoryData]);
+
   const tabs = [
     {
       id: 'host',
@@ -150,8 +216,8 @@ const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void })
     },
     {
       id: 'history',
-      name: 'History',
-      content: <EuiText>{'History here'}</EuiText>,
+      name: 'Raw History',
+      content: historyContent,
     },
   ];
 

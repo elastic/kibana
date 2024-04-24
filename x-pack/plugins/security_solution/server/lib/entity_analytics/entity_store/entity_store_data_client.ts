@@ -15,6 +15,7 @@ import type {
 import _ from 'lodash';
 import jsonDiff from 'json-diff';
 import flat from 'flat';
+import type { IdField } from '../../../../common/api/entity_analytics';
 import type {
   EntityStoreEntity,
   NewEntityStoreEntity,
@@ -246,6 +247,43 @@ export class EntityStoreDataClient {
         : [],
       created: result.items.filter((item) => wasSuccessfulOp(item.create)).length,
       updated: result.items.filter((item) => wasSuccessfulOp(item.update)).length,
+    };
+  }
+
+  public async getEntityHistory({
+    idField,
+    idValue,
+  }: {
+    idField: IdField;
+    idValue: string;
+  }): Promise<{ history: EntityHistoryDocument[] }> {
+    const res = await this.options.esClient.search<EntityHistoryDocument>({
+      index: getEntityStoreHistoryIndex(this.options.namespace),
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [`entity.${idField}`]: idValue,
+                },
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    });
+
+    return {
+      // @ts-expect-error _source is optional
+      history: res.hits.hits.map((hit) => hit._source),
     };
   }
 

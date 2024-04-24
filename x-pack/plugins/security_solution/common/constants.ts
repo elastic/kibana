@@ -251,6 +251,7 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
 export * from './entity_analytics/constants';
 export const INTERNAL_ENTITY_STORE_URL = '/internal/entity_store' as const;
 export const ENTITY_STORE_INIT_URL = `${INTERNAL_ENTITY_STORE_URL}/init`;
+export const ENTITY_STORE_ENTITY_HISTORY_URL = `${INTERNAL_ENTITY_STORE_URL}/entity_history`;
 
 export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
 export const INTERNAL_TAGS_URL = `/internal/tags`;
