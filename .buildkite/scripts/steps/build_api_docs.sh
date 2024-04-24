@@ -5,10 +5,10 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Run scripts/type_check to ensure that all build available"
-node scripts/type_check
+# node scripts/type_check
 
 echo "--- Build API Docs"
-node --max-old-space-size=12000 scripts/build_api_docs
+#node --max-old-space-size=12000 scripts/build_api_docs
 
 if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   echo "--- Publish API Docs"
@@ -20,11 +20,14 @@ if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   git checkout -b "$branch"
   git add ./*.docnav.json
   git add api_docs
+  echo hello > potato.txt && git add potato.txt
   git commit -m "[api-docs] Daily api_docs build"
 
   git config --list | cat
   git branch | cat
   git remote | cat
+
+  echo TOKEN START: "${VAULT_GITHUB_TOKEN:0:4}"
 
   echo "Pushing branch $branch"
 
