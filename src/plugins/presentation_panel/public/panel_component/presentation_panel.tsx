@@ -61,11 +61,7 @@ export const PresentationPanel = <
   const Panel = value?.Panel;
   const UnwrappedComponent = value?.unwrappedComponent;
   const shouldHavePanel = !hidePanelChrome;
-  if (
-    error ||
-    (shouldHavePanel && !Panel) ||
-    !UnwrappedComponent
-  ) {
+  if (error || (shouldHavePanel && !Panel) || !UnwrappedComponent) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -83,7 +79,9 @@ export const PresentationPanel = <
   ) : (
     <EuiErrorBoundary>
       <UnwrappedComponent
-        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<typeof UnwrappedComponent>)}
+        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
+          typeof UnwrappedComponent
+        >)}
       />
     </EuiErrorBoundary>
   );
