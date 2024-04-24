@@ -94,7 +94,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ],
       },
       mochaOpts: {
-        grep: '/^(?!.*@brokenInEss).*@ess.*/',
+        grep: '/^(?!.*@skipInEss).*@ess.*/',
       },
     };
   };
