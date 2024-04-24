@@ -7,7 +7,12 @@
  */
 
 import type { ApiVersion } from '@kbn/core-http-common';
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core-http-server';
+import type {
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteConfig,
+  VersionedRouteValidation,
+} from '@kbn/core-http-server';
 import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
@@ -19,8 +24,10 @@ import { createRequest } from './core_versioned_route.test.util';
 describe('Versioned route', () => {
   let router: Router;
   let responseFactory: jest.Mocked<KibanaResponseFactory>;
+  let testValidation: ReturnType<typeof createFooValidation>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
   beforeEach(() => {
+    testValidation = createFooValidation();
     responseFactory = {
       custom: jest.fn(({ body, statusCode }) => ({
         options: {},
@@ -36,9 +43,6 @@ describe('Versioned route', () => {
     } as any;
     router = createRouter();
   });
-
-  const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
-    createFooValidation();
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -162,6 +166,8 @@ describe('Versioned route', () => {
     'runs %s request validations',
     async (staticOrLazy) => {
       let handler: RequestHandler;
+      const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
+        testValidation;
 
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
       const versionedRouter = CoreVersionedRouter.from({ router });
@@ -194,6 +200,10 @@ describe('Versioned route', () => {
 
   it('constructs lazily provided validations once (idempotency)', async () => {
     let handler: RequestHandler;
+    const { fooValidation } = testValidation;
+    const originalResponse = fooValidation.response;
+    const lazyRequestValidation = jest.fn(() => originalResponse());
+    fooValidation.response = lazyRequestValidation;
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
     const versionedRouter = CoreVersionedRouter.from({ router });
     const lazyValidation = jest.fn(() => fooValidation);
@@ -216,10 +226,18 @@ describe('Versioned route', () => {
         }),
         responseFactory
       );
+      const [route] = versionedRouter.getRoutes();
+      const [
+        {
+          options: { validate },
+        },
+      ] = route.handlers;
+      (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)().response!();
       expect(status).toBe(200);
     }
 
     expect(lazyValidation).toHaveBeenCalledTimes(1);
+    expect(lazyRequestValidation).toHaveBeenCalledTimes(1);
   });
 
   describe('when in dev', () => {
@@ -234,6 +252,8 @@ describe('Versioned route', () => {
 
     it('also runs response validations', async () => {
       let handler: RequestHandler;
+      const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
+        testValidation;
 
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
       const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });

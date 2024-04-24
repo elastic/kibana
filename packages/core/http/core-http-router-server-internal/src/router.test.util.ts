@@ -31,7 +31,7 @@ export function createFooValidation() {
         }),
       }),
     },
-    response: {
+    response: () => ({
       200: {
         body: schema.object({
           foo: schema.number({
@@ -39,7 +39,7 @@ export function createFooValidation() {
           }),
         }),
       },
-    },
+    }),
   };
 
   return {
