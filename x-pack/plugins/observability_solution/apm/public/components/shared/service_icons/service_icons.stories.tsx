@@ -9,10 +9,7 @@ import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import {
-  APIReturnType,
-  createCallApmApi,
-} from '../../../services/rest/create_call_apm_api';
+import { APIReturnType, createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { ServiceIcons } from '.';
 
 type ServiceDetailsReturnType =
@@ -65,12 +62,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({
-  serviceName,
-  environment,
-  start,
-  end,
-}) => {
+export const Example: Story<Args> = ({ serviceName, environment, start, end }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -81,9 +73,7 @@ export const Example: Story<Args> = ({
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="l">
-                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">
-                        {serviceName}
-                      </h1>
+                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

@@ -15,10 +15,9 @@
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/index-management-plugin",
+    "@kbn/index-management"
   ],
   "exclude": [
     "target/**/*",
   ]
 }
-

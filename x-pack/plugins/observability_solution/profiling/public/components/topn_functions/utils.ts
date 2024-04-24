@@ -48,6 +48,7 @@ export interface IFunctionRow {
   selfAnnualCostUSD: number;
   totalAnnualCO2kgs: number;
   totalAnnualCostUSD: number;
+  subGroups?: Record<string, number>;
   diff?: {
     rank: number;
     samples: number;
@@ -149,6 +150,7 @@ export function getFunctionsRows({
       selfAnnualCostUSD: topN.selfAnnualCostUSD,
       totalAnnualCO2kgs: topN.totalAnnualCO2kgs,
       totalAnnualCostUSD: topN.totalAnnualCostUSD,
+      subGroups: topN.subGroups,
       diff: calculateDiff(),
     };
   });
@@ -214,5 +216,6 @@ export function convertRowToFrame(row: IFunctionRow) {
     totalAnnualCO2Kgs: row.totalAnnualCO2kgs,
     selfAnnualCostUSD: row.selfAnnualCostUSD,
     totalAnnualCostUSD: row.totalAnnualCostUSD,
+    subGroups: row.subGroups,
   };
 }

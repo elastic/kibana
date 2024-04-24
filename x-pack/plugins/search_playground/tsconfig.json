@@ -17,7 +17,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/logging",
     "@kbn/ml-response-stream",
     "@kbn/security-plugin",
     "@kbn/user-profile-components",
@@ -27,7 +26,15 @@
     "@kbn/navigation-plugin",
     "@kbn/core-http-server",
     "@kbn/share-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/elastic-assistant-common",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",

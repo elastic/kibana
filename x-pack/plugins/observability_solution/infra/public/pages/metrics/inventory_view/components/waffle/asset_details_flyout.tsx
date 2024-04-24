@@ -28,7 +28,7 @@ const flyoutTabs = [
   ...hostDetailsTabs,
   {
     id: ContentTabIds.LINK_TO_APM,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.linkToApm', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.linkToApm', {
       defaultMessage: 'APM',
     }),
   },

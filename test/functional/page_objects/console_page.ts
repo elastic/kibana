@@ -147,7 +147,7 @@ export class ConsolePageObject extends FtrService {
     if (!element) return false;
 
     const attribute = await element.getAttribute('style');
-    return !attribute.includes('display: none;');
+    return !attribute?.includes('display: none;');
   }
 
   public async getAutocompleteSuggestion(index: number = 0) {
@@ -321,7 +321,7 @@ export class ConsolePageObject extends FtrService {
     await blocks[blockNumber].click();
     await this.retry.waitFor('json block to be collapsed', async () => {
       return blocks[blockNumber].getAttribute('class').then((classes) => {
-        return classes.includes('ace_closed');
+        return classes?.includes('ace_closed') ?? false;
       });
     });
   }
@@ -336,7 +336,7 @@ export class ConsolePageObject extends FtrService {
     await blocks[blockNumber].click();
     await this.retry.waitFor('json block to be expanded', async () => {
       return blocks[blockNumber].getAttribute('class').then((classes) => {
-        return classes.includes('ace_open');
+        return classes?.includes('ace_open') ?? false;
       });
     });
   }
@@ -349,7 +349,7 @@ export class ConsolePageObject extends FtrService {
     }
 
     const classes = await blocks[blockNumber].getAttribute('class');
-    return classes.includes('ace_open');
+    return classes?.includes('ace_open') ?? false;
   }
 
   public async selectCurrentRequest() {
@@ -385,7 +385,7 @@ export class ConsolePageObject extends FtrService {
     });
 
     // style attribute looks like this: "top: 0px; height: 18.5px;" height is the line height
-    const styleAttribute = await line.getAttribute('style');
+    const styleAttribute = (await line.getAttribute('style')) ?? '';
     const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
     const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
     // calculate the line number by dividing the top position by the line height
@@ -490,7 +490,7 @@ export class ConsolePageObject extends FtrService {
     const path = [];
     for (const pathPart of requestPath) {
       const className = await pathPart.getAttribute('class');
-      if (className.includes('ace_param')) {
+      if (className?.includes('ace_param') ?? false) {
         // This is a parameter, we don't want to include it in the path
         break;
       }

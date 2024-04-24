@@ -31,7 +31,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useDeleteNote } from './hooks/use_delete_note';
-import { getTimelineNoteSelector } from '../../timeline/notes_tab_content/selectors';
+import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};

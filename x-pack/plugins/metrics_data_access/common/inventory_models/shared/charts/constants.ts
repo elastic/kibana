@@ -94,6 +94,13 @@ export const DISK_USAGE_LABEL = i18n.translate(
   }
 );
 
+export const DISK_USAGE_AVERAGE_LABEL = i18n.translate(
+  'xpack.metricsData.assetDetails.metrics.label.diskUsageAverage',
+  {
+    defaultMessage: 'Disk Usage Average',
+  }
+);
+
 export const DISK_IOPS_LABEL = i18n.translate(
   'xpack.metricsData.assetDetails.metrics.label.diskIOPS',
   {
@@ -115,10 +122,10 @@ export const DISK_WRITE_IOPS_LABEL = i18n.translate(
   }
 );
 
-export const DISK_USAGE_BY_MOUNTING_POINT_LABEL = i18n.translate(
+export const DISK_USAGE_BY_MOUNT_POINT_LABEL = i18n.translate(
   'xpack.metricsData.assetDetails.metrics.label.diskUsageByMountingPoint',
   {
-    defaultMessage: 'Disk Usage by Mounting Point',
+    defaultMessage: 'Disk Usage by Mount Point',
   }
 );
 

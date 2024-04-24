@@ -193,27 +193,13 @@
           },
           {
             "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.allow",
+            "id": "def-server.AssistantToolParams.anonymizationFields",
             "type": "Array",
             "tags": [],
-            "label": "allow",
+            "label": "anonymizationFields",
             "description": [],
             "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.allowReplacement",
-            "type": "Array",
-            "tags": [],
-            "label": "allowReplacement",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
+              "{ id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -238,7 +224,8 @@
             "label": "chain",
             "description": [],
             "signature": [
-              "RetrievalQAChain"
+              "RetrievalQAChain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1482,6 +1469,23 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.llm",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "llm",
+            "description": [],
+            "signature": [
+              "ActionsClientLlm",
+              " | ",
+              "ActionsClientChatOpenAI",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.modelExists",
             "type": "boolean",
             "tags": [],
@@ -1552,7 +1556,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

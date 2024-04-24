@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the the grid toolbar', async () => {
-      await testSubjects.existOrFail('dscGridToolbar');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
     });
 
     it('navigates to context view from embeddable', async () => {

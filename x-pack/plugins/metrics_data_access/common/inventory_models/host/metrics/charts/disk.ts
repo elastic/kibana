@@ -16,12 +16,11 @@ import {
   DEFAULT_XY_YBOUNDS,
   DISK_IOPS_LABEL,
   DISK_THROUGHPUT_LABEL,
-  DISK_USAGE_BY_MOUNTING_POINT_LABEL,
-  DISK_USAGE_LABEL,
+  DISK_USAGE_BY_MOUNT_POINT_LABEL,
 } from '../../../shared/charts/constants';
 
-const diskThroughputReadWrite: LensConfigWithId = {
-  id: 'diskThroughputReadWrite',
+const diskIOReadWrite: LensConfigWithId = {
+  id: 'diskIOReadWrite',
   chartType: 'xy',
   title: DISK_IOPS_LABEL,
   layers: [
@@ -53,7 +52,7 @@ const diskThroughputReadWrite: LensConfigWithId = {
 const diskUsageByMountPoint: LensConfigWithId = {
   id: 'diskUsageByMountPoint',
   chartType: 'xy',
-  title: DISK_USAGE_BY_MOUNTING_POINT_LABEL,
+  title: DISK_USAGE_BY_MOUNT_POINT_LABEL,
   layers: [
     {
       seriesType: 'area',
@@ -66,7 +65,7 @@ const diskUsageByMountPoint: LensConfigWithId = {
       },
       yAxis: [
         {
-          ...formulas.diskUsage,
+          ...formulas.diskUsageAverage,
           label: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
             {
@@ -83,8 +82,8 @@ const diskUsageByMountPoint: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-const diskIOReadWrite: LensConfigWithId = {
-  id: 'diskIOReadWrite',
+const diskThroughputReadWrite: LensConfigWithId = {
+  id: 'diskThroughputReadWrite',
   chartType: 'xy',
   title: DISK_THROUGHPUT_LABEL,
   layers: [
@@ -198,61 +197,6 @@ const diskWriteThroughput: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-const diskSpaceUsageAvailable: LensConfigWithId = {
-  id: 'diskSpaceUsageAvailable',
-  chartType: 'xy',
-  title: DISK_USAGE_LABEL,
-  layers: [
-    {
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [
-        {
-          ...formulas.diskUsage,
-          label: i18n.translate(
-            'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
-            {
-              defaultMessage: 'Used',
-            }
-          ),
-        },
-        {
-          ...formulas.diskSpaceAvailability,
-          label: i18n.translate(
-            'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available',
-            {
-              defaultMessage: 'Available',
-            }
-          ),
-        },
-      ],
-    },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_LEGEND,
-  ...DEFAULT_XY_YBOUNDS,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
-};
-
-const diskUsageXY: LensConfigWithId = {
-  id: 'diskUsage',
-  chartType: 'xy',
-  title: formulas.diskUsage.label ?? '',
-  layers: [
-    {
-      seriesType: 'line',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [formulas.diskUsage],
-    },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
-  ...DEFAULT_XY_YBOUNDS,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
-};
-
 const diskUsageMetric: LensConfigWithId = {
   id: 'diskUsage',
   chartType: 'metric',
@@ -263,7 +207,6 @@ const diskUsageMetric: LensConfigWithId = {
 
 export const disk = {
   xy: {
-    diskSpaceUsageAvailable,
     diskThroughputReadWrite,
     diskUsageByMountPoint,
     diskIOReadWrite,
@@ -272,7 +215,6 @@ export const disk = {
     diskIOWrite,
     diskReadThroughput,
     diskWriteThroughput,
-    diskUsage: diskUsageXY,
   },
   metric: {
     diskUsage: diskUsageMetric,

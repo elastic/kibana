@@ -11,6 +11,7 @@ import {
   DISK_READ_THROUGHPUT_LABEL,
   DISK_SPACE_AVAILABILITY_LABEL,
   DISK_SPACE_AVAILABLE_LABEL,
+  DISK_USAGE_AVERAGE_LABEL,
   DISK_USAGE_LABEL,
   DISK_WRITE_IOPS_LABEL,
   DISK_WRITE_THROUGHPUT_LABEL,
@@ -48,6 +49,13 @@ export const diskSpaceAvailability: LensBaseLayer = {
 
 export const diskUsage: LensBaseLayer = {
   label: DISK_USAGE_LABEL,
+  value: 'max(system.filesystem.used.pct)',
+  format: 'percent',
+  decimals: 0,
+};
+
+export const diskUsageAverage: LensBaseLayer = {
+  label: DISK_USAGE_AVERAGE_LABEL,
   value: 'average(system.filesystem.used.pct)',
   format: 'percent',
   decimals: 0,

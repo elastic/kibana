@@ -200,6 +200,9 @@ export const getSyntheticsMonitorSavedObjectType = (
         id: {
           type: 'keyword',
         },
+        config_id: {
+          type: 'keyword',
+        },
         tags: {
           type: 'keyword',
           fields: {
@@ -254,6 +257,18 @@ export const getSyntheticsMonitorSavedObjectType = (
         i18n.translate('xpack.synthetics.syntheticsMonitors.label', {
           defaultMessage: 'Synthetics - Monitor',
         }),
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              config_id: { type: 'keyword' },
+            },
+          },
+        ],
+      },
     },
   };
 };

@@ -28,7 +28,9 @@ import { useWithArtifactSubmitData } from '../../../../components/artifact_list_
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
+  ArtifactConfirmModalLabelProps,
 } from '../../../../components/artifact_list_page/types';
+import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { EventFiltersForm } from './form';
 
 import { getInitialExceptionFromEvent } from '../utils';
@@ -71,6 +73,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     const [exception, setException] = useState<ArtifactFormComponentProps['item']>(
       getInitialExceptionFromEvent(data)
     );
+
+    const [confirmModalLabels, setConfirmModalLabels] = useState<
+      ArtifactConfirmModalLabelProps | undefined
+    >();
+
+    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
     const policiesIsLoading = useMemo<boolean>(
       () => policiesRequest.isLoading || policiesRequest.isRefetching,
@@ -121,7 +129,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       onClose();
     }, [isSubmittingData, policiesIsLoading, onClose]);
 
-    const handleOnSubmit = useCallback(() => {
+    const submitEventFilter = useCallback(() => {
       return submitData(exception, {
         onSuccess: (result) => {
           toasts.addSuccess(getCreationSuccessMessage(result));
@@ -132,6 +140,14 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         },
       });
     }, [exception, onClose, submitData, toasts]);
+
+    const handleOnSubmit = useCallback(() => {
+      if (confirmModalLabels) {
+        setShowConfirmModal(true);
+      } else {
+        return submitEventFilter();
+      }
+    }, [confirmModalLabels, submitEventFilter]);
 
     const confirmButtonMemo = useMemo(
       () => (
@@ -165,7 +181,25 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       if (!formState) return;
       setIsFormValid(formState.isValid);
       setException(formState.item);
+      setConfirmModalLabels(formState.confirmModalLabels);
     }, []);
+
+    const confirmModal = useMemo(() => {
+      if (confirmModalLabels) {
+        const { title, body, confirmButton, cancelButton } = confirmModalLabels;
+        return (
+          <ArtifactConfirmModal
+            title={title}
+            body={body}
+            confirmButton={confirmButton}
+            cancelButton={cancelButton}
+            onSuccess={submitEventFilter}
+            onCancel={() => setShowConfirmModal(false)}
+            data-test-subj="artifactConfirmModal"
+          />
+        );
+      }
+    }, [confirmModalLabels, submitEventFilter]);
 
     return (
       <EuiFlyout
@@ -230,6 +264,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
+        {showConfirmModal && confirmModal}
       </EuiFlyout>
     );
   }

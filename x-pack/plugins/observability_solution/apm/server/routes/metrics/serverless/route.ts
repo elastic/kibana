@@ -12,12 +12,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  transactionDataSourceRt,
-} from '../../default_api_types';
+import { environmentRt, kueryRt, rangeRt, transactionDataSourceRt } from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
 import {
   ActiveInstanceOverview,
@@ -38,8 +33,7 @@ import { FetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import { Coordinate } from '../../../../typings/timeseries';
 
 const serverlessMetricsChartsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -49,10 +43,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       t.partial({ serverlessId: t.string }),
-      t.intersection([
-        transactionDataSourceRt,
-        t.type({ bucketSizeInSeconds: toNumberRt }),
-      ]),
+      t.intersection([transactionDataSourceRt, t.type({ bucketSizeInSeconds: toNumberRt })]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -95,18 +86,12 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
 });
 
 const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances',
   params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.partial({ serverlessId: t.string }),
-    ]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt, t.partial({ serverlessId: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -140,8 +125,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
 });
 
 const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -173,18 +157,12 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
 });
 
 const serverlessMetricsSummaryRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/metrics/serverless/summary',
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/summary',
   params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.partial({ serverlessId: t.string }),
-    ]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt, t.partial({ serverlessId: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServerlessSummaryResponse> => {
@@ -193,20 +171,14 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
-    const [
-      apmEventClient,
-      awsLambdaPriceFactor,
-      awsLambdaRequestCostPerMillion,
-    ] = await Promise.all([
-      getApmEventClient(resources),
-      uiSettingsClient
-        .get<string>(apmAWSLambdaPriceFactor)
-        .then(
-          (value): AWSLambdaPriceFactor =>
-            JSON.parse(value) as AWSLambdaPriceFactor
-        ),
-      uiSettingsClient.get<number>(apmAWSLambdaRequestCostPerMillion),
-    ]);
+    const [apmEventClient, awsLambdaPriceFactor, awsLambdaRequestCostPerMillion] =
+      await Promise.all([
+        getApmEventClient(resources),
+        uiSettingsClient
+          .get<string>(apmAWSLambdaPriceFactor)
+          .then((value): AWSLambdaPriceFactor => JSON.parse(value) as AWSLambdaPriceFactor),
+        uiSettingsClient.get<number>(apmAWSLambdaRequestCostPerMillion),
+      ]);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
