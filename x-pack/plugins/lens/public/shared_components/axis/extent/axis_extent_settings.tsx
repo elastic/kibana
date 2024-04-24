@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup, htmlIdGenerator, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AxisExtentMode, YScaleType } from '@kbn/expression-xy-plugin/common';
+import { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import { RangeInputField } from '../../range_input_field';
 import { validateExtent } from './helpers';
 import type { UnifiedAxisExtentConfig } from './types';
@@ -18,7 +18,7 @@ export const LOWER_BOUND_MAX = 0;
 
 const idPrefix = htmlIdGenerator()();
 
-interface DataBoundsObject {
+export interface DataBoundsObject {
   min: number;
   max: number;
 }
@@ -26,7 +26,6 @@ interface DataBoundsObject {
 export function AxisBoundsControl({
   type,
   canHaveNiceValues,
-  disableCustomRange,
   ...props
 }: {
   type: 'metric' | 'bucket';
@@ -37,21 +36,31 @@ export function AxisBoundsControl({
   disableCustomRange: boolean;
   testSubjPrefix: string;
   canHaveNiceValues?: boolean;
-  scaleType?: YScaleType;
+  scaleType?: YScaleType | XScaleType;
 }) {
-  const { extent, hasBarOrArea, setExtent, dataBounds, testSubjPrefix, scaleType } = props;
+  const {
+    extent,
+    hasBarOrArea,
+    setExtent,
+    dataBounds,
+    testSubjPrefix,
+    scaleType,
+    disableCustomRange,
+  } = props;
   const { errorMsg, helpMsg } = validateExtent(hasBarOrArea, extent, scaleType);
-  // Bucket type does not have the "full" mode
-  const allowedModeForNiceDomain = type === 'metric' ? ['full', 'custom'] : ['dataBounds'];
+  const allowedModeForNiceDomain =
+    type === 'metric' ? ['full', 'custom'] : ['dataBounds', 'custom'];
   const canShowNiceValues = canHaveNiceValues && allowedModeForNiceDomain.includes(extent.mode);
-
   const canShowCustomRanges =
     extent?.mode === 'custom' && (type === 'bucket' || !disableCustomRange);
 
   const ModeAxisBoundsControl =
     type === 'metric' ? MetricAxisBoundsControl : BucketAxisBoundsControl;
   return (
-    <ModeAxisBoundsControl {...props} disableCustomRange={disableCustomRange}>
+    <ModeAxisBoundsControl
+      {...props}
+      scaleType={scaleType as YScaleType} // only applies to MetricAxisBoundsControl
+    >
       {canShowCustomRanges ? (
         <RangeInputField
           isInvalid={Boolean(errorMsg)}
@@ -106,6 +115,7 @@ export function AxisBoundsControl({
           fullWidth
         >
           <EuiSwitch
+            compressed
             showLabel={false}
             label={i18n.translate('xpack.lens.fullExtent.niceValues', {
               defaultMessage: 'Round to nice values',
@@ -118,7 +128,6 @@ export function AxisBoundsControl({
                 niceValues,
               });
             }}
-            compressed
           />
         </EuiFormRow>
       ) : null}
@@ -177,14 +186,14 @@ function MetricAxisBoundsControl({
               label: i18n.translate('xpack.lens.axisExtent.full', {
                 defaultMessage: 'Full',
               }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_full'`,
+              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_full`,
             },
             {
               id: `${idPrefix}dataBounds`,
               label: i18n.translate('xpack.lens.axisExtent.axisExtent.dataBounds', {
                 defaultMessage: 'Data',
               }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_DataBounds'`,
+              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_data`,
               isDisabled: hasBarOrArea,
             },
             {
@@ -192,7 +201,7 @@ function MetricAxisBoundsControl({
               label: i18n.translate('xpack.lens.axisExtent.axisExtent.custom', {
                 defaultMessage: 'Custom',
               }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_custom'`,
+              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_custom`,
               isDisabled: disableCustomRange,
             },
           ]}
@@ -218,10 +227,14 @@ function MetricAxisBoundsControl({
 
 export function getBounds(
   mode: AxisExtentMode,
-  scaleType?: YScaleType,
+  scaleType?: YScaleType | XScaleType,
   dataBounds?: DataBoundsObject
 ): Pick<UnifiedAxisExtentConfig, 'lowerBound' | 'upperBound'> {
-  if (mode !== 'custom' || !dataBounds) return {};
+  if (mode !== 'custom' || !dataBounds)
+    return {
+      lowerBound: undefined,
+      upperBound: undefined,
+    };
 
   if (dataBounds.min >= 0 && dataBounds.max >= 0) {
     const lowerBoundMax = scaleType === 'log' ? LOG_LOWER_BOUND_MAX : LOWER_BOUND_MAX;
@@ -265,7 +278,7 @@ function BucketAxisBoundsControl({
   dataBounds,
   testSubjPrefix,
   children,
-}: ModeAxisBoundsControlProps) {
+}: Omit<ModeAxisBoundsControlProps, 'scaleType'>) {
   return (
     <>
       <EuiFormRow
@@ -289,7 +302,7 @@ function BucketAxisBoundsControl({
               label: i18n.translate('xpack.lens.axisExtent.dataBounds', {
                 defaultMessage: 'Data',
               }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_DataBounds'`,
+              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_data'`,
             },
             {
               id: `${idPrefix}custom`,

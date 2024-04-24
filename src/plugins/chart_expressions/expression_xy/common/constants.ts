@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ScaleType, XScaleType } from '@elastic/charts';
-
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
 export const DATA_DECORATION_CONFIG = 'dataDecorationConfig';
@@ -87,14 +85,14 @@ export const SeriesTypes = {
   AREA: 'area',
 } as const;
 
-export const YScaleTypes: Record<string, ScaleType> = {
+export const YScaleTypes = {
   TIME: 'time',
   LINEAR: 'linear',
   LOG: 'log',
   SQRT: 'sqrt',
 } as const;
 
-export const XScaleTypes: Record<string, XScaleType> = {
+export const XScaleTypes = {
   TIME: 'time',
   LINEAR: 'linear',
   ORDINAL: 'ordinal',

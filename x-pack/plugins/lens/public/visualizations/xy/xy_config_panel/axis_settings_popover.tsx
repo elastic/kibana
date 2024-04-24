@@ -116,7 +116,13 @@ export interface AxisSettingsPopoverProps {
   /**
    * set axis extent
    */
-  setExtent?: (extent: AxisExtentConfig | undefined) => void;
+  setExtent?: (extent?: AxisExtentConfig) => void;
+  /**
+   * Set scale and extent together
+   *
+   * Note: Must set both together or state does not update correctly
+   */
+  setScaleWithExtent?: (extent?: AxisExtentConfig, scale?: YScaleType) => void;
   hasBarOrAreaOnAxis: boolean;
   hasPercentageAxis: boolean;
   dataBounds?: { min: number; max: number };
@@ -233,6 +239,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   useMultilayerTimeAxis,
   scale,
   setScale,
+  setScaleWithExtent,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
@@ -334,7 +341,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         >
           <EuiSwitch
             compressed
-            data-test-subj={`lnsshowEndzones`}
+            data-test-subj="lnsshowEndzones"
             label={i18n.translate('xpack.lens.xyChart.showEnzones', {
               defaultMessage: 'Show partial data markers',
             })}
@@ -375,7 +382,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           <EuiSelect
             compressed
             fullWidth
-            data-test-subj={`lnsshowEndzones`}
+            data-test-subj="lnsScaleSelect"
             aria-label={i18n.translate('xpack.lens.xyChart.setScale', {
               defaultMessage: 'Axis scale',
             })}
@@ -399,17 +406,17 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                 value: 'sqrt',
               },
             ]}
-            onChange={(e) => {
-              const newScale = e.target.value as YScaleType;
-              setScale(newScale);
+            onChange={({ target }) => {
+              if (!setScaleWithExtent || !extent) return;
+              const newScale = target.value as YScaleType;
 
-              if (localExtent) {
-                // Update bounds to resect constraints of new scale
-                setLocalExtent({
-                  ...localExtent,
-                  ...getBounds(localExtent.mode, newScale, dataBounds),
-                });
-              }
+              setScaleWithExtent(
+                {
+                  ...extent,
+                  ...getBounds(extent.mode, newScale, dataBounds),
+                },
+                newScale
+              );
             }}
             value={scale}
           />

@@ -12,6 +12,12 @@ import { ToolbarPopover, AxisTicksSettings } from '../../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ShallowWrapper } from 'enzyme';
 
+jest.useFakeTimers();
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: jest.fn((fn) => fn),
+}));
+
 function getExtentControl(root: ShallowWrapper) {
   return root.find('[testSubjPrefix="lnsXY"]').shallow();
 }
@@ -58,6 +64,10 @@ describe('Axes Settings', () => {
       hasPercentageAxis: false,
       orientation: 0,
       setOrientation: jest.fn(),
+      setScaleWithExtent: jest.fn(),
+      setExtent: jest.fn(),
+      setScale: jest.fn(),
+      scale: 'linear',
     };
   });
 
@@ -165,13 +175,11 @@ describe('Axes Settings', () => {
     });
 
     it('renders 3 options for metric bound inputs', () => {
-      const setSpy = jest.fn();
       const component = shallow(
         <AxisSettingsPopover
           {...props}
           axis="yLeft"
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
-          setExtent={setSpy}
         />
       );
       const buttonGroup = getModeButtonsComponent(component).find(
@@ -181,39 +189,31 @@ describe('Axes Settings', () => {
     });
 
     it('renders nice values enabled by default if mode is full for metric', () => {
-      const setSpy = jest.fn();
       const component = shallow(
-        <AxisSettingsPopover {...props} axis="yLeft" extent={{ mode: 'full' }} setExtent={setSpy} />
+        <AxisSettingsPopover {...props} axis="yLeft" extent={{ mode: 'full' }} />
       );
       const niceValuesSwitch = getNiceValueSwitch(component);
       expect(niceValuesSwitch.prop('checked')).toBe(true);
     });
 
-    it('should not renders nice values if mode is custom for metric', () => {
-      const setSpy = jest.fn();
+    it('should render nice values if mode is custom for metric', () => {
       const component = shallow(
         <AxisSettingsPopover
           {...props}
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
           axis="yLeft"
-          setExtent={setSpy}
         />
       );
-      expect(
-        getExtentControl(component)
-          .find('[data-test-subj="lnsXY_axisExtent_niceValues"]')
-          .isEmptyRender()
-      ).toBe(true);
+      const niceValuesSwitch = getNiceValueSwitch(component);
+      expect(niceValuesSwitch.prop('checked')).toBe(true);
     });
 
     it('renders metric (y) bound inputs if mode is custom', () => {
-      const setSpy = jest.fn();
       const component = shallow(
         <AxisSettingsPopover
           {...props}
           axis="yLeft"
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
-          setExtent={setSpy}
         />
       );
       const rangeInput = getRangeInputComponent(component);
@@ -224,13 +224,11 @@ describe('Axes Settings', () => {
     });
 
     it('renders 2 options for bucket bound inputs', () => {
-      const setSpy = jest.fn();
       const component = shallow(
         <AxisSettingsPopover
           {...props}
           axis="x"
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
-          setExtent={setSpy}
         />
       );
       const buttonGroup = getModeButtonsComponent(component).find(
@@ -239,45 +237,32 @@ describe('Axes Settings', () => {
       expect(buttonGroup.prop('options')).toHaveLength(2);
     });
 
-    it('renders nice values enabled by default if mode is dataBounds for bucket', () => {
-      const setSpy = jest.fn();
+    it('should render nice values enabled by default if mode is dataBounds for bucket', () => {
+      const component = shallow(
+        <AxisSettingsPopover {...props} axis="x" extent={{ mode: 'dataBounds' }} />
+      );
+      const niceValuesSwitch = getNiceValueSwitch(component);
+      expect(niceValuesSwitch.prop('checked')).toBe(true);
+    });
+
+    it('should renders nice values if mode is custom for bucket', () => {
       const component = shallow(
         <AxisSettingsPopover
           {...props}
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
           axis="x"
-          extent={{ mode: 'dataBounds' }}
-          setExtent={setSpy}
         />
       );
       const niceValuesSwitch = getNiceValueSwitch(component);
       expect(niceValuesSwitch.prop('checked')).toBe(true);
     });
 
-    it('should not renders nice values if mode is custom for bucket', () => {
-      const setSpy = jest.fn();
-      const component = shallow(
-        <AxisSettingsPopover
-          {...props}
-          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
-          axis="x"
-          setExtent={setSpy}
-        />
-      );
-      expect(
-        getExtentControl(component)
-          .find('[data-test-subj="lnsXY_axisExtent_niceValues"]')
-          .isEmptyRender()
-      ).toBe(true);
-    });
-
     it('renders bucket (x) bound inputs if mode is custom', () => {
-      const setSpy = jest.fn();
       const component = shallow(
         <AxisSettingsPopover
           {...props}
           axis="x"
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
-          setExtent={setSpy}
         />
       );
       const rangeInput = getRangeInputComponent(component);
@@ -286,5 +271,133 @@ describe('Axes Settings', () => {
       expect(lower.prop('value')).toEqual(123);
       expect(upper.prop('value')).toEqual(456);
     });
+
+    describe('Custom bounds', () => {
+      describe('changing scales', () => {
+        it('should update extents when scale changes from linear to log scale', () => {
+          const component = shallow(
+            <AxisSettingsPopover
+              {...props}
+              scale="linear"
+              dataBounds={{ min: 0, max: 1000 }}
+              extent={{ mode: 'custom', lowerBound: 0, upperBound: 1000 }}
+              axis="yLeft"
+            />
+          );
+
+          const scaleSelect = component.find('[data-test-subj="lnsScaleSelect"]');
+          scaleSelect.simulate('change', { target: { value: 'log' } });
+
+          expect(props.setScaleWithExtent).toBeCalledWith(
+            {
+              mode: 'custom',
+              lowerBound: 0.01,
+              upperBound: 1000,
+            },
+            'log'
+          );
+        });
+
+        it('should update extent and scale when scale changes from log to linear scale', () => {
+          const component = shallow(
+            <AxisSettingsPopover
+              {...props}
+              scale="log"
+              dataBounds={{ min: 0, max: 1000 }}
+              extent={{ mode: 'custom', lowerBound: 0.01, upperBound: 1000 }}
+              axis="yLeft"
+            />
+          );
+
+          const scaleSelect = component.find('[data-test-subj="lnsScaleSelect"]');
+          scaleSelect.simulate('change', { target: { value: 'linear' } });
+
+          expect(props.setScaleWithExtent).toBeCalledWith(
+            {
+              mode: 'custom',
+              lowerBound: 0,
+              upperBound: 1000,
+            },
+            'linear'
+          );
+        });
+      });
+    });
+
+    describe('Changing bound type', () => {
+      it('should reset extent when mode changes from custom to full', () => {
+        const component = shallow(
+          <AxisSettingsPopover
+            {...props}
+            scale="log"
+            dataBounds={{ min: 0, max: 1000 }}
+            extent={{ mode: 'custom', lowerBound: 10, upperBound: 1000 }}
+            axis="yLeft"
+          />
+        );
+
+        const boundsBtns = getBoundsButtons(component);
+
+        boundsBtns.full.simulate('click');
+        expect(props.setExtent).toBeCalledWith({
+          mode: 'full',
+          lowerBound: undefined,
+          upperBound: undefined,
+        });
+
+        (props.setExtent as jest.Mock).mockClear();
+        boundsBtns.custom.simulate('click');
+        expect(props.setExtent).toBeCalledWith({
+          mode: 'custom',
+          lowerBound: 0.01,
+          upperBound: 1000,
+        });
+      });
+
+      it('should reset extent when mode changes from custom to data', () => {
+        const component = shallow(
+          <AxisSettingsPopover
+            {...props}
+            scale="linear"
+            dataBounds={{ min: 0, max: 1000 }}
+            extent={{ mode: 'custom', lowerBound: -10, upperBound: 1000 }}
+            axis="yLeft"
+          />
+        );
+
+        const boundsBtns = getBoundsButtons(component);
+
+        boundsBtns.data.simulate('click');
+        expect(props.setExtent).toBeCalledWith({
+          mode: 'dataBounds',
+          lowerBound: undefined,
+          upperBound: undefined,
+        });
+
+        (props.setExtent as jest.Mock).mockClear();
+        boundsBtns.custom.simulate('click');
+        expect(props.setExtent).toBeCalledWith({
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 1000,
+        });
+      });
+    });
   });
 });
+
+function getBoundsButtons(root: ShallowWrapper) {
+  const btnGroup = root
+    .find('AxisBoundsControl')
+    .shallow()
+    .find('MetricAxisBoundsControl')
+    .shallow()
+    .find('EuiButtonGroup')
+    .shallow();
+
+  return {
+    full: btnGroup.find('[data-test-subj="lnsXY_axisExtent_groups_full"]'),
+    data: btnGroup.find('[data-test-subj="lnsXY_axisExtent_groups_data"]'),
+    custom: btnGroup.find('[data-test-subj="lnsXY_axisExtent_groups_custom"]'),
+  };
+}

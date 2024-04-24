@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
@@ -259,24 +259,39 @@ export const XyToolbar = memo(function XyToolbar(
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
   );
-  const setLeftExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
+
+  const setScaleWithExtentFn = useCallback(
+    (extentKey: 'yLeftExtent' | 'yRightExtent', scaleKey: 'yLeftScale' | 'yRightScale') =>
+      (extent?: AxisExtentConfig, scale?: YScaleType) => {
+        setState({
+          ...state,
+          [extentKey]: extent,
+          [scaleKey]: scale,
+        });
+      },
+    [setState, state]
+  );
+
+  const setExtentFn = useCallback(
+    (extentKey: 'xExtent' | 'yLeftExtent' | 'yRightExtent') => (extent?: AxisExtentConfig) => {
       setState({
         ...state,
-        yLeftExtent: extent,
+        [extentKey]: extent,
       });
     },
     [setState, state]
   );
-  const setXExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
+
+  const setScaleFn = useCallback(
+    (scaleKey: 'yLeftScale' | 'yRightScale') => (scale?: YScaleType) => {
       setState({
         ...state,
-        xExtent: extent,
+        [scaleKey]: scale,
       });
     },
     [setState, state]
   );
+
   const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'right')
@@ -284,15 +299,6 @@ export const XyToolbar = memo(function XyToolbar(
         const seriesType = dataLayers.find((l) => l.layerId === series.layer)?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
-  );
-  const setRightExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
-      setState({
-        ...state,
-        yRightExtent: extent,
-      });
-    },
-    [setState, state]
   );
 
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
@@ -483,17 +489,13 @@ export const XyToolbar = memo(function XyToolbar(
               setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               extent={state?.yLeftExtent || { mode: 'full' }}
-              setExtent={setLeftExtent}
+              setExtent={setExtentFn('yLeftExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
               scale={state?.yLeftScale}
-              setScale={(scale) => {
-                setState({
-                  ...state,
-                  yLeftScale: scale,
-                });
-              }}
+              setScale={setScaleFn('yLeftScale')}
+              setScaleWithExtent={setScaleWithExtentFn('yLeftExtent', 'yLeftScale')}
             />
           </TooltipWrapper>
 
@@ -519,7 +521,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
             extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
-            setExtent={setXExtent}
+            setExtent={setExtentFn('xExtent')}
             dataBounds={xDataBounds}
           />
 
@@ -555,16 +557,12 @@ export const XyToolbar = memo(function XyToolbar(
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               extent={state?.yRightExtent || { mode: 'full' }}
-              setExtent={setRightExtent}
+              setExtent={setExtentFn('yRightExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
               scale={state?.yRightScale}
-              setScale={(scale) => {
-                setState({
-                  ...state,
-                  yRightScale: scale,
-                });
-              }}
+              setScale={setScaleFn('yRightScale')}
+              setScaleWithExtent={setScaleWithExtentFn('yRightExtent', 'yRightScale')}
             />
           </TooltipWrapper>
         </EuiFlexGroup>

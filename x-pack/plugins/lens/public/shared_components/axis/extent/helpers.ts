@@ -6,8 +6,8 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { YScaleType } from '@kbn/expression-xy-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import type { DatasourcePublicAPI } from '../../../types';
 import type { UnifiedAxisExtentConfig } from './types';
 
@@ -106,7 +106,7 @@ export function getDataBounds(
 export function validateExtent(
   hasBarOrArea: boolean,
   extent: UnifiedAxisExtentConfig,
-  scaleType?: YScaleType
+  scaleType?: YScaleType | XScaleType
 ): {
   helpMsg?: string;
   errorMsg?: string;
