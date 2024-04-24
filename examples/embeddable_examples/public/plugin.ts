@@ -45,6 +45,8 @@ import { registerAddSearchPanelAction } from './react_embeddables/search/registe
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
+import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
+import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -140,6 +142,14 @@ export class EmbeddableExamplesPlugin
         './react_embeddables/search/search_react_embeddable'
       );
       return getSearchEmbeddableFactory(deps);
+    });
+
+    registerCreateSavedBookAction(deps.uiActions);
+    registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
+      const { savedBookEmbeddableFactory } = await import(
+        './react_embeddables/saved_book/saved_book_react_embeddable'
+      );
+      return savedBookEmbeddableFactory;
     });
 
     return {

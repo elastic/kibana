@@ -9,7 +9,6 @@
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
 import {
   HasParentApi,
   PublishesDataLoading,
@@ -17,12 +16,11 @@ import {
   PublishesUnifiedSearch,
   PublishesWritableUnifiedSearch,
 } from '@kbn/presentation-publishing';
+import { SerializedTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/initialize_time_range';
 
-export interface State {
-  timeRange: TimeRange | undefined;
-}
+export type SearchSerializedState = SerializedTimeRange;
 
-export type Api = DefaultEmbeddableApi<State> &
+export type Api = DefaultEmbeddableApi<SearchSerializedState> &
   PublishesDataViews &
   PublishesDataLoading &
   Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'> &

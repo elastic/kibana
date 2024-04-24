@@ -6,18 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { ByRefCapableEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { SavesExternalState, SerializedTitles } from '@kbn/presentation-publishing';
 
-/**
- * Book state contains all state required to initialize a book embeddable.
- */
-export interface BookByValueState extends SerializedTitles {
+export interface BookAttributes {
+  bookTitle: string;
   authorName: string;
   numberOfPages: number;
+  bookDescription?: string;
 }
-export interface BookByReferenceState extends SerializedTitles {
+
+export interface BookByValueSerializedState {
+  attributes: BookAttributes;
+}
+
+export interface BookByReferenceSerializedState {
   savedBookId: string;
 }
 
-export type BookApi = ByRefCapableEmbeddableApi<BookByReferenceState, BookByValueState>;
+export type BookSerializedState = SerializedTitles &
+  (BookByValueSerializedState | BookByReferenceSerializedState);
+
+/**
+ * Book runtime state is a flattened version of all possible state keys.
+ */
+export interface BookRuntimeState
+  extends BookAttributes,
+    Partial<BookByReferenceSerializedState>,
+    SerializedTitles {}
+
+export type BookApi = DefaultEmbeddableApi<BookSerializedState> & SavesExternalState;

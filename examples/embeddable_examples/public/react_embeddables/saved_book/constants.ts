@@ -8,3 +8,4 @@
 
 export const SAVED_BOOK_ID = 'book';
 export const ADD_SAVED_BOOK_ACTION_ID = 'create_saved_book';
+export const ADD_SAVED_BOOK_BY_REFERENCE_ACTION_ID = 'create_saved_book_by_reference';

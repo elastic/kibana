@@ -7,7 +7,12 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { CanDuplicatePanels, CanExpandPanels, TracksOverlays } from '@kbn/presentation-containers';
+import {
+  CanDuplicatePanels,
+  CanExpandPanels,
+  ProvidesUnsavedState,
+  TracksOverlays,
+} from '@kbn/presentation-containers';
 import {
   HasType,
   HasTypeDisplayName,
@@ -31,6 +36,7 @@ export type DashboardExternallyAccessibleApi = HasTypeDisplayName &
   CanDuplicatePanels &
   TracksOverlays &
   PublishesSavedObjectId &
+  ProvidesUnsavedState &
   DashboardPluginInternalFunctions &
   CanExpandPanels;
 

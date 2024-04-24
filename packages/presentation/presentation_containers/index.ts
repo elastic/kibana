@@ -25,7 +25,6 @@ export {
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
-export { apiHasSavableState, type HasSavableState } from './interfaces/saved_state';
 export {
   apiHasSerializableState,
   type HasSerializableState,

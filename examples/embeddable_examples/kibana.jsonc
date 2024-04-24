@@ -16,7 +16,7 @@
       "charts",
       "fieldFormats"
     ],
-    "requiredBundles": ["presentationUtil"],
+    "requiredBundles": ["presentationUtil", "kibanaUtils"],
     "extraPublicDirs": ["public/hello_world"]
   }
 }

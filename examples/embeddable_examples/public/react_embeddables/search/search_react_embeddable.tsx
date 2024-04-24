@@ -6,25 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiBadge, EuiCallOut, EuiStat } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   initializeTimeRange,
   fetch$,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { Api, Services, State } from './types';
+import { Api, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<State, Api> = {
+  const factory: ReactEmbeddableFactory<SearchSerializedState, Api> = {
     type: SEARCH_EMBEDDABLE_ID,
     deserializeState: (state) => {
-      return state.rawState as State;
+      return state.rawState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const timeRange = initializeTimeRange(state);
@@ -125,9 +128,33 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           }
 
           return (
-            <p>
-              Found <strong>{count}</strong> from {defaultDataView.name}
-            </p>
+            <div
+              css={css`
+                width: 100%;
+                padding: ${euiThemeVars.euiSizeM};
+              `}
+            >
+              <EuiStat
+                title={count}
+                titleColor="subdued"
+                description={
+                  <span>
+                    <EuiBadge iconType="index" color="hollow">
+                      {i18n.translate('embeddableExamples.search.result', {
+                        defaultMessage: '{dataViewName}',
+                        values: { dataViewName: defaultDataView.name },
+                      })}
+                    </EuiBadge>
+                  </span>
+                }
+                titleSize="l"
+              >
+                {i18n.translate('embeddableExamples.search.result', {
+                  defaultMessage: '{count, plural, one {document} other {documents}} found',
+                  values: { count },
+                })}
+              </EuiStat>
+            </div>
           );
         },
       };

@@ -15,9 +15,9 @@ import {
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 import { PublishesSettings } from './publishes_settings';
 
-export interface PanelPackage {
+export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
-  initialState?: object;
+  initialState: SerializedStateType;
 }
 
 export interface PresentationContainer

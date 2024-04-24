@@ -83,6 +83,10 @@ export {
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export {
+  apiSavesExternalState,
+  type SavesExternalState,
+} from './interfaces/external_state/saves_external_state';
+export {
   apiPublishesUnsavedChanges,
   type PublishesUnsavedChanges,
 } from './interfaces/publishes_unsaved_changes';

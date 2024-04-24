@@ -24,8 +24,10 @@ const ON_STATE_CHANGE_DEBOUNCE = 100;
  * TODO: Rename this to simply `Embeddable` when the legacy Embeddable system is removed.
  */
 export const ReactEmbeddableRenderer = <
-  StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  RuntimeState extends object = SerializedState,
+  ExternalState extends object = object
 >({
   type,
   maybeId,
@@ -37,9 +39,9 @@ export const ReactEmbeddableRenderer = <
   type: string;
   parentApi?: unknown;
   maybeId?: string;
-  onApiAvailable?: (api: ApiType) => void;
+  onApiAvailable?: (api: Api) => void;
   panelProps?: Pick<
-    PresentationPanelProps<ApiType>,
+    PresentationPanelProps<Api>,
     | 'showShadow'
     | 'showBorder'
     | 'showBadges'
@@ -51,7 +53,7 @@ export const ReactEmbeddableRenderer = <
    * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
    * as it changes. This is **not** expected to change over the lifetime of the component.
    */
-  onAnyStateChange?: (state: SerializedPanelState<StateType>) => void;
+  onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -59,25 +61,31 @@ export const ReactEmbeddableRenderer = <
     () =>
       (async () => {
         const uuid = maybeId ?? generateId();
-        const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
+        const factory = await getReactEmbeddableFactory<
+          SerializedState,
+          Api,
+          RuntimeState,
+          ExternalState
+        >(type);
 
-        const { initialState, startStateDiffing } = await initializeReactEmbeddableState(
-          uuid,
-          factory,
-          parentApi
-        );
+        const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
+          SerializedState,
+          RuntimeState,
+          ExternalState
+        >(uuid, factory, parentApi);
 
         const registerApi = (
-          apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
-          comparators: StateComparators<StateType>
+          apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
+          comparators: StateComparators<RuntimeState>
         ) => {
           if (onAnyStateChange) {
             /**
              * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
              * an `onAnyStateChange` callback is provided
              */
-            const comparatorDefinitions: Array<ComparatorDefinition<StateType, keyof StateType>> =
-              Object.values(comparators);
+            const comparatorDefinitions: Array<
+              ComparatorDefinition<RuntimeState, keyof RuntimeState>
+            > = Object.values(comparators);
             combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
               .pipe(skip(1), debounceTime(ON_STATE_CHANGE_DEBOUNCE))
               .subscribe(() => {
@@ -93,7 +101,7 @@ export const ReactEmbeddableRenderer = <
             unsavedChanges,
             resetUnsavedChanges,
             type: factory.type,
-          } as unknown as ApiType;
+          } as unknown as Api;
           cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;

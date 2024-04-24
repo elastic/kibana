@@ -8,10 +8,12 @@
 
 import { SerializedPanelState } from './serialized_state';
 
-export interface ProvidesUnsavedState<StateType extends object = object> {
-  getUnsavedStateForChild: (childId: string) => SerializedPanelState<StateType> | undefined;
+export interface ProvidesUnsavedState<SerializedState extends object = object> {
+  getUnsavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
 }
 
-export const apiProvidesUnsavedState = (api: unknown): api is ProvidesUnsavedState => {
+export const apiProvidesUnsavedState = <SerializedState extends object = object>(
+  api: unknown
+): api is ProvidesUnsavedState<SerializedState> => {
   return Boolean(api && (api as ProvidesUnsavedState).getUnsavedStateForChild);
 };

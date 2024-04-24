@@ -13,7 +13,7 @@ import { StateComparators } from '../../comparators';
 import { PublishesWritableTimeRange } from './publishes_unified_search';
 
 export interface SerializedTimeRange {
-  timeRange: TimeRange | undefined;
+  timeRange?: TimeRange;
 }
 
 export const initializeTimeRange = (

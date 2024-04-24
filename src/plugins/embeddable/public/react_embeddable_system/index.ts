@@ -11,10 +11,4 @@ export {
   registerReactEmbeddableFactory,
 } from './react_embeddable_registry';
 export { ReactEmbeddableRenderer } from './react_embeddable_renderer';
-export type {
-  DefaultEmbeddableApi,
-  ReactEmbeddableFactory,
-  ReactEmbeddableRegistration,
-  ByRefCapableEmbeddableApi,
-  ByRefCapableEmbeddableFactory,
-} from './types';
+export type { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';

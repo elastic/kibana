@@ -14,12 +14,14 @@ import { Reference } from '@kbn/content-management-utils';
  */
 export interface SerializedPanelState<RawStateType extends object = object> {
   references?: Reference[];
-  rawState: RawStateType | undefined;
-  version?: string;
+  rawState: RawStateType;
 }
-
-export interface HasSerializableState<StateType extends object = object> {
-  serializeState: () => SerializedPanelState<StateType>;
+export interface HasSerializableState<State extends object = object> {
+  /**
+   * Serializes all state that is needed to re-create this Embeddable as it
+   * currently appears. The opposite of {@link ReactEmbeddableFactory}
+   */
+  serializeState: () => SerializedPanelState<State>;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {

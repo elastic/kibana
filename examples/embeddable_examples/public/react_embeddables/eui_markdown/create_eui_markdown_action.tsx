@@ -11,6 +11,7 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
+import { MarkdownEditorSerializedState } from './types';
 
 // -----------------------------------------------------------------------------
 // Create and register an action which allows this embeddable to be created from
@@ -25,7 +26,7 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel(
+      embeddable.addNewPanel<MarkdownEditorSerializedState>(
         {
           panelType: EUI_MARKDOWN_ID,
           initialState: { content: '# hello world!' },

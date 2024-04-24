@@ -11,12 +11,14 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, map } from 'rxjs';
 import { SerializedPanelState } from './serialized_state';
 
-export interface PublishesLastSavedState<StateType extends object = object> {
+export interface PublishesLastSavedState<SerializedState extends object = object> {
   lastSavedState: Subject<void>; // a notification that the last saved state has changed
-  getLastSavedStateForChild: (childId: string) => SerializedPanelState<StateType> | undefined;
+  getLastSavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
 }
 
-export const apiPublishesLastSavedState = (api: unknown): api is PublishesLastSavedState => {
+export const apiPublishesLastSavedState = <SerializedState extends object = object>(
+  api: unknown
+): api is PublishesLastSavedState<SerializedState> => {
   return Boolean(
     api &&
       (api as PublishesLastSavedState).lastSavedState &&
@@ -24,22 +26,25 @@ export const apiPublishesLastSavedState = (api: unknown): api is PublishesLastSa
   );
 };
 
-export const getLastSavedStateSubjectForChild = <StateType extends unknown = unknown>(
+export const getLastSavedStateSubjectForChild = <
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState
+>(
   parentApi: unknown,
   childId: string,
-  deserializer?: (state: SerializedPanelState) => StateType
-): PublishingSubject<StateType | undefined> | undefined => {
+  deserializer: (state: SerializedPanelState<SerializedState>) => RuntimeState
+): PublishingSubject<RuntimeState | undefined> | undefined => {
   if (!parentApi) return;
-  const fetchLastSavedState = (): StateType | undefined => {
-    if (!apiPublishesLastSavedState(parentApi)) return;
+  const fetchLastSavedState = (): RuntimeState | undefined => {
+    if (!apiPublishesLastSavedState<SerializedState>(parentApi)) return;
     const rawLastSavedState = parentApi.getLastSavedStateForChild(childId);
     if (rawLastSavedState === undefined) return;
-    return deserializer
-      ? deserializer(rawLastSavedState)
-      : (rawLastSavedState.rawState as StateType);
+    return deserializer(rawLastSavedState);
   };
 
-  const lastSavedStateForChild = new BehaviorSubject<StateType | undefined>(fetchLastSavedState());
+  const lastSavedStateForChild = new BehaviorSubject<RuntimeState | undefined>(
+    fetchLastSavedState()
+  );
   if (!apiPublishesLastSavedState(parentApi)) return;
   parentApi.lastSavedState
     .pipe(

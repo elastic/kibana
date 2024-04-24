@@ -100,9 +100,6 @@ export {
   registerReactEmbeddableFactory,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
-  type ReactEmbeddableRegistration,
-  type ByRefCapableEmbeddableApi,
-  type ByRefCapableEmbeddableFactory,
 } from './react_embeddable_system';
 
 export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';

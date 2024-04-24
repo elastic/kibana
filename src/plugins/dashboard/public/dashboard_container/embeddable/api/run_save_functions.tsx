@@ -14,11 +14,8 @@ import {
   isReferenceOrValueEmbeddable,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
-import {
-  apiHasSavableState,
-  apiHasSerializableState,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
+import { apiPublishesUnsavedChanges, apiSavesExternalState } from '@kbn/presentation-publishing';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -40,26 +37,34 @@ const serializeAllPanelState = async (
   dashboard: DashboardContainer
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
   const references: Reference[] = [];
-  const savePromises: Array<Promise<{ serializedState: SerializedPanelState; uuid: string }>> = [];
   const panels = cloneDeep(dashboard.getInput().panels);
+
+  // serialize all panel state.
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
     if (api && apiHasSerializableState(api)) {
-      savePromises.push(
-        (async () => {
-          const serializedState = api.serializeState();
-          return apiHasSavableState(api)
-            ? { serializedState: await api.saveState(serializedState), uuid }
-            : { serializedState, uuid };
-        })()
-      );
+      const serializedState = api.serializeState();
+      panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
+      references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
     }
   }
-  const saveResults = await Promise.all(savePromises);
-  for (const { serializedState, uuid } of saveResults) {
-    panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
-    references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
+
+  // save to external store for any panels that require it.
+  const savePromises: Array<Promise<void>> = [];
+  for (const [uuid, panel] of Object.entries(panels)) {
+    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
+    const api = dashboard.children$.value[uuid];
+    const apiHasUnsavedChanges = apiPublishesUnsavedChanges(api)
+      ? Object.keys(api.unsavedChanges.value ?? {}).length > 0
+      : true; // if the API doesn't publish unsaved changes, then we have no idea if it needs to be saved or not and must save it.
+
+    if (api && apiSavesExternalState(api) && apiHasUnsavedChanges) {
+      savePromises.push(api.saveExternalState());
+    }
+  }
+  if (savePromises.length > 0) {
+    await Promise.all(savePromises);
   }
   return { panels, references };
 };

@@ -19,21 +19,7 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
-import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
-
-const combineStates = <StateType extends object = object>(
-  base: SerializedPanelState<StateType> | undefined,
-  override: SerializedPanelState<StateType> | undefined
-): SerializedPanelState<StateType> => {
-  return {
-    references: [...(base?.references ?? []), ...(override?.references ?? [])],
-    rawState: {
-      ...(base?.rawState ?? ({} as StateType)),
-      ...(override?.rawState ?? ({} as StateType)),
-    },
-    version: override?.version ?? base?.version,
-  };
-};
+import { AnyReactEmbeddableFactory } from './types';
 
 const getDefaultDiffingApi = () => {
   return {
@@ -43,51 +29,68 @@ const getDefaultDiffingApi = () => {
   };
 };
 
+const initializeNullState = <
+  SerializedState extends object
+>(): SerializedPanelState<SerializedState> => ({
+  references: [],
+  rawState: {} as SerializedState,
+});
+
 export const initializeReactEmbeddableState = async <
-  StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  SerializedState extends object,
+  RuntimeState extends object,
+  ExternalState extends object
 >(
   uuid: string,
-  factory: ReactEmbeddableFactory<StateType, ApiType>,
+  factory: AnyReactEmbeddableFactory,
   parentApi: unknown
 ) => {
-  const lastSavedParentState = apiPublishesLastSavedState(parentApi)
-    ? parentApi?.getLastSavedStateForChild(uuid)
-    : undefined;
-  const latestParentState = apiProvidesUnsavedState(parentApi)
-    ? combineStates(lastSavedParentState, parentApi.getUnsavedStateForChild(uuid))
+  const lastSavedParentState = apiPublishesLastSavedState<SerializedState>(parentApi)
+    ? parentApi?.getLastSavedStateForChild(uuid) ?? initializeNullState<SerializedState>()
+    : initializeNullState<SerializedState>();
+  const latestParentState = apiProvidesUnsavedState<SerializedState>(parentApi)
+    ? parentApi.getUnsavedStateForChild(uuid) ?? lastSavedParentState
     : lastSavedParentState;
 
-  const loadedState = factory.load ? await factory.load(latestParentState) : undefined;
+  let initialRuntimeState: RuntimeState;
+  let firstLoadedExternalState: SerializedPanelState<ExternalState>;
+  if (factory?.loadExternalState) {
+    firstLoadedExternalState = await factory.loadExternalState(latestParentState);
+    initialRuntimeState = factory.deserializeState(latestParentState, firstLoadedExternalState);
+  } else {
+    initialRuntimeState = factory.deserializeState(latestParentState);
+  }
 
-  const initialState = factory.deserializeState(combineStates(loadedState, latestParentState));
-
-  const startStateDiffing = (comparators: StateComparators<StateType>) => {
+  const startStateDiffing = (comparators: StateComparators<RuntimeState>) => {
     if (Object.keys(comparators).length === 0) return getDefaultDiffingApi();
 
-    const lastSavedStateSubject = getLastSavedStateSubjectForChild<StateType>(
+    const lastSavedStateSubject = getLastSavedStateSubjectForChild<SerializedState, RuntimeState>(
       parentApi,
       uuid,
       (state) => {
-        // deserializer includes loaded state to ensure by reference panels are fully compared.
-        return factory.deserializeState(combineStates(loadedState, state));
+        if (factory?.loadExternalState) {
+          // when deserializing last saved state, we always use the external state that was loaded
+          // on initiailization to avoid loading it multiple times.
+          return factory.deserializeState(state, firstLoadedExternalState);
+        }
+        return factory.deserializeState(state);
       }
     );
     if (!lastSavedStateSubject) return getDefaultDiffingApi();
 
     const comparatorSubjects: Array<PublishingSubject<unknown>> = [];
-    const comparatorKeys: Array<keyof StateType> = [];
-    for (const key of Object.keys(comparators) as Array<keyof StateType>) {
+    const comparatorKeys: Array<keyof RuntimeState> = [];
+    for (const key of Object.keys(comparators) as Array<keyof RuntimeState>) {
       const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
       comparatorSubjects.push(comparatorSubject as PublishingSubject<unknown>);
       comparatorKeys.push(key);
     }
 
-    const unsavedChanges = new BehaviorSubject<Partial<StateType> | undefined>(
+    const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
       runComparators(
         comparators,
         comparatorKeys,
-        lastSavedStateSubject?.getValue(),
+        lastSavedStateSubject?.getValue() as RuntimeState,
         getInitialValuesFromComparators(comparators, comparatorKeys)
       )
     );
@@ -97,9 +100,9 @@ export const initializeReactEmbeddableState = async <
         debounceTime(100),
         map((latestStates) =>
           comparatorKeys.reduce((acc, key, index) => {
-            acc[key] = latestStates[index] as StateType[typeof key];
+            acc[key] = latestStates[index] as RuntimeState[typeof key];
             return acc;
-          }, {} as Partial<StateType>)
+          }, {} as Partial<RuntimeState>)
         ),
         combineLatestWith(lastSavedStateSubject)
       )
@@ -114,12 +117,12 @@ export const initializeReactEmbeddableState = async <
         const lastSaved = lastSavedStateSubject?.getValue();
         for (const key of comparatorKeys) {
           const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-          setter(lastSaved?.[key] as StateType[typeof key]);
+          setter(lastSaved?.[key] as RuntimeState[typeof key]);
         }
       },
       cleanup: () => subscription.unsubscribe(),
     };
   };
 
-  return { initialState, startStateDiffing };
+  return { initialState: initialRuntimeState, startStateDiffing };
 };

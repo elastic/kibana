@@ -12,6 +12,7 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
+import { FieldListSerializedStateState } from './types';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
@@ -22,8 +23,9 @@ export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) =
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel({
+      embeddable.addNewPanel<FieldListSerializedStateState>({
         panelType: FIELD_LIST_ID,
+        initialState: {},
       });
     },
     getDisplayName: () =>

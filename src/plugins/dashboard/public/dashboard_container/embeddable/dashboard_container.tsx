@@ -551,7 +551,6 @@ export class DashboardContainer
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
-        version: serialized.version,
       };
     }
     return panel;
@@ -784,7 +783,12 @@ export class DashboardContainer
     const panel: DashboardPanelState | undefined = panels[childId];
 
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
-    return { rawState: panel?.explicitInput, version: panel?.version, references };
+    return { rawState: panel?.explicitInput, references };
+  };
+
+  public getUnsavedStateForChild = (childId: string) => {
+    const references = getReferencesForPanelId(childId, this.savedObjectReferences);
+    return { rawState: this.getInput().panels[childId].explicitInput, references };
   };
 
   public removePanel(id: string) {

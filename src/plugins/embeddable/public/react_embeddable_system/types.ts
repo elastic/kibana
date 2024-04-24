@@ -5,18 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  HasSavableState,
-  HasSerializableState,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
-import React, { ReactElement } from 'react';
-
-export type ReactEmbeddableRegistration<
-  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
-> = (ref: React.ForwardedRef<ApiType>) => ReactElement | null;
+import {
+  HasType,
+  PublishesUnsavedChanges,
+  SavesExternalState,
+  StateComparators,
+} from '@kbn/presentation-publishing';
+import React from 'react';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -27,68 +24,83 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
   extends DefaultPresentationPanelApi,
     HasType,
     PublishesUnsavedChanges,
-    HasSerializableState<SerializedState> {}
-
-export type ReactEmbeddableApiRegistration<
-  StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
-> = Omit<ApiType, 'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'>;
-
-export interface ReactEmbeddableFactory<
-  State extends object,
-  ApiType extends DefaultEmbeddableApi<State> = DefaultEmbeddableApi<State>
-> {
-  type: string;
-  latestVersion?: string;
-  deserializeState: (state: SerializedPanelState) => State;
-  buildEmbeddable: (
-    initialState: State,
-    buildApi: (
-      apiRegistration: ReactEmbeddableApiRegistration<State, ApiType>,
-      comparators: StateComparators<State>
-    ) => ApiType,
-    uuid: string,
-    parentApi?: unknown
-  ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
-}
+    HasSerializableState<SerializedState>,
+    Partial<SavesExternalState> {}
 
 /**
- * A version of the default embeddable api that supports saving portions of the state
- * by reference.
+ * A subset of the default embeddable API used in registration to allow implementors to omit aspects
+ * of the API that will be automatically added by the system.
  */
-export interface ByRefCapableEmbeddableApi<
-  ByReferenceState extends object = object,
-  ByValueState extends object = object
-> extends DefaultEmbeddableApi<ByValueState & Partial<ByReferenceState>>,
-    HasSavableState<ByReferenceState, ByValueState> {}
+export type ReactEmbeddableApiRegistration<
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'>;
 
-export interface ByRefCapableEmbeddableFactory<
-  ByReferenceState extends object,
-  ByValueState extends object,
-  ApiType extends ByRefCapableEmbeddableApi<
-    ByReferenceState,
-    ByValueState
-  > = ByRefCapableEmbeddableApi<ByReferenceState, ByValueState>
-> extends Omit<
-    ReactEmbeddableFactory<ByValueState, ApiType>,
-    'deserializeState' | 'buildEmbeddable'
-  > {
-  load?: (
-    parentState: SerializedPanelState<ByReferenceState | ByValueState>
-  ) => Promise<SerializedPanelState<Partial<ByValueState>> | undefined>;
+/**
+ * The React Embeddable Factory interface is used to register a series of functions that
+ * create and manage an embeddable instance.
+ *
+ * Embeddables are React components that manage their own state, can be serialized and
+ * deserialized, and return an API that can be used to interact with them imperatively.
+ * provided by the parent, and will not save any state to an external store.
+ **/
+export interface ReactEmbeddableFactory<
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  RuntimeState extends object = SerializedState,
+  ExternalState extends object = {}
+> {
+  /**
+   * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
+   * to find this factory.
+   */
+  type: string;
+
+  /**
+   * An optional async function that loads state from some external store. This function
+   * takes the most recent state from the parent and returns some loaded external state.
+   *
+   * If this is provided, your API should also extend {@link SavesExternalState} to allow
+   * the embeddable to save back to the external state store.
+   */
+  loadExternalState?: (
+    panelState: SerializedPanelState<SerializedState>
+  ) => Promise<SerializedPanelState<ExternalState>>;
+
+  /**
+   * A required synchronous function that transforms serialized state into runtime state.
+   * This will be used twice - once for the parent state, and once for the last saved state
+   * for comparison.
+   *
+   * If `loadExternalState` is provided, this function will be called with the result of that.
+   *
+   * This can also be used to:
+   *
+   * - Inject references provided by the parent
+   * - Migrate the state to a newer version (this must be undone when serializing)
+   */
   deserializeState: (
-    state: SerializedPanelState<ByValueState & Partial<ByReferenceState>>
-  ) => ByValueState & Partial<ByReferenceState>;
+    panelState: SerializedPanelState<SerializedState>,
+    externalState?: SerializedPanelState<ExternalState>
+  ) => RuntimeState;
+
+  /**
+   * A required async function that builds your embeddable component and a linked API instance. The API
+   * and component will be combined together by the ReactEmbeddableRenderer. Initial state will contain the result of
+   * the deserialize function.
+   *
+   * The returned API must extend {@link HasSerializableState} which does the opposite of the deserializeState
+   * function.
+   */
   buildEmbeddable: (
-    initialState: ByValueState & Partial<ByReferenceState>,
+    initialState: RuntimeState,
     buildApi: (
-      apiRegistration: ReactEmbeddableApiRegistration<
-        ByValueState & Partial<ByReferenceState>,
-        ApiType
-      >,
-      comparators: StateComparators<ByValueState & Partial<ByReferenceState>>
-    ) => ApiType,
+      apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
+      comparators: StateComparators<RuntimeState>
+    ) => Api,
     uuid: string,
     parentApi?: unknown
-  ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
+  ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }
+
+export type AnyReactEmbeddableFactory = ReactEmbeddableFactory<any, any, any, any>;
