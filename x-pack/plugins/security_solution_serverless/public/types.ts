@@ -14,6 +14,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 import type { ServerlessSecurityConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -36,6 +37,7 @@ export interface SecuritySolutionServerlessPluginStartDeps {
   serverless: ServerlessPluginStart;
   management: ManagementStart;
   cloud: CloudStart;
+  indexManagement?: IndexManagementPluginStart;
 }
 
 export type ServerlessSecurityPublicConfig = Pick<
