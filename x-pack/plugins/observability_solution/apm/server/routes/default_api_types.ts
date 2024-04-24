@@ -52,10 +52,10 @@ export const transactionDataSourceRt = t.type({
 });
 
 const BoolQueryRt = t.type({
-  should: t.array(t.unknown),
-  must: t.array(t.unknown),
-  must_not: t.array(t.unknown),
-  filter: t.array(t.unknown),
+  should: t.array(t.record(t.string, t.unknown)),
+  must: t.array(t.record(t.string, t.unknown)),
+  must_not: t.array(t.record(t.string, t.unknown)),
+  filter: t.array(t.record(t.string, t.unknown)),
 });
 
 export const filtersRt = new t.Type<BoolQuery, string, unknown>(
