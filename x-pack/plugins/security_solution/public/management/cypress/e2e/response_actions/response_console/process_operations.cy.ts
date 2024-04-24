@@ -26,14 +26,12 @@ import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_
 
 const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
 
-// Failing: See https://github.com/elastic/kibana/issues/170371
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170371
-  describe.skip('Processes operations:', () => {
+  describe('Processes operations:', () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;

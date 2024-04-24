@@ -188,7 +188,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             flowCategory={searchParams.get('category')}
             ref={packageListRef}
             customCards={customCards?.filter(
-              (card) => card.type === 'generated' && !card.isCollectionCard
+              // Filter out collection cards and regular integrations that show up via search anyway
+              (card) => card.type === 'virtual' && !card.isCollectionCard
             )}
             joinCardLists
           />
