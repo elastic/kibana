@@ -103,7 +103,8 @@ export class VegaBaseView {
       } else {
         this._parentEl.classList.remove('vgaVis--autoresize');
       }
-      this._parentEl.replaceChildren().classList.add('vgaVis');
+      this._parentEl.replaceChildren();
+      this._parentEl.classList.add('vgaVis');
       this._parentEl.style.flexDirection = this._parser.containerDir;
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
