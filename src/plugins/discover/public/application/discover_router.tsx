@@ -49,25 +49,25 @@ export const DiscoverRouter = ({
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
           <Routes>
-            <Route path={'/context/:dataViewId/:id'}>
+            <Route path="/context/:dataViewId/:id">
               <ContextAppRoute />
             </Route>
             <Route
-              path={'/doc/:dataView/:index/:type'}
+              path="/doc/:dataView/:index/:type"
               render={(props) => (
                 <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
               )}
             />
-            <Route path={'/doc/:dataViewId/:index'}>
+            <Route path="/doc/:dataViewId/:index">
               <SingleDocRoute />
             </Route>
-            <Route path={'/viewAlert/:id'}>
+            <Route path="/viewAlert/:id">
               <ViewAlertRoute />
             </Route>
-            <Route path={'/view/:id'}>
+            <Route path="/view/:id">
               <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
             </Route>
-            <Route path="/">
+            <Route path="/" exact>
               <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
             </Route>
             <NotFoundRoute />
