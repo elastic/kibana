@@ -66,8 +66,11 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                 <EuiCopy textToCopy={getSLOTransformId(result.sloId, result.sloRevision)}>
                   {(copy) => (
                     <EuiButtonIcon
-                      data-test-subj="sloHealthCalloutButton"
-                      aria-label="Copy text to clipboard"
+                      data-test-subj="sloHealthCalloutCopyButton"
+                      aria-label={i18n.translate(
+                        'xpack.slo.sloList.healthCallout.copyToClipboard',
+                        { defaultMessage: 'Copy to clipboard' }
+                      )}
                       color="text"
                       iconType="copy"
                       onClick={copy}
@@ -83,8 +86,11 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                 <EuiCopy textToCopy={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
                   {(copy) => (
                     <EuiButtonIcon
-                      data-test-subj="sloHealthCalloutButton"
-                      aria-label="Copy text to clipboard"
+                      data-test-subj="sloHealthCalloutCopyButton"
+                      aria-label={i18n.translate(
+                        'xpack.slo.sloList.healthCallout.copyToClipboard',
+                        { defaultMessage: 'Copy to clipboard' }
+                      )}
                       color="text"
                       iconType="copy"
                       onClick={copy}
