@@ -49,6 +49,14 @@ export const SUPPRESSED_PRIORITY_ACTION = {
   }),
 };
 
+export const IMPROVING_PRIORITY_ACTION_ID = 'slo.burnRate.improving';
+export const IMPROVING_PRIORITY_ACTION = {
+  id: IMPROVING_PRIORITY_ACTION_ID,
+  name: i18n.translate('xpack.slo.alerting.burnRate.improvingPriorityAction', {
+    defaultMessage: 'Improving',
+  }),
+};
+
 export const SLO_MODEL_VERSION = 2;
 export const SLO_RESOURCES_VERSION = 3.2;
 export const SLO_RESOURCES_VERSION_MAJOR = 3;

@@ -14,3 +14,15 @@ export const DependencyRT = t.type({
 export const DependenciesRT = t.array(DependencyRT);
 
 export type Dependency = t.OutputOf<typeof DependencyRT>;
+
+export interface InstanceHistoryRecord {
+  actionGroup: string;
+  improvingFrom?: string;
+  suppressed?: boolean;
+  timerange: { from: number; to?: number };
+}
+
+export interface InstanceHistory {
+  instanceId: string;
+  history: InstanceHistoryRecord[];
+}
