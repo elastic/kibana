@@ -21,9 +21,6 @@ export type { DataDocumentsMsg } from './application/main/services/discover_data
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {
   CustomizationCallback,
-  DiscoverProfileId,
-  DiscoverProfileOptions,
-  RegisterCustomizationProfile,
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,
