@@ -10,7 +10,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
-      machineType: n2-standard-8
+      machineType: n2-highcpu-16
       preemptible: true
     timeout_in_minutes: 60
 
