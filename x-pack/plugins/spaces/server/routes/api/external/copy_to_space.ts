@@ -96,14 +96,16 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       } = request.body;
 
       const { headers } = request;
-      usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementCopySavedObjects({
-          headers,
-          createNewCopies,
-          overwrite,
-          compatibilityMode,
-        })
-      );
+      usageStatsClientPromise
+        .then((usageStatsClient) =>
+          usageStatsClient.incrementCopySavedObjects({
+            headers,
+            createNewCopies,
+            overwrite,
+            compatibilityMode,
+          })
+        )
+        .catch(() => {});
 
       try {
         const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
@@ -198,13 +200,15 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         request.body;
 
       const { headers } = request;
-      usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementResolveCopySavedObjectsErrors({
-          headers,
-          createNewCopies,
-          compatibilityMode,
-        })
-      );
+      usageStatsClientPromise
+        .then((usageStatsClient) =>
+          usageStatsClient.incrementResolveCopySavedObjectsErrors({
+            headers,
+            createNewCopies,
+            compatibilityMode,
+          })
+        )
+        .catch(() => {});
 
       const resolveCopySavedObjectsToSpacesConflicts =
         resolveCopySavedObjectsToSpacesConflictsFactory(startServices.savedObjects, request);

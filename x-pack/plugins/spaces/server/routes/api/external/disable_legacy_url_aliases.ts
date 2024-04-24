@@ -35,9 +35,9 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
 
       const { aliases } = request.body;
 
-      usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementDisableLegacyUrlAliases()
-      );
+      usageStatsClientPromise
+        .then((usageStatsClient) => usageStatsClient.incrementDisableLegacyUrlAliases())
+        .catch(() => {});
 
       try {
         await spacesClient.disableLegacyUrlAliases(aliases);
