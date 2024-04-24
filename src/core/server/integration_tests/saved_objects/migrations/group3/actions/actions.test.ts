@@ -65,7 +65,7 @@ describe('migration actions', () => {
   beforeAll(async () => {
     esServer = await startES();
     // we don't need a long timeout for testing purposes
-    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 5500 });
+    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
@@ -390,8 +390,7 @@ describe('migration actions', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/152677
-  describe.skip('waitForIndexStatus', () => {
+  describe('waitForIndexStatus', () => {
     afterEach(async () => {
       try {
         await client.indices.delete({ index: 'red_then_yellow_index' });
