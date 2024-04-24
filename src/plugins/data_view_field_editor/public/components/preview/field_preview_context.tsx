@@ -19,7 +19,6 @@ import React, {
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
 import { useStateSelector } from '../../state_utils';
@@ -279,43 +278,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       fields: updatedFields,
     });
   }, [name, type, parentName, controller]);
-
-  /**
-   * Whenever the format changes we immediately update the preview
-   */
-  useEffect(() => {
-    const { previewResponse: prev } = controller.state$.getValue();
-    const { fields } = prev;
-
-    controller.setPreviewResponse({
-      ...prev,
-      fields: fields.map((field) => {
-        const nextValue =
-          script === null && Boolean(document)
-            ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
-            : field?.value;
-
-        const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
-
-        return {
-          ...field,
-          value: nextValue,
-          formattedValue,
-        };
-      }),
-    });
-  }, [name, script, document, controller, type, format]);
-
-  /*
-  useEffect(() => {
-    if (script?.source === undefined) {
-      // Whenever the source is not defined ("Set value" is toggled off or the
-      // script is empty) we clear the error and update the params cache.
-      controller.setLastExecutePainlessRequestParams({ script: undefined });
-      controller.setPreviewError(null);
-    }
-  }, [script?.source, controller]);
-  */
 
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)

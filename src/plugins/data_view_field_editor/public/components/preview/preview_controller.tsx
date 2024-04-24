@@ -14,6 +14,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
 import debounce from 'lodash/debounce';
+import { get, assign } from 'lodash';
 import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
@@ -241,9 +242,27 @@ export class PreviewController {
   };
 
   setParams = (params: Partial<Params>) => {
+    const prevState = this.internalState$.getValue();
+    const { script, document, name, type, format } = assign({}, prevState.params, params);
+    const prevPreviewResponseFields = prevState.previewResponse.fields;
+    const fields = prevPreviewResponseFields.map((field) => {
+      const nextValue =
+        script === null && Boolean(document)
+          ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
+          : field?.value;
+
+      const formattedValue = this.valueFormatter({ value: nextValue, type, format });
+
+      return {
+        ...field,
+        value: nextValue,
+        formattedValue,
+      };
+    });
     const stateUpdate: Partial<PreviewState> = {
+      previewResponse: { fields, error: prevState.previewResponse.error },
       params: {
-        ...this.internalState$.getValue().params,
+        ...prevState.params,
         ...params,
       },
     };
@@ -252,9 +271,10 @@ export class PreviewController {
     // script is empty) we clear the error and update the params cache.
     if (params.script?.source === undefined) {
       stateUpdate.previewResponse = {
-        ...this.internalState$.getValue().previewResponse,
+        ...prevState.previewResponse,
         error: null,
       };
+      // ideally this would be a single state update
       this.setLastExecutePainlessRequestParams({ script: undefined });
     }
 
