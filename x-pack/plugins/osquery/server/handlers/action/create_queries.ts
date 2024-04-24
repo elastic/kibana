@@ -8,6 +8,8 @@
 import { isEmpty, isNumber, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { BasicFields } from '@kbn/alerting-types';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -16,7 +18,7 @@ import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 
 interface CreateDynamicQueriesParams {
   params: CreateLiveQueryRequestBodySchema;
-  alertData?: Record<string, unknown>;
+  alertData?: ParsedTechnicalFields & Omit<BasicFields, '_id'>;
   agents: string[];
   osqueryContext: OsqueryAppContext;
   error?: string;
@@ -70,7 +72,7 @@ export const createDynamicQueries = async ({
 
 export const replacedQueries = (
   query: string | undefined,
-  alertData?: Record<string, unknown>
+  alertData?: ParsedTechnicalFields & Omit<BasicFields, '_id'>
 ): { query: string | undefined; error?: string } => {
   if (alertData && query) {
     const { result, skipped } = replaceParamsQuery(query, alertData);
