@@ -30,6 +30,7 @@ import {
   getMethodCompletionItems,
   getRequestEndLineNumber,
   getRequestStartLineNumber,
+  getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
   stringifyRequest,
@@ -318,6 +319,12 @@ export class MonacoEditorActionsProvider {
     if (autocompleteType === AutocompleteType.PATH) {
       return {
         suggestions: getUrlPathCompletionItems(model, position),
+      };
+    }
+
+    if (autocompleteType === AutocompleteType.URL_PARAMS) {
+      return {
+        suggestions: getUrlParamsCompletionItems(model, position),
       };
     }
 
