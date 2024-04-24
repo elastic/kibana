@@ -93,7 +93,6 @@ export const PresentationPanelInternal = <
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean | string } = {};
-    attrs['data-shared-item'] = '';
     if (dataLoading) {
       attrs['data-loading'] = true;
     } else {

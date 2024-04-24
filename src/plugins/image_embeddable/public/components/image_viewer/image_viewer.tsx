@@ -50,6 +50,7 @@ export function ImageViewer({
   className,
   containerCSS,
   isScreenshotMode,
+  ...rest
 }: ImageViewerProps) {
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
 
@@ -68,6 +69,7 @@ export function ImageViewer({
 
   return (
     <div
+      {...rest}
       css={[
         css`
           position: relative;
