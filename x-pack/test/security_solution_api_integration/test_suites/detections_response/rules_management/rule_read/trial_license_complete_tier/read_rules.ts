@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@brokenInServerless @skipInQA should be able to a read a execute immediately action correctly', async () => {
+      it('@skipInServerless should be able to a read a execute immediately action correctly', async () => {
         // create connector/action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(ruleWithActions);
       });
 
-      it('@brokenInServerless should be able to a read a scheduled action correctly', async () => {
+      it('@skipInServerless should be able to a read a scheduled action correctly', async () => {
         // create connector/action
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
