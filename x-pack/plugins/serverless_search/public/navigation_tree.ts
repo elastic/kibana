@@ -29,6 +29,16 @@ export const navigationTree: NavigationTreeDefinition = {
           spaceBefore: 'm',
         },
         {
+          id: 'dev_tools',
+          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+            defaultMessage: 'Dev Tools',
+          }),
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+          },
+        },
+        {
           id: 'kibana',
           title: i18n.translate('xpack.serverlessSearch.nav.kibana', {
             defaultMessage: 'Kibana',
@@ -87,18 +97,6 @@ export const navigationTree: NavigationTreeDefinition = {
     },
   ],
   footer: [
-    {
-      type: 'navItem',
-      id: 'dev_tools',
-      title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-        defaultMessage: 'Dev Tools',
-      }),
-      link: 'dev_tools:console',
-      getIsActive: ({ pathNameSerialized, prepend }) => {
-        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-      },
-      icon: 'editorCodeBlock',
-    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
