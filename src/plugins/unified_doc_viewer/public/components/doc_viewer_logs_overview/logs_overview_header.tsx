@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
-  DocumentOverview,
+  LogDocumentOverview,
   fieldConstants,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
@@ -30,7 +30,7 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
   defaultMessage: 'Content breakdown',
 });
 
-export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
+export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
   const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
   const { field, value } = getMessageFieldWithFallbacks(doc);

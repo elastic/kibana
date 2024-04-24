@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DocumentOverview } from '@kbn/discover-utils';
+import { LogDocumentOverview } from '@kbn/discover-utils';
 
 const LEVEL_DICT = {
   error: 'danger',
@@ -21,7 +21,7 @@ const LEVEL_DICT = {
 type Level = keyof typeof LEVEL_DICT;
 
 interface LogLevelProps {
-  level: DocumentOverview['log.level'];
+  level: LogDocumentOverview['log.level'];
 }
 
 export function LogLevel({ level }: LogLevelProps) {

@@ -10,7 +10,7 @@ import React from 'react';
 import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { first } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataTableRecord, DocumentOverview, fieldConstants } from '@kbn/discover-utils';
+import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 
@@ -18,10 +18,10 @@ export function LogsOverviewHighlights({
   formattedDoc,
   flattenedDoc,
 }: {
-  formattedDoc: DocumentOverview;
+  formattedDoc: LogDocumentOverview;
   flattenedDoc: DataTableRecord['flattened'];
 }) {
-  const getHighlightProps = (field: keyof DocumentOverview) => ({
+  const getHighlightProps = (field: keyof LogDocumentOverview) => ({
     field,
     formattedValue: formattedDoc[field],
     value: flattenedDoc[field],

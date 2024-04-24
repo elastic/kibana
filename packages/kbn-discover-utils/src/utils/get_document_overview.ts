@@ -8,13 +8,13 @@
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord, DocumentOverview, fieldConstants, formatFieldValue } from '../..';
+import { DataTableRecord, LogDocumentOverview, fieldConstants, formatFieldValue } from '../..';
 
 export function getDocumentOverview(
   doc: DataTableRecord,
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
-): DocumentOverview {
-  const formatField = <T extends keyof DocumentOverview>(field: T) => {
+): LogDocumentOverview {
+  const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     return (
       field in doc.flattened
         ? formatFieldValue(
@@ -25,7 +25,7 @@ export function getDocumentOverview(
             dataView.fields.getByName(field)
           )
         : undefined
-    ) as DocumentOverview[T];
+    ) as LogDocumentOverview[T];
   };
 
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
