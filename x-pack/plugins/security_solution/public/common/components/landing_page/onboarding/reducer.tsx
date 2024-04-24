@@ -7,8 +7,14 @@
 
 import type { ProductLine } from './configs';
 import { setupActiveSections, updateActiveSections } from './helpers';
-import type { ExpandedCardSteps, ReducerActions } from './types';
-import { type CardId, type StepId, type TogglePanelReducer, OnboardingActions } from './types';
+import type {
+  ExpandedCardSteps,
+  ReducerActions,
+  type CardId,
+  type StepId,
+  type TogglePanelReducer,
+  OnboardingActions,
+} from './types';
 
 export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
   if (action.type === OnboardingActions.ToggleProduct) {

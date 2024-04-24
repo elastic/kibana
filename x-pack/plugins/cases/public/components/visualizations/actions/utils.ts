@@ -5,8 +5,11 @@
  * 2.0.
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import type {
+  LensSavedObjectAttributes,
+  LENS_EMBEDDABLE_TYPE,
+  type Embeddable as LensEmbeddable,
+} from '@kbn/lens-plugin/public';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
 import type { PersistableStateAttachmentPayload } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
