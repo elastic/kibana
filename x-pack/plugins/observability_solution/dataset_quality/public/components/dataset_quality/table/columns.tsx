@@ -119,11 +119,6 @@ const datasetQualityColumnTooltip = (
     id="xpack.datasetQuality.datasetQualityColumnTooltip"
     defaultMessage="Quality is based on the percentage of degraded docs in a dataset. {visualQueue}"
     values={{
-      ignoredProperty: (
-        <EuiCode language="json" transparentBackground>
-          _ignored
-        </EuiCode>
-      ),
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
