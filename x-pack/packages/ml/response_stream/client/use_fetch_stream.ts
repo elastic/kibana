@@ -66,7 +66,8 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
   apiVersion?: string,
   body?: B,
   customReducer?: FetchStreamCustomReducer<R>,
-  headers?: HttpFetchOptions['headers']
+  headers?: HttpFetchOptions['headers'],
+  dispatchHandler?: any
 ) {
   const [errors, setErrors] = useState<string[]>([]);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -142,9 +143,13 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
       } else if (action) {
-        dataRef.current = reducerWithFallback.reducer(dataRef.current, action) as ReducerState<
-          CustomReducer<R>
-        >;
+        if (dispatchHandler) {
+          dispatchHandler(action as ReducerAction<CustomReducer<R>>);
+        } else {
+          dataRef.current = reducerWithFallback.reducer(dataRef.current, action) as ReducerState<
+            CustomReducer<R>
+          >;
+        }
       }
     }
 
