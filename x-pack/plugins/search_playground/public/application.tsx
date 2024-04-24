@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParameters } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,7 +17,7 @@ import { AppPluginStartDependencies } from './types';
 export const renderApp = async (
   core: CoreStart,
   services: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  element: HTMLElement
 ) => {
   const { PlaygroundRouter } = await import('./playground_router');
 

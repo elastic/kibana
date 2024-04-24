@@ -32,7 +32,9 @@ export class SearchPlaygroundPlugin
     this.config = initializerContext.config.get<SearchPlaygroundConfigType>();
   }
 
-  public setup(core: CoreSetup): SearchPlaygroundPluginSetup {
+  public setup(
+    core: CoreSetup<AppPluginStartDependencies, SearchPlaygroundPluginStart>
+  ): SearchPlaygroundPluginSetup {
     if (!this.config.ui?.enabled) return {};
 
     core.application.register({
@@ -42,15 +44,12 @@ export class SearchPlaygroundPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        const startDeps: AppPluginStartDependencies = {
+          ...depsStart,
+          history,
+        };
 
-        return renderApp(
-          coreStart,
-          {
-            history,
-            ...depsStart,
-          } as AppPluginStartDependencies,
-          { element } as AppMountParameters
-        );
+        return renderApp(coreStart, startDeps, element);
       },
     });
 
