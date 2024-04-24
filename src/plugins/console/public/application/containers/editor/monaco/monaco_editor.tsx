@@ -58,6 +58,10 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);
   }, [docLinkVersion]);
 
+  const autoIndentCallback = useCallback(async (event: React.MouseEvent) => {
+    return actionsProvider.current!.autoIndent(event);
+  }, []);
+
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
   }, [dispatch, http, toasts, trackUiMetric]);
@@ -109,7 +113,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           <ConsoleMenu
             getCurl={getCurlCallback}
             getDocumentation={getDocumenationLink}
-            autoIndent={() => {}}
+            autoIndent={autoIndentCallback}
             notifications={notifications}
           />
         </EuiFlexItem>

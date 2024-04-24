@@ -17,6 +17,7 @@ import {
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { formatRequestBodyDoc } from '../../../../lib/utils';
 import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
@@ -264,5 +265,39 @@ export class MonacoEditorActionsProvider {
     populateContext(urlTokens, context, undefined, true, components);
 
     return getDocumentationLinkFromAutocompleteContext(context, docLinkVersion);
+  }
+
+  public async autoIndent(event: React.MouseEvent) {
+    event.preventDefault();
+    const requests = await this.getRequests();
+    const { range } = await this.getSelectedParsedRequestsAndRange();
+
+    console.log(range);
+
+    if (requests.length < 1) {
+      return;
+    }
+
+    requests.forEach((request) => {
+      if (request.data && request.data.length > 0) {
+        let indent = request.data.length === 1; // unindent multi docs by default
+        let formattedData = formatRequestBodyDoc(request.data, indent);
+        if (!formattedData.changed) {
+          // toggle.
+          indent = !indent;
+          formattedData = formatRequestBodyDoc(request.data, indent);
+        }
+
+        const firstLine = request.data + ' ' + request.url;
+        const newRequest = [firstLine, ...formattedData.data];
+
+        this.editor.executeEdits('', [
+          {
+            range,
+            text: newRequest.join('/n'),
+          },
+        ]);
+      }
+    });
   }
 }
