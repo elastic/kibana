@@ -271,24 +271,25 @@ function injectReferences(
 }
 
 function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
-  if (!('valuesInLegend' in state)) {
-    return state;
-  }
-  delete state.valuesInLegend;
-  const result: XYState = {
-    ...state,
-    legend: {
-      ...state.legend,
-      legendStats: [
-        ...new Set([
-          ...(state.valuesInLegend ? [LegendStats.values] : []),
-          ...(state.legend.legendStats || []),
-        ]),
-      ],
-    },
-  };
+  if ('valuesInLegend' in state) {
+    const valuesInLegend = state.valuesInLegend;
+    delete state.valuesInLegend;
+    const result: XYState = {
+      ...state,
+      legend: {
+        ...state.legend,
+        legendStats: [
+          ...new Set([
+            ...(valuesInLegend ? [LegendStats.values] : []),
+            ...(state.legend.legendStats || []),
+          ]),
+        ],
+      },
+    };
 
-  return result;
+    return result;
+  }
+  return state;
 }
 
 function convertToValuesInLegend(state: XYState) {
