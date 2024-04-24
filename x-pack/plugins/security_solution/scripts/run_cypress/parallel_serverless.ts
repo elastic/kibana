@@ -62,6 +62,29 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   }
 };
 
+// Check if proxy service is up and running executing a healthcheck call.
+function proxy_healthcheck(proxyUrl: string): Promise<boolean> {
+  const fetchHealthcheck = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
+
+    const response = await axios.get(`${proxyUrl}/healthcheck`);
+    log.info(`The proxy service is available.`);
+    return response.status == 200;
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError) {
+        log.info(`The proxy service is not available. A retry will be triggered soon...`);
+      }
+    },
+    retries: 4,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchHealthcheck, retryOptions);
+}
+
 // Wait until elasticsearch status goes green
 function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
@@ -229,7 +252,7 @@ export const cli = () => {
         : getApiKeyFromElasticCloudJsonFile();
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET) {
+      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && await proxy_healthcheck(PROXY_URL)) {
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
