@@ -681,7 +681,7 @@ export class ActionsClient {
     return additionalPrivileges;
   }
 
-  public async getActionTypeId(actionId: string): Promise<string | undefined> {
+  private async getActionTypeId(actionId: string): Promise<string | undefined> {
     const inMemoryConnector = this.context.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
