@@ -33,4 +33,5 @@ export interface SecurityServiceStart {
    * The {@link CoreAuthenticationService | authentication service}
    */
   authc: CoreAuthenticationService;
+  audit: CoreAuditServiceSetup;
 }
