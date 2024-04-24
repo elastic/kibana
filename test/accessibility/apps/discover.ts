@@ -134,11 +134,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
         await testSubjects.click('openFieldActionsButton-Cancelled'); // Open the actions
-        await testSubjects.click('openFieldActionsButton-Cancelled'); // Close the actions
       } else {
         await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
       }
       await a11y.testAppSnapshot();
+      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
+        await testSubjects.click('openFieldActionsButton-Cancelled'); // Close the actions
+      }
     });
 
     it('a11y test for data-grid table with columns', async () => {

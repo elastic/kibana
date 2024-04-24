@@ -38,7 +38,6 @@ import { isTextBasedQuery } from '../../application/main/utils/is_text_based_que
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
-import './_discover_grid_flyout.scss';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -85,7 +84,8 @@ export function DiscoverGridFlyout({
   const flyoutCustomization = useDiscoverCustomization('flyout');
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
-  const defaultWidth = flyoutCustomization?.size ?? euiTheme.base * 34; // Give enough room to search bar to not wrap
+  const DEFAULT_WIDTH = euiTheme.base * 34;
+  const defaultWidth = flyoutCustomization?.size ?? DEFAULT_WIDTH; // Give enough room to search bar to not wrap
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(FLYOUT_WIDTH_KEY, defaultWidth);
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
@@ -233,9 +233,9 @@ export function DiscoverGridFlyout({
         maxWidth={maxWidth}
         onResize={setFlyoutWidth}
         css={{
-          maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
+          maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}
-        className="dscGridFlyout"
+        paddingSize="m"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
