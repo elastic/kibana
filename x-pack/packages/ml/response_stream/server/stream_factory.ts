@@ -144,7 +144,7 @@ export function streamFactory<T = unknown>(
         function repeat() {
           if (!tryToEnd) {
             if (responseSizeSinceLastKeepAlive < FLUSH_PAYLOAD_SIZE) {
-              push({ flushPayload } as unknown as T);
+              push({ flushPayload, type: 'flushPayload' } as unknown as T);
             }
             responseSizeSinceLastKeepAlive = 0;
             setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);

@@ -15,6 +15,7 @@ import {
   type ReducerState,
 } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
+import { batch } from 'react-redux';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -65,7 +66,9 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
   apiVersion?: string,
   body?: B,
   customReducer?: FetchStreamCustomReducer<R>,
-  headers?: HttpFetchOptions['headers']
+  headers?: HttpFetchOptions['headers'],
+  dispatch?: any,
+  batchEnabled?: boolean
 ) {
   const [errors, setErrors] = useState<string[]>([]);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -75,7 +78,7 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
     ? customReducer
     : ({ reducer: stringReducer, initialState: '' } as FetchStreamCustomReducer<R>);
 
-  const [data, dispatch] = useReducer(
+  const [data, internalDispatch] = useReducer(
     reducerWithFallback.reducer,
     reducerWithFallback.initialState
   );
@@ -111,8 +114,17 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
       } else if (Array.isArray(actions) && actions.length > 0) {
-        for (const action of actions) {
-          dispatch(action as ReducerAction<CustomReducer<R>>);
+        if (dispatch && batchEnabled) {
+          batch(() => {
+            for (const action of actions) {
+              dispatch(action as ReducerAction<CustomReducer<R>>);
+            }
+          });
+        } else {
+          for (const action of actions) {
+            if (dispatch) dispatch(action as ReducerAction<CustomReducer<R>>);
+            else internalDispatch(action as ReducerAction<CustomReducer<R>>);
+          }
         }
       }
     }
