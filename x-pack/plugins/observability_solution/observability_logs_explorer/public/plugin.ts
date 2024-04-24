@@ -72,8 +72,8 @@ export class ObservabilityLogsExplorerPlugin
     });
 
     // ensure the tabs are shown when in the observability nav mode
-    discover.configureTopNav('oblt', {
-      showInline: true,
+    discover.configureInlineTopNav('oblt', {
+      enabled: true,
       showLogsExplorerTabs: true,
     });
 

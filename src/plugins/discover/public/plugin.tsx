@@ -111,15 +111,10 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showInlineTopNav: (
-    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
-  ) => void;
-  readonly configureTopNav: (
+  readonly showInlineTopNav: () => void;
+  readonly configureInlineTopNav: (
     projectNavId: string,
-    options: {
-      showInline: boolean;
-      showLogsExplorerTabs: boolean;
-    }
+    options: DiscoverCustomizationContext['inlineTopNav']
   ) => void;
 }
 
@@ -337,8 +332,7 @@ export class DiscoverPlugin
           .getActiveSolutionNavId$()
           .pipe(
             map((navId) => ({
-              displayMode: 'standalone',
-              // TODO: make this conditional on the chrome nav id
+              ...defaultCustomizationContext,
               inlineTopNav:
                 this.inlineTopNav.get(navId) ??
                 this.inlineTopNav.get(null) ??
@@ -392,17 +386,14 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
+      showInlineTopNav: () => {
         this.inlineTopNav.set(null, {
           enabled: true,
-          showLogsExplorerTabs: showLogsExplorerTabs ?? false,
+          showLogsExplorerTabs: false,
         });
       },
-      configureTopNav: (projectNavId, { showInline: enabled, showLogsExplorerTabs }) => {
-        this.inlineTopNav.set(projectNavId, {
-          enabled,
-          showLogsExplorerTabs,
-        });
+      configureInlineTopNav: (projectNavId, options) => {
+        this.inlineTopNav.set(projectNavId, options);
       },
     };
   }
