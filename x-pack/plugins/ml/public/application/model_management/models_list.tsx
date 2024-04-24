@@ -486,7 +486,7 @@ export const ModelsList: FC<Props> = ({
   const columns: Array<EuiBasicTableColumn<ModelItem>> = [
     {
       align: 'left',
-      width: '2%',
+      width: '32px',
       isExpander: true,
       render: (item: ModelItem) => {
         if (!item.stats) {
