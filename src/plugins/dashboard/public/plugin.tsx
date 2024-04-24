@@ -258,6 +258,7 @@ export class DashboardPlugin
         appMounted();
 
         const [coreStart] = await core.getStartServices();
+        
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
           scopedHistory: () => this.currentHistory!,
