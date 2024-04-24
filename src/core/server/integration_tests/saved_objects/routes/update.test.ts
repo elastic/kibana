@@ -101,6 +101,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsUpdate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

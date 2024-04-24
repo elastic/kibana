@@ -115,6 +115,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     expect(result.body).toEqual({ saved_objects: clientResponse });
     expect(coreUsageStatsClient.incrementSavedObjectsBulkUpdate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['visualization', 'dashboard'],
     });
   });
 
