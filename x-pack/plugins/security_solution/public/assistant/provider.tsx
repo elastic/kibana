@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -13,15 +13,14 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
   bulkUpdateConversations,
-  mergeBaseWithPersistedConversations,
-  useFetchCurrentUserConversations,
+  getUserConversations,
 } from '@kbn/elastic-assistant';
 
-import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
@@ -52,7 +51,7 @@ export const createConversations = async (
 ) => {
   // migrate conversations with messages from the local storage
   // won't happen next time
-  const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
+  const conversations = storage.get(`${APP_ID}.${LOCAL_STORAGE_KEY}`);
 
   if (conversations && Object.keys(conversations).length > 0) {
     const conversationsToCreate = Object.values(conversations).filter(
@@ -101,7 +100,7 @@ export const createConversations = async (
       notifications.toasts
     );
     if (bulkResult && bulkResult.success) {
-      storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
+      storage.remove(`${APP_ID}.${LOCAL_STORAGE_KEY}`);
       notifications.toasts?.addSuccess({
         iconType: 'check',
         title: LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE,
@@ -129,34 +128,27 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
-  const migrateConversationsFromLocalStorage = once(() =>
-    createConversations(notifications, http, storage)
-  );
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
-      const mergedData = mergeBaseWithPersistedConversations({}, conversationsData);
+  useEffect(() => {
+    const migrateConversationsFromLocalStorage = once(async () => {
+      const res = await getUserConversations({
+        http,
+      });
       if (
-        conversationsData &&
-        Object.keys(conversationsData).length === 0 &&
         assistantAvailability.isAssistantEnabled &&
-        assistantAvailability.hasAssistantPrivilege
+        assistantAvailability.hasAssistantPrivilege &&
+        res.total === 0
       ) {
-        migrateConversationsFromLocalStorage();
+        await createConversations(notifications, http, storage);
       }
-      return mergedData;
-    },
-    [
-      assistantAvailability.hasAssistantPrivilege,
-      assistantAvailability.isAssistantEnabled,
-      migrateConversationsFromLocalStorage,
-    ]
-  );
-  useFetchCurrentUserConversations({
+    });
+    migrateConversationsFromLocalStorage();
+  }, [
+    assistantAvailability.hasAssistantPrivilege,
+    assistantAvailability.isAssistantEnabled,
     http,
-    onFetch: onFetchedConversations,
-    isAssistantEnabled:
-      assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege,
-  });
+    notifications,
+    storage,
+  ]);
 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
