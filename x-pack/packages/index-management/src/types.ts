@@ -15,12 +15,17 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
 
+export interface DSLConfigSubject {
+  canDisableDataRetention: boolean;
+}
+
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
 }
 
 export interface IndexManagementPluginStart {
+  setDSLConfig: ({ canDisableDataRetention }: DSLConfigSubject) => void;
   extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;

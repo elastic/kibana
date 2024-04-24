@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
 import { render, unmountComponentAtNode } from 'react-dom';
 import SemVer from 'semver/classes/semver';
 
@@ -24,19 +26,23 @@ import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
 import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';
+import { DSLConfigSubject } from '../types';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface IndexManagementAppContextProps {
   core: CoreStart;
   dependencies: AppDependencies;
+  dslConfig$: BehaviorSubject<DSLConfigSubject>;
 }
 
 export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps> = ({
   children,
   core,
   dependencies,
+  dslConfig$,
 }) => {
+  const dslConfig = useObservable(dslConfig$);
   const { docLinks, notifications, application, executionContext, overlays, theme } = core;
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
@@ -68,7 +74,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     <KibanaRenderContextProvider {...core}>
       <KibanaReactContextProvider>
         <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={dependencies}>
+          <AppContextProvider value={{ ...dependencies, dslConfig }}>
             <MappingsEditorProvider>
               <ComponentTemplatesProvider value={componentTemplateProviderValues}>
                 <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
@@ -83,7 +89,8 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
 
 export const renderApp = (
   elem: HTMLElement | null,
-  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
+  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies },
+  dslConfig$: BehaviorSubject<DSLConfigSubject>
 ) => {
   if (!elem) {
     return () => undefined;
@@ -91,7 +98,7 @@ export const renderApp = (
   const { history } = dependencies;
 
   render(
-    <IndexManagementAppContext core={core} dependencies={dependencies}>
+    <IndexManagementAppContext core={core} dependencies={dependencies} dslConfig$={dslConfig$}>
       <App history={history} />
     </IndexManagementAppContext>,
     elem

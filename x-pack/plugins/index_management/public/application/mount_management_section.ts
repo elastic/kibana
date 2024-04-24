@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
+import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -24,7 +25,7 @@ import { setUiMetricService } from './services/api';
 import { notificationService } from './services/notification';
 import { httpService } from './services/http';
 import { ExtensionsService } from '../services/extensions_service';
-import { StartDependencies } from '../types';
+import { StartDependencies, DSLConfigSubject } from '../types';
 
 function initSetup({
   usageCollection,
@@ -111,6 +112,7 @@ export async function mountManagementSection({
   kibanaVersion,
   config,
   cloud,
+  dslConfig$,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
@@ -120,6 +122,7 @@ export async function mountManagementSection({
   kibanaVersion: SemVer;
   config: AppDependencies['config'];
   cloud?: CloudSetup;
+  dslConfig$: BehaviorSubject<DSLConfigSubject>;
 }) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -149,7 +152,11 @@ export async function mountManagementSection({
     usageCollection,
   });
 
-  const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });
+  const unmountAppCallback = renderApp(
+    element,
+    { core, dependencies: appDependencies },
+    dslConfig$
+  );
 
   return () => {
     docTitle.reset();

@@ -21,7 +21,9 @@
       "discover",
       "security",
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "indexManagement"
+    ],
     "requiredBundles": []
   }
 }

@@ -11,6 +11,9 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+
+export type { DSLConfigSubject } from '@kbn/index-management';
+
 export interface SetupDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
