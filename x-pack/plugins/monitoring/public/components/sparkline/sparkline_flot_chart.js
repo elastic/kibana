@@ -7,7 +7,6 @@
 
 import { last, isFunction, debounce } from 'lodash';
 import $ from 'jquery';
-import '@kbn/flot-charts';
 import { DEBOUNCE_FAST_MS } from '../../../common/constants';
 
 /**

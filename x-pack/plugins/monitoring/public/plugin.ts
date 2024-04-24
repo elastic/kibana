@@ -14,6 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import '@kbn/flot-charts';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
