@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -81,21 +81,57 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
-  const [integrationSearch, setIntegrationSearch] = useState('');
+
+  const [hasPackageListLoaded, setHasPackageListLoaded] = useState<boolean>(false);
+  const onPackageListLoaded = useCallback(() => {
+    setHasPackageListLoaded(true);
+  }, []);
+  const packageListRef = useRef<HTMLDivElement | null>(null);
+  const customCardsRef = useRef<HTMLDivElement | null>(null);
+  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+  const selectedCategory: Category | null = searchParams.get('category') as Category | null;
+
+  useEffect(() => {
+    if (selectedCategory === null || !hasPackageListLoaded) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      customCardsRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }, 10);
+
+    return () => clearTimeout(timeout);
+  }, [selectedCategory, hasPackageListLoaded]);
+
+  useEffect(() => {
+    const searchParam = searchParams.get('search') ?? '';
+    if (integrationSearch === searchParam) return;
+    const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    if (integrationSearch) {
+      entries.search = integrationSearch;
+    } else {
+      delete entries.search;
+    }
+    setSearchParams(entries, { replace: true });
+  }, [integrationSearch, searchParams, setSearchParams]);
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListSearchBarRef.current) {
-        packageListSearchBarRef.current.focus();
-        packageListSearchBarRef.current.scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-        });
+      if (packageListRef.current) {
+        // adding a slight delay causes the search bar to be rendered
+        new Promise((r) => setTimeout(r, 10)).then(() =>
+          packageListRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        );
       }
     },
-    [setIntegrationSearch]
+    []
   );
 
   const customCards = useCustomCardsForCategory(
@@ -151,7 +187,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {Array.isArray(customCards) && <OnboardingFlowPackageList customCards={customCards} />}
+          {Array.isArray(customCards) && (
+            <OnboardingFlowPackageList
+              ref={customCardsRef}
+              customCards={customCards}
+              flowSearch={integrationSearch}
+              flowCategory={searchParams.get('category')}
+              onLoaded={onPackageListLoaded}
+            />
+          )}
 
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
@@ -162,8 +206,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           <OnboardingFlowPackageList
             showSearchBar={true}
             searchQuery={integrationSearch}
+            flowSearch={integrationSearch}
             setSearchQuery={setIntegrationSearch}
-            ref={packageListSearchBarRef}
+            flowCategory={searchParams.get('category')}
+            ref={packageListRef}
+            customCards={customCards?.filter(
+              // Filter out collection cards and regular integrations that show up via search anyway
+              (card) => card.type === 'virtual' && !card.isCollectionCard
+            )}
+            joinCardLists
           />
         </>
       )}

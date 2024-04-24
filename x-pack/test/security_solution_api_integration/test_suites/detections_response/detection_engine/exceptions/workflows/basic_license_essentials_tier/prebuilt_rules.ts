@@ -37,8 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // @skipInQA purposefully - only running tests in MKI whose failure should block release
-  describe('@serverless @ess @skipInQA exceptions workflows for prebuilt rules', () => {
+  describe('@serverless @ess exceptions workflows for prebuilt rules', () => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
