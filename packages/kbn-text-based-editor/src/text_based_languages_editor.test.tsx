@@ -60,6 +60,8 @@ describe('TextBasedLanguagesEditor', () => {
   }
   let props: TextBasedLanguagesEditorProps;
   beforeAll(() => {
+    // Mocking matchMedia to resolve TypeError: window.matchMedia is not a function
+    // For more info, see https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: jest.fn().mockImplementation((query) => ({
