@@ -37,7 +37,7 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
-import { ELASTIC_RESPONSE_ACTION_MESSAGE, getElasticResponseActionMessage } from '../../utils';
+import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -224,33 +224,33 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       command: 'isolate',
     };
 
-    // if (!reqIndexOptions.error) {
-    //   let error = (await this.validateRequest(reqIndexOptions)).error;
-    //   const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-    //     reqIndexOptions.user?.id,
-    //     reqIndexOptions.actionId
-    //   );
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
+        reqIndexOptions.user?.id,
+        reqIndexOptions.actionId
+      );
 
-    //   if (!error) {
-    //     try {
-    //       await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
-    //         ids: actionRequest.endpoint_ids,
-    //         command: 'contain',
-    //         comment: reqIndexOptions.comment
-    //           ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-    //           : actionCommentMessage,
-    //       });
-    //     } catch (err) {
-    //       error = err;
-    //     }
-    //   }
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
+            ids: actionRequest.endpoint_ids,
+            command: 'contain',
+            comment: reqIndexOptions.comment
+              ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
+              : actionCommentMessage,
+          });
+        } catch (err) {
+          error = err;
+        }
+      }
 
-    //   reqIndexOptions.error = error?.message;
+      reqIndexOptions.error = error?.message;
 
-    //   if (!this.options.isAutomated && error) {
-    //     throw error;
-    //   }
-    // }
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
