@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addFilterIn, addFilterOut } from '@kbn/cell-actions';
+import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions';
 import { of } from 'rxjs';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { CreateFilterLensActionParams } from './create_action';
@@ -15,6 +15,7 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 jest.mock('@kbn/cell-actions', () => ({
   addFilterIn: jest.fn(),
   addFilterOut: jest.fn(),
+  addExistsFilter: jest.fn(),
 }));
 
 jest.mock('../../../timelines/store', () => ({
@@ -125,14 +126,12 @@ describe('createFilterLensAction', () => {
       data: mockUserCountData,
       trigger: mockTrigger,
     });
-    expect(addFilterIn).toHaveBeenCalledWith({
+    expect(addExistsFilter).toHaveBeenCalledWith({
       filterManager: 'mockFilterManager',
-      fieldName: 'user.count',
-      value: [],
+      key: 'user.count',
       negate: false,
       dataViewId: 'indexPatternId',
     });
-    expect(addFilterOut).not.toHaveBeenCalled();
   });
 
   it('should create an "Not exists" filter when value type equals "value_count"', async () => {
@@ -145,10 +144,9 @@ describe('createFilterLensAction', () => {
       data: mockUserCountData,
       trigger: mockTrigger,
     });
-    expect(addFilterOut).toHaveBeenCalledWith({
+    expect(addExistsFilter).toHaveBeenCalledWith({
       filterManager: 'mockFilterManager',
-      fieldName: 'user.count',
-      value: [],
+      key: 'user.count',
       negate: true,
       dataViewId: 'indexPatternId',
     });

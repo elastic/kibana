@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addFilterIn, addFilterOut } from '@kbn/cell-actions';
+import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions';
 import {
   isValueSupportedByDefaultActions,
   valueToArray,
@@ -74,7 +74,7 @@ export const createFilterLensAction = ({
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
-      const valueType = data[0]?.columnMeta?.sourceParams?.type;
+      const isCounter = data[0]?.columnMeta?.sourceParams?.type === 'value_count';
       const rawValue = data[0]?.value;
       const mayBeDataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
       const dataViewId = typeof mayBeDataViewId === 'string' ? mayBeDataViewId : undefined;
@@ -99,11 +99,10 @@ export const createFilterLensAction = ({
         : dataService.query.filterManager;
 
       // If value type is value_count, we want to filter an `Exists` filter instead of a `Term` filter
-      if (valueType === 'value_count') {
-        addFilter({
+      if (isCounter) {
+        addExistsFilter({
           filterManager,
-          fieldName: field,
-          value: [],
+          key: field,
           negate: !!negate,
           dataViewId,
         });

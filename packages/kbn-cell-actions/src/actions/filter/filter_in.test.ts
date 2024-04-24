@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { addFilterIn, createFilterInActionFactory } from './filter_in';
+import { createFilterInActionFactory } from './filter_in';
 import { makeActionContext } from '../../mocks/helpers';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 
@@ -203,74 +203,6 @@ describe('createFilterInActionFactory', () => {
       });
       expect(mockCreateFilter).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();
-    });
-  });
-});
-
-describe('addFilterIn', () => {
-  describe('negate is provided', () => {
-    it('should create a negate filter if negate is true', () => {
-      addFilterIn({
-        filterManager: mockFilterManager,
-        fieldName,
-        value: [],
-        negate: true,
-        dataViewId,
-      });
-      expect(mockCreateFilter).toHaveBeenCalledWith({
-        key: fieldName,
-        value: [],
-        negate: true,
-        dataViewId,
-      });
-    });
-
-    it('should create a "non-negate" filter if negate is false', () => {
-      addFilterIn({
-        filterManager: mockFilterManager,
-        fieldName,
-        value: [],
-        negate: false,
-        dataViewId,
-      });
-      expect(mockCreateFilter).toHaveBeenCalledWith({
-        key: fieldName,
-        value: [],
-        dataViewId,
-        negate: false,
-      });
-    });
-  });
-
-  describe('negate is not provided', () => {
-    it('should create a "negate" filter when filter value is empty', () => {
-      addFilterIn({
-        filterManager: mockFilterManager,
-        fieldName,
-        value: [],
-        dataViewId,
-      });
-      expect(mockCreateFilter).toHaveBeenCalledWith({
-        key: fieldName,
-        value: [],
-        dataViewId,
-        negate: true,
-      });
-    });
-
-    it('should create a "none-negate" filter when filter value is available', () => {
-      addFilterIn({
-        filterManager: mockFilterManager,
-        fieldName,
-        value: [value],
-        dataViewId,
-      });
-      expect(mockCreateFilter).toHaveBeenCalledWith({
-        key: fieldName,
-        value: [value],
-        dataViewId,
-        negate: false,
-      });
     });
   });
 });
