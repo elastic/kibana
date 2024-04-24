@@ -1037,7 +1037,7 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        '@typescript-eslint/import/no-duplicates': ['error'],
+        'import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -1216,7 +1216,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/import/no-duplicates': ['error'],
+        'import/no-duplicates': ['error'],
       },
       overrides: [
         {
