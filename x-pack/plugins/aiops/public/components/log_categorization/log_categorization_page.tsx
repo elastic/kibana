@@ -51,6 +51,7 @@ import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
+import { CategoryFinder } from './category_finder';
 import type { DocumentStats } from '../../hooks/use_document_count_stats';
 
 const BAR_TARGET = 20;
@@ -94,6 +95,9 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [filterKey, setFilterKey] = useState<string | null>(null);
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -296,6 +300,18 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     [fields, loadCategories, selectedField, stateFromUrl.field]
   );
 
+  useEffect(
+    function filterCategories() {
+      if (!data) {
+        return;
+      }
+      setFilteredCategories(
+        filterKey === null ? data.categories : data.categories.filter((c) => c.key === filterKey)
+      );
+    },
+    [data, filterKey]
+  );
+
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
     setData(null);
     setFieldValidationResult(null);
@@ -392,8 +408,21 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       />
 
       {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
+        <>
+          <CategoryFinder
+            categories={data.categories}
+            eventRate={eventRate}
+            loading={loading}
+            value={undefined}
+            setFilterKey={setFilterKey}
+          />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+
+      {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
         <CategoryTable
-          categories={data.categories}
+          categories={filteredCategories}
           aiopsListState={stateFromUrl}
           dataViewId={dataView.id!}
           eventRate={eventRate}

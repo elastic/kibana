@@ -16,6 +16,7 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -36,6 +37,7 @@ export interface UnifiedDocViewerStart {
 export interface UnifiedDocViewerStartDeps {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  uiActions: UiActionsStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -109,12 +111,20 @@ export class UnifiedDocViewerPublicPlugin
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, fieldFormats } = deps;
+    const { data, fieldFormats, uiActions } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
     };
-    const services = { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
+    const services = {
+      analytics,
+      data,
+      fieldFormats,
+      storage,
+      uiSettings,
+      unifiedDocViewer,
+      uiActions,
+    };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;
   }

@@ -50,6 +50,7 @@ import { SamplingMenu } from './sampling_menu';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
+import { CategoryFinder } from './category_finder';
 import { CreateCategorizationJobButton } from './create_categorization_job';
 
 enum SELECTED_TAB {
@@ -61,6 +62,7 @@ export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
+  fieldValue: string | undefined;
   onClose: () => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
@@ -73,10 +75,13 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
   selectedField,
+  fieldValue,
   onClose,
   embeddingOrigin,
   additionalFilter,
 }) => {
+  // console.log(fieldValue);
+
   const {
     notifications: { toasts },
     data: {
@@ -115,6 +120,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [filterKey, setFilterKey] = useState<string | null>(null);
   const [showTabs, setShowTabs] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
 
@@ -278,6 +285,17 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  useEffect(
+    function filterCategories() {
+      if (!data) {
+        return;
+      }
+      setFilteredCategories(
+        filterKey === null ? data.categories : data.categories.filter((c) => c.key === filterKey)
+      );
+    },
+    [data, filterKey]
+  );
   const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   return (
@@ -319,6 +337,17 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           eventRateLength={eventRate.length}
           fieldSelected={selectedField !== null}
         />
+
+        {selectedField !== undefined && data !== null ? (
+          <CategoryFinder
+            categories={data.categories}
+            eventRate={eventRate}
+            loading={loading}
+            value={fieldValue}
+            setFilterKey={setFilterKey}
+          />
+        ) : null}
+
         {loading === false && data !== null && data.categories.length > 0 ? (
           <>
             {showTabs ? (

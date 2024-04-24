@@ -8,9 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from '@kbn/ml-ui-actions';
+import {
+  ACTION_CATEGORIZE_FIELD,
+  ACTION_CATEGORIZE_FIELD_VALUE,
+  type CategorizeFieldContext,
+} from '@kbn/ml-ui-actions';
 import type { AiopsPluginStartDeps } from '../../types';
 import { showCategorizeFlyout } from './show_flyout';
+import { showCategorizeValuePopover } from './show_popover';
 
 export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
   createAction<CategorizeFieldContext>({
@@ -24,7 +29,43 @@ export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: Aiops
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      const { field, dataView, originatingApp, additionalFilter } = context;
-      showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp, additionalFilter);
+      const { field, dataView, fieldValue, originatingApp } = context;
+      showCategorizeFlyout(
+        field,
+        dataView,
+        coreStart,
+        plugins,
+        originatingApp,
+        undefined,
+        fieldValue
+      );
+    },
+  });
+
+export const categorizeFieldValueAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
+  createAction<CategorizeFieldContext>({
+    type: ACTION_CATEGORIZE_FIELD_VALUE,
+    id: ACTION_CATEGORIZE_FIELD_VALUE,
+    getDisplayName: () =>
+      i18n.translate('xpack.aiops.categorizeFieldAction.displayName', {
+        defaultMessage: 'Categorize field',
+      }),
+    isCompatible: async ({ field }: CategorizeFieldContext) => {
+      return field.esTypes?.includes('text') === true;
+    },
+    execute: async (context: CategorizeFieldContext) => {
+      const { field, dataView, fieldValue, originatingApp, setPopoverContents, onClose } = context;
+      showCategorizeValuePopover(
+        field,
+        dataView,
+        coreStart,
+        plugins,
+        originatingApp,
+        fieldValue,
+        setPopoverContents,
+        onClose
+      );
+      // const { field, dataView, originatingApp, additionalFilter } = context;
+      // showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp, additionalFilter);
     },
   });

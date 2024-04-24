@@ -16,7 +16,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
+import { triggerCategorizeValueActions } from '@kbn/unified-field-list/src/components/field_categorize_button/categorize_trigger_utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 interface TableActionsProps {
@@ -29,6 +32,8 @@ interface TableActionsProps {
   onToggleColumn: (field: string) => void;
   ignoredValue: boolean;
   onTogglePinned: (field: string) => void;
+  uiActions?: UiActionsStart;
+  dataView?: DataView;
 }
 
 interface PanelItem {
@@ -51,6 +56,8 @@ export const TableActions = ({
   onFilter,
   ignoredValue,
   onTogglePinned,
+  uiActions,
+  dataView,
 }: TableActionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const openActionsLabel = i18n.translate('unifiedDocViewer.docView.table.actions.open', {
@@ -59,6 +66,9 @@ export const TableActions = ({
   const actionsLabel = i18n.translate('unifiedDocViewer.docView.table.actions.label', {
     defaultMessage: 'Actions',
   });
+
+  const [showPatternAnalysisPopover, setShowPatternAnalysisPopover] =
+    useState<React.ReactElement | null>(null);
 
   // Filters pair
   const filtersPairDisabled = !fieldMapping || !fieldMapping.filterable || ignoredValue;
@@ -212,6 +222,29 @@ export const TableActions = ({
     },
   ];
 
+  if (fieldMapping?.esTypes?.includes('text')) {
+    panels[0].items.push({
+      name: 'Find pattern',
+      'aria-label': pinnedAriaLabel,
+      icon: 'machineLearningApp',
+      onClick: () => {
+        if (uiActions && dataView && fieldMapping) {
+          const fieldValue = (flattenedField as string[])[0];
+          setShowPatternAnalysisPopover(null);
+          triggerCategorizeValueActions(
+            uiActions,
+            setShowPatternAnalysisPopover,
+            () => setShowPatternAnalysisPopover(null),
+            fieldMapping,
+            fieldValue,
+            '',
+            dataView
+          );
+        }
+      },
+    });
+  }
+
   if (mode === 'inline') {
     return (
       <EuiFlexGroup
@@ -220,6 +253,17 @@ export const TableActions = ({
         className="kbnDocViewer__buttons"
         data-test-subj={`fieldActionsGroup-${field}`}
       >
+        <EuiPopover
+          ownFocus
+          isOpen={showPatternAnalysisPopover !== null}
+          closePopover={() => setShowPatternAnalysisPopover(null)}
+          display="block"
+          anchorPosition="leftUp"
+          data-test-subj="fieldPopover"
+          offset={20}
+        >
+          <div>{showPatternAnalysisPopover}</div>
+        </EuiPopover>
         {panels[0].items.map((item) => (
           <EuiFlexItem key={item.icon} grow={false}>
             <EuiToolTip content={item.name}>
@@ -230,7 +274,7 @@ export const TableActions = ({
                 iconType={item.icon}
                 iconSize="s"
                 disabled={item.disabled}
-                onClick={item.onClick}
+                onClick={() => item.onClick()}
               />
             </EuiToolTip>
           </EuiFlexItem>

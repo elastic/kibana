@@ -32,7 +32,8 @@ export async function showCategorizeFlyout(
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
-  additionalFilter?: CategorizationAdditionalFilter
+  additionalFilter?: CategorizationAdditionalFilter,
+  fieldValue?: string
 ): Promise<void> {
   const { analytics, http, theme, overlays, application, notifications, uiSettings, i18n } =
     coreStart;
@@ -75,6 +76,7 @@ export async function showCategorizeFlyout(
                     savedSearch={null}
                     selectedField={field}
                     onClose={onFlyoutClose}
+                    fieldValue={fieldValue}
                     embeddingOrigin={originatingApp}
                     additionalFilter={additionalFilter}
                   />
