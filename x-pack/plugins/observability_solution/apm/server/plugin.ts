@@ -76,7 +76,7 @@ export class APMPlugin
         logger: this.logger,
         kibanaVersion: this.initContext.env.packageInfo.version,
         isProd: this.initContext.env.mode.prod,
-      });
+      }).catch(() => {});
     }
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
@@ -127,16 +127,18 @@ export class APMPlugin
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
-      apmIndicesPromise.then((apmIndices) => {
-        plugins.home?.tutorials.registerTutorial(
-          tutorialProvider({
-            apmConfig: currentConfig,
-            apmIndices,
-            cloud: plugins.cloud,
-            isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-          })
-        );
-      });
+      apmIndicesPromise
+        .then((apmIndices) => {
+          plugins.home?.tutorials.registerTutorial(
+            tutorialProvider({
+              apmConfig: currentConfig,
+              apmIndices,
+              cloud: plugins.cloud,
+              isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+            })
+          );
+        })
+        .catch(() => {});
     }
 
     const telemetryUsageCounter =
