@@ -16,23 +16,12 @@ export JOB=kibana-security-solution-chrome
 
 buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
-mkdir .ftr
-vault_get security-quality-gate/role-users data -format=json > .ftr/role_users.json
-vault_get security-quality-gate/role-users/sec-sol-auto-01 data -format=json > .ftr/sec-sol-auto-01.json
-vault_get security-quality-gate/role-users/sec-sol-auto-02 data -format=json > .ftr/sec-sol-auto-02.json
-vault_get security-quality-gate/role-users/sec-sol-auto-03 data -format=json > .ftr/sec-sol-auto-03.json
+source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 
 cd x-pack/test/security_solution_cypress
 set +e
 
-QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
-QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
-PROXY_URL=$(vault_get security-solution-quality-gate-proxy proxy_url_test)
-PROXY_CLIENT_ID=$(vault_get security-solution-quality-gate-proxy client_id)
-PROXY_SECRET=$(vault_get security-solution-quality-gate-proxy secret)
-BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
-
-PROXY_AUTH=$(echo "$PROXY_CLIENT_ID:$PROXY_SECRET" | base64)
+export BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
 echo "--- Triggering Kibana tests for $1"
-PROXY_URL=$PROXY_URL PROXY_CLIENT_ID=$PROXY_CLIENT_ID PROXY_SECRET=$PROXY_SECRET QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_IMAGE_COMMIT=$KIBANA_MKI_IMAGE_COMMIT BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+  KIBANA_MKI_IMAGE_COMMIT=$KIBANA_MKI_IMAGE_COMMIT BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY  yarn $1; status=$?; yarn junit:merge || :; exit $status
