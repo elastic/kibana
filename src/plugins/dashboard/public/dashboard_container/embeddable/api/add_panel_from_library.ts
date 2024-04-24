@@ -14,6 +14,10 @@ export function addFromLibrary(this: DashboardContainer) {
   this.openOverlay(
     openAddPanelFlyout({
       container: this,
+      onAddPanel: (id: string) => {
+        this.setScrollToPanelId(id);
+        this.setHighlightPanelId(id);
+      },
       onClose: () => {
         this.clearOverlays();
       },

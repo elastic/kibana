@@ -22,6 +22,7 @@ const LazyAddPanelFlyout = React.lazy(async () => {
 
 export const openAddPanelFlyout = ({
   container,
+  onAddPanel,
   onClose,
 }: {
   container: PresentationContainer;
@@ -32,7 +33,7 @@ export const openAddPanelFlyout = ({
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyAddPanelFlyout container={container} />
+        <LazyAddPanelFlyout container={container} onAddPanel={onAddPanel} />
       </Suspense>,
       { theme$: core.theme.theme$ }
     ),

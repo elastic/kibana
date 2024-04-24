@@ -20,6 +20,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
 import { Toast } from '@kbn/core/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   core,
   embeddableStart,
@@ -32,14 +33,21 @@ import {
   ReactEmbeddableSavedObject,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
-  SavedObjectEmbeddableInput,
   getReactEmbeddableSavedObjects,
-  Container,
+  PanelIncompatibleError,
 } from '../lib';
 
 type LegacyFactoryMap = { [key: string]: EmbeddableFactory };
 type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
   [key: string]: ReactEmbeddableSavedObject<TSavedObjectAttributes> & { type: string };
+};
+
+type CanAddNewEmbeddable = {
+  addNewEmbeddable: (type: string, explicitInput: unknown, attributes: unknown) => { id: string };
+};
+
+const apiCanAddNewEmbeddable = (api: unknown): api is CanAddNewEmbeddable => {
+  return typeof (api as CanAddNewEmbeddable).addNewEmbeddable === 'function';
 };
 
 let lastToast: string | Toast;
@@ -75,7 +83,7 @@ export const AddPanelFlyout = ({
   container,
   onAddPanel,
 }: {
-  container: Container;
+  container: PresentationContainer;
   onAddPanel?: (id: string) => void;
 }) => {
   const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
@@ -137,6 +145,12 @@ export const AddPanelFlyout = ({
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
+      // container.addNewEmbeddable is required for legacy embeddables to support
+      // panel placement strategies
+      if (!apiCanAddNewEmbeddable(container)) {
+        throw new PanelIncompatibleError();
+      }
+
       let embeddableId: string;
 
       if (savedObjectToPanel[type]) {
@@ -151,7 +165,7 @@ export const AddPanelFlyout = ({
 
         embeddableId = _embeddableId;
       } else {
-        const { id: _embeddableId } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+        const { id: _embeddableId } = await container.addNewEmbeddable(
           legacyFactoryForSavedObjectType.type,
           { savedObjectId: id },
           savedObject.attributes
