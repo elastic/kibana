@@ -6,6 +6,13 @@
     "id": "discoverCustomizationExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["controls", "developerExamples", "discover", "embeddable", "kibanaUtils"]
+    "requiredPlugins": [
+      "controls",
+      "developerExamples",
+      "discover",
+      "embeddable",
+      "kibanaUtils",
+      "data"
+    ]
   }
 }

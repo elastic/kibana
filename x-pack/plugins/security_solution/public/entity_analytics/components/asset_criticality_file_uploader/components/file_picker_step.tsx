@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCode,
   EuiCodeBlock,
   EuiFilePicker,
   EuiPanel,
@@ -52,7 +53,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <EuiTitle size="xxs">
             <h3>
               <FormattedMessage
-                defaultMessage="CSV File Format Requirements"
+                defaultMessage="Supported file formats and size"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.csvFileFormatRequirements"
               />
             </h3>
@@ -62,7 +63,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Supported file formats: {formats}"
+                defaultMessage="File formats: {formats}"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.acceptedFileFormats"
                 values={{
                   formats: SUPPORTED_FILE_EXTENSIONS.join(', '),
@@ -71,7 +72,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
             </li>
             <li>
               <FormattedMessage
-                defaultMessage="You can upload files up to {maxFileSize}"
+                defaultMessage="Maximum file size: {maxFileSize}"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit"
                 values={{
                   maxFileSize: formatBytes(CRITICALITY_CSV_MAX_SIZE_BYTES),
@@ -83,7 +84,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <EuiTitle size="xxs">
             <h3>
               <FormattedMessage
-                defaultMessage="Required CSV Structure"
+                defaultMessage="Required file structure"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.CSVStructureTitle"
               />
             </h3>
@@ -93,7 +94,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Resource type: Indicate whether the resource is a {host} or a {user}."
+                defaultMessage="Entity type: Indicate whether the entity is a {host} or a {user}."
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
                 values={{
                   host: <b>{'host'}</b>,
@@ -104,21 +105,21 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
             <li>
               {
                 <FormattedMessage
-                  defaultMessage="Identifier: The unique identifier for each asset's {hostName} or {userName}."
+                  defaultMessage="Identifier: Specify the entity's {hostName} or {userName}."
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
                   values={{
-                    hostName: <b>{'Host.name'}</b>,
-                    userName: <b>{'User.name'}</b>,
+                    hostName: <b>{'host.name'}</b>,
+                    userName: <b>{'user.name'}</b>,
                   }}
                 />
               }
             </li>
             <li>
               <FormattedMessage
-                defaultMessage="Criticality label: Use any one of {labels}"
+                defaultMessage="Criticality level: Specify any one of {labels}"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
                 values={{
-                  labels: <b>{ValidCriticalityLevels.join(', ')}</b>,
+                  labels: <EuiCode>{ValidCriticalityLevels.join(', ')}</EuiCode>,
                 }}
               />
             </li>
