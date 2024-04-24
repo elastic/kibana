@@ -20,7 +20,7 @@ import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import {
   addSignificantItemsHistogram,
   updateLoadingState,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 

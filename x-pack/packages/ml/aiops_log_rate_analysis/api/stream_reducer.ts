@@ -101,3 +101,21 @@ export const logRateAnalysisResultsSlice = createSlice({
 
 export const streamReducer = logRateAnalysisResultsSlice.reducer;
 export const streamReducerActions = logRateAnalysisResultsSlice.actions;
+
+type StreamReducerActions = typeof streamReducerActions;
+export type ApiActionName = keyof StreamReducerActions;
+export type AiopsLogRateAnalysisApiAction = ReturnType<StreamReducerActions[ApiActionName]>;
+
+export const {
+  addError,
+  addSignificantItems,
+  addSignificantItemsGroup,
+  addSignificantItemsGroupHistogram,
+  addSignificantItemsHistogram,
+  ping,
+  resetAll,
+  resetErrors,
+  resetGroups,
+  setZeroDocsFallback,
+  updateLoadingState,
+} = logRateAnalysisResultsSlice.actions;

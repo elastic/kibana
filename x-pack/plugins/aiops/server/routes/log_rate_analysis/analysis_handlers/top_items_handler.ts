@@ -10,7 +10,10 @@ import { queue } from 'async';
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
 
-import { addSignificantItems, updateLoadingState } from '@kbn/aiops-log-rate-analysis/api/actions';
+import {
+  addSignificantItems,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type {
   AiopsLogRateAnalysisSchema,

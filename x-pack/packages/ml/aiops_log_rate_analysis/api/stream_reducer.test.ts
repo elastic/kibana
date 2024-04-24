@@ -14,8 +14,9 @@ import {
   resetAll,
   resetGroups,
   updateLoadingState,
-} from './actions';
-import { getDefaultState, streamReducer } from './stream_reducer';
+  getDefaultState,
+  streamReducer,
+} from './stream_reducer';
 
 describe('streamReducer', () => {
   it('updates loading state', () => {
