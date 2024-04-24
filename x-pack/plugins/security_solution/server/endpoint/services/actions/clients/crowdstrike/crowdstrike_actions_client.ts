@@ -37,7 +37,7 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
-import { ELASTIC_RESPONSE_ACTION_MESSAGE, getElasticResponseActionMessage } from '../../utils';
+import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
