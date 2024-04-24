@@ -300,14 +300,14 @@ function BucketAxisBoundsControl({
               label: i18n.translate('xpack.lens.axisExtent.dataBounds', {
                 defaultMessage: 'Data',
               }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_data'`,
+              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_data`,
             },
             {
               id: `${idPrefix}custom`,
               label: i18n.translate('xpack.lens.axisExtent.custom', {
                 defaultMessage: 'Custom',
               }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_custom'`,
+              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_custom`,
             },
           ]}
           idSelected={`${idPrefix}${extent.mode ?? 'dataBounds'}`}

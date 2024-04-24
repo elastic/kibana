@@ -325,7 +325,7 @@ describe('Axes Settings', () => {
     });
 
     describe('Changing bound type', () => {
-      it('should reset extent when mode changes from custom to full', () => {
+      it('should reset y extent when mode changes from custom to full', () => {
         const component = shallow(
           <AxisSettingsPopover
             {...props}
@@ -336,7 +336,7 @@ describe('Axes Settings', () => {
           />
         );
 
-        const boundsBtns = getBoundsButtons(component);
+        const boundsBtns = getBoundsButtons(component, 'MetricAxisBoundsControl');
 
         boundsBtns.full.simulate('click');
         expect(props.setExtent).toBeCalledWith({
@@ -354,18 +354,18 @@ describe('Axes Settings', () => {
         });
       });
 
-      it('should reset extent when mode changes from custom to data', () => {
+      it('should reset y extent when mode changes from custom to data', () => {
         const component = shallow(
           <AxisSettingsPopover
             {...props}
             scale="linear"
             dataBounds={{ min: 0, max: 1000 }}
             extent={{ mode: 'custom', lowerBound: -10, upperBound: 1000 }}
-            axis="yLeft"
+            axis="yRight"
           />
         );
 
-        const boundsBtns = getBoundsButtons(component);
+        const boundsBtns = getBoundsButtons(component, 'MetricAxisBoundsControl');
 
         boundsBtns.data.simulate('click');
         expect(props.setExtent).toBeCalledWith({
@@ -382,15 +382,47 @@ describe('Axes Settings', () => {
           upperBound: 1000,
         });
       });
+
+      it('should reset x extent when mode changes from custom to data', () => {
+        const component = shallow(
+          <AxisSettingsPopover
+            {...props}
+            scale="linear"
+            dataBounds={{ min: 100, max: 1000 }}
+            extent={{ mode: 'custom', lowerBound: -100, upperBound: 1000 }}
+            axis="x"
+          />
+        );
+
+        const boundsBtns = getBoundsButtons(component, 'BucketAxisBoundsControl');
+
+        boundsBtns.data.simulate('click');
+        expect(props.setExtent).toBeCalledWith({
+          mode: 'dataBounds',
+          lowerBound: undefined,
+          upperBound: undefined,
+        });
+
+        (props.setExtent as jest.Mock).mockClear();
+        boundsBtns.custom.simulate('click');
+        expect(props.setExtent).toBeCalledWith({
+          mode: 'custom',
+          lowerBound: 100,
+          upperBound: 1000,
+        });
+      });
     });
   });
 });
 
-function getBoundsButtons(root: ShallowWrapper) {
+function getBoundsButtons(
+  root: ShallowWrapper,
+  axisBoundsControl: 'MetricAxisBoundsControl' | 'BucketAxisBoundsControl'
+) {
   const btnGroup = root
     .find('AxisBoundsControl')
     .shallow()
-    .find('MetricAxisBoundsControl')
+    .find(axisBoundsControl)
     .shallow()
     .find('EuiButtonGroup')
     .shallow();
