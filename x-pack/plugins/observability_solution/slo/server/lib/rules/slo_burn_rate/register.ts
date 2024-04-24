@@ -104,6 +104,7 @@ export function sloBurnRateRuleType(
         { name: 'suppressedAction', description: suppressedActionVariableDescription },
         { name: 'previousActionGroup', description: previousActionGroupActionVariableDescription },
         { name: 'improvedActionGroup', description: improvedActionGroupActionVariableDescription },
+        { name: 'isDegrading', description: improvedActionGroupActionVariableDescription },
       ],
     },
     alerts: {
@@ -187,8 +188,7 @@ export const suppressedActionVariableDescription = i18n.translate(
 export const previousActionGroupActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.previousActionGroupDescription',
   {
-    defaultMessage:
-      'The action group from the previous execution. Only available as part of the "Improving" action group.',
+    defaultMessage: 'The action group from the previous execution.',
   }
 );
 
@@ -197,5 +197,12 @@ export const improvedActionGroupActionVariableDescription = i18n.translate(
   {
     defaultMessage:
       'The action group that would have triggerd. Only available as part of the "Improving" action group.',
+  }
+);
+
+export const isDegradingActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.isDegradingDescription',
+  {
+    defaultMessage: 'Set to true when the alert is in a degrading state',
   }
 );

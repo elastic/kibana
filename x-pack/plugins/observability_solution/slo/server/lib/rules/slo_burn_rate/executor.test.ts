@@ -36,13 +36,16 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ALERT_ACTION,
   ALERT_ACTION_ID,
+  HIGH_PRIORITY_ACTION,
   HIGH_PRIORITY_ACTION_ID,
+  IMPROVING_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
+  SLO_SERVERITY_HISTORY_FIELD,
 } from '../../../../common/field_names/slo';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -204,7 +207,7 @@ describe('BurnRateRuleExecutor', () => {
           previousStartedAt: null,
           rule: {} as SanitizedRuleConfig,
           spaceId: 'irrelevant',
-          state: {},
+          state: { history: [] },
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
         })
@@ -225,7 +228,7 @@ describe('BurnRateRuleExecutor', () => {
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
         spaceId: 'irrelevant',
-        state: {},
+        state: { history: [] },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
       });
@@ -234,7 +237,7 @@ describe('BurnRateRuleExecutor', () => {
       expect(servicesMock.alertsClient!.report).not.toHaveBeenCalled();
       expect(servicesMock.alertsClient!.setAlertData).not.toHaveBeenCalled();
       expect(servicesMock.alertsClient!.getRecoveredAlerts).not.toHaveBeenCalled();
-      expect(result).toEqual({ state: {} });
+      expect(result).toEqual({ state: { history: [] } });
     });
 
     it('does not schedule an alert when long windows burn rates are below the threshold', async () => {
@@ -274,7 +277,7 @@ describe('BurnRateRuleExecutor', () => {
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
         spaceId: 'irrelevant',
-        state: {},
+        state: { history: [] },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
       });
@@ -320,7 +323,7 @@ describe('BurnRateRuleExecutor', () => {
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
         spaceId: 'irrelevant',
-        state: {},
+        state: { history: [] },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
       });
@@ -356,10 +359,12 @@ describe('BurnRateRuleExecutor', () => {
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
 
+      const startedAt = new Date();
+
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
         uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
+        start: startedAt.toISOString(),
       }));
 
       const executor = getRuleExecutor({
@@ -369,7 +374,7 @@ describe('BurnRateRuleExecutor', () => {
 
       await executor({
         params: ruleParams,
-        startedAt: new Date(),
+        startedAt,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
@@ -395,6 +400,15 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: ALERT_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -411,6 +425,15 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: ALERT_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -419,6 +442,7 @@ describe('BurnRateRuleExecutor', () => {
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
           burnRateThreshold: 2,
+          isDegrading: true,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
@@ -430,6 +454,7 @@ describe('BurnRateRuleExecutor', () => {
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
           burnRateThreshold: 2,
+          isDegrading: true,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
@@ -489,10 +514,12 @@ describe('BurnRateRuleExecutor', () => {
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
 
+      const startedAt = new Date();
+
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
         uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
+        start: startedAt.toISOString(),
       }));
 
       const executor = getRuleExecutor({
@@ -502,14 +529,14 @@ describe('BurnRateRuleExecutor', () => {
 
       await executor({
         params: ruleParams,
-        startedAt: new Date(),
+        startedAt,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
         spaceId: 'irrelevant',
-        state: {},
+        state: { history: [] },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
       });
@@ -528,6 +555,15 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: ALERT_ACTION.id,
+              suppressed: true,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -544,6 +580,15 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: ALERT_ACTION.id,
+              suppressed: true,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -552,6 +597,7 @@ describe('BurnRateRuleExecutor', () => {
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
           burnRateThreshold: 2,
+          isDegrading: true,
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
@@ -563,6 +609,7 @@ describe('BurnRateRuleExecutor', () => {
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
           burnRateThreshold: 2,
+          isDegrading: true,
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
@@ -604,23 +651,25 @@ describe('BurnRateRuleExecutor', () => {
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
 
+      const startedAt = new Date();
+
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
         uuid: `uuid-${id}`,
-        start: new Date().toISOString(),
+        start: startedAt.toISOString(),
       }));
 
       const executor = getRuleExecutor({ basePath: basePathMock });
       await executor({
         params: ruleParams,
-        startedAt: new Date(),
+        startedAt,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
         spaceId: 'irrelevant',
-        state: {},
+        state: { history: [] },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
       });
@@ -639,6 +688,15 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: HIGH_PRIORITY_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
@@ -655,6 +713,15 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: HIGH_PRIORITY_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
         },
       });
 
@@ -664,6 +731,7 @@ describe('BurnRateRuleExecutor', () => {
           longWindow: { burnRate: 1.2, duration: '6h' },
           shortWindow: { burnRate: 1.9, duration: '30m' },
           burnRateThreshold: 1,
+          isDegrading: true,
           reason:
             'HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
         }),
@@ -675,6 +743,159 @@ describe('BurnRateRuleExecutor', () => {
           longWindow: { burnRate: 1.1, duration: '6h' },
           shortWindow: { burnRate: 1.5, duration: '30m' },
           burnRateThreshold: 1,
+          isDegrading: true,
+          reason:
+            'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
+        }),
+      });
+    });
+
+    it('schedules an improving alert when the HIGH conditions but the previous was CRITICAL', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const buckets = [
+        {
+          instanceId: 'foo',
+          windows: [
+            { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
+            { shortWindowBurnRate: 1.9, longWindowBurnRate: 1.2 },
+          ],
+        },
+        {
+          instanceId: 'bar',
+          windows: [
+            { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
+            { shortWindowBurnRate: 1.5, longWindowBurnRate: 1.1 },
+          ],
+        },
+      ];
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
+      );
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
+      );
+
+      const startedAt = new Date();
+
+      // @ts-ignore
+      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
+        uuid: `uuid-${id}`,
+        start: startedAt.toISOString(),
+      }));
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: ruleParams,
+        startedAt,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {
+          history: [
+            {
+              instanceId: 'foo',
+              history: [
+                {
+                  actionGroup: ALERT_ACTION.id,
+                  suppressed: false,
+                  timerange: {
+                    from: startedAt.valueOf() - 60_000,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+      });
+
+      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+        id: 'foo',
+        actionGroup: IMPROVING_PRIORITY_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
+          [ALERT_REASON]:
+            'IMPROVING - CRITICAL -> HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 1,
+          [ALERT_EVALUATION_VALUE]: 1.2,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: ALERT_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf() - 60_000,
+                to: startedAt.valueOf(),
+              },
+            },
+            {
+              actionGroup: HIGH_PRIORITY_ACTION.id,
+              improvingFrom: ALERT_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
+        },
+      });
+      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+        id: 'bar',
+        actionGroup: HIGH_PRIORITY_ACTION_ID,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
+          [ALERT_REASON]:
+            'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 1,
+          [ALERT_EVALUATION_VALUE]: 1.1,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [SLO_SERVERITY_HISTORY_FIELD]: [
+            {
+              actionGroup: HIGH_PRIORITY_ACTION.id,
+              suppressed: false,
+              timerange: {
+                from: startedAt.valueOf(),
+              },
+            },
+          ],
+        },
+      });
+
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'foo',
+        context: expect.objectContaining({
+          longWindow: { burnRate: 1.2, duration: '6h' },
+          shortWindow: { burnRate: 1.9, duration: '30m' },
+          burnRateThreshold: 1,
+          isDegrading: false,
+          improvedActionGroup: HIGH_PRIORITY_ACTION.name,
+          previousActionGroup: ALERT_ACTION.name,
+          reason:
+            'IMPROVING - CRITICAL -> HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
+        }),
+      });
+
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
+        id: 'bar',
+        context: expect.objectContaining({
+          longWindow: { burnRate: 1.1, duration: '6h' },
+          shortWindow: { burnRate: 1.5, duration: '30m' },
+          burnRateThreshold: 1,
+          isDegrading: true,
           reason:
             'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
         }),

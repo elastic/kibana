@@ -97,7 +97,8 @@ export const getRuleExecutor = ({
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
-    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
+    const evaluationDate = new Date(dateEnd);
+    const results = await evaluate(esClient.asCurrentUser, slo, params, evaluationDate);
     const history: InstanceHistory[] = [];
 
     const suppressResults =
@@ -143,7 +144,7 @@ export const getRuleExecutor = ({
           }
 
           const { actionGroup, latestHistoryEvent, historyRecord } = computeActionGroup(
-            new Date(dateEnd),
+            evaluationDate,
             state.history || [],
             instanceId,
             windowDef.actionGroup,
@@ -153,7 +154,7 @@ export const getRuleExecutor = ({
           // If the alert has been improving for too long, then we need to stop
           // maintain the current status and let it recover so the next status
           // can trigger a new event
-          if (alertHasBeenImprovingTooLong(windowDef, latestHistoryEvent)) {
+          if (alertHasBeenImprovingTooLong(evaluationDate, windowDef, latestHistoryEvent)) {
             break;
           }
 
@@ -211,12 +212,16 @@ export const getRuleExecutor = ({
             sloName: slo.name,
             sloInstanceId: instanceId,
             slo,
-            suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
+            suppressedAction: shouldSuppress ? getActionGroupName(windowDef.actionGroup) : null,
+            isDegrading: latestHistoryEvent.improvingFrom == null,
           };
 
           if (latestHistoryEvent.improvingFrom) {
-            context.previousActionGroup = latestHistoryEvent.improvingFrom;
-            context.improvedActionGroup = latestHistoryEvent.actionGroup;
+            context.previousActionGroup = getActionGroupName(latestHistoryEvent.improvingFrom);
+            context.improvedActionGroup = getActionGroupName(latestHistoryEvent.actionGroup);
+          } else if (historyRecord.history.length > 1) {
+            const previousRecord = historyRecord.history[historyRecord.history.length - 2];
+            context.previousActionGroup = getActionGroupName(previousRecord.actionGroup);
           }
 
           alertsClient.setAlertData({ id: alertId, context });
@@ -327,6 +332,7 @@ function buildReason(
 }
 
 function alertHasBeenImprovingTooLong(
+  startedAt: Date,
   windowDef: WindowSchema,
   latestHistoryEvent: InstanceHistoryRecord
 ) {
@@ -338,7 +344,10 @@ function alertHasBeenImprovingTooLong(
     windowDef.longWindow.value,
     toDurationUnit(windowDef.longWindow.unit)
   );
-  const eventDurationInMinutes = (Date.now() - latestHistoryEvent.timerange.from) / 60_000;
+  const eventDurationInMinutes = (startedAt.valueOf() - latestHistoryEvent.timerange.from) / 60_000;
+  if (eventDurationInMinutes <= 0) {
+    return false;
+  }
   const eventDuration = new Duration(eventDurationInMinutes, DurationUnit.Minute);
   return !eventDuration.isShorterThan(windowDuration);
 }
