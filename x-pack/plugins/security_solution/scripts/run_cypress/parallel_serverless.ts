@@ -302,9 +302,9 @@ ${JSON.stringify(argv, null, 2)}
       // We don't override the image when executing the tests on the second quality gate.
       if (!process.env.KIBANA_MKI_IMAGE_COMMIT) {
         log.info(
-          'KIBANA_MKI_IMAGE_COMMIT is not provided, so @serverlessQA --@skipInServerless tags will run.'
+          'KIBANA_MKI_IMAGE_COMMIT is not provided, so @serverlessQA --@skipInServerless --@skipInServerlessMKI tags will run.'
         );
-        cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless';
+        cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless --@skipInServerlessMKI';
       }
 
       const tier: string = argv.tier;
