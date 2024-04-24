@@ -270,10 +270,6 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    const activeSolutionNavId$ = projectNavigation
-      .getActiveSolutionNavDefinition$()
-      .pipe(map((navDefinition) => navDefinition?.id ?? null));
-
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyleSubject$.getValue();
       if (chromeStyle !== 'project') {
@@ -540,7 +536,7 @@ export class ChromeService {
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$,
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
-      getActiveSolutionNavId$: () => activeSolutionNavId$,
+      getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
