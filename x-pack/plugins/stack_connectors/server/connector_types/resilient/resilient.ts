@@ -51,9 +51,9 @@ export class ResilientConnector extends CaseConnector<
 
   constructor(
     params: ServiceParams<ResilientConfig, ResilientSecrets>,
-    PushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
   ) {
-    super(params, PushToServiceParamsExtendedSchema);
+    super(params, pushToServiceParamsExtendedSchema);
 
     this.urls = {
       incidentTypes: `${this.getIncidentFieldsUrl()}/incident_type_ids`,

@@ -12,7 +12,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { ResilientConnector } from './resilient';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RESILIENT_CONNECTOR_ID } from './constants';
-import { PushToServiceParamsExtendedSchema } from './schema';
+import { PushToServiceIncidentSchema } from './schema';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -94,7 +94,7 @@ describe('IBM Resilient connector', () => {
       config: { orgId, apiUrl },
       secrets: { apiKeyId, apiKeySecret },
     },
-    PushToServiceParamsExtendedSchema
+    PushToServiceIncidentSchema
   );
   beforeAll(() => {
     jest.useFakeTimers();

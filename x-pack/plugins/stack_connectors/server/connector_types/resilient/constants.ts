@@ -11,6 +11,4 @@ export enum SUB_ACTION {
   FIELDS = 'getFields',
   SEVERITY = 'severity',
   INCIDENT_TYPES = 'incidentTypes',
-  RUN = 'run',
-  TEST = 'test',
 }

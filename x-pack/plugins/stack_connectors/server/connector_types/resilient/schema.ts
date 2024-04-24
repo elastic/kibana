@@ -43,7 +43,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   ),
 });
 
-export const PushToServiceParamsExtendedSchema = {
+export const PushToServiceIncidentSchema = {
   name: schema.string(),
   description: schema.nullable(schema.string()),
   incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
