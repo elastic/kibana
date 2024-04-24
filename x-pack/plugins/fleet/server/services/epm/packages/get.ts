@@ -34,6 +34,7 @@ import type {
   InstalledPackage,
   PackageSpecManifest,
   AssetsMap,
+  EsDataStream,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -195,10 +196,10 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       name,
       version,
       install_status: installStatus,
-      es_index_patterns: esIndexPatterns,
+      data_streams: esDataStreams,
     } = integrationSavedObject.attributes;
 
-    const dataStreams = getInstalledPackageSavedObjectDataStreams(esIndexPatterns, dataStreamType);
+    const dataStreams = getInstalledPackageSavedObjectDataStreams(esDataStreams, dataStreamType);
 
     return {
       name,
@@ -379,22 +380,22 @@ export async function getInstalledPackageManifests(
 }
 
 function getInstalledPackageSavedObjectDataStreams(
-  indexPatterns: Record<string, string>,
+  esDataStreams: EsDataStream[] = [],
   dataStreamType?: string
 ) {
-  return Object.entries(indexPatterns)
-    .map(([key, value]) => {
-      return {
-        name: value,
-        title: key,
-      };
-    })
+  return esDataStreams
     .filter((stream) => {
       if (!dataStreamType) {
         return true;
       } else {
-        return stream.name.startsWith(`${dataStreamType}-`);
+        return stream.pattern.startsWith(`${dataStreamType}-`);
       }
+    })
+    .map((stream) => {
+      return {
+        name: stream.pattern,
+        title: stream.display_name ?? stream.name,
+      };
     });
 }
 

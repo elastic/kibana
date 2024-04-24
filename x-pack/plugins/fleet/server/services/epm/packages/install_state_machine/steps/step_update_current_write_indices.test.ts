@@ -56,7 +56,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
         verification_status: 'verified',
         installed_kibana: [] as any,
         installed_es: installedEs,
-        es_index_patterns: {},
+        data_streams: [],
       },
       type: PACKAGES_SAVED_OBJECT_TYPE,
       references: [],

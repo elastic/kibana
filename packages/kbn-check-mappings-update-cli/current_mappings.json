@@ -954,10 +954,6 @@
   },
   "epm-packages": {
     "properties": {
-      "es_index_patterns": {
-        "dynamic": false,
-        "properties": {}
-      },
       "experimental_data_stream_features": {
         "properties": {
           "data_stream": {
@@ -1034,6 +1030,15 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "display_name": { "type": "text" },
+      "data_streams": {
+        "dynamic": false,
+        "properties": {
+          "pattern": { "type": "keyword" },
+          "name": { "type": "keyword" },
+          "display_name": { "type": "text" }
+        }
       },
       "package_assets": {
         "dynamic": false,

@@ -767,10 +767,10 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
       ],
-      es_index_patterns: {
-        test_logs: 'logs-all_assets.test_logs-*',
-        test_metrics: 'metrics-all_assets.test_metrics-*',
-      },
+      data_streams: [
+        { name: 'test_logs', pattern: 'logs-all_assets.test_logs-*' },
+        { name: 'test_metrics', pattern: 'metrics-all_assets.test_metrics-*' },
+      ],
       name: 'all_assets',
       version: '0.1.0',
       install_version: '0.1.0',

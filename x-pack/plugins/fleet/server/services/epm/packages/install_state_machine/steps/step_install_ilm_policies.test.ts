@@ -53,7 +53,7 @@ describe('stepInstallILMPolicies', () => {
           type: ElasticsearchAssetType.transform,
         },
       ] as any,
-      es_index_patterns: {},
+      data_streams: [],
     },
     type: PACKAGES_SAVED_OBJECT_TYPE,
     references: [],

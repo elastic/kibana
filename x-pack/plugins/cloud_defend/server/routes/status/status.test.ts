@@ -33,7 +33,7 @@ const mockCloudDefendPackageInfo: Installation = {
   installed_kibana_space_id: 'default',
   installed_es: [],
   package_assets: [],
-  es_index_patterns: { alerts: 'logs-cloud_defend.alerts-*' },
+  data_streams: [{ name: 'alerts', pattern: 'logs-cloud_defend.alerts-*' }],
   name: 'cloud_defend',
   version: '1.0.0',
   install_version: '1.0.0',

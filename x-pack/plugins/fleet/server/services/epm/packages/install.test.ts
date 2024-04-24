@@ -766,6 +766,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     policy_templates: [
       {
         name: 'log',
+        title: 'My Logs',
         type: 'log',
       },
     ],
@@ -827,7 +828,8 @@ describe('installAssetsForInputPackagePolicy', () => {
       expect.anything(),
       {
         'test.tata': 'log-test.tata-*',
-      }
+      },
+      [{ display_name: 'My Logs Dataset', name: 'test.tata', pattern: 'log-test.tata-*' }]
     );
   });
 });
