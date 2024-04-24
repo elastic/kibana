@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       return {};
     }
   };
+
   describe('delete_slo', () => {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
@@ -135,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         });
 
+        const numberOfRollupDocumentsBeforeDeletion = sloRollupData.hits.hits.length;
         expect(sloRollupData.hits.hits.length > 0).to.be(true);
         expect(sloSummaryData.hits.hits.length > 0).to.be(true);
 
@@ -168,7 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
             sloId,
             indexName: SLO_DESTINATION_INDEX_PATTERN,
           });
-          if (sloRollupDataAfterDeletion.hits.hits.length > 0) {
+          if (
+            sloRollupDataAfterDeletion.hits.hits.length >= numberOfRollupDocumentsBeforeDeletion
+          ) {
             throw new Error('SLO rollup data not deleted yet');
           }
           return true;

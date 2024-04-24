@@ -242,7 +242,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
               },
               orderDirection: 'desc',
               otherBucket: true,
-              missingBucket: false,
+              missingBucket: true,
               parentFormat: {
                 id: 'terms',
               },
