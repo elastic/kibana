@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
+  formatNumber,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -24,10 +25,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { formatBytes } from '@kbn/formatters';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
+  BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { QualityIndicator } from '../../quality_indicator';
@@ -247,7 +248,7 @@ export const getDatasetQualityTableColumns = ({
           borderRadius="m"
           isLoading={loadingDataStreamStats}
         >
-          {formatBytes(dataStreamStat.sizeBytes || 0)}
+          {formatNumber(dataStreamStat.sizeBytes || 0, BYTE_NUMBER_FORMAT)}
         </EuiSkeletonRectangle>
       ),
       width: '100px',

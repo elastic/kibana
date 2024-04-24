@@ -34,7 +34,7 @@ import { LogCategories } from './get_log_categories';
 const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
   options: {
-    tags: ['access:apm', 'access:ai_assistant'],
+    tags: ['access:apm'],
   },
 
   params: t.type({
@@ -45,16 +45,16 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   ): Promise<{
     serviceSummary?: ServiceSummary;
     downstreamDependencies?: APMDownstreamDependency[];
-    logCategories: LogCategories;
-    serviceChangePoints: Array<{
+    logCategories?: LogCategories;
+    serviceChangePoints?: Array<{
       title: string;
       changes: TimeseriesChangePoint[];
     }>;
-    exitSpanChangePoints: Array<{
+    exitSpanChangePoints?: Array<{
       title: string;
       changes: TimeseriesChangePoint[];
     }>;
-    anomalies: ApmAnomalies;
+    anomalies?: ApmAnomalies;
   }> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
