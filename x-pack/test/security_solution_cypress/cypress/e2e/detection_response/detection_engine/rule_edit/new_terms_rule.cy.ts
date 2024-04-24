@@ -44,7 +44,7 @@ const rule = getNewTermsRule();
 describe(
   'Detection rules, New terms, Edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipServerlessMKI'],
     env: {
       // alertSuppressionForNewTermsRuleEnabled feature flag is also enabled in a global config
       kbnServerArgs: [
