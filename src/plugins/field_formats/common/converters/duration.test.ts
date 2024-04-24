@@ -232,31 +232,51 @@ describe('Duration Format', () => {
   });
 
   testCase({
-    inputFormat: 'seconds',
+    inputFormat: 'milliseconds',
     outputFormat: 'humanizePrecise',
-    outputPrecision: 2,
+    outputPrecision: 0,
     showSuffix: true,
+    useShortSuffix: true,
     fixtures: [
       {
+        input: -123,
+        output: '-123 ms',
+      },
+      {
+        input: 1,
+        output: '1 ms',
+      },
+      {
         input: 600,
-        output: '10.00 minutes',
+        output: '600 ms',
       },
       {
         input: 30,
-        output: '30.00 seconds',
+        output: '30 ms',
       },
       {
         input: 3000,
-        output: '50.00 minutes',
+        output: '3 s',
       },
       {
-        input: 604800,
-        output: '1.00 weeks',
+        input: 300000,
+        output: '5 min',
       },
-      // 1 week and 3 and a half days
       {
-        input: 907200,
-        output: '1.50 weeks',
+        input: 30000000,
+        output: '8 h',
+      },
+      {
+        input: 90000000,
+        output: '1 d',
+      },
+      {
+        input: 9000000000,
+        output: '3 mon',
+      },
+      {
+        input: 99999999999,
+        output: '3 y',
       },
     ],
   });
@@ -291,6 +311,36 @@ describe('Duration Format', () => {
       {
         input: 691200,
         output: '1.14 weeks',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'seconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    fixtures: [
+      {
+        input: 600,
+        output: '10.00 minutes',
+      },
+      {
+        input: 30,
+        output: '30.00 seconds',
+      },
+      {
+        input: 3000,
+        output: '50.00 minutes',
+      },
+      {
+        input: 604800,
+        output: '1.00 weeks',
+      },
+      // 1 week and 3 and a half days
+      {
+        input: 907200,
+        output: '1.50 weeks',
       },
     ],
   });

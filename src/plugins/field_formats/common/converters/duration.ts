@@ -127,8 +127,13 @@ export class DurationFormat extends FieldFormat {
   };
 }
 
+// function to calculate the precision part of the value
+const calculatePrecision = (rawValue: number, unitValue: number, unitInSeconds: number) => {
+  return Math.floor(unitValue) + (rawValue - unitValue * unitInSeconds) / unitInSeconds;
+};
+
 function formatDuration(
-  val: number,
+  rawValue: number,
   duration: moment.Duration,
   outputPrecision: number,
   useShortSuffix: boolean,
@@ -136,15 +141,17 @@ function formatDuration(
 ) {
   // return nothing when the duration is falsy or not correctly parsed (P0D)
   if (!duration || !duration.isValid()) return;
+  const secPerDay = 86400;
+  //  this array is used to get find the first unit value that is not 0, calculate the precision part and return the formatted string
   const units = [
-    { unit: duration.years(), unitInSeconds: 365 * 24 * 60 * 60, method: 'asYears' },
-    { unit: duration.months(), unitInSeconds: 28 * 24 * 60 * 60, method: 'asMonths' },
-    { unit: duration.weeks(), unitInSeconds: 7 * 24 * 60 * 60, method: 'asWeeks' },
-    { unit: duration.days(), unitInSeconds: 24 * 60 * 60, method: 'asDays' },
-    { unit: duration.hours(), unitInSeconds: 60 * 60, method: 'asHours' },
-    { unit: duration.minutes(), unitInSeconds: 60, method: 'asMinutes' },
-    { unit: duration.seconds(), unitInSeconds: 1, method: 'asSeconds' },
-    { unit: duration.milliseconds(), unitInSeconds: 0.001, method: 'asMilliseconds' },
+    { getValue: () => duration.years(), unitInSeconds: 365 * secPerDay, method: 'asYears' },
+    { getValue: () => duration.months(), unitInSeconds: 31 * secPerDay, method: 'asMonths' },
+    { getValue: () => duration.weeks(), unitInSeconds: 7 * secPerDay, method: 'asWeeks' },
+    { getValue: () => duration.days(), unitInSeconds: secPerDay, method: 'asDays' },
+    { getValue: () => duration.hours(), unitInSeconds: 3600, method: 'asHours' },
+    { getValue: () => duration.minutes(), unitInSeconds: 60, method: 'asMinutes' },
+    { getValue: () => duration.seconds(), method: 'asSeconds' },
+    { getValue: () => duration.milliseconds(), method: 'asMilliseconds' },
   ];
 
   const getUnitText = (method: string) => {
@@ -152,23 +159,13 @@ function formatDuration(
     return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
   };
 
-  for (let i = 0; i < units.length; i++) {
-    const unitValue = units[i].unit;
-    if (unitValue >= 1) {
-      const unitInSeconds = units[i].unitInSeconds;
-      const unitText = getUnitText(units[i].method);
-      const value = Math.floor(unitValue);
-      if (unitInSeconds > 1) {
-        const precice = value + (val - unitValue * unitInSeconds) / unitInSeconds;
-        return precice.toFixed(outputPrecision) + includeSpace + unitText;
-      } else {
-        return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
-      }
+  for (const unit of units) {
+    const unitValue = unit.getValue();
+    if (unitValue >= 1 || unit === units[units.length - 1]) {
+      const finalValue = unit.unitInSeconds
+        ? calculatePrecision(rawValue, unitValue, unit.unitInSeconds)
+        : unitValue;
+      return finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }
   }
-
-  const unitValue = units[units.length - 1].unit;
-  const unitText = getUnitText(units[units.length - 1].method);
-
-  return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
 }
