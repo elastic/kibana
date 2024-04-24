@@ -29,7 +29,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
 
     try {
       const { context: obsAlertContext } = await http.get<{ context: string }>(
-        '/internal/observability/assistant/get_obs_alert_details_context',
+        '/internal/apm/assistant/get_obs_alert_details_context',
         {
           query: {
             alert_started_at: new Date(alert.formatted.start).toISOString(),

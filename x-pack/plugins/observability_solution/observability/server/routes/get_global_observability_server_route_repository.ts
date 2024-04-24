@@ -6,13 +6,11 @@
  */
 
 import { ObservabilityConfig } from '..';
-import { assistantRouteRepository } from './assistant/route';
 import { rulesRouteRepository } from './rules/route';
 
 export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const repository = {
     ...rulesRouteRepository,
-    ...assistantRouteRepository,
   };
   return repository;
 }
