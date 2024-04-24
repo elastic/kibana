@@ -72,7 +72,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                     <span data-test-subj="asset-criticality-validLinesMessage">
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
-                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset criticality will be assigned} other {{validLinesCountBold} asset criticalities will be assigned}}"
+                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset criticality level will be assigned} other {{validLinesCountBold} asset criticality levels will be assigned}}"
                         values={{
                           validLinesCount: validLines.count,
                           validLinesCountBold: <b>{validLines.count}</b>,
