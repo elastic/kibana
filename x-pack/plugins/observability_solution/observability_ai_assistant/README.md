@@ -75,7 +75,10 @@ There are a couple of ways to integrate with the AI Assistant: functions, screen
 
 #### **2.1** Functions
 
-Functions are the heartbeat of the Assistant. It allows the LLM to pull data from the Platform, rather than us just pushing it.  
+Functions are the heartbeat of the Assistant. It allows the LLM to pull data from the Platform, rather than us just pushing it.
+
+Functions are available everywhere, and should be used sparingly. They're especially useful for very specific tasks that require an interpretation of the user's prompt from the LLM. E.g., to convert a user question into an ES|QL query. If you simply want to attach data, there's no need to register a function. You can use the screen context API for this.
+
 They have a name and description for the LLM. They can also define parameters so the LLM understands how to call the function. These parameters are defined as a JSON Schema. Additionally, functions have what we call `respond` and `render` functions.
 
 The `respond` function is called on the server, with the arguments that the LLM has sent over (based on the parameters we have defined). The `respond` function is asynchronous, and can fetch data, and format it for the LLM to use. It can return a message, which is in the format of `{ content: { ... }, data: { ... } }`. `content` is what the LLM eventually sees as the function response. `data` is optional, and can be used to store data that is not used by the LLM, but for instance is used for visualizations or debugging. You can also return an Observable, which allows you to emit multiple messages.
@@ -202,41 +205,14 @@ useEffect(() => {
         },
       },
       async ({ arguments: { myProperty } }) => {
-        return observabilityAIAssistant?.service.navigate(() => {
-          moveToUrl();
-        });
-      }
-    ),
-  });
-}, [observabilityAIAssistant?.service, moveToUrl]);
-```
-
-`navigate` is a utility function that waits until the network is silent for at least a second, and then sends the screen context from the new page back to the Assistant. `createScreenContext` is a utility
-
-You can also update some state and directly return data to the Assistant:
-
-```ts
-import { createScreenContext } from '@kbn/observability-ai-assistant-plugin/public';
-useEffect(() => {
-  return observabilityAIAssistant?.service.setScreenContext({
-    actions: createScreenContextAction(
-      {
-        name: 'navigate_to_home',
-        description: 'Navigate to the home page',
-        parameters: {
-          type: 'object',
-          properties: {
-            myProperty: 'myValue',
-          },
-        },
-      },
-      async ({ arguments: { myProperty } }) => {
-        setFormValue(myProperty);
-        return {
-          content: 'Form value was updated',
-        };
+        return doSomethingOnThePage()
+          .then(( response ) => {
+            return { content: { response } } };
+          })
       }
     ),
   });
 }, [observabilityAIAssistant?.service]);
 ```
+
+Any data you return will be sent back to the AI Assistant. `createScreenContext` is a utility function that allows you to get typed arguments to your `respond` function. You can also define the action without it.
