@@ -88,12 +88,13 @@ function EstimatedLabel({ label }: { label: string }) {
       })}
     >
       <>
-        {label}{' '}
-        <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        {label} <EuiIcon size="s" color="subdued" type="questionInCircle" />
       </>
     </EuiToolTip>
   );
 }
+
+const SAMPLES_COLUMN_WIDTH = '152px';
 
 export function APMTransactions({ functionName, serviceNames }: Props) {
   const {
@@ -216,7 +217,7 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       },
       {
         field: 'serviceSamples',
-        width: '150px',
+        width: SAMPLES_COLUMN_WIDTH,
         sortable: true,
         name: (
           <EstimatedLabel
@@ -267,7 +268,7 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
             })}
           />
         ),
-        width: '152px',
+        width: SAMPLES_COLUMN_WIDTH,
         render(_, { transactionSamples }) {
           if (isLoadingTransactions) {
             return '--';
