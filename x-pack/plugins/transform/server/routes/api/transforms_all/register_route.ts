@@ -13,7 +13,7 @@ import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
@@ -34,8 +34,11 @@ export function registerRoute({ router, license }: RouteDependencies) {
         version: '1',
         validate: false,
       },
-      license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
-        routeHandler
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }
