@@ -64,16 +64,22 @@ export const filtersRt = new t.Type<BoolQuery, string, unknown>(
   (input: unknown, context: t.Context) =>
     either.chain(t.string.validate(input, context), (value: string) => {
       try {
-        const parsedFilters = JSON.parse(value);
+        const filters = JSON.parse(value);
+        if (filters.should) {
+          throw new Error('should clause is not supported');
+        }
+        if (filters.must) {
+          throw new Error('must clause is not supported');
+        }
         const decoded = {
           should: [],
           must: [],
-          must_not: parsedFilters.must_not ? [...parsedFilters.must_not] : [],
-          filter: parsedFilters.filter ? [...parsedFilters.filter] : [],
+          must_not: filters.must_not ? [...filters.must_not] : [],
+          filter: filters.filter ? [...filters.filter] : [],
         };
         return t.success(decoded);
       } catch (err) {
-        return t.failure(input, context);
+        return t.failure(input, context, err.message);
       }
     }),
   (filters: BoolQuery): string => JSON.stringify(filters)
