@@ -94,7 +94,8 @@ export function DataPreviewChart({
     isError,
   } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range || defaultRange);
 
-  const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
+  const isMoreThan100 =
+    !ignoreMoreThan100 && previewData?.find((row) => row.sliValue && row.sliValue > 1) != null;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -104,7 +105,7 @@ export function DataPreviewChart({
       : (uiSettings.get('format:percent:defaultPattern') as string);
 
   // map values to row.sliValue and filter out no data values
-  const values = (previewData || []).map((row) => row.sliValue).filter((value) => value !== -1);
+  const values = (previewData || []).map((row) => row.sliValue);
   const maxValue = max(values);
   const minValue = min(values);
   const domain = {
@@ -340,7 +341,7 @@ export function DataPreviewChart({
                 yAccessors={['value']}
                 data={(previewData ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
-                  value: datum.sliValue >= 0 ? datum.sliValue : null,
+                  value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
                   events: datum.events,
                 }))}
               />
