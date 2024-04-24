@@ -8,7 +8,7 @@
 
 import { Router, type RouterOptions } from './router';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { schema } from '@kbn/config-schema';
+import { isConfigSchema, schema } from '@kbn/config-schema';
 import { createFooValidation } from './router.test.util';
 import { createRequestMock } from '@kbn/hapi-mocks/src/request';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
@@ -119,9 +119,15 @@ describe('Router', () => {
   it('constructs lazily provided validations once (idempotency)', async () => {
     const router = new Router('', logger, enhanceWithContext, routerOptions);
     const { fooValidation } = testValidation;
-    const original = fooValidation.response;
-    const responseValidation = jest.fn(() => original());
-    fooValidation.response = responseValidation;
+
+    const response200 = fooValidation.response[200].body;
+    const lazyResponse200 = jest.fn(() => response200());
+    fooValidation.response[200].body = lazyResponse200;
+
+    const response404 = fooValidation.response[404].body;
+    const lazyResponse404 = jest.fn(() => response404());
+    fooValidation.response[404].body = lazyResponse404;
+
     const lazyValidation = jest.fn(() => fooValidation);
     router.post(
       {
@@ -140,11 +146,25 @@ describe('Router', () => {
         }),
         mockResponseToolkit
       );
-      (validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>)()
-        .response!();
+
+      expect(
+        isConfigSchema(
+          (
+            validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
+          )().response![200].body()
+        )
+      ).toBe(true);
+      expect(
+        isConfigSchema(
+          (
+            validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
+          )().response![404].body()
+        )
+      ).toBe(true);
     }
     expect(lazyValidation).toHaveBeenCalledTimes(1);
-    expect(responseValidation).toHaveBeenCalledTimes(1);
+    expect(lazyResponse200).toHaveBeenCalledTimes(1);
+    expect(lazyResponse404).toHaveBeenCalledTimes(1);
   });
 
   it('registers pluginId if provided', () => {

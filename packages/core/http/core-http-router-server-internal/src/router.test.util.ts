@@ -31,15 +31,22 @@ export function createFooValidation() {
         }),
       }),
     },
-    response: () => ({
+    response: {
       200: {
-        body: schema.object({
-          foo: schema.number({
-            validate: validateOutputFn,
+        body: () =>
+          schema.object({
+            foo: schema.number({
+              validate: validateOutputFn,
+            }),
           }),
-        }),
       },
-    }),
+      404: {
+        body: () =>
+          schema.object({
+            error: schema.string(),
+          }),
+      },
+    },
   };
 
   return {

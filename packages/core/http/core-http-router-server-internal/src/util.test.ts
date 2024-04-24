@@ -27,19 +27,16 @@ describe('prepareResponseValidation', () => {
       },
     };
 
-    const prepared = prepareResponseValidation(validation);
+    const prepared = prepareResponseValidation(validation.response!);
 
     expect(prepared).toEqual({
-      request: {},
-      response: {
-        200: { body: expect.any(Function) },
-        404: { body: expect.any(Function) },
-        unsafe: { body: true },
-      },
+      200: { body: expect.any(Function) },
+      404: { body: expect.any(Function) },
+      unsafe: { body: true },
     });
 
-    [1, 2, 3].forEach(() => prepared.response![200].body());
-    [1, 2, 3].forEach(() => prepared.response![404].body());
+    [1, 2, 3].forEach(() => prepared[200].body());
+    [1, 2, 3].forEach(() => prepared[404].body());
 
     expect(validation.response![200].body).toHaveBeenCalledTimes(1);
     expect(validation.response![404].body).toHaveBeenCalledTimes(1);

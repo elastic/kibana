@@ -7,28 +7,14 @@
  */
 
 import { once } from 'lodash';
-import { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
+import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
+import { prepareResponseValidation } from '../util';
 
-function isStatusCode(key: string) {
-  return !isNaN(parseInt(key, 10));
-}
-
-export function prepareResponseValidation(
-  validation: VersionedRouteValidation<unknown, unknown, unknown>
-): VersionedRouteValidation<unknown, unknown, unknown> {
+function prepareValidation(validation: VersionedRouteValidation<unknown, unknown, unknown>) {
   if (validation.response) {
-    const responses = Object.entries(validation.response).map(([key, value]) => {
-      if (isStatusCode(key)) {
-        return [key, { body: once(value.body) }];
-      }
-      return [key, value];
-    });
-
     return {
       ...validation,
-      response: {
-        ...Object.fromEntries(responses),
-      },
+      response: prepareResponseValidation(validation.response),
     };
   }
   return validation;
@@ -42,12 +28,12 @@ export function prepareVersionedRouteValidation(
     const validate = options.validate;
     return {
       ...options,
-      validate: once(() => prepareResponseValidation(validate())),
+      validate: once(() => prepareValidation(validate())),
     };
   } else if (typeof options.validate === 'object' && options.validate !== null) {
     return {
       ...options,
-      validate: prepareResponseValidation(options.validate),
+      validate: prepareValidation(options.validate),
     };
   }
   return options;

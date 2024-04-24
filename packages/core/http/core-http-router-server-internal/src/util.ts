@@ -9,16 +9,35 @@
 import { once } from 'lodash';
 import {
   isFullValidatorContainer,
+  RouteValidatorFullConfigResponse,
+  VersionedRouteResponseValidation,
   type RouteConfig,
   type RouteMethod,
   type RouteValidator,
 } from '@kbn/core-http-server';
 
-function prepareResponseValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
-  if (isFullValidatorContainer(validator) && typeof validator.response === 'function') {
+function isStatusCode(key: string) {
+  return !isNaN(parseInt(key, 10));
+}
+
+export function prepareResponseValidation(
+  validation: RouteValidatorFullConfigResponse | VersionedRouteResponseValidation
+): RouteValidatorFullConfigResponse | VersionedRouteResponseValidation {
+  const responses = Object.entries(validation).map(([key, value]) => {
+    if (isStatusCode(key)) {
+      return [key, { body: once(value.body) }];
+    }
+    return [key, value];
+  });
+
+  return Object.fromEntries(responses);
+}
+
+function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
+  if (isFullValidatorContainer(validator) && validator.response) {
     return {
       ...validator,
-      response: once(validator.response),
+      response: prepareResponseValidation(validator.response),
     };
   }
   return validator;
@@ -34,12 +53,12 @@ export function prepareRouteConfigValidation<P, Q, B>(
     const validate = config.validate;
     return {
       ...config,
-      validate: once(() => prepareResponseValidation(validate())),
+      validate: once(() => prepareValidation(validate())),
     };
   } else if (typeof config.validate === 'object' && typeof config.validate !== null) {
     return {
       ...config,
-      validate: prepareResponseValidation(config.validate),
+      validate: prepareValidation(config.validate),
     };
   }
   return config;
