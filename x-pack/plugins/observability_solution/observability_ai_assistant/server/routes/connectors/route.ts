@@ -26,7 +26,9 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
           includeSystemActionTypes: false,
         })
         .then((types) =>
-          types.filter((type) => type.enabled && type.enabledInLicense).map((type) => type.id)
+          types
+            .filter((type) => type.enabled && type.enabledInLicense && type.enabledInConfig)
+            .map((type) => type.id)
         ),
       actionsClient.getAll(),
     ]);
