@@ -41,7 +41,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
       color="warning"
       iconType="warning"
       title={i18n.translate('xpack.slo.sloDetails.healthCallout.title', {
-        defaultMessage: 'This SLO has issues with its transform',
+        defaultMessage: 'This SLO has issues with its transforms',
       })}
     >
       <EuiFlexGroup direction="column" alignItems="flexStart">
