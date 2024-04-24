@@ -313,6 +313,13 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
+packages/core/user-profile/core-user-profile-browser @elastic/kibana-core
+packages/core/user-profile/core-user-profile-browser-internal @elastic/kibana-core
+packages/core/user-profile/core-user-profile-browser-mocks @elastic/kibana-core
+packages/core/user-profile/core-user-profile-common @elastic/kibana-core
+packages/core/user-profile/core-user-profile-server @elastic/kibana-core
+packages/core/user-profile/core-user-profile-server-internal @elastic/kibana-core
+packages/core/user-profile/core-user-profile-server-mocks @elastic/kibana-core
 packages/core/user-settings/core-user-settings-server @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
