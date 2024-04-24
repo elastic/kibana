@@ -27,7 +27,7 @@ export const observabilityAlertDetailsContextRt = t.intersection([
   }),
 ]);
 
-type AlertDetailsContextHandlerQuery = t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+export type AlertDetailsContextHandlerQuery = t.TypeOf<typeof observabilityAlertDetailsContextRt>;
 export interface AlertDetailsRequestContext {
   request: KibanaRequest;
   core: Promise<CoreRequestHandlerContext>;

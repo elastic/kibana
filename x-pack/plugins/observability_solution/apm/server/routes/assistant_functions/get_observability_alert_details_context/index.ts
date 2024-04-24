@@ -8,8 +8,8 @@
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext, Logger } from '@kbn/core/server';
+import { AlertDetailsContextHandlerQuery } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
-import * as t from 'io-ts';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -21,24 +21,7 @@ import { ApmTimeseriesType, getApmTimeseries } from '../get_apm_timeseries';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
-
-export const observabilityAlertDetailsContextRt = t.intersection([
-  t.type({
-    alert_started_at: t.string,
-  }),
-  t.partial({
-    // apm fields
-    'service.name': t.string,
-    'service.environment': t.string,
-    'transaction.type': t.string,
-    'transaction.name': t.string,
-
-    // infrastructure fields
-    'host.name': t.string,
-    'container.id': t.string,
-    'kubernetes.pod.name': t.string,
-  }),
-]);
+import { getContextMessage } from './get_context_message';
 
 export async function getObservabilityAlertDetailsContext({
   coreContext,
@@ -57,7 +40,7 @@ export async function getObservabilityAlertDetailsContext({
   esClient: ElasticsearchClient;
   logger: Logger;
   mlClient?: MlClient;
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  query: AlertDetailsContextHandlerQuery;
 }) {
   const alertStartedAt = query.alert_started_at;
   const serviceEnvironment = query['service.environment'];
@@ -182,14 +165,16 @@ export async function getObservabilityAlertDetailsContext({
     anomaliesPromise,
   ]);
 
-  return {
+  return getContextMessage({
+    serviceName,
+    serviceEnvironment,
     serviceSummary,
     downstreamDependencies,
     logCategories,
     serviceChangePoints,
     exitSpanChangePoints,
     anomalies,
-  };
+  });
 }
 
 async function getServiceChangePoints({

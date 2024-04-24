@@ -44,6 +44,7 @@ import { getRandomSampler } from './lib/helpers/get_random_sampler';
 import { getApmEventClient } from './lib/helpers/get_apm_event_client';
 import { getApmAlertsClient } from './lib/helpers/get_apm_alerts_client';
 import { getMlClient } from './lib/helpers/get_ml_client';
+import { getObservabilityAlertDetailsContext } from './routes/assistant_functions/get_observability_alert_details_context';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -56,7 +57,7 @@ export class APMPlugin
   }
 
   public setup(core: CoreSetup<APMPluginStartDependencies>, plugins: APMPluginSetupDependencies) {
-    this.logger = this.initContext.logger.get();
+    const logger = (this.logger = this.initContext.logger.get());
     const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmTelemetry);
@@ -271,7 +272,16 @@ export class APMPlugin
           ]);
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-        return '';
+        return getObservabilityAlertDetailsContext({
+          coreContext,
+          apmEventClient,
+          annotationsClient,
+          apmAlertsClient,
+          mlClient,
+          esClient,
+          query,
+          logger,
+        });
       }
     );
 
