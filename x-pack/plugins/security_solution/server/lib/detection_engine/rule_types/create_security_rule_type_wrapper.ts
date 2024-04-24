@@ -310,6 +310,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             tuples,
             remainingGap,
             wroteWarningStatus: rangeTuplesWarningStatus,
+            warningStatusMessage: rangeTuplesWarningMessage,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -322,6 +323,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           });
           if (rangeTuplesWarningStatus) {
             wroteWarningStatus = rangeTuplesWarningStatus;
+            warningMessage = rangeTuplesWarningMessage;
           }
 
           if (remainingGap.asMilliseconds() > 0) {

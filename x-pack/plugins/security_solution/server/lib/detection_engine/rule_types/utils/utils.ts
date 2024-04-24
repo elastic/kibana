@@ -433,6 +433,7 @@ export const getRuleRangeTuples = async ({
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
   let wroteWarningStatus = false;
+  let warningStatusMessage;
   if (originalFrom == null || originalTo == null) {
     throw new Error('Failed to parse date math of rule.from or rule.to');
   }
@@ -441,7 +442,7 @@ export const getRuleRangeTuples = async ({
   let maxSignalsToUse = maxSignals;
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
-    const warningStatusMessage = `The rule's max_signals value (${maxSignals}) is greater than the Kibana alerting limit set in xpack.alerting.rules.run.alerts.max (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} per rule run.`;
+    warningStatusMessage = `The rule's max_signals value (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} per rule run.`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
@@ -464,7 +465,7 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), wroteWarningStatus };
+    return { tuples, remainingGap: moment.duration(0), wroteWarningStatus, warningStatusMessage };
   }
 
   const gap = getGapBetweenRuns({
@@ -497,6 +498,7 @@ export const getRuleRangeTuples = async ({
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
     wroteWarningStatus,
+    warningStatusMessage,
   };
 };
 

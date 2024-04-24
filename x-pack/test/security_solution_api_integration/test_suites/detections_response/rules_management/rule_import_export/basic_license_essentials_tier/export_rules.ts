@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should export defaultable fields when values are set', async () => {
         const defaultableFields: BaseDefaultableFields = {
-          max_signals: 100,
+          max_signals: 200,
         };
         const ruleToExport = getCustomQueryRuleParams(defaultableFields);
 

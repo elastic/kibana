@@ -123,9 +123,3 @@ function isQueryRulePayload(rule: RuleCreateProps | RuleUpdateProps): rule is Qu
 function isQueryRuleObject(rule?: RuleAlertType): rule is Rule<UnifiedQueryRuleParams> {
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
-
-export const validateMaxSignals = (maxSignals?: number) => {
-  if (maxSignals !== undefined && maxSignals <= 0) {
-    throw new CustomHttpRequestError(`max_signals must be greater than 0`, 400);
-  }
-};
