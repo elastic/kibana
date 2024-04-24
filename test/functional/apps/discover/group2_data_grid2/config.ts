@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableExplorerPlugin } from './plugin';
+import { FtrConfigProviderContext } from '@kbn/test';
 
-export const plugin = () => new EmbeddableExplorerPlugin();
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+
+  return {
+    ...functionalConfig.getAll(),
+    testFiles: [require.resolve('.')],
+  };
+}
