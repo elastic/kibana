@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group2', function () {
+  describe('discover/group4', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
     });
@@ -20,7 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./_data_grid_doc_navigation'));
-    loadTestFile(require.resolve('./_data_grid_doc_table'));
+    loadTestFile(require.resolve('./_adhoc_data_views'));
   });
 }
