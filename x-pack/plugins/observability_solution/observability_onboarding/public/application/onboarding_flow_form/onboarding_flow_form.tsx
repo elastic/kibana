@@ -6,27 +6,29 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
+  EuiAvatar,
   EuiCheckableCard,
-  EuiTitle,
-  EuiText,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-  EuiAvatar,
-  useEuiTheme,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { OnboardingFlowPackageList } from '../packages_list';
+import { useCustomMargin } from '../shared/use_custom_margin';
+import { Category } from './types';
+import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 
 interface UseCaseOption {
-  id: string;
+  id: Category;
   label: string;
   description: React.ReactNode;
 }
@@ -42,8 +44,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
-          defaultMessage:
-            'Detect patterns, troubleshoot in real time, gain insights from logs.',
+          defaultMessage: 'Detect patterns, troubleshoot in real time, gain insights from logs.',
         }
       ),
     },
@@ -56,8 +57,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
-          defaultMessage:
-            'Collect distributed traces and catch application performance problems.',
+          defaultMessage: 'Collect distributed traces and catch application performance problems.',
         }
       ),
     },
@@ -77,11 +77,46 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
+  const customMargin = useCustomMargin();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
-  const { euiTheme } = useEuiTheme();
-
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const packageListRef = React.useRef<HTMLDivElement | null>(null);
+  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+
+  useEffect(() => {
+    const searchParam = searchParams.get('search') ?? '';
+    if (integrationSearch === searchParam) return;
+    const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    if (integrationSearch) {
+      entries.search = integrationSearch;
+    } else {
+      delete entries.search;
+    }
+    setSearchParams(entries, { replace: true });
+  }, [integrationSearch, searchParams, setSearchParams]);
+
+  const createCollectionCardHandler = useCallback(
+    (query: string) => () => {
+      setIntegrationSearch(query);
+      if (packageListRef.current) {
+        // adding a slight delay causes the search bar to be rendered
+        new Promise((r) => setTimeout(r, 10)).then(() =>
+          packageListRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        );
+      }
+    },
+    []
+  );
+
+  const customCards = useCustomCardsForCategory(
+    createCollectionCardHandler,
+    searchParams.get('category') as Category | null
+  );
 
   return (
     <EuiPanel hasBorder>
@@ -96,12 +131,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup
-        css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}
-        gutterSize="m"
-        direction="column"
-      >
-        {options.map((option, index) => (
+      <EuiFlexGroup css={customMargin} gutterSize="m" direction="column">
+        {options.map((option) => (
           <EuiFlexItem key={option.id}>
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
@@ -116,9 +147,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() =>
-                setSearchParams({ category: option.id }, { replace: true })
-              }
+              onChange={() => setSearchParams({ category: option.id }, { replace: true })}
             />
           </EuiFlexItem>
         ))}
@@ -137,32 +166,33 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {/* Mock integrations grid */}
-          <EuiFlexGrid columns={3} css={{ margin: 20 }}>
-            {new Array(6).fill(null).map((_, index) => (
-              <EuiCard
-                key={index}
-                layout="horizontal"
-                title={searchParams.get('category')!}
-                titleSize="xs"
-                description={searchParams.get('category')!}
-                icon={<EuiIcon type="logoObservability" size="l" />}
-                betaBadgeProps={
-                  index === 0
-                    ? {
-                        label: 'Quick Start',
-                        color: 'accent',
-                        size: 's',
-                      }
-                    : undefined
-                }
-                hasBorder
-                css={{
-                  borderColor: index === 0 ? '#ba3d76' : undefined,
-                }}
-              />
-            ))}
-          </EuiFlexGrid>
+          {Array.isArray(customCards) && (
+            <OnboardingFlowPackageList
+              customCards={customCards}
+              flowSearch={integrationSearch}
+              flowCategory={searchParams.get('category')}
+            />
+          )}
+
+          <EuiText css={customMargin} size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
+              defaultMessage="Not seeing yours? Search through our 130 ways of ingesting data:"
+            />
+          </EuiText>
+          <OnboardingFlowPackageList
+            showSearchBar={true}
+            searchQuery={integrationSearch}
+            flowSearch={integrationSearch}
+            setSearchQuery={setIntegrationSearch}
+            flowCategory={searchParams.get('category')}
+            ref={packageListRef}
+            customCards={customCards?.filter(
+              // Filter out collection cards and regular integrations that show up via search anyway
+              (card) => card.type === 'virtual' && !card.isCollectionCard
+            )}
+            joinCardLists
+          />
         </>
       )}
     </EuiPanel>
@@ -174,10 +204,7 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
-  title,
-  iconType,
-}) => (
+const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />

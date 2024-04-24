@@ -10,6 +10,7 @@ import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import styled from '@emotion/styled';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
@@ -18,6 +19,12 @@ import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './typ
 import { useAssistantContext } from '../../assistant_context';
 
 export const DEFAULT_PAGE_SIZE = 10;
+
+const Wrapper = styled.div`
+  > div > .euiSpacer {
+    block-size: 16px;
+  }
+`;
 
 const defaultSort: SortConfig = {
   sort: {
@@ -119,20 +126,21 @@ const ContextEditorComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiInMemoryTable
-      allowNeutralSort={false}
-      childrenBetween={hasUpdateAIAssistantAnonymization ? toolbar : undefined}
-      columns={columns}
-      compressed={true}
-      data-test-subj="contextEditor"
-      isSelectable={true}
-      itemId={FIELDS.FIELD}
-      items={rows}
-      pagination={pagination}
-      search={search}
-      selection={selectionValue}
-      sorting={defaultSort}
-    />
+    <Wrapper>
+      <EuiInMemoryTable
+        allowNeutralSort={false}
+        childrenBetween={hasUpdateAIAssistantAnonymization ? toolbar : undefined}
+        columns={columns}
+        compressed={true}
+        data-test-subj="contextEditor"
+        itemId={FIELDS.FIELD}
+        items={rows}
+        pagination={pagination}
+        search={search}
+        selection={selectionValue}
+        sorting={defaultSort}
+      />
+    </Wrapper>
   );
 };
 

@@ -47,7 +47,7 @@ export function getCombinedMessage({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   isNewChat: boolean;
@@ -65,19 +65,24 @@ export function getCombinedMessage({
     .map((id) => {
       const promptContextData = transformRawData({
         anonymizationFields: selectedPromptContexts[id].contextAnonymizationFields?.data ?? [],
-        currentReplacements,
+        currentReplacements: { ...currentReplacements, ...selectedPromptContexts[id].replacements },
         getAnonymizedValue,
         onNewReplacements,
         rawData: selectedPromptContexts[id].rawData,
       });
 
-      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContextData)}`;
+      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContextData)}\n`;
     });
 
+  const content = `${
+    isNewChat && selectedSystemPrompt && selectedSystemPrompt.content.length > 0
+      ? `${selectedSystemPrompt?.content ?? ''}\n\n`
+      : ''
+  }${promptContextsContent.length > 0 ? `${promptContextsContent}\n` : ''}${promptText}`;
+
   return {
-    content: `${
-      isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
-    }${promptContextsContent}\n\n${promptText}`,
+    // trim ensures any extra \n and other whitespace is removed
+    content: content.trim(),
     role: 'user', // we are combining the system and user messages into one message
     timestamp: new Date().toLocaleString(),
     replacements,

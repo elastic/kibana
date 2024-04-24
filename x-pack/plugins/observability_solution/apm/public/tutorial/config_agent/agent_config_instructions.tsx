@@ -34,10 +34,7 @@ export function AgentConfigInstructions({
     return (
       <>
         <EuiSpacer />
-        <OpenTelemetryInstructions
-          apmServerUrl={apmServerUrl}
-          secretToken={secretToken}
-        />
+        <OpenTelemetryInstructions apmServerUrl={apmServerUrl} secretToken={secretToken} />
       </>
     );
   }

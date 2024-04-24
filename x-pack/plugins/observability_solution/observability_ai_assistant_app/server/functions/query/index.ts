@@ -77,8 +77,9 @@ export function registerQueryFunction({
     {
       name: 'execute_query',
       contexts: ['core'],
-      visibility: FunctionVisibility.AssistantOnly,
-      description: 'Display the results of an ES|QL query',
+      visibility: FunctionVisibility.UserOnly,
+      description:
+        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
       parameters: {
         type: 'object',
         properties: {
@@ -108,17 +109,8 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no arguments.`,
       visibility: FunctionVisibility.AssistantOnly,
-      parameters: {
-        type: 'object',
-        properties: {
-          switch: {
-            type: 'boolean',
-          },
-        },
-        required: ['switch'],
-      } as const,
     },
     async ({ messages, connectorId, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
@@ -174,13 +166,14 @@ export function registerQueryFunction({
               ${VisualizeESQLUserIntention.visualizeXy}
 
               Some examples:
-              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
               "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
               "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+              
+              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
               "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
@@ -202,6 +195,14 @@ export function registerQueryFunction({
               parameters: {
                 type: 'object',
                 properties: {
+                  guides: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
+                    },
+                    description: 'A list of guides',
+                  },
                   commands: {
                     type: 'array',
                     items: {
@@ -237,12 +238,19 @@ export function registerQueryFunction({
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
-        commands: string[];
-        functions: string[];
+        guides?: string[];
+        commands?: string[];
+        functions?: string[];
         intention: VisualizeESQLUserIntention;
       };
 
-      const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
+      const keywords = [
+        ...(args.commands ?? []),
+        ...(args.functions ?? []),
+        ...(args.guides ?? []),
+        'SYNTAX',
+        'OVERVIEW',
+      ].map((keyword) => keyword.toUpperCase());
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
@@ -297,6 +305,8 @@ export function registerQueryFunction({
                 \`\`\`esql
                 <query>
                 \`\`\`
+
+                Respond in plain text. Do not attempt to use a function.
   
                 Prefer to use commands and functions for which you have requested documentation.
   
@@ -331,18 +341,6 @@ export function registerQueryFunction({
                 as mentioned in the system message and documentation. When converting queries from one language
                 to ES|QL, make sure that the functions are available and documented in ES|QL.
                 E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-                
-                Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
-                functions in stats commands, NOT in SORT or EVAL.
-                Rationale: Only aggregation functions are supported in STATS commands, and aggregation
-                functions are only supported in STATS commands. 
-                Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
-                Do not use aggregation functions anywhere else, such as SORT or EVAL.
-                Example:
-                \`\`\`esql
-                EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
-                | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-                \`\`\`
                 
                 `,
             },
@@ -398,7 +396,19 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: { switch: true } }))
+        startWith(
+          createFunctionResponseMessage({
+            name: 'query',
+            content: {},
+            data: {
+              documentation: {
+                intention: args.intention,
+                keywords,
+                files: messagesToInclude,
+              },
+            },
+          })
+        )
       );
     }
   );

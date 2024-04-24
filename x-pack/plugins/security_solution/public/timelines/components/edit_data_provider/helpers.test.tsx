@@ -98,6 +98,7 @@ describe('helpers', () => {
             { label: 'event.action' },
             { label: 'event.category' },
             { label: 'event.severity' },
+            { label: 'event.kind' },
           ],
         },
         {

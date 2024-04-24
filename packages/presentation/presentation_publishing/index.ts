@@ -60,6 +60,10 @@ export {
 } from './interfaces/has_type';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
+  apiHasExecutionContext,
+  type HasExecutionContext,
+} from './interfaces/has_execution_context';
+export {
   apiPublishesBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';

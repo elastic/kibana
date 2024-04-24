@@ -20,11 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  Operation,
-  DISCOVERY_RULE_TYPE_ALL,
-  STAGED_DISCOVERY_RULE_ID,
-} from '.';
+import { Operation, DISCOVERY_RULE_TYPE_ALL, STAGED_DISCOVERY_RULE_ID } from '.';
 
 interface Props {
   id: string;
@@ -101,10 +97,7 @@ export function EditDiscoveryRule({
                 fullWidth
                 options={
                   operationTypes
-                    .find(
-                      ({ operation: definedOperation }) =>
-                        definedOperation.value === operation
-                    )
+                    .find(({ operation: definedOperation }) => definedOperation.value === operation)
                     ?.types.map((item) => ({
                       inputDisplay: item.label,
                       value: item.value,
@@ -158,10 +151,7 @@ export function EditDiscoveryRule({
       )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="apmEditDiscoveryRuleCancelButton"
-            onClick={onCancel}
-          >
+          <EuiButtonEmpty data-test-subj="apmEditDiscoveryRuleCancelButton" onClick={onCancel}>
             Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>

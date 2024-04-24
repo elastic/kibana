@@ -14,6 +14,8 @@ import {
   IUiSettingsClient,
   ApplicationStart,
   ExecutionContextStart,
+  ThemeServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
@@ -40,7 +42,9 @@ export interface AppDeps {
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  theme: ChartsPluginSetup['theme'];
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+  chartsTheme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];

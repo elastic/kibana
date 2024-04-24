@@ -9,11 +9,7 @@ import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-export function CrossClusterSearchCompatibilityWarning({
-  version,
-}: {
-  version: string;
-}) {
+export function CrossClusterSearchCompatibilityWarning({ version }: { version: string }) {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.apm.correlations.ccsWarningCalloutTitle', {

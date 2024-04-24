@@ -3274,6 +3274,17 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.HASH_TO_VERSION_MAP.slosettings3d1b76c39bfb2cc8296b024d73854724",
+            "type": "string",
+            "tags": [],
+            "label": "'slo-settings|3d1b76c39bfb2cc8296b024d73854724'",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
             "id": "def-common.HASH_TO_VERSION_MAP.slodc7f35c0cf07d71bb36f154996fe10c6",
             "type": "string",
             "tags": [],
