@@ -24,7 +24,7 @@ import type {
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
-  ReportInsightsGeneratedParams,
+  ReportAttackDiscoveriesGeneratedParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
   ReportDetailsFlyoutOpenedParams,
@@ -74,8 +74,8 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params);
   };
 
-  public reportInsightsGenerated = (params: ReportInsightsGeneratedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.InsightsGenerated, params);
+  public reportAttackDiscoveriesGenerated = (params: ReportAttackDiscoveriesGeneratedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.InsightsGenerated, params); // TODO: update this when TelemetryEventTypes reflects the rename from Insights to Attack discoveries
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
