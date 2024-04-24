@@ -41,10 +41,7 @@ import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../transaction_charts/helper';
+import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimeZone } from '../helper/timezone';
 
@@ -75,10 +72,7 @@ export function BreakdownChart({
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
   const theme = useTheme();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -100,18 +94,11 @@ export function BreakdownChart({
   const timeZone = getTimeZone(core.uiSettings);
 
   return (
-    <ChartContainer
-      height={height}
-      hasData={!isEmpty}
-      status={fetchStatus}
-      id={id}
-    >
+    <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus} id={id}>
       <Chart ref={chartRef}>
         <Tooltip stickTo="top" showNullValues />
         <Settings
-          onBrushEnd={(event) =>
-            onBrushEnd({ x: (event as XYBrushEvent).x, history })
-          }
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
@@ -134,12 +121,7 @@ export function BreakdownChart({
           tickFormat={xFormatter}
           gridLine={{ visible: false }}
         />
-        <Axis
-          id="y-axis"
-          ticks={3}
-          position={Position.Left}
-          tickFormat={yTickFormat}
-        />
+        <Axis id="y-axis" ticks={3} position={Position.Left} tickFormat={yTickFormat} />
 
         {showAnnotations && (
           <LineAnnotation
@@ -174,9 +156,7 @@ export function BreakdownChart({
                 yAccessors={['y']}
                 data={serie.data}
                 stackAccessors={['x']}
-                stackMode={
-                  yAxisType === 'percentage' ? 'percentage' : undefined
-                }
+                stackMode={yAxisType === 'percentage' ? 'percentage' : undefined}
                 color={serie.areaColor}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
@@ -184,12 +164,7 @@ export function BreakdownChart({
           })
         ) : (
           // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
-          <AreaSeries
-            id="empty_chart"
-            xAccessor="x"
-            yAccessors={['y']}
-            data={[]}
-          />
+          <AreaSeries id="empty_chart" xAccessor="x" yAccessors={['y']} data={[]} />
         )}
       </Chart>
     </ChartContainer>

@@ -15,6 +15,7 @@ import {
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamDetails,
   DataStreamStatServiceResponse,
+  IntegrationsResponse,
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
@@ -54,6 +55,7 @@ export interface WithFlyoutOptions {
     dataset?: FlyoutDataset;
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
+    breakdownField?: string;
   };
 }
 
@@ -83,7 +85,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
-  WithIntegrations;
+  Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -118,6 +120,10 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
+      value: 'integrations.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
       value: 'flyout.initializing.dataStreamDetails.fetching';
       context: DefaultDatasetQualityStateContext;
     }
@@ -144,6 +150,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_INSIGHTS_TIME_RANGE';
       timeRange: TimeRangeConfig;
+    }
+  | {
+      type: 'BREAKDOWN_FIELD_CHANGE';
+      breakdownField: string | null;
     }
   | {
       type: 'CLOSE_FLYOUT';
@@ -176,4 +186,5 @@ export type DatasetQualityControllerEvent =
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
+  | DoneInvokeEvent<IntegrationsResponse>
   | DoneInvokeEvent<Error>;

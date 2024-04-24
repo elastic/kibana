@@ -306,7 +306,12 @@ export const NativeConnectorConfiguration: React.FC = () => {
                       }
                     )}
                     <EuiSpacer size="s" />
-                    <EuiLink href={docLinks.documentLevelSecurity} target="_blank">
+                    <EuiLink
+                      data-test-subj="entSearchContent-connectorDetail-documentLevelSecurityLink"
+                      data-telemetry-id="entSearchContent-connectorDetail-documentLevelSecurityLink"
+                      href={docLinks.documentLevelSecurity}
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.securityLinkLabel',
                         {

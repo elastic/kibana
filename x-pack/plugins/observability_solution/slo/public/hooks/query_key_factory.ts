@@ -56,6 +56,7 @@ export const sloKeys = {
     range: { start: number; end: number },
     groupings?: Record<string, unknown>
   ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
+  burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
 };
 
 export type SloKeys = typeof sloKeys;

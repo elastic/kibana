@@ -277,13 +277,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   // Fetch assistant capabilities
   const { data: capabilities } = useCapabilities({ http, toasts });
-  const { assistantModelEvaluation: modelEvaluatorEnabled } =
+  const { assistantAlertsInsights, assistantModelEvaluation: modelEvaluatorEnabled } =
     capabilities ?? defaultAssistantFeatures;
 
   const value = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
+      assistantAlertsInsights,
       assistantAvailability,
       assistantTelemetry,
       augmentMessageCodeBlocks,
@@ -323,6 +324,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       alertsIndexPattern,
+      assistantAlertsInsights,
       assistantAvailability,
       assistantTelemetry,
       augmentMessageCodeBlocks,
