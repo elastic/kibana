@@ -68,6 +68,18 @@ export const buildHttpQuery = ({
             },
       },
       _source: false,
+      fields: [
+        'host.name',
+        'source.ip',
+        'url.path',
+        'http.request.method',
+        'url.domain',
+        'http.response.status_code',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
     track_total_hits: false,

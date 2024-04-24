@@ -197,8 +197,8 @@ export const formattedSearchStrategyResponse = {
                 format: 'strict_date_optional_time',
               },
             ],
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -270,6 +270,13 @@ export const expectedDsl = {
       },
     },
     _source: false,
+    fields: [
+      'dns.question.registered_domain',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
     size: 0,
   },
   track_total_hits: false,

@@ -50,6 +50,12 @@ export const buildTopNFlowQuery = ({
       aggregations: getFlowTargetAggs(sort, flowTarget, querySize),
       query,
       _source: false,
+      fields: [
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
     track_total_hits: false,
