@@ -223,7 +223,7 @@ export const getPackagePolicyUpdateCallback = (
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
-    notifyProtectionFeatureUsage(
+    await notifyProtectionFeatureUsage(
       endpointIntegrationData,
       featureUsageService,
       endpointMetadataService

@@ -93,7 +93,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          */
         if (endpointData.endpointMetrics.totalEndpoints === 0) {
           log.l('no endpoint metrics to report');
-          taskMetricsService.end(trace);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -167,11 +167,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
         }
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
         return telemetryPayloads.length;
       } catch (err) {
         log.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`, err);
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

@@ -54,7 +54,7 @@ export class CompleteExternalResponseActionsTask {
     return `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`;
   }
 
-  public async setup({ taskManager }: CompleteExternalResponseActionsTaskSetupOptions) {
+  public setup({ taskManager }: CompleteExternalResponseActionsTaskSetupOptions) {
     if (this.wasSetup) {
       throw new Error(`Task has already been setup!`);
     }
@@ -143,7 +143,7 @@ export class CompleteExternalResponseActionsTask {
       this.log.info(
         `Un-registering task definition [${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}] (if it exists)`
       );
-      taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE);
+      taskManager.removeIfExists(COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE).catch(() => {});
       this.cleanup = undefined;
     };
   }
