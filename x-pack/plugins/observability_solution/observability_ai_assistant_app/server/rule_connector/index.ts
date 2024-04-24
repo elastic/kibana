@@ -34,6 +34,7 @@ import {
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { AlertDetailsContextService } from '@kbn/observability-plugin/server/services';
+import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
@@ -175,10 +176,7 @@ async function executor(
     });
   });
 
-  const systemMessage = functionClient
-    .getContexts()
-    .find((def) => def.name === 'core')?.description;
-  const backgroundInstruction = await getBackgroundProcessInstruction(
+  const backgroundInstruction = getBackgroundProcessInstruction(
     execOptions.params.rule,
     execOptions.params.alerts,
     (alert: Record<string, any>) =>
@@ -211,7 +209,12 @@ async function executor(
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.System,
-            content: systemMessage,
+            content: getSystemMessageFromInstructions({
+              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+              registeredInstructions: functionClient.getInstructions(),
+              knowledgeBaseInstructions: [],
+              requestInstructions: [],
+            }),
           },
         },
         {
