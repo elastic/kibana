@@ -50,7 +50,8 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  forceSyntheticSource: schema.boolean({ defaultValue: false }),
+
+  forceSyntheticSource: schema.boolean({ defaultValue: false }), // deprecated
   latestAgentVersionsUrl: schema.string({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
@@ -101,6 +102,9 @@ export const config: PluginConfigDescriptor<APMConfig> = {
       level: 'warning',
     }),
     renameFromRoot('xpack.apm.maxServiceSelection', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
+    unused('forceSyntheticSource', {
       level: 'warning',
     }),
   ],
