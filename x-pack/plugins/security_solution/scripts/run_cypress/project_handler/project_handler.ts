@@ -1,4 +1,4 @@
-import { ToolingLog } from "@kbn/tooling-log";
+import { ToolingLog } from '@kbn/tooling-log';
 
 export interface ProductType {
   product_line: string;
@@ -41,6 +41,9 @@ export interface Credentials {
 }
 
 export class ProjectHandler {
+  private readonly DEFAULT_ERROR_MSG: string =
+    'The method needs to be overriden when the class is inherited!';
+
   baseEnvUrl: string;
   log: ToolingLog;
 
@@ -50,5 +53,26 @@ export class ProjectHandler {
       level: 'info',
       writeTo: process.stdout,
     });
+  }
+
+  // Method to invoke the create project API for serverless.
+  async createSecurityProject(
+    projectName: string,
+    productTypes: ProductType[],
+    commit: string
+  ): Promise<Project | undefined> {
+    throw new Error(this.DEFAULT_ERROR_MSG);
+  }
+
+  async deleteSecurityProject(projectId: string, projectName: string): Promise<void> {
+    throw new Error(this.DEFAULT_ERROR_MSG);
+  }
+
+  resetCredentials(projectId: string, runnerId: string): Promise<Credentials | undefined> {
+    throw new Error(this.DEFAULT_ERROR_MSG);
+  }
+
+  waitForProjectInitialized(projectId: string): Promise<void> {
+    throw new Error(this.DEFAULT_ERROR_MSG);
   }
 }
