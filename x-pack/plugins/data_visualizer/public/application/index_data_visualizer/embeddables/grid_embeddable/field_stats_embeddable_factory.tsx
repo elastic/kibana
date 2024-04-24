@@ -8,16 +8,16 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { type UnifiedFieldListSidebarContainerProps } from '@kbn/unified-field-list';
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { initializeTitles } from '@kbn/presentation-publishing';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import { FIELD_STATS_EMBED_ID } from './constants';
 import type { FieldListApi, FieldListSerializedStateState } from './types';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
-
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
   return {
     originatingApp: '',
@@ -49,7 +49,6 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       const api = buildApi(
         {
           ...titlesApi,
-          ...titleComparators,
           serializeState: () => {
             return {
               rawState: {
@@ -63,10 +62,10 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
         }
       );
 
+      // @todo: Remove usage of deprecated React rendering utilities
+      // see https://github.com/elastic/kibana/pull/181094
       const startServices = await core.getStartServices();
-
       const I18nContext = startServices[0].i18n.Context;
-
       const servicesToOverride = parentApi.overrideServices ?? {};
       const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };
       const datePickerDeps = {
@@ -77,6 +76,14 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       return {
         api,
         Component: () => {
+          const embeddableState$ = useMemo(
+            () =>
+              parentApi.embeddableState
+                ? parentApi.embeddableState
+                : new BehaviorSubject<FieldStatisticTableEmbeddableState | undefined>(),
+            []
+          );
+
           return (
             <I18nContext>
               <KibanaThemeProvider theme$={services.theme.theme$}>

@@ -58,7 +58,7 @@ export class DataVisualizerPlugin
 
     registerReactEmbeddableFactory(FIELD_STATS_EMBED_ID, async () => {
       const { getFieldStatsTableFactory } = await import(
-        './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_react_embeddable'
+        './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_embeddable_factory'
       );
       return getFieldStatsTableFactory(core);
     });

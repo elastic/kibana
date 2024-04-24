@@ -44,7 +44,7 @@ export interface NoSamplingOption {
 
 export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
-export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+export interface FieldStatisticTableEmbeddableApi extends EmbeddableInput {
   dataView: DataView;
   savedSearch?: SavedSearch;
   query?: Query | AggregateQuery;

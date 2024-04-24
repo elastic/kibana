@@ -60,12 +60,12 @@ function createFieldStatsGridAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
+      const startServices = await getStartServices();
       try {
-        const initialState = {};
+        const initialState = { panelTitle: 'Field statistics' };
         presentationContainerParent.addNewPanel({
           panelType: FIELD_STATS_EMBED_ID,
           initialState: {
-            ...initialState,
             title: initialState.panelTitle,
           },
         });

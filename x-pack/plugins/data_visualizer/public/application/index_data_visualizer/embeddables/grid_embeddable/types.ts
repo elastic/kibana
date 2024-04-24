@@ -44,7 +44,7 @@ export interface DataVisualizerGridInput<T = Query> {
 
 export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<ESQLQuery>;
 
-export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
+export type FieldStatisticTableEmbeddableApi = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
 export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';

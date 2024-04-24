@@ -24,10 +24,10 @@ const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
 export const EmbeddableESQLFieldStatsTableWrapper = ({
   input,
-  onOutputChange,
+  onInternalStateChange,
 }: {
   input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableInput;
-  onOutputChange?: (ouput: any) => void;
+  onInternalStateChange?: (ouput: any) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -35,11 +35,11 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onOutputChange) {
-        onOutputChange(update);
+      if (onInternalStateChange) {
+        onInternalStateChange(update);
       }
     },
-    [dataVisualizerListState, onOutputChange]
+    [dataVisualizerListState, onInternalStateChange]
   );
 
   const {
@@ -66,7 +66,7 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onOutputChange}
+      onChange={onInternalStateChange}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
     />
