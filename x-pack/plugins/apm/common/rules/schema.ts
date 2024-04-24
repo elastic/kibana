@@ -66,7 +66,7 @@ export const anomalyParamsSchema = schema.object({
     schema.literal(ML_ANOMALY_SEVERITY.MINOR),
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
-  anomalyDetectorTypes: schema.arrayOf(detectorsSchema, { minSize: 1 }),
+  anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1 })),
 });
 
 export const transactionErrorRateParamsSchema = schema.object({
