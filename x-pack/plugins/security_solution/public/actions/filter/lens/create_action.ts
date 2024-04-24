@@ -90,8 +90,6 @@ export const createFilterLensAction = ({
 
       topValuesPopover.closePopover();
 
-      const addFilter = negate === true ? addFilterOut : addFilterIn;
-
       const timeline = getTimelineById(store.getState(), TimelineId.active);
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
@@ -108,7 +106,7 @@ export const createFilterLensAction = ({
         });
         return;
       }
-      
+
       const addFilter = negate === true ? addFilterOut : addFilterIn;
       addFilter({
         filterManager,
