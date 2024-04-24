@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState} from '../lib/utils';
+import {extractFieldValue, phaseToState, Event} from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     POD_STATUS_ROUTE,
@@ -65,12 +65,22 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         };
 
         const esResponse = await client.search(dsl);
+        console.log(esResponse);
+        console.log(esResponse.hits.hits.length);
+        if (esResponse.hits.hits.length > 0) {
         const hit = esResponse.hits.hits[0];
         const { fields = {} } = hit;
         const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
         const nodeName = extractFieldValue(fields['resource.attributes.k8s.node.name']);
         const time = extractFieldValue(fields['@timestamp']);
         const state = phaseToState(podPhase);
+        var failingReason = {} as Event;
+        if (state !== 'Succeeded' && state !== 'Running') {
+          const event = await getPodEvents(client, request.query.pod_name, request.query.namespace);
+          if (event.note != '') {
+            failingReason = event;
+          }
+        }
         return response.ok({
           body: {
             time: time,
@@ -79,8 +89,86 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             name: request.query.pod_name,
             namespace: request.query.namespace,
             node: nodeName,
+            failingReason: failingReason,
           },
         });
+      } else {
+        const message =  `Pod ${request.query.namespace}/${request.query.pod_name} not found`
+        return response.ok({
+            body: {
+              time: '',
+              message: message,
+              name: request.query.pod_name,
+              namespace: request.query.namespace,
+              reason: "Not found",
+            },
+          });
+      }
       }
     );
 };
+
+export async function getPodEvents(client: any, podName: string, namespace: string): Promise<Event>{
+
+  const musts = [
+    {
+        term: {
+          'Body.object.regarding.name': podName,
+        },
+      },
+      {
+        term: {
+          'Body.object.metadata.namespace': namespace,
+        },
+      },
+      {
+        term: {
+          'Body.object.kind': "Event"
+        }
+      }
+  ];
+
+  const must_not = [
+    {
+      term: {
+        'Body.object.type': "Normal"
+      }
+    }
+  ];
+
+  const dsl: estypes.SearchRequest = {
+    index: ["logs-generic-*"],
+    size: 1,
+    sort: [{ '@timestamp': 'desc' }],
+    _source: false,
+    fields: [
+      '@timestamp',
+      'Body.object.*',
+    ],
+    query: {
+      bool: {
+        must: musts,
+        must_not: must_not,
+      },
+    },
+  };
+
+  const esResponse = await client.search(dsl);
+  console.log(esResponse);
+  var  event = {} as Event;
+  if (esResponse.hits.hits.length > 0) {
+    const hit = esResponse.hits.hits[0];
+    const { fields = {} } = hit;
+    const reason = extractFieldValue(fields['Body.object.reason']);
+    const note = extractFieldValue(fields['Body.object.note']);
+    const eventType = extractFieldValue(fields['Body.object.type']);
+    const lastObserved = extractFieldValue(fields['Body.object.series.lastObservedTime']);
+    event = {
+      'reason': reason,
+      'note': note,
+      'time': lastObserved,
+      'type': eventType
+    };
+  }
+  return event;
+}

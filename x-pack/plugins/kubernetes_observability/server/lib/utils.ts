@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+export type Event = {
+    note: string;
+    reason: string;
+    type: string;
+    time: string;
+  };
+
 export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
     return toArray(maybeArray)[0];
 }
