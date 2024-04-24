@@ -17,7 +17,7 @@ import {
 describe(
   'Agent Policy Settings - Essentials',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

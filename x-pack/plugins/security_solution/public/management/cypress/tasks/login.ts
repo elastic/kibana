@@ -53,7 +53,7 @@ export const login: CyLoginTask = (
 
   if (isServerless && isCloudServerless) {
     // MKI QA Cloud Serverless
-    cy.task('getSessionCookie', 'admin').then((cookie) => {
+    cy.task('getSessionCookie', user).then((cookie) => {
       cy.setCookie('sid', cookie as string);
     });
     cy.visit('/');

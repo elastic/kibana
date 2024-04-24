@@ -31,7 +31,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
+describe('Artifacts pages', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   before(() => {

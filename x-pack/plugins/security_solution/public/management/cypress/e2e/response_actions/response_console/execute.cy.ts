@@ -21,7 +21,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -41,7 +41,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@serverlessQA'] },
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id, undefined, '8.14.0').then((host) => {
+            return createEndpointHost(policy.policy_id).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });

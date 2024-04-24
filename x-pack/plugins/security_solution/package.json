@@ -18,7 +18,6 @@
     "cypress:dw:serverless:run": "yarn cypress:dw:serverless run",
     "cypress:dw:qa:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel_serverless --config-file ./public/management/cypress/cypress_serverless_qa.config.ts",
     "cypress:dw:qa:serverless:run": "yarn cypress:dw:qa:serverless run",
-    "cypress:dw:qa:serverless:open": "yarn cypress:dw:qa:serverless open",
     "cypress:dw:serverless:changed-specs-only": "yarn cypress:dw:serverless run --changed-specs-only --env burn=2",
     "cypress:dw:endpoint": "echo '\n** WARNING **: Run script `cypress:dw:endpoint` no longer valid! Use `cypress:dw` instead\n'",
     "cypress:dw:endpoint:run": "echo '\n** WARNING **: Run script `cypress:dw:endpoint:run` no longer valid! Use `cypress:dw:run` instead\n'",

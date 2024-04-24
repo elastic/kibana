@@ -41,7 +41,7 @@ steps:
       localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 300
-    parallelism: 1
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '*'

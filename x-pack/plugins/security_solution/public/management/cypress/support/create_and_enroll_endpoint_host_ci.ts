@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
 
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -61,7 +60,7 @@ export const createAndEnrollEndpointHostCI = async ({
   disk,
   memory,
   hostname,
-  version = kibanaPackageJson.version,
+  version = '8.14.0',
   useClosestVersionMatch = true,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
