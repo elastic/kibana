@@ -89,9 +89,6 @@ describe('FipsService', () => {
         );
         fipsServiceSetup.validateLicenseForFips();
 
-        expect(() => {
-          fipsServiceSetup.validateLicenseForFips();
-        }).not.toThrowError();
         expect(logger.error).not.toHaveBeenCalled();
       });
 
@@ -101,9 +98,6 @@ describe('FipsService', () => {
         );
         fipsServiceSetup.validateLicenseForFips();
 
-        expect(() => {
-          fipsServiceSetup.validateLicenseForFips();
-        }).not.toThrowError();
         expect(logger.error).not.toHaveBeenCalled();
       });
 
@@ -113,28 +107,16 @@ describe('FipsService', () => {
         );
         fipsServiceSetup.validateLicenseForFips();
 
-        expect(() => {
-          fipsServiceSetup.validateLicenseForFips();
-        }).not.toThrowError();
         expect(logger.error).not.toHaveBeenCalled();
       });
 
       it('should throw Error/log.error if license features do not allowFips and `fipsMode.enabled` is `true`', () => {
-        const mockExit: jest.SpyInstance = jest
-          .spyOn(process, 'exit')
-          .mockImplementation((exitCode) => {
-            throw new Error(`Fake Exit: ${exitCode}`);
-          });
-
         fipsServiceSetup = fipsService.setup(
           buildMockFipsServiceSetupParams('basic', true, of({ allowFips: false }))
         );
 
-        try {
-          fipsServiceSetup.validateLicenseForFips();
-        } catch (e) {
-          expect(mockExit).toHaveBeenNthCalledWith(1, 78);
-        }
+        // Because the Error is thrown from within a SafeSubscriber and cannot be hooked into
+        fipsServiceSetup.validateLicenseForFips();
 
         expect(logger.error).toHaveBeenCalled();
       });

@@ -42,7 +42,7 @@ export class FipsService {
         if (license.isLicenseAvailable() && !this.isInitialLicenseLoaded) {
           if (config?.fipsMode.enabled && !license.getFeatures().allowFips) {
             this.logger.error(errorMessage);
-            process.exit(78);
+            throw new Error(errorMessage);
           }
 
           this.isInitialLicenseLoaded = true;
