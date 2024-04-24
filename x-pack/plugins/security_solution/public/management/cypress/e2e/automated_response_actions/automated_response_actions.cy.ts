@@ -21,6 +21,7 @@ import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_dat
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 // FLAKY: https://github.com/elastic/kibana/issues/168340
+// Failing: See https://github.com/elastic/kibana/issues/168340
 describe.skip(
   'Automated Response Actions',
   {
