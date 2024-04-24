@@ -62,7 +62,9 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
       iconType={isOpen ? 'arrowDown' : 'arrowRight'}
       onDismiss={onDismiss}
       size="s"
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={(e) => {
+        setIsOpen(!isOpen);
+      }}
       title={
         <FormattedMessage
           id="xpack.slo.sloList.healthCallout.title"
@@ -71,7 +73,13 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
       }
     >
       {isOpen && (
-        <EuiFlexGroup direction="column" alignItems="flexStart">
+        <EuiFlexGroup
+          direction="column"
+          alignItems="flexStart"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <EuiFlexItem>
             <FormattedMessage
               id="xpack.slo.sloList.healthCallout.description"
