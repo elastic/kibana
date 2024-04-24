@@ -880,7 +880,7 @@ describe('TaskScheduling', () => {
         )
       );
 
-      expect(result).resolves.toEqual({ id: 'v4uuid', state: { foo: 'bar' } });
+      await expect(result).resolves.toEqual({ id: 'v4uuid', state: { foo: 'bar' } });
     });
 
     test('rejects ephemeral task if lifecycle returns an error', async () => {
@@ -924,7 +924,7 @@ describe('TaskScheduling', () => {
         )
       );
 
-      expect(result).rejects.toMatchInlineSnapshot(
+      await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Ephemeral Task of type foo was rejected]`
       );
     });
@@ -946,7 +946,7 @@ describe('TaskScheduling', () => {
       });
 
       const result = taskScheduling.ephemeralRunNow(ephemeralTask);
-      expect(result).rejects.toMatchInlineSnapshot(
+      await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Ephemeral Task of type foo was rejected because ephemeral tasks are not supported]`
       );
     });

@@ -111,7 +111,7 @@ export function createTaskPoller<T, H>({
     start: () => {
       if (!running) {
         running = true;
-        runCycle();
+        void runCycle();
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
         setTimeout(() => subscribe(), 0);

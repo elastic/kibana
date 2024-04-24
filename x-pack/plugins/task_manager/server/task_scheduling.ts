@@ -416,7 +416,7 @@ export class TaskScheduling {
       if (cancel) {
         cancel.then(() => {
           subscription.unsubscribe();
-        });
+        }, reject);
       }
     });
   }
