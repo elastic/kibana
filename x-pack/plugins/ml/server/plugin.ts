@@ -133,6 +133,10 @@ export class MlServerPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
+      privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {
+        defaultMessage:
+          'Granting the All feature privilege will also grant the role All feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved searches and visualizations as well as machine learning job, trained model and module saved objects.',
+      }),
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
