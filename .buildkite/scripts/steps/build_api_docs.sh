@@ -4,9 +4,6 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-echo "--- Run scripts/type_check to ensure that all build available"
-node scripts/type_check
-
 echo "--- Build API Docs"
 node --max-old-space-size=12000 scripts/build_api_docs
 
