@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
@@ -54,7 +54,6 @@ export function MachineLearningJobTableProvider(
   const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   return new (class MlJobTable {
     public async selectAllJobs(): Promise<void> {
@@ -71,15 +70,21 @@ export function MachineLearningJobTableProvider(
     }
 
     public async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
-      await find.clickByCssSelector(
-        `[data-test-subj="mlJobListSearchBar"] span[data-text="${quickFilterButton}"]`
+      const searchBar: WebElementWrapper = await testSubjects.find('mlJobListSearchBar');
+      const quickFilter: WebElementWrapper = await searchBar.findByCssSelector(
+        `span[data-text="${quickFilterButton}"]`
       );
-      const ariaPressed: boolean = await find.existsByCssSelector(
-        `[data-test-subj="mlJobListSearchBar"] button[aria-pressed="true"] span[data-text="${quickFilterButton}"]`
-      );
-      expect(ariaPressed).to.eql(
-        true,
-        `Expected quick filter button [${quickFilterButton}] to be pressed, but it was not pressed`
+      await quickFilter.click();
+
+      const searchBarButtons = await searchBar.findAllByTagName('button');
+      let pressedBttnText: string = '';
+      for await (const button of searchBarButtons)
+        if ((await button.getAttribute('aria-pressed')) === 'true')
+          pressedBttnText = await button.getVisibleText();
+
+      expect(pressedBttnText).to.eql(
+        quickFilterButton,
+        `Expected visible text of pressed quick filter button to equal [${quickFilterButton}], but got [${pressedBttnText}]`
       );
     }
 
