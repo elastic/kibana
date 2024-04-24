@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getAstAndSyntaxErrors, type ESQLSource } from '@kbn/esql-ast';
+import { type ESQLSource } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
@@ -28,6 +28,10 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
 
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export async function getIndexPatternFromESQLQuery(esql?: string) {
+  // While from the general async bundle global prospective the math doesn't change
+  // this async import isolate it a new bundle for those app who use this function but
+  // ES|QL is not their main usage preventing to load this (big) dependency when not using it
+  const { getAstAndSyntaxErrors } = await import('@kbn/esql-ast');
   const { ast } = await getAstAndSyntaxErrors(esql);
   const fromCommand = ast.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
