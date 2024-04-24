@@ -11,6 +11,7 @@ import type {
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
+  VersionedResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
 import { Router } from '../router';
@@ -243,16 +244,18 @@ describe('Versioned route', () => {
       expect(
         isConfigSchema(
           (
-            validate as () => VersionedRouteValidation<unknown, unknown, unknown>
-          )().response![200].body()
+            (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)().response![200]
+              .body as VersionedResponseValidation
+          )()
         )
       ).toBe(true);
 
       expect(
         isConfigSchema(
           (
-            validate as () => VersionedRouteValidation<unknown, unknown, unknown>
-          )().response![404].body()
+            (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)().response![404]
+              .body as VersionedResponseValidation
+          )()
         )
       ).toBe(true);
 
@@ -274,7 +277,7 @@ describe('Versioned route', () => {
       ).toThrow(/Invalid public version/);
     });
 
-    it('also runs response validations', async () => {
+    it('runs response validations', async () => {
       let handler: RequestHandler;
       const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
         testValidation;
@@ -305,6 +308,42 @@ describe('Versioned route', () => {
       expect(validateParamsFn).toHaveBeenCalledTimes(1);
       expect(validateQueryFn).toHaveBeenCalledTimes(1);
       expect(validateOutputFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs custom response validations', async () => {
+      let handler: RequestHandler;
+      const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
+        testValidation;
+
+      const customFn = jest.fn(() => ({ value: 1 }));
+      fooValidation.response[200].body = { customFn } as any;
+      (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: fooValidation,
+        },
+        handlerFn
+      );
+
+      const kibanaResponse = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+
+      expect(kibanaResponse.status).toBe(200);
+      expect(validateBodyFn).toHaveBeenCalledTimes(1);
+      expect(validateParamsFn).toHaveBeenCalledTimes(1);
+      expect(validateQueryFn).toHaveBeenCalledTimes(1);
+      expect(validateOutputFn).toHaveBeenCalledTimes(0);
+      expect(customFn).toHaveBeenCalledTimes(1);
     });
   });
 

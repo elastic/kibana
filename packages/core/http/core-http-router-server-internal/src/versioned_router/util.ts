@@ -7,14 +7,46 @@
  */
 
 import { once } from 'lodash';
-import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
-import { prepareResponseValidation } from '../util';
+import type {
+  AddVersionOpts,
+  RouteValidationFunction,
+  VersionedCustomRouteValidation,
+  VersionedResponseValidation,
+  VersionedRouteResponseValidation,
+  VersionedRouteValidation,
+} from '@kbn/core-http-server';
+import { Type } from '@kbn/config-schema';
+
+export function isCustomValidation(
+  v: VersionedCustomRouteValidation | VersionedResponseValidation
+): v is VersionedCustomRouteValidation {
+  return 'customFn' in v;
+}
+
+export function unwrapResponseBodyValidation(
+  validation: VersionedRouteResponseValidation[number]['body']
+): RouteValidationFunction<unknown> | Type<unknown> {
+  if (isCustomValidation(validation)) {
+    return validation.customFn;
+  }
+  return validation();
+}
 
 function prepareValidation(validation: VersionedRouteValidation<unknown, unknown, unknown>) {
   if (validation.response) {
+    const { unsafe, ...responseValidations } = validation.response;
+    const result: VersionedRouteResponseValidation = {};
+
+    for (const [key, { body }] of Object.entries(responseValidations)) {
+      result[key as unknown as number] = { body: isCustomValidation(body) ? body : once(body) };
+    }
+
     return {
       ...validation,
-      response: prepareResponseValidation(validation.response),
+      response: {
+        ...validation.response,
+        ...result,
+      },
     };
   }
   return validation;

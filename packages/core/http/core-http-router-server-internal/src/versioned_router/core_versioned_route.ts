@@ -37,7 +37,7 @@ import {
 import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
-import { prepareVersionedRouteValidation } from './util';
+import { prepareVersionedRouteValidation, unwrapResponseBodyValidation } from './util';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -170,7 +170,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
       try {
-        const { body, params, query } = validate(req, validation.request, handler.options.version);
+        const { body, params, query } = validate(req, validation.request);
         req.body = body;
         req.params = params;
         req.query = query;
@@ -193,8 +193,10 @@ export class CoreVersionedRoute implements VersionedRoute {
       try {
         validate(
           { body: response.payload },
-          { body: responseValidation.body(), unsafe: { body: unsafe?.body } },
-          handler.options.version
+          {
+            body: unwrapResponseBodyValidation(responseValidation.body),
+            unsafe: { body: unsafe?.body },
+          }
         );
       } catch (e) {
         return res.custom({
