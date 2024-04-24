@@ -17,7 +17,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonPage.loginWithRole('viewer');
     });
 
-    it.only('does not have the space selection menu in header', async () => {
+    it('does not have the space selection menu in header', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertProjectHeaderExists();
 
