@@ -20,7 +20,6 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
-  PublishesDataViews,
   PublishesUnifiedSearch,
   PublishingSubject,
   PublishesTimeRange,
@@ -57,11 +56,6 @@ export type {
  * Common API for all ML embeddables
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
-  extends DefaultEmbeddableApi<StateType>,
-    PublishesDataViews,
-    PublishesUnifiedSearch {}
-
-export interface MlEmbeddableBasicApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     PublishesTimeRange {}
 
@@ -168,7 +162,7 @@ export interface SingleMetricViewerEmbeddableState
     SingleMetricViewerEmbeddableCustomInput {}
 
 export type SingleMetricViewerEmbeddableApi =
-  MlEmbeddableBasicApi<SingleMetricViewerEmbeddableState> &
+  MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
     PublishesWritablePanelTitle &
     SingleMetricViewerComponentApi;
 

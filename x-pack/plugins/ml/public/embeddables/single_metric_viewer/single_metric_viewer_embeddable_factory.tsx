@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
 import moment from 'moment';
 import {
+  apiHasExecutionContext,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -119,6 +120,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
           const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
           const [jobsLoaded, setJobsLoaded] = useState(false);
 
+          const isMounted = useRef(true);
+
           const {
             mlApiServices,
             mlJobService,
@@ -134,23 +137,25 @@ export const getSingleMetricViewerEmbeddableFactory = (
             showFrozenDataTierChoice: false,
           };
 
+          if (!apiHasExecutionContext(parentApi)) {
+            throw new Error('Parent API does not have execution context');
+          }
+
           const [{ singleMetricViewerData, bounds, lastRefresh }, error] =
             useBatchedPublishingSubjects(singleMetricViewerData$, blockingError);
+
+          useReactEmbeddableExecutionContext(
+            services[0].executionContext,
+            parentApi.executionContext,
+            ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+            uuid
+          );
 
           useUnmount(() => {
             onSingleMetricViewerDestroy();
             onDestroy();
             subscriptions.unsubscribe();
           });
-
-          useReactEmbeddableExecutionContext(
-            services[0].executionContext,
-            // TODO https://github.com/elastic/kibana/issues/180055
-            // @ts-ignore
-            parentApi?.executionContext?.value ?? { name: 'dashboard' },
-            ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-            uuid
-          );
 
           const selectedJobId = singleMetricViewerData?.jobIds[0];
           // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,
@@ -161,9 +166,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
               : singleMetricViewerData?.functionDescription;
           const previousRefresh = usePrevious(lastRefresh ?? 0);
 
-          // Holds the container height for previously fetched data
-          const containerHeightRef = useRef<number>();
-
           useEffect(function setUpJobsLoaded() {
             async function loadJobs() {
               try {
@@ -173,7 +175,14 @@ export const getSingleMetricViewerEmbeddableFactory = (
                 blockingError.next(e);
               }
             }
+            if (isMounted.current === false) {
+              return;
+            }
             loadJobs();
+
+            return () => {
+              isMounted.current = false;
+            };
             // eslint-disable-next-line react-hooks/exhaustive-deps
           }, []);
 
@@ -190,6 +199,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
                   }
                 }
               }
+              if (isMounted.current === false) {
+                return;
+              }
               fetchSelectedJob();
             },
             [selectedJobId, mlApiServices]
@@ -203,9 +215,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
           // eslint-disable-next-line react-hooks/exhaustive-deps
           const resizeHandler = useCallback(
             throttle((e: { width: number; height: number }) => {
-              // Keep previous container height so it doesn't change the page layout
-              containerHeightRef.current = e.height;
-
               if (Math.abs(chartWidth - e.width) > minElemAndChartDiff) {
                 setChartWidth(e.width);
               }
