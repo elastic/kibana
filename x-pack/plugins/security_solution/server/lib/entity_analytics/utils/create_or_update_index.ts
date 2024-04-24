@@ -75,7 +75,6 @@ export const createOrUpdateDatastream = async ({
 }): Promise<{
   created: boolean;
 }> => {
-  console.log(JSON.stringify(template));
   if (!template?.index_patterns?.length) {
     throw new Error('Datastream template must have at least one index pattern');
   }
