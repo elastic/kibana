@@ -21,7 +21,7 @@ describe('useFleetServerHostsForPolicy', () => {
       resendRequest: jest.fn(),
       data: {
         fleet_server: {
-          agent_policies: [
+          policies: [
             {
               id: 'default-policy',
               name: 'default-policy',

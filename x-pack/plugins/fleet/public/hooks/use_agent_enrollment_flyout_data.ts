@@ -43,7 +43,7 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
 
   const agentPolicies = useMemo(() => {
     if (!isLoadingAgentPolicies || !isLoadingFleetServerPolicyStatus) {
-      const fleetServerPolicyIds = fleetServerPolicyStatus?.fleet_server?.agent_policies.map(
+      const fleetServerPolicyIds = fleetServerPolicyStatus?.fleet_server?.policies.map(
         (policy) => policy.id
       );
       return (agentPoliciesData?.items ?? []).filter(
@@ -54,7 +54,7 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
   }, [
     isLoadingAgentPolicies,
     isLoadingFleetServerPolicyStatus,
-    fleetServerPolicyStatus?.fleet_server?.agent_policies,
+    fleetServerPolicyStatus?.fleet_server?.policies,
     agentPoliciesData?.items,
   ]);
 

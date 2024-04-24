@@ -17,10 +17,10 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
 
   const eligibleFleetServerPolicies = useMemo(
     () =>
-      data?.fleet_server?.agent_policies
-        ? data?.fleet_server?.agent_policies?.filter((item) => !item.is_managed)
+      data?.fleet_server?.policies
+        ? data?.fleet_server?.policies?.filter((item) => !item.is_managed)
         : [],
-    [data?.fleet_server?.agent_policies]
+    [data?.fleet_server?.policies]
   );
 
   useEffect(() => {

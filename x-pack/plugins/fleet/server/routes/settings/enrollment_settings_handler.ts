@@ -14,7 +14,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../..
 import type {
   GetEnrollmentSettingsResponse,
   AgentPolicy,
-  EnrollmentSettingsAgentPolicy,
+  EnrollmentSettingsFleetServerPolicy,
 } from '../../../common/types';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
@@ -30,7 +30,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   const agentPolicyId = request.query?.agentPolicyId;
   const settingsResponse: GetEnrollmentSettingsResponse = {
     fleet_server: {
-      agent_policies: [],
+      policies: [],
       has_active: false,
     },
   };
@@ -50,7 +50,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
 
     // Check if there is any active fleet server enrolled into the fleet server policies policies
     if (fleetServerAgentPolicies) {
-      settingsResponse.fleet_server.agent_policies = fleetServerAgentPolicies;
+      settingsResponse.fleet_server.policies = fleetServerAgentPolicies;
       settingsResponse.fleet_server.has_active = await hasActiveFleetServersForAgentPolicies(
         esClient,
         soClient,
@@ -103,8 +103,8 @@ const getFleetServerAgentPolicies = async (
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string
 ): Promise<{
-  fleetServerAgentPolicies?: EnrollmentSettingsAgentPolicy[];
-  scopedAgentPolicy?: EnrollmentSettingsAgentPolicy;
+  fleetServerAgentPolicies?: EnrollmentSettingsFleetServerPolicy[];
+  scopedAgentPolicy?: EnrollmentSettingsFleetServerPolicy;
 }> => {
   const mapPolicy = (policy: AgentPolicy) => ({
     id: policy.id,

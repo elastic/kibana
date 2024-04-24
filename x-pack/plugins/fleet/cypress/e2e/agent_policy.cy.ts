@@ -100,7 +100,7 @@ describe('Edit agent policy', () => {
     });
     cy.intercept('/internal/fleet/settings/enrollment', {
       fleet_server: {
-        agent_policies: [
+        policies: [
           {
             id: 'fleet-server-policy',
             name: 'Fleet Server policy',
@@ -123,7 +123,7 @@ describe('Edit agent policy', () => {
     });
     cy.intercept('/internal/fleet/settings/enrollment?agentPolicyId=policy-1', {
       fleet_server: {
-        agent_policies: [],
+        policies: [],
         has_active: true,
         host: {
           id: 'fleet-server-1',

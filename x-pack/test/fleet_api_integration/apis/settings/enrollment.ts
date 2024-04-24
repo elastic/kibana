@@ -27,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(response.body).to.eql({
         fleet_server: {
-          agent_policies: [],
+          policies: [],
           has_active: false,
         },
         download_source: {
@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.eql({
           fleet_server: {
-            agent_policies: [
+            policies: [
               {
                 id: 'fleet-server-policy',
                 is_default_fleet_server: true,
@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.eql({
           fleet_server: {
-            agent_policies: [
+            policies: [
               {
                 id: 'fleet-server-policy-2',
                 is_default_fleet_server: false,
@@ -149,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.eql({
           fleet_server: {
-            agent_policies: [],
+            policies: [],
             has_active: false,
             host: {
               id: 'second-host',

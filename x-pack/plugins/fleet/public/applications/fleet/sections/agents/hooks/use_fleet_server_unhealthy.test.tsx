@@ -28,7 +28,7 @@ describe('useFleetServerUnhealthy', () => {
       data: {
         fleet_server: {
           has_active: true,
-          agent_policies: [
+          policies: [
             {
               id: 'default-policy',
               name: 'default-policy',
@@ -58,7 +58,7 @@ describe('useFleetServerUnhealthy', () => {
       data: {
         fleet_server: {
           has_active: false,
-          agent_policies: [],
+          policies: [],
         },
       },
     });

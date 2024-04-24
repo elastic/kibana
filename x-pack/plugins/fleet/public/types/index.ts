@@ -139,7 +139,7 @@ export type {
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
-  EnrollmentSettingsAgentPolicy,
+  EnrollmentSettingsFleetServerPolicy,
   GetEnrollmentSettingsRequest,
   GetEnrollmentSettingsResponse,
 } from '../../common/types';

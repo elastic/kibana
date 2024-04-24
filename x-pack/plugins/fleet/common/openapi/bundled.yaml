@@ -3904,7 +3904,7 @@ components:
         fleet_server:
           type: object
           properties:
-            agent_policies:
+            policies:
               type: array
               items:
                 type: object

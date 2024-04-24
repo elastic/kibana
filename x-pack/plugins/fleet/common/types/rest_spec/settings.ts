@@ -25,7 +25,7 @@ export interface GetEnrollmentSettingsRequest {
   };
 }
 
-export type EnrollmentSettingsAgentPolicy = Pick<
+export type EnrollmentSettingsFleetServerPolicy = Pick<
   AgentPolicy,
   | 'id'
   | 'name'
@@ -38,7 +38,7 @@ export type EnrollmentSettingsAgentPolicy = Pick<
 
 export interface GetEnrollmentSettingsResponse {
   fleet_server: {
-    agent_policies: EnrollmentSettingsAgentPolicy[];
+    policies: EnrollmentSettingsFleetServerPolicy[];
     has_active: boolean;
     host?: FleetServerHost;
     host_proxy?: FleetProxy;
