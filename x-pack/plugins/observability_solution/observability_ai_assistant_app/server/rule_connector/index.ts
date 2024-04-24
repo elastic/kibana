@@ -32,6 +32,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import { AlertDetailsContextService } from '@kbn/observability-plugin/server/services';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
@@ -86,7 +87,8 @@ export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOp
 >;
 
 export function getObsAIAssistantConnectorType(
-  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
+  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
+  alertDetailsContextService: AlertDetailsContextService
 ): ObsAIAssistantConnectorType {
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
@@ -111,7 +113,7 @@ export function getObsAIAssistantConnectorType(
     },
     renderParameterTemplates,
     executor(options) {
-      return executor(options, initResources);
+      return executor(options, initResources, alertDetailsContextService);
     },
   };
 }
@@ -131,7 +133,8 @@ function renderParameterTemplates(
 
 async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
-  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
+  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
+  alertDetailsContextService: AlertDetailsContextService
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const request = execOptions.request;
   const alerts = execOptions.params.alerts;
@@ -147,6 +150,14 @@ async function executor(
   }
 
   const resources = await initResources(request);
+  await alertDetailsContextService.getAlertDetailsContext(
+    {
+      core: resources.context.core,
+      licensing: resources.context.licensing,
+      request: resources.request,
+    },
+    { alert_started_at: '' }
+  );
   const client = await resources.service.getClient({ request });
   const functionClient = await resources.service.getFunctionClient({
     signal: new AbortController().signal,

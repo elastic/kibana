@@ -6,7 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import {
+  IScopedClusterClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export const observabilityAlertDetailsContextRt = t.intersection([
@@ -30,7 +35,18 @@ export const observabilityAlertDetailsContextRt = t.intersection([
 export type AlertDetailsContextHandlerQuery = t.TypeOf<typeof observabilityAlertDetailsContextRt>;
 export interface AlertDetailsRequestContext {
   request: KibanaRequest;
-  core: Promise<CoreRequestHandlerContext>;
+  core: Promise<{
+    elasticsearch: {
+      client: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
+    };
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
+  }>;
   licensing: Promise<LicensingApiRequestHandlerContext>;
 }
 type AlertDetailsContextHandler = (
