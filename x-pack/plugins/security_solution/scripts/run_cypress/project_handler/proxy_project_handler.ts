@@ -1,12 +1,19 @@
-import {
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import axios, { AxiosError } from 'axios';
+import pRetry from 'p-retry';
+import type {
   ProductType,
   Project,
   CreateProjectRequestBody,
   Credentials,
-  ProjectHandler,
 } from './project_handler';
-import axios, { AxiosError } from 'axios';
-import pRetry from 'p-retry';
+import { ProjectHandler } from './project_handler';
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 
@@ -16,7 +23,6 @@ export class ProxyHandler extends ProjectHandler {
   constructor(baseEnvUrl: string, proxyClientId: string, proxySecret: string) {
     super(baseEnvUrl);
     this.proxyAuth = btoa(`${proxyClientId}:${proxySecret}`);
-
   }
 
   // Method to invoke the create project API for serverless.

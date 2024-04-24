@@ -1,7 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import axios, { AxiosError } from 'axios';
 import pRetry from 'p-retry';
-import { ProductType, Project, CreateProjectRequestBody, Credentials, ProjectHandler } from './project_handler';
-
+import type {
+  ProductType,
+  Project,
+  CreateProjectRequestBody,
+  Credentials,
+} from './project_handler';
+import { ProjectHandler } from './project_handler';
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 
@@ -25,8 +37,10 @@ export class CloudHandler extends ProjectHandler {
       product_types: productTypes,
     };
 
-    this.log.info(`Kibana Latest Qualified Image - Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
-    if ((process.env.KIBANA_MKI_IMAGE_COMMIT) || commit) {
+    this.log.info(
+      `Kibana Latest Qualified Image - Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`
+    );
+    if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
       const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
       this.log.info(

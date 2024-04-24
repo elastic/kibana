@@ -43,7 +43,7 @@ export class SamlSessionManager {
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
   private readonly supportedRoles: string[];
-  private readonly userRoleFilePath : string;
+  private readonly userRoleFilePath: string;
 
   constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
     this.isCloud = options.isCloud;

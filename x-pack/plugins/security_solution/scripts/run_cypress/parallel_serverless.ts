@@ -28,7 +28,7 @@ import { exec } from 'child_process';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
-import { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
+import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
 import { CloudHandler } from './project_handler/cloud_project_handler';
 import { ProxyHandler } from './project_handler/proxy_project_handler';
 
@@ -252,7 +252,7 @@ export const cli = () => {
         : getApiKeyFromElasticCloudJsonFile();
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && await proxyHealthcheck(PROXY_URL)) {
+      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
