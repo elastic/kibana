@@ -171,7 +171,8 @@ export async function getServiceMetadataDetails({
 
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
-  if (response.hits.total.value === 0) {
+  const hit = response.hits.hits[0]?._source as ServiceMetadataDetailsRaw | undefined;
+  if (!hit) {
     return {
       service: undefined,
       container: undefined,
@@ -179,8 +180,7 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } = response.hits.hits[0]
-    ._source as ServiceMetadataDetailsRaw;
+  const { service, agent, host, kubernetes, container, cloud, labels } = hit;
 
   const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),

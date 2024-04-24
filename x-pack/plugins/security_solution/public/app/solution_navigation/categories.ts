@@ -47,7 +47,10 @@ export const CATEGORIES: Array<SeparatorLinkCategory<SolutionPageName>> = [
   // --- Hidden links that need to be configured in the navigationTree for breadcrumbs ---
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.entityAnalyticsManagement], // Linked from the management cards landing.
+    linkIds: [
+      SecurityPageName.entityAnalyticsManagement,
+      SecurityPageName.entityAnalyticsAssetClassification,
+    ], // Linked from the management cards landing.
   },
 ];
 
