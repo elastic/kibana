@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlADJobTable } from './job_table';
 
@@ -15,12 +16,14 @@ export function MachineLearningJobExpandedDetailsProvider(
   jobTable: MlADJobTable
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     async clickEditAnnotationAction(jobId: string) {
-      await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
-      await find.existsByCssSelector('div[data-popover-open="true"][data-popover-panel="true"]');
+      const row: WebElementWrapper = await testSubjects.find(`*row-annotation_for_${jobId}`);
+      const collapsedMenuButton: WebElementWrapper = await row.findByTestSubject(
+        'euiCollapsedItemActionsButton'
+      );
+      await collapsedMenuButton.click();
       await testSubjects.click('mlAnnotationsActionEdit');
       await testSubjects.existOrFail('mlAnnotationFlyout', {
         timeout: 3_000,
