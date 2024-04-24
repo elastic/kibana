@@ -128,9 +128,22 @@ export class DurationFormat extends FieldFormat {
 }
 
 // function to calculate the precision part of the value
-const calculatePrecision = (rawValue: number, unitValue: number, unitInSeconds: number) => {
-  return Math.floor(unitValue) + (rawValue - unitValue * unitInSeconds) / unitInSeconds;
+const calculatePrecision = (rawValue: number, unitValue: number, seconds: number) => {
+  return Math.floor(unitValue) + (rawValue - unitValue * seconds) / seconds;
 };
+
+// Array of units is to find the first unit duration value that is not 0
+const units = [
+  { getValue: (dur: moment.Duration) => dur.years(), seconds: 31536000, method: 'asYears' },
+  // Note: 31 days is used as a month in the duration format
+  { getValue: (dur: moment.Duration) => dur.months(), seconds: 2678400, method: 'asMonths' },
+  { getValue: (dur: moment.Duration) => dur.weeks(), seconds: 604800, method: 'asWeeks' },
+  { getValue: (dur: moment.Duration) => dur.days(), seconds: 86400, method: 'asDays' },
+  { getValue: (dur: moment.Duration) => dur.hours(), seconds: 3600, method: 'asHours' },
+  { getValue: (dur: moment.Duration) => dur.minutes(), seconds: 60, method: 'asMinutes' },
+  { getValue: (dur: moment.Duration) => dur.seconds(), method: 'asSeconds' },
+  { getValue: (dur: moment.Duration) => dur.milliseconds(), method: 'asMilliseconds' },
+];
 
 function formatDuration(
   rawValue: number,
@@ -141,18 +154,6 @@ function formatDuration(
 ) {
   // return nothing when the duration is falsy or not correctly parsed (P0D)
   if (!duration || !duration.isValid()) return;
-  const secPerDay = 86400;
-  //  this array is used to get find the first unit value that is not 0, calculate the precision part and return the formatted string
-  const units = [
-    { getValue: () => duration.years(), unitInSeconds: 365 * secPerDay, method: 'asYears' },
-    { getValue: () => duration.months(), unitInSeconds: 31 * secPerDay, method: 'asMonths' },
-    { getValue: () => duration.weeks(), unitInSeconds: 7 * secPerDay, method: 'asWeeks' },
-    { getValue: () => duration.days(), unitInSeconds: secPerDay, method: 'asDays' },
-    { getValue: () => duration.hours(), unitInSeconds: 3600, method: 'asHours' },
-    { getValue: () => duration.minutes(), unitInSeconds: 60, method: 'asMinutes' },
-    { getValue: () => duration.seconds(), method: 'asSeconds' },
-    { getValue: () => duration.milliseconds(), method: 'asMilliseconds' },
-  ];
 
   const getUnitText = (method: string) => {
     const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
@@ -160,10 +161,15 @@ function formatDuration(
   };
 
   for (const unit of units) {
-    const unitValue = unit.getValue();
+    // this is the formatted duration value of the unit
+    const unitValue = unit.getValue(duration);
     if (unitValue >= 1 || unit === units[units.length - 1]) {
-      const finalValue = unit.unitInSeconds
-        ? calculatePrecision(rawValue, unitValue, unit.unitInSeconds)
+      // return a value if it's the first iteration where the value > 1, or the last iteration
+      // calculate the fractional part of the value based on conversion to seconds
+      // So when 1 year is given as unit value and the raw value in seconds is more than that
+      // the overflow in seconds is used to calculate fractional part of the returned value
+      const finalValue = unit.seconds
+        ? calculatePrecision(rawValue, unitValue, unit.seconds)
         : unitValue;
       return finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }

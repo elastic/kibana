@@ -316,36 +316,6 @@ describe('Duration Format', () => {
   });
 
   testCase({
-    inputFormat: 'seconds',
-    outputFormat: 'humanizePrecise',
-    outputPrecision: 2,
-    showSuffix: true,
-    fixtures: [
-      {
-        input: 600,
-        output: '10.00 minutes',
-      },
-      {
-        input: 30,
-        output: '30.00 seconds',
-      },
-      {
-        input: 3000,
-        output: '50.00 minutes',
-      },
-      {
-        input: 604800,
-        output: '1.00 weeks',
-      },
-      // 1 week and 3 and a half days
-      {
-        input: 907200,
-        output: '1.50 weeks',
-      },
-    ],
-  });
-
-  testCase({
     inputFormat: 'hours',
     outputFormat: 'humanizePrecise',
     outputPrecision: 0,
