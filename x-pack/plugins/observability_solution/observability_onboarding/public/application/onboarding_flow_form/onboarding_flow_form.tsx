@@ -39,13 +39,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       id: 'logs',
       label: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.collectAndAnalyzeMyLabel',
-        { defaultMessage: 'Collect and analyze my logs' }
+        { defaultMessage: 'Collect and analyze logs' }
       ),
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
           defaultMessage:
-            'Detect patterns, gain insights from logs, get alerted when no. of errors is beyond configured threshold',
+            'Detect patterns, gain insights from logs, get alerted when surpassing error thresholds',
         }
       ),
     },
@@ -67,7 +67,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       id: 'infra',
       label: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyInfrastructureLabel',
-        { defaultMessage: 'Monitor my infrastructure' }
+        { defaultMessage: 'Monitor infrastructure' }
       ),
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.builtOnPowerfulElasticsearchLabel',
@@ -128,7 +128,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         new Promise((r) => setTimeout(r, 10)).then(() =>
           packageListRef.current?.scrollIntoView({
             behavior: 'smooth',
-            block: 'center',
+            block: 'start',
           })
         );
       }
