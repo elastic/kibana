@@ -16,6 +16,7 @@ import {
 } from '.';
 import { Observable } from 'rxjs';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { AlertDetailsContextService } from '@kbn/observability-plugin/server/services';
 
 describe('observabilityAIAssistant rule_connector', () => {
   describe('getObsAIAssistantConnectorAdapter', () => {
@@ -56,7 +57,10 @@ describe('observabilityAIAssistant rule_connector', () => {
       const initResources = jest
         .fn()
         .mockResolvedValue({} as ObservabilityAIAssistantRouteHandlerResources);
-      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const connectorType = getObsAIAssistantConnectorType(
+        initResources,
+        new AlertDetailsContextService()
+      );
       expect(connectorType.id).toEqual(OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID);
       expect(connectorType.isSystemActionType).toEqual(true);
       expect(connectorType.minimumLicenseRequired).toEqual('enterprise');
@@ -66,7 +70,11 @@ describe('observabilityAIAssistant rule_connector', () => {
       const initResources = jest
         .fn()
         .mockResolvedValue({} as ObservabilityAIAssistantRouteHandlerResources);
-      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const alertContextService = { getAlertDetailsContext: jest.fn().mockResolvedValue('') };
+      const connectorType = getObsAIAssistantConnectorType(
+        initResources,
+        new AlertDetailsContextService()
+      );
       const result = await connectorType.executor({
         actionId: 'observability-ai-assistant',
         request: getFakeKibanaRequest({ id: 'foo', api_key: 'bar' }),
@@ -106,7 +114,10 @@ describe('observabilityAIAssistant rule_connector', () => {
         },
       } as unknown as ObservabilityAIAssistantRouteHandlerResources);
 
-      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const connectorType = getObsAIAssistantConnectorType(
+        initResources,
+        new AlertDetailsContextService()
+      );
       const result = await connectorType.executor({
         actionId: 'observability-ai-assistant',
         request: getFakeKibanaRequest({ id: 'foo', api_key: 'bar' }),

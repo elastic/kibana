@@ -176,7 +176,7 @@ async function executor(
     });
   });
 
-  const backgroundInstruction = getBackgroundProcessInstruction(
+  const backgroundInstruction = await getBackgroundProcessInstruction(
     execOptions.params.rule,
     execOptions.params.alerts,
     (alert: Record<string, any>) =>
