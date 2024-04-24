@@ -180,6 +180,14 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             );
           }
 
+          const basePrivilege =
+            privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
+            CUSTOM_PRIVILEGE_VALUE;
+
+          const privilege = privilegeCalculator.isWildcardBasePrivilage(record.privilegeIndex)
+            ? '*'
+            : basePrivilege;
+
           let icon = <EuiIcon type="empty" size="s" />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
@@ -202,13 +210,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
               <EuiFlexItem>
-                <PrivilegeDisplay
-                  privilege={
-                    privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
-                    CUSTOM_PRIVILEGE_VALUE
-                  }
-                  data-test-subj={`privilegeColumn`}
-                />
+                <PrivilegeDisplay privilege={privilege} data-test-subj={`privilegeColumn`} />
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -222,6 +224,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         actions: [
           {
             render: (record: TableRow) => {
+              if (privilegeCalculator.isWildcardBasePrivilage(record.privilegeIndex)) {
+                return <></>;
+              }
+
               return (
                 <EuiButtonIcon
                   aria-label={i18n.translate(

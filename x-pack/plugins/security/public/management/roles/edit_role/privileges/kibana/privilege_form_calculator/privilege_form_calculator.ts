@@ -26,14 +26,20 @@ export class PrivilegeFormCalculator {
    */
   public getBasePrivilege(privilegeIndex: number) {
     const entry = this.role.kibana[privilegeIndex];
-    const entryNormilized = {
-      ...entry,
-      base: entry.base.map((privelege) => (privelege === '*' ? 'all' : privelege)),
-    };
-
     const basePrivileges = this.kibanaPrivileges.getBasePrivileges(entry);
 
-    return basePrivileges.find((bp) => entryNormilized.base.includes(bp.id));
+    return basePrivileges.find((bp) => entry.base.includes(bp.id));
+  }
+
+  /**
+   * Returns true if it is base wildcard (*) privilege.
+   *
+   * @param privilegeIndex the index of the kibana privileges role component
+   */
+  public isWildcardBasePrivilage(privilegeIndex: number) {
+    const entry = this.role.kibana[privilegeIndex];
+
+    return entry.base.includes('*');
   }
 
   /**
