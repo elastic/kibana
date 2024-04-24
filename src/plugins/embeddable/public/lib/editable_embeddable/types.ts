@@ -11,7 +11,7 @@ import { HasParentApi, HasUniqueId } from '@kbn/presentation-publishing';
 import { EmbeddableAppContext } from '..';
 
 export interface HasEditorApp {
-  getEditorAppTarget: () => Promise<{ editApp: string; editPath: string }>;
+  getEditorAppTarget: () => Promise<{ editApp?: string; editPath?: string; editUrl?: string }>;
 }
 
 export interface HasAppContext {
