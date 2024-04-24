@@ -37,7 +37,7 @@ export const INTRODUCTION_NOTEBOOK: Notebook = {
       {
         cell_type: 'markdown',
         source: [
-          '\nNotebooks are a great way to test and prototype code, and share results with others.',
+          '\nNotebooks are a great way to test and prototype code, and share results with others. In our notebooks we use the official [Elasticsearch Python client](https://elasticsearch-py.readthedocs.io/en/latest/) to call the Elasticsearch APIs.',
         ],
       },
       {
@@ -52,7 +52,7 @@ export const INTRODUCTION_NOTEBOOK: Notebook = {
           '\n',
           'You can run notebooks in two ways:',
           '\n',
-          '- **Run in Colab**: You can run all our notebooks in Google Colab. Just click the `Open in Colab` button at the top of the notebook.\n',
+          '- **Run in Colab**: You can run all our notebooks in Google [Colab](https://colab.research.google.com), a free, zero configuration, in-browser notebook execution environment. Just click the `Open in Colab` button at the top of a notebook to test it in Colab.\n',
           '- **Run locally**: You can also download the notebooks from the repository and run them locally using tools like [JupyterLab](https://jupyter.org/install).\n',
           '\n',
           'ℹ️ Just make sure to copy your **Elasticsearch endpoint and API key** so the notebook can run against your deployment.\n',
