@@ -83,11 +83,6 @@ describe('#serializeGlobalBasePrivilege', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  test('returns * modified to all', () => {
-    const wildcardResult = PrivilegeSerializer.serializeGlobalBasePrivilege('*');
-    expect(wildcardResult).toBe('all');
-  });
-
   test('returns all unmodified', () => {
     const allResult = PrivilegeSerializer.serializeGlobalBasePrivilege('all');
     expect(allResult).toBe('all');

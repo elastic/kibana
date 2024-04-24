@@ -36,7 +36,7 @@ export class PrivilegeFormCalculator {
    *
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  public isWildcardBasePrivilage(privilegeIndex: number) {
+  public isWildcardBasePrivilege(privilegeIndex: number) {
     const entry = this.role.kibana[privilegeIndex];
 
     return entry.base.includes('*');
