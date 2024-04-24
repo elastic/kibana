@@ -173,7 +173,7 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
    * Response schemas for your route.
    *
    */
-  response?: () => RouteValidatorFullConfigResponse;
+  response?: RouteValidatorFullConfigResponse;
 }
 
 /**
