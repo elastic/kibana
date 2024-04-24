@@ -24,7 +24,7 @@ import {
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/ml-response-stream/client';
+import { useFetchStreamRedux } from '@kbn/ml-response-stream/client';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
@@ -34,7 +34,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { getDefaultState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
 import { clearAllRowState, useAppDispatch, useAppSelector } from '@kbn/aiops-components';
@@ -225,9 +224,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     start,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<AiopsLogRateAnalysisSchema<'2'>, typeof streamReducer>(
+  } = useFetchStreamRedux<AiopsLogRateAnalysisSchema<'2'>>(
     http,
     '/internal/aiops/log_rate_analysis',
+    dispatch,
     '2',
     {
       start: earliest,
@@ -251,10 +251,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       overrides,
       sampleProbability,
     },
-    { reducer: streamReducer, initialState: getDefaultState() },
-    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
-    dispatch,
-    true
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
   const { significantItems, zeroDocsFallback } = data;
