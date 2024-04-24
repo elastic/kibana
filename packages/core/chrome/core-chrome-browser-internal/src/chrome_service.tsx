@@ -227,7 +227,7 @@ export class ChromeService {
     const bodyClasses$ = combineLatest([
       headerBanner$,
       this.isVisible$!,
-      chromeStyleSubject$,
+      chromeStyle$,
       application.currentActionMenu$,
     ]).pipe(
       map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
@@ -356,7 +356,7 @@ export class ChromeService {
 
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
-        const chromeStyle = useObservable(chromeStyleSubject$, defaultChromeStyle);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
