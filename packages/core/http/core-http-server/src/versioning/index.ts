@@ -16,4 +16,6 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  VersionedCustomRouteValidation,
+  VersionedResponseValidation,
 } from './types';

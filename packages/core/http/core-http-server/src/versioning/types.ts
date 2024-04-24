@@ -17,6 +17,7 @@ import type {
   RouteConfigOptions,
   RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
+  RouteValidationFunction,
 } from '../..';
 
 type RqCtx = RequestHandlerContextBase;
@@ -201,6 +202,14 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 /** @public */
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
+/** @public */
+export interface VersionedCustomRouteValidation {
+  customFn: RouteValidationFunction<unknown>;
+}
+
+/** @public */
+export type VersionedResponseValidation = () => Type<unknown>;
+
 /**
  * Map of response status codes to response schemas
  *
@@ -229,7 +238,9 @@ export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigR
  * @public
  */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: () => Type<unknown> };
+  [statusCode: number]: {
+    body: VersionedCustomRouteValidation | VersionedResponseValidation;
+  };
   unsafe?: { body?: boolean };
 }
 
