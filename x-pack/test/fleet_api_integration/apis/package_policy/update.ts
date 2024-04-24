@@ -545,7 +545,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(item.revision).to.equal(2);
+      expect(item.revision).to.equal(3);
     });
 
     it('should not allow to override properties other than inputs', async function () {
