@@ -20,12 +20,12 @@ export const I18nProvider = ({
 }: {
   children: IntlProvider['props']['children'] | React.ReactElement;
 }) => {
-  const { messages, formats, locale, defaultLocale, defaultFormats } = i18n.getTranslation();
-
   const isInitialized = i18n.getIsInitialized();
   if (!isInitialized) {
     throw new Error('kbn-i18n must be initialized before using <I18nProvider />');
   }
+
+  const { messages, formats, locale, defaultLocale, defaultFormats } = i18n.getTranslation();
 
   return (
     <IntlProvider

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -23,17 +24,17 @@ export function IndexTemplatesStatus() {
   const tabStatus = getIsIndexTemplateOk(diagnosticsBundle);
 
   return (
-    <TabStatus
-      isLoading={isLoading}
-      isOk={tabStatus}
-      data-test-subj="indexTemplatesStatus"
-    >
-      Index templates
+    <TabStatus isLoading={isLoading} isOk={tabStatus} data-test-subj="indexTemplatesStatus">
+      {i18n.translate('xpack.apm.indexTemplatesStatus.tabStatus.indexTemplatesLabel', {
+        defaultMessage: 'Index templates',
+      })}
       <EuiLink
         data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
         href={router.link('/diagnostics/index-templates', { query })}
       >
-        See details
+        {i18n.translate('xpack.apm.indexTemplatesStatus.seeDetailsLinkLabel', {
+          defaultMessage: 'See details',
+        })}
       </EuiLink>
     </TabStatus>
   );
@@ -44,17 +45,13 @@ export function getIsIndexTemplateOk(diagnosticsBundle?: DiagnosticsBundle) {
     return true;
   }
 
-  const hasNonStandardIndexTemplates =
-    diagnosticsBundle.apmIndexTemplates?.some(
-      ({ isNonStandard }) => isNonStandard
-    );
-
-  const isEveryExpectedApmIndexTemplateInstalled =
-    diagnosticsBundle.apmIndexTemplates.every(
-      ({ exists, isNonStandard }) => isNonStandard || exists
-    );
-
-  return (
-    isEveryExpectedApmIndexTemplateInstalled && !hasNonStandardIndexTemplates
+  const hasNonStandardIndexTemplates = diagnosticsBundle.apmIndexTemplates?.some(
+    ({ isNonStandard }) => isNonStandard
   );
+
+  const isEveryExpectedApmIndexTemplateInstalled = diagnosticsBundle.apmIndexTemplates.every(
+    ({ exists, isNonStandard }) => isNonStandard || exists
+  );
+
+  return isEveryExpectedApmIndexTemplateInstalled && !hasNonStandardIndexTemplates;
 }

@@ -18,6 +18,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
+  const retry = getService('retry');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('Customizations', () => {
@@ -60,13 +61,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.click('logsViewSelectorButton');
       await testSubjects.click('logsViewSelectorOption-ASavedSearch');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
-      const expected = {
-        title: 'A Saved Search',
-        description: 'A Saved Search Description',
-      };
-      expect(title).to.eql(expected.title);
-      expect(description).to.eql(expected.description);
+      await retry.try(async () => {
+        const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+        const expected = {
+          title: 'A Saved Search',
+          description: 'A Saved Search Description',
+        };
+        expect(title).to.eql(expected.title);
+        expect(description).to.eql(expected.description);
+      });
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('Search bar Prepend Filters exists and should apply filter properly', async () => {

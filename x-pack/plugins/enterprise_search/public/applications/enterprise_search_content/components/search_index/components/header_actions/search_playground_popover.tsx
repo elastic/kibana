@@ -11,9 +11,8 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { PLAYGROUND_PATH } from '../../../../../applications/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
-
-import { PLAYGROUND_PATH } from '../../../../routes';
 
 export interface SearchPlaygroundPopoverProps {
   indexName: string;
@@ -28,6 +27,7 @@ export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = (
 
   return (
     <EuiButton
+      data-test-subj="enterpriseSearchSearchPlaygroundPopoverViewInPlaygroundButton"
       data-telemetry-id={`entSearchContent-${ingestionMethod}-header-viewPlayground`}
       iconType="eye"
       onClick={() => {

@@ -145,7 +145,6 @@ export function translate(
       throw new Error('Missing `defaultMessage`.');
     }
 
-    /* eslint-disable formatjs/enforce-default-message */
     return intl.formatMessage(
       {
         id,
@@ -155,7 +154,6 @@ export function translate(
       values,
       { ignoreTag, shouldParseSkeletons: true }
     );
-    /* eslint-enable */
   } catch (e) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
   }
@@ -166,7 +164,7 @@ export function translate(
  * @param newTranslation
  */
 export function init(newTranslation?: TranslationInput) {
-  if (!newTranslation || !newTranslation.locale || typeof newTranslation.locale !== 'string') {
+  if (typeof newTranslation?.locale !== 'string') {
     return;
   }
 
@@ -195,6 +193,6 @@ export async function load(translationsUrl: string) {
   }
 
   await polyfillLocale(normalizeLocale(newTranslation.locale));
-  activateTranslation(newTranslation);
+  init(newTranslation);
   isInitialized = true;
 }

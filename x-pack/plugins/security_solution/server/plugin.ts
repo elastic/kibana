@@ -211,6 +211,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         getStartServices: core.getStartServices,
         kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
+        auditLogger: plugins.security?.audit.withoutRequest,
         taskManager: plugins.taskManager,
         telemetry: core.analytics,
         entityAnalyticsConfig: config.entityAnalytics,
@@ -558,6 +559,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+      assistantAlertsInsights: config.experimentalFeatures.assistantAlertsInsights,
+      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+    });
+    plugins.elasticAssistant.registerFeatures('management', {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });
 

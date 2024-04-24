@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +23,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { BetaBadge } from '../../../../../shared/beta/beta_badge';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
@@ -79,9 +78,6 @@ export const ConnectorSyncRules: React.FC = () => {
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <BetaBadge />
-                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
               <EuiText size="s">
@@ -96,7 +92,12 @@ export const ConnectorSyncRules: React.FC = () => {
                   })}
                 </p>
                 <p>
-                  <EuiLink href={docLinks.syncRules} external>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchConnectorSyncRulesLearnMoreAboutSyncRulesLink"
+                    href={docLinks.syncRules}
+                    external
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.index.connector.syncRules.syncRulesLabel',
                       {
@@ -109,6 +110,7 @@ export const ConnectorSyncRules: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchConnectorSyncRulesButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-editDraftRules"
                 color="primary"
                 onClick={() => setIsEditing(!isEditing)}
@@ -190,7 +192,12 @@ export const ConnectorSyncRules: React.FC = () => {
                       )}
                     </p>
                     <p>
-                      <EuiLink external href={docLinks.syncRules}>
+                      <EuiLink
+                        data-test-subj="enterpriseSearchConnectorSyncRulesLearnMoreAboutAdvancedSyncRulesLink"
+                        external
+                        href={docLinks.syncRulesAdvanced}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
                           {
@@ -204,6 +211,28 @@ export const ConnectorSyncRules: React.FC = () => {
                 <EuiCodeBlock isCopyable language="json">
                   {advancedSnippet}
                 </EuiCodeBlock>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutTitle',
+                      { defaultMessage: 'Configuration' }
+                    )}
+                    color="warning"
+                    iconType="iInCircle"
+                  >
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutDescription',
+                          {
+                            defaultMessage:
+                              'This advanced sync rule might override some configuration fields.',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>

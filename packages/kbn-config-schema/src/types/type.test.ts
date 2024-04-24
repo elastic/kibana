@@ -9,6 +9,7 @@
 import { get } from 'lodash';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
+import { META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 
 class MyType extends Type<any> {
   constructor(opts: TypeOptions<any> = {}) {
@@ -16,8 +17,9 @@ class MyType extends Type<any> {
   }
 }
 
-test('describe', () => {
-  const type = new MyType({ description: 'my description' });
+test('meta', () => {
+  const type = new MyType({ meta: { description: 'my description', id: 'foo' } });
   const meta = type.getSchema().describe();
   expect(get(meta, 'flags.description')).toBe('my description');
+  expect(get(meta, `metas[0].${META_FIELD_X_OAS_REF_ID}`)).toBe('foo');
 });

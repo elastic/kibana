@@ -56,9 +56,10 @@ export const Chat = () => {
     handleSubmit,
     getValues,
   } = useFormContext<ChatForm>();
-  const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
+  const { messages, append, stop: stopRequest, setMessages, reload, error } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
+  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
 
   const onSubmit = async (data: ChatForm) => {
     await append(
@@ -82,11 +83,18 @@ export const Chat = () => {
     [messages]
   );
 
-  const regenerateMessages = () => {
+  const isToolBarActionsDisabled = useMemo(
+    () => chatMessages.length <= 1 || !!error || isRegenerating || isSubmitting,
+    [chatMessages, error, isSubmitting, isRegenerating]
+  );
+
+  const regenerateMessages = async () => {
+    setIsRegenerating(true);
     const formData = getValues();
-    reload({
+    await reload({
       data: buildFormData(formData),
     });
+    setIsRegenerating(false);
   };
 
   if (showStartPage) {
@@ -106,6 +114,9 @@ export const Chat = () => {
             borderRight: euiTheme.border.thin,
             paddingTop: euiTheme.size.l,
             paddingBottom: euiTheme.size.l,
+            // don't allow the chat to shrink below 66.6% of the screen
+            flexBasis: 0,
+            minWidth: '66.6%',
           }}
         >
           <EuiFlexGroup direction="column" className="eui-fullHeight">
@@ -132,7 +143,7 @@ export const Chat = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="sparkles"
-                    disabled={chatMessages.length <= 1}
+                    disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
                   >
                     <FormattedMessage
@@ -144,7 +155,7 @@ export const Chat = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="refresh"
-                    disabled={chatMessages.length <= 1}
+                    disabled={isToolBarActionsDisabled}
                     onClick={() => {
                       setMessages([]);
                     }}
@@ -171,9 +182,9 @@ export const Chat = () => {
                   <QuestionInput
                     value={field.value}
                     onChange={field.onChange}
-                    isDisabled={isSubmitting}
+                    isDisabled={isSubmitting || isRegenerating}
                     button={
-                      isSubmitting ? (
+                      isSubmitting || isRegenerating ? (
                         <EuiButtonIcon
                           aria-label={i18n.translate(
                             'xpack.searchPlayground.chat.stopButtonAriaLabel',
@@ -210,7 +221,7 @@ export const Chat = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
           <ChatSidebar selectedIndicesCount={selectedIndicesCount} />
         </EuiFlexItem>
       </EuiFlexGroup>

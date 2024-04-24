@@ -84,6 +84,7 @@ export const GroupSourcePrioritization: React.FC = () => {
 
   const headerAction = (
     <EuiButton
+      data-test-subj="enterpriseSearchGroupSourcePrioritizationButton"
       disabled={groupPrioritiesUnchanged}
       color="primary"
       fill
@@ -116,14 +117,21 @@ export const GroupSourcePrioritization: React.FC = () => {
             )}
           </>
         }
-        actions={<EuiButton onClick={showOrgSourcesModal}>{ZERO_STATE_BUTTON_TEXT}</EuiButton>}
+        actions={
+          <EuiButton
+            data-test-subj="enterpriseSearchGroupSourcePrioritizationButton"
+            onClick={showOrgSourcesModal}
+          >
+            {ZERO_STATE_BUTTON_TEXT}
+          </EuiButton>
+        }
       />
       <EuiSpacer size="xxl" />
     </EuiPanel>
   );
 
   const sourceTable = (
-    <EuiTable responsive={false} tableLayout="auto">
+    <EuiTable responsiveBreakpoint={false} tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SOURCE_TABLE_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>

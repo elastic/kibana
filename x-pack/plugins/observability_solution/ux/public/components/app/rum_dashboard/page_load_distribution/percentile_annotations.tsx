@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   AnnotationDomainType,
   LineAnnotation,
@@ -20,9 +21,7 @@ interface Props {
   percentiles?: Record<string, number | null>;
 }
 
-function generateAnnotationData(
-  values?: Record<string, number | null>
-): LineAnnotationDatum[] {
+function generateAnnotationData(values?: Record<string, number | null>): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
     dataValue: value[1],
     details: `${(+value[0]).toFixed(0)}`,
@@ -40,14 +39,13 @@ export function PercentileAnnotations({ percentiles }: Props) {
     },
   };
 
-  function PercentileTooltip({
-    annotation,
-  }: {
-    annotation: LineAnnotationDatum;
-  }) {
+  function PercentileTooltip({ annotation }: { annotation: LineAnnotationDatum }) {
     return (
       <span data-cy="percentileTooltipTitle">
-        {annotation.details}th Percentile
+        {annotation.details}
+        {i18n.translate('xpack.ux.percentileTooltip.span.thPercentileLabel', {
+          defaultMessage: 'th Percentile',
+        })}
       </span>
     );
   }
@@ -68,10 +66,20 @@ export function PercentileAnnotations({ percentiles }: Props) {
               <EuiToolTip
                 title={<PercentileTooltip annotation={annotation} />}
                 content={
-                  <span>Pages loaded: {Math.round(annotation.dataValue)}</span>
+                  <span>
+                    {i18n.translate('xpack.ux.percentileAnnotations.span.pagesLoadedLabel', {
+                      defaultMessage: 'Pages loaded:',
+                    })}
+                    {Math.round(annotation.dataValue)}
+                  </span>
                 }
               >
-                <>{annotation.details}th</>
+                <>
+                  {annotation.details}
+                  {i18n.translate('xpack.ux.percentileAnnotations.thLabel', {
+                    defaultMessage: 'th',
+                  })}
+                </>
               </EuiToolTip>
             </span>
           }

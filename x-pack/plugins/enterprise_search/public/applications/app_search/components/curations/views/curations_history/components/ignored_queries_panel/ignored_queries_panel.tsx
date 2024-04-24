@@ -84,7 +84,12 @@ export const IgnoredQueriesPanel: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
-            <EuiButtonEmpty iconType="refresh" size="xs" onClick={() => loadIgnoredQueries()}>
+            <EuiButtonEmpty
+              data-test-subj="enterpriseSearchIgnoredQueriesPanelRefreshButton"
+              iconType="refresh"
+              size="xs"
+              onClick={() => loadIgnoredQueries()}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.refresh',
                 {
@@ -114,7 +119,6 @@ export const IgnoredQueriesPanel: React.FC = () => {
         itemId="query"
         // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
         columns={columns}
-        hasActions
         pagination={{
           ...convertMetaToPagination(meta),
           showPerPageOptions: false,

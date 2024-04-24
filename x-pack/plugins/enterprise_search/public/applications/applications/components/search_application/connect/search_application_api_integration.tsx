@@ -82,10 +82,7 @@ interface Tab {
 }
 
 export const SearchApplicationApiIntegrationStage: React.FC = () => {
-  const {
-    application,
-    share: { url },
-  } = useValues(KibanaLogic);
+  const { application, share } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
   const { searchApplicationName } = useValues(SearchApplicationViewLogic);
   const { apiKey } = useValues(SearchApplicationApiLogic);
@@ -130,7 +127,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
 
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   const consolePreviewLink = canShowDevtools
-    ? url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
+    ? share?.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
         {
           loadFrom: `data:text/plain,${compressToEncodedURIComponent(
             consoleRequest(searchApplicationName, params)
@@ -235,7 +232,10 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
                 defaultMessage="To get the most out of the JavaScript client, use the client's example template and follow our {searchapplicationSearchDocLink} on building a search experience."
                 values={{
                   searchapplicationSearchDocLink: (
-                    <EuiLink href={docLinks.searchApplicationsSearch}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSearchApplicationApiIntegrationStageHowToGuideLink"
+                      href={docLinks.searchApplicationsSearch}
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step3.clientDocumenation',
                         {
@@ -258,7 +258,11 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
         <>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" alignItems="flexEnd">
-            <EuiLink href={consolePreviewLink} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchApplicationApiIntegrationStageTryInConsoleLink"
+              href={consolePreviewLink}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.consoleButton"
                 defaultMessage="Try in console"

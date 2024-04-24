@@ -24,10 +24,7 @@ interface Props {
   secretToken?: string;
 }
 
-export function OpenTelemetryInstructions({
-  apmServerUrl,
-  secretToken,
-}: Props) {
+export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) {
   const items = [
     {
       setting: 'OTEL_EXPORTER_OTLP_ENDPOINT',
@@ -35,9 +32,7 @@ export function OpenTelemetryInstructions({
     },
     {
       setting: 'OTEL_EXPORTER_OTLP_HEADERS',
-      value: `"Authorization=Bearer ${
-        secretToken ? secretToken : '<secret-token>'
-      }"`,
+      value: `"Authorization=Bearer ${secretToken ? secretToken : '<secret-token>'}"`,
     },
     {
       setting: 'OTEL_METRICS_EXPORTER',
@@ -60,22 +55,16 @@ export function OpenTelemetryInstructions({
     {
       field: 'setting',
       width: '23%',
-      name: i18n.translate(
-        'xpack.apm.tutorial.config_otel.column.configSettings',
-        {
-          defaultMessage: 'Configuration setting (1)',
-        }
-      ),
+      name: i18n.translate('xpack.apm.tutorial.config_otel.column.configSettings', {
+        defaultMessage: 'Configuration setting (1)',
+      }),
     },
     {
       field: 'value',
       width: '55%',
-      name: i18n.translate(
-        'xpack.apm.tutorial.config_otel.column.configValue',
-        {
-          defaultMessage: 'Configuration value',
-        }
-      ),
+      name: i18n.translate('xpack.apm.tutorial.config_otel.column.configValue', {
+        defaultMessage: 'Configuration value',
+      }),
       render: (_, { value }) => (
         <>
           <EuiText size="s" color="accent">
@@ -108,11 +97,7 @@ export function OpenTelemetryInstructions({
 
   return (
     <>
-      <EuiBasicTable
-        items={items}
-        columns={columns}
-        data-test-subj="otel-instructions-table"
-      />
+      <EuiBasicTable items={items} columns={columns} data-test-subj="otel-instructions-table" />
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
         <FormattedMessage
@@ -125,7 +110,10 @@ export function OpenTelemetryInstructions({
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
-                OTEL_EXPORTER_OTLP_ENDPOINT
+                {i18n.translate(
+                  'xpack.apm.openTelemetryInstructions.otelexporterotlpendpointLinkLabel',
+                  { defaultMessage: 'OTEL_EXPORTER_OTLP_ENDPOINT' }
+                )}
               </EuiLink>
             ),
             otelExporterOtlpHeaders: (
@@ -134,7 +122,10 @@ export function OpenTelemetryInstructions({
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
-                OTEL_EXPORTER_OTLP_HEADERS
+                {i18n.translate(
+                  'xpack.apm.openTelemetryInstructions.otelexporterotlpheadersLinkLabel',
+                  { defaultMessage: 'OTEL_EXPORTER_OTLP_HEADERS' }
+                )}
               </EuiLink>
             ),
             otelResourceAttributes: (
@@ -143,7 +134,10 @@ export function OpenTelemetryInstructions({
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
               >
-                OTEL_RESOURCE_ATTRIBUTES
+                {i18n.translate(
+                  'xpack.apm.openTelemetryInstructions.otelresourceattributesLinkLabel',
+                  { defaultMessage: 'OTEL_RESOURCE_ATTRIBUTES' }
+                )}
               </EuiLink>
             ),
           }}
@@ -164,12 +158,9 @@ export function OpenTelemetryInstructions({
                 target="_blank"
                 href="https://opentelemetry.io/docs/instrumentation"
               >
-                {i18n.translate(
-                  'xpack.apm.tutorial.config_otel.instrumentationGuide',
-                  {
-                    defaultMessage: 'OpenTelemetry Instrumentation guide',
-                  }
-                )}
+                {i18n.translate('xpack.apm.tutorial.config_otel.instrumentationGuide', {
+                  defaultMessage: 'OpenTelemetry Instrumentation guide',
+                })}
               </EuiLink>
             ),
           }}

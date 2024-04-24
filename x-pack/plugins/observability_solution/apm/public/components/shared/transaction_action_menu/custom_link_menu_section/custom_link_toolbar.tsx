@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiButtonEmpty,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -43,7 +37,10 @@ export function CustomLinkToolbar({
                 <EuiIcon
                   type="gear"
                   color="text"
-                  aria-label="Custom links settings page"
+                  aria-label={i18n.translate(
+                    'xpack.apm.customLinkToolbar.euiIcon.customLinksSettingsPageLabel',
+                    { defaultMessage: 'Custom links settings page' }
+                  )}
                 />
               </LegacyAPMLink>
             </EuiToolTip>

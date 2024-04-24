@@ -124,7 +124,10 @@ export const ExtractionRulesTable: React.FC = () => {
         defaultMessage: 'Field rules',
       }),
       render: (rule: ExtractionRule) => (
-        <EuiButtonEmpty onClick={() => toggleExpandedItem(rule)}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchColumnsButton"
+          onClick={() => toggleExpandedItem(rule)}
+        >
           {rule.rules.length}
         </EuiButtonEmpty>
       ),
@@ -243,7 +246,6 @@ export const ExtractionRulesTable: React.FC = () => {
       )}
       <EuiBasicTable
         columns={columns}
-        isExpandable
         itemId="id"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         items={extractionRules}

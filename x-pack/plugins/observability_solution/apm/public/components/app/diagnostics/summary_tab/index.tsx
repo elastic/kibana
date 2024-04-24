@@ -6,13 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiCallOut,
-  EuiDescriptionList,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
@@ -25,8 +22,7 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export function DiagnosticsSummary() {
   const { diagnosticsBundle } = useDiagnosticsContext();
   const isCrossCluster = getIsCrossCluster(diagnosticsBundle);
-  const hasAllPrivileges =
-    diagnosticsBundle?.diagnosticsPrivileges.hasAllPrivileges ?? true;
+  const hasAllPrivileges = diagnosticsBundle?.diagnosticsPrivileges.hasAllPrivileges ?? true;
 
   if (isCrossCluster || !hasAllPrivileges) {
     return (
@@ -56,35 +52,43 @@ export function DiagnosticsSummary() {
 
 function CrossClusterSearchCallout() {
   return (
-    <EuiCallOut title="Cross cluster search not supported" color="warning">
-      The APM index settings is targetting remote clusters. Please note that
-      this is not currently supported by the Diagnostics Tool and functionality
-      will therefore be limited.
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.apm.crossClusterSearchCallout.euiCallOut.crossClusterSearchNotLabel',
+        { defaultMessage: 'Cross cluster search not supported' }
+      )}
+      color="warning"
+    >
+      <FormattedMessage
+        id="xpack.apm.diagnosticsSummaryTab.CrossClusterSearchCalloutText"
+        defaultMessage={
+          'The APM index settings is targetting remote clusters. Please note that this is not currently supported by the Diagnostics Tool and functionality will therefore be limited.'
+        }
+      />
     </EuiCallOut>
   );
 }
 
-function PrivilegesCallout({
-  diagnosticsBundle,
-}: {
-  diagnosticsBundle: DiagnosticsBundle;
-}) {
-  const missingClusterPrivileges = Object.entries(
-    diagnosticsBundle.diagnosticsPrivileges.cluster
-  )
+function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: DiagnosticsBundle }) {
+  const missingClusterPrivileges = Object.entries(diagnosticsBundle.diagnosticsPrivileges.cluster)
     .filter(([privilegeName, hasPrivilege]) => !hasPrivilege)
     .map(([privilegeName]) => privilegeName);
 
-  const missingIndexPrivileges = Object.entries(
-    diagnosticsBundle.diagnosticsPrivileges.index
-  )
+  const missingIndexPrivileges = Object.entries(diagnosticsBundle.diagnosticsPrivileges.index)
     .filter(([indexName, privObject]) => !privObject.read)
     .map(([indexName, privObject]) => indexName);
 
   return (
     <>
-      <EuiCallOut title="Insufficient access" color="warning">
-        Not all features are available due to missing privileges.
+      <EuiCallOut
+        title={i18n.translate('xpack.apm.privilegesCallout.euiCallOut.insufficientAccessLabel', {
+          defaultMessage: 'Insufficient access',
+        })}
+        color="warning"
+      >
+        {i18n.translate('xpack.apm.privilegesCallout.notAllFeaturesAreCallOutLabel', {
+          defaultMessage: 'Not all features are available due to missing privileges.',
+        })}
         <br />
         <br />
         <EuiDescriptionList
@@ -92,7 +96,12 @@ function PrivilegesCallout({
             ...(missingClusterPrivileges.length > 0
               ? [
                   {
-                    title: 'Missing cluster privileges',
+                    title: i18n.translate(
+                      'xpack.apm.diagnosticsSummaryTab.missingClusterPrivilegesTitle',
+                      {
+                        defaultMessage: 'Missing cluster privileges',
+                      }
+                    ),
                     description: missingClusterPrivileges.join(', '),
                   },
                 ]
@@ -101,7 +110,12 @@ function PrivilegesCallout({
             ...(missingIndexPrivileges.length > 0
               ? [
                   {
-                    title: 'Missing index privileges',
+                    title: i18n.translate(
+                      'xpack.apm.diagnosticsSummaryTab.missingIndexPrivilegesTitle',
+                      {
+                        defaultMessage: 'Missing index privileges',
+                      }
+                    ),
                     description: missingIndexPrivileges.join(', '),
                   },
                 ]

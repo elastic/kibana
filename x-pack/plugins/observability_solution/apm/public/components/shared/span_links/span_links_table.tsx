@@ -38,9 +38,7 @@ export function SpanLinksTable({ items }: Props) {
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
   );
-  const [idActionMenuOpen, setIdActionMenuOpen] = useState<
-    string | undefined
-  >();
+  const [idActionMenuOpen, setIdActionMenuOpen] = useState<string | undefined>();
 
   const columns: Array<EuiBasicTableColumn<SpanLinkDetails>> = [
     {
@@ -89,16 +87,9 @@ export function SpanLinksTable({ items }: Props) {
       render: (_, { spanId, traceId, details }) => {
         if (details && details.transactionId) {
           return (
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="xs"
-              responsive={false}
-            >
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={getSpanIcon(details.spanType, details.spanSubtype)}
-                  size="l"
-                />
+                <EuiIcon type={getSpanIcon(details.spanType, details.spanSubtype)} size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
@@ -143,7 +134,9 @@ export function SpanLinksTable({ items }: Props) {
             button={
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label="Edit"
+                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+                  defaultMessage: 'Edit',
+                })}
                 iconType="boxesHorizontal"
                 onClick={() => {
                   setIdActionMenuOpen(id);
@@ -164,10 +157,9 @@ export function SpanLinksTable({ items }: Props) {
                       path: { transactionId: details.transactionId },
                     })}
                   >
-                    {i18n.translate(
-                      'xpack.apm.spanLinks.table.actions.goToTraceDetails',
-                      { defaultMessage: 'Go to trace' }
-                    )}
+                    {i18n.translate('xpack.apm.spanLinks.table.actions.goToTraceDetails', {
+                      defaultMessage: 'Go to trace',
+                    })}
                   </EuiLink>
                 </EuiFlexItem>
               )}
@@ -182,10 +174,9 @@ export function SpanLinksTable({ items }: Props) {
                       }}
                       flush="both"
                     >
-                      {i18n.translate(
-                        'xpack.apm.spanLinks.table.actions.copyParentTraceId',
-                        { defaultMessage: 'Copy parent trace id' }
-                      )}
+                      {i18n.translate('xpack.apm.spanLinks.table.actions.copyParentTraceId', {
+                        defaultMessage: 'Copy parent trace id',
+                      })}
                     </EuiButtonEmpty>
                   )}
                 </EuiCopy>
@@ -199,10 +190,9 @@ export function SpanLinksTable({ items }: Props) {
                       query: { waterfallItemId: spanId },
                     })}
                   >
-                    {i18n.translate(
-                      'xpack.apm.spanLinks.table.actions.goToSpanDetails',
-                      { defaultMessage: 'Go to span details' }
-                    )}
+                    {i18n.translate('xpack.apm.spanLinks.table.actions.goToSpanDetails', {
+                      defaultMessage: 'Go to span details',
+                    })}
                   </EuiLink>
                 </EuiFlexItem>
               )}
@@ -217,10 +207,9 @@ export function SpanLinksTable({ items }: Props) {
                       }}
                       flush="both"
                     >
-                      {i18n.translate(
-                        'xpack.apm.spanLinks.table.actions.copySpanId',
-                        { defaultMessage: 'Copy span id' }
-                      )}
+                      {i18n.translate('xpack.apm.spanLinks.table.actions.copySpanId', {
+                        defaultMessage: 'Copy span id',
+                      })}
                     </EuiButtonEmpty>
                   )}
                 </EuiCopy>
@@ -232,12 +221,5 @@ export function SpanLinksTable({ items }: Props) {
     },
   ];
 
-  return (
-    <EuiInMemoryTable
-      items={items}
-      columns={columns}
-      sorting={true}
-      pagination={true}
-    />
-  );
+  return <EuiInMemoryTable items={items} columns={columns} sorting={true} pagination={true} />;
 }

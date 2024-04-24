@@ -1,0 +1,12 @@
+SIGNUM
+
+Syntax
+Parameters
+number
+Numeric expression. If null, the function returns null.
+DescriptionReturns the sign of the given number. It returns -1 for negative numbers, 0 for 0 and 1 for positive numbers.Supported types
+Example
+```esql
+ROW d = 100.0
+| EVAL s = SIGNUM(d)
+```

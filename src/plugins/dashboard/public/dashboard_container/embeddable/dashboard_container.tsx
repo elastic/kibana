@@ -141,10 +141,14 @@ export class DashboardContainer
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
+  public lastReloadRequestTime$ = new BehaviorSubject<string | undefined>(undefined);
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public reload$ = new Subject<void>();
+  public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+
+  public readonly executionContext: KibanaExecutionContext;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -280,10 +284,21 @@ export class DashboardContainer
         'syncTooltips'
       ),
     };
+    this.timeRestore$ = embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+      this.publishingSubscription,
+      this,
+      'timeRestore'
+    );
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput
     >(this.publishingSubscription, this, 'timeslice');
+    this.lastReloadRequestTime$ = embeddableInputToSubject<
+      string | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'lastReloadRequestTime');
+
+    this.executionContext = initialInput.executionContext;
   }
 
   public getAppContext() {
@@ -836,12 +851,4 @@ export class DashboardContainer
     }
     if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
-
-  public getFilters() {
-    return this.getInput().filters;
-  }
-
-  public getQuery(): Query | undefined {
-    return this.getInput().query;
-  }
 }

@@ -5,15 +5,13 @@
  * 2.0.
  */
 import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/core/server';
+import { getListOfSummaryIndices } from './slo_settings';
 import { typedSearch } from '../utils/queries';
 import { IllegalArgumentError } from '../errors';
-import {
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  DEFAULT_SLO_GROUPS_PAGE_SIZE,
-} from '../../common/constants';
+import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { Status } from '../domain/models';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
@@ -43,24 +41,30 @@ interface SliDocument {
 export class FindSLOGroups {
   constructor(
     private esClient: ElasticsearchClient,
+    private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
   ) {}
+
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
+    const groupsFilter = [params.groupsFilter ?? []].flat();
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
     let parsedFilters: any = {};
-
     try {
       parsedFilters = JSON.parse(filters);
     } catch (e) {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
+    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+
+    const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
+
     const response = await typedSearch(this.esClient, {
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: indices,
       size: 0,
       query: {
         bool: {
@@ -69,6 +73,7 @@ export class FindSLOGroups {
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
+          must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
       body: {
@@ -77,6 +82,7 @@ export class FindSLOGroups {
             terms: {
               field: groupBy,
               size: 10000,
+              ...(hasSelectedTags && { include: groupsFilter }),
             },
             aggs: {
               worst: {
@@ -148,6 +154,9 @@ export class FindSLOGroups {
     const results =
       response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
         const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
+        if (String(bucket.key).endsWith('.temp') && groupBy === '_index') {
+          return acc;
+        }
         return [
           ...acc,
           {

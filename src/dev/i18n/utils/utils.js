@@ -144,7 +144,6 @@ function extractValueReferencesFromIcuAst(node, keys = new Set()) {
 
       keys.add(element.value);
 
-      // format contains all specific parameters for complex argumentElements
       if (element.options) {
         for (const option of Object.values(element.options)) {
           extractValueReferencesFromIcuAst(option, keys);

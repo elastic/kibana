@@ -7,6 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -69,7 +70,13 @@ export function TransactionLink() {
     <CentralizedContainer>
       <EuiEmptyPrompt
         iconType="apmTrace"
-        title={<h2>Fetching transaction...</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.transactionLink.h2.fetchingTransactionLabel', {
+              defaultMessage: 'Fetching transaction...',
+            })}
+          </h2>
+        }
       />
     </CentralizedContainer>
   );

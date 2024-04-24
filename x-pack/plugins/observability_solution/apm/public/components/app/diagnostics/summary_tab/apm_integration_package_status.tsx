@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiLink } from '@elastic/eui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -23,11 +24,7 @@ export function ApmIntegrationPackageStatus() {
   const packageVersion = diagnosticsBundle?.fleetPackageInfo.version;
 
   return (
-    <TabStatus
-      isLoading={isLoading}
-      isOk={isInstalled}
-      data-test-subj="integrationPackageStatus"
-    >
+    <TabStatus isLoading={isLoading} isOk={isInstalled} data-test-subj="integrationPackageStatus">
       {isLoading
         ? '...'
         : isInstalled
@@ -39,7 +36,9 @@ export function ApmIntegrationPackageStatus() {
           data-test-subj="apmApmIntegrationPackageStatusGoToApmIntegrationLink"
           href={basePath.prepend('/app/integrations/detail/apm/overview')}
         >
-          Go to APM Integration
+          {i18n.translate('xpack.apm.apmIntegrationPackageStatus.goToAPMIntegrationLinkLabel', {
+            defaultMessage: 'Go to APM Integration',
+          })}
         </EuiLink>
       ) : null}
     </TabStatus>

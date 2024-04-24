@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function TabStatus({
@@ -23,24 +24,24 @@ export function TabStatus({
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`${props['data-test-subj']}_Badge`}
-            >
+            <EuiFlexItem grow={false} data-test-subj={`${props['data-test-subj']}_Badge`}>
               {isLoading ? (
                 <EuiBadge color="default">-</EuiBadge>
               ) : isOk ? (
-                <EuiBadge color="green">OK</EuiBadge>
+                <EuiBadge color="green">
+                  {i18n.translate('xpack.apm.tabStatus.okBadgeLabel', { defaultMessage: 'OK' })}
+                </EuiBadge>
               ) : (
-                <EuiBadge color="warning">Warning</EuiBadge>
+                <EuiBadge color="warning">
+                  {i18n.translate('xpack.apm.tabStatus.warningBadgeLabel', {
+                    defaultMessage: 'Warning',
+                  })}
+                </EuiBadge>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={10}
-          data-test-subj={`${props['data-test-subj']}_Content`}
-        >
+        <EuiFlexItem grow={10} data-test-subj={`${props['data-test-subj']}_Content`}>
           {children}
         </EuiFlexItem>
       </EuiFlexGroup>

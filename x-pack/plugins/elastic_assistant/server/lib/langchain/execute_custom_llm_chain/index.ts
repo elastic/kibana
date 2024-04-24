@@ -12,7 +12,11 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
+import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
@@ -30,8 +34,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actions,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
+  anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
@@ -60,7 +63,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
     model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure
@@ -96,11 +104,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
-    allow,
-    allowReplacement,
+    anonymizationFields,
     alertsIndexPattern,
     isEnabledKnowledgeBase,
     chain,
+    llm,
     esClient,
     modelExists,
     onNewReplacements,
@@ -165,6 +173,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     };
 
     let message = '';
+    let tokenParentRunId = '';
 
     executor
       .invoke(
@@ -176,8 +185,14 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         {
           callbacks: [
             {
-              handleLLMNewToken(payload) {
-                if (payload.length && !didEnd) {
+              handleLLMNewToken(payload, _idx, _runId, parentRunId) {
+                if (tokenParentRunId.length === 0 && !!parentRunId) {
+                  // set the parent run id as the parentRunId of the first token
+                  // this is used to ensure that all tokens in the stream are from the same run
+                  // filtering out runs that are inside e.g. tool calls
+                  tokenParentRunId = parentRunId;
+                }
+                if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
                   push({ payload, type: 'content' });
                   // store message in case of error
                   message += payload;
