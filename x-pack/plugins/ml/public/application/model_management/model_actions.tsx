@@ -408,9 +408,8 @@ export function useModelActions({
           defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
         available: (item) =>
           canCreateTrainedModels &&
