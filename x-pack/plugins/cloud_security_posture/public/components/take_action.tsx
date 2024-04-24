@@ -96,23 +96,25 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
     color: 'success',
     iconType: '',
     'data-test-subj': 'csp:toast-success-rule-state-change',
+    title: toMountPoint(
+      <EuiText size="m">
+        <strong data-test-subj={`csp:toast-success-rule-title`}>
+          {isBenchmarkRuleMuted ? (
+            <FormattedMessage
+              id="xpack.csp.flyout.ruleEnabledToastTitle"
+              defaultMessage="Rule Enabled"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.csp.flyout.ruleDisabledToastTitle"
+              defaultMessage="Rule Disabled"
+            />
+          )}
+        </strong>
+      </EuiText>
+    ),
     text: toMountPoint(
       <div>
-        <EuiText size="m">
-          <strong data-test-subj={`csp:toast-success-rule-title`}>
-            {isBenchmarkRuleMuted ? (
-              <FormattedMessage
-                id="xpack.csp.flyout.ruleEnabledToastTitle"
-                defaultMessage="Rule Enabled"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.csp.flyout.ruleDisabledToastTitle"
-                defaultMessage="Rule Disabled"
-              />
-            )}
-          </strong>
-        </EuiText>
         {isBenchmarkRuleMuted ? (
           <FormattedMessage
             id="xpack.csp.flyout.ruleEnabledToastRulesCount"
