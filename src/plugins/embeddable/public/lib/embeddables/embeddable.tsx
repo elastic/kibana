@@ -134,6 +134,7 @@ export abstract class Embeddable<
       localTimeRange: this.localTimeRange,
       isEditingEnabled: this.isEditingEnabled,
       panelDescription: this.panelDescription,
+      defaultPanelDescription: this.defaultPanelDescription,
       canLinkToLibrary: this.canLinkToLibrary,
       disabledActionIds: this.disabledActionIds,
       unlinkFromLibrary: this.unlinkFromLibrary,
@@ -177,6 +178,7 @@ export abstract class Embeddable<
   public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
   public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
   public panelDescription: LegacyEmbeddableAPI['panelDescription'];
+  public defaultPanelDescription: LegacyEmbeddableAPI['defaultPanelDescription'];
   public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
   public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
   public setLocalTimeRange: LegacyEmbeddableAPI['setLocalTimeRange'];
