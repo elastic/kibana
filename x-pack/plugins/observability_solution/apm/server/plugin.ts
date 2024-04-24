@@ -235,7 +235,7 @@ export class APMPlugin
           plugins: resourcePlugins,
           context: {
             core: requestContext.core,
-            licensing: Promise.resolve(requestContext.licensing),
+            licensing: requestContext.licensing,
             alerting: resourcePlugins.alerting!.start().then((startContract) => {
               return {
                 getRulesClient() {

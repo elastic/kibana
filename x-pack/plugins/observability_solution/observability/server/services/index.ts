@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { CoreRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
+import { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export const observabilityAlertDetailsContextRt = t.intersection([
@@ -28,10 +28,10 @@ export const observabilityAlertDetailsContextRt = t.intersection([
 ]);
 
 type AlertDetailsContextHandlerQuery = t.TypeOf<typeof observabilityAlertDetailsContextRt>;
-interface AlertDetailsRequestContext {
+export interface AlertDetailsRequestContext {
   request: KibanaRequest;
   core: Promise<CoreRequestHandlerContext>;
-  licensing: LicensingApiRequestHandlerContext;
+  licensing: Promise<LicensingApiRequestHandlerContext>;
 }
 type AlertDetailsContextHandler = (
   context: AlertDetailsRequestContext,
@@ -41,7 +41,7 @@ type AlertDetailsContextHandler = (
 export class AlertDetailsContextService {
   private handlers: AlertDetailsContextHandler[] = [];
 
-  constructor(private readonly logger: Logger) {}
+  constructor() {}
 
   registerHandler(handler: AlertDetailsContextHandler) {
     this.handlers.push(handler);

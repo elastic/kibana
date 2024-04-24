@@ -100,9 +100,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const logsExplorerLocator =
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
-    const alertDetailsContextService = new AlertDetailsContextService(
-      this.logger.get('alert_details_context_service')
-    );
+    const alertDetailsContextService = new AlertDetailsContextService();
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
