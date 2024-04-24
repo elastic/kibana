@@ -737,6 +737,12 @@ describe('Actions Plugin', () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
+          const platinumLicense = licensingMock.createLicense({
+            license: { status: 'active', type: 'platinum' },
+          });
+          // @ts-ignore
+          plugin.licenseState.updateInformation(platinumLicense);
+
           pluginSetup.registerType({
             id: '.cases',
             name: 'Cases',
