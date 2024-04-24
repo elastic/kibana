@@ -309,8 +309,9 @@ export class EntityStoreDataClient {
     // diff only gives us partial paths, e.g if a whole object is replaced, we only get the top level key
     const changedFields = getChangedFieldsPathsFromDiff(diff);
     const previousValues = _.pick(previousEntity, changedFields);
+    const values = _.pick(entity, changedFields);
     // now we can use the previous values to get the full paths
-    const allFieldsChanged = removeArrayIndexesFromFlatPaths(Object.keys(flat(previousValues)));
+    const allFieldsChanged = removeArrayIndexesFromFlatPaths(Object.keys(flat(values)));
     return {
       '@timestamp': entity['@timestamp'],
       entity,
