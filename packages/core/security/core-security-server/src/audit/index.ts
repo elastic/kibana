@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { AuditServiceSetup } from './audit_service';
 export type { AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit_events';
 export type { AuditLogger } from './audit_logger';
