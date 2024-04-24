@@ -19,7 +19,7 @@ import { CustomCard } from './types';
 
 interface Props {
   /**
-   * A subset of either existing card names to feature, or generated
+   * A subset of either existing card names to feature, or virtual
    * cards to display. The inclusion of CustomCards will override the default
    * list functionality.
    */
