@@ -28,40 +28,42 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
       return [];
     }
 
-    const res = await http.get('/internal/apm/assistant/get_obs_alert_details_context', {
-      query: {
-        alert_started_at: new Date(alert.formatted.start).toISOString(),
+    try {
+      const res = await http.get('/internal/apm/assistant/get_obs_alert_details_context', {
+        query: {
+          alert_started_at: new Date(alert.formatted.start).toISOString(),
 
-        // service fields
-        'service.name': fields['service.name'],
-        'service.environment': fields['service.environment'],
-        'transaction.type': fields['transaction.type'],
-        'transaction.name': fields['transaction.name'],
+          // service fields
+          'service.name': fields['service.name'],
+          'service.environment': fields['service.environment'],
+          'transaction.type': fields['transaction.type'],
+          'transaction.name': fields['transaction.name'],
 
-        // infra fields
-        'host.name': fields['host.name'],
-        'container.id': fields['container.id'],
-      },
-    });
+          // infra fields
+          'host.name': fields['host.name'],
+          'container.id': fields['container.id'],
+          'kubernetes.pod.name': fields['kubernetes.pod.name'],
+        },
+      });
 
-    const {
-      serviceSummary,
-      downstreamDependencies,
-      logCategories,
-      serviceChangePoints,
-      exitSpanChangePoints,
-      anomalies,
-    } = res as any;
+      const {
+        serviceSummary,
+        downstreamDependencies,
+        logCategories,
+        serviceChangePoints,
+        exitSpanChangePoints,
+        anomalies,
+      } = res as any;
 
-    const serviceName = fields['service.name'];
-    const serviceEnvironment = fields['service.environment'];
+      const serviceName = fields['service.name'];
+      const serviceEnvironment = fields['service.environment'];
 
-    const obsAlertContext = `${
-      !isEmpty(serviceSummary)
-        ? `Metadata for the service where the alert occurred:
+      const obsAlertContext = `${
+        !isEmpty(serviceSummary)
+          ? `Metadata for the service where the alert occurred:
 ${JSON.stringify(serviceSummary, null, 2)}`
-        : ''
-    }
+          : ''
+      }
 
     ${
       !isEmpty(downstreamDependencies)
@@ -99,21 +101,29 @@ ${JSON.stringify(downstreamDependencies, null, 2)}`
     }          
     `;
 
-    return observabilityAIAssistant.getContextualInsightMessages({
-      message: `I'm looking at an alert and trying to understand why it was triggered`,
-      instructions: dedent(
-        `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.        
+      return observabilityAIAssistant.getContextualInsightMessages({
+        message: `I'm looking at an alert and trying to understand why it was triggered`,
+        instructions: dedent(
+          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.        
 
         The following contextual information is available to help me understand the alert:
         ${obsAlertContext}
 
         Be brief and to the point.
         Do not list the alert details as bullet points.
-        Do refer to the contextual information provided above when relevant.
+        Refer to the contextual information provided above when relevant.
         Pay specific attention to why the alert happened and what may have contributed to it.
         `
-      ),
-    });
+        ),
+      });
+    } catch (e) {
+      return observabilityAIAssistant.getContextualInsightMessages({
+        message: `I'm looking at an alert and trying to understand why it was triggered`,
+        instructions: dedent(
+          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.`
+        ),
+      });
+    }
   }, [alert, http, observabilityAIAssistant]);
 
   if (!ObservabilityAIAssistantContextualInsight) {

@@ -68,7 +68,7 @@ const loginPageAsWriteAuthorizedUser = (url: string) => {
 // https://github.com/elastic/kibana/issues/179965
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();

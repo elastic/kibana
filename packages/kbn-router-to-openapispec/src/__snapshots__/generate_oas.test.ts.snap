@@ -155,6 +155,10 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "type": "string",
+                  },
                   "foo": Object {
                     "type": "string",
                   },
