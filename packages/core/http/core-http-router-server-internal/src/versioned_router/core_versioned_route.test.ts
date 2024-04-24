@@ -14,7 +14,7 @@ import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
-import { createRequest } from './core_versioned_route.test.utils';
+import { createRequest } from './core_versioned_route.test.util';
 
 describe('Versioned route', () => {
   let router: Router;
@@ -191,6 +191,36 @@ describe('Versioned route', () => {
       expect(validateOutputFn).toHaveBeenCalledTimes(0); // does not call this in non-dev
     }
   );
+
+  it('constructs lazily provided validations once (idempotency)', async () => {
+    let handler: RequestHandler;
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const lazyValidation = jest.fn(() => fooValidation);
+    versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: lazyValidation,
+      },
+      handlerFn
+    );
+
+    for (let i = 0; i < 10; i++) {
+      const { status } = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+      expect(status).toBe(200);
+    }
+
+    expect(lazyValidation).toHaveBeenCalledTimes(1);
+  });
 
   describe('when in dev', () => {
     // NOTE: Temporary test to ensure single public API version is enforced

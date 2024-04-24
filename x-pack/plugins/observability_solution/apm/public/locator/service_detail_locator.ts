@@ -19,9 +19,7 @@ const helpersModule = import('./helpers');
 
 export const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-export class APMServiceDetailLocator
-  implements LocatorDefinition<APMLocatorPayload>
-{
+export class APMServiceDetailLocator implements LocatorDefinition<APMLocatorPayload> {
   id = APM_APP_LOCATOR_ID;
   uiSettings: IUiSettingsClient;
 
@@ -35,9 +33,7 @@ export class APMServiceDetailLocator
     const defaultTimeRange = this.uiSettings.get<TimePickerTimeDefaults>(
       UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
     );
-    const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(
-      enableComparisonByDefault
-    );
+    const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(enableComparisonByDefault);
     const defaultEnvironment = this.uiSettings.get<string>(
       defaultApmServiceEnvironment,
       ENVIRONMENT_ALL.value

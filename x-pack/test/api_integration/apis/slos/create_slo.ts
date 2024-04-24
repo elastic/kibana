@@ -150,8 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.sli-v3.1',
-              pipeline: '.slo-observability.sli.pipeline-v3.1',
+              index: '.slo-observability.sli-v3.2',
+              pipeline: '.slo-observability.sli.pipeline-v3.2',
             },
             frequency: '1m',
             sync: { time: { field: '@timestamp', delay: '1m' } },
@@ -183,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Rolled-up SLI data for SLO: Test SLO for api integration [id: ${id}, revision: 1]`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3.1, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.2, managed: true, managed_by: 'observability' },
           },
         ],
       });
@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
             version: '10.0.0',
             create_time: summaryTransform.body.transforms[0].create_time,
             source: {
-              index: ['.slo-observability.sli-v3*'],
+              index: ['.slo-observability.sli-v3.2*'],
               query: {
                 bool: {
                   filter: [
@@ -217,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.summary-v3.1',
+              index: '.slo-observability.summary-v3.2',
               pipeline: `.slo-observability.summary.pipeline-${id}-1`,
             },
             frequency: '1m',
@@ -229,6 +229,30 @@ export default function ({ getService }: FtrProviderContext) {
                 'slo.revision': { terms: { field: 'slo.revision' } },
                 'slo.groupings.tags': {
                   terms: { field: 'slo.groupings.tags' },
+                },
+                'monitor.config_id': {
+                  terms: {
+                    field: 'monitor.config_id',
+                    missing_bucket: true,
+                  },
+                },
+                'monitor.name': {
+                  terms: {
+                    field: 'monitor.name',
+                    missing_bucket: true,
+                  },
+                },
+                'observer.geo.name': {
+                  terms: {
+                    field: 'observer.geo.name',
+                    missing_bucket: true,
+                  },
+                },
+                'observer.name': {
+                  terms: {
+                    field: 'observer.name',
+                    missing_bucket: true,
+                  },
                 },
                 'service.name': { terms: { field: 'service.name', missing_bucket: true } },
                 'service.environment': {
@@ -281,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Summarise the rollup data of SLO: Test SLO for api integration [id: ${id}, revision: 1].`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3.1, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.2, managed: true, managed_by: 'observability' },
           },
         ],
       });

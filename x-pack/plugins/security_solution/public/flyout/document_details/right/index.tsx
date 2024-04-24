@@ -16,6 +16,7 @@ import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
+import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
@@ -64,7 +65,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
     storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
 
     telemetry.reportDetailsFlyoutTabClicked({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'right',
       tabId,
     });
@@ -85,6 +86,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
+      {flyoutIsExpandable && <RightPanelTour />}
       <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}

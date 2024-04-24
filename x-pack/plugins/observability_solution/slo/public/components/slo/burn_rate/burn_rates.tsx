@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBetaBadge,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
@@ -72,33 +65,15 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.slo.burnRate.title', {
-                    defaultMessage: 'Burn rate',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.slo.burnRate.technicalPreviewBadgeTitle', {
-                  defaultMessage: 'Technical Preview',
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.slo.burnRate.title', {
+                  defaultMessage: 'Burn rate',
                 })}
-                size="s"
-                tooltipPosition="bottom"
-                tooltipContent={i18n.translate(
-                  'xpack.slo.burnRate.technicalPreviewBadgeDescription',
-                  {
-                    defaultMessage:
-                      'This functionality is in technical preview and is subject to change or may be removed in future versions. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Technical preview features are not subject to the support service level agreement of official generally available features.',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {

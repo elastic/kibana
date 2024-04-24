@@ -17,7 +17,7 @@ import {
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
-import { SLO } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
@@ -37,7 +37,7 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    let updatedSlo: SLO = Object.assign({}, originalSlo, params, {
+    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, params, {
       groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
     });
 
@@ -99,7 +99,7 @@ export class UpdateSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${updatedSlo.id}`,
-            document: createTempSummaryDocument(updatedSlo, this.spaceId),
+            document: createTempSummaryDocument(updatedSlo, this.spaceId, this.basePath),
             refresh: true,
           }),
         { logger: this.logger }
@@ -129,7 +129,7 @@ export class UpdateSLO {
     return this.toResponse(updatedSlo);
   }
 
-  private async deleteOriginalSLO(originalSlo: SLO) {
+  private async deleteOriginalSLO(originalSlo: SLODefinition) {
     try {
       const originalRollupTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
       await this.transformManager.stop(originalRollupTransformId);
@@ -179,7 +179,7 @@ export class UpdateSLO {
     });
   }
 
-  private toResponse(slo: SLO): UpdateSLOResponse {
+  private toResponse(slo: SLODefinition): UpdateSLOResponse {
     return updateSLOResponseSchema.encode(slo);
   }
 }

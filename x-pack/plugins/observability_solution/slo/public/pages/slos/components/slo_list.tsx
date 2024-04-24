@@ -124,6 +124,7 @@ export function SloList() {
           kqlQuery={kqlQuery}
           sort={state.sort.by}
           direction={state.sort.direction}
+          filters={filters}
         />
       )}
     </EuiFlexGroup>

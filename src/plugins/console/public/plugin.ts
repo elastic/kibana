@@ -19,6 +19,7 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddableConsoleProps,
+  EmbeddedConsoleView,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
 
@@ -111,6 +112,7 @@ export class ConsoleUIPlugin
   public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
     const {
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     const consoleStart: ConsolePluginStart = {};
@@ -132,12 +134,17 @@ export class ConsoleUIPlugin
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);
           },
+          alternateView: this._embeddableConsole.alternateView,
+          isMonacoEnabled,
         });
       };
       consoleStart.isEmbeddedConsoleAvailable = () =>
         this._embeddableConsole.isEmbeddedConsoleAvailable();
       consoleStart.openEmbeddedConsole = (content?: string) =>
         this._embeddableConsole.openEmbeddedConsole(content);
+      consoleStart.registerEmbeddedConsoleAlternateView = (view: EmbeddedConsoleView | null) => {
+        this._embeddableConsole.registerAlternateView(view);
+      };
     }
 
     return consoleStart;

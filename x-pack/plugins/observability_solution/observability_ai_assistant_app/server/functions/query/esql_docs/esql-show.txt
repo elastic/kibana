@@ -7,7 +7,7 @@ SHOW item
 
 Parameters
 item
-Can be INFO or FUNCTIONS.
+Can only be INFO.
 DescriptionThe
 ```esql
 SHOW source command returns information about the deployment and
@@ -19,14 +19,7 @@ Use
 SHOW INFO to return the deployment’s version, build date and hash.
 ```
 
-Use
-```esql
-SHOW FUNCTIONS to return a list of all supported functions and a
-```
-
-synopsis of each function.
 Examples
 ```esql
-SHOW functions
-| WHERE STARTS_WITH(name, "is_")
+SHOW INFO
 ```
