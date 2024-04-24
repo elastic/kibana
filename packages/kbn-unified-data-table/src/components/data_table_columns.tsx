@@ -13,7 +13,7 @@ import {
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
@@ -119,6 +119,18 @@ function buildEuiGridColumn({
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
+  const textBasedField =
+    isPlainRecord && !dataViewField
+      ? new DataViewField({
+          name: columnName,
+          type: columnsMeta?.[columnName]?.type ?? 'unknown',
+          esTypes: columnsMeta?.[columnName]?.type
+            ? ([columnsMeta[columnName].esType] as string[])
+            : undefined,
+          searchable: true,
+          aggregatable: false,
+        })
+      : undefined;
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -137,6 +149,14 @@ function buildEuiGridColumn({
   } else {
     cellActions = dataViewField
       ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
+      : textBasedField
+      ? buildCellActions(
+          textBasedField,
+          toastNotifications,
+          valueToStringConverter,
+          onFilter,
+          isPlainRecord
+        )
       : [];
   }
 

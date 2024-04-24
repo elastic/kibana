@@ -151,11 +151,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       if (query && isOfAggregateQueryType(query) && 'esql' in query) {
         const fieldName = typeof field === 'string' ? field : field.name;
+        // send the field type for casting
+        const fieldType = typeof field !== 'string' ? field.type : undefined;
         const updatedQuery = await appendWhereClauseToESQLQuery(
           query.esql,
           fieldName,
-          String(values),
-          operation
+          values,
+          operation,
+          fieldType
         );
         data.query.queryString.setQuery({
           esql: updatedQuery,
