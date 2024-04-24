@@ -8,6 +8,7 @@
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 type MockInternalEsClient = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
@@ -19,12 +20,15 @@ jest.mock('../utils/create_or_update_index', () => ({
 describe('AssetCriticalityDataClient', () => {
   const esClientInternal = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const logger = loggingSystemMock.createLogger();
+  const mockAuditLogger = auditLoggerMock.create();
+
   describe('init', () => {
     it('ensures the index is available and up to date', async () => {
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient: esClientInternal,
         logger,
         namespace: 'default',
+        auditLogger: mockAuditLogger,
       });
 
       await assetCriticalityDataClient.init();
@@ -72,6 +76,7 @@ describe('AssetCriticalityDataClient', () => {
         esClient: esClientMock,
         logger: loggerMock,
         namespace: 'default',
+        auditLogger: mockAuditLogger,
       });
     });
 
