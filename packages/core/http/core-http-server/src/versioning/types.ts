@@ -204,7 +204,7 @@ export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigR
 
 /** @public */
 export interface VersionedCustomRouteValidation {
-  customFn: RouteValidationFunction<unknown>;
+  custom: RouteValidationFunction<unknown>;
 }
 
 /** @public */
