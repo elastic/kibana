@@ -324,6 +324,12 @@ export class MonacoEditorActionsProvider {
       };
     }
 
+    if (autocompleteType === AutocompleteType.URL_PARAMS) {
+      return {
+        suggestions: getUrlParamsCompletionItems(model, position),
+      };
+    }
+
     return {
       suggestions: [],
     };
