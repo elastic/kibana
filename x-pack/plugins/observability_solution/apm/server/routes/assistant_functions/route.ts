@@ -6,30 +6,20 @@
  */
 import * as t from 'io-ts';
 import { omit } from 'lodash';
+import { observabilityAlertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  observabilityAlertDetailsContextRt,
-  getObservabilityAlertDetailsContext,
-} from './get_observability_alert_details_context';
+import { getObservabilityAlertDetailsContext } from './get_observability_alert_details_context';
 
 import {
   downstreamDependenciesRouteRt,
   getAssistantDownstreamDependencies,
   type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
-import { type ServiceSummary } from './get_apm_service_summary';
-import { ApmAnomalies } from './get_apm_service_summary/get_anomalies';
-import {
-  getApmTimeseries,
-  getApmTimeseriesRt,
-  TimeseriesChangePoint,
-  type ApmTimeseries,
-} from './get_apm_timeseries';
-import { LogCategories } from './get_log_categories';
+import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_apm_timeseries';
 
 const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
@@ -40,22 +30,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   params: t.type({
     query: observabilityAlertDetailsContextRt,
   }),
-  handler: async (
-    resources
-  ): Promise<{
-    serviceSummary?: ServiceSummary;
-    downstreamDependencies?: APMDownstreamDependency[];
-    logCategories?: LogCategories;
-    serviceChangePoints?: Array<{
-      title: string;
-      changes: TimeseriesChangePoint[];
-    }>;
-    exitSpanChangePoints?: Array<{
-      title: string;
-      changes: TimeseriesChangePoint[];
-    }>;
-    anomalies?: ApmAnomalies;
-  }> => {
+  handler: async (resources): Promise<{ context: string }> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
 
@@ -74,7 +49,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
       ]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    return getObservabilityAlertDetailsContext({
+    const obsAlertContext = await getObservabilityAlertDetailsContext({
       coreContext,
       annotationsClient,
       apmAlertsClient,
@@ -84,6 +59,8 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
       mlClient,
       query,
     });
+
+    return { context: obsAlertContext };
   },
 });
 
