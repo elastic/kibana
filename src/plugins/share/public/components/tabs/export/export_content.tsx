@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 
 import {
@@ -23,6 +23,7 @@ import {
   EuiSwitchEvent,
   EuiText,
   EuiToolTip,
+  type EuiRadioGroupOption,
 } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { ShareMenuItem } from '../../../types';
@@ -37,12 +38,8 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
 type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'csv';
 
 const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: ExportProps) => {
-  // needed for CSV in Discover
-  const firstRadio =
-    (aggregateReportTypes[0].reportType as AllowedExports) ?? ('printablePdfV2' as const);
   const [, setIsStale] = useState(false);
   const [isCreatingReport, setIsCreatingReport] = useState<boolean>(false);
-  const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(firstRadio);
   const [usePrintLayout, setPrintLayout] = useState(false);
   const isMounted = useMountedState();
 
@@ -51,20 +48,16 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     setIsStale(true);
   }, [isMounted]);
 
-  const getProperties = useCallback(() => {
-    if (objectType === 'search') {
-      return aggregateReportTypes[0];
-    } else {
-      return aggregateReportTypes?.filter(({ reportType }) => reportType === selectedRadio)[0];
-    }
-  }, [selectedRadio, aggregateReportTypes, objectType]);
+  const radioOptions = useMemo(() => {
+    return aggregateReportTypes
+      .filter(({ reportType }) => reportType)
+      .map(({ reportType, label }) => {
+        return { id: reportType, label, 'data-test-subj': `${reportType}-radioOption` };
+      }) as EuiRadioGroupOption[];
+  }, [aggregateReportTypes]);
 
-  const handlePrintLayoutChange = useCallback(
-    (evt: EuiSwitchEvent) => {
-      setPrintLayout(evt.target.checked);
-      getProperties();
-    },
-    [setPrintLayout, getProperties]
+  const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(
+    radioOptions[0].id as AllowedExports
   );
 
   const {
@@ -76,19 +69,16 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     downloadCSVLens,
     absoluteUrl,
     renderLayoutOptionSwitch,
-  } = getProperties();
+  } = useMemo(() => {
+    return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio) ?? {};
+  }, [selectedRadio, aggregateReportTypes]);
 
-  const getRadioOptions = useCallback(() => {
-    if (!aggregateReportTypes.length) {
-      throw new Error('No content registered for this tab');
-    }
-    return aggregateReportTypes.map(({ reportType, label }) => {
-      if (reportType == null) {
-        throw new Error('expected reportType to be string!');
-      }
-      return { id: reportType, label, 'data-test-subj': `${reportType}-radioOption` };
-    });
-  }, [aggregateReportTypes]);
+  const handlePrintLayoutChange = useCallback(
+    (evt: EuiSwitchEvent) => {
+      setPrintLayout(evt.target.checked);
+    },
+    [setPrintLayout]
+  );
 
   const renderLayoutOptionsSwitch = useCallback(() => {
     if (renderLayoutOptionSwitch) {
@@ -128,18 +118,9 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
 
   useEffect(() => {
     isMounted();
-    getRadioOptions();
     renderLayoutOptionsSwitch();
-    getProperties();
     markAsStale();
-  }, [
-    aggregateReportTypes,
-    getProperties,
-    getRadioOptions,
-    renderLayoutOptionsSwitch,
-    markAsStale,
-    isMounted,
-  ]);
+  }, [aggregateReportTypes, renderLayoutOptionsSwitch, markAsStale, isMounted]);
 
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
@@ -238,15 +219,12 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   }, [generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
-    if (getRadioOptions().length > 1) {
+    if (radioOptions.length > 1) {
       return (
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup
-            options={getRadioOptions()}
-            onChange={(id) => {
-              setSelectedRadio(id as AllowedExports);
-              getProperties();
-            }}
+            options={radioOptions}
+            onChange={(id) => setSelectedRadio(id as AllowedExports)}
             name="image reporting radio group"
             idSelected={selectedRadio}
             legend={{
