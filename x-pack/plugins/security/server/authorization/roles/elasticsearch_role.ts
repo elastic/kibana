@@ -30,6 +30,9 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
   run_as: Role['elasticsearch']['run_as'];
 };
 
+const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
+const isWildcardPrivilage = (app: string) => app === PRIVILEGES_ALL_WILDCARD;
+
 export function transformElasticsearchRoleToRole(
   features: KibanaFeature[],
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
@@ -68,9 +71,6 @@ function transformRoleApplicationsToKibanaPrivileges(
   application: string,
   logger: Logger
 ) {
-  const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
-  const isWildcardPrivilage = (app: string) => app === PRIVILEGES_ALL_WILDCARD;
-
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
       roleApplication.application === application ||
@@ -324,7 +324,8 @@ const extractUnrecognizedApplicationNames = (
       .filter(
         (roleApplication) =>
           roleApplication.application !== application &&
-          roleApplication.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD
+          !isReservedPrivilege(roleApplication.application) &&
+          !isWildcardPrivilage(roleApplication.application)
       )
       .map((roleApplication) => roleApplication.application)
   );
