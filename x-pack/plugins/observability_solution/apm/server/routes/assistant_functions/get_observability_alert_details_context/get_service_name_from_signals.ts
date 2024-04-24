@@ -11,8 +11,12 @@ import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plu
 import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
+import { ESSearchRequest } from '@kbn/es-types';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  APMEventClient,
+  APMEventESSearchRequest,
+} from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { observabilityAlertDetailsContextRt } from '.';
 import { RollupInterval } from '../../../../common/rollup';
 
@@ -31,37 +35,14 @@ export async function getServiceNameFromSignals({
     return query['service.name'];
   }
 
-  if (query['container.id']) {
-    const serviceName = await getServiceNameFromTraces({
-      query,
-      apmEventClient,
-    });
-
-    if (serviceName) {
-      return serviceName;
-    }
-
-    return getServiceNameFromLogs({ query, esClient, coreContext });
+  if (!query['kubernetes.pod.name'] && !query['container.id']) {
+    return;
   }
-}
 
-async function getServiceNameFromLogs({
-  query,
-  esClient,
-  coreContext,
-}: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
-  esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
-}) {
-  const index =
-    (await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern)) ?? 'logs-*';
+  const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
+  const end = moment(query.alert_started_at).valueOf();
 
-  const start = moment(query.alert_started_at).subtract(30, 'minutes').unix();
-  const end = moment(query.alert_started_at).unix();
-
-  const res = await typedSearch<{ service: { name: string } }, any>(esClient, {
-    index,
+  const params: APMEventESSearchRequest['body'] = {
     _source: ['service.name'],
     terminate_after: 1,
     size: 1,
@@ -69,28 +50,60 @@ async function getServiceNameFromLogs({
     query: {
       bool: {
         filter: [
+          {
+            bool: {
+              should: [
+                ...termQuery('container.id', query['container.id']),
+                ...termQuery('kubernetes.pod.name', query['kubernetes.pod.name']),
+              ],
+              minimum_should_match: 1,
+            },
+          },
           { exists: { field: 'service.name' } },
-          ...termQuery('container.id', query['container.id']),
           ...rangeQuery(start, end),
         ],
       },
     },
+  };
+
+  const serviceName = await getServiceNameFromTraces({
+    params,
+    apmEventClient,
+  });
+
+  if (serviceName) {
+    return serviceName;
+  }
+
+  return getServiceNameFromLogs({ params, esClient, coreContext });
+}
+
+async function getServiceNameFromLogs({
+  params,
+  esClient,
+  coreContext,
+}: {
+  params: ESSearchRequest['body'];
+  esClient: ElasticsearchClient;
+  coreContext: CoreRequestHandlerContext;
+}) {
+  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const res = await typedSearch<{ service: { name: string } }, any>(esClient, {
+    index,
+    ...params,
   });
 
   return res.hits.hits[0]?._source?.service?.name;
 }
 
 async function getServiceNameFromTraces({
-  query,
+  params,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  params: APMEventESSearchRequest['body'];
   apmEventClient: APMEventClient;
 }) {
-  const start = moment(query.alert_started_at).subtract(30, 'minutes').unix();
-  const end = moment(query.alert_started_at).unix();
-
-  const res = await apmEventClient.search('get_service_name', {
+  const res = await apmEventClient.search('get_service_name_from_traces', {
     apm: {
       sources: [
         {
@@ -99,21 +112,7 @@ async function getServiceNameFromTraces({
         },
       ],
     },
-    body: {
-      _source: ['service.name'],
-      terminate_after: 1,
-      size: 1,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            { exists: { field: 'service.name' } },
-            ...termQuery('container.id', query['container.id']),
-            ...rangeQuery(start, end),
-          ],
-        },
-      },
-    },
+    body: params,
   });
 
   return res.hits.hits[0]?._source.service.name;
