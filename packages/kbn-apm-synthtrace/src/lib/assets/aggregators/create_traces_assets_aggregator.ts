@@ -24,16 +24,16 @@ export function createTracesAssetsAggregator() {
       },
       init: (event, firstSeen, lastSeen) => {
         return {
-          'asset.id': event['service.name']!,
+          'asset.id': event['service.name'],
           'asset.type': 'service',
           'asset.identifying_metadata': ['service.name'],
-          'asset.signalTypes': ['traces'],
-          'service.environment': event['service.environment']!,
-          'service.name': event['service.name']!,
-          'service.node.name': event['service.node.name'] || '',
+          'asset.has_traces': true,
           'asset.first_seen': firstSeen,
           'asset.last_seen': lastSeen,
-          'service.language.name': event['service.language.name'] || '',
+          'service.environment': event['service.environment'],
+          'service.name': event['service.name'],
+          'service.node.name': event['service.node.name'],
+          'service.language.name': event['service.language.name'],
         };
       },
     },

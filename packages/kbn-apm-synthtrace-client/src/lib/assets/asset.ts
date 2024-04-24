@@ -8,7 +8,6 @@
 
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
-import { SignalType } from './signal';
 
 type AssetType = 'host' | 'pod' | 'container' | 'service';
 
@@ -18,7 +17,8 @@ export interface AssetDocument extends Fields {
   'asset.first_seen': string;
   'asset.last_seen': string;
   'asset.identifying_metadata': string[];
-  'asset.signalTypes': SignalType[];
+  'asset.has_logs'?: boolean;
+  'asset.has_traces'?: boolean;
 }
 
 export class Asset<F extends AssetDocument> extends Serializable<F> {}

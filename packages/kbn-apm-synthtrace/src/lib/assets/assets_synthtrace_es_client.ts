@@ -75,12 +75,16 @@ function getMergeAssetsTransform() {
   const mergedDocuments: Record<string, AssetDocument> = {};
   return new Transform({
     objectMode: true,
-    transform(document: ESDocumentWithOperation<AssetDocument>, encoding, callback) {
-      const assetId = document['asset.id'];
+    transform(nextDocument: ESDocumentWithOperation<AssetDocument>, encoding, callback) {
+      const assetId = nextDocument['asset.id'];
       if (!mergedDocuments[assetId]) {
-        mergedDocuments[assetId] = { ...document };
+        mergedDocuments[assetId] = { ...nextDocument };
       } else {
-        mergedDocuments[assetId]['asset.signalTypes'].push(...document['asset.signalTypes']);
+        const mergedtDocument = mergedDocuments[assetId];
+        mergedtDocument['asset.has_traces'] =
+          mergedtDocument['asset.has_traces'] || nextDocument['asset.has_traces'];
+        mergedtDocument['asset.has_logs'] =
+          mergedtDocument['asset.has_logs'] || nextDocument['asset.has_logs'];
       }
       callback();
     },
