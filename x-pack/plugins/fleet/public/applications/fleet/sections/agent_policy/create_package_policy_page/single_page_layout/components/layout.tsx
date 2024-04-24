@@ -21,6 +21,7 @@ import {
 
 import { WithHeaderLayout } from '../../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import { SetupTechnology } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
 import type { EditPackagePolicyFrom } from '../../types';
 
@@ -45,6 +46,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     isSelected: boolean;
     onClick: React.ReactEventHandler;
   }>;
+  setupAgentPolicyName: string;
 }> = memo(
   ({
     from,
@@ -56,6 +58,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     children,
     'data-test-subj': dataTestSubj,
     tabs = [],
+    setupAgentPolicyName,
   }) => {
     const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
@@ -68,6 +71,17 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         ].includes(from),
       [from]
     );
+
+    const isAgentless = setupAgentPolicyName?.toLowerCase().includes(SetupTechnology.AGENTLESS);
+
+    const showAgentPolicyName = agentPolicy && (isAdd || isEdit) && !isAgentless;
+
+    const getAgentPolicyName = () => {
+      const policyName = setupAgentPolicyName ?? '-';
+      if (!isAgentless) {
+        return policyName;
+      }
+    };
 
     const pageTitle = useMemo(() => {
       if ((isAdd || isEdit || isUpgrade) && packageInfo) {
@@ -230,20 +244,19 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiFlexGroup>
     );
 
-    const rightColumn =
-      agentPolicy && (isAdd || isEdit) ? (
-        <EuiDescriptionList className="eui-textRight" textStyle="reverse">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
-              defaultMessage="Agent policy"
-            />
-          </EuiDescriptionListTitle>
-          <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
-            {agentPolicy?.name || '-'}
-          </AgentPolicyName>
-        </EuiDescriptionList>
-      ) : undefined;
+    const rightColumn = showAgentPolicyName ? (
+      <EuiDescriptionList className="eui-textRight" textStyle="reverse">
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
+            defaultMessage="Agent policy"
+          />
+        </EuiDescriptionListTitle>
+        <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
+          {getAgentPolicyName()}
+        </AgentPolicyName>
+      </EuiDescriptionList>
+    ) : undefined;
 
     const maxWidth = 770;
     return (
