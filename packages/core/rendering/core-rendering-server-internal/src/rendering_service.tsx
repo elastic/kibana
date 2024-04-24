@@ -10,7 +10,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError, take, timeout } from 'rxjs';
-import { i18n } from '@kbn/i18n';
+import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -61,6 +61,7 @@ export class RenderingService {
   public async preboot({
     http,
     uiPlugins,
+    i18n,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
       registerBootstrapRoute({
@@ -75,7 +76,7 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { http, uiPlugins }),
+      render: this.render.bind(this, { http, uiPlugins, i18n }),
     };
   }
 
@@ -86,6 +87,7 @@ export class RenderingService {
     uiPlugins,
     customBranding,
     userSettings,
+    i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -106,6 +108,7 @@ export class RenderingService {
         status,
         customBranding,
         userSettings,
+        i18n,
       }),
     };
   }
@@ -119,7 +122,8 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
+    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
+      renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -201,14 +205,17 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
+    const translationHash = i18n.getTranslationHash();
+    const translationsUrl = `${serverBasePath}/translations/${translationHash}/${i18nLib.getLocale()}.json`;
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      i18n: i18n.translate,
-      locale: i18n.getLocale(),
+      i18n: i18nLib.translate,
+      locale: i18nLib.getLocale(),
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
@@ -233,7 +240,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           // TODO: Make this load as part of static assets!
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl,
         },
         theme: {
           darkMode,
