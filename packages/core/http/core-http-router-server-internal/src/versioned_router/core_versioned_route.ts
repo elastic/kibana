@@ -188,12 +188,12 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, req, res);
 
-    if (this.router.isDev && validation?.response?.()[response.status]) {
-      const { [response.status]: responseValidation, unsafe } = validation.response();
+    if (this.router.isDev && validation?.response?.[response.status]) {
+      const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         validate(
           { body: response.payload },
-          { body: responseValidation.body, unsafe: { body: unsafe?.body } },
+          { body: responseValidation.body(), unsafe: { body: unsafe?.body } },
           handler.options.version
         );
       } catch (e) {

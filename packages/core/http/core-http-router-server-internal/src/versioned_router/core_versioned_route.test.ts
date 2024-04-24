@@ -20,6 +20,7 @@ import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
+import { isConfigSchema } from '@kbn/config-schema';
 
 describe('Versioned route', () => {
   let router: Router;
@@ -201,9 +202,15 @@ describe('Versioned route', () => {
   it('constructs lazily provided validations once (idempotency)', async () => {
     let handler: RequestHandler;
     const { fooValidation } = testValidation;
-    const originalResponse = fooValidation.response;
-    const lazyRequestValidation = jest.fn(() => originalResponse());
-    fooValidation.response = lazyRequestValidation;
+
+    const response200 = fooValidation.response[200].body;
+    const lazyResponse200 = jest.fn(() => response200());
+    fooValidation.response[200].body = lazyResponse200;
+
+    const response404 = fooValidation.response[404].body;
+    const lazyResponse404 = jest.fn(() => response404());
+    fooValidation.response[404].body = lazyResponse404;
+
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
     const versionedRouter = CoreVersionedRouter.from({ router });
     const lazyValidation = jest.fn(() => fooValidation);
@@ -232,12 +239,29 @@ describe('Versioned route', () => {
           options: { validate },
         },
       ] = route.handlers;
-      (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)().response!();
+
+      expect(
+        isConfigSchema(
+          (
+            validate as () => VersionedRouteValidation<unknown, unknown, unknown>
+          )().response![200].body()
+        )
+      ).toBe(true);
+
+      expect(
+        isConfigSchema(
+          (
+            validate as () => VersionedRouteValidation<unknown, unknown, unknown>
+          )().response![404].body()
+        )
+      ).toBe(true);
+
       expect(status).toBe(200);
     }
 
     expect(lazyValidation).toHaveBeenCalledTimes(1);
-    expect(lazyRequestValidation).toHaveBeenCalledTimes(1);
+    expect(lazyResponse200).toHaveBeenCalledTimes(1);
+    expect(lazyResponse404).toHaveBeenCalledTimes(1);
   });
 
   describe('when in dev', () => {

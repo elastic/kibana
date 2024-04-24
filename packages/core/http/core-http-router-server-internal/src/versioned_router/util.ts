@@ -9,13 +9,26 @@
 import { once } from 'lodash';
 import { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 
-function prepareResponseValidation(
+function isStatusCode(key: string) {
+  return !isNaN(parseInt(key, 10));
+}
+
+export function prepareResponseValidation(
   validation: VersionedRouteValidation<unknown, unknown, unknown>
-) {
-  if (typeof validation.response === 'function') {
+): VersionedRouteValidation<unknown, unknown, unknown> {
+  if (validation.response) {
+    const responses = Object.entries(validation.response).map(([key, value]) => {
+      if (isStatusCode(key)) {
+        return [key, { body: once(value.body) }];
+      }
+      return [key, value];
+    });
+
     return {
       ...validation,
-      response: once(validation.response),
+      response: {
+        ...Object.fromEntries(responses),
+      },
     };
   }
   return validation;
@@ -24,7 +37,7 @@ function prepareResponseValidation(
 // Integration tested in ./core_versioned_route.test.ts
 export function prepareVersionedRouteValidation(
   options: AddVersionOpts<unknown, unknown, unknown>
-) {
+): AddVersionOpts<unknown, unknown, unknown> {
   if (typeof options.validate === 'function') {
     const validate = options.validate;
     return {
