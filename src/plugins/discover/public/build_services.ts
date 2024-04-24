@@ -14,6 +14,7 @@ import {
   CoreStart,
   DocLinksStart,
   ToastsStart,
+  I18nStart,
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
@@ -77,6 +78,7 @@ export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -160,6 +162,7 @@ export const buildServices = memoize(
       data: plugins.data,
       docLinks: core.docLinks,
       embeddable: plugins.embeddable,
+      i18n: core.i18n,
       theme: core.theme,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,

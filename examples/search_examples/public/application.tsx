@@ -39,7 +39,7 @@ const LINKS: ExampleLink[] = [
 ];
 
 export const renderApp = (
-  { notifications, savedObjects, http, application }: CoreStart,
+  { notifications, savedObjects, http, application, ...startServices }: CoreStart,
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
@@ -60,6 +60,7 @@ export const renderApp = (
                   data={data}
                   http={http}
                   unifiedSearch={unifiedSearch}
+                  {...startServices}
                 />
               </Route>
               <Route path={LINKS[1].path}>

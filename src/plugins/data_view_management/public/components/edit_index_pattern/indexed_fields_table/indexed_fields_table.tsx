@@ -8,10 +8,11 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { OverlayStart } from '@kbn/core/public';
 import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
+import { StartServices } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];
@@ -27,8 +28,8 @@ interface IndexedFieldsTableProps {
   fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
-  theme: ThemeServiceStart;
   compositeRuntimeFields: Record<string, RuntimeField>;
+  startServices: StartServices;
 }
 
 interface IndexedFieldsTableState {
@@ -196,7 +197,7 @@ export class IndexedFieldsTable extends Component<
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldNames) => this.props.helpers.deleteField(fieldNames)}
           openModal={this.props.openModal}
-          theme={this.props.theme}
+          startServices={this.props.startServices}
         />
       </div>
     );

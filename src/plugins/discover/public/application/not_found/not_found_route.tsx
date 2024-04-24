@@ -43,10 +43,7 @@ export function NotFoundRoute() {
             />
           </p>
         </EuiCallOut>,
-        {
-          theme: core.theme,
-          i18n: core.i18n,
-        }
+        core
       )
     );
 

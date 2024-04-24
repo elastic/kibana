@@ -145,7 +145,7 @@ const mountComponent = async ({
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
-    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+    <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverHistogramLayout {...props} />

@@ -84,10 +84,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
-          theme: core.theme,
-          i18n: core.i18n,
-        }),
+        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, core),
       });
       throw new Error(errorTitle);
     }
@@ -107,10 +104,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<Markdown markdownContent={error.message} readOnly />, {
-          theme: core.theme,
-          i18n: core.i18n,
-        }),
+        text: toMountPoint(<Markdown markdownContent={error.message} readOnly />, core),
       });
       throw new Error(errorTitle);
     }
