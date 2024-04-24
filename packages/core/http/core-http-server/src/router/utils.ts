@@ -50,5 +50,5 @@ export function getResponseValidation(
     | (() => RouteValidator<unknown, unknown, unknown>)
 ): undefined | RouteValidatorFullConfigResponse {
   if (typeof value === 'function') value = value();
-  return isFullValidatorContainer(value) ? value.response : undefined;
+  return isFullValidatorContainer(value) ? value.response?.() : undefined;
 }

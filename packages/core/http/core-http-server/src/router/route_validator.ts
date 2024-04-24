@@ -146,7 +146,33 @@ export interface RouteValidatorFullConfigResponse {
  */
 export interface RouteValidatorRequestAndResponses<P, Q, B> {
   request: RouteValidatorFullConfigRequest<P, Q, B>;
-  response?: RouteValidatorFullConfigResponse;
+  /**
+   * Response schemas for your route.
+   *
+   * @note Response schemas can be expensive to instantiate. We expect consumers
+   * to provide these schemas lazily since they may not be needed.
+   *
+   * @note The {@link TypeOf} type utility from @kbn/config-schema can extract
+   * types from lazily created schemas
+   *
+   * @example
+   *
+   * ```ts
+   * // Avoid this:
+   * const responseSchema = schema.object({ foo: foo.string() });
+   * // Do this:
+   * const lazyResponseSchema = () => schema.object({ foo: foo.string() });
+   *
+   * type ResponseType = TypeOf<typeof lazyResponseSchema>; // Can take a func
+   * ...
+   * router.post(
+   *  { validation: { response: responseSchema } },
+   *  handlerFn
+   * )
+   * ...
+   * ```
+   */
+  response?: () => RouteValidatorFullConfigResponse;
 }
 
 /**
