@@ -50,6 +50,7 @@ import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin
 import {
   EmbeddableSetup,
   EmbeddableStart,
+  registerReactEmbeddableFactory,
   registerSavedObjectToPanelMethod,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -396,8 +397,12 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
-    const embeddableFactory = new VisualizeEmbeddableFactory({ start });
-    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    // const embeddableFactory = new VisualizeEmbeddableFactory({ start });
+    // embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { visualizeEmbeddableFactory } = await import('./react_embeddable');
+      return visualizeEmbeddableFactory;
+    });
 
     contentManagement.registry.register({
       id: CONTENT_ID,
