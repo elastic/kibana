@@ -73,6 +73,7 @@ export class FindSLOGroups {
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
+          must_not: [...(parsedFilters.must_not ?? [])],
         },
       },
       body: {

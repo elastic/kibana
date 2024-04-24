@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -82,8 +82,29 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const packageListRef = React.useRef<HTMLDivElement | null>(null);
+  const [hasPackageListLoaded, setHasPackageListLoaded] = useState<boolean>(false);
+  const onPackageListLoaded = useCallback(() => {
+    setHasPackageListLoaded(true);
+  }, []);
+  const packageListRef = useRef<HTMLDivElement | null>(null);
+  const customCardsRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+  const selectedCategory: Category | null = searchParams.get('category') as Category | null;
+
+  useEffect(() => {
+    if (selectedCategory === null || !hasPackageListLoaded) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      customCardsRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }, 10);
+
+    return () => clearTimeout(timeout);
+  }, [selectedCategory, hasPackageListLoaded]);
 
   useEffect(() => {
     const searchParam = searchParams.get('search') ?? '';
@@ -168,9 +189,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
           {Array.isArray(customCards) && (
             <OnboardingFlowPackageList
+              ref={customCardsRef}
               customCards={customCards}
               flowSearch={integrationSearch}
               flowCategory={searchParams.get('category')}
+              onLoaded={onPackageListLoaded}
             />
           )}
 
@@ -188,7 +211,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             flowCategory={searchParams.get('category')}
             ref={packageListRef}
             customCards={customCards?.filter(
-              (card) => card.type === 'generated' && !card.isCollectionCard
+              // Filter out collection cards and regular integrations that show up via search anyway
+              (card) => card.type === 'virtual' && !card.isCollectionCard
             )}
             joinCardLists
           />
