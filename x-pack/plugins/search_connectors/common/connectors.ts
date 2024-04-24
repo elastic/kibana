@@ -486,7 +486,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
         defaultMessage: 'Search over your content on OpenText Documentum.',
       }
     ),
-    iconPath: 'opentext_documentum.svg',
+    iconPath: 'connector.svg',
     isBeta: false,
     isNative: false,
     isTechPreview: true,
