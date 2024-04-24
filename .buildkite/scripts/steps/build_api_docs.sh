@@ -27,7 +27,7 @@ if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   git branch | cat
   git remote | cat
 
-  echo TOKEN START: "${VAULT_GITHUB_TOKEN:0:4}"
+#  echo TOKEN START: "${VAULT_GITHUB_TOKEN:0:4}"
 
   echo "Pushing branch $branch"
 
