@@ -26,7 +26,7 @@ export function getESQLWithSafeLimit(esql: string, limit: number): string {
   return parts
     .map((part, i) => {
       if (i === index) {
-        return `${part.trim()} | LIMIT ${limit}`;
+        return `${part.trim()} \n| LIMIT ${limit}`;
       }
       return part;
     })
