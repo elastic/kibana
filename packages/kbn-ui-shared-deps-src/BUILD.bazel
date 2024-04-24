@@ -21,7 +21,6 @@ webpack_cli(
     "//packages/kbn-babel-register",
     "//packages/kbn-babel-preset",
     # packages included in the shared deps src bundle
-    "//packages/kbn-flot-charts",
     "//packages/kbn-ui-theme",
     "//packages/kbn-i18n",
     "//packages/kbn-i18n-react",
