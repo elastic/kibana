@@ -28,8 +28,6 @@ import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
-  registerReactEmbeddableFactory,
-  registerSavedObjectToPanelMethod,
 } from '@kbn/embeddable-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
@@ -79,7 +77,7 @@ import { MapsXPackConfig, MapsConfigType } from '../config';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
-import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
@@ -92,9 +90,8 @@ import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
-import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
-import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
-import { MapByValueInput } from './embeddable';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -230,16 +227,6 @@ export class MapsPlugin
       name: APP_NAME,
     });
 
-    registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
-      if (!savedObject.managed) {
-        return { savedObjectId: savedObject.id };
-      }
-
-      return {
-        attributes: savedObjectToEmbeddableAttributes(savedObject),
-      };
-    });
-
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
@@ -273,10 +260,7 @@ export class MapsPlugin
       plugins.visualizations.unRegisterAlias(APP_ID);
     }
 
-    registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
-      const { mapEmbeddableFactory } = await import('./react_embeddable/map_react_embeddable');
-      return mapEmbeddableFactory;
-    });
+    setupMapEmbeddable();
 
     return {
       createLayerDescriptors,
