@@ -18,7 +18,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
-import { SLO_ERROR_BUDGET_EMBEDDABLE } from '../../../embeddable/slo/error_budget/slo_error_budget_embeddable';
+import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   data: ChartData[];
@@ -44,7 +44,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
 
       const state = {
         input: embeddableInput,
-        type: SLO_ERROR_BUDGET_EMBEDDABLE,
+        type: SLO_ERROR_BUDGET_ID,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
