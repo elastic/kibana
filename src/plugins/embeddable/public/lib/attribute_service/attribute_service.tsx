@@ -20,7 +20,6 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
 } from '..';
 
