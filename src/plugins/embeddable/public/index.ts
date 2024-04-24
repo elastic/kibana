@@ -55,6 +55,7 @@ export {
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
+  navigateToEditor,
 } from './lib';
 export type {
   Adapters,
@@ -85,6 +86,7 @@ export type {
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
   ValueClickContext,
+  HasEditorApp,
 } from './lib';
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 export type {

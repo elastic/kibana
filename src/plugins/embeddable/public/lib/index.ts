@@ -17,3 +17,4 @@ export * from './self_styled_embeddable';
 export * from './filterable_embeddable';
 export * from './factory_migrations/run_factory_migrations';
 export * from './embeddable_saved_object_registry';
+export * from './editable_embeddable';

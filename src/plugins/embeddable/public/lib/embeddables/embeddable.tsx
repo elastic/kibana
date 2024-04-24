@@ -189,7 +189,7 @@ export abstract class Embeddable<
   public isCompatibleWithUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithUnifiedSearch'];
   public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
 
-  public getEditHref(): string | undefined {
+  public async getEditHref(): Promise<string | undefined> {
     return this.getOutput().editUrl ?? undefined;
   }
 
