@@ -7,3 +7,5 @@
  */
 
 export const PLUGIN_ID = 'portableDashboardExamples';
+
+export const FILTER_DEBUGGER_EMBEDDABLE_ID = 'FILTER_DEBUGGER_EMBEDDABLE_ID';

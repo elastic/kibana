@@ -5,7 +5,7 @@
   "description": "Example app that shows how to register custom embeddables",
   "plugin": {
     "id": "embeddableExamples",
-    "server": true,
+    "server": false,
     "browser": true,
     "requiredPlugins": [
       "dataViews",
@@ -17,7 +17,6 @@
       "fieldFormats",
       "developerExamples"
     ],
-    "requiredBundles": ["presentationUtil"],
-    "extraPublicDirs": ["public/hello_world"]
+    "requiredBundles": ["presentationUtil"]
   }
 }

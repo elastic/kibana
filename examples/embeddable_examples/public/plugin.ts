@@ -18,28 +18,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import {
-  HelloWorldEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactoryDefinition,
-} from './hello_world';
 
-import {
-  LIST_CONTAINER,
-  ListContainerFactoryDefinition,
-  ListContainerFactory,
-} from './list_container';
-
-import {
-  SIMPLE_EMBEDDABLE,
-  SimpleEmbeddableFactory,
-  SimpleEmbeddableFactoryDefinition,
-} from './migrations';
-import {
-  FILTER_DEBUGGER_EMBEDDABLE,
-  FilterDebuggerEmbeddableFactory,
-  FilterDebuggerEmbeddableFactoryDefinition,
-} from './filter_debugger';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
@@ -63,52 +42,12 @@ export interface StartDeps {
   fieldFormats: FieldFormatsStart;
 }
 
-interface ExampleEmbeddableFactories {
-  getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;
-  getListContainerEmbeddableFactory: () => ListContainerFactory;
-  getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
-  getFilterDebuggerEmbeddableFactory: () => FilterDebuggerEmbeddableFactory;
-}
-
-export interface StartApi {
-  createSampleData: () => Promise<void>;
-  factories: ExampleEmbeddableFactories;
-}
-
-export class EmbeddableExamplesPlugin implements Plugin<void, StartApi, SetupDeps, StartDeps> {
-  private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
-
+export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
     setupApp(core, developerExamples);
-
-    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        HELLO_WORLD_EMBEDDABLE,
-        new HelloWorldEmbeddableFactoryDefinition()
-      );
-
-    this.exampleEmbeddableFactories.getMigrationsEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        SIMPLE_EMBEDDABLE,
-        new SimpleEmbeddableFactoryDefinition()
-      );
-
-    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        LIST_CONTAINER,
-        new ListContainerFactoryDefinition(async () => ({
-          embeddableServices: (await core.getStartServices())[1].embeddable,
-        }))
-      );
-
-    this.exampleEmbeddableFactories.getFilterDebuggerEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        FILTER_DEBUGGER_EMBEDDABLE,
-        new FilterDebuggerEmbeddableFactoryDefinition()
-      );
   }
 
-  public start(core: CoreStart, deps: StartDeps): StartApi {
+  public start(core: CoreStart, deps: StartDeps) {
     registerCreateFieldListAction(deps.uiActions);
     registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
@@ -132,11 +71,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, StartApi, SetupDep
       );
       return getSearchEmbeddableFactory(deps);
     });
-
-    return {
-      createSampleData: async () => {},
-      factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
-    };
   }
 
   public stop() {}
