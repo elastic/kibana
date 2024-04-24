@@ -12,6 +12,7 @@ import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-
 import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
+import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
 
 /**
  * The `core` context provided to route handler.
@@ -33,6 +34,7 @@ export interface CoreRequestHandlerContext {
   uiSettings: UiSettingsRequestHandlerContext;
   deprecations: DeprecationsRequestHandlerContext;
   security: SecurityRequestHandlerContext;
+  userProfile: UserProfileRequestHandlerContext;
 }
 
 /**
