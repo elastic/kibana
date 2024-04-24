@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   UserProfileData,
   UserProfileLabels,
   UserProfileWithSecurity,
   UserProfile,
-} from '@kbn/security-plugin-types-common';
+} from '@kbn/core-user-profile-common';
 
 /**
  * A set of methods to work with Kibana user profiles.
  */
-export interface UserProfileServiceStart {
+export interface UserProfileService {
   /**
    * Retrieves a user profile for the current user extracted from the specified request. If the profile isn't available,
    * e.g. for the anonymous users or users authenticated via authenticating proxies, the `null` value is returned.
    * @param params Get current user profile operation parameters.
    * @param params.request User request instance to get user profile for.
    * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+   * optional "dataPath" parameter can be used to return personal data for the requested user
+   * profiles (within `kibana` namespace only).
    */
   getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
     params: UserProfileGetCurrentParams
@@ -34,7 +36,8 @@ export interface UserProfileServiceStart {
    * @param params Bulk get operation parameters.
    * @param params.uids List of user profile identifiers.
    * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+   * optional "dataPath" parameter can be used to return personal data for the requested user
+   * profiles (within `kibana` namespace only).
    */
   bulkGet<D extends UserProfileData>(
     params: UserProfileBulkGetParams
