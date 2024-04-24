@@ -138,6 +138,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           <EuiFlexItem key={option.id}>
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
+              data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
               name={radioGroupId}
               label={
                 <>
