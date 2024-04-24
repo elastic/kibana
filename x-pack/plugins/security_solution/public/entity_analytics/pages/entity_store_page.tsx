@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiButton,
   EuiFlyout,
   EuiButtonIcon,
   EuiInMemoryTable,
@@ -41,6 +42,7 @@ import { getSeverityColor } from '../../detections/components/alerts_kpis/severi
 import { AssetCriticalityBadge } from '../components/asset_criticality/asset_criticality_badge';
 import { RiskScoreLevel } from '../components/severity/common';
 import { useEntityHistory } from '../api/hooks/use_get_entity_history';
+import { EntityTimelinePOC } from './timeline_flyout_poc';
 const useViewEntityFlyout = () => {
   const [isViewEntityPanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
   const [viewEntityPanelData, setViewEntityPanelData] = React.useState<any | null>(null);
@@ -263,6 +265,15 @@ export const EntityStorePage = () => {
     viewEntityPanelData,
   } = useViewEntityFlyout();
 
+  const [isTimelinePanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
+  const closeTimelinePanel = useCallback(() => {
+    setIsViewEntityPanelVisible(false);
+  }, []);
+
+  const openTimelinePanel = useCallback((data: any) => {
+    setIsViewEntityPanelVisible(true);
+  }, []);
+
   useEffect(() => {
     searchDonutChart({
       params: {
@@ -437,9 +448,11 @@ export const EntityStorePage = () => {
             data-test-subj="entityAnalyticsManagementPageTitle"
             title={'Entity Store - Hosts'}
           />
+
           {isViewEntityPanelVisible && (
             <ViewEntityFlyout data={viewEntityPanelData} onClose={closeViewEntityPanel} />
           )}
+          {isTimelinePanelVisible && <EntityTimelinePOC onClose={closeTimelinePanel} />}
           <EuiFlexGroup direction="row" gutterSize="m">
             <EuiFlexItem grow={1}>
               <EuiPanel hasBorder>
@@ -472,6 +485,8 @@ export const EntityStorePage = () => {
             pagination
             sorting
           />
+          <EuiSpacer size="l" />
+          <EuiButton onClick={openTimelinePanel}>{'Open Timeline POC'}</EuiButton>
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     </>
