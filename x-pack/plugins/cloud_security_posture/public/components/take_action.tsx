@@ -44,7 +44,7 @@ export const showCreateDetectionRuleSuccessToast = (
     color: 'success',
     iconType: '',
     'data-test-subj': 'csp:toast-success',
-    text: toMountPoint(
+    title: toMountPoint(
       <div>
         <EuiText size="m">
           <strong data-test-subj="csp:toast-success-title">{ruleResponse.name}</strong>
@@ -60,6 +60,10 @@ export const showCreateDetectionRuleSuccessToast = (
             defaultMessage="Add rule actions to get notified when alerts are generated."
           />
         </EuiText>
+      </div>
+    ),
+    text: toMountPoint(
+      <div>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
