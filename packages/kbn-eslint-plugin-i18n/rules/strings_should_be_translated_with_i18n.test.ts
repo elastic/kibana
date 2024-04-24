@@ -431,36 +431,36 @@ function TestComponent() {
   )
 }`,
   },
-  // {
-  //   name: invalid[0].name,
-  //   filename: invalid[0].filename,
-  //   code: invalid[0].output as string,
-  // },
-  // {
-  //   name: invalid[1].name,
-  //   filename: invalid[1].filename,
-  //   code: invalid[1].output as string,
-  // },
-  // {
-  //   name: invalid[2].name,
-  //   filename: invalid[2].filename,
-  //   code: invalid[2].output as string,
-  // },
-  // {
-  //   name: invalid[3].name,
-  //   filename: invalid[3].filename,
-  //   code: invalid[3].output as string,
-  // },
-  // {
-  //   name: invalid[4].name,
-  //   filename: invalid[4].filename,
-  //   code: invalid[4].output as string,
-  // },
-  // {
-  //   name: invalid[5].name,
-  //   filename: invalid[5].filename,
-  //   code: invalid[5].output as string,
-  // },
+  {
+    name: invalid[0].name,
+    filename: invalid[0].filename,
+    code: invalid[0].output as string,
+  },
+  {
+    name: invalid[1].name,
+    filename: invalid[1].filename,
+    code: invalid[1].output as string,
+  },
+  {
+    name: invalid[2].name,
+    filename: invalid[2].filename,
+    code: invalid[2].output as string,
+  },
+  {
+    name: invalid[3].name,
+    filename: invalid[3].filename,
+    code: invalid[3].output as string,
+  },
+  {
+    name: invalid[4].name,
+    filename: invalid[4].filename,
+    code: invalid[4].output as string,
+  },
+  {
+    name: invalid[5].name,
+    filename: invalid[5].filename,
+    code: invalid[5].output as string,
+  },
 ];
 
 for (const [name, tester] of [tsTester, babelTester]) {
