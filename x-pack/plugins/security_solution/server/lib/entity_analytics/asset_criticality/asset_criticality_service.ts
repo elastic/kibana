@@ -117,7 +117,9 @@ const getCriticalitiesFromTimestamp = async ({
   if (entityTypes) {
     filters.push({
       terms: {
-        id_field: entityTypes.map((entityType) => (entityType === 'host' ? 'host.id' : 'user.id')),
+        id_field: entityTypes.map((entityType) =>
+          entityType === 'host' ? 'host.name' : 'user.name'
+        ),
       },
     });
   }
@@ -153,5 +155,4 @@ export const assetCriticalityServiceFactory = ({
     entityTypes?: EntityType[];
   }) => getCriticalitiesFromTimestamp({ assetCriticalityDataClient, ...opts }),
   isEnabled: () => uiSettingsClient.get<boolean>(ENABLE_ASSET_CRITICALITY_SETTING),
-  
 });

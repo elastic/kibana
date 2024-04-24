@@ -102,7 +102,7 @@ export class EntityStoreDataClient {
       host: {
         ...entityA.host,
         ...entityB.host,
-        ip_history: uniqueLimitedIpHistory ? uniqueLimitedIpHistory : undefined,
+        ip_history: uniqueLimitedIpHistory,
       },
     };
   }
@@ -170,28 +170,34 @@ export class EntityStoreDataClient {
     const operations: EntityStoreBulkOperations = [];
     const historyOperations: EntityHistoryStoreBulkOperations = [];
     entities.forEach((entity) => {
-      const existingEntity = existingEntitiesByHostName[entity.host.name];
+      const existingEntityDoc = existingEntitiesByHostName[entity.host.name];
+      const existingEntity = existingEntityDoc?._source;
+
+      let mergedEntity;
+
+      if (existingEntity) {
+        mergedEntity = EntityStoreDataClient.mergeEntities(existingEntity, entity);
+      }
+
       const entityHistoryOperations = this.getEntityHistoryOperations(
-        entity,
-        existingEntity?._source
+        mergedEntity || entity,
+        existingEntity
       );
 
       if (entityHistoryOperations) {
         historyOperations.push(...entityHistoryOperations);
       }
 
-      if (existingEntity?._source) {
-        const mergedEntity = EntityStoreDataClient.mergeEntities(existingEntity._source, entity);
-
-        if (entitiesAreMeaningfullyDifferent(mergedEntity, existingEntity._source)) {
+      if (mergedEntity && existingEntity) {
+        if (entitiesAreMeaningfullyDifferent(mergedEntity, existingEntity)) {
           operations.push(
             ...[
               {
                 update: {
-                  _id: existingEntity._id,
+                  _id: existingEntityDoc._id,
                   _index: getEntityStoreIndex(this.options.namespace),
-                  if_seq_no: existingEntity._seq_no,
-                  if_primary_term: existingEntity._primary_term,
+                  if_seq_no: existingEntityDoc._seq_no,
+                  if_primary_term: existingEntityDoc._primary_term,
                 },
               },
               { doc: mergedEntity },
@@ -304,7 +310,7 @@ export class EntityStoreDataClient {
     const changedFields = getChangedFieldsPathsFromDiff(diff);
     const previousValues = _.pick(previousEntity, changedFields);
     // now we can use the previous values to get the full paths
-    const allFieldsChanged = removeArrayIndexesFromFlatPaths(Object.keys(flat(entity)));
+    const allFieldsChanged = removeArrayIndexesFromFlatPaths(Object.keys(flat(previousValues)));
     return {
       '@timestamp': entity['@timestamp'],
       entity,

@@ -82,12 +82,17 @@ export const createOrUpdateDatastream = async ({
   try {
     await esClient.indices.putIndexTemplate(template);
 
-    const createResult = await esClient.indices.createDataStream({
-      name,
-    });
+    const createResult = await esClient.indices
+      .createDataStream({
+        name,
+      })
+      .catch((err) => {
+        // TODO: some error handling here
+        logger.warn(`Failed to create datastream: ${name}: ${err.message}`);
+      });
 
     return {
-      created: createResult.acknowledged,
+      created: createResult?.acknowledged || false,
     };
   } catch (err) {
     const error = transformError(err);
