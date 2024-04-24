@@ -10,12 +10,14 @@ import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/en
 // only used in "real" endpoint tests not in mocked ones
 export const createEndpointHost = (
   agentPolicyId: string,
-  timeout?: number
+  timeout?: number,
+  version?: string
 ): Cypress.Chainable<CreateAndEnrollEndpointHostResponse> => {
   return cy.task(
     'createEndpointHost',
     {
       agentPolicyId,
+      version,
     },
     { timeout: timeout ?? 30 * 60 * 1000 }
   );

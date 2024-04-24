@@ -41,7 +41,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@serverlessQA'] },
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_id, undefined, '8.14.0').then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
