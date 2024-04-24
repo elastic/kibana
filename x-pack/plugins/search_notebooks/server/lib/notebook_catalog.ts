@@ -24,7 +24,7 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
       }),
       description: i18n.translate('xpack.searchNotebooks.notebooksCatalog.quickStart.description', {
         defaultMessage:
-          "This interactive notebook will introduce you to some basic operations with Elasticsearch, using the official Elasticsearch Python client. You'll perform semantic search using Sentence Transformers for text embedding. Learn how to integrate traditional text-based search with semantic search, for a hybrid search system.",
+          'Learn how to create a simple hybrid search system that combines semantic search and lexical (keyword) search.',
       }),
     },
     {
@@ -35,8 +35,7 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
       description: i18n.translate(
         'xpack.searchNotebooks.notebooksCatalog.keywordQueryFiltering.description',
         {
-          defaultMessage:
-            'This interactive notebook will introduce you to the basic Elasticsearch queries, using the official Elasticsearch Python client. Before getting started on this section you should work through our quick start, as you will be using the same dataset.',
+          defaultMessage: 'Learn the basics of Elasticsearch queries and filters.',
         }
       ),
     },
@@ -49,7 +48,7 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
         'xpack.searchNotebooks.notebooksCatalog.hybridSearch.description',
         {
           defaultMessage:
-            'This interactive notebook will use the reciprocal rank fusion algorithm to combine the results of BM25 and kNN semantic search.',
+            'Learn how to use the reciprocal rank fusion algorithm to combine the results of BM25 and kNN semantic search.',
         }
       ),
     },
@@ -59,7 +58,8 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
         defaultMessage: 'Semantic Search using ELSER v2 text expansion',
       }),
       description: i18n.translate('xpack.searchNotebooks.notebooksCatalog.elser.description', {
-        defaultMessage: 'Learn how to use ELSER for text expansion-powered semantic search.',
+        defaultMessage:
+          "Learn how to use ELSER, Elastic's retrieval model for text expansion-powered semantic search that works out of the box.",
       }),
     },
     {
@@ -71,7 +71,7 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
         'xpack.searchNotebooks.notebooksCatalog.multilingual.description',
         {
           defaultMessage:
-            "In this example we'll use a multilingual embedding model 'multilingual-e5-base' to perform search on a dataset of mixed language documents.",
+            'Learn how to use a multilingual embedding model to search over a dataset of mixed language documents.',
         }
       ),
     },
