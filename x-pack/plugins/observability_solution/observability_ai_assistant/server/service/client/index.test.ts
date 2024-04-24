@@ -218,8 +218,8 @@ describe('Observability AI Assistant client', () => {
           return new Promise((resolve, reject) => {
             titleLlmPromiseResolve = (title: string) => {
               const titleLlmSimulator = createLlmSimulator();
-              titleLlmSimulator.next({ content: title });
-              titleLlmSimulator.complete();
+              void titleLlmSimulator.next({ content: title });
+              void titleLlmSimulator.complete();
               resolve({
                 actionId: '',
                 status: 'ok',
