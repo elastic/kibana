@@ -18,7 +18,7 @@ import {
 } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
-  Comparator,
+  COMPARATORS,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
 import {
@@ -56,13 +56,13 @@ import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(Object.values(Comparator)) as Type<Comparator>,
+  comparator: oneOfLiterals(Object.values(COMPARATORS)) as Type<COMPARATORS>,
   timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-  warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))) as Type<
-    Comparator | undefined
+  warningComparator: schema.maybe(oneOfLiterals(Object.values(COMPARATORS))) as Type<
+    COMPARATORS | undefined
   >,
   customMetric: schema.maybe(
     schema.object({

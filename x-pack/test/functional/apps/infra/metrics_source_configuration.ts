@@ -9,7 +9,7 @@ import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   InfraRuleType,
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
@@ -192,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 criteria: [
                   {
                     aggType: Aggregators.AVERAGE,
-                    comparator: Comparator.GT,
+                    comparator: COMPARATORS.GREATER_THAN,
                     threshold: [0.5],
                     timeSize: 5,
                     timeUnit: 'm',

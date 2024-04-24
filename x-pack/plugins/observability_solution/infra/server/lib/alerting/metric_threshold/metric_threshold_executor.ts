@@ -23,7 +23,7 @@ import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { AlertStates, COMPARATORS } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -503,9 +503,9 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number | null;
     threshold: number[];
-    comparator: Comparator;
+    comparator: COMPARATORS;
     warningThreshold?: number[];
-    warningComparator?: Comparator;
+    warningComparator?: COMPARATORS;
     timeSize: number;
     timeUnit: TimeUnitChar;
   } & AlertResult,

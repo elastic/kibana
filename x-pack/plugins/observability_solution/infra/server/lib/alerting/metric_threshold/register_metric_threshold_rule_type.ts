@@ -16,7 +16,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { COMPARATORS, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -66,11 +66,11 @@ export async function registerMetricThresholdRuleType(
 
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(Object.values(Comparator)),
+    comparator: oneOfLiterals(Object.values(COMPARATORS)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-    warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
+    warningComparator: schema.maybe(oneOfLiterals(Object.values(COMPARATORS))),
   };
 
   const nonCountCriterion = schema.object({

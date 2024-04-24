@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
+import { COMPARATORS, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     timeUnit: 'm',
     sourceId: 'default',
     threshold: [100],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   };
 
   const source: InfraSource = {
@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...baseCondition,
             metric: 'rx',
             threshold: [107374182400],
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
           },
           esClient,
         });

@@ -8,7 +8,7 @@
 import moment from 'moment';
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import { getElasticsearchMetricQuery } from './metric_query';
@@ -20,7 +20,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   };
 
   const groupBy = 'host.doggoname';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { COMPARATORS, builtInComparators } from './comparators';
+export { COMPARATORS, builtInComparators } from '../../../common/comparators';
 export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types';
 export { loadAllActions, loadActionTypes } from '../../application/lib/action_connector_api';
 export { ConnectorAddModal } from '../../application/sections/action_connector_form';

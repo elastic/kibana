@@ -23,6 +23,8 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
+  builtInComparators,
+  COMPARATORS,
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
@@ -45,15 +47,15 @@ import {
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import {
-  Comparator,
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api';
+import {
+  COMPARATORS,
   FilterQuery,
   InventoryMetricConditions,
   QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
-import {
-  SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../common/http_api/snapshot_api';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
   DerivedIndexPattern,
@@ -98,7 +100,7 @@ type Props = Omit<
 
 export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
@@ -446,7 +448,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     props;
   const {
     metric,
-    comparator = Comparator.GT,
+    comparator = COMPARATORS.GREATER_THAN,
     threshold = [],
     customMetric,
     warningThreshold = [],
@@ -477,14 +479,14 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator | undefined });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS | undefined });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
@@ -701,6 +703,20 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 };
 
+// Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
+const updatedBuiltInComparators = { ...builtInComparators };
+delete updatedBuiltInComparators[COMPARATORS.NOT_BETWEEN];
+const customComparators = {
+  ...builtInComparators,
+  [COMPARATORS.NOT_BETWEEN]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
+      defaultMessage: 'Is not between',
+    }),
+    value: COMPARATORS.NOT_BETWEEN,
+    requiredValues: 2,
+  },
+};
+
 const ThresholdElement: React.FC<{
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
@@ -713,8 +729,9 @@ const ThresholdElement: React.FC<{
     <>
       <div css={StyledExpressionCss}>
         <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
+          thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
           threshold={threshold}
+          customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}

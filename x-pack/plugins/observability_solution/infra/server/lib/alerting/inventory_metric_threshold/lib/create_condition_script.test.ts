@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Comparator } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
+import { COMPARATORS } from '../../../../../common/alerting/metrics';
 
 describe('createConditionScript', () => {
   it('should convert tx threshold from bits to byte', () => {
-    expect(createConditionScript([8], Comparator.GT_OR_EQ, 'tx')).toEqual({
+    expect(createConditionScript([8], COMPARATORS.GREATER_THAN_OR_EQUALS, 'tx')).toEqual({
       params: {
         // Threshold has been converted from 8 bits to 1 byte
         threshold: 1,

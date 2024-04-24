@@ -10,7 +10,7 @@ import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { AlertStates, COMPARATORS } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
@@ -49,7 +49,7 @@ const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
 
 const recoveredComparatorToI18n = (
-  comparator: Comparator,
+  comparator: COMPARATORS,
   threshold: number[],
   currentValue: number
 ) => {
@@ -60,17 +60,17 @@ const recoveredComparatorToI18n = (
     defaultMessage: 'above',
   });
   switch (comparator) {
-    case Comparator.BETWEEN:
+    case COMPARATORS.BETWEEN:
       return currentValue < threshold[0] ? belowText : aboveText;
-    case Comparator.OUTSIDE_RANGE:
+    case COMPARATORS.NOT_BETWEEN:
       return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenRecovery', {
         defaultMessage: 'between',
       });
-    case Comparator.GT:
-    case Comparator.GT_OR_EQ:
+    case COMPARATORS.GREATER_THAN:
+    case COMPARATORS.GREATER_THAN_OR_EQUALS:
       return belowText;
-    case Comparator.LT:
-    case Comparator.LT_OR_EQ:
+    case COMPARATORS.LESS_THAN:
+    case COMPARATORS.LESS_THAN_OR_EQUALS:
       return aboveText;
   }
 };
@@ -88,7 +88,7 @@ const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : `
 export const buildFiredAlertReason: (alertResult: {
   group: string;
   metric: string;
-  comparator: Comparator;
+  comparator: COMPARATORS;
   threshold: Array<number | string>;
   currentValue: number | string;
   timeSize: number;
@@ -111,7 +111,7 @@ export const buildFiredAlertReason: (alertResult: {
 export const buildRecoveredAlertReason: (alertResult: {
   group: string;
   metric: string;
-  comparator: Comparator;
+  comparator: COMPARATORS;
   threshold: Array<number | string>;
   currentValue: number | string;
 }) => string = ({ group, metric, comparator, threshold, currentValue }) =>

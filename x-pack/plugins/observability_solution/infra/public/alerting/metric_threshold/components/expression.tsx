@@ -29,7 +29,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import { Aggregators, COMPARATORS, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
@@ -47,7 +47,7 @@ type Props = Omit<
 
 const defaultExpression = {
   aggType: Aggregators.AVERAGE,
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
@@ -175,7 +175,7 @@ export const Expressions: React.FC<Props> = (props) => {
         'criteria',
         md.currentOptions.metrics.map((metric) => ({
           metric: metric.field,
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [],
           timeSize,
           timeUnit,

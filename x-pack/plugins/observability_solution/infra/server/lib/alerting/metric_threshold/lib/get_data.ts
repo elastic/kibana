@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import {
@@ -286,13 +286,13 @@ export const getData = async (
 };
 
 const comparatorMap = {
-  [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
+  [COMPARATORS.BETWEEN]: (value: number, [a, b]: number[]) =>
     value >= Math.min(a, b) && value <= Math.max(a, b),
   // `threshold` is always an array of numbers in case the BETWEEN comparator is
   // used; all other compartors will just destructure the first value in the array
-  [Comparator.GT]: (a: number, [b]: number[]) => a > b,
-  [Comparator.LT]: (a: number, [b]: number[]) => a < b,
-  [Comparator.OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
-  [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
-  [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
+  [COMPARATORS.GREATER_THAN]: (a: number, [b]: number[]) => a > b,
+  [COMPARATORS.LESS_THAN]: (a: number, [b]: number[]) => a < b,
+  [COMPARATORS.NOT_BETWEEN]: (value: number, [a, b]: number[]) => value < a || value > b,
+  [COMPARATORS.GREATER_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a >= b,
+  [COMPARATORS.LESS_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a <= b,
 };

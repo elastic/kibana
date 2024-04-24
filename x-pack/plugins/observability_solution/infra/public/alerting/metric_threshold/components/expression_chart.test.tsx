@@ -12,7 +12,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { Aggregators, COMPARATORS } from '../../../../common/alerting/metrics';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
@@ -98,7 +98,7 @@ describe('ExpressionChart', () => {
       timeUnit: 'm',
       sourceId: 'default',
       threshold: [1],
-      comparator: Comparator.GT_OR_EQ,
+      comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
     };
     const { wrapper } = await setup(expression);
     expect(wrapper.find('[data-test-subj~="noChartData"]').exists()).toBeTruthy();

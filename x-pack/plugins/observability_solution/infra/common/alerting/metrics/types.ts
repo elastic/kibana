@@ -8,8 +8,10 @@ import * as rt from 'io-ts';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { COMPARATORS } from '@kbn/triggers-actions-ui-plugin/common';
 import { SnapshotCustomMetricInput } from '../../http_api';
 
+export { COMPARATORS } from '@kbn/triggers-actions-ui-plugin/common';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 
@@ -21,15 +23,6 @@ export enum InfraRuleType {
 export interface InfraRuleTypeParams {
   [InfraRuleType.MetricThreshold]: MetricThresholdParams;
   [InfraRuleType.InventoryThreshold]: InventoryMetricConditions;
-}
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
 }
 
 export enum Aggregators {
@@ -82,10 +75,10 @@ export interface InventoryMetricConditions {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: Comparator;
+  comparator: COMPARATORS;
   customMetric?: SnapshotCustomMetricInput;
   warningThreshold?: number[];
-  warningComparator?: Comparator;
+  warningComparator?: COMPARATORS;
 }
 
 export interface InventoryMetricThresholdParams {
@@ -111,8 +104,8 @@ interface BaseMetricExpressionParams {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: Comparator;
-  warningComparator?: Comparator;
+  comparator: COMPARATORS;
+  warningComparator?: COMPARATORS;
   warningThreshold?: number[];
 }
 

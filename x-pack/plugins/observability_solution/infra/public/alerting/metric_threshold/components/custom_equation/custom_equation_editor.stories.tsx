@@ -11,7 +11,7 @@ import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
@@ -93,7 +93,7 @@ const BASE_ARGS = {
     timeSize: 1,
     timeUnit: 'm' as TimeUnitChar,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
   fields: [
     { name: 'system.cpu.user.pct', normalizedType: 'number' },

@@ -6,7 +6,7 @@
  */
 
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { Comparator, InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { COMPARATORS, InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { createConditionScript } from './create_condition_script';
 
@@ -34,7 +34,7 @@ export const createBucketSelector = (
           },
           script: createConditionScript(
             condition.warningThreshold as number[],
-            condition.warningComparator as Comparator,
+            condition.warningComparator as COMPARATORS,
             metric
           ),
         },

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { isNil } from 'lodash';
 import { builtInComparators } from '../constants';
-import { Comparator } from '../types';
+import { Comparator } from '../../../common';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 

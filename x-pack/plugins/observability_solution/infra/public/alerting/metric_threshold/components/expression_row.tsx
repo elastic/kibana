@@ -29,7 +29,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { Aggregators, COMPARATORS } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
@@ -38,11 +38,11 @@ import { CUSTOM_EQUATION } from '../i18n_strings';
 
 const customComparators = {
   ...builtInComparators,
-  [Comparator.OUTSIDE_RANGE]: {
+  [COMPARATORS.NOT_BETWEEN]: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
       defaultMessage: 'Is not between',
     }),
-    value: Comparator.OUTSIDE_RANGE,
+    value: COMPARATORS.NOT_BETWEEN,
     requiredValues: 2,
   },
 };
@@ -92,7 +92,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,
-    comparator = Comparator.GT,
+    comparator = COMPARATORS.GREATER_THAN,
     threshold = [],
     warningThreshold = [],
     warningComparator,
@@ -126,14 +126,14 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
@@ -385,7 +385,7 @@ const ThresholdElement: React.FC<{
     <>
       <StyledExpression>
         <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
+          thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
           threshold={displayedThreshold}
           customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}

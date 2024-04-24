@@ -10,7 +10,7 @@ import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
@@ -106,7 +106,7 @@ describe('The metric threshold rule type', () => {
   afterAll(() => jest.useRealTimers());
 
   describe('querying the entire infrastructure', () => {
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -122,7 +122,7 @@ describe('The metric threshold rule type', () => {
         },
       });
     const setResults = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       shouldFire: boolean = false,
       shouldWarn: boolean = false,
@@ -146,8 +146,8 @@ describe('The metric threshold rule type', () => {
       ]);
 
     test('should report alert with the > comparator when condition is met', async () => {
-      setResults(Comparator.GT, [0.75], true);
-      await execute(Comparator.GT, [0.75]);
+      setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: '*',
@@ -162,14 +162,14 @@ describe('The metric threshold rule type', () => {
     });
 
     test('should not report any alerts with the > comparator when condition is not met', async () => {
-      setResults(Comparator.GT, [1.5], false);
-      await execute(Comparator.GT, [1.5]);
+      setResults(COMPARATORS.GREATER_THAN, [1.5], false);
+      await execute(COMPARATORS.GREATER_THAN, [1.5]);
       testNAlertsReported(0);
     });
 
     test('should report alert with the < comparator when condition is met', async () => {
-      setResults(Comparator.LT, [1.5], true);
-      await execute(Comparator.LT, [1.5]);
+      setResults(COMPARATORS.LESS_THAN, [1.5], true);
+      await execute(COMPARATORS.LESS_THAN, [1.5]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: '*',
@@ -184,14 +184,14 @@ describe('The metric threshold rule type', () => {
     });
 
     test('should not report any alerts with the < comparator when condition is not met', async () => {
-      setResults(Comparator.LT, [0.75], false);
-      await execute(Comparator.LT, [0.75]);
+      setResults(COMPARATORS.LESS_THAN, [0.75], false);
+      await execute(COMPARATORS.LESS_THAN, [0.75]);
       testNAlertsReported(0);
     });
 
     test('should report alert with the >= comparator when condition is met', async () => {
-      setResults(Comparator.GT_OR_EQ, [0.75], true);
-      await execute(Comparator.GT_OR_EQ, [0.75]);
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: '*',
@@ -206,14 +206,14 @@ describe('The metric threshold rule type', () => {
     });
 
     test('should not report any alerts with the >= comparator when condition is not met', async () => {
-      setResults(Comparator.GT_OR_EQ, [1.5], false);
-      await execute(Comparator.GT_OR_EQ, [1.5]);
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5], false);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5]);
       testNAlertsReported(0);
     });
 
     test('should report alert with the <= comparator when condition is met', async () => {
-      setResults(Comparator.LT_OR_EQ, [1.5], true);
-      await execute(Comparator.LT_OR_EQ, [1.5]);
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5], true);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: '*',
@@ -228,14 +228,14 @@ describe('The metric threshold rule type', () => {
     });
 
     test('should not report any alerts with the <= comparator when condition is not met', async () => {
-      setResults(Comparator.LT_OR_EQ, [0.75], false);
-      await execute(Comparator.LT_OR_EQ, [0.75]);
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75], false);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75]);
       testNAlertsReported(0);
     });
 
     test('should report alert with the between comparator when condition is met', async () => {
-      setResults(Comparator.BETWEEN, [0, 1.5], true);
-      await execute(Comparator.BETWEEN, [0, 1.5]);
+      setResults(COMPARATORS.BETWEEN, [0, 1.5], true);
+      await execute(COMPARATORS.BETWEEN, [0, 1.5]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: '*',
@@ -250,14 +250,14 @@ describe('The metric threshold rule type', () => {
     });
 
     test('should not report any alerts with the between comparator when condition is not met', async () => {
-      setResults(Comparator.BETWEEN, [0, 0.75], false);
-      await execute(Comparator.BETWEEN, [0, 0.75]);
+      setResults(COMPARATORS.BETWEEN, [0, 0.75], false);
+      await execute(COMPARATORS.BETWEEN, [0, 0.75]);
       testNAlertsReported(0);
     });
 
     test('should report alert with the outside range comparator when condition is met', async () => {
-      setResults(Comparator.OUTSIDE_RANGE, [0, 0.75], true);
-      await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 0.75]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: '*',
@@ -272,15 +272,15 @@ describe('The metric threshold rule type', () => {
     });
 
     test('should not report any alerts with the outside range comparator when condition is not met', async () => {
-      setResults(Comparator.OUTSIDE_RANGE, [0, 1.5], false);
-      await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
       testNAlertsReported(0);
     });
   });
 
   describe('querying with a groupBy parameter', () => {
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string[] = ['something'],
       metric?: string,
@@ -310,7 +310,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -322,7 +322,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -334,7 +334,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       testNAlertsReported(2);
       testAlertReported(1, {
         id: alertIdA,
@@ -365,7 +365,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1.5],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -377,7 +377,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1.5],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -389,7 +389,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [1.5]);
+      await execute(COMPARATORS.LESS_THAN, [1.5]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertIdA,
@@ -409,7 +409,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [5],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -421,7 +421,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [5],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -433,7 +433,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [5]);
+      await execute(COMPARATORS.GREATER_THAN, [5]);
       testNAlertsReported(0);
     });
 
@@ -442,7 +442,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 1.0,
@@ -454,7 +454,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -466,7 +466,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -479,7 +479,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult1 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['something'],
         'test.metric.2'
@@ -489,7 +489,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -501,7 +501,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -513,7 +513,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: null,
@@ -526,7 +526,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult2 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['something'],
         'test.metric.1',
@@ -539,7 +539,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -551,7 +551,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -564,7 +564,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult3 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['something', 'something-else'],
         'test.metric.1',
@@ -574,7 +574,7 @@ describe('The metric threshold rule type', () => {
     });
 
     const executeWithFilter = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       filterQuery: string,
       metric?: string,
@@ -603,7 +603,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 1.0,
@@ -615,7 +615,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -627,7 +627,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -640,7 +640,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult1 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.2'
@@ -650,7 +650,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -662,7 +662,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -674,7 +674,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: null,
@@ -687,7 +687,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult2 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -700,7 +700,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -712,7 +712,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -725,7 +725,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult3 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'different' }),
         'test.metric.1',
@@ -739,7 +739,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 1.0,
@@ -751,7 +751,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -763,7 +763,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -776,7 +776,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult1 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.2'
@@ -786,7 +786,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -798,7 +798,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: null,
@@ -810,7 +810,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: null,
@@ -823,7 +823,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const { state: stateResult2 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -837,7 +837,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -849,7 +849,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: null,
@@ -864,7 +864,7 @@ describe('The metric threshold rule type', () => {
       // Consider c as untracked
       services.alertsClient.isTrackedAlert.mockImplementation((id: string) => id !== 'c');
       const { state: stateResult3 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -879,7 +879,7 @@ describe('The metric threshold rule type', () => {
 
   describe('querying with a groupBy parameter host.name and rule tags', () => {
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string[] = ['host.name'],
       metric?: string,
@@ -913,7 +913,7 @@ describe('The metric threshold rule type', () => {
         {
           'host-01': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -928,7 +928,7 @@ describe('The metric threshold rule type', () => {
           },
           'host-02': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -943,7 +943,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       testNAlertsReported(2);
       testAlertReported(1, {
         id: alertIdA,
@@ -972,7 +972,7 @@ describe('The metric threshold rule type', () => {
 
   describe('querying without a groupBy parameter and rule tags', () => {
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string = '',
       metric?: string,
@@ -1004,7 +1004,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1018,7 +1018,7 @@ describe('The metric threshold rule type', () => {
       ]);
 
       const alertID = '*';
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
@@ -1035,7 +1035,7 @@ describe('The metric threshold rule type', () => {
 
   describe('querying with multiple criteria', () => {
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       thresholdA: number[],
       thresholdB: number[],
       groupBy: string = '',
@@ -1068,7 +1068,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1082,7 +1082,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metric: 'test.metric.2',
             currentValue: 3.0,
@@ -1095,7 +1095,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const alertID = '*';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
@@ -1116,7 +1116,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT_OR_EQ,
+            comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
             threshold: [1.0],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1129,7 +1129,7 @@ describe('The metric threshold rule type', () => {
         },
         {},
       ]);
-      await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0], [2.5]);
       testNAlertsReported(0);
     });
 
@@ -1138,7 +1138,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1150,7 +1150,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             metric: 'test.metric.1',
             currentValue: 3.0,
@@ -1164,7 +1164,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metric: 'test.metric.2',
             currentValue: 3.0,
@@ -1176,7 +1176,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metric: 'test.metric.2',
             currentValue: 1.0,
@@ -1189,7 +1189,7 @@ describe('The metric threshold rule type', () => {
         },
       ]);
       const alertIdA = 'a';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'something');
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0], 'something');
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertIdA,
@@ -1209,7 +1209,7 @@ describe('The metric threshold rule type', () => {
 
   describe('querying with the count aggregator', () => {
     const alertID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1230,7 +1230,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.9],
             metric: 'count',
             currentValue: 1,
@@ -1242,7 +1242,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.9]);
+      await execute(COMPARATORS.GREATER_THAN, [0.9]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
@@ -1257,7 +1257,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [0.5],
             metric: 'count',
             currentValue: 1,
@@ -1269,14 +1269,14 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [0.5]);
+      await execute(COMPARATORS.LESS_THAN, [0.5]);
       // should still have only been called once
       testNAlertsReported(1);
     });
 
     describe('with a groupBy parameter', () => {
       const executeGroupBy = (
-        comparator: Comparator,
+        comparator: COMPARATORS,
         threshold: number[],
         sourceId: string = 'default',
         state?: any
@@ -1305,7 +1305,7 @@ describe('The metric threshold rule type', () => {
           {
             a: {
               ...baseCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               metric: 'count',
               currentValue: 1,
@@ -1317,7 +1317,7 @@ describe('The metric threshold rule type', () => {
             },
             b: {
               ...baseCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               metric: 'count',
               currentValue: 1,
@@ -1329,13 +1329,13 @@ describe('The metric threshold rule type', () => {
             },
           },
         ]);
-        const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        const resultState = await executeGroupBy(COMPARATORS.LESS_THAN_OR_EQUALS, [0]);
         testNAlertsReported(0);
         setEvaluationResults([
           {
             a: {
               ...baseCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               metric: 'count',
               currentValue: 0,
@@ -1347,7 +1347,7 @@ describe('The metric threshold rule type', () => {
             },
             b: {
               ...baseCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               metric: 'count',
               currentValue: 0,
@@ -1359,7 +1359,7 @@ describe('The metric threshold rule type', () => {
             },
           },
         ]);
-        await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
+        await executeGroupBy(COMPARATORS.LESS_THAN_OR_EQUALS, [0], 'empty-response', resultState);
         testNAlertsReported(2);
         testAlertReported(1, {
           id: alertIdA,
@@ -1384,7 +1384,7 @@ describe('The metric threshold rule type', () => {
   });
   describe('querying with the p99 aggregator', () => {
     const alertID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1406,7 +1406,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [1],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -1418,7 +1418,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [1]);
+      await execute(COMPARATORS.GREATER_THAN, [1]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
@@ -1433,7 +1433,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -1445,7 +1445,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [1]);
+      await execute(COMPARATORS.LESS_THAN, [1]);
       // should still only have been called once
       testNAlertsReported(1);
     });
@@ -1453,7 +1453,7 @@ describe('The metric threshold rule type', () => {
 
   describe('querying with the p95 aggregator', () => {
     const alertID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1475,7 +1475,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.25],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1487,7 +1487,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.25]);
+      await execute(COMPARATORS.GREATER_THAN, [0.25]);
       testNAlertsReported(1);
       testAlertReported(1, {
         id: alertID,
@@ -1504,7 +1504,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [0.95],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1516,7 +1516,7 @@ describe('The metric threshold rule type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [0.95]);
+      await execute(COMPARATORS.LESS_THAN, [0.95]);
       // should still only have been called once
       testNAlertsReported(1);
     });
@@ -1533,7 +1533,7 @@ describe('The metric threshold rule type', () => {
           criteria: [
             {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [1],
               metric: 'test.metric.3',
             },
@@ -1547,7 +1547,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1578,7 +1578,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1606,13 +1606,13 @@ describe('The metric threshold rule type', () => {
           criteria: [
             {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [1],
               metric: 'test.metric.3',
             },
             {
               ...baseCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [30],
             },
           ],
@@ -1625,7 +1625,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1676,7 +1676,7 @@ describe('The metric threshold rule type', () => {
           criteria: [
             {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric,
             },
@@ -1701,7 +1701,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1731,7 +1731,7 @@ describe('The metric threshold rule type', () => {
         {
           '*': {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1761,7 +1761,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.1',
             currentValue: 1.0,
@@ -1773,7 +1773,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -1817,7 +1817,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1829,7 +1829,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.3',
             currentValue: null,
@@ -1872,7 +1872,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -1884,7 +1884,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.2',
             currentValue: 1,
@@ -1896,7 +1896,7 @@ describe('The metric threshold rule type', () => {
           },
           c: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.2',
             currentValue: 3,
@@ -1942,7 +1942,7 @@ describe('The metric threshold rule type', () => {
         {
           a: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.1',
             currentValue: 1,
@@ -1954,7 +1954,7 @@ describe('The metric threshold rule type', () => {
           },
           b: {
             ...baseNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metric: 'test.metric.1',
             currentValue: 3,
@@ -1999,7 +1999,7 @@ describe('The metric threshold rule type', () => {
             criteria: [
               {
                 ...baseNonCountCriterion,
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [0],
                 metric,
               },
@@ -2020,7 +2020,7 @@ describe('The metric threshold rule type', () => {
           {
             '*': {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric: 'test.metric.3',
               currentValue: null,
@@ -2038,7 +2038,7 @@ describe('The metric threshold rule type', () => {
           {
             '*': {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric: 'test.metric.3',
               currentValue: null,
@@ -2056,7 +2056,7 @@ describe('The metric threshold rule type', () => {
           {
             a: {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric: 'test.metric.1',
               currentValue: 1,
@@ -2068,7 +2068,7 @@ describe('The metric threshold rule type', () => {
             },
             b: {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric: 'test.metric.1',
               currentValue: 3,
@@ -2114,7 +2114,7 @@ describe('The metric threshold rule type', () => {
           {
             a: {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric: 'test.metric.3',
               currentValue: null,
@@ -2126,7 +2126,7 @@ describe('The metric threshold rule type', () => {
             },
             b: {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metric: 'test.metric.3',
               currentValue: null,
@@ -2221,7 +2221,7 @@ describe('The metric threshold rule type', () => {
           criteria: [
             {
               ...baseNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [9.999],
             },
           ],
@@ -2229,9 +2229,9 @@ describe('The metric threshold rule type', () => {
       });
 
     const setResults = ({
-      comparator = Comparator.GT,
+      comparator = COMPARATORS.GREATER_THAN,
       threshold = [9999],
-      warningComparator = Comparator.GT,
+      warningComparator = COMPARATORS.GREATER_THAN,
       warningThreshold = [2.49],
       metric = 'test.metric.1',
       currentValue = 7.59,
@@ -2479,7 +2479,7 @@ const baseNonCountCriterion = {
   timeSize: 1,
   timeUnit: 'm',
   threshold: [0],
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
 } as NonCountMetricExpressionParams;
 
 const baseCountCriterion = {
@@ -2487,5 +2487,5 @@ const baseCountCriterion = {
   timeSize: 1,
   timeUnit: 'm',
   threshold: [0],
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
 } as CountMetricExpressionParams;

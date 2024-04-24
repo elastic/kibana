@@ -8,3 +8,9 @@
 export interface TriggersActionsUiConfigType {
   enableExperimental: string[];
 }
+
+export interface Comparator {
+  text: string;
+  value: string;
+  requiredValues: number;
+}

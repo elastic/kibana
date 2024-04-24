@@ -7,7 +7,7 @@
 
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
@@ -49,7 +49,7 @@ export const createBucketSelector = (
           },
           script: createConditionScript(
             condition.warningThreshold as number[],
-            condition.warningComparator as Comparator
+            condition.warningComparator as COMPARATORS
           ),
         },
       }

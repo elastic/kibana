@@ -15,7 +15,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
 import {
   Aggregators,
-  Comparator,
+  COMPARATORS,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics';
 
@@ -178,7 +178,7 @@ const baseCriterion = {
   timeSize: 1,
   timeUnit: 'm',
   threshold: [0],
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
 } as InventoryMetricConditions;
 
 describe('The inventory threshold alert type', () => {
@@ -187,7 +187,7 @@ describe('The inventory threshold alert type', () => {
 
     setup();
 
-    const execute = (comparator: Comparator, threshold: number[], options?: any) =>
+    const execute = (comparator: COMPARATORS, threshold: number[], options?: any) =>
       executor({
         ...mockOptions,
         services,
@@ -215,7 +215,7 @@ describe('The inventory threshold alert type', () => {
     test('throws error when alertsClient is null', async () => {
       try {
         services.alertsClient = null;
-        await execute(Comparator.GT, [0.75]);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
       } catch (e) {
         expect(e).toMatchInlineSnapshot(
           '[Error: Expected alertsClient not to be null! There may have been an issue installing alert resources.]'
@@ -232,7 +232,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -248,7 +248,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -259,7 +259,7 @@ describe('The inventory threshold alert type', () => {
           },
         },
       });
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(mostRecentAction(instanceIdA).tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
@@ -282,7 +282,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -298,7 +298,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -309,7 +309,7 @@ describe('The inventory threshold alert type', () => {
           },
         },
       });
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(mostRecentAction(instanceIdA).tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
       expect(mostRecentAction(instanceIdB).tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
     });
@@ -329,7 +329,7 @@ describe('The inventory threshold alert type', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [0.75],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           shouldFire: true,
           shouldWarn: false,
           currentValue: 1.0,
@@ -340,7 +340,7 @@ describe('The inventory threshold alert type', () => {
           },
         },
       });
-      await execute(Comparator.GT, [0.75], options);
+      await execute(COMPARATORS.GREATER_THAN, [0.75], options);
       expect(evaluateConditionFn).toHaveBeenCalledWith(
         expect.objectContaining({
           executionTimestamp: mockedEndDate,

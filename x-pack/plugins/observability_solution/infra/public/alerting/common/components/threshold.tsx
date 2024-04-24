@@ -10,7 +10,7 @@ import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '../../../../common/alerting/metrics';
 
 export interface ChartProps {
   theme?: PartialTheme;
@@ -19,7 +19,7 @@ export interface ChartProps {
 
 export interface Props {
   chartProps: ChartProps;
-  comparator: Comparator | string;
+  comparator: COMPARATORS | string;
   id: string;
   threshold: number;
   title: string;
