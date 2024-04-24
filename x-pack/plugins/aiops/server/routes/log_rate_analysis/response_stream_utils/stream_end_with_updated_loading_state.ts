@@ -12,7 +12,7 @@ import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import {
   updateLoadingStateAction,
   type AiopsLogRateAnalysisApiAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 /**

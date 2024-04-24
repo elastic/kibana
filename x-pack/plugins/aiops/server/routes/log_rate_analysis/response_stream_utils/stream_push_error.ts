@@ -11,7 +11,7 @@ import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-lo
 import {
   addErrorAction,
   type AiopsLogRateAnalysisApiAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type { LogDebugMessage } from './log_debug_message';
 
