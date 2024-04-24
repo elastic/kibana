@@ -180,11 +180,15 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             );
           }
 
+          const isWildcardBasePrivilege = privilegeCalculator.isWildcardBasePrivilege(
+            record.privilegeIndex
+          );
+
           const basePrivilege =
             privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
             CUSTOM_PRIVILEGE_VALUE;
 
-          const privilege = privilegeCalculator.isWildcardBasePrivilage(record.privilegeIndex)
+          const privilege = privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)
             ? '*'
             : basePrivilege;
 
@@ -224,7 +228,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         actions: [
           {
             render: (record: TableRow) => {
-              if (privilegeCalculator.isWildcardBasePrivilage(record.privilegeIndex)) {
+              if (privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)) {
                 return <></>;
               }
 
@@ -246,6 +250,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           },
           {
             render: (record: TableRow) => {
+              if (privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)) {
+                return <></>;
+              }
+
               return (
                 <EuiButtonIcon
                   aria-label={i18n.translate(
