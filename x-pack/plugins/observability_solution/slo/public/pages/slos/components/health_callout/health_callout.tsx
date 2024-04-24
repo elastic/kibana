@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
+import React, { useState } from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -24,6 +24,9 @@ import { useKibana } from '../../../../utils/kibana_react';
 export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
   const { http } = useKibana().services;
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
+  const [showCallOut, setShowCallOut] = useState(
+    !sessionStorage.getItem('slo_health_callout_hidden')
+  );
 
   if (isLoading || isError || results === undefined || results?.length === 0) {
     return null;
@@ -41,10 +44,20 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     (result) => result.health.summary === 'unhealthy'
   );
 
+  const onDismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem('slo_health_callout_hidden', 'true');
+  };
+
+  if (!showCallOut) {
+    return null;
+  }
+
   return (
     <EuiCallOut
       color="warning"
       iconType="warning"
+      onDismiss={onDismiss}
       title={i18n.translate('xpack.slo.sloList.healthCallout.title', {
         defaultMessage: 'Some SLOs have issues with their transform',
       })}
