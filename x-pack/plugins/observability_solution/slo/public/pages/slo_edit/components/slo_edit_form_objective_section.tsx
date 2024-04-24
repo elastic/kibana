@@ -18,7 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeWindow } from '@kbn/slo-schema';
+import { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,7 +46,7 @@ export function SloEditFormObjectiveSection() {
   const timeWindowType = watch('timeWindow.type');
   const indicator = watch('indicator.type');
 
-  const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindow | undefined>(
+  const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindowType | undefined>(
     defaultValues?.timeWindow?.type
   );
 

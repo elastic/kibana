@@ -51,7 +51,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     );
     deps.uiActions.addTriggerAction(
       USER_TRIGGER,
-      createEditUserAction(async () => (await startServices)[0].overlays.openModal)
+      createEditUserAction(async () => (await startServices)[0])
     );
 
     deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, viewInMapsAction);
@@ -68,10 +68,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(
-          { uiActionsStartService: depsStart.uiActions, openModal: coreStart.overlays.openModal },
-          params
-        );
+        return renderApp({ uiActionsStartService: depsStart.uiActions, core: coreStart }, params);
       },
     });
 

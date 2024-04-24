@@ -44,6 +44,8 @@ import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 
 import { getConnectorTemplate } from '../search_index/connector/constants';
 
+import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
+
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
@@ -51,11 +53,17 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { index, isLoading, connector, updateConnectorConfigurationStatus } =
-    useValues(ConnectorViewLogic);
+  const {
+    index,
+    isLoading,
+    connector,
+    updateConnectorConfigurationStatus,
+    hasAdvancedFilteringFeature,
+  } = useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { errorConnectingMessage, http } = useValues(HttpLogic);
+  const { advancedSnippet } = useValues(ConnectorFilteringLogic);
 
   const { connectorTypes } = useValues(KibanaLogic);
   const BETA_CONNECTORS = useMemo(
@@ -126,6 +134,8 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             exampleLink: (
                               <EuiLink
+                                data-test-subj="entSearchContent-connector-configuration-exampleConfigFileLink"
+                                data-telemetry-id="entSearchContent-connector-configuration-exampleConfigFileLink"
                                 href="https://github.com/elastic/connectors-python/blob/main/config.yml.example"
                                 target="_blank"
                                 external
@@ -158,6 +168,8 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
+                                data-test-subj="entSearchContent-connector-configuration-deploymentModeLink"
+                                data-telemetry-id="entSearchContent-connector-configuration-deploymentModeLink"
                                 href={docLinks.connectorsClientDeploy}
                                 target="_blank"
                                 external
@@ -222,6 +234,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           <EuiSpacer size="s" />
                           <EuiButton
                             disabled={!index}
+                            data-test-subj="entSearchContent-connector-configuration-recheckNow"
                             data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
                             onClick={() => fetchConnector({ connectorId: connector.id })}
@@ -248,6 +261,37 @@ export const ConnectorConfiguration: React.FC = () => {
                             }
                           )}
                         />
+                      )}
+                      <EuiSpacer size="s" />
+                      {connector.status && hasAdvancedFilteringFeature && !!advancedSnippet && (
+                        <EuiCallOut
+                          title={i18n.translate(
+                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+                            { defaultMessage: 'Configuration warning' }
+                          )}
+                          iconType="iInCircle"
+                          color="warning"
+                        >
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+                            defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
+                            values={{
+                              advancedSyncRulesDocs: (
+                                <EuiLink
+                                  data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+                                  data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+                                  href={docLinks.syncRules}
+                                  target="_blank"
+                                >
+                                  {i18n.translate(
+                                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                                    { defaultMessage: 'Advanced Sync Rules' }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiCallOut>
                       )}
                     </ConnectorConfigurationComponent>
                   ),
@@ -383,7 +427,12 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink href={docLinks.connectors} target="_blank">
+                    <EuiLink
+                      data-test-subj="entSearchContent-connector-configuration-connectorDocumentationLink"
+                      data-telemetry-id="entSearchContent-connector-configuration-connectorDocumentationLink"
+                      href={docLinks.connectors}
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.viewDocumentation.label',
                         {
@@ -404,6 +453,8 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="entSearchContent-connector-configuration-readmeLink"
+                      data-telemetry-id="entSearchContent-connector-configuration-readmeLink"
                       href="https://github.com/elastic/connectors-python/blob/main/README.md"
                       target="_blank"
                     >
@@ -417,7 +468,12 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   {docsUrl && (
                     <EuiFlexItem>
-                      <EuiLink href={docsUrl} target="_blank">
+                      <EuiLink
+                        data-test-subj="entSearchContent-connector-configuration-deployWithDockerLink"
+                        data-telemetry-id="entSearchContent-connector-configuration-deployWithDockerLink"
+                        href={docsUrl}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.dockerDeploy.label',
                           {
@@ -429,6 +485,8 @@ export const ConnectorConfiguration: React.FC = () => {
                   )}
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="entSearchContent-connector-configuration-deployWithoutDockerLink"
+                      data-telemetry-id="entSearchContent-connector-configuration-deployWithoutDockerLink"
                       href="https://github.com/elastic/connectors-python/blob/main/docs/CONFIG.md#run-the-connector-service-for-a-custom-connector"
                       target="_blank"
                     >

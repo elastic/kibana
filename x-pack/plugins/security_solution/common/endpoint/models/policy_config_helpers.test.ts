@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { policyFactory } from './policy_config';
 import {
   disableProtections,
@@ -128,7 +128,12 @@ describe('Policy Config helpers', () => {
 
   describe('setPolicyToEventCollectionOnly()', () => {
     it('should set the policy to event collection only', () => {
-      expect(ensureOnlyEventCollectionIsAllowed(policyFactory())).toEqual(eventsOnlyPolicy());
+      const policyConfig = policyFactory();
+      policyConfig.windows.antivirus_registration = {
+        enabled: true,
+        mode: AntivirusRegistrationModes.enabled,
+      };
+      expect(ensureOnlyEventCollectionIsAllowed(policyConfig)).toEqual(eventsOnlyPolicy());
     });
   });
 
@@ -223,7 +228,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       behavior_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
-    antivirus_registration: { enabled: false },
+    antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
     attack_surface_reduction: { credential_hardening: { enabled: false } },
   },
   mac: {
