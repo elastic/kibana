@@ -6,6 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableExplorerPlugin } from './plugin';
+import React from 'react';
 
-export const plugin = () => new EmbeddableExplorerPlugin();
+import { EuiText } from '@elastic/eui';
+
+export const Overview = () => {
+  return (
+    <EuiText>
+      <p>
+        Embeddables are React components that manage their own state, can be serialized and
+        deserialized, and return an API that can be used to interact with them imperatively.
+      </p>
+    </EuiText>
+  );
+};
