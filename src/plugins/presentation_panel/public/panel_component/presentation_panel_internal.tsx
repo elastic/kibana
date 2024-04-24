@@ -92,7 +92,7 @@ export const PresentationPanelInternal = <
   }, [api, onPanelStatusChange]);
 
   const contentAttrs = useMemo(() => {
-    const attrs: { [key: string]: boolean | string } = {};
+    const attrs: { [key: string]: boolean } = {};
     if (dataLoading) {
       attrs['data-loading'] = true;
     } else {
