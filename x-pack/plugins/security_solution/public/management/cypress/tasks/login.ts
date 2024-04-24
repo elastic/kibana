@@ -19,7 +19,7 @@ export const ROLE = Object.freeze<Record<SecurityTestUser, SecurityTestUser>>({
 });
 
 interface CyLoginTask {
-  (user?: SecurityTestUser): ReturnType<typeof sendApiLoginRequest>;
+  (user?: SecurityTestUser): ReturnType<typeof sendApiLoginRequest> | void;
 
   /**
    * Login using any username/password
@@ -45,7 +45,7 @@ interface CyLoginTask {
  */
 export const login: CyLoginTask = (
   user: SecurityTestUser = ROLE.endpoint_operations_analyst
-): ReturnType<typeof sendApiLoginRequest> | any => {
+): ReturnType<typeof sendApiLoginRequest> | void => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
   const isServerless = Cypress.env('IS_SERVERLESS');
@@ -57,7 +57,6 @@ export const login: CyLoginTask = (
       cy.setCookie('sid', cookie as string);
     });
     cy.visit('/');
-    // return sendApiLoginRequest(username, password);
   } else if (user) {
     return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
       username = loadedUser.username;

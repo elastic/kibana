@@ -17,6 +17,9 @@ export JOB=kibana-defend-workflows-serverless-cypress
 
 buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
+mkdir .ftr
+vault_get security-quality-gate/role-users data -format=json > .ftr/role_users.json
+
 cd x-pack/plugins/security_solution
 set +e
 
