@@ -681,22 +681,18 @@ export class ActionsClient {
     return additionalPrivileges;
   }
 
-  private async getActionTypeId(actionId: string): Promise<string | undefined> {
+  private async getActionTypeId(actionId: string): Promise<string> {
     const inMemoryConnector = this.context.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
 
     if (inMemoryConnector) return inMemoryConnector.actionTypeId;
 
-    try {
-      const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-        'action',
-        actionId
-      );
-      return attributes.actionTypeId;
-    } catch (err) {
-      return undefined;
-    }
+    const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+      'action',
+      actionId
+    );
+    return attributes.actionTypeId;
   }
 
   public async execute({
@@ -707,18 +703,13 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
-    const actionTypeId = await this.getActionTypeId(actionId);
-    if (!actionTypeId) {
-      const message = `Action type not found for action [${actionId}]`;
-      return { actionId, status: 'error', message };
-    }
-
+    // we need these later for executable-ability checks
+    let actionTypeId: string | undefined;
+    let typeNotFoundErr: Error | undefined;
     try {
-      this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+      actionTypeId = await this.getActionTypeId(actionId);
     } catch (err) {
-      const message = `Attempting to execute a disabled action type ${err}`;
-      this.context.logger.warn(message);
-      return { actionId, status: 'error', message };
+      typeNotFoundErr = err;
     }
 
     if (
@@ -734,6 +725,21 @@ export class ActionsClient {
       });
     } else {
       trackLegacyRBACExemption('execute', this.context.usageCounter);
+    }
+
+    // we need to throw the actionType not found/enabled error AFTER the authorization check
+    if (!actionTypeId) {
+      if (typeNotFoundErr) throw typeNotFoundErr;
+      // defensive, in case of future code changes and typeNotFoundErr isn't set
+      throw new Error(`Action type not found for actionId: ${actionId}`);
+    }
+
+    try {
+      this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    } catch (err) {
+      const message = `Attempting to execute a disabled action type ${err}`;
+      this.context.logger.warn(message);
+      return { actionId, status: 'error', message };
     }
 
     return this.context.actionExecutor.execute({
