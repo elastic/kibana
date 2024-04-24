@@ -42,7 +42,7 @@ export const postAlertsInsightsRoute = (router: IRouter<ElasticAssistantRequestH
           },
           response: {
             200: {
-              body: buildRouteValidationWithZod(AlertsInsightsPostResponse),
+              body: { custom: buildRouteValidationWithZod(AlertsInsightsPostResponse) },
             },
           },
         },

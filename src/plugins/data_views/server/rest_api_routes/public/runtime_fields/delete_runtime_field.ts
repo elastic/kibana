@@ -78,7 +78,7 @@ const deleteRuntimeFieldRouteFactory =
           },
           response: {
             200: {
-              body: schema.never(),
+              body: () => schema.never(),
             },
           },
         },

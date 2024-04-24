@@ -55,17 +55,17 @@ export const dataViewSpecSchema = schema.object({
   allowHidden: schema.maybe(schema.boolean()),
 });
 
-export const dataViewsRuntimeResponseSchema = schema.object({
-  [SERVICE_KEY]: dataViewSpecSchema,
-  fields: schema.arrayOf(schema.object(fieldSpecSchemaFields)),
-});
+export const dataViewsRuntimeResponseSchema = () =>
+  schema.object({
+    [SERVICE_KEY]: dataViewSpecSchema,
+    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields)),
+  });
 
-export const indexPatternsRuntimeResponseSchema = schema.object({
-  [SERVICE_KEY_LEGACY]: dataViewSpecSchema,
-  field: schema.object(fieldSpecSchemaFields),
-});
+export const indexPatternsRuntimeResponseSchema = () =>
+  schema.object({
+    [SERVICE_KEY_LEGACY]: dataViewSpecSchema,
+    field: schema.object(fieldSpecSchemaFields),
+  });
 
-export const runtimeResponseSchema = schema.oneOf([
-  dataViewsRuntimeResponseSchema,
-  indexPatternsRuntimeResponseSchema,
-]);
+export const runtimeResponseSchema = () =>
+  schema.oneOf([dataViewsRuntimeResponseSchema(), indexPatternsRuntimeResponseSchema()]);

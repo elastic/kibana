@@ -21,7 +21,9 @@ export function registerTelemetryLastReported(
 ) {
   // GET to retrieve
   const v2GetValidations = {
-    response: { 200: { body: schema.object({ lastReported: schema.maybe(schema.number()) }) } },
+    response: {
+      200: { body: () => schema.object({ lastReported: schema.maybe(schema.number()) }) },
+    },
   };
 
   const v2GetHandler: RequestHandler = async (context, req, res) => {

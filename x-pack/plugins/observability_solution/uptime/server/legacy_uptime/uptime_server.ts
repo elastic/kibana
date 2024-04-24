@@ -103,7 +103,7 @@ export const initUptimeServer = (
                 },
                 response: {
                   200: {
-                    body: DynamicSettingsSchema,
+                    body: () => DynamicSettingsSchema,
                   },
                 },
               },
@@ -129,7 +129,7 @@ export const initUptimeServer = (
                 },
                 response: {
                   200: {
-                    body: DynamicSettingsSchema,
+                    body: () => DynamicSettingsSchema,
                   },
                 },
               },
