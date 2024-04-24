@@ -35,7 +35,6 @@ export function registerContextFunction({
   functions.registerFunction(
     {
       name: 'context',
-      contexts: ['core'],
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.AssistantOnly,
@@ -68,10 +67,6 @@ export function registerContextFunction({
       const { queries, categories } = args;
 
       async function getContext() {
-        const systemMessage = messages.find(
-          (message) => message.message.role === MessageRole.System
-        );
-
         const screenDescription = compact(
           screenContexts.map((context) => context.screenDescription)
         ).join('\n\n');
@@ -91,10 +86,6 @@ export function registerContextFunction({
 
         if (!isKnowledgeBaseAvailable) {
           return { content };
-        }
-
-        if (!systemMessage) {
-          throw new Error('No system message found');
         }
 
         const userMessage = last(
