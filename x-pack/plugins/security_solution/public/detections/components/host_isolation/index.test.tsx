@@ -10,9 +10,6 @@ import { render } from '@testing-library/react';
 import { HostIsolationPanel } from '.';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
-import { getFieldValue } from './helpers';
 
 const queryClient = new QueryClient({
   logger: {
