@@ -45,7 +45,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
     },
   };
 
-  describe.only('IBM Resilient', () => {
+  describe('IBM Resilient', () => {
     describe('IBM Resilient - Action Creation', () => {
       const simulator = new ResilientSimulator({
         proxy: {
