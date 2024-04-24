@@ -27,8 +27,8 @@ import {
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { useNodeDetailsRedirect } from '../../../link_to';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
+import { useNodeDetailsLinkProps } from '../../../link_to/use_node_details_redirect';
 
 export interface Props {
   options: MetricsExplorerOptions;
@@ -71,7 +71,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
@@ -106,19 +105,20 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
 
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
 
-  const nodeDetailLinkProps = useLinkProps({
-    app: 'metrics',
-    ...(nodeType
-      ? getNodeDetailUrl({
-          assetType: nodeType,
-          assetId: series.id,
-          search: {
-            from: dateMathExpressionToEpoch(timeRange.from),
-            to: dateMathExpressionToEpoch(timeRange.to, true),
-          },
-        })
-      : {}),
+  // TODO FIX ME!
+  if (!nodeType) {
+    throw new Error();
+  }
+
+  const nodeDetailLinkProps = useNodeDetailsLinkProps({
+    assetType: nodeType as InventoryItemType,
+    assetId: series.id,
+    search: {
+      from: dateMathExpressionToEpoch(timeRange.from),
+      to: dateMathExpressionToEpoch(timeRange.to, true),
+    },
   });
+
   const tsvbLinkProps = useLinkProps({
     ...createTSVBLink(source, options, series, timeRange, chartOptions),
   });
@@ -130,7 +130,8 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
             values: { name: nodeType },
           }),
           icon: 'metricsApp',
-          ...(nodeType ? nodeDetailLinkProps : {}),
+          // FIX ME
+          ...(nodeType ? { href: nodeDetailLinkProps?.href } : {}),
           'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
         },
       ]

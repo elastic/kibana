@@ -6,9 +6,8 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { CloudProviderIcon } from '@kbn/custom-icons';
-import { useNodeDetailsRedirect } from '../../../../link_to';
+import { useNodeDetailsLinkProps } from '../../../../link_to/use_node_details_redirect';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
@@ -19,19 +18,16 @@ interface EntryTitleProps {
 
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const { parsedDateRange } = useUnifiedSearchContext();
 
-  const link = useLinkProps({
-    ...getNodeDetailUrl({
-      assetId: name,
-      assetType: 'host',
-      search: {
-        from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
-        to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
-        name,
-      },
-    }),
+  const nodeDetailMenuItemLink = useNodeDetailsLinkProps({
+    assetId: name,
+    assetType: 'host',
+    search: {
+      from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
+      to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
+      name,
+    },
   });
 
   const providerName = cloudProvider ?? 'Unknown';
@@ -53,7 +49,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
           <EuiLink
             data-test-subj="hostsViewTableEntryTitleLink"
             className="eui-displayBlock eui-textTruncate"
-            {...link}
+            {...nodeDetailMenuItemLink}
           >
             {name}
           </EuiLink>
