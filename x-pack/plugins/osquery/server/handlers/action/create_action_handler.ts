@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
@@ -29,7 +28,7 @@ interface Metadata {
 interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
-  alertData?: ParsedTechnicalFields;
+  alertData?: Record<string, unknown>;
   error?: string;
 }
 
