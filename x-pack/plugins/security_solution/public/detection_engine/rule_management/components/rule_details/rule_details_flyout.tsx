@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
@@ -181,6 +182,10 @@ export const RuleDetailsFlyout = ({
     setSelectedTabId(tab.id);
   };
 
+  const prebuiltRulesFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'prebuiltRulesFlyoutTitle',
+  });
+
   return (
     <EuiFlyout
       id={id}
@@ -190,10 +195,11 @@ export const RuleDetailsFlyout = ({
       key="prebuilt-rules-flyout"
       paddingSize="l"
       data-test-subj={dataTestSubj}
+      aria-labelledby={prebuiltRulesFlyoutTitleId}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{rule.name}</h2>
+          <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
       </EuiFlyoutHeader>
