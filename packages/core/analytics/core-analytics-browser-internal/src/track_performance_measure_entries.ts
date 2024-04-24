@@ -16,21 +16,21 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
   ) {
     list.getEntries().forEach((entry) => {
       if (entry.entryType === 'measure') {
-        const measureName = entry?.name;
+        const target = entry?.name;
         const duration = entry.duration;
 
         if (isDevMode) {
-          if (!measureName) {
+          if (!target) {
             console.error(`Failed to report the performance entry. Measure name is undefined`);
           }
 
           if (!duration) {
             console.error(
-              `Failed to report the performance entry. Duration for the measure: ${measureName} is undefined`
+              `Failed to report the performance entry. Duration for the measure: ${target} is undefined`
             );
           }
 
-          console.log(`The measure ${measureName} completed in ${duration}ms`);
+          console.log(`The measure ${target} completed in ${duration / 1000}s`);
         }
 
         if (droppedEntriesCount > 0) {
@@ -39,8 +39,11 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
 
         try {
           reportPerformanceMetricEvent(analytics, {
-            eventName: measureName,
+            eventName: 'time_to_render',
             duration,
+            meta: {
+              target
+            }
           });
         } catch (error) {
           if (isDevMode) {

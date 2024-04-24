@@ -6,15 +6,27 @@
  */
 import React from 'react';
 import { perfomanceMarks } from '@kbn/ebt-tools';
+import { useLocation } from 'react-router-dom';
+import afterFrame from './after_frame';
+
+function measureInteraction() {
+  performance.mark(perfomanceMarks.startPageChange);
+
+  return {
+    end() {
+      performance.mark('endafterFrame');
+    },
+  };
+}
 
 export function MarkPerformanceNavigation({ children }: { children: React.ReactNode }) {
-  const location = window.location;
+  const location = useLocation();
+  const interaction = measureInteraction();
 
   React.useEffect(() => {
-    performance.mark(perfomanceMarks.startOnRouterChange);
-    return () => {
-      performance.clearMarks(perfomanceMarks.startOnRouterChange);
-    };
+    afterFrame(() => {
+      interaction.end();
+    });
   }, [location.pathname]);
 
   return <>{children}</>;

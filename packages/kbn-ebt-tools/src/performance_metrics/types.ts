@@ -38,9 +38,10 @@ type InfaTargetId =
   `${App.INFRA}.${InfraRouting}.${AvailableComponents}.${TargetComponent}.${Details}__${Phase}`;
 
 export interface WithPerformanceMetricsProps {
-  measureName: ApmTargetId | InfaTargetId;
+  target: ApmTargetId | InfaTargetId;
   onMeasureComplete: boolean;
   onStartTracking?: boolean;
+  onMarkUpdate?: boolean;
 }
 
 export type Phase = 'mounted' | 'updated';

@@ -18,7 +18,8 @@ let phase: Phase;
  */
 // TODO come up with better names
 export const perfomanceMarks = {
-  startOnRouterChange: 'start::routerChange',
+  startPageChange: 'start::pageChange',
+  endPageReady: 'end::pageReady',
   startMount: 'start::mount',
   endMount: `end::mount`,
   startOnUpdate: `start::Update`,
@@ -42,64 +43,68 @@ export function withPerformanceMetrics<P>(
 ) {
   return function WithPerformanceMetrics(props: P & WithPerformanceMetricsProps) {
     const hasMounted = useRef<boolean>(false);
-    const measureName = props.measureName;
 
-    // Set a marker on each render
-    performance.mark(perfomanceMarks.startOnUpdate);
+    const target = props.target;
 
     useMount(() => {
       performance.mark(perfomanceMarks.startMount);
     });
 
     useEffect(() => {
-      if (props.onMeasureComplete) {
-        if (hasMounted.current) {
-          performance.mark(perfomanceMarks.endOnUpdate);
-          phase = 'updated';
-          // TODO check if markes exist before measuring
+      if (props.onMeasureComplete && !hasMounted.current) {
+        hasMounted.current = true;
 
-          /**
-           * Measure the time taken for the `onMeasureComplete` event to complete from the time the component is re-rendered.
-           * */
+        performance.mark(perfomanceMarks.endMount);
+        phase = 'mounted';
 
-          performance.measure(
-            `${measureName}__${phase}`,
-            perfomanceMarks.startOnUpdate,
-            perfomanceMarks.endOnUpdate
-          );
-        } else {
-          hasMounted.current = true;
+        /**
+         * Measure the duration from the moment the user navigates to the page until the `onMeasureComplete` event is completed.
+         * */
 
-          performance.mark(perfomanceMarks.endMount);
-          phase = 'mounted';
+        performance.measure(
+          `${target}__actual_duration`,
+          perfomanceMarks.startPageChange,
+          perfomanceMarks.endMount
+        );
 
-          /**
-           * Measure the duration from the moment the user navigates to the page until the `onMeasureComplete` event is completed.
-           * */
+        /**
+         * Measure the time taken for the `onMeasureComplete` event to complete from the time the component is mounted.
+         * */
 
-          performance.measure(
-            `${measureName}__actual_duration`,
-            perfomanceMarks.startOnRouterChange,
-            perfomanceMarks.endMount
-          );
-
-          /**
-           * Measure the time taken for the `onMeasureComplete` event to complete from the time the component is mounted.
-           * */
-
-          performance.measure(
-            `${measureName}__${phase}`,
-            perfomanceMarks.startMount,
-            perfomanceMarks.endMount
-          );
-        }
+        performance.measure(
+          `${target}__${phase}`,
+          perfomanceMarks.startMount,
+          perfomanceMarks.endMount
+        );
 
         return () => {
           performance.clearMeasures();
           // TODO clear marks
         };
       }
+
+      if (props.onMeasureComplete && hasMounted.current && !props.onMarkUpdate) {
+        performance.mark(perfomanceMarks.endOnUpdate);
+        phase = 'updated';
+        // TODO check if markes exist before measuring
+
+        /**
+         * Measure the time taken for the `onMeasureComplete` event to complete from the time the component is re-rendered.
+         * */
+
+        performance.measure(
+          `${target}__${phase}`,
+          perfomanceMarks.startOnUpdate,
+          perfomanceMarks.endOnUpdate
+        );
+      }
     }, [props.onMeasureComplete]);
+
+    useEffect(() => {
+      if (props.onMarkUpdate && hasMounted.current) {
+        performance.mark(perfomanceMarks.startOnUpdate);
+      }
+    }, [props.onMarkUpdate]);
 
     return <BaseComponent {...props} />;
   };
