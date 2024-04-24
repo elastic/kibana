@@ -14,7 +14,10 @@ import type {
 } from '@kbn/security-solution-upselling/service/types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
-import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/messages';
+import {
+  UPGRADE_INVESTIGATION_GUIDE,
+  UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
+} from '@kbn/security-solution-upselling/messages';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import {
@@ -161,6 +164,13 @@ export const upsellingMessages: UpsellingMessages = [
     pli: ProductFeatureKey.investigationGuide,
     message: UPGRADE_INVESTIGATION_GUIDE(
       getProductTypeByPLI(ProductFeatureKey.investigationGuide) ?? ''
+    ),
+  },
+  {
+    id: 'investigation_guide_interactions',
+    pli: ProductFeatureKey.investigationGuideInteractions,
+    message: UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS(
+      getProductTypeByPLI(ProductFeatureKey.investigationGuideInteractions) ?? ''
     ),
   },
 ];

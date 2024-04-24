@@ -74,9 +74,15 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     }, [autoFocusDisabled]);
 
     const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
+    const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
     const uiPluginsWithState = useMemo(() => {
-      return includePlugins ? uiPlugins({ insightsUpsellingMessage }) : undefined;
-    }, [insightsUpsellingMessage, includePlugins]);
+      return includePlugins
+        ? uiPlugins({
+            insightsUpsellingMessage,
+            interactionsUpsellingMessage,
+          })
+        : undefined;
+    }, [includePlugins, insightsUpsellingMessage, interactionsUpsellingMessage]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {
