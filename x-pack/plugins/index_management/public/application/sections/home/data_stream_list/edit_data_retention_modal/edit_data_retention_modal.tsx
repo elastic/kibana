@@ -275,6 +275,10 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
+          {/*
+            We hide the field from the dom instead of not mounting it, otherwise
+            the formlib doesnt initialize the value for the field correctly.
+          */}
           <UseField
             path="dataRetentionEnabled"
             component={ToggleField}
