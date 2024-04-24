@@ -178,7 +178,6 @@ function MetricAxisBoundsControl({
             defaultMessage: 'Bounds',
           })}
           data-test-subj={`${testSubjPrefix}_axisBounds_groups`}
-          name="axisBounds"
           buttonSize="compressed"
           options={[
             {
@@ -294,7 +293,6 @@ function BucketAxisBoundsControl({
             defaultMessage: 'Bounds',
           })}
           data-test-subj={`${testSubjPrefix}_axisBounds_groups`}
-          name="axisBounds"
           buttonSize="compressed"
           options={[
             {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { concat, last, map, Observable, shareReplay, withLatestFrom } from 'rxjs';
+import { concat, from, last, mergeMap, Observable, shareReplay, withLatestFrom } from 'rxjs';
 import {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -16,8 +16,32 @@ import {
   ConcatenatedMessage,
 } from './concatenate_chat_completion_chunks';
 
+type ConcatenateMessageCallback = (
+  concatenatedMessage: ConcatenatedMessage
+) => Promise<ConcatenatedMessage>;
+
+function mergeWithEditedMessage(
+  originalMessage: ConcatenatedMessage,
+  chunkEvent: ChatCompletionChunkEvent,
+  callback?: ConcatenateMessageCallback
+): Observable<MessageAddEvent> {
+  return from(
+    (callback ? callback(originalMessage) : Promise.resolve(originalMessage)).then((message) => {
+      const next: MessageAddEvent = {
+        type: StreamingChatResponseEventType.MessageAdd as const,
+        id: chunkEvent.id,
+        message: {
+          '@timestamp': new Date().toISOString(),
+          ...message,
+        },
+      };
+      return next;
+    })
+  );
+}
+
 export function emitWithConcatenatedMessage(
-  callback?: (concatenatedMessage: ConcatenatedMessage) => ConcatenatedMessage
+  callback?: ConcatenateMessageCallback
 ): (
   source$: Observable<ChatCompletionChunkEvent>
 ) => Observable<ChatCompletionChunkEvent | MessageAddEvent> {
@@ -30,17 +54,8 @@ export function emitWithConcatenatedMessage(
         concatenateChatCompletionChunks(),
         last(),
         withLatestFrom(source$),
-        map(([message, chunkEvent]) => {
-          const next: MessageAddEvent = {
-            type: StreamingChatResponseEventType.MessageAdd as const,
-            id: chunkEvent.id,
-            message: {
-              '@timestamp': new Date().toISOString(),
-              ...(callback ? callback(message) : message),
-            },
-          };
-
-          return next;
+        mergeMap(([message, chunkEvent]) => {
+          return mergeWithEditedMessage(message, chunkEvent, callback);
         })
       )
     );

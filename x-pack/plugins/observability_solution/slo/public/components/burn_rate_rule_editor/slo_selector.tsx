@@ -7,15 +7,15 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 
 interface Props {
-  initialSlo?: SLOResponse;
+  initialSlo?: SLODefinitionResponse;
   errors?: string[];
-  onSelected: (slo: SLOResponse | undefined) => void;
+  onSelected: (slo: SLODefinitionResponse | undefined) => void;
 }
 
 function SloSelector({ initialSlo, onSelected, errors }: Props) {

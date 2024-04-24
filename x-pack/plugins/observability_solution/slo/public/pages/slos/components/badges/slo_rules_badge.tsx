@@ -13,10 +13,15 @@ import { BurnRateRuleParams } from '../../../../typings';
 
 export interface Props {
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
+  isRemote?: boolean;
   onClick?: () => void;
 }
 
-export function SloRulesBadge({ rules, onClick }: Props) {
+export function SloRulesBadge({ rules, onClick, isRemote }: Props) {
+  if (isRemote) {
+    return null;
+  }
+
   return rules === undefined || rules.length > 0 ? null : (
     <EuiToolTip
       position="top"

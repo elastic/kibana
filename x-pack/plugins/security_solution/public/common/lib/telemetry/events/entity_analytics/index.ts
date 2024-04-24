@@ -99,3 +99,118 @@ export const addRiskInputToTimelineClickedEvent: TelemetryEvent = {
     },
   },
 };
+
+export const assetCriticalityFileSelectedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssetCriticalityFileSelected,
+  schema: {
+    valid: {
+      type: 'boolean',
+      _meta: {
+        description: 'If the file is valid',
+        optional: false,
+      },
+    },
+    errorCode: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error code if the file is invalid',
+        optional: true,
+      },
+    },
+    file: {
+      properties: {
+        size: {
+          type: 'long',
+          _meta: {
+            description: 'File size in bytes',
+            optional: false,
+          },
+        },
+      },
+    },
+  },
+};
+
+export const assetCriticalityCsvPreviewGeneratedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated,
+  schema: {
+    file: {
+      properties: {
+        size: {
+          type: 'long',
+          _meta: {
+            description: 'File size in bytes',
+            optional: false,
+          },
+        },
+      },
+    },
+    processing: {
+      properties: {
+        startTime: {
+          type: 'date',
+          _meta: {
+            description: 'Processing start time',
+            optional: false,
+          },
+        },
+        endTime: {
+          type: 'date',
+          _meta: {
+            description: 'Processing end time',
+            optional: false,
+          },
+        },
+        tookMs: {
+          type: 'long',
+          _meta: {
+            description: 'Processing time in milliseconds',
+            optional: false,
+          },
+        },
+      },
+    },
+    stats: {
+      properties: {
+        validLines: {
+          type: 'long',
+          _meta: {
+            description: 'Number of valid lines',
+            optional: false,
+          },
+        },
+        invalidLines: {
+          type: 'long',
+          _meta: {
+            description: 'Number of invalid lines',
+            optional: false,
+          },
+        },
+        totalLines: {
+          type: 'long',
+          _meta: {
+            description: 'Total number of lines',
+            optional: false,
+          },
+        },
+      },
+    },
+  },
+};
+
+export const assetCriticalityCsvImportedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssetCriticalityCsvImported,
+  schema: {
+    file: {
+      properties: {
+        size: {
+          type: 'long',
+          _meta: {
+            description: 'File size in bytes',
+            optional: false,
+          },
+        },
+      },
+    },
+  },
+};

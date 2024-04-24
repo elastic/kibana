@@ -13,12 +13,14 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { AssetCriticalityAuditActions } from '../audit';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 
 export const assetCriticalityStatusRoute = (
-  router: SecuritySolutionPluginRouter,
+  router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned
@@ -39,6 +41,17 @@ export const assetCriticalityStatusRoute = (
         const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
         const result = await assetCriticalityClient.getStatus();
+
+        securitySolution.getAuditLogger()?.log({
+          message: 'User checked the status of the asset criticality service',
+          event: {
+            action: AssetCriticalityAuditActions.ASSET_CRITICALITY_STATUS_GET,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.ACCESS,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
         const body: AssetCriticalityStatusResponse = {
           asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
         };

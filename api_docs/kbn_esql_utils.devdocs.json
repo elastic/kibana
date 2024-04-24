@@ -21,6 +21,54 @@
     "functions": [
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.appendToESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "appendToESQLQuery",
+        "description": [],
+        "signature": [
+          "(baseESQLQuery: string, appendedText: string) => string"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendToESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseESQLQuery",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendToESQLQuery.$2",
+            "type": "string",
+            "tags": [],
+            "label": "appendedText",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLAdHocDataview",
         "type": "Function",
         "tags": [],
@@ -371,6 +419,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.ESQL_LATEST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "\"2024.04.01\""
+        ],
+        "path": "packages/kbn-esql-utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.TextBasedLanguages",

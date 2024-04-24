@@ -20,6 +20,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
@@ -387,15 +388,26 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       }
     }, [error, isEditFlow, labels, setUrlParams, toasts, urlParams.itemId]);
 
+    const artifactFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'artifactFlyoutTitle',
+    });
+
     if (!isFlyoutOpened || error) {
       return null;
     }
 
     return (
-      <EuiFlyout size={size} onClose={handleFlyoutClose} data-test-subj={dataTestSubj}>
+      <EuiFlyout
+        size={size}
+        onClose={handleFlyoutClose}
+        data-test-subj={dataTestSubj}
+        aria-labelledby={artifactFlyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{isEditFlow ? labels.flyoutEditTitle : labels.flyoutCreateTitle}</h2>
+            <h2 id={artifactFlyoutTitleId}>
+              {isEditFlow ? labels.flyoutEditTitle : labels.flyoutCreateTitle}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         {!isInitializing && showExpiredLicenseBanner && (

@@ -80,6 +80,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
       await aiops.logRateAnalysisPage.clickDocumentCountChart(testData.chartClickCoordinates);
+
+      if (!testData.autoRun) {
+        await aiops.logRateAnalysisPage.assertNoAutoRunButtonExists();
+        await aiops.logRateAnalysisPage.clickNoAutoRunButton();
+      }
+
       await aiops.logRateAnalysisPage.assertAnalysisSectionExists();
 
       if (testData.brushDeviationTargetTimestamp) {

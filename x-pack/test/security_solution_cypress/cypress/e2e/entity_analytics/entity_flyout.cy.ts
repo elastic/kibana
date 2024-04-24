@@ -129,10 +129,22 @@ describe(
             .contains('High Impact')
             .should('be.visible');
         });
+        it('should unassign asset criticality state', () => {
+          cy.log('asset criticality update');
+          expandFirstAlertUserFlyout();
+          selectAssetCriticalityLevel('High Impact');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('High Impact')
+            .should('be.visible');
+          selectAssetCriticalityLevel('Unassigned');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('Unassigned')
+            .should('be.visible');
+        });
       });
 
       // https://github.com/elastic/kibana/issues/179248
-      describe('Managed data section', { tags: ['@skipInServerless'] }, () => {
+      describe('Managed data section', { tags: ['@skipInServerlessMKI'] }, () => {
         beforeEach(() => {
           mockFleetInstalledIntegrations([
             {

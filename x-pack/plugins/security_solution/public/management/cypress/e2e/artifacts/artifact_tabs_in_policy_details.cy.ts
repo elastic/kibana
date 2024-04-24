@@ -56,11 +56,14 @@ const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
 
 const visitArtifactTab = (tabId: string) => {
   visitPolicyDetailsPage();
+  clickArtifactTab(tabId);
+};
+
+const clickArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/171644
-describe.skip('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   before(() => {
@@ -136,6 +139,8 @@ describe.skip('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverl
 
           cy.getByTestSubj('backToOrigin').click();
           cy.getByTestSubj('policyDetailsPage').should('exist');
+          clickArtifactTab(testData.nextTabId); // Make sure the next tab is accessible and backLink doesn't throw errors
+          cy.getByTestSubj('policyDetailsPage');
         });
       });
 

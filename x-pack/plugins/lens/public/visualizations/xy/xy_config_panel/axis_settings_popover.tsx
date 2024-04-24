@@ -318,7 +318,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               defaultMessage: 'Orientation',
             })}
             data-test-subj="lnsXY_axisOrientation_groups"
-            name="axisOrientation"
             buttonSize="compressed"
             options={axisOrientationOptions}
             idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}

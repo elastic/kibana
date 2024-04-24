@@ -1,0 +1,10 @@
+TO_BASE64
+
+Syntax
+Parameters
+string
+A string.
+DescriptionEncode a string to a base64 string.Supported types
+Example
+row a = "elastic"
+| eval e = to_base64(a)
