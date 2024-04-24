@@ -18,11 +18,20 @@ import * as i18n from './translations';
 
 const human = '\n\nHuman:';
 
+
+const messageBody = {
+  contents: [
+    {role: 'user',
+      parts:[{
+       text: 'Write the first line of a story about a magic backpack.'}]}
+  ]
+}
+
 export const DEFAULT_BODY = JSON.stringify({
   gemini_version: 'gemini-1.0-pro-001',
-  messages: [{ content: 'Hello world', role: 'user' }],
+  messages: messageBody,
   max_tokens: DEFAULT_TOKEN_LIMIT,
-  stop_sequences: [human],
+  // stop_sequences: [human],
 });
 
 export const geminiConfig: ConfigFieldSchema[] = [
@@ -74,52 +83,6 @@ export const geminiConfig: ConfigFieldSchema[] = [
 ];
 
 export const geminiSecrets: SecretsFieldSchema[] = [
-  {
-    id: 'accessKey',
-    label: i18n.ACCESS_KEY_LABEL,
-    isPasswordField: true,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="To use the Gemini API, you'll need an API key. If you don't already have one, create a key in Google AI Studio.
-        {geminiAPIKeyDocs}."
-        id="xpack.stackConnectors.components.gemini.geminiApiKeyDocumentation"
-        values={{
-          geminiAPIKeyDocs: (
-            <EuiLink
-              data-test-subj="aws-api-keys-doc"
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-            >
-              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-  {
-    id: 'secret',
-    label: i18n.SECRET,
-    isPasswordField: true,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="To use the Gemini API, you'll need an API key. If you don't already have one, create a key in Google AI Studio.
-        {geminiAPIKeyDocs}.."
-        id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
-        values={{
-          geminiAPIKeyDocs: (
-            <EuiLink
-              data-test-subj="aws-api-keys-doc"
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-            >
-              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
   {
     id: 'apiKey',
     label: i18n.API_KEY,

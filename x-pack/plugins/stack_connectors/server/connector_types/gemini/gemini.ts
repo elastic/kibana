@@ -8,9 +8,6 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AxiosError, Method } from 'axios';
-import axios from 'axios';
-// import { VertexAI } from '@google-cloud/vertexai';
-
 // import { IncomingMessage } from 'http';
 // import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -40,6 +37,7 @@ import {
 } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
+/** Interfaces that define the Gemini model response */
 interface Part {
   text: string;
 }
@@ -168,55 +166,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
 
-    /** Call via the JS SDK
-     
-        const genAI = new GoogleGenerativeAI(this.secrets.apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-pro"});  
-        const prompt = 'Write a story about a magic backpack';
-        
-        let text = 'Testing this function!';
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        text = response.text();
-        console.log('TEXT', text);
-     */
-    
-    
-    /** REST call with error handling
-      
-    * try {
-            const response = await axios.request(params);
-            console.log('Response:', response.data);
-        } catch (error) {
-            // Check if the error is an AxiosError
-            if (axios.isAxiosError(error)) {
-                // Retrieve detailed error information
-                const axiosError = error as AxiosError;
-                if (axiosError.response) {
-                    // The request was made and the server responded with a status code
-                    console.error('Response data:', axiosError.response.data);
-                    console.error('Status code:', axiosError.response.status);
-                    console.error('Headers:', axiosError.response.headers);
-                    console.error('Message:', axiosError.message);
-                } else if (axiosError.request) {
-                    // The request was made but no response was received
-                    console.error('Request:', axiosError.request);
-                } else {
-                    // Something happened in setting up the request that triggered an error
-                    console.error('Error:', axiosError.message);
-                }
-            } else {
-                // Other types of errors (e.g., network error)
-                console.error('Error:', error.message);
-            }
-        }
-    */
-
     const response = await this.request(params);
     const candidate = response.data.candidates[0];
     const completionText = candidate.content.parts[0].text;
-    console.log("Content:", candidate.content.parts[0].text);
+    console.log("Completion:", candidate.content.parts[0].text);
 
     return { completion: completionText }
   }
@@ -230,13 +183,13 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     // set model on per request basis
     // const currentModel = reqModel ?? this.model;
     const apiKey = this.secrets.apiKey
-    console.log('API_KEY', apiKey);
+    const data = JSON.stringify(JSON.parse(body)['messages']);
+    const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
-    const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`
     const requestArgs = {
       url: `${this.url}${path}`,
       method: 'post' as Method,
-      data: body,
+      data: data,
       headers: { 
         'Content-Type': 'application/json'
       },
@@ -254,12 +207,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     // system,
     // temperature,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    console.log('BEFORE RUN_API CALL');
     const res = await this.runApi({
-      body: JSON.stringify({ messages }),
-      model,
+        body: JSON.stringify({messages}),
+        model,
     });
-    console.log('AFTER RUN_API CALL');
+
     return { message: res.completion };
   }
 }
