@@ -65,12 +65,6 @@ export const filtersRt = new t.Type<BoolQuery, string, unknown>(
     either.chain(t.string.validate(input, context), (value: string) => {
       try {
         const filters = JSON.parse(value);
-        if (filters.should) {
-          throw new Error('should clause is not supported');
-        }
-        if (filters.must) {
-          throw new Error('must clause is not supported');
-        }
         const decoded = {
           should: [],
           must: [],

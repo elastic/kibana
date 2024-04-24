@@ -24,14 +24,6 @@ describe('filtersRt', () => {
     });
   });
 
-  it.each(['must', 'should'])('does not support must or should', (clause) => {
-    const filters = `{"${clause}":[{"term":{"service.name":"myService"}}],"filter":[{"range":{"@timestamp":{"gte":1617273600000,"lte":1617277200000}}}]}`;
-    const result = filtersRt.decode(filters);
-    // @ts-ignore-next-line
-    expect(result.left[0].message).toEqual(`${clause} clause is not supported`);
-    expect(isLeft(result)).toEqual(true);
-  });
-
   it.each(['3', 'true', '{}'])('should not decode invalid filter JSON: %s', (invalidJson) => {
     const filters = `{ "filter": ${invalidJson}}`;
     const result = filtersRt.decode(filters);
