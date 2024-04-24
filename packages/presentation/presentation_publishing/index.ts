@@ -39,10 +39,6 @@ export {
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
-export {
-  apiPublishesSearchSession,
-  type PublishesSearchSession,
-} from './interfaces/fetch/publishes_search_session';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
