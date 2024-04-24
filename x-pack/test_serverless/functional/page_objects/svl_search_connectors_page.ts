@@ -154,7 +154,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
               value = await subject.getAttribute(connectorName);
               return true;
             })
-            .catch(() => {
+            .catch(async () => {
               await browser.refresh();
               return false;
             });
