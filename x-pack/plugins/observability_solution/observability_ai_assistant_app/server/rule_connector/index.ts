@@ -6,6 +6,7 @@
  */
 
 import { filter } from 'rxjs';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -150,14 +151,6 @@ async function executor(
   }
 
   const resources = await initResources(request);
-  await alertDetailsContextService.getAlertDetailsContext(
-    {
-      core: resources.context.core,
-      licensing: resources.context.licensing,
-      request: resources.request,
-    },
-    { alert_started_at: '' }
-  );
   const client = await resources.service.getClient({ request });
   const functionClient = await resources.service.getFunctionClient({
     signal: new AbortController().signal,
@@ -185,9 +178,23 @@ async function executor(
   const systemMessage = functionClient
     .getContexts()
     .find((def) => def.name === 'core')?.description;
-  const backgroundInstruction = getBackgroundProcessInstruction(
+  const backgroundInstruction = await getBackgroundProcessInstruction(
     execOptions.params.rule,
-    execOptions.params.alerts
+    execOptions.params.alerts,
+    (alert: Record<string, any>) =>
+      alertDetailsContextService.getAlertDetailsContext(
+        {
+          core: resources.context.core,
+          licensing: resources.context.licensing,
+          request: resources.request,
+        },
+        {
+          alert_started_at: get(alert, 'kibana.alert.start'),
+          'service.name': get(alert, 'service.name'),
+          'service.environment': get(alert, 'service.environment'),
+          'host.name': get(alert, 'host.name'),
+        }
+      )
   );
 
   client
@@ -276,17 +283,35 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   };
 };
 
-function getBackgroundProcessInstruction(rule: RuleType, alerts: AlertSummary) {
+async function getBackgroundProcessInstruction(
+  rule: RuleType,
+  alerts: AlertSummary,
+  getAlertContext: (alert: Record<string, any>) => Promise<string>
+) {
+  const getAlertGroupDetails = async (alertGroup: Array<Record<string, any>>) => {
+    const formattedDetails = await Promise.all(
+      alerts.new.map(async (alert) => {
+        return `- ${JSON.stringify(
+          alert
+        )}. The following contextual information is available:\n${await getAlertContext(alert)}`;
+      })
+    ).then((messages) => messages.join('\n'));
+
+    return formattedDetails;
+  };
+
   let instruction = `You are called as a background process because the following alerts have changed state for the rule ${JSON.stringify(
     rule
   )}:\n`;
   if (alerts.new.length > 0) {
-    instruction += `- ${alerts.new.length} alerts have fired: ${JSON.stringify(alerts.new)}\n`;
+    instruction += `- ${alerts.new.length} alerts have fired:\n${await getAlertGroupDetails(
+      alerts.new
+    )}\n`;
   }
   if (alerts.recovered.length > 0) {
-    instruction += `- ${alerts.recovered.length} alerts have recovered: ${JSON.stringify(
-      alerts.recovered
-    )}\n`;
+    instruction += `- ${
+      alerts.recovered.length
+    } alerts have recovered\n: ${await getAlertGroupDetails(alerts.recovered)}\n`;
   }
   instruction +=
     ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
