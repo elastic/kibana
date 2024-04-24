@@ -46,7 +46,7 @@ export interface State {
 }
 
 const logRateAnalysisSlice = createSlice({
-  name: 'editTransformFlyout',
+  name: 'logRateAnalysis',
   initialState: getDefaultState(),
   reducers: {
     clearAllRowState: (state: State) => {
