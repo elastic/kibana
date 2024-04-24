@@ -7,6 +7,7 @@
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { Subscription } from 'rxjs';
+import type { BasicFields } from '@kbn/rule-registry-plugin/common/search_strategy';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { OsqueryActiveLicenses } from './validate_license';
@@ -23,7 +24,7 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
 
   const create = async (
     params: CreateLiveQueryRequestBodySchema,
-    alertData?: ParsedTechnicalFields
+    alertData?: ParsedTechnicalFields & Omit<BasicFields, '_id'>
   ) => {
     const error = validateLicense(licenses);
 
