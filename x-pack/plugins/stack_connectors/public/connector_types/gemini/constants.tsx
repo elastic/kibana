@@ -16,22 +16,24 @@ import {
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
 
-const human = '\n\nHuman:';
-
+const generationConfig = {
+  stopSequences: 'Title',
+  temperature: 0,
+  maxOutputTokens: DEFAULT_TOKEN_LIMIT,
+}
 
 const messageBody = {
   contents: [
     {role: 'user',
       parts:[{
        text: 'Write the first line of a story about a magic backpack.'}]}
-  ]
+  ],
+  generationConfig,
 }
 
 export const DEFAULT_BODY = JSON.stringify({
   gemini_version: 'gemini-1.0-pro-001',
   messages: messageBody,
-  max_tokens: DEFAULT_TOKEN_LIMIT,
-  // stop_sequences: [human],
 });
 
 export const geminiConfig: ConfigFieldSchema[] = [

@@ -169,7 +169,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     const response = await this.request(params);
     const candidate = response.data.candidates[0];
     const completionText = candidate.content.parts[0].text;
-    console.log("Completion:", candidate.content.parts[0].text);
+    console.log("Completion:", completionText);
 
     return { completion: completionText }
   }
@@ -184,6 +184,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     // const currentModel = reqModel ?? this.model;
     const apiKey = this.secrets.apiKey
     const data = JSON.stringify(JSON.parse(body)['messages']);
+    console.log('Data', data);
     const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const requestArgs = {
