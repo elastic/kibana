@@ -7,9 +7,9 @@
  */
 
 import { LegendDisplay, PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import {
   CategoryDisplayTypes,
-  LegendStats,
   NumberDisplayTypes,
   PartitionVisConfiguration,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';

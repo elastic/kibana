@@ -50,6 +50,7 @@ import {
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  LegendStats,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -105,13 +106,7 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
-import {
-  AxisExtentModes,
-  LegendStats,
-  SeriesTypes,
-  ValueLabelModes,
-  XScaleTypes,
-} from '../../common/constants';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';

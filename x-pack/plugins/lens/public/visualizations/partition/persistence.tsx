@@ -6,7 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { LegendStats, PieLayerState, PieVisualizationState } from '../../../common/types';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { PieLayerState, PieVisualizationState } from '../../../common/types';
 
 type PersistedPieLayerState = Omit<PieLayerState, 'legendStats'> & {
   showValuesInLegend?: boolean;

@@ -14,7 +14,7 @@ import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
@@ -49,7 +49,6 @@ import {
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
-  LegendStats,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 

@@ -44,7 +44,7 @@ import { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { layerTypes, LegendStats, Visualization } from '../..';
+import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
@@ -60,6 +60,7 @@ import {
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {

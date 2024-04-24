@@ -10,7 +10,7 @@ import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } fro
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize } from '../../constants';
+import { LegendSize, LegendStats } from '../../constants';
 import {
   CategoryDisplayTypes,
   PartitionChartTypes,
@@ -27,7 +27,6 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
   CollapseFunctions,
-  LegendStats,
 } from '../constants';
 import { ExpressionValueVisDimension } from '../../expression_functions';
 

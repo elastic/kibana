@@ -15,6 +15,7 @@ import {
   XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import { Layer } from '..';
 import { ChartType } from '../../../common';
 import {
@@ -29,7 +30,6 @@ import {
   VisParams,
 } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
-import { LegendStats } from '../../to_ast';
 
 function getYScaleType(scale?: Scale): XYConfiguration['yLeftScale'] | undefined {
   const type = scale?.type;

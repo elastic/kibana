@@ -10,7 +10,7 @@ import type { Position } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
-import type { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
@@ -78,10 +78,6 @@ export type PieLayerState = SharedPieLayerState & {
   layerId: string;
   layerType: LayerType;
 };
-
-export enum LegendStats {
-  values = 'values',
-}
 
 export interface PieVisualizationState {
   shape: $Values<typeof PieChartTypes>;

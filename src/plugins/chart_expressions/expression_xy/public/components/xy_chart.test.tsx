@@ -37,7 +37,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { DataLayerConfig } from '../../common';
-import { LayerTypes, LegendStats } from '../../common/constants';
+import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
   chartsActiveCursorService,
@@ -58,7 +58,7 @@ import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();

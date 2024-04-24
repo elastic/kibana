@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { ArgTypes } from '@storybook/addons';
-import { LegendStats } from '@kbn/visualizations-plugin/common';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import { EmptySizeRatios, LegendDisplay } from '../../../common';
 import { ChartTypes } from '../../../common/types';
 

@@ -19,14 +19,11 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
-
-export enum LegendStats {
-  values = 'values',
-}
 
 export interface LegendSettingsPopoverProps {
   /**

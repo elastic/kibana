@@ -22,7 +22,7 @@ import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
-import { LegendStats } from '@kbn/visualizations-plugin/common';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedPieVisualizationState } from './persistence';
 
 jest.mock('../../id_generator');
