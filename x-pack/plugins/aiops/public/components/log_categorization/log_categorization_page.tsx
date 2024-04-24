@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import {
   EuiButton,
   EuiSpacer,
@@ -51,6 +52,8 @@ import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { createDocumentStatsHash } from './utils';
+import { TableHeader } from './category_table/table_header';
+import { useOpenInDiscover } from './category_table/use_open_in_discover';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -79,7 +82,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   );
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -151,6 +155,17 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     undefined,
     undefined,
     BAR_TARGET
+  );
+
+  const openInDiscover = useOpenInDiscover(
+    dataView.id!,
+    selectedField,
+    selectedCategories,
+    stateFromUrl,
+    timefilter,
+    true,
+    undefined,
+    undefined
   );
 
   useEffect(() => {
@@ -371,7 +386,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           <DocumentCountChart
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
-            selectedCategory={selectedCategory}
+            selectedCategory={highlightedCategory}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -390,19 +405,28 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       />
 
       {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
-        <CategoryTable
-          categories={data.categories}
-          aiopsListState={stateFromUrl}
-          dataViewId={dataView.id!}
-          eventRate={eventRate}
-          selectedField={selectedField}
-          pinnedCategory={pinnedCategory}
-          setPinnedCategory={setPinnedCategory}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          timefilter={timefilter}
-          displayExamples={data.displayExamples}
-        />
+        <>
+          <TableHeader
+            categoriesCount={data.categories.length}
+            selectedCategoriesCount={selectedCategories.length}
+            openInDiscover={openInDiscover}
+          />
+
+          <EuiSpacer size="xs" />
+          <EuiHorizontalRule margin="none" />
+
+          <CategoryTable
+            categories={data.categories}
+            eventRate={eventRate}
+            pinnedCategory={pinnedCategory}
+            setPinnedCategory={setPinnedCategory}
+            highlightedCategory={highlightedCategory}
+            setHighlightedCategory={setHighlightedCategory}
+            displayExamples={data.displayExamples}
+            setSelectedCategories={setSelectedCategories}
+            openInDiscover={openInDiscover}
+          />
+        </>
       ) : null}
     </EuiPageBody>
   );

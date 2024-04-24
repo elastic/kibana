@@ -41,6 +41,7 @@ import { EmbeddableMenu } from './embeddable_menu';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
 import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
+import { useOpenInDiscover } from '../category_table/use_open_in_discover';
 
 export interface LogCategorizationPageProps {
   onClose: () => void;
@@ -88,7 +89,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     })
   );
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
   const [fields, setFields] = useState<DataViewField[]>([]);
   const [currentDocumentStatsHash, setCurrentDocumentStatsHash] = useState<number | null>(null);
@@ -155,6 +157,36 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     undefined,
     undefined,
     BAR_TARGET
+  );
+
+  const onAddFilter = useCallback(
+    (values: Filter, alias?: string) => {
+      if (input.onAddFilter === undefined) {
+        return;
+      }
+
+      const filter = buildEmptyFilter(false, dataView.id);
+      if (alias) {
+        filter.meta.alias = alias;
+      }
+      filter.query = values.query;
+      if (onAddFilter !== undefined) {
+        input.onAddFilter();
+      }
+      filterManager.addFilters([filter]);
+    },
+    [dataView.id, filterManager, input]
+  );
+
+  const openInDiscover = useOpenInDiscover(
+    dataView.id!,
+    selectedField?.displayName ?? undefined,
+    selectedCategories,
+    stateFromUrl,
+    timefilter,
+    false,
+    onAddFilter,
+    undefined
   );
 
   useEffect(
@@ -243,6 +275,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
           timeRange.useSubAgg ? tempAdditionalFilter : undefined
         ),
       ]);
+      // eslint-disable-next-line no-console
+      console.log('categorizationResult', categorizationResult);
 
       if (mounted.current !== true) {
         return;
@@ -338,25 +372,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     ]
   );
 
-  const onAddFilter = useCallback(
-    (values: Filter, alias?: string) => {
-      if (input.onAddFilter === undefined) {
-        return;
-      }
-
-      const filter = buildEmptyFilter(false, dataView.id);
-      if (alias) {
-        filter.meta.alias = alias;
-      }
-      filter.query = values.query;
-      if (onAddFilter !== undefined) {
-        input.onAddFilter();
-      }
-      filterManager.addFilters([filter]);
-    },
-    [dataView.id, filterManager, input]
-  );
-
   useEffect(
     function triggerAnalysis() {
       const buckets = documentStats.documentCountStats?.buckets;
@@ -369,6 +384,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         (currentAdditionalConfigsHash !== previousAdditionalConfigsHash &&
           currentDocumentStatsHash !== null)
       ) {
+        // eslint-disable-next-line no-console
+        console.log('trigger', currentDocumentStatsHash, previousDocumentStatsHash);
         randomSampler.setDocCount(documentStats.totalCount);
         setEventRate(
           Object.entries(buckets).map(([key, docCount]) => ({
@@ -379,6 +396,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         loadCategories();
         setPreviousDocumentStatsHash(currentDocumentStatsHash);
         setPreviousAdditionalConfigsHash(currentAdditionalConfigsHash);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('no trigger', currentDocumentStatsHash, previousDocumentStatsHash);
       }
     },
     [
@@ -397,6 +417,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   useEffect(
     function refreshTriggeredFromButton() {
       if (input?.lastReloadRequestTime !== undefined) {
+        setPreviousDocumentStatsHash(0);
+        setPreviousAdditionalConfigsHash(null);
         forceRefresh();
       }
     },
@@ -415,7 +437,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         <EuiFlexItem css={{ position: 'relative', overflowY: 'auto' }}>
           <>
             <FieldValidationCallout validationResults={fieldValidationResult} />
-            {(loading ?? true) === true ? <LoadingCategorization onClose={onClose} /> : null}
+            {(loading ?? true) === true ? <LoadingCategorization onCancel={cancelRequest} /> : null}
             <InformationText
               loading={loading ?? true}
               categoriesLength={data?.categories?.length ?? null}
@@ -428,22 +450,15 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
             selectedField !== null ? (
               <CategoryTable
                 categories={data.categories}
-                aiopsListState={stateFromUrl}
-                dataViewId={dataView.id!}
                 eventRate={eventRate}
-                selectedField={selectedField}
                 pinnedCategory={pinnedCategory}
                 setPinnedCategory={setPinnedCategory}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                timefilter={timefilter}
-                onAddFilter={onAddFilter}
-                onClose={onClose}
+                highlightedCategory={highlightedCategory}
+                setHighlightedCategory={setHighlightedCategory}
                 enableRowActions={false}
-                additionalFilter={additionalFilter}
-                navigateToDiscover={additionalFilter !== undefined}
                 displayExamples={data.displayExamples}
-                displayHeader={false}
+                setSelectedCategories={setSelectedCategories}
+                openInDiscover={openInDiscover}
               />
             ) : null}
           </>
