@@ -76,7 +76,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async confirmConnectorCreated() {
         await retry.waitForWithTimeout('connector table to appear', 5000, () =>
           testSubjects
-            .existorFail('serverlessSearchConnectorTable')
+            .existOrFail('serverlessSearchConnectorTable')
             .then(() => true)
             .catch(async () => {
               await browser.refresh();
