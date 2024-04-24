@@ -9,12 +9,11 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { pick } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiResizeObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
 import moment from 'moment';
 import {
@@ -47,6 +46,10 @@ interface AppStateZoom {
   from?: string;
   to?: string;
 }
+
+const errorMessage = i18n.translate('xpack.ml.singleMetricViewerEmbeddable.errorMessage"', {
+  defaultMessage: 'Unable to load the ML single metric viewer data',
+});
 
 export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -86,6 +89,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           ...timeRangeApi,
           ...singleMetricViewerControlsApi,
           dataLoading,
+          blockingError,
           serializeState: () => {
             return {
               rawState: {
@@ -172,7 +176,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
                 await mlJobService.loadJobsWrapper();
                 setJobsLoaded(true);
               } catch (e) {
-                blockingError.next(e);
+                blockingError.next(new Error(errorMessage));
               }
             }
             if (isMounted.current === false) {
@@ -195,7 +199,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
                     const job = jobs[0];
                     setSelectedJob(job);
                   } catch (e) {
-                    blockingError.next(e);
+                    blockingError.next(new Error(errorMessage));
                   }
                 }
               }
@@ -246,24 +250,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
             [setZoom, setSelectedForecastId]
           );
-
-          if (error) {
-            return (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.ml.singleMetricViewerEmbeddable.errorMessage"
-                    defaultMessage="Unable to load the ML single metric viewer data"
-                  />
-                }
-                color="danger"
-                iconType="warning"
-                css={{ width: '100%' }}
-              >
-                <p>{error.message}</p>
-              </EuiCallOut>
-            );
-          }
 
           return (
             <I18nContext>
