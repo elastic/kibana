@@ -18,7 +18,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { exhaustMap, takeUntil, timer } from 'rxjs';
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
@@ -166,7 +166,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     timer(this.initialCheckDelayMs, this.checkIntervalMs)
       .pipe(
         takeUntil(this.stop$),
-        exhaustMap(() => this.sendIfDue)
+        exhaustMap(() => this.sendIfDue())
       )
       .subscribe();
   }
