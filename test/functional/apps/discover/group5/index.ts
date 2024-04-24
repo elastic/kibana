@@ -11,23 +11,24 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group4', function () {
+  describe('discover/group5', function () {
     before(async function () {
-      await browser.setWindowSize(1600, 1200);
+      await browser.setWindowSize(1300, 800);
     });
 
     after(async function unloadMakelogs() {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./_discover_fields_api'));
-    loadTestFile(require.resolve('./_adhoc_data_views'));
-    loadTestFile(require.resolve('./_esql_view'));
-    loadTestFile(require.resolve('./_date_nested'));
-    loadTestFile(require.resolve('./_chart_hidden'));
-    loadTestFile(require.resolve('./_context_encoded_url_params'));
-    loadTestFile(require.resolve('./_data_view_edit'));
-    loadTestFile(require.resolve('./_field_list_new_fields'));
-    loadTestFile(require.resolve('./_document_comparison'));
+    loadTestFile(require.resolve('./_no_data'));
+    loadTestFile(require.resolve('./_filter_editor'));
+    loadTestFile(require.resolve('./_field_data'));
+    loadTestFile(require.resolve('./_field_data_with_fields_api'));
+    loadTestFile(require.resolve('./_shared_links'));
+    loadTestFile(require.resolve('./_source_filters'));
+    loadTestFile(require.resolve('./_large_string'));
+    loadTestFile(require.resolve('./_greeting_screen'));
+    loadTestFile(require.resolve('./_inspector'));
+    loadTestFile(require.resolve('./_url_state'));
   });
 }
