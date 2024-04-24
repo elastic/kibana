@@ -759,12 +759,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('max signals', () => {
-        beforeEach(async () => {
-          await createAlertsIndex(supertest, log);
-        });
-
         afterEach(async () => {
-          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
         });
 
