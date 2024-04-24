@@ -42,31 +42,6 @@ export const useColumns = ({
     }
     setUsedColumns(nextColumns);
   }, [columns, useNewFieldsApi, usedColumns]);
-
-  useEffect(() => {
-    console.log('changed columns', columns);
-  }, [columns]);
-
-  useEffect(() => {
-    console.log('changed usedColumns', usedColumns);
-  }, [usedColumns]);
-
-  useEffect(() => {
-    console.log('changed sort', sort);
-  }, [sort]);
-
-  useEffect(() => {
-    console.log('changed defaultOrder', defaultOrder);
-  }, [defaultOrder]);
-
-  useEffect(() => {
-    console.log(`changed setUsedColumns`, setUsedColumns);
-  }, [setUsedColumns]);
-
-  useEffect(() => {
-    console.log(`changed setAppState`, setAppState);
-  }, [setAppState]);
-
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
@@ -75,7 +50,6 @@ export const useColumns = ({
         dataViews,
         setAppState,
         useNewFieldsApi,
-        setUsedColumns,
         columns: usedColumns,
         sort,
         defaultOrder,
@@ -86,7 +60,6 @@ export const useColumns = ({
       dataViews,
       defaultOrder,
       setAppState,
-      setUsedColumns,
       sort,
       useNewFieldsApi,
       usedColumns,

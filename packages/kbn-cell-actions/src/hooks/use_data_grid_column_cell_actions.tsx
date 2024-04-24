@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { MutableRefObject, useCallback, useMemo, useRef } from 'react';
 import {
   EuiDataGridRefProps,
   EuiLoadingSpinner,
@@ -77,38 +77,6 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
     disabledActionTypes,
   });
 
-  // useEffect for changes in below vars
-  // columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef
-  //
-
-  useEffect(() => {
-    console.log('changed cellActions columnsActions', columnsActions);
-  }, [columnsActions]);
-
-  useEffect(() => {
-    console.log('changed cellActions fields', fields);
-  }, [fields]);
-
-  useEffect(() => {
-    console.log('changed cellActions getCellValue', getCellValue);
-  }, [getCellValue]);
-
-  useEffect(() => {
-    console.log('changed cellActions loading', loading);
-  }, [loading]);
-
-  useEffect(() => {
-    console.log('changed cellActions metadata', metadata);
-  }, [metadata]);
-
-  useEffect(() => {
-    console.log('changed cellActions triggerId', triggerId);
-  }, [triggerId]);
-
-  useEffect(() => {
-    console.log('changed cellActions dataGridRef', dataGridRef);
-  }, [dataGridRef]);
-
   const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
     if (loading) {
       return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
@@ -157,8 +125,6 @@ const createColumnCellAction = ({
   function ColumnCellAction({ Component, rowIndex, isExpanded }) {
     const nodeRef = useRef<HTMLAnchorElement | null>(null);
     const buttonRef = useRef<HTMLAnchorElement | null>(null);
-
-    console.log({ isExpanded });
 
     const actionContext: CellActionExecutionContext = useMemo(() => {
       const { name } = field;

@@ -58,7 +58,6 @@ export function getStateColumnActions({
   dataViews,
   useNewFieldsApi,
   setAppState,
-  setUsedColumns,
   columns,
   sort,
   defaultOrder,
@@ -67,7 +66,6 @@ export function getStateColumnActions({
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setUsedColumns: (columns: string[]) => void;
   setAppState: (state: { columns: string[]; sort?: string[][] }) => void;
   columns?: string[];
   sort: string[][] | undefined;
@@ -100,7 +98,6 @@ export function getStateColumnActions({
         ? (nextColumns || []).slice(1)
         : nextColumns;
 
-    setUsedColumns(actualColumns);
     setAppState({ columns: actualColumns });
   }
   return {
