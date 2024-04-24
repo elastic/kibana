@@ -20,14 +20,14 @@ import { Type } from '@kbn/config-schema';
 export function isCustomValidation(
   v: VersionedCustomRouteValidation | VersionedResponseValidation
 ): v is VersionedCustomRouteValidation {
-  return 'customFn' in v;
+  return 'custom' in v;
 }
 
 export function unwrapResponseBodyValidation(
   validation: VersionedRouteResponseValidation[number]['body']
 ): RouteValidationFunction<unknown> | Type<unknown> {
   if (isCustomValidation(validation)) {
-    return validation.customFn;
+    return validation.custom;
   }
   return validation();
 }

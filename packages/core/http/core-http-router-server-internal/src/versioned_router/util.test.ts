@@ -12,23 +12,23 @@ import { isCustomValidation, unwrapResponseBodyValidation } from './util';
 
 test.each([
   [() => schema.object({}), false],
-  [{ customFn: () => ({ value: 1 }) }, true],
+  [{ custom: () => ({ value: 1 }) }, true],
 ])('isCustomValidation correctly detects custom validation %#', (input, result) => {
   expect(isCustomValidation(input)).toBe(result);
 });
 
 test('unwrapResponseBodyValidation', () => {
   const mySchema = schema.object({});
-  const customFn = () => ({ value: 'ok' });
+  const custom = () => ({ value: 'ok' });
   const validation: VersionedRouteResponseValidation = {
     200: {
       body: () => mySchema,
     },
     404: {
-      body: { customFn },
+      body: { custom },
     },
   };
 
   expect(unwrapResponseBodyValidation(validation[200].body)).toBe(mySchema);
-  expect(unwrapResponseBodyValidation(validation[404].body)).toBe(customFn);
+  expect(unwrapResponseBodyValidation(validation[404].body)).toBe(custom);
 });

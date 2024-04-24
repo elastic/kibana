@@ -315,8 +315,8 @@ describe('Versioned route', () => {
       const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
         testValidation;
 
-      const customFn = jest.fn(() => ({ value: 1 }));
-      fooValidation.response[200].body = { customFn } as any;
+      const custom = jest.fn(() => ({ value: 1 }));
+      fooValidation.response[200].body = { custom } as any;
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
       const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
@@ -343,7 +343,7 @@ describe('Versioned route', () => {
       expect(validateParamsFn).toHaveBeenCalledTimes(1);
       expect(validateQueryFn).toHaveBeenCalledTimes(1);
       expect(validateOutputFn).toHaveBeenCalledTimes(0);
-      expect(customFn).toHaveBeenCalledTimes(1);
+      expect(custom).toHaveBeenCalledTimes(1);
     });
   });
 
