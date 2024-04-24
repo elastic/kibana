@@ -481,6 +481,7 @@ x-pack/plugins/index_lifecycle_management @elastic/kibana-management
 x-pack/packages/index-management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
