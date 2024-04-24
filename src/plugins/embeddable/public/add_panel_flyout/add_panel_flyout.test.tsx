@@ -49,10 +49,10 @@ describe('add panel flyout', () => {
   let container: HelloWorldContainer;
 
   beforeEach(() => {
-    const { overlays } = coreMock.createStart();
+    const coreStart = coreMock.createStart();
     const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
       (() => null) as any,
-      overlays
+      coreStart
     );
 
     embeddableStart.getEmbeddableFactories = jest

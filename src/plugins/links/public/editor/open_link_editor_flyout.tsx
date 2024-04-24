@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
@@ -64,14 +64,14 @@ export async function openLinkEditorFlyout({
     };
 
     ReactDOM.render(
-      <KibanaThemeProvider theme={coreServices.theme}>
+      <KibanaRenderContextProvider {...coreServices}>
         <LinkEditor
           link={link}
           onSave={onSave}
           onClose={onCancel}
           parentDashboard={parentDashboard}
         />
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       ref.current
     );
   }).catch(() => {

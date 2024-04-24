@@ -16,7 +16,7 @@
       "contentManagement"
     ],
     "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
-    "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils", "presentationPanel"],
+    "requiredBundles": ["savedObjects", "kibanaUtils", "presentationPanel"],
     "extraPublicDirs": ["common"]
   }
 }

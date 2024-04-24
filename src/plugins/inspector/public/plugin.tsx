@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
@@ -59,9 +59,9 @@ export interface Start {
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(_core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
     this.views.register(getRequestsViewDescription());
@@ -109,7 +109,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               theme: core.theme,
             }}
           />,
-          { theme$: core.theme.theme$ }
+          core
         ),
         {
           'data-test-subj': 'inspectorPanel',
