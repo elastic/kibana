@@ -512,42 +512,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/nav_control/nav_control.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/nav_control/nav_control.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/nav_control/nav_control.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
           },
@@ -574,114 +538,6 @@
           {
             "plugin": "console",
             "path": "src/plugins/console/public/shared_imports.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2079,14 +1935,6 @@
           {
             "plugin": "licensing",
             "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
           },
           {
             "plugin": "visualizations",
