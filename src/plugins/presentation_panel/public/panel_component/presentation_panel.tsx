@@ -49,14 +49,22 @@ export const PresentationPanel = <
     // when unwrappedComponent needs to be re-loaded
   }, []);
 
+  if (loading)
+    return (
+      <PanelLoader
+        showShadow={props.showShadow}
+        showBorder={props.showBorder}
+        dataTestSubj="embeddablePanelLoadingIndicator"
+      />
+    );
+
   const Panel = value?.Panel;
   const UnwrappedComponent = value?.unwrappedComponent;
-  const shouldHavePanel = !loading && !hidePanelChrome;
-  const shouldHaveUnwrappedComponent = !loading;
+  const shouldHavePanel = !hidePanelChrome;
   if (
     error ||
     (shouldHavePanel && !Panel) ||
-    (shouldHaveUnwrappedComponent && !UnwrappedComponent)
+    !UnwrappedComponent
   ) {
     return (
       <EuiFlexGroup
@@ -70,20 +78,13 @@ export const PresentationPanel = <
     );
   }
 
-  if (loading)
-    return (
-      <PanelLoader
-        showShadow={props.showShadow}
-        showBorder={props.showBorder}
-        dataTestSubj="embeddablePanelLoadingIndicator"
-      />
-    );
-
   return shouldHavePanel && Panel ? (
-    <Panel<ApiType, PropsType> Component={UnwrappedComponent!} {...passThroughProps} />
+    <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
   ) : (
     <EuiErrorBoundary>
-      <UnwrappedComponent />
+      <UnwrappedComponent
+        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<typeof UnwrappedComponent>)}
+      />
     </EuiErrorBoundary>
   );
 };

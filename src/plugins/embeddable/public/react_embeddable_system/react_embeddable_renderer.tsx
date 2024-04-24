@@ -132,7 +132,7 @@ export const ReactEmbeddableRenderer = <
   }, []);
 
   return (
-    <PresentationPanel
+    <PresentationPanel<ApiType, {}>
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
       Component={componentPromise}
