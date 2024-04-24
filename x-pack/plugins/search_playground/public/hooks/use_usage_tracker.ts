@@ -14,7 +14,6 @@ const APP_TRACKER_NAME = 'search_playground';
 export const useUsageTracker = () => {
   const { usageCollection } = useKibana().services;
 
-  // See: https://docs.elastic.dev/telemetry/collection/usage-counters/
   return useMemo(
     () => ({
       click: usageCollection.reportUiCounter.bind(

@@ -16,6 +16,13 @@ const render = (children: React.ReactNode) =>
 const MockIcon = () => <span />;
 
 jest.mock('../../hooks/use_management_link');
+jest.mock('../../hooks/use_usage_tracker', () => ({
+  useUsageTracker: () => ({
+    count: jest.fn(),
+    load: jest.fn(),
+    click: jest.fn(),
+  }),
+}));
 
 const mockUseManagementLink = useManagementLink as jest.Mock;
 

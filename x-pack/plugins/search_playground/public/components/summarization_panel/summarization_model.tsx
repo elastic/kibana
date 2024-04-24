@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import {
   EuiButtonIcon,
@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
 import { useManagementLink } from '../../hooks/use_management_link';
 
@@ -38,6 +39,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   models,
   onSelect,
 }) => {
+  const usageTracker = useUsageTracker();
   const managementLink = useManagementLink(selectedModel.connectorId);
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
@@ -46,7 +48,6 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       onSelect(newSelectedModel);
     }
   };
-
   const modelsOption: Array<EuiSuperSelectOption<string>> = useMemo(
     () =>
       models.map((model) => ({
@@ -94,6 +95,10 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       })),
     [models]
   );
+
+  useEffect(() => {
+    usageTracker.click(`summarization_model_selected_${selectedModel}`);
+  }, [usageTracker, selectedModel]);
 
   return (
     <EuiFormRow
