@@ -202,7 +202,7 @@ export class ChromeService {
     // ChromeStyle is set to undefined by default, which means that no header will be rendered until
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
-    const chromeStyle$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
+    const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -214,16 +214,20 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const chromeStyle$ = chromeStyleSubject$.pipe(
+      filter((style): style is ChromeStyle => style !== undefined),
+      takeUntil(this.stop$)
+    );
     const setChromeStyle = (style: ChromeStyle) => {
-      if (style === chromeStyle$.getValue()) return;
-      chromeStyle$.next(style);
+      if (style === chromeStyleSubject$.getValue()) return;
+      chromeStyleSubject$.next(style);
     };
 
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const bodyClasses$ = combineLatest([
       headerBanner$,
       this.isVisible$!,
-      chromeStyle$,
+      chromeStyleSubject$,
       application.currentActionMenu$,
     ]).pipe(
       map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
@@ -266,13 +270,12 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    const getActiveSolutionNavId$ = () =>
-      projectNavigation
-        .getActiveSolutionNavDefinition$()
-        .pipe(map((navDefinition) => navDefinition?.id ?? null));
+    const activeSolutionNavId$ = projectNavigation
+      .getActiveSolutionNavDefinition$()
+      .pipe(map((navDefinition) => navDefinition?.id ?? null));
 
     const validateChromeStyle = () => {
-      const chromeStyle = chromeStyle$.getValue();
+      const chromeStyle = chromeStyleSubject$.getValue();
       if (chromeStyle !== 'project') {
         // Helps ensure callers go through the serverless plugin to get here.
         throw new Error(
@@ -353,11 +356,11 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
-      const defaultChromeStyle = chromeStyle$.getValue();
+      const defaultChromeStyle = chromeStyleSubject$.getValue();
 
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
-        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
+        const chromeStyle = useObservable(chromeStyleSubject$, defaultChromeStyle);
 
         if (!isVisible) {
           return (
@@ -535,13 +538,9 @@ export class ChromeService {
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
-      getChromeStyle$: () =>
-        chromeStyle$.pipe(
-          filter((style): style is ChromeStyle => style !== undefined),
-          takeUntil(this.stop$)
-        ),
+      getChromeStyle$: () => chromeStyle$,
       getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
-      getActiveSolutionNavId$,
+      getActiveSolutionNavId$: () => activeSolutionNavId$,
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),

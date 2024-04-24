@@ -18,7 +18,7 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
 import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
@@ -33,7 +33,7 @@ export const LogsExplorerTopNavMenu = () => {
     services: { chrome },
   } = useKibanaContextForPlugin();
 
-  const chromeStyle = useObservable(useMemo(() => chrome.getChromeStyle$(), [chrome]));
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
 
   return chromeStyle === 'project' ? <ProjectTopNav /> : <ClassicTopNav />;
 };
