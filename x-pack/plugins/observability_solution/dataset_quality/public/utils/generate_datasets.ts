@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mapPercentageToQuality } from '../../common/utils';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
@@ -46,10 +47,17 @@ export function generateDatasets(
     {
       percentage: DegradedDocsStat['percentage'];
       count: DegradedDocsStat['count'];
+      quality: DegradedDocsStat['quality'];
     }
   > = degradedDocStats.reduce(
-    (degradedMapAcc, { dataset, percentage, count }) =>
-      Object.assign(degradedMapAcc, { [dataset]: { percentage, count } }),
+    (degradedMapAcc, { dataset, percentage, count, quality }) =>
+      Object.assign(degradedMapAcc, {
+        [dataset]: {
+          percentage,
+          count,
+          quality: mapPercentageToQuality(percentage),
+        },
+      }),
     {}
   );
 

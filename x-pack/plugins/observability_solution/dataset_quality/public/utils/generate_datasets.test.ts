@@ -47,6 +47,7 @@ describe('generateDatasets', () => {
       degradedDocs: {
         percentage: 0,
         count: 0,
+        quality: 'good',
       },
     },
     {
@@ -61,6 +62,7 @@ describe('generateDatasets', () => {
       degradedDocs: {
         percentage: 0,
         count: 0,
+        quality: 'good',
       },
     },
   ];
@@ -70,11 +72,13 @@ describe('generateDatasets', () => {
       dataset: 'logs-system.application-default',
       percentage: 0,
       count: 0,
+      quality: 'good' as const,
     },
     {
       dataset: 'logs-synth-default',
       percentage: 11.320754716981131,
       count: 6,
+      quality: 'poor' as const,
     },
   ];
 
@@ -86,6 +90,11 @@ describe('generateDatasets', () => {
         ...dataStreamStats[0],
         title: integrations[0].datasets[dataStreamStats[0].name],
         integration: integrations[0],
+        degradedDocs: {
+          percentage: degradedDocs[0].percentage,
+          count: degradedDocs[0].count,
+          quality: 'good',
+        },
       },
       {
         ...dataStreamStats[1],
@@ -111,6 +120,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          quality: 'good',
         },
       },
       {
@@ -126,6 +136,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
+          quality: 'poor',
         },
       },
     ]);
@@ -142,6 +153,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          quality: 'good',
         },
       },
       {
@@ -149,6 +161,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
+          quality: 'poor',
         },
       },
     ]);

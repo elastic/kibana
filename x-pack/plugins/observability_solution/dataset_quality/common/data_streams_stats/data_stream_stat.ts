@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_DEGRADED_DOCS } from '../constants';
-import { DataStreamType } from '../types';
-import { indexNameToDataStreamParts } from '../utils';
+import { DataStreamType, QualityIndicators } from '../types';
+import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
 import { DegradedDocsStat } from './malformed_docs_stat';
 import { DataStreamStatType } from './types';
@@ -25,6 +25,7 @@ export class DataStreamStat {
   degradedDocs: {
     percentage: number;
     count: number;
+    quality: QualityIndicators;
   };
 
   private constructor(dataStreamStat: DataStreamStat) {
@@ -40,6 +41,7 @@ export class DataStreamStat {
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
       count: dataStreamStat.degradedDocs.count,
+      quality: dataStreamStat.degradedDocs.quality,
     };
   }
 
@@ -80,6 +82,7 @@ export class DataStreamStat {
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
+        quality: mapPercentageToQuality(degradedDocStat.percentage),
       },
     };
 

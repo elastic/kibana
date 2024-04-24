@@ -9,8 +9,6 @@ import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
-import { mapPercentageToQuality } from './helpers';
-import { QualityIndicator } from './indicator';
 
 const FEW_DEGRADED_DOCS_THRESHOLD = 0.0005;
 
@@ -21,17 +19,13 @@ export function QualityPercentageIndicator({
   percentage: number;
   degradedDocsCount?: number;
 }) {
-  const quality = mapPercentageToQuality(percentage);
-
   const isFewDegradedDocsAvailable = percentage && percentage < FEW_DEGRADED_DOCS_THRESHOLD;
 
-  const description = isFewDegradedDocsAvailable ? (
+  return isFewDegradedDocsAvailable ? (
     <DatasetWithFewDegradedDocs degradedDocsCount={degradedDocsCount} />
   ) : (
     <DatasetWithManyDegradedDocs percentage={percentage} />
   );
-
-  return <QualityIndicator quality={quality} description={description} />;
 }
 
 const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?: number }) => {
