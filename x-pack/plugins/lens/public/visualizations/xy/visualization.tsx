@@ -939,6 +939,7 @@ export const getXyVisualization = ({
     }
 
     const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
+    const dataLayers = getDataLayers(state.layers);
     const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
     const logAxisGroups = axisGroups.filter(
       ({ groupId }) =>
