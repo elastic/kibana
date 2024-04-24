@@ -20,6 +20,7 @@ import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169958
+// Failing: See https://github.com/elastic/kibana/issues/169958
 describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
