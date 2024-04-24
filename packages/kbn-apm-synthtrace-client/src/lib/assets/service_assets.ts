@@ -9,10 +9,10 @@
 import { Asset, AssetDocument } from './asset';
 
 export interface ServiceAssetDocument extends AssetDocument {
-  'service.language.name': string;
+  'service.language.name'?: string;
   'service.name': string;
-  'service.node.name': string;
-  'service.environment': string;
+  'service.node.name'?: string;
+  'service.environment'?: string;
 }
 
 export class ServiceAsset extends Asset<ServiceAssetDocument> {
