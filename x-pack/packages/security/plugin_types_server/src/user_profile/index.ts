@@ -11,4 +11,4 @@ export type {
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
   UserProfileGetCurrentParams,
-} from './user_profile_service';
+} from '@kbn/core-user-profile-server';
