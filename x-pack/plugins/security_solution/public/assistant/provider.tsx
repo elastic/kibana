@@ -46,8 +46,6 @@ const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
 );
 
 export const createConversations = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  conversationsData: Record<string, any>,
   notifications: NotificationsStart,
   http: HttpSetup,
   storage: Storage
@@ -56,12 +54,7 @@ export const createConversations = async (
   // won't happen next time
   const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
 
-  if (
-    conversationsData &&
-    Object.keys(conversationsData).length === 0 &&
-    conversations &&
-    Object.keys(conversations).length > 0
-  ) {
+  if (conversations && Object.keys(conversations).length > 0) {
     const conversationsToCreate = Object.values(conversations).filter(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c: any) => c.messages && c.messages.length > 0
@@ -87,10 +80,14 @@ export const createConversations = async (
             const selectedConnector = (connectors ?? []).find(
               (connector) => connector.id === c.apiConfig.connectorId
             );
-            c.apiConfig = {
-              ...c.apiConfig,
-              actionTypeId: selectedConnector?.actionTypeId,
-            };
+            if (selectedConnector) {
+              c.apiConfig = {
+                ...c.apiConfig,
+                actionTypeId: selectedConnector.actionTypeId,
+              };
+            } else {
+              c.apiConfig = undefined;
+            }
           }
           res[c.id] = {
             ...c,
@@ -132,15 +129,19 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
-  const migrateConversationsFromLocalStorage = once(
-    (conversationsData: Record<string, Conversation>) =>
-      createConversations(conversationsData, notifications, http, storage)
+  const migrateConversationsFromLocalStorage = once(() =>
+    createConversations(notifications, http, storage)
   );
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
       const mergedData = mergeBaseWithPersistedConversations({}, conversationsData);
-      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
-        migrateConversationsFromLocalStorage(mergedData);
+      if (
+        conversationsData &&
+        Object.keys(conversationsData).length === 0 &&
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege
+      ) {
+        migrateConversationsFromLocalStorage();
       }
       return mergedData;
     },
