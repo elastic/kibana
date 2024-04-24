@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   source.documentType === ApmDocumentType.TransactionMetric &&
                   !source.hasDurationSummaryField
               ).length
-            ).to.eql(2);
+            ).to.eql(3);
           });
         });
       });
