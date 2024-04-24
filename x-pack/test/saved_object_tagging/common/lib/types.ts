@@ -20,12 +20,5 @@ export interface Role {
 
 export interface ExpectedResponse {
   httpCode: number;
-  expectResponse: (
-    body: Record<
-      string,
-      {
-        tags: Array<{ id: string }>; // for the purposes of testing, we only care about the tags' id field
-      }
-    >
-  ) => void | Promise<void>;
+  expectResponse: (body: Record<string, any>) => void | Promise<void>;
 }

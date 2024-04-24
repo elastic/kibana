@@ -39,10 +39,11 @@ export default function (ftrContext: FtrProviderContext) {
             throw new Error('Expected body.tags to be an array');
           }
 
-          const tags = body.tags;
-          tags.sort((a, b) => {
-            return a.id.localeCompare(b.id);
-          });
+          const tags = (body.tags as [{ id: string }])
+            // sort the tags by ID alphabetically
+            .sort((a, b) => {
+              return a.id.localeCompare(b.id);
+            });
 
           expect(tags).to.eql([
             {
