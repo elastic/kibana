@@ -26,11 +26,6 @@ export class PrivilegeFormCalculator {
    */
   public getBasePrivilege(privilegeIndex: number) {
     const entry = this.role.kibana[privilegeIndex];
-    const entryNormilized = {
-      ...entry,
-      base: entry.base.map((privelege) => (privelege === '*' ? 'all' : privelege)),
-    };
-
     const basePrivileges = this.kibanaPrivileges.getBasePrivileges(entry);
 
     return basePrivileges.find((bp) => entry.base.includes(bp.id));
