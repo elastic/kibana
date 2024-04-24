@@ -798,6 +798,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
       enrichedPackagePolicy = packagePolicyUpdate;
     }
+
     const packagePolicy = { ...enrichedPackagePolicy, name: enrichedPackagePolicy.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
 

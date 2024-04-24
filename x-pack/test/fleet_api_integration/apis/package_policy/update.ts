@@ -521,6 +521,45 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should allow to override inputs', async function () {
+      const inputs = [
+        {
+          enabled: true,
+          streams: [],
+          config: {
+            policy: {
+              value: policyFactory(),
+            },
+          },
+          type: 'endpoint',
+        },
+      ];
+      const {
+        body: { item },
+      } = await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs,
+          },
+        })
+        .expect(200);
+      expect(item.revision).to.equal(2);
+    });
+
+    it('should not allow to override properties other than inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            name: 'test',
+          },
+        })
+        .expect(400);
+    });
+
     describe('Simplified package policy', async () => {
       it('should work with valid values', async function () {
         await supertest

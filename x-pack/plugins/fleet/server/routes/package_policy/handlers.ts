@@ -34,6 +34,8 @@ import type {
   PackagePolicy,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestBodySchema,
+  PackagePolicyInput,
 } from '../../types';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -318,7 +320,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   try {
-    const { force, package: pkg, overrides, ...body } = request.body;
+    const { force, package: pkg, ...body } = request.body;
     // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
     if ('output_id' in body) {
       delete body.output_id;
@@ -344,25 +346,33 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
     } else {
+      const { overrides, ...restOfBody } = body as TypeOf<
+        typeof UpdatePackagePolicyRequestBodySchema
+      >;
       const packagePolicyInputs = removeFieldsFromInputSchema(packagePolicy.inputs);
 
       // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
       newData = {
-        ...body,
-        name: body.name ?? packagePolicy.name,
-        description: body.description ?? packagePolicy.description,
-        namespace: body.namespace ?? packagePolicy?.namespace,
-        policy_id: body.policy_id ?? packagePolicy.policy_id,
-        enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
+        ...restOfBody,
+        name: restOfBody.name ?? packagePolicy.name,
+        description: restOfBody.description ?? packagePolicy.description,
+        namespace: restOfBody.namespace ?? packagePolicy?.namespace,
+        policy_id: restOfBody.policy_id ?? packagePolicy.policy_id,
+        enabled:
+          'enabled' in restOfBody
+            ? restOfBody.enabled ?? packagePolicy.enabled
+            : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,
-        inputs: body.inputs ?? packagePolicyInputs,
-        vars: body.vars ?? packagePolicy.vars,
+        inputs: restOfBody.inputs ?? packagePolicyInputs,
+        vars: restOfBody.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
+
+      // if inputs overrides are specified, remove disallowed properties `compiled_streams` and `compiled_input`
+      if (overrides?.inputs) {
+        newData.inputs = removeFieldsFromInputSchema(overrides.inputs as PackagePolicyInput[]);
+      }
     }
 
-    if (overrides?.inputs) {
-      newData.inputs = removeFieldsFromInputSchema(overrides.inputs);
-    }
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
