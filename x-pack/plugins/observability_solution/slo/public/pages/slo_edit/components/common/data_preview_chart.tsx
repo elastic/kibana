@@ -103,7 +103,8 @@ export function DataPreviewChart({
       ? formatPattern
       : (uiSettings.get('format:percent:defaultPattern') as string);
 
-  const values = (previewData || []).map((row) => row.sliValue);
+  // map values to row.sliValue and filter out no data values
+  const values = (previewData || []).map((row) => row.sliValue).filter((value) => value !== -1);
   const maxValue = max(values);
   const minValue = min(values);
   const domain = {
