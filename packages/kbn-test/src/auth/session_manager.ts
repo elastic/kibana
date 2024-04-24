@@ -47,11 +47,11 @@ export class SamlSessionManager {
 
   constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
     this.isCloud = options.isCloud;
+    this.log = options.log;
     // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
     const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
-    console.log(`Using the file ${rolesFile} for the role users`);
+    this.log.info(`Using the file ${rolesFile} for the role users`);
     this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);
-    this.log = options.log;
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
