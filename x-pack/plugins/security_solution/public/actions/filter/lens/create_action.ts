@@ -108,7 +108,8 @@ export const createFilterLensAction = ({
         });
         return;
       }
-
+      
+      const addFilter = negate === true ? addFilterOut : addFilterIn;
       addFilter({
         filterManager,
         fieldName: field,
