@@ -171,7 +171,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('@ess @serverless Threat match type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/155304
+  describe('@ess @serverless @serverlessQA Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
     });

@@ -30,12 +30,18 @@ import type {
 import type { FormatFactory } from '../../../common/types';
 import type { DatatableProps } from '../../../common/expressions';
 
-async function getColumnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {
+export async function getColumnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {
   if (!table.rows.length) {
     return;
   }
+
+  // to avoid false negatives, find the first index of the row with data for each column
+  const rowsWithDataForEachColumn = table.columns.map((column, colIndex) => {
+    const rowIndex = table.rows.findIndex((row) => row[column.id] != null);
+    return [rowIndex > -1 ? rowIndex : 0, colIndex];
+  });
   return Promise.all(
-    table.columns.map(async (column, colIndex) => {
+    rowsWithDataForEachColumn.map(async ([rowIndex, colIndex]) => {
       return Boolean(
         await handlers.hasCompatibleActions?.({
           name: 'filter',
@@ -44,7 +50,7 @@ async function getColumnsFilterable(table: Datatable, handlers: IInterpreterRend
               {
                 table,
                 column: colIndex,
-                row: 0,
+                row: rowIndex,
               },
             ],
           },
