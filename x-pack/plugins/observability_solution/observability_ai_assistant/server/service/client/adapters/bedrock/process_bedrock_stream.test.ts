@@ -173,7 +173,9 @@ describe('processBedrockStream', () => {
       );
     }
 
-    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(`"no elements in sequence"`);
+    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unexpected token 'i', \\"invalid json\\" is not valid JSON"`
+    );
   });
 
   it('successfully invokes a function without parameters', async () => {
