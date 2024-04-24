@@ -219,6 +219,12 @@ const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType 
         iconSize="l"
         color="subdued"
         css={{
+          /**
+           * Nudges the icon a bit to the
+           * right because it's not symmetrical and
+           * look off-center by default. This makes
+           * it visually centered.
+           */
           padding: '24px 22px 24px 26px',
         }}
       />
