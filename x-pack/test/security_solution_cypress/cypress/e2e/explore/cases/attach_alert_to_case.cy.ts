@@ -31,10 +31,6 @@ describe('Alerts timeline', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
-
-    login();
-    visitWithTimeRange(ALERTS_URL);
-    waitForAlertsToPopulate();
   });
 
   afterEach(() => {
