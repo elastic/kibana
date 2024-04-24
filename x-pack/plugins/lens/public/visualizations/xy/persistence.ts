@@ -91,13 +91,9 @@ export function convertToRuntime(
   annotationGroups?: AnnotationGroups,
   references?: SavedObjectReference[]
 ) {
-  const outputState = needsInjectReferences(state)
-    ? injectReferences(state, annotationGroups, references)
-    : state;
-  if ('valuesInLegend' in outputState) {
-    return convertToLegendStats(outputState);
-  }
-  return outputState;
+  let newState = cloneDeep(injectReferences(state, annotationGroups, references));
+  newState = convertToLegendStats(newState);
+  return newState;
 }
 
 export function convertToPersistable(state: XYState) {
@@ -189,6 +185,9 @@ function injectReferences(
   if (!references || !references.length) {
     return state as XYState;
   }
+  if (!needsInjectReferences(state)) {
+    return state as XYState;
+  }
 
   if (!annotationGroups) {
     throw new Error(
@@ -272,12 +271,14 @@ function injectReferences(
 }
 
 function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
-  const newState = cloneDeep(state);
-  delete newState.valuesInLegend;
+  if (!('valuesInLegend' in state)) {
+    return state;
+  }
+  delete state.valuesInLegend;
   const result: XYState = {
-    ...newState,
+    ...state,
     legend: {
-      ...newState.legend,
+      ...state.legend,
       legendStats: [
         ...new Set([
           ...(state.valuesInLegend ? [LegendStats.values] : []),

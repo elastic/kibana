@@ -14,7 +14,7 @@ export const getLegendStats = (layer: PieLayerState, shape: PieChartType) => {
   if ('defaultLegendStats' in PartitionChartsMeta[shape]?.legend) {
     return (
       layer.legendStats ??
-      PartitionChartsMeta[shape]?.legend?.defaultLegendStats ?? [LegendStats.values]
+      PartitionChartsMeta[shape].legend.defaultLegendStats ?? [LegendStats.values]
     );
   }
 };

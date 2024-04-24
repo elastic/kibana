@@ -270,29 +270,28 @@ export const getXyVisualization = ({
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
-    return state
-      ? convertToRuntime(state, annotationGroups!, references)
-      : {
-          title: 'Empty XY chart',
-          legend: { isVisible: true, position: Position.Right },
-          valueLabels: 'hide',
-          preferredSeriesType: defaultSeriesType,
-          layers: [
-            {
-              layerId: addNewLayer(),
-              accessors: [],
-              position: Position.Top,
-              seriesType: defaultSeriesType,
-              showGridlines: false,
-              layerType: LayerTypes.DATA,
-              palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-              colorMapping:
-                mainPalette?.type === 'colorMapping'
-                  ? mainPalette.value
-                  : getColorMappingDefaults(),
-            },
-          ],
-        };
+    if (state) {
+      return convertToRuntime(state, annotationGroups!, references);
+    }
+    return {
+      title: 'Empty XY chart',
+      legend: { isVisible: true, position: Position.Right },
+      valueLabels: 'hide',
+      preferredSeriesType: defaultSeriesType,
+      layers: [
+        {
+          layerId: addNewLayer(),
+          accessors: [],
+          position: Position.Top,
+          seriesType: defaultSeriesType,
+          showGridlines: false,
+          layerType: LayerTypes.DATA,
+          palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+          colorMapping:
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
+        },
+      ],
+    };
   },
 
   getLayerType(layerId, state) {

@@ -27,43 +27,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(text).to.eql(expectedText);
   }
 
-  async function goToTimeRangeForXyChart() {
-    await PageObjects.lens.goToTimeRange(undefined, 'Sep 22, 2015 @ 23:30:00.000');
-  }
-
   describe('lens persisted and runtime state differences properties', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/legend_statistics'
       );
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults':
+          '{  "from": "2015-09-18T19:37:13.000Z",  "to": "2015-09-22T23:30:30.000Z"}',
+      });
+    });
+
+    after(async () => {
+      await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
     describe('xy chart', () => {
       it('shows values in legend for legacy valuesInLegend===true property and saves it correctly', async () => {
         const title = 'xyValuesInLegendTrue';
         await loadSavedLens(title);
-        await goToTimeRangeForXyChart();
         await expectLegendOneItem('Count of records', '2');
         await PageObjects.lens.save(title);
         await loadSavedLens(title);
-        await goToTimeRangeForXyChart();
         await expectLegendOneItem('Count of records', '2');
       });
 
       it('does not show values in legend for legacy valuesInLegend===false prop', async () => {
         await loadSavedLens('xyValuesInLegendFalse');
-        await goToTimeRangeForXyChart();
         await expectLegendOneItem('Count of records');
       });
       it('shows values in legend for legendStats===["values"] prop', async () => {
         await loadSavedLens('xyLegendStats');
-        await goToTimeRangeForXyChart();
         await expectLegendOneItem('Count of records', '2');
       });
     });
     describe('waffle chart', () => {
       it('waffleshows values in legend for legacy valuesInLegend===true property', async () => {
         await loadSavedLens('waffleValuesInLegendTrue');
-        await expectLegendOneItem('Count of records', '14,005');
+        await expectLegendOneItem('Count of records', '14,003');
       });
       it('shows values in legend for legacy showValuesInLegend===false prop', async () => {
         await loadSavedLens('waffleValuesInLegendFalse');
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('shows values in legend for legendStats===["values"] prop', async () => {
         await loadSavedLens('waffleLegendStats');
-        await expectLegendOneItem('Count of records', '14,005');
+        await expectLegendOneItem('Count of records', '14,003');
       });
     });
   });

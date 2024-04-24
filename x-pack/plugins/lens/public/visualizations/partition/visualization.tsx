@@ -168,18 +168,19 @@ export const getPieVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {
-    return state
-      ? convertToRuntime(state)
-      : {
-          shape: PieChartTypes.DONUT,
-          layers: [
-            newLayerState(
-              addNewLayer(),
-              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
-            ),
-          ],
-          palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-        };
+    if (state) {
+      return convertToRuntime(state);
+    }
+    return {
+      shape: PieChartTypes.DONUT,
+      layers: [
+        newLayerState(
+          addNewLayer(),
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
+        ),
+      ],
+      palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+    };
   },
 
   getPersistableState(state) {

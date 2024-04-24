@@ -869,7 +869,7 @@ export function XYChart({
                   )
                 : undefined
             }
-            showLegendExtra={isHistogramViz && !!(legend.legendStats?.[0] === LegendStats.values)}
+            showLegendExtra={isHistogramViz && legend.legendStats?.[0] === LegendStats.values}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={

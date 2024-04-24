@@ -18,16 +18,13 @@ export type PersistedPieVisualizationState = Omit<PieVisualizationState, 'layers
 };
 
 export function convertToRuntime(state: PersistedPieVisualizationState) {
-  if (state.layers.some((l) => 'showValuesInLegend' in l)) {
-    return convertToLegendStats(state);
-  }
-  return state;
+  let newState = cloneDeep(state) as unknown as PieVisualizationState;
+  newState = convertToLegendStats(newState);
+  return newState;
 }
 
 function convertToLegendStats(state: PieVisualizationState) {
-  const newState = cloneDeep(state) as unknown as PieVisualizationState;
-
-  newState.layers.forEach((l) => {
+  state.layers.forEach((l) => {
     if ('showValuesInLegend' in l) {
       l.legendStats = [
         ...new Set([
@@ -39,7 +36,7 @@ function convertToLegendStats(state: PieVisualizationState) {
     delete (l as PersistedPieLayerState).showValuesInLegend;
   });
 
-  return newState;
+  return state;
 }
 
 export function convertToPersistable(state: PieVisualizationState) {
