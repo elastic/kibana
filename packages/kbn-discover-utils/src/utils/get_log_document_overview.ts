@@ -10,7 +10,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, LogDocumentOverview, fieldConstants, formatFieldValue } from '../..';
 
-export function getDocumentOverview(
+export function getLogDocumentOverview(
   doc: DataTableRecord,
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
 ): LogDocumentOverview {

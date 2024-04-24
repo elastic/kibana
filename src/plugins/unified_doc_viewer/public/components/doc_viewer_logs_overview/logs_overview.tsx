@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { getDocumentOverview } from '@kbn/discover-utils';
+import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
@@ -24,7 +24,7 @@ export function LogsOverview({
   onRemoveColumn,
 }: DocViewRenderProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
-  const parsedDoc = getDocumentOverview(hit, { dataView, fieldFormats });
+  const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
 
   return (
     <FieldActionsProvider
