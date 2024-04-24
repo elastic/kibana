@@ -6,10 +6,9 @@
  */
 
 import { fetch$ } from '@kbn/presentation-publishing';
-import type { Observable } from 'rxjs';
 import { type TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import { combineLatest, startWith, BehaviorSubject } from 'rxjs';
+import { combineLatest, BehaviorSubject } from 'rxjs';
 import type {
   SingleMetricViewerEmbeddableApi,
   SingleMetricViewerEmbeddableUserInput,
@@ -34,7 +33,6 @@ export const initializeSingleMetricViewerDataFetcher = (
   api: SingleMetricViewerEmbeddableApi,
   dataLoading: BehaviorSubject<boolean | undefined>,
   blockingError: BehaviorSubject<Error | undefined>,
-  refresh$: Observable<void>,
   timefilter: TimefilterContract
 ) => {
   const singleMetricViewerData$ = new BehaviorSubject<SingleMetricViewerData>({
@@ -50,19 +48,17 @@ export const initializeSingleMetricViewerDataFetcher = (
     functionDescription: api.functionDescription,
   });
 
-  const subscription = combineLatest([
-    singleMetricViewerInput$,
-    fetch$(api),
-    refresh$.pipe(startWith(null)),
-  ]).subscribe(([singleMetricViewerData, fetchContext]) => {
-    let bounds;
-    let lastRefresh;
-    if (timefilter !== undefined && fetchContext.timeRange !== undefined) {
-      bounds = timefilter.calculateBounds(fetchContext.timeRange);
-      lastRefresh = Date.now();
+  const subscription = combineLatest([singleMetricViewerInput$, fetch$(api)]).subscribe(
+    ([singleMetricViewerData, fetchContext]) => {
+      let bounds;
+      let lastRefresh;
+      if (timefilter !== undefined && fetchContext.timeRange !== undefined) {
+        bounds = timefilter.calculateBounds(fetchContext.timeRange);
+        lastRefresh = Date.now();
+      }
+      singleMetricViewerData$.next({ singleMetricViewerData, bounds, lastRefresh });
     }
-    singleMetricViewerData$.next({ singleMetricViewerData, bounds, lastRefresh });
-  });
+  );
 
   return {
     singleMetricViewerData$,

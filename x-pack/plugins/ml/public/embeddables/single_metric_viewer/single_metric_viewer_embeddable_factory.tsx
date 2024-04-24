@@ -20,10 +20,9 @@ import moment from 'moment';
 import {
   initializeTimeRange,
   initializeTitles,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -80,8 +79,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
       const dataLoading = new BehaviorSubject<boolean | undefined>(true);
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
 
-      const refresh$ = new BehaviorSubject<void>(undefined);
-
       const api = buildApi(
         {
           ...titlesApi,
@@ -110,7 +107,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
         api,
         dataLoading,
         blockingError,
-        refresh$,
         services[1].data.query.timefilter.timefilter
       );
 
@@ -122,7 +118,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
           const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
           const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
           const [jobsLoaded, setJobsLoaded] = useState(false);
-          const [error, setError] = useState<string | undefined>();
 
           const {
             mlApiServices,
@@ -139,8 +134,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
             showFrozenDataTierChoice: false,
           };
 
-          const { singleMetricViewerData, bounds, lastRefresh } =
-            useStateFromPublishingSubject(singleMetricViewerData$);
+          const [{ singleMetricViewerData, bounds, lastRefresh }, error] =
+            useBatchedPublishingSubjects(singleMetricViewerData$, blockingError);
 
           useUnmount(() => {
             onSingleMetricViewerDestroy();
@@ -175,8 +170,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
                 await mlJobService.loadJobsWrapper();
                 setJobsLoaded(true);
               } catch (e) {
-                const errorMessage = extractErrorMessage(e);
-                setError(errorMessage);
+                blockingError.next(e);
               }
             }
             loadJobs();
@@ -186,20 +180,19 @@ export const getSingleMetricViewerEmbeddableFactory = (
           useEffect(
             function setUpSelectedJob() {
               async function fetchSelectedJob() {
-                if (mlApiServices && selectedJobId !== undefined && error === undefined) {
+                if (mlApiServices && selectedJobId !== undefined) {
                   try {
                     const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
                     const job = jobs[0];
                     setSelectedJob(job);
                   } catch (e) {
-                    const errorMessage = extractErrorMessage(e);
-                    setError(errorMessage);
+                    blockingError.next(e);
                   }
                 }
               }
               fetchSelectedJob();
             },
-            [selectedJobId, mlApiServices, error]
+            [selectedJobId, mlApiServices]
           );
 
           const autoZoomDuration = useMemo(() => {
@@ -258,7 +251,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
                 iconType="warning"
                 css={{ width: '100%' }}
               >
-                <p>{error}</p>
+                <p>{error.message}</p>
               </EuiCallOut>
             );
           }
