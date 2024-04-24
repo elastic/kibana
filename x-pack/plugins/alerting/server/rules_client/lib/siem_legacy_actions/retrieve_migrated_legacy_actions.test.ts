@@ -18,7 +18,7 @@ import {
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
 
 import { find } from '../../methods/find';
-import { deleteRule } from '../../methods/delete';
+import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
 
 jest.mock('../../methods/find', () => {
   return {
@@ -26,7 +26,7 @@ jest.mock('../../methods/find', () => {
   };
 });
 
-jest.mock('../../methods/delete', () => {
+jest.mock('../../../application/rule/methods/delete/delete_rule', () => {
   return {
     deleteRule: jest.fn(),
   };

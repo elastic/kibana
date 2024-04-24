@@ -5,40 +5,51 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
-import { untrackRuleAlerts, migrateLegacyActions } from '../lib';
-import { RuleAttributes } from '../../data/rule/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RawRule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { untrackRuleAlerts, migrateLegacyActions } from '../../../../rules_client/lib';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { DeleteRuleParams } from './types';
+import { deleteRuleParamsSchema } from './schemas';
+import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 
-export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
+export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
+  try {
+    deleteRuleParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating delete params - ${error.message}`);
+  }
+
+  const { id } = params;
+
   return await retryIfConflicts(
     context.logger,
     `rulesClient.delete('${id}')`,
-    async () => await deleteWithOCC(context, { id })
+    async () => await deleteRuleWithOCC(context, { id })
   );
 }
 
-async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: string }) {
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
   let apiKeyCreatedByUser: boolean | undefined | null = false;
-  let attributes: RawRule;
+  let attributes: RuleAttributes;
 
   try {
-    const decryptedAlert =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-        RULE_SAVED_OBJECT_TYPE,
-        id,
-        {
-          namespace: context.namespace,
-        }
-      );
+    const decryptedAlert = await getDecryptedRuleSo({
+      encryptedSavedObjectsClient: context.encryptedSavedObjectsClient,
+      id,
+      savedObjectsGetOptions: {
+        namespace: context.namespace,
+      },
+    });
     apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
@@ -48,11 +59,12 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     context.logger.error(
       `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
+
     // Still attempt to load the scheduledTaskId using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
-      RULE_SAVED_OBJECT_TYPE,
-      id
-    );
+    const alert = await getRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      id,
+    });
     taskIdToRemove = alert.attributes.scheduledTaskId;
     attributes = alert.attributes;
   }
@@ -75,11 +87,17 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     throw error;
   }
 
-  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  await untrackRuleAlerts(context, id, attributes);
 
   // migrate legacy actions only for SIEM rules
+  // TODO (http-versioning): Remove this cast, this enables us to move forward
+  // without fixing all of other solution types
   if (attributes.consumer === AlertConsumers.SIEM) {
-    await migrateLegacyActions(context, { ruleId: id, attributes, skipActionsValidation: true });
+    await migrateLegacyActions(context, {
+      ruleId: id,
+      attributes: attributes as RawRule,
+      skipActionsValidation: true,
+    });
   }
 
   context.auditLogger?.log(
@@ -89,7 +107,10 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
-  const removeResult = await context.unsecuredSavedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id);
+  const removeResult = await deleteRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    id,
+  });
 
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,

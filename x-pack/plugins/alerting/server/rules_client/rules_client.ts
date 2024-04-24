@@ -39,7 +39,7 @@ import {
 import { find, FindParams } from './methods/find';
 import { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
-import { deleteRule } from './methods/delete';
+import { deleteRule, DeleteRuleParams } from '../application/rule/methods/delete';
 import {
   bulkDeleteRules,
   BulkDeleteRulesRequestBody,
@@ -125,7 +125,7 @@ export class RulesClient {
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
     createRule<Params>(this.context, params);
-  public delete = (params: { id: string }) => deleteRule(this.context, params);
+  public delete = (params: DeleteRuleParams) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
     find<Params>(this.context, params);
   public get = <Params extends RuleTypeParams = never>(params: GetParams) =>

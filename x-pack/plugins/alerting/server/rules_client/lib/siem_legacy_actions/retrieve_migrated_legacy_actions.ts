@@ -10,7 +10,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RulesClientContext } from '../..';
 import { RawRuleAction } from '../../../types';
 import { find } from '../../methods/find';
-import { deleteRule } from '../../methods/delete';
+import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
 import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
 import { transformFromLegacyActions } from './transform_legacy_actions';
 
