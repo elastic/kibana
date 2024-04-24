@@ -9,10 +9,7 @@ import { queue } from 'async';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
-import {
-  addSignificantItemsAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+import { addSignificantItems, updateLoadingState } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
@@ -137,7 +134,7 @@ export const significantItemsHandlerFactory =
           });
           significantTerms.push(...pValues);
 
-          responseStream.push(addSignificantItemsAction(pValues));
+          responseStream.push(addSignificantItems(pValues));
 
           fieldValuePairsCount += pValues.length;
         }
@@ -156,15 +153,13 @@ export const significantItemsHandlerFactory =
 
         if (significantCategoriesForField.length > 0) {
           significantCategories.push(...significantCategoriesForField);
-          responseStream.push(addSignificantItemsAction(significantCategoriesForField));
+          responseStream.push(addSignificantItems(significantCategoriesForField));
           fieldValuePairsCount += significantCategoriesForField.length;
         }
       }
 
-      stateHandler.loaded(loadingStep, false);
-
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(

@@ -10,10 +10,7 @@ import { queue } from 'async';
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
 
-import {
-  addSignificantItemsAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+import { addSignificantItems, updateLoadingState } from '@kbn/aiops-log-rate-analysis/api/actions';
 
 import type {
   AiopsLogRateAnalysisSchema,
@@ -75,7 +72,7 @@ export const topItemsHandlerFactory =
       );
 
       if (topCategories.length > 0) {
-        responseStream.push(addSignificantItemsAction(topCategories));
+        responseStream.push(addSignificantItems(topCategories));
       }
     }
 
@@ -137,11 +134,11 @@ export const topItemsHandlerFactory =
         });
         topTerms.push(...fetchedTopTerms);
 
-        responseStream.push(addSignificantItemsAction(fetchedTopTerms));
+        responseStream.push(addSignificantItems(fetchedTopTerms));
       }
 
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(

@@ -8,7 +8,7 @@
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
-  addErrorAction,
+  addError,
   type AiopsLogRateAnalysisApiAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 
@@ -25,6 +25,6 @@ export const streamPushErrorFactory = (
 ) => {
   return function pushError(m: string) {
     logDebugMessage('Push error.');
-    push(addErrorAction(m));
+    push(addError(m));
   };
 };

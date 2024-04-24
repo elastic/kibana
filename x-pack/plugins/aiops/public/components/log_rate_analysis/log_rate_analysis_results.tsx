@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import { getDefaultState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
 import { clearAllRowState, useAppDispatch, useAppSelector } from '@kbn/aiops-components';
@@ -251,7 +251,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       overrides,
       sampleProbability,
     },
-    { reducer: streamReducer, initialState },
+    { reducer: streamReducer, initialState: getDefaultState() },
     { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 

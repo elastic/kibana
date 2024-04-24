@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  resetAllAction,
-  resetErrorsAction,
-  resetGroupsAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+import { resetAll, resetErrors, resetGroups } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
@@ -24,15 +20,15 @@ export const overridesHandlerFactory =
   () => {
     if (!requestBody.overrides) {
       logDebugMessage('Full Reset.');
-      responseStream.push(resetAllAction());
+      responseStream.push(resetAll());
     } else {
       logDebugMessage('Reset Errors.');
-      responseStream.push(resetErrorsAction());
+      responseStream.push(resetErrors());
     }
 
     if (requestBody.overrides?.regroupOnly) {
       logDebugMessage('Reset Groups.');
-      responseStream.push(resetGroupsAction());
+      responseStream.push(resetGroups());
     }
 
     if (requestBody.overrides?.loaded) {

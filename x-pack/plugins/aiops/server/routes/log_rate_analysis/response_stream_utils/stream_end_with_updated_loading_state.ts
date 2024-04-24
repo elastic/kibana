@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
-  updateLoadingStateAction,
+  updateLoadingState,
   type AiopsLogRateAnalysisApiAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 
@@ -26,7 +26,7 @@ export const streamEndWithUpdatedLoadingStateFactory = (
 ) => {
   return function endWithUpdatedLoadingState() {
     push(
-      updateLoadingStateAction({
+      updateLoadingState({
         ccsWarning: false,
         loaded: 1,
         loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.doneMessage', {

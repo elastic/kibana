@@ -7,10 +7,7 @@
 
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
-import {
-  pingAction,
-  type AiopsLogRateAnalysisApiAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+import { ping, type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/actions';
 
 import type { LogDebugMessage } from './log_debug_message';
 import type { StateHandler } from './state_handler';
@@ -32,7 +29,7 @@ export const streamPushPingWithTimeoutFactory = (
     setTimeout(() => {
       if (stateHandler.isRunning()) {
         logDebugMessage('Ping message.');
-        push(pingAction());
+        push(ping());
         pushPingWithTimeout();
       }
     }, PING_FREQUENCY);
