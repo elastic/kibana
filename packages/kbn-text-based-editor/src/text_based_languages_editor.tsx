@@ -43,7 +43,7 @@ import {
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
 import {
-  textBasedLanguagedEditorStyles as textBasedLanguageEditorStyles,
+  textBasedLanguageEditorStyles,
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_EXPANDED,
   EDITOR_MAX_HEIGHT,
