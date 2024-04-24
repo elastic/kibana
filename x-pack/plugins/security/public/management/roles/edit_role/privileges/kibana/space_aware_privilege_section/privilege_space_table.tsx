@@ -180,10 +180,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             );
           }
 
-          const isWildcardBasePrivilege = privilegeCalculator.isWildcardBasePrivilege(
-            record.privilegeIndex
-          );
-
           const basePrivilege =
             privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
             CUSTOM_PRIVILEGE_VALUE;
