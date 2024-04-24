@@ -27,51 +27,41 @@ import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
 import type {
-  FieldStatisticTableEmbeddableApi,
-  ESQLDataVisualizerGridEmbeddableInput,
-  DataVisualizerGridEmbeddableOutput,
+  FieldStatisticTableEmbeddableState,
+  ESQLDataVisualizerGridEmbeddableState,
+  DataVisualizerGridEmbeddableApi,
 } from './types';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 
-function isESQLFieldStatisticTableEmbeddableApi(
+function isESQLFieldStatisticTableEmbeddableState(
   input: unknown
-): input is ESQLDataVisualizerGridEmbeddableInput {
+): input is ESQLDataVisualizerGridEmbeddableState {
   return isPopulatedObject(input, ['esql']) && input.esql === true;
 }
 
-function isFieldStatisticTableEmbeddableApi(
+function isFieldStatisticTableEmbeddableState(
   input: unknown
-): input is Required<FieldStatisticTableEmbeddableApi, 'dataView'> {
+): input is Required<FieldStatisticTableEmbeddableState, 'dataView'> {
   return isPopulatedObject(input, ['dataView']);
 }
 
 export const IndexDataVisualizerViewWrapper = (props: {
   id: string;
   embeddableContext: InstanceType<IDataVisualizerGridEmbeddable>;
-  embeddableInput: Readonly<Observable<FieldStatisticTableEmbeddableApi>>;
-  onInternalStateChange?: (output: any) => void;
+  embeddableInput: Readonly<Observable<FieldStatisticTableEmbeddableState>>;
+  onApiUpdate?: (output: any) => void;
 }) => {
-  const { embeddableInput, onInternalStateChange } = props;
+  const { embeddableInput, onApiUpdate } = props;
 
   const input = useObservable(embeddableInput);
 
-  if (isESQLFieldStatisticTableEmbeddableApi(input)) {
-    return (
-      <EmbeddableESQLFieldStatsTableWrapper
-        input={input}
-        onInternalStateChange={onInternalStateChange}
-      />
-    );
+  if (isESQLFieldStatisticTableEmbeddableState(input)) {
+    return <EmbeddableESQLFieldStatsTableWrapper input={input} onApiUpdate={onApiUpdate} />;
   }
-  if (isFieldStatisticTableEmbeddableApi(input)) {
-    return (
-      <EmbeddableFieldStatsTableWrapper
-        input={input}
-        onInternalStateChange={onInternalStateChange}
-      />
-    );
+  if (isFieldStatisticTableEmbeddableState(input)) {
+    return <EmbeddableFieldStatsTableWrapper input={input} onApiUpdate={onApiUpdate} />;
   } else {
     return (
       <EuiEmptyPrompt
@@ -98,15 +88,15 @@ export const IndexDataVisualizerViewWrapper = (props: {
   }
 };
 export class DataVisualizerGridEmbeddable extends Embeddable<
-  FieldStatisticTableEmbeddableApi,
-  DataVisualizerGridEmbeddableOutput
+  FieldStatisticTableEmbeddableState,
+  DataVisualizerGridEmbeddableApi
 > {
   private node?: HTMLElement;
   private reload$ = new Subject<void>();
   public readonly type: string = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
   constructor(
-    initialInput: FieldStatisticTableEmbeddableApi,
+    initialInput: FieldStatisticTableEmbeddableState,
     public services: DataVisualizerGridEmbeddableServices,
     parent?: IContainer
   ) {
@@ -135,7 +125,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
                   id={this.input.id}
                   embeddableContext={this}
                   embeddableInput={this.getInput$()}
-                  onInternalStateChange={(output) => this.updateOutput(output)}
+                  onApiUpdate={(output) => this.updateOutput(output)}
                 />
               </Suspense>
             </DatePickerContextProvider>

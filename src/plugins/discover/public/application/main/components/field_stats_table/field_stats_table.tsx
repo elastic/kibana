@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, type UiCounterMetricType } from '@kbn/analytics';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  ReactEmbeddableRenderer,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -44,7 +40,7 @@ export interface NoSamplingOption {
 
 export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
-export interface FieldStatisticTableEmbeddableApi extends EmbeddableInput {
+export interface FieldStatisticTableEmbeddableApi {
   dataView: DataView;
   savedSearch?: SavedSearch;
   query?: Query | AggregateQuery;
@@ -78,7 +74,7 @@ export interface FieldStatisticTableEmbeddableState {
   samplingOption?: SamplingOption;
 }
 
-export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
+export interface DataVisualizerGridEmbeddableOutput {
   showDistributions?: boolean;
 }
 
@@ -159,12 +155,13 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
   const services = useDiscoverServices();
 
+  // State from Discover we want the embeddable to reflect
   const embeddableState$ = useMemo(
     () => new BehaviorSubject<FieldStatisticTableEmbeddableState | undefined>(),
     []
   );
-
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  // Embeddable state exposed to external consumers like Discover
+  const embeddableApiSubscription = useRef(null);
 
   const showPreviewByDefault = useMemo(
     () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
@@ -173,12 +170,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
   useEffect(() => {
     const availableFields$ = stateContainer?.dataState.data$.availableFields$;
-    // @todo
-    // const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-    //   if (output.showDistributions !== undefined && stateContainer) {
-    //     stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
-    //   }
-    // });
 
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddableState$) {
@@ -199,10 +190,10 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     });
 
     return () => {
-      // sub?.unsubscribe();
       refetch?.unsubscribe();
       fields?.unsubscribe();
       embeddableState$?.unsubscribe();
+      embeddableApiSubscription.current?.unsubscribe();
     };
   }, [embeddableState$, stateContainer]);
 
@@ -218,6 +209,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         sessionId: searchSessionId,
         fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
         totalDocuments,
+        showPreviewByDefault,
         samplingOption: {
           mode: 'normal_sampling',
           shardSize: 5000,
@@ -232,49 +224,61 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     query,
     columns,
     filters,
-    onAddFilter,
     searchSessionId,
     totalDocuments,
     stateContainer,
+    showPreviewByDefault,
   ]);
 
   useEffect(() => {
-    if (showPreviewByDefault && embeddableState$) {
-      // Update embeddable whenever one of the important input changes
-      embeddableState$.next({
-        ...embeddableState$.getValue(),
-        showPreviewByDefault,
-      });
-    }
-  }, [showPreviewByDefault, embeddableState$]);
-
-  useEffect(() => {
+    // Track should only be called once when component is loaded
     trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
-
-    return () => {};
   }, [trackUiMetric]);
 
-  const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
+  const embeddableApi = useRef<FieldStatisticsTableEmbeddableApi>();
   const parentApi = useMemo(() => {
     return {
       embeddableState$,
-      overrideServices: { data: { ...services.data, id: 'overriden' } },
+      // Overriding with data service from Discover because
+      // in serverless, Discover's data might be a proxy
+      // in which case the proxied version might be different
+      overrideServices: { data: { ...services.data, executionContext: 'discover' } },
       onAddFilter,
     };
   }, [embeddableState$, services.data, onAddFilter]);
 
+  const handleEmbeddableApiReady = useCallback(
+    (api: FieldStatisticsTableEmbeddableApi) => {
+      embeddableApi.current = api;
+      if (api.showDistributions$) {
+        embeddableApiSubscription.current = api.showDistributions$.subscribe(
+          (showDistributions) => {
+            if (showDistributions !== undefined && stateContainer) {
+              stateContainer.appState.update({
+                hideAggregatedPreview: !showDistributions,
+              });
+            }
+          }
+        );
+      }
+    },
+    [stateContainer]
+  );
+
   return (
     <EuiFlexItem css={statsTableCss}>
-      <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+      <ReactEmbeddableRenderer<
+        FieldStatisticsTableEmbeddableState,
+        FieldStatisticsTableEmbeddableApi
+      >
         maybeId={'discover_data_visualizer_grid'}
         type={'data_visualizer_grid'}
         state={{
+          // initialState of embeddalbe
           rawState: embeddableState$.getValue() ?? {},
         }}
         parentApi={parentApi}
-        onApiAvailable={(api) => {
-          embeddableApi.current = api;
-        }}
+        onApiAvailable={handleEmbeddableApiReady}
         panelProps={{
           css: embeddableEuiPanelCss,
           hideHeader: true,

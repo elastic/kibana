@@ -14,10 +14,10 @@ import type {
   DataVisualizerPluginStart,
   DataVisualizerStartDependencies,
 } from '../../../../plugin';
-import type { FieldStatisticTableEmbeddableApi } from './types';
+import type { FieldStatisticTableEmbeddableState } from './types';
 
 export class DataVisualizerGridEmbeddableFactory
-  implements EmbeddableFactoryDefinition<FieldStatisticTableEmbeddableApi>
+  implements EmbeddableFactoryDefinition<FieldStatisticTableEmbeddableState>
 {
   public readonly type = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
@@ -60,7 +60,7 @@ export class DataVisualizerGridEmbeddableFactory
     return [coreStart, pluginsStart];
   }
 
-  public async create(initialInput: FieldStatisticTableEmbeddableApi, parent?: IContainer) {
+  public async create(initialInput: FieldStatisticTableEmbeddableState, parent?: IContainer) {
     const [coreStart, pluginsStart] = await this.getServices();
     const { DataVisualizerGridEmbeddable } = await import('./grid_embeddable');
     return new DataVisualizerGridEmbeddable(initialInput, [coreStart, pluginsStart], parent);

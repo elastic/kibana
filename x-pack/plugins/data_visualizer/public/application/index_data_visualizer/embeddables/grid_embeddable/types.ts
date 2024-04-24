@@ -6,7 +6,6 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -15,7 +14,7 @@ import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_vi
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 
-export interface DataVisualizerGridInput<T = Query> {
+export interface FieldStatisticTableEmbeddableProps<T = Query> {
   dataView?: DataView;
   savedSearch?: SavedSearch | null;
   query?: T;
@@ -42,10 +41,10 @@ export interface DataVisualizerGridInput<T = Query> {
   indexPattern?: string;
 }
 
-export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<ESQLQuery>;
+export type ESQLDataVisualizerGridEmbeddableState = FieldStatisticTableEmbeddableProps<ESQLQuery>;
 
-export type FieldStatisticTableEmbeddableApi = EmbeddableInput & DataVisualizerGridInput;
-export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
+export type FieldStatisticTableEmbeddableState = FieldStatisticTableEmbeddableProps;
+export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticTableEmbeddableState>;
 
 export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
-import type { FieldStatisticTableEmbeddableApi } from './types';
+import type { FieldStatisticTableEmbeddableState } from './types';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -22,11 +22,11 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const EmbeddableFieldStatsTableWrapper = ({
   input,
-  onInternalStateChange,
+  onApiUpdate,
   onAddFilter,
 }: {
-  input: Required<FieldStatisticTableEmbeddableApi, 'dataView'>;
-  onInternalStateChange?: (ouput: any) => void;
+  input: Required<FieldStatisticTableEmbeddableState, 'dataView'>;
+  onApiUpdate?: (ouput: any) => void;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
@@ -35,11 +35,11 @@ export const EmbeddableFieldStatsTableWrapper = ({
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onInternalStateChange) {
-        onInternalStateChange(update);
+      if (onApiUpdate) {
+        onApiUpdate(update);
       }
     },
-    [dataVisualizerListState, onInternalStateChange]
+    [dataVisualizerListState, onApiUpdate]
   );
 
   const {
@@ -88,7 +88,7 @@ export const EmbeddableFieldStatsTableWrapper = ({
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onInternalStateChange}
+      onChange={onApiUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
     />

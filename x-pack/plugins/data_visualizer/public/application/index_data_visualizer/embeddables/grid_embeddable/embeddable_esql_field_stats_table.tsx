@@ -15,7 +15,7 @@ import {
   useESQLDataVisualizerData,
 } from '../../hooks/esql/use_data_visualizer_esql_data';
 import type {
-  ESQLDataVisualizerGridEmbeddableInput,
+  ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedAppState,
 } from './types';
 import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_results';
@@ -24,10 +24,10 @@ const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
 export const EmbeddableESQLFieldStatsTableWrapper = ({
   input,
-  onInternalStateChange,
+  onApiUpdate,
 }: {
-  input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableInput;
-  onInternalStateChange?: (ouput: any) => void;
+  input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableState;
+  onApiUpdate?: (ouput: any) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -35,11 +35,11 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onInternalStateChange) {
-        onInternalStateChange(update);
+      if (onApiUpdate) {
+        onApiUpdate(update);
       }
     },
-    [dataVisualizerListState, onInternalStateChange]
+    [dataVisualizerListState, onApiUpdate]
   );
 
   const {
@@ -66,7 +66,7 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onInternalStateChange}
+      onChange={onApiUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
     />

@@ -16,48 +16,42 @@ import type { DataVisualizerStartDependencies } from '../../../../plugin';
 import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
 import type {
-  FieldStatisticTableEmbeddableApi,
-  ESQLDataVisualizerGridEmbeddableInput,
+  FieldStatisticTableEmbeddableState,
+  ESQLDataVisualizerGridEmbeddableState,
 } from './types';
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 
-function isESQLFieldStatisticTableEmbeddableApi(
+function isESQLFieldStatisticTableEmbeddableState(
   input: unknown
-): input is ESQLDataVisualizerGridEmbeddableInput {
+): input is ESQLDataVisualizerGridEmbeddableState {
   return isPopulatedObject(input, ['esql']) && input.esql === true;
 }
 
-function isFieldStatisticTableEmbeddableApi(
+function isFieldStatisticTableEmbeddableState(
   input: unknown
-): input is Required<FieldStatisticTableEmbeddableApi, 'dataView'> {
-  return isPopulatedObject(input, ['dataView']);
+): input is Required<FieldStatisticTableEmbeddableState, 'dataView'> {
+  return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
 }
 
 const FieldStatisticsWrapper = (props: {
   id: string;
-  embeddableState$: Readonly<Observable<FieldStatisticTableEmbeddableApi>>;
-  onInternalStateChange?: (output: any) => void;
+  embeddableState$: Readonly<Observable<FieldStatisticTableEmbeddableState>>;
+  onApiUpdate?: (output: any) => void;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }) => {
-  const { embeddableState$, onInternalStateChange, onAddFilter } = props;
+  const { embeddableState$, onApiUpdate, onAddFilter } = props;
 
   const input = useObservable(embeddableState$);
 
-  if (isESQLFieldStatisticTableEmbeddableApi(input)) {
-    return (
-      <EmbeddableESQLFieldStatsTableWrapper
-        input={input}
-        onInternalStateChange={onInternalStateChange}
-        onA
-      />
-    );
+  if (isESQLFieldStatisticTableEmbeddableState(input)) {
+    return <EmbeddableESQLFieldStatsTableWrapper input={input} onApiUpdate={onApiUpdate} />;
   }
-  if (isFieldStatisticTableEmbeddableApi(input)) {
+  if (isFieldStatisticTableEmbeddableState(input)) {
     return (
       <EmbeddableFieldStatsTableWrapper
         input={input}
-        onInternalStateChange={onInternalStateChange}
+        onApiUpdate={onApiUpdate}
         onAddFilter={onAddFilter}
       />
     );

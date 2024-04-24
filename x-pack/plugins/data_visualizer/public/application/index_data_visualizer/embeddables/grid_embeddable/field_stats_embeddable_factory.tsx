@@ -44,11 +44,17 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const id = uuid.toString();
+      const showDistributions$ =
+        // @ts-ignore
+        (initialState.showPreviewByDefault !== undefined
+          ? new BehaviorSubject(initialState.showPreviewByDefault)
+          : parentApi?.showDistributions$) ?? new BehaviorSubject(undefined);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState); // @TODO: remove
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const api = buildApi(
         {
           ...titlesApi,
+          showDistributions$,
           serializeState: () => {
             return {
               rawState: {
@@ -94,6 +100,11 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
                         id={uuid}
                         embeddableState$={parentApi.embeddableState$}
                         onAddFilter={parentApi.onAddFilter}
+                        onApiUpdate={(changes) => {
+                          if ('showDistributions' in changes && Object.keys(changes).length === 1) {
+                            showDistributions$.next(changes.showDistributions);
+                          }
+                        }}
                       />
                     </Suspense>
                   </DatePickerContextProvider>
