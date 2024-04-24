@@ -192,7 +192,7 @@ export class CoreAppsService {
               body: schema.recordOf(schema.string(), schema.any()),
             },
             response: {
-              '200': { body: schema.object({ ok: schema.boolean() }) },
+              '200': { body: () => schema.object({ ok: schema.boolean() }) },
             },
           },
         },
