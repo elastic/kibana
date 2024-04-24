@@ -8,7 +8,7 @@
 import { screen, render } from '@testing-library/react';
 import React from 'react';
 
-import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
+import { AlertSuppressionLabel } from './alert_suppression_label';
 
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
@@ -19,17 +19,17 @@ jest.mock('../../../../../common/detection_engine/utils', () => ({
 
 const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
 
-describe('component: AlertSuppressionTechnicalPreviewBadge', () => {
+describe('component: AlertSuppressionLabel', () => {
   it('should render technical preview when rule type suppression is not in GA', () => {
     isSuppressionRuleInGAMock.mockReturnValue(false);
-    render(<AlertSuppressionTechnicalPreviewBadge label="Test label" ruleType="query" />);
+    render(<AlertSuppressionLabel label="Test label" ruleType="query" />);
 
     expect(screen.getByText('Technical Preview')).toBeInTheDocument();
   });
   it('should not render technical preview when rule type suppression is in GA', () => {
     isSuppressionRuleInGAMock.mockReturnValue(true);
 
-    render(<AlertSuppressionTechnicalPreviewBadge label="Test label" ruleType="eql" />);
+    render(<AlertSuppressionLabel label="Test label" ruleType="eql" />);
 
     expect(screen.queryByText('Technical Preview')).not.toBeInTheDocument();
   });

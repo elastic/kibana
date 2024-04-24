@@ -37,7 +37,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { AlertSuppressionTechnicalPreviewBadge } from '../../../rule_creation_ui/components/description_step/alert_suppression_technical_preview_badge';
+import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
@@ -345,7 +345,7 @@ interface AlertSuppressionTitleProps {
 }
 
 const AlertSuppressionTitle = ({ title, ruleType }: AlertSuppressionTitleProps) => {
-  return <AlertSuppressionTechnicalPreviewBadge label={title} ruleType={ruleType} />;
+  return <AlertSuppressionLabel label={title} ruleType={ruleType} />;
 };
 
 interface SuppressAlertsByFieldProps {

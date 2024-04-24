@@ -50,7 +50,7 @@ import type {
 import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
-import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
+import { AlertSuppressionLabel } from './alert_suppression_label';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -607,7 +607,7 @@ export const buildAlertSuppressionDescription = (
     </EuiFlexGroup>
   );
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} ruleType={ruleType} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -627,7 +627,7 @@ export const buildAlertSuppressionWindowDescription = (
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} ruleType={ruleType} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -650,7 +650,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} ruleType={ruleType} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
