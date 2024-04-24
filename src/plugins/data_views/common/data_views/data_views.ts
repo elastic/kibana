@@ -824,12 +824,20 @@ export class DataViewsService {
     displayErrors?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
+
+    console.log('============= initFromSavedObjectLoadFields', savedObjectId, title);
+
+    const pattern =
+      savedObjectId === 'alerts' && true ? '.alerts-security.alerts-default' : (title as string);
+
+    console.log('============= initFromSavedObjectLoadFields', pattern);
+
     const { fields, indices, etag } = await this.refreshFieldSpecMap(
       spec.fields || {},
       savedObjectId,
       spec.title as string,
       {
-        pattern: title as string,
+        pattern,
         metaFields: await this.getMetaFields(),
         type,
         rollupIndex: typeMeta?.params?.rollup_index,
@@ -997,20 +1005,20 @@ export class DataViewsService {
     displayErrors: boolean = true,
     refreshFields = false
   ): Promise<DataView> => {
-    const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
-      if (dataView && refreshFields) {
-        await this.refreshFields(dataView, displayErrors);
-      }
-      return dataView;
-    });
+    // const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
+    //   if (dataView && refreshFields) {
+    //     await this.refreshFields(dataView, displayErrors);
+    //   }
+    //   return dataView;
+    // });
 
-    let indexPatternPromise: Promise<DataView>;
-    if (dataViewFromCache) {
-      indexPatternPromise = dataViewFromCache;
-    } else {
-      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
-      this.dataViewCache.set(id, indexPatternPromise);
-    }
+    // let indexPatternPromise: Promise<DataView>;
+    // if (dataViewFromCache) {
+    //   indexPatternPromise = dataViewFromCache;
+    // } else {
+    const indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
+    this.dataViewCache.set(id, indexPatternPromise);
+    // }
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {

@@ -401,6 +401,11 @@ export const useSourcererDataView = (
   const selectedDataView = useMemo(() => {
     return kibanaDataViews.find((dataView) => dataView.id === selectedDataViewId);
   }, [kibanaDataViews, selectedDataViewId]);
+
+  // FIXME:
+  console.log('selectedDataView', selectedDataViewId, selectedDataView);
+  console.log('defaultDataView', defaultDataView);
+
   const loading = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeIsLoading(state, scopeId);
   });
@@ -485,6 +490,7 @@ export const useSourcererDataView = (
       browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
       indexPattern: {
+        // FIXME: fix this omg
         fields: sourcererDataView.indexFields,
         title: selectedPatterns.join(','),
         getName: () => selectedPatterns.join(','),

@@ -77,7 +77,7 @@ export const kibanaDataViews = createSelector(
 
 export const defaultDataView = createSelector(
   selectSourcerer,
-  (sourcerer) => sourcerer.defaultDataView,
+  (sourcerer) => sourcerer.kibanaDataViews.find(({ id }) => id === 'alerts') as any,
   {
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
