@@ -33,7 +33,7 @@ export class GetSLOHealth {
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     const sloIds = params.list.map(({ sloId }) => sloId);
     const sloList = await this.repository.findAllByIds(sloIds);
-    const sloById = keyBy(sloList, (slo) => slo.id);
+    const sloById = keyBy(sloList, 'id');
 
     const filteredList = params.list
       .filter((item) => !!sloById[item.sloId])
