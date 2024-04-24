@@ -4,7 +4,3 @@ steps:
     agents:
       queue: c2-16
     timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
