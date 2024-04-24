@@ -202,9 +202,35 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 /** @public */
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
-/** @public */
+/**
+ * Map of response status codes to response schemas
+ *
+ * @note Instantiating response schemas is expensive, especially when it is
+ *       not needed in most cases. See example below to ensure this is lazily
+ *       provided.
+ *
+ * @note The {@link TypeOf} type utility from @kbn/config-schema can extract
+ *       types from lazily created schemas
+ *
+ * @example
+ * ```ts
+ * // Avoid this:
+ * const badResponseSchema = schema.object({ foo: foo.string() });
+ * // Do this:
+ * const goodResponseSchema = () => schema.object({ foo: foo.string() });
+ *
+ * type ResponseType = TypeOf<typeof goodResponseSchema>;
+ * ...
+ * .addVersion(
+ *  { ... validation: { response: { 200: { body: goodResponseSchema } } } },
+ *  handlerFn
+ * )
+ * ...
+ * ```
+ * @public
+ */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  [statusCode: number]: { body: RouteValidationFunction<unknown> | (() => Type<unknown>) };
   unsafe?: { body?: boolean };
 }
 
@@ -225,27 +251,9 @@ export interface VersionedRouteValidation<P, Q, B> {
    * @note This validation is only intended to run in development. Do not use this
    *       for setting default values!
    *
-   * @note Instantiating response schemas is expensive, especially when it not needed
-   *       in most cases. See example below to ensure this is lazily provided.
-   *
-   * @example
-   * ```ts
-   * // Avoid this:
-   * const badResponseSchema = schema.object({ foo: foo.string() });
-   * // Do this:
-   * const goodResponseSchema = () => schema.object({ foo: foo.string() });
-   *
-   * type ResponseType = TypeOf<typeof goodResponseSchema>; // Can take a func
-   * ...
-   * .addVersion(
-   *  { ... validation: { response: responseSchema } },
-   *  handlerFn
-   * )
-   * ...
-   * ```
    * @public
    */
-  response?: () => VersionedRouteResponseValidation;
+  response?: VersionedRouteResponseValidation;
 }
 
 /**
