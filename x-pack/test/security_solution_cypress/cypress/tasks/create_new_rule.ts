@@ -278,6 +278,10 @@ export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
   return ruleName;
 };
 
+export const fillCustomQueryInput = (ruleQuery: string = ruleFields.ruleQuery) => {
+  getCustomQueryInput().type(ruleQuery);
+};
+
 export const fillDescription = (description: string = ruleFields.ruleDescription) => {
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(description, { force: true });

@@ -3446,6 +3446,10 @@
                 "path": "packages/core/status/core-status-server-internal/src/routes/status_preboot.ts"
               },
               {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.ts"
+              },
+              {
                 "plugin": "@kbn/core-rendering-server-internal",
                 "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.ts"
               },
@@ -3460,10 +3464,6 @@
               {
                 "plugin": "@kbn/core-deprecations-server-internal",
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/routes/get.ts"
-              },
-              {
-                "plugin": "@kbn/core-i18n-server-internal",
-                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.ts"
               },
               {
                 "plugin": "@kbn/core-apps-server-internal",
@@ -5704,6 +5704,10 @@
               {
                 "plugin": "@kbn/core-apps-server-internal",
                 "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundle_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.test.ts"
               },
               {
                 "plugin": "@kbn/core-i18n-server-internal",
