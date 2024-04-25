@@ -159,3 +159,4 @@ export { getConversationById } from './impl/assistant/api/conversations/conversa
 export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
+export { getUserConversations } from './impl/assistant/api';

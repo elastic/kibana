@@ -273,9 +273,9 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { enabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>; }"
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>; }"
             ],
             "path": "x-pack/plugins/observability_solution/apm/server/plugin.ts",
             "deprecated": false,
@@ -448,9 +448,9 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly enabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
-          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverless: Readonly<{} & { enabled: true; }>; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }"
+          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverless: Readonly<{} & { enabled: true; }>; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability_solution/apm/server/index.ts",
         "deprecated": false,
@@ -917,19 +917,21 @@
           "StringC",
           "; 'container.id': ",
           "StringC",
+          "; 'kubernetes.pod.name': ",
+          "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
-          " & { params: { query: { alert_started_at: string; } & { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; }; }; }) => Promise<{ serviceSummary?: ",
+          " & { params: { query: { alert_started_at: string; } & { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ serviceSummary?: ",
           "ServiceSummary",
           " | undefined; downstreamDependencies?: ",
           "APMDownstreamDependency",
-          "[] | undefined; logCategories: ",
+          "[] | undefined; logCategories?: ",
           "LogCategories",
-          "; serviceChangePoints: { title: string; changes: ",
+          "; serviceChangePoints?: { title: string; changes: ",
           "TimeseriesChangePoint",
-          "[]; }[]; exitSpanChangePoints: { title: string; changes: ",
+          "[]; }[] | undefined; exitSpanChangePoints?: { title: string; changes: ",
           "TimeseriesChangePoint",
-          "[]; }[]; anomalies: { '@timestamp': string; metricName: string; \"service.name\": string; \"service.environment\": \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          "[]; }[] | undefined; anomalies?: { '@timestamp': string; metricName: string; \"service.name\": string; \"service.environment\": \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {
@@ -939,7 +941,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; \"transaction.type\": string; anomalyScore: string | number | null; actualValue: number; expectedBoundsLower: number; expectedBoundsUpper: number; }[]; }>; } & ",
+          ">; \"transaction.type\": string; anomalyScore: string | number | null; actualValue: number; expectedBoundsLower: number; expectedBoundsUpper: number; }[] | undefined; }>; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/assistant/get_apm_timeseries\": { endpoint: \"POST /internal/apm/assistant/get_apm_timeseries\"; params?: ",
           "TypeC",
@@ -4637,7 +4639,17 @@
           "PartialC",
           "<{ transactionName: ",
           "StringC",
-          "; }>, ",
+          "; filters: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          ", string, unknown>; }>, ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -4709,7 +4721,15 @@
           "RollupInterval",
           ".None>]>; }>]>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
-          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          " | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {
@@ -4897,7 +4917,17 @@
           "PartialC",
           "<{ transactionName: ",
           "StringC",
-          "; }>, ",
+          "; filters: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          ", string, unknown>; }>, ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -4971,7 +5001,15 @@
           "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; latencyAggregationType: ",
           "LatencyAggregationType",
-          "; bucketSizeInSeconds: number; useDurationSummary: boolean; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          "; bucketSizeInSeconds: number; useDurationSummary: boolean; } & { transactionName?: string | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          " | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {
@@ -6073,7 +6111,17 @@
           "PartialC",
           "<{ transactionName: ",
           "StringC",
-          "; }>, ",
+          "; filters: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          ", string, unknown>; }>, ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -6145,7 +6193,15 @@
           "RollupInterval",
           ".None>]>; }>]>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
-          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          " | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {
@@ -7926,9 +7982,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { enabled: boolean; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { enabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
-            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>"
+            "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>"
           ],
           "path": "x-pack/plugins/observability_solution/apm/server/types.ts",
           "deprecated": false,
