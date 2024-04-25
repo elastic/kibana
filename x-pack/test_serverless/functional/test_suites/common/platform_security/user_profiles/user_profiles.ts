@@ -8,13 +8,17 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'userProfiles']);
+const VIEWER_ROLE = 'viewer';
+const DARK_MODE_TAG = 'v8dark';
+const LIGHT_MODE_TAG = 'v8light';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlUserProfile']);
+  const svlUserManager = getService('svlUserManager');
 
   describe('User Profile Page', async () => {
     before(async () => {
-      // TODO: migrate to SAML role when profile page displays the data
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {
@@ -25,20 +29,35 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       it('should change theme based on the User Profile Theme control', async () => {
         await pageObjects.common.navigateToApp('security_account');
 
-        const themeKeyPadMenu = await pageObjects.userProfiles.getThemeKeypadMenu();
-        expect(themeKeyPadMenu).not.to.be(null);
+        const changeTo = (currentMode: string): string => {
+          return currentMode === LIGHT_MODE_TAG ? DARK_MODE_TAG : LIGHT_MODE_TAG;
+        };
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Dark');
-        const darkModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(darkModeTag).to.be('v8dark');
+        const modeTag = await pageObjects.svlUserProfile.getThemeTag();
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Light');
-        const lightModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(lightModeTag).to.be('v8light');
+        const expectedModeFirst = changeTo(modeTag);
+        await pageObjects.svlUserProfile.changeUserProfileTheme();
+        const modeChangeFirst = await pageObjects.svlUserProfile.getThemeTag();
+        expect(modeChangeFirst).to.be(expectedModeFirst);
 
-        await pageObjects.userProfiles.changeUserProfileTheme('Space default');
-        const spaceDefaultModeTag = await pageObjects.userProfiles.getThemeTag();
-        expect(spaceDefaultModeTag).to.be('v8light');
+        const expectedModeSecond = changeTo(modeChangeFirst);
+        await pageObjects.svlUserProfile.changeUserProfileTheme();
+        const modeChangeSecond = await pageObjects.svlUserProfile.getThemeTag();
+        expect(modeChangeSecond).to.be(expectedModeSecond);
+      });
+    });
+
+    describe('User details', async () => {
+      it('should change theme based on the User Profile Theme control', async () => {
+        await pageObjects.common.navigateToApp('security_account');
+
+        const userData = await svlUserManager.getUserData(VIEWER_ROLE);
+
+        const actualFullname = await pageObjects.svlUserProfile.getProfileFullname();
+        const actualEmail = await pageObjects.svlUserProfile.getProfileEmail();
+
+        expect(actualFullname).to.be(userData.fullname);
+        expect(actualEmail).to.be(userData.email);
       });
     });
   });
