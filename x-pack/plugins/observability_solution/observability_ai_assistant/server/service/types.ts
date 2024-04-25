@@ -13,7 +13,11 @@ import type {
   FunctionDefinition,
   FunctionResponse,
 } from '../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
+import type {
+  Message,
+  ObservabilityAIAssistantScreenContextRequest,
+  UserInstructionOrPlainText,
+} from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
@@ -42,6 +46,18 @@ export interface FunctionHandler {
   definition: FunctionDefinition;
   respond: RespondFunction<any, FunctionResponse>;
 }
+
+export type RegisteredInstruction = UserInstructionOrPlainText | RegisterInstructionCallback;
+
+type RegisterInstructionCallback = ({
+  availableFunctionNames,
+}: {
+  availableFunctionNames: string[];
+}) => UserInstructionOrPlainText | UserInstructionOrPlainText[] | undefined;
+
+export type RegisterInstruction = (
+  ...instructions: Array<UserInstructionOrPlainText | RegisterInstructionCallback>
+) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
