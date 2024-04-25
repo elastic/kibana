@@ -9,7 +9,7 @@ import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { EndpointActionGenerator } from './endpoint_action_generator';
-import { SENTINEL_ONE_ACTIVITY_INDEX } from '../..';
+import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../..';
 import type {
   LogsEndpointAction,
   SentinelOneActivityEsDoc,
@@ -61,7 +61,7 @@ export class SentinelOneDataGenerator extends EndpointActionGenerator {
   ): SearchHit<SentinelOneActivityEsDoc> {
     const hit = this.toEsSearchHit<SentinelOneActivityEsDoc>(
       this.generateActivityEsDoc(overrides),
-      SENTINEL_ONE_ACTIVITY_INDEX
+      SENTINEL_ONE_ACTIVITY_INDEX_PATTERN
     );
 
     hit.inner_hits = {
