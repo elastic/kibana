@@ -114,10 +114,9 @@ export async function executeCreateAction({
     executeEditAction({
       embeddable,
       startDependencies: deps,
-      overlays: core.overlays,
-      theme: core.theme,
       isNewPanel: true,
       deletePanel,
+      ...core,
     });
   }
 }

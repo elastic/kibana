@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
@@ -134,9 +134,7 @@ export async function executeEditEmbeddableAction({
             handle.close();
           },
         }),
-        {
-          theme$: core.theme.theme$,
-        }
+        core
       ),
       {
         className: 'lnsConfigPanel__overlay',

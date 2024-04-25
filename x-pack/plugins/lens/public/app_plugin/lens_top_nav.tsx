@@ -279,13 +279,13 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   indexPatternService,
   currentDoc,
   onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
+  startServices,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -746,7 +746,7 @@ export const LensTopNavMenu = ({
             toggleSettingsMenuOpen({
               lensStore,
               anchorElement,
-              theme$,
+              startServices,
             }),
         },
       },
@@ -794,8 +794,8 @@ export const LensTopNavMenu = ({
     uiSettings,
     isOnTextBasedMode,
     lensStore,
-    theme$,
     notifications.toasts,
+    startServices,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -904,7 +904,7 @@ export const LensTopNavMenu = ({
   const editField = useMemo(
     () =>
       canEditDataView
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+        ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
