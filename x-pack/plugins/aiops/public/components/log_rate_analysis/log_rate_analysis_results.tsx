@@ -134,13 +134,10 @@ export interface LogRateAnalysisResultsData {
  * LogRateAnalysis props require a data view.
  */
 interface LogRateAnalysisResultsProps {
-  /** The type of analysis, whether it's a spike or dip */
-  analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
   earliest: number;
   /** End timestamp filter */
   latest: number;
-  isBrushCleared: boolean;
   /** Callback for resetting the analysis */
   onReset: () => void;
   /** Window parameters for the analysis */
@@ -160,9 +157,7 @@ interface LogRateAnalysisResultsProps {
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
-  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
-  isBrushCleared,
   latest,
   onReset,
   windowParameters,
@@ -175,6 +170,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
+  const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
   const stickyHistogram = useAppSelector((s) => s.logRateAnalysis.stickyHistogram);
 
   // Store the performance metric's start time using a ref
@@ -388,7 +384,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   return (
     <div data-test-subj="aiopsLogRateAnalysisResults">
       <ProgressControls
-        isBrushCleared={isBrushCleared}
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}

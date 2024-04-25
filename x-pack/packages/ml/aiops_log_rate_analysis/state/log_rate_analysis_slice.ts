@@ -10,18 +10,31 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import type { WindowParameters } from '../window_parameters';
 
+import type { LogRateAnalysisType } from '../log_rate_analysis_type';
+import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
+
 export type InitialAnalysisStart = number | WindowParameters | undefined;
+export interface BrushSelectionUpdatePayload {
+  windowParameters: WindowParameters;
+  force: boolean;
+  analysisType: LogRateAnalysisType;
+}
 
 interface LogRateAnalysisState {
+  analysisType: LogRateAnalysisType;
   autoRunAnalysis: boolean;
   initialAnalysisStart: InitialAnalysisStart;
+  isBrushCleared: boolean;
   stickyHistogram: boolean;
+  windowParameters?: WindowParameters;
 }
 
 function getDefaultState(): LogRateAnalysisState {
   return {
+    analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     autoRunAnalysis: true,
     initialAnalysisStart: undefined,
+    isBrushCleared: true,
     // Default to false for now, until page restructure work to enable smooth sticky histogram is done
     stickyHistogram: false,
   };
@@ -31,6 +44,26 @@ export const logRateAnalysisSlice = createSlice({
   name: 'logRateAnalysis',
   initialState: getDefaultState(),
   reducers: {
+    brushSelectionUpdate: (
+      state: LogRateAnalysisState,
+      action: PayloadAction<BrushSelectionUpdatePayload>
+    ) => {
+      if (!state.isBrushCleared || action.payload.force) {
+        state.windowParameters = action.payload.windowParameters;
+      }
+      if (action.payload.force) {
+        state.isBrushCleared = false;
+      }
+      state.analysisType = action.payload.analysisType;
+    },
+    clearSelection: (state: LogRateAnalysisState) => {
+      state.windowParameters = undefined;
+      state.isBrushCleared = true;
+      state.initialAnalysisStart = undefined;
+    },
+    setAnalysisType: (state: LogRateAnalysisState, action: PayloadAction<LogRateAnalysisType>) => {
+      state.analysisType = action.payload;
+    },
     setAutoRunAnalysis: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
       state.autoRunAnalysis = action.payload;
     },
@@ -40,12 +73,30 @@ export const logRateAnalysisSlice = createSlice({
     ) => {
       state.initialAnalysisStart = action.payload;
     },
+    setIsBrushCleared: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
+      state.isBrushCleared = action.payload;
+    },
     setStickyHistogram: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
       state.stickyHistogram = action.payload;
+    },
+    setWindowParameters: (
+      state: LogRateAnalysisState,
+      action: PayloadAction<WindowParameters | undefined>
+    ) => {
+      state.windowParameters = action.payload;
+      state.isBrushCleared = action.payload === undefined;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setAutoRunAnalysis, setInitialAnalysisStart, setStickyHistogram } =
-  logRateAnalysisSlice.actions;
+export const {
+  brushSelectionUpdate,
+  clearSelection,
+  setAnalysisType,
+  setAutoRunAnalysis,
+  setInitialAnalysisStart,
+  setIsBrushCleared,
+  setStickyHistogram,
+  setWindowParameters,
+} = logRateAnalysisSlice.actions;

@@ -20,6 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 
 import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_background';
 
@@ -30,7 +31,6 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
  * Props for ProgressControlProps
  */
 interface ProgressControlProps {
-  isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
   onRefresh: () => void;
@@ -52,7 +52,6 @@ interface ProgressControlProps {
 export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
-    isBrushCleared,
     progress,
     progressMessage,
     onRefresh,
@@ -66,6 +65,9 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
   const progressOutput = Math.round(progress * 100);
 
   const { euiTheme } = useEuiTheme();
+
+  const isBrushCleared = useAppSelector((s) => s.logRateAnalysis.isBrushCleared);
+
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };
 

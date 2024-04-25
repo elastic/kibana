@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
@@ -21,11 +21,11 @@ import {
   getSnappedWindowParameters,
   LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
   LOG_RATE_ANALYSIS_TYPE,
-  type LogRateAnalysisType,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import {
   clearAllRowState,
+  clearSelection,
   setAutoRunAnalysis,
   setInitialAnalysisStart,
   useAppDispatch,
@@ -98,16 +98,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   embeddingOrigin,
 }) => {
   const { dataView } = useDataSource();
+  const dispatch = useAppDispatch();
 
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
-  const [isBrushCleared, setIsBrushCleared] = useState(true);
-  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
-    LOG_RATE_ANALYSIS_TYPE.SPIKE
-  );
-
-  useEffect(() => {
-    setIsBrushCleared(windowParameters === undefined);
-  }, [windowParameters]);
+  const windowParameters = useAppSelector((s) => s.logRateAnalysis.windowParameters);
 
   // Window parameters stored in the url state use this components
   // `initialAnalysisStart` prop to set the initial params restore from url state.
@@ -139,9 +132,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   );
 
   const autoRunAnalysis = useAppSelector((s) => s.logRateAnalysis.autoRunAnalysis);
+  const isBrushCleared = useAppSelector((s) => s.logRateAnalysis.isBrushCleared);
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-  const dispatch = useAppDispatch();
 
   const { documentStats, earliest, latest } = useData(
     dataView,
@@ -158,26 +151,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
-  function brushSelectionUpdate(
-    windowParametersUpdate: WindowParameters,
-    force: boolean,
-    logRateAnalysisTypeUpdate: LogRateAnalysisType
-  ) {
-    if (!isBrushCleared || force) {
-      setWindowParameters(windowParametersUpdate);
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-    setLogRateAnalysisType(logRateAnalysisTypeUpdate);
-  }
-
-  function clearSelection() {
-    setWindowParameters(undefined);
-    setIsBrushCleared(true);
-
+  function clearSelectionHandler() {
+    dispatch(clearSelection());
     dispatch(clearAllRowState());
-    dispatch(setInitialAnalysisStart(undefined));
   }
 
   const barStyle = {
@@ -252,14 +228,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     <EuiPanel hasBorder={false} hasShadow={false}>
       {showDocumentCountContent && (
         <DocumentCountContent
-          brushSelectionUpdateHandler={brushSelectionUpdate}
           documentCountStats={documentCountStats}
           documentCountStatsSplit={documentCountStatsCompare}
           documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
             currentSelectedSignificantItem,
             currentSelectedGroup
           )}
-          isBrushCleared={isBrushCleared}
           totalCount={totalCount}
           sampleProbability={sampleProbability}
           barColorOverride={barColorOverride}
@@ -270,11 +244,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       <EuiHorizontalRule />
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
-          analysisType={logRateAnalysisType}
           earliest={earliest}
-          isBrushCleared={isBrushCleared}
           latest={latest}
-          onReset={clearSelection}
+          onReset={clearSelectionHandler}
           sampleProbability={sampleProbability}
           searchQuery={searchQuery}
           windowParameters={windowParameters}
@@ -311,7 +283,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
               </EuiButton>{' '}
               <EuiButton
                 data-test-subj="aiopsClearSelectionBadge"
-                onClick={() => clearSelection()}
+                onClick={() => clearSelectionHandler()}
                 color="text"
               >
                 <FormattedMessage

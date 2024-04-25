@@ -14,10 +14,7 @@ import type {
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import {
-  DocumentCountChartWithAutoAnalysisStart,
-  type BrushSelectionUpdateHandler,
-} from '@kbn/aiops-components';
+import { DocumentCountChartRedux } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import type { DocumentCountStats } from '../../../get_document_stats';
@@ -25,11 +22,9 @@ import type { DocumentCountStats } from '../../../get_document_stats';
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
-  isBrushCleared: boolean;
   totalCount: number;
   sampleProbability: number;
   /** Optional color override for the default bar color for charts */
@@ -45,11 +40,9 @@ export interface DocumentCountContentProps {
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  brushSelectionUpdateHandler,
   documentCountStats,
   documentCountStatsSplit,
   documentCountStatsSplitLabel = '',
-  isBrushCleared,
   totalCount,
   sampleProbability,
   barColorOverride,
@@ -99,16 +92,14 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
       </EuiFlexItem>
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
-          <DocumentCountChartWithAutoAnalysisStart
+          <DocumentCountChartRedux
             dependencies={{ data, uiSettings, fieldFormats, charts }}
-            brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
             chartPointsSplit={chartPointsSplit}
             timeRangeEarliest={timeRangeEarliest}
             timeRangeLatest={timeRangeLatest}
             interval={documentCountStats.interval}
             chartPointsSplitLabel={documentCountStatsSplitLabel}
-            isBrushCleared={isBrushCleared}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
             changePoint={documentCountStats.changePoint}
