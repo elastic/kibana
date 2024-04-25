@@ -358,6 +358,16 @@ describe('Axes Settings', () => {
         const component = shallow(
           <AxisSettingsPopover
             {...props}
+            layers={[
+              {
+                seriesType: 'line',
+                layerType: LayerTypes.DATA,
+                layerId: 'first',
+                splitAccessor: 'baz',
+                xAccessor: 'foo',
+                accessors: ['bar'],
+              },
+            ]}
             scale="linear"
             dataBounds={{ min: 0, max: 1000 }}
             extent={{ mode: 'custom', lowerBound: -10, upperBound: 1000 }}
