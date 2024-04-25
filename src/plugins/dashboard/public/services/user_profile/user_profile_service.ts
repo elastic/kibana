@@ -8,15 +8,15 @@
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardStartDependencies } from '../../plugin';
-import { DashboardSecurityService } from './types';
+import { DashboardUserProfileService } from './types';
 
-export type SecurityServiceFactory = KibanaPluginServiceFactory<
-  DashboardSecurityService,
+export type UserProfileServiceFactory = KibanaPluginServiceFactory<
+  DashboardUserProfileService,
   DashboardStartDependencies
 >;
 
-export const securityServiceFactory: SecurityServiceFactory = ({ startPlugins }) => {
-  const { security } = startPlugins;
+export const userProfileServiceFactory: UserProfileServiceFactory = ({ coreStart }) => {
+  const { userProfile } = coreStart;
 
-  return { userProfiles: security?.userProfiles };
+  return userProfile;
 };

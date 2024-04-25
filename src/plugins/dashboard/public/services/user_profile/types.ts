@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardSecurityService } from './types';
+import type { CoreStart } from '@kbn/core/public';
 
-export type SecurityServiceFactory = PluginServiceFactory<DashboardSecurityService>;
-
-export const securityServiceFactory: SecurityServiceFactory = () => {
-  return {};
-};
+export interface DashboardUserProfileService {
+  bulkGet: CoreStart['userProfile']['bulkGet'];
+}

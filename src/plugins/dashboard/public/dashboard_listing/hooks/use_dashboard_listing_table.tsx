@@ -99,7 +99,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
-    security,
+    userProfile,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -269,11 +269,9 @@ export const useDashboardListingTable = ({
     async (userProfileIds: string[]) => {
       if (userProfileIds.length === 0) return [];
 
-      return (
-        security.userProfiles?.bulkGet({ uids: new Set(userProfileIds), dataPath: 'avatar' }) ?? []
-      );
+      return userProfile.bulkGet({ uids: new Set(userProfileIds), dataPath: 'avatar' });
     },
-    [security.userProfiles]
+    [userProfile]
   );
 
   const onFetchSuccess = useCallback(() => {
