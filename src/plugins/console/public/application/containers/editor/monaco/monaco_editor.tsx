@@ -50,10 +50,13 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
-  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
-    setupResizeChecker(divRef.current!, editor);
-  }, [setupResizeChecker]);
+  const editorDidMountCallback = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      setupResizeChecker(divRef.current!, editor);
+    },
+    [setupResizeChecker]
+  );
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
@@ -138,7 +141,6 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
         }}
-        editorDidMount={editorDidMountCallback}
       />
     </div>
   );
