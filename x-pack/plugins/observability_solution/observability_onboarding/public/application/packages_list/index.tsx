@@ -62,7 +62,7 @@ const PackageListGridWrapper = ({
 }: WrapperProps) => {
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: false,
+    prereleaseIntegrationsEnabled: true,
   });
 
   const list: IntegrationCardItem[] = useIntegrationCardList(
