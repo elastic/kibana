@@ -107,8 +107,6 @@ export function SloDetailsPage() {
     storeAutoRefreshState(!isAutoRefreshing);
   };
 
-  console.log(selectedTabId);
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
