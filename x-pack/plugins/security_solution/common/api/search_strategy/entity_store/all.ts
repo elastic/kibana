@@ -6,11 +6,11 @@
  */
 
 import { z } from 'zod';
-import { RiskQueries } from '../model/factory_query_type';
+import { EntityStoreQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const entityStoreRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  factoryQueryType: z.literal(RiskQueries.entityStore),
+  factoryQueryType: z.literal(EntityStoreQueries.entityStore),
 });
 
 export type EntityStoreRequestOptionsInput = z.input<typeof entityStoreRequestOptionsSchema>;

@@ -6,13 +6,13 @@
  */
 
 import type { FactoryQueryTypes } from '../../../../../common/search_strategy';
-import { RiskQueries } from '../../../../../common/search_strategy';
+import { EntityStoreQueries } from '../../../../../common/search_strategy';
 import type { SecuritySolutionFactory } from '../types';
-import { riskScore } from './all';
-import { kpiRiskScore } from './kpi';
+import { entityStore } from './entity_store';
 
-export const riskScoreFactory: Record<RiskQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
-  [RiskQueries.hostsRiskScore]: riskScore,
-  [RiskQueries.usersRiskScore]: riskScore,
-  [RiskQueries.kpiRiskScore]: kpiRiskScore,
+export const entityStoreFactory: Record<
+  EntityStoreQueries,
+  SecuritySolutionFactory<FactoryQueryTypes>
+> = {
+  [EntityStoreQueries.entityStore]: entityStore,
 };

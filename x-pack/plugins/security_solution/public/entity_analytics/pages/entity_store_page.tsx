@@ -30,7 +30,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
 import type { RiskLevels } from '../../../common/entity_analytics';
-import { RiskQueries } from '../../../common/search_strategy';
+import { EntityStoreQueries } from '../../../common/search_strategy';
 import type { FillColor } from '../../common/components/charts/donutchart';
 import { DonutChart } from '../../common/components/charts/donutchart';
 import { HeaderPage } from '../../common/components/header_page';
@@ -258,8 +258,8 @@ const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void })
 
 export const EntityStorePage = () => {
   const { result: donutChartResponse, search: searchDonutChart } =
-    useSearchStrategy<RiskQueries.entityStore>({
-      factoryQueryType: RiskQueries.entityStore,
+    useSearchStrategy<EntityStoreQueries.entityStore>({
+      factoryQueryType: EntityStoreQueries.entityStore,
       initialResult: {},
       errorMessage: 'donut chart error',
     });
@@ -304,8 +304,8 @@ export const EntityStorePage = () => {
   }, []);
 
   const { result: newHostsResponse, search: searchNewHosts } =
-    useSearchStrategy<RiskQueries.entityStore>({
-      factoryQueryType: RiskQueries.entityStore,
+    useSearchStrategy<EntityStoreQueries.entityStore>({
+      factoryQueryType: EntityStoreQueries.entityStore,
       initialResult: {},
       errorMessage: 'new hosts error',
     });
@@ -353,8 +353,8 @@ export const EntityStorePage = () => {
   ];
 
   const { result: allHostsResponse, search: searchAllHosts } =
-    useSearchStrategy<RiskQueries.entityStore>({
-      factoryQueryType: RiskQueries.entityStore,
+    useSearchStrategy<EntityStoreQueries.entityStore>({
+      factoryQueryType: EntityStoreQueries.entityStore,
       initialResult: {},
       errorMessage: 'all hosts error',
     });

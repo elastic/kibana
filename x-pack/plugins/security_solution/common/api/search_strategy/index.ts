@@ -35,12 +35,12 @@ import {
 } from './related_entities/related_entities';
 
 import {
-  entityStoreRequestOptionsSchema,
   hostsRiskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
   usersRiskScoreRequestOptionsSchema,
 } from './risk_score/risk_score';
 
+import { entityStoreRequestOptionsSchema } from './entity_store/entity_store';
 import {
   managedUserDetailsSchema,
   observedUserDetailsSchema,
@@ -59,6 +59,8 @@ export * from './network/network';
 export * from './related_entities/related_entities';
 
 export * from './risk_score/risk_score';
+
+export * from './entity_store/entity_store';
 
 export * from './cti/cti';
 

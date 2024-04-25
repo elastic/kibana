@@ -35,6 +35,9 @@ export enum RiskQueries {
   hostsRiskScore = 'hostsRiskScore',
   usersRiskScore = 'usersRiskScore',
   kpiRiskScore = 'kpiRiskScore',
+}
+
+export enum EntityStoreQueries {
   entityStore = 'entityStore',
 }
 

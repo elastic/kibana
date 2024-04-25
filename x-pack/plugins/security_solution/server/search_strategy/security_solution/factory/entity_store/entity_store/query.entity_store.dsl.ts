@@ -9,7 +9,7 @@
 
 export const QUERY_SIZE = 10;
 
-export const buildRiskScoreQuery = ({
+export const buildEntityStoreQuery = ({
   defaultIndex,
   params,
 }: {

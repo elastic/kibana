@@ -12,6 +12,7 @@ import { hostsFactory } from './hosts';
 import { networkFactory } from './network';
 import { ctiFactoryTypes } from './cti';
 import { riskScoreFactory } from './risk_score';
+import { entityStoreFactory } from './entity_store';
 import { usersFactory } from './users';
 import { firstLastSeenFactory } from './last_first_seen';
 import { relatedEntitiesFactory } from './related_entities';
@@ -25,6 +26,7 @@ export const securitySolutionFactory: Record<
   ...networkFactory,
   ...ctiFactoryTypes,
   ...riskScoreFactory,
+  ...entityStoreFactory,
   ...firstLastSeenFactory,
   ...relatedEntitiesFactory,
 };

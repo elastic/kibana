@@ -9,15 +9,15 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { buildRiskScoreQuery } from './query.risk_score.dsl';
+import { buildEntityStoreQuery } from './query.entity_store.dsl';
 
 export const entityStore = {
-  buildDsl: (options: any) => buildRiskScoreQuery(options),
+  buildDsl: (options: any) => buildEntityStoreQuery(options),
   parse: async (options: any, response: IEsSearchResponse) => ({
     ...response,
     response: response.rawResponse,
     inspect: {
-      dsl: [inspectStringifyObject(buildRiskScoreQuery(options))],
+      dsl: [inspectStringifyObject(buildEntityStoreQuery(options))],
     },
   }),
 };

@@ -29,6 +29,7 @@ import type {
   CtiQueries,
   CtiDataSourceStrategyResponse,
 } from './cti';
+import type { EntityStoreQueries } from './entity_store';
 
 import type {
   RiskQueries,
@@ -90,6 +91,8 @@ import type {
   RiskScoreKpiRequestOptionsInput,
   RiskScoreRequestOptions,
   RiskScoreRequestOptionsInput,
+  EntityStoreRequestOptions,
+  EntityStoreRequestOptionsInput,
   ThreatIntelSourceRequestOptions,
   ThreatIntelSourceRequestOptionsInput,
   UserAuthenticationsRequestOptions,
@@ -97,14 +100,11 @@ import type {
   UsersRequestOptions,
   UsersRequestOptionsInput,
 } from '../../api/search_strategy';
-import type {
-  EntityStoreRequestOptions,
-  EntityStoreRequestOptionsInput,
-} from '../../api/search_strategy/risk_score/entity_store';
 
 export * from './cti';
 export * from './hosts';
 export * from './risk_score';
+export * from './entity_store';
 export * from './network';
 export * from './users';
 export * from './first_last_seen';
@@ -114,6 +114,7 @@ export type FactoryQueryTypes =
   | HostsQueries
   | UsersQueries
   | NetworkQueries
+  | EntityStoreQueries
   | RiskQueries
   | CtiQueries
   | typeof FirstLastSeenQuery
@@ -213,7 +214,7 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? ThreatIntelSourceRequestOptionsInput
   : T extends RiskQueries.hostsRiskScore
   ? RiskScoreRequestOptionsInput
-  : T extends RiskQueries.entityStore
+  : T extends EntityStoreQueries.entityStore
   ? EntityStoreRequestOptionsInput
   : T extends RiskQueries.usersRiskScore
   ? RiskScoreRequestOptionsInput
@@ -267,7 +268,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? ThreatIntelSourceRequestOptions
   : T extends RiskQueries.hostsRiskScore
   ? RiskScoreRequestOptions
-  : T extends RiskQueries.entityStore
+  : T extends EntityStoreQueries.entityStore
   ? EntityStoreRequestOptions
   : T extends RiskQueries.usersRiskScore
   ? RiskScoreRequestOptions
