@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef, Suspense } from 'react';
+import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
@@ -19,7 +19,7 @@ import { CustomCard } from './types';
 
 interface Props {
   /**
-   * A subset of either existing card names to feature, or generated
+   * A subset of either existing card names to feature, or virtual
    * cards to display. The inclusion of CustomCards will override the default
    * list functionality.
    */
@@ -38,6 +38,7 @@ interface Props {
    * When enabled, custom and integration cards are joined into a single list.
    */
   joinCardLists?: boolean;
+  onLoaded?: () => void;
 }
 
 type WrapperProps = Props & {
@@ -57,6 +58,7 @@ const PackageListGridWrapper = ({
   flowCategory,
   flowSearch,
   joinCardLists = false,
+  onLoaded,
 }: WrapperProps) => {
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
@@ -71,6 +73,12 @@ const PackageListGridWrapper = ({
     flowSearch,
     joinCardLists
   );
+
+  useEffect(() => {
+    if (!isLoading && onLoaded !== undefined) {
+      onLoaded();
+    }
+  }, [isLoading, onLoaded]);
 
   if (isLoading) return <Loading />;
 
@@ -89,8 +97,10 @@ const PackageListGridWrapper = ({
               box={{
                 incremental: true,
               }}
-              onChange={(arg) => {
-                setSearchQuery?.(arg.queryText);
+              onChange={({ queryText, error }) => {
+                if (error) return;
+
+                setSearchQuery?.(queryText);
               }}
               query={searchQuery ?? ''}
             />
