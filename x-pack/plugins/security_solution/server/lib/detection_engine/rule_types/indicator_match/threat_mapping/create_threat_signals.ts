@@ -190,6 +190,7 @@ export const createThreatSignals = async ({
       const { maxClauseCountValue, errorType } = getMaxClauseCountErrorValue(
         searchesPerformed,
         threatFieldsLength,
+        chunkPage,
         eventsTelemetry
       );
 

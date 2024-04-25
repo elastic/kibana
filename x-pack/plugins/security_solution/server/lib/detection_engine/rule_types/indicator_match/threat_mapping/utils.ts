@@ -251,6 +251,7 @@ export const getSignalValueMap = ({
 export const getMaxClauseCountErrorValue = (
   searchesPerformed: SearchAfterAndBulkCreateReturnType[],
   threatEntriesCount: number,
+  previousChunkSize: number,
   eventsTelemetry: ITelemetryEventsSender | undefined
 ) =>
   searchesPerformed.reduce<{
@@ -287,6 +288,12 @@ export const getMaxClauseCountErrorValue = (
         // so we need to make this smaller than a single 'failed to create query'
         // max clause count error.
         const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1)));
+        // There is a chance the new calculated val still may yield a too many nested queries
+        // error message. In that case we want to make sure we don't fall into an infinite loop
+        // and so we send a new value that is guaranteed to be smaller than the previous one.
+        if (val >= previousChunkSize) {
+          return { maxClauseCountValue: previousChunkSize / 2, errorType: MANY_NESTED_CLAUSES_ERR };
+        }
         return { maxClauseCountValue: val, errorType: MANY_NESTED_CLAUSES_ERR };
       } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
         const tempVal = parseInt(foundMaxClauseCountValue, 10);
