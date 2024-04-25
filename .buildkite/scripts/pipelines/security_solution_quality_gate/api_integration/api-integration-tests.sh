@@ -5,15 +5,15 @@ if [ -z "$1" ]
     exit 1
 fi
 
-# source .buildkite/scripts/common/util.sh
-# .buildkite/scripts/bootstrap.sh
+source .buildkite/scripts/common/util.sh
+.buildkite/scripts/bootstrap.sh
 
-# buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
+buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
 source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 
 cd x-pack/test/security_solution_api_integration
-# set +e
+set +e
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
