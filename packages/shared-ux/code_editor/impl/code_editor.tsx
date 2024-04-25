@@ -112,6 +112,8 @@ export interface CodeEditorProps {
    */
   editorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 
+  editorWillUnmount?: () => void;
+
   /**
    * Should the editor use the dark theme
    */
@@ -165,6 +167,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
+  editorWillUnmount,
   useDarkTheme: useDarkThemeProp,
   transparentBackground,
   suggestionProvider,
@@ -446,10 +449,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
     (editor) => {
+      editorWillUnmount?.();
+
       const model = editor.getModel();
       model?.dispose();
     },
-    []
+    [editorWillUnmount]
   );
 
   useEffect(() => {
