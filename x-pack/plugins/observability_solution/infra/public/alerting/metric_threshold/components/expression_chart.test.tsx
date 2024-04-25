@@ -12,7 +12,8 @@ import { DataViewBase } from '@kbn/es-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { Aggregators, COMPARATORS } from '../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';

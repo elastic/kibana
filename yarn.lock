@@ -3122,6 +3122,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-comparators@link:x-pack/packages/kbn-alerting-comparators":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-example-plugin@link:x-pack/examples/alerting_example":
   version "0.0.0"
   uid ""

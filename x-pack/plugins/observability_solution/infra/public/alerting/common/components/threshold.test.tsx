@@ -6,7 +6,7 @@
  */
 
 import { LIGHT_THEME } from '@elastic/charts';
-import { COMPARATORS } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './threshold';
 import React from 'react';

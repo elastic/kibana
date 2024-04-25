@@ -15,8 +15,9 @@ import {
   RuleType,
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { COMPARATORS, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
 import {

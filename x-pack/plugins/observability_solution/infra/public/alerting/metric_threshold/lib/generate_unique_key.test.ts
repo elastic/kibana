@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Aggregators, COMPARATORS } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 import { generateUniqueKey } from './generate_unique_key';
 

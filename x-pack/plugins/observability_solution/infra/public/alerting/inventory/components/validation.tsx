@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  COMPARATORS,
   FilterQuery,
   InventoryMetricConditions,
   QUERY_INVALID,

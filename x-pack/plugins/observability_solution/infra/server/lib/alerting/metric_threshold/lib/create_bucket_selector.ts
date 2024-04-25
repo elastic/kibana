@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  Aggregators,
-  COMPARATORS,
-  MetricExpressionParams,
-} from '../../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 

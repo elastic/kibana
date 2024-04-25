@@ -6,7 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Aggregators, COMPARATORS } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
 
 export const buildMetricThresholdRule = (

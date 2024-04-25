@@ -10,7 +10,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { COMPARATORS, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

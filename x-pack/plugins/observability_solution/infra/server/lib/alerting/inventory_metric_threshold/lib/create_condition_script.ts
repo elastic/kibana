@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { COMPARATORS } from '../../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertMetricValue } from './convert_metric_value';
 
 export const createConditionScript = (

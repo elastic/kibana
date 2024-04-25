@@ -10,7 +10,8 @@ import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { AlertStates, COMPARATORS } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { AlertStates } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(

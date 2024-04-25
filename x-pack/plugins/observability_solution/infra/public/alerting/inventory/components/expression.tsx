@@ -44,12 +44,12 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
 } from '../../../../common/http_api';
 import {
-  COMPARATORS,
   FilterQuery,
   InventoryMetricConditions,
   QUERY_INVALID,

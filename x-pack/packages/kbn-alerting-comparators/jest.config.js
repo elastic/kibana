@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export interface TriggersActionsUiConfigType {
-  enableExperimental: string[];
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/packages/kbn-alerting-comparators'],
+};

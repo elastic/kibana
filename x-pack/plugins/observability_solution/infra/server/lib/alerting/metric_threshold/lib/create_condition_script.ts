@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { COMPARATORS } from '../../../../../common/alerting/metrics';
-
+import { COMPARATORS } from '@kbn/alerting-comparators';
 export const createConditionScript = (threshold: number[], comparator: COMPARATORS) => {
   if (comparator === COMPARATORS.BETWEEN && threshold.length === 2) {
     return {

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { createConditionScript } from './create_condition_script';
-import { COMPARATORS } from '../../../../../common/alerting/metrics';
 
 describe('createConditionScript', () => {
   it('should convert tx threshold from bits to byte', () => {

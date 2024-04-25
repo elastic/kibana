@@ -7,7 +7,7 @@
 import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { first, last } from 'lodash';
 import React from 'react';
-import { COMPARATORS } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Color, colorTransformer } from '../../../../common/color_palette';
 
 interface ThresholdAnnotationsProps {

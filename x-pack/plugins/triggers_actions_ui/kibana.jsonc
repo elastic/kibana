@@ -46,7 +46,6 @@
     "extraPublicDirs": [
       "public/common",
       "public/common/constants",
-      "common"
     ]
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Comparator } from './types';
+import { Comparator } from './comparators_type';
 
 export enum COMPARATORS {
   GREATER_THAN = '>',

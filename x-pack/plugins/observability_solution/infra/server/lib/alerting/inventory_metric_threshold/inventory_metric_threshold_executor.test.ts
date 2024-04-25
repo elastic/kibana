@@ -13,12 +13,8 @@ import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/serve
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
-import {
-  Aggregators,
-  COMPARATORS,
-  InventoryMetricConditions,
-} from '../../../../common/alerting/metrics';
-
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';

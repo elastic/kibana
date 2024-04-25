@@ -8,9 +8,9 @@
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  COMPARATORS,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
