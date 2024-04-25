@@ -174,16 +174,20 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
         >
           <>
-            {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}
-            {' '}
+            {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}{' '}
             {(usingEffectiveRetention || usingDataRetention) && (
               <EuiToolTip
-                content={i18n.translate('xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip', {
-                  defaultMessage: `This data stream is using {retentionType}.`,
-                  values: {
-                    retentionType: usingEffectiveRetention ? 'effective retention' : 'customer defined retention'
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                  {
+                    defaultMessage: `This data stream is using {retentionType}.`,
+                    values: {
+                      retentionType: usingEffectiveRetention
+                        ? 'effective retention'
+                        : 'customer defined retention',
+                    },
                   }
-                })}
+                )}
               >
                 <EuiIcon size="s" color="subdued" type="iInCircle" />
               </EuiToolTip>

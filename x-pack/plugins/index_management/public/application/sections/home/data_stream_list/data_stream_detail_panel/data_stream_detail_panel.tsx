@@ -222,7 +222,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       </EuiLink>
     );
 
-    let defaultDetails = [
+    const defaultDetails = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
           defaultMessage: 'Health',
@@ -331,12 +331,18 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     // If both rentention types are available, we wanna surface to the user both
     if (lifecycle?.effective_retention && lifecycle?.data_retention) {
       defaultDetails.push({
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTitle', {
-          defaultMessage: 'Data retention',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTooltip', {
-          defaultMessage: `This is the data retention defined by you, but the effective retention is the one being enforced.`,
-        }),
+        name: i18n.translate(
+          'xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTitle',
+          {
+            defaultMessage: 'Data retention',
+          }
+        ),
+        toolTip: i18n.translate(
+          'xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTooltip',
+          {
+            defaultMessage: `This is the data retention defined by you, but the effective retention is the one being enforced.`,
+          }
+        ),
         content: (
           <ConditionalWrap
             condition={isDataStreamFullyManagedByILM(dataStream)}
