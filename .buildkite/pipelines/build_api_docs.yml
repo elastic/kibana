@@ -1,12 +1,7 @@
 env:
   PUBLISH_API_DOCS_CHANGES: 'true'
 steps:
-  - commands:
-      - .buildkite/scripts/bootstrap.sh
-      - echo "--- Running type check"
-      - (node scripts/type_check && buildkite-agent meta-data set "type_check_status" "success") || buildkite-agent meta-data set "type_check_status" "failure"
-      - echo "--- Type-check finished"
-      - test "$(buildkite-agent meta-data get type_check_status)" == "success" || exit 1
+  - command: .buildkite/scripts/steps/api_docs/type_check_with_status.sh
     label: Run scripts/type_check
     key: type_check
     agents:
@@ -17,7 +12,7 @@ steps:
       preemptible: true
     timeout_in_minutes: 50
 
-  - command: .buildkite/scripts/steps/build_api_docs.sh
+  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
       image: family/kibana-ubuntu-2004
