@@ -41,7 +41,6 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { BasicFields } from '../../common/search_strategy';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -624,7 +623,7 @@ export class AlertsClient {
       return {
         _index: alert.hits.hits[0]._index,
         ...alert.hits.hits[0]._source,
-      } as ParsedTechnicalFields & Omit<BasicFields, '_id'>;
+      } as ParsedTechnicalFields & { _index?: string };
     } catch (error) {
       this.logger.error(`get threw an error: ${error}`);
       throw error;

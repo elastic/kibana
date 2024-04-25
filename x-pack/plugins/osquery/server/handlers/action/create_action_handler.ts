@@ -10,7 +10,6 @@ import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { BasicFields } from '@kbn/rule-registry-plugin/common/search_strategy';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
@@ -30,7 +29,7 @@ interface Metadata {
 interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
-  alertData?: ParsedTechnicalFields & Omit<BasicFields, '_id'>;
+  alertData?: ParsedTechnicalFields & { _index?: string };
   error?: string;
 }
 

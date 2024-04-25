@@ -9,7 +9,6 @@ import { createDynamicQueries } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
-import type { BasicFields } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 describe('create queries', () => {
   const defualtQueryParams = {
@@ -61,7 +60,7 @@ describe('create queries', () => {
           process: {
             pid,
           },
-        } as unknown as ParsedTechnicalFields & Omit<BasicFields, '_id'>,
+        } as unknown as ParsedTechnicalFields & { _index?: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -78,7 +77,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         alertData: {
           process: { pid },
-        } as unknown as ParsedTechnicalFields & Omit<BasicFields, '_id'>,
+        } as unknown as ParsedTechnicalFields & { _index?: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -90,7 +89,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         alertData: {
           process: {},
-        } as unknown as ParsedTechnicalFields & Omit<BasicFields, '_id'>,
+        } as unknown as ParsedTechnicalFields & { _index?: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');
