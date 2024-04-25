@@ -37,7 +37,7 @@ const SUPPRESS_BY_FIELDS = ['agent.type'];
 describe(
   'Detection Rule Creation - EQL Rules - With Alert Suppression',
   {
-    tags: ['@ess', '@serverless', '@skipServerlessMKI'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
     env: {
       ftrConfig: {
