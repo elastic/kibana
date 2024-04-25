@@ -54,6 +54,7 @@ function LatencyChart({
   offset,
   timeZone,
   customAlertEvaluationThreshold,
+  kuery = '',
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -70,6 +71,7 @@ function LatencyChart({
   offset: string;
   timeZone: string;
   customAlertEvaluationThreshold?: number;
+  kuery?: string;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -92,7 +94,7 @@ function LatencyChart({
             path: { serviceName },
             query: {
               environment,
-              kuery: '',
+              kuery,
               start,
               end,
               transactionType,
@@ -118,6 +120,7 @@ function LatencyChart({
       transactionType,
       transactionName,
       preferred,
+      kuery,
     ]
   );
   const alertEvalThreshold =

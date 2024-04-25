@@ -18,6 +18,7 @@ export function APMAlertingLatencyChart({
   rangeFrom,
   rangeTo,
   latencyThresholdInMicroseconds,
+  transactionName,
 }: EmbeddableAPMAlertingVizProps & {
   latencyThresholdInMicroseconds?: number;
 }) {
@@ -26,10 +27,10 @@ export function APMAlertingLatencyChart({
     serviceName,
     transactionType,
     setTransactionType,
-    transactionName,
     comparisonChartTheme,
     latencyAggregationType,
     setLatencyAggregationType,
+    kuery,
   } = useAlertingProps({
     rule,
   });
@@ -59,6 +60,7 @@ export function APMAlertingLatencyChart({
       comparisonEnabled={false}
       offset={''}
       customAlertEvaluationThreshold={latencyThresholdInMicroseconds}
+      kuery={kuery}
     />
   );
 }

@@ -19,8 +19,7 @@ import { APMThroughputChartEmbeddableComponent } from './chart';
 import type { APMThroughputChartEmbeddableInput } from './types';
 import type { EmbeddableDeps } from '../types';
 
-export const APM_THROUGHPUT_CHART_EMBEDDABLE =
-  'APM_THROUGHPUT_CHART_EMBEDDABLE';
+export const APM_THROUGHPUT_CHART_EMBEDDABLE = 'APM_THROUGHPUT_CHART_EMBEDDABLE';
 
 export class APMThroughputChartEmbeddable extends AbstractEmbeddable<
   APMThroughputChartEmbeddableInput,

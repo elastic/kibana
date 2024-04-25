@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { ErrorEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import { GetSLOResponse, APMTransactionDurationIndicator } from '@kbn/slo-schema';
@@ -46,6 +47,13 @@ export function APMEmbeddableRoot({
   const [embeddable, setEmbeddable] = useState<ErrorEmbeddable | IEmbeddable | undefined>();
 
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  const filter = slo.indicator.params.filter;
+  const isKueryFilter = typeof filter === 'string';
+
+  const kuery = isKueryFilter ? filter : undefined;
+  const filters = !isKueryFilter
+    ? buildQueryFromFilters(filter?.filters, undefined, undefined)
+    : undefined;
 
   useEffect(() => {
     async function setupEmbeddable() {
@@ -62,6 +70,8 @@ export function APMEmbeddableRoot({
           rangeFrom: dataTimeRange.from.toISOString(),
           rangeTo: dataTimeRange.to.toISOString(),
           latencyThresholdInMicroseconds: slo.indicator.params.threshold * 1000,
+          kuery,
+          filters,
           alert,
           rule,
           comparisonEnabled: true,

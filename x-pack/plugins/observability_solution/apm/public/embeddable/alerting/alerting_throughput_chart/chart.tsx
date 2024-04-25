@@ -16,12 +16,13 @@ export function APMAlertingThroughputChart({
   timeZone,
   rangeFrom,
   rangeTo,
+  transactionName,
 }: EmbeddableAPMAlertingVizProps) {
   const {
+    kuery,
     environment,
     serviceName,
     transactionType,
-    transactionName,
     comparisonChartTheme,
     setTransactionType,
   } = useAlertingProps({
@@ -50,6 +51,7 @@ export function APMAlertingThroughputChart({
       timeZone={timeZone}
       comparisonEnabled={false}
       offset={''}
+      kuery={kuery}
     />
   );
 }

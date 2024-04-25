@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../context/environments_context/use_environments_context';
-import { useAnyOfApmParams } from '../../hooks/use_apm_params';
+import { useApmParams } from '../../hooks/use_apm_params';
 import { getComparisonChartTheme } from '../../components/shared/time_comparison/get_comparison_chart_theme';
 import { getAggsTypeFromRule } from '../../components/alerting/ui_components/alert_details_app_section/helpers';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
@@ -18,13 +18,12 @@ export function useAlertingProps({
 }: {
   rule: Rule<{ aggregationType: LatencyAggregationType }>;
 }) {
-  const { transactionType: defaultTransactionType, serviceName } =
-    useApmServiceContext();
+  const { transactionType: defaultTransactionType, serviceName } = useApmServiceContext();
 
   const { environment } = useEnvironmentsContext();
   const {
-    query: { transactionName },
-  } = useAnyOfApmParams('/services/{serviceName}/transactions/view');
+    query: { kuery },
+  } = useApmParams('/services/{serviceName}/overview');
 
   const params = rule.params;
   const comparisonChartTheme = getComparisonChartTheme();
@@ -32,9 +31,7 @@ export function useAlertingProps({
   const [latencyAggregationType, setLatencyAggregationType] = useState(
     getAggsTypeFromRule(params.aggregationType)
   );
-  const [transactionType, setTransactionType] = useState(
-    defaultTransactionType
-  );
+  const [transactionType, setTransactionType] = useState(defaultTransactionType);
 
   useEffect(() => {
     setTransactionType(defaultTransactionType);
@@ -43,11 +40,11 @@ export function useAlertingProps({
   return {
     transactionType,
     setTransactionType,
-    transactionName,
     serviceName,
     environment,
     latencyAggregationType,
     setLatencyAggregationType,
     comparisonChartTheme,
+    kuery,
   };
 }

@@ -41,6 +41,7 @@ function ThroughputChart({
   comparisonEnabled,
   offset,
   timeZone,
+  kuery = '',
 }: {
   transactionType: string;
   setTransactionType?: (transactionType: string) => void;
@@ -53,6 +54,7 @@ function ThroughputChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
+  kuery?: string;
 }) {
   /* Throughput Chart */
 
@@ -60,7 +62,7 @@ function ThroughputChart({
     start,
     end,
     numBuckets: 100,
-    kuery: '',
+    kuery,
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
@@ -76,7 +78,7 @@ function ThroughputChart({
             },
             query: {
               environment,
-              kuery: '',
+              kuery,
               start,
               end,
               transactionType,
@@ -89,7 +91,7 @@ function ThroughputChart({
         });
       }
     },
-    [environment, serviceName, start, end, transactionType, transactionName, preferred]
+    [environment, serviceName, start, end, transactionType, transactionName, preferred, kuery]
   );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
   const timeseriesThroughput = [

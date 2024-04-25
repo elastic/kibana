@@ -46,6 +46,7 @@ function FailedTransactionChart({
   end,
   comparisonChartTheme,
   timeZone,
+  kuery = '',
 }: {
   transactionType: string;
   setTransactionType?: (transactionType: string) => void;
@@ -56,6 +57,7 @@ function FailedTransactionChart({
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
   timeZone: string;
+  kuery?: string;
 }) {
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
@@ -63,7 +65,7 @@ function FailedTransactionChart({
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
-    kuery: '',
+    kuery,
     numBuckets: 100,
     type: transactionName
       ? ApmDocumentType.TransactionMetric
@@ -82,7 +84,7 @@ function FailedTransactionChart({
               },
               query: {
                 environment,
-                kuery: '',
+                kuery,
                 start,
                 end,
                 transactionType,
@@ -96,7 +98,7 @@ function FailedTransactionChart({
         );
       }
     },
-    [environment, serviceName, start, end, transactionType, transactionName, preferred]
+    [environment, serviceName, start, end, transactionType, transactionName, preferred, kuery]
   );
   const timeseriesErrorRate = [
     {

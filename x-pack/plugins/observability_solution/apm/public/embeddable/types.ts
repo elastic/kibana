@@ -39,6 +39,7 @@ export interface APMEmbeddableProps {
   transactionName?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  kuery?: string;
 }
 
 export type APMEmbeddableInput = EmbeddableInput & APMEmbeddableProps;

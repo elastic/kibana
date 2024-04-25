@@ -19,8 +19,7 @@ import { APMAlertingLatencyChart } from './chart';
 import type { APMAlertingVizEmbeddableInput } from '../types';
 import type { EmbeddableDeps } from '../../types';
 
-export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE =
-  'APM_ALERTING_LATENCY_CHART_EMBEDDABLE';
+export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE';
 export class APMAlertingLatencyChartEmbeddable extends AbstractEmbeddable<
   APMAlertingVizEmbeddableInput,
   EmbeddableOutput
@@ -60,11 +59,11 @@ export class APMAlertingLatencyChartEmbeddable extends AbstractEmbeddable<
       <APMEmbeddableContext
         deps={this.deps}
         serviceName={input.serviceName}
-        transactionName={input.transactionName}
         transactionType={input.transactionType}
         environment={input.environment}
         rangeFrom={input.rangeFrom}
         rangeTo={input.rangeTo}
+        kuery={input.kuery}
       >
         <APMAlertingLatencyChart
           rule={input.rule}
@@ -73,6 +72,7 @@ export class APMAlertingLatencyChartEmbeddable extends AbstractEmbeddable<
           rangeFrom={input.rangeFrom}
           rangeTo={input.rangeTo}
           latencyThresholdInMicroseconds={input.latencyThresholdInMicroseconds}
+          transactionName={input.transactionName}
         />
       </APMEmbeddableContext>,
       node

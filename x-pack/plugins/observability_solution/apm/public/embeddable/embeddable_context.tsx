@@ -9,10 +9,7 @@ import { createMemoryHistory } from 'history';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext, ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { ApmServiceContextProvider } from '../context/apm_service/apm_service_context';
 import { ApmTimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
@@ -30,30 +27,28 @@ type APMEmbeddableContextProps = Omit<APMEmbeddableInput, 'id'> & {
 
 export function APMEmbeddableContext({
   serviceName,
-  transactionName,
   transactionType,
   environment = ENVIRONMENT_ALL_VALUE,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
+  kuery,
   deps,
   children,
 }: APMEmbeddableContextProps) {
   const params = getQueryParams({
-    transactionName,
     transactionType,
     environment,
     rangeFrom,
     rangeTo,
+    kuery,
   });
   /* Many APM components rely on URL state. To account for this,
    * we create history with a spoofed initial URL to match
    * the data type for the embeddable input. */
-  const routeContext = transactionName
-    ? `/services/${serviceName}/transactions/view`
-    : `/services/${serviceName}/overview`;
+  const routeContext = `/services/${serviceName}/overview`;
   const history = createMemoryHistory({
     initialEntries: [
-      `${routeContext}?comparisonEnabled=true&kuery=&latencyAggregationType=avg&offset=1d&${params}`,
+      `${routeContext}?comparisonEnabled=true&latencyAggregationType=avg&offset=1d&${params}`,
     ],
   });
   const services: ApmPluginContextValue = {
@@ -87,9 +82,7 @@ export function APMEmbeddableContext({
               <KibanaContextProvider services={deps.coreStart}>
                 <ApmTimeRangeMetadataContextProvider>
                   <ApmServiceContextProvider>
-                    <ChartPointerEventContextProvider>
-                      {children}
-                    </ChartPointerEventContextProvider>
+                    <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
                   </ApmServiceContextProvider>
                 </ApmTimeRangeMetadataContextProvider>
               </KibanaContextProvider>
@@ -107,6 +100,7 @@ const getQueryParams = ({
   environment = ENVIRONMENT_ALL_VALUE,
   rangeTo = 'now',
   rangeFrom = 'now-15m',
+  kuery,
 }: Omit<APMEmbeddableInput, 'serviceName' | 'id'>) => {
   const transactionNameParam = transactionName
     ? `transactionName=${encodeURIComponent(transactionName)}`
@@ -114,15 +108,14 @@ const getQueryParams = ({
   const transactionTypeParam = transactionType
     ? `transactionType=${encodeURIComponent(transactionType)}`
     : null;
-  const environmentParam = environment
-    ? `environment=${encodeURIComponent(environment)}`
-    : null;
+  const environmentParam = environment ? `environment=${encodeURIComponent(environment)}` : null;
   const params = [
     transactionNameParam,
     transactionTypeParam,
     environmentParam,
     `rangeFrom=${encodeURIComponent(rangeFrom)}`,
     `rangeTo=${encodeURIComponent(rangeTo)}`,
+    kuery ? `kuery=${encodeURIComponent(kuery)}` : null,
   ]
     .filter(Boolean)
     .join('&');

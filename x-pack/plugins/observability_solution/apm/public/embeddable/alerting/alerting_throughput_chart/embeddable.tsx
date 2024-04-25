@@ -19,8 +19,7 @@ import { APMAlertingThroughputChart } from './chart';
 import type { APMAlertingVizEmbeddableInput } from '../types';
 import type { EmbeddableDeps } from '../../types';
 
-export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE =
-  'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
+export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE = 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
 
 export class APMAlertingThroughputChartEmbeddable extends AbstractEmbeddable<
   APMAlertingVizEmbeddableInput,
@@ -61,11 +60,11 @@ export class APMAlertingThroughputChartEmbeddable extends AbstractEmbeddable<
       <APMEmbeddableContext
         deps={this.deps}
         serviceName={input.serviceName}
-        transactionName={input.transactionName}
         transactionType={input.transactionType}
         environment={input.environment}
         rangeFrom={input.rangeFrom}
         rangeTo={input.rangeTo}
+        kuery={input.kuery}
       >
         <APMAlertingThroughputChart
           rule={input.rule}
@@ -73,6 +72,7 @@ export class APMAlertingThroughputChartEmbeddable extends AbstractEmbeddable<
           timeZone={input.timeZone}
           rangeFrom={input.rangeFrom}
           rangeTo={input.rangeTo}
+          transactionName={input.transactionName}
         />
       </APMEmbeddableContext>,
       node

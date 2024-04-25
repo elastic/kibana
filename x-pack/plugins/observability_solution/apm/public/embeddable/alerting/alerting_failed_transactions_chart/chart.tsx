@@ -16,14 +16,15 @@ export function APMAlertingFailedTransactionsChart({
   timeZone,
   rangeFrom,
   rangeTo,
+  transactionName,
 }: EmbeddableAPMAlertingVizProps) {
   const {
     environment,
     serviceName,
     transactionType,
-    transactionName,
     comparisonChartTheme,
     setTransactionType,
+    kuery,
   } = useAlertingProps({
     rule,
   });
@@ -47,6 +48,7 @@ export function APMAlertingFailedTransactionsChart({
       end={rangeTo}
       comparisonChartTheme={comparisonChartTheme}
       timeZone={timeZone}
+      kuery={kuery}
     />
   );
 }

@@ -61,13 +61,14 @@ export class APMAlertingFailedTransactionsChartEmbeddable extends AbstractEmbedd
       <APMEmbeddableContext
         deps={this.deps}
         serviceName={input.serviceName}
-        transactionName={input.transactionName}
         transactionType={input.transactionType}
         environment={input.environment}
         rangeFrom={input.rangeFrom}
         rangeTo={input.rangeTo}
+        kuery={input.kuery}
       >
         <APMAlertingFailedTransactionsChart
+          transactionName={input.transactionName}
           rule={input.rule}
           alert={input.alert}
           timeZone={input.timeZone}

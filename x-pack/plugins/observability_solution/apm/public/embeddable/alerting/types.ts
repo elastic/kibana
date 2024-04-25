@@ -24,4 +24,6 @@ export type APMAlertingVizEmbeddableInput = EmbeddableInput &
     serviceName: string;
     environment?: string;
     transactionType?: string;
+    kuery?: string;
+    filters?: string;
   };
