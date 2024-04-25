@@ -79,7 +79,7 @@ export async function getStateFromAggregateQuery(
   const context = state.initialContext;
   const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
   // fetch the pattern from the query
-  const indexPattern = await getIndexPatternFromTextBasedQuery(query);
+  const indexPattern = getIndexPatternFromTextBasedQuery(query);
   // get the id of the dataview
   let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
@@ -128,7 +128,7 @@ export async function getStateFromAggregateQuery(
   };
 }
 
-export async function getIndexPatternFromTextBasedQuery(query: AggregateQuery): Promise<string> {
+export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string {
   let indexPattern = '';
   // sql queries
   if ('sql' in query) {

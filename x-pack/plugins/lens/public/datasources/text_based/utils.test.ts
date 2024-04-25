@@ -52,32 +52,32 @@ jest.mock('./fetch_data_from_aggregate_query', () => ({
 
 describe('Text based languages utils', () => {
   describe('getIndexPatternFromTextBasedQuery', () => {
-    it('should return the index pattern for sql query', async () => {
-      const indexPattern = await getIndexPatternFromTextBasedQuery({
+    it('should return the index pattern for sql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
         sql: 'SELECT bytes, memory from foo',
       });
 
       expect(indexPattern).toBe('foo');
     });
 
-    it('should return empty index pattern for non sql query', async () => {
-      const indexPattern = await getIndexPatternFromTextBasedQuery({
+    it('should return empty index pattern for non sql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
         lang1: 'SELECT bytes, memory from foo',
       } as unknown as AggregateQuery);
 
       expect(indexPattern).toBe('');
     });
 
-    it('should return the index pattern for es|ql query', async () => {
-      const indexPattern = await getIndexPatternFromTextBasedQuery({
+    it('should return the index pattern for es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
         esql: 'from foo | keep bytes, memory ',
       });
 
       expect(indexPattern).toBe('foo');
     });
 
-    it('should return empty index pattern for non es|ql query', async () => {
-      const indexPattern = await getIndexPatternFromTextBasedQuery({
+    it('should return empty index pattern for non es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
         lang1: 'from foo | keep bytes, memory ',
       } as unknown as AggregateQuery);
 
