@@ -29,7 +29,10 @@ export const buildSecurityApi = ({
       asScoped(request) {
         return audit.asScoped(request);
       },
-      withoutRequest: audit.withoutRequest,
+      withoutRequest: {
+        log: audit.withoutRequest.log,
+        enabled: audit.withoutRequest.enabled,
+      },
     },
   };
 };
