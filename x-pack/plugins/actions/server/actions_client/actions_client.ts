@@ -681,20 +681,6 @@ export class ActionsClient {
     return additionalPrivileges;
   }
 
-  private async getActionTypeId(actionId: string): Promise<string> {
-    const inMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === actionId
-    );
-
-    if (inMemoryConnector) return inMemoryConnector.actionTypeId;
-
-    const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-      'action',
-      actionId
-    );
-    return attributes.actionTypeId;
-  }
-
   public async execute({
     actionId,
     params,
@@ -703,20 +689,34 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
-    // we need these later for executable-ability checks
-    let actionTypeId: string | undefined;
-    let typeNotFoundErr: Error | undefined;
-    try {
-      actionTypeId = await this.getActionTypeId(actionId);
-    } catch (err) {
-      typeNotFoundErr = err;
-    }
+    const log = this.context.logger;
 
     if (
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
+      let actionTypeId: string | undefined;
+
+      try {
+        if (this.isPreconfigured(actionId) || this.isSystemAction(actionId)) {
+          const connector = this.context.inMemoryConnectors.find(
+            (inMemoryConnector) => inMemoryConnector.id === actionId
+          );
+
+          actionTypeId = connector?.actionTypeId;
+        } else {
+          // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
+          const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+            'action',
+            actionId
+          );
+
+          actionTypeId = attributes.actionTypeId;
+        }
+      } catch (err) {
+        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+      }
 
       await this.context.authorization.ensureAuthorized({
         operation: 'execute',
@@ -725,21 +725,6 @@ export class ActionsClient {
       });
     } else {
       trackLegacyRBACExemption('execute', this.context.usageCounter);
-    }
-
-    // we need to throw the actionType not found/enabled error AFTER the authorization check
-    if (!actionTypeId) {
-      if (typeNotFoundErr) throw typeNotFoundErr;
-      // defensive, in case of future code changes and typeNotFoundErr isn't set
-      throw new Error(`Action type not found for actionId: ${actionId}`);
-    }
-
-    try {
-      this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    } catch (err) {
-      const message = `Attempting to execute a disabled action type ${err}`;
-      this.context.logger.warn(message);
-      return { actionId, status: 'error', message };
     }
 
     return this.context.actionExecutor.execute({

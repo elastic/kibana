@@ -2728,32 +2728,6 @@ describe('execute()', () => {
       });
     });
 
-    test('throws when license is not valid for the type of action', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-      registerMyActionType();
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
-      mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
-        throw new Error('license issue');
-      });
-
-      const result = await actionsClient.execute({
-        actionId: 'action-id',
-        params: {
-          name: 'my name',
-        },
-        source: asHttpRequestExecutionSource(request),
-      });
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "actionId": "action-id",
-          "message": "Attempting to execute a disabled action type Error: license issue",
-          "status": "error",
-        }
-      `);
-    });
-
     test('tracks legacy RBAC', async () => {
       registerMyActionType();
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());

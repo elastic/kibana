@@ -36,7 +36,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should not execute an email action', async () => {
+    it('should not execute a pre-configured email connector because of license', async () => {
       await supertest
         .post('/api/actions/connector/my-test-email/_execute')
         .set('kbn-xsrf', 'foo')

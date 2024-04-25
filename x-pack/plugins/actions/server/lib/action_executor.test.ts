@@ -1259,6 +1259,27 @@ describe('Action Executor', () => {
         });
       }
     });
+
+    test(`${label} throws error when license is not valid for the type of action`, async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+      connectorTypeRegistry.isActionExecutable.mockReturnValue(false);
+      connectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+        throw new Error('nope');
+      });
+
+      if (executeUnsecure) {
+        await expect(() => actionExecutor.executeUnsecured(executeUnsecuredParams)).rejects.toThrow(
+          'nope'
+        );
+        expect(connectorType.executor).not.toHaveBeenCalled();
+      } else {
+        await expect(() => actionExecutor.execute(executeParams)).rejects.toThrow('nope');
+        expect(connectorType.executor).not.toHaveBeenCalled();
+      }
+    });
   }
 });
 
