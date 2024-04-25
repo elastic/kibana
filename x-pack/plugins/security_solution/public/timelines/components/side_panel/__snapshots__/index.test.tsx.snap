@@ -146,13 +146,6 @@ Array [
 `;
 
 exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set 1`] = `
-.c0 {
-  -webkit-flex: 0 1 auto;
-  -ms-flex: 0 1 auto;
-  flex: 0 1 auto;
-  margin-top: 8px;
-}
-
 .c1 .euiFlyoutBody__overflow {
   display: -webkit-box;
   display: -webkit-flex;
@@ -170,6 +163,13 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   flex: 1;
   overflow: hidden;
   padding: 0 12px 12px;
+}
+
+.c0 {
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  margin-top: 8px;
 }
 
 .c2 .side-panel-flyout-footer {
