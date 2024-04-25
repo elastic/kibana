@@ -21,6 +21,9 @@ export const useResizeCheckerUtils = () => {
     divElement: HTMLDivElement,
     editor: monaco.editor.IStandaloneCodeEditor
   ) => {
+    if (resizeChecker.current) {
+      resizeChecker.current.destroy();
+    }
     resizeChecker.current = new ResizeChecker(divElement);
     resizeChecker.current.on('resize', () => {
       editor.layout();
