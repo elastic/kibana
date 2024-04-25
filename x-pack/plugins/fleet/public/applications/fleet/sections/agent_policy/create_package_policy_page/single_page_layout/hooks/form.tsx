@@ -409,6 +409,7 @@ export function useOnSubmit({
     [
       formState,
       hasErrors,
+      agentCount,
       packagePolicy,
       selectedPolicyTab,
       isAgentlessPolicyId,
@@ -421,7 +422,6 @@ export function useOnSubmit({
       onSaveNavigate,
       confirmForceInstall,
       hasFleetAddAgentsPrivileges,
-      agentCount,
     ]
   );
 
