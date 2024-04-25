@@ -96,7 +96,8 @@
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
     "@kbn/shared-svg",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/alerting-comparators"
   ],
   "exclude": [
     "target/**/*"
