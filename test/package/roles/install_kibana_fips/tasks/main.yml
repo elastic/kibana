@@ -45,6 +45,7 @@
   file:
     path: "{{ kibana_dist_path }}"
     state: directory
+    mode: "0777"
 
 - name: find kibana distribution
   find:
