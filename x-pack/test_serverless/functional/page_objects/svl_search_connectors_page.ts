@@ -73,18 +73,6 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         const connectorsList = await this.getConnectorsList();
         return Boolean(connectorsList.find((name) => name === connectorName));
       },
-      async confirmConnectorCreated() {
-        await retry.waitForWithTimeout('connector table to appear', 5000, () =>
-          testSubjects
-            .existOrFail('serverlessSearchConnectorTable')
-            .then(() => true)
-            .catch(async () => {
-              await browser.refresh();
-              return false;
-            })
-        );
-        await browser.refresh();
-      },
       async confirmDeleteConnectorModalComponentsExists() {
         await testSubjects.existOrFail('serverlessSearchDeleteConnectorModalFieldText');
         await testSubjects.existOrFail('confirmModalConfirmButton');
@@ -146,20 +134,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         expect(isEnabled).to.be(false);
       },
       async getConnectorFromConnectorTable(connectorName: string) {
-        let value: string | null = null;
-        await retry.waitForWithTimeout('connector to appear', 5000, async () => {
-          return testSubjects
-            .find('serverlessSearchColumnsLink')
-            .then(async (subject) => {
-              value = await subject.getAttribute(connectorName);
-              return true;
-            })
-            .catch(async () => {
-              await browser.refresh();
-              return false;
-            });
-        });
-        return value;
+        await testSubjects.getAttribute('serverlessSearchColumnsLink', connectorName);
       },
       async getConnectorsList() {
         const rows = await (
