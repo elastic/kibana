@@ -112,7 +112,7 @@ const ExportContentUi = ({
               data-test-subj="usePrintLayout"
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
                 <FormattedMessage
@@ -137,39 +137,23 @@ const ExportContentUi = ({
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                isDirty ? (
+            <EuiCopy textToCopy={absoluteUrl ?? ''}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  iconType="copyClipboard"
+                  onClick={copy}
+                  data-test-subj="shareReportingCopyURL"
+                  flush="both"
+                >
                   <FormattedMessage
-                    id="share.modalContent.unsavedStateErrorText"
-                    defaultMessage="Save your work before copying this URL."
+                    id="share.modalContent.copyUrlButtonLabel"
+                    defaultMessage="Copy Post URL"
                   />
-                ) : (
-                  <FormattedMessage
-                    id="share.modalContent.savedStateErrorText"
-                    defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-                  />
-                )
-              }
-            >
-              <EuiCopy textToCopy={absoluteUrl ?? ''}>
-                {(copy) => (
-                  <EuiButtonEmpty
-                    iconType="copy"
-                    onClick={copy}
-                    data-test-subj="shareReportingCopyURL"
-                    flush="both"
-                  >
-                    <FormattedMessage
-                      id="share.modalContent.copyUrlButtonLabel"
-                      defaultMessage="Post URL"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            </EuiToolTip>
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
@@ -239,7 +223,7 @@ const ExportContentUi = ({
         <>{renderRadioOptions()}</>
         <EuiSpacer size="xl" />
       </EuiForm>
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">
         <>{renderLayoutOptionsSwitch()}</>
         <>{showCopyURLButton()}</>
         <>{renderGenerateReportButton()}</>
