@@ -737,7 +737,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                             <EuiText size="xs">
                               <h4>
                                 {i18n.translate(
-                                  'xpack.serverlessSearch.apiKey.privileges.boilerplate.label',
+                                  'xpack.security.apiKey.privileges.boilerplate.label',
                                   {
                                     defaultMessage: 'Replace with boilerplate:',
                                   }
@@ -754,7 +754,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                               }
                             >
                               {i18n.translate(
-                                'xpack.serverlessSearch.apiKeys.apiKeyFlyout.roleDescriptors.readOnlyLabel',
+                                'xpack.security.apiKeys.apiKeyFlyout.roleDescriptors.readOnlyLabel',
                                 {
                                   defaultMessage: 'Read-only',
                                 }
