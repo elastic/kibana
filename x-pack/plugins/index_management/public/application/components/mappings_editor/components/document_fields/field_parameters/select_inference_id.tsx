@@ -146,11 +146,10 @@ export const SelectInferenceId = ({
 
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
-  // const selectedOptionLabel = options.find((option) => option.checked)?.label;
-  const selectedOptions = options.filter((option) => option.checked).find((k) => k.label);
+  const selectedOptionLabel = options.find((option) => option.checked)?.label;
   useEffect(() => {
-    setValue(selectedOptions?.label ?? 'elser_model_2');
-  }, [selectedOptions, setValue]);
+    setValue(selectedOptionLabel ?? 'elser_model_2');
+  }, [selectedOptionLabel, setValue]);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
     undefined
@@ -189,7 +188,7 @@ export const SelectInferenceId = ({
                       setIsInferencePopoverVisible(!isInferencePopoverVisible);
                     }}
                   >
-                    {selectedOptions?.label ||
+                    {selectedOptionLabel ||
                       i18n.translate(
                         'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
                         {
