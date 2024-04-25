@@ -6,7 +6,10 @@
  */
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import { observabilityAlertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import {
+  AlertDetailsContextualInsight,
+  observabilityAlertDetailsContextRt,
+} from '@kbn/observability-plugin/server/services';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
@@ -30,7 +33,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   params: t.type({
     query: observabilityAlertDetailsContextRt,
   }),
-  handler: async (resources): Promise<Record<string, any>> => {
+  handler: async (resources): Promise<AlertDetailsContextualInsight[]> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
 

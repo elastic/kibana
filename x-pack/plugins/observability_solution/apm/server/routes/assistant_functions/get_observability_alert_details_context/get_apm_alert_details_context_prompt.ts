@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { AlertDetailsContextualInsight } from '@kbn/observability-plugin/server/services';
 import { APMDownstreamDependency } from '../get_apm_downstream_dependencies';
 import { ServiceSummary } from '../get_apm_service_summary';
 import { LogCategories } from '../get_log_categories';
@@ -30,49 +31,55 @@ export function getApmAlertDetailsContextPrompt({
   serviceChangePoints?: ChangePointGrouping[];
   exitSpanChangePoints?: ChangePointGrouping[];
   anomalies?: ApmAnomalies;
-}): string {
-  const obsAlertContext = `${
-    !isEmpty(serviceSummary)
-      ? `Metadata for the service where the alert occurred:
-${JSON.stringify(serviceSummary, null, 2)}`
-      : ''
+}): AlertDetailsContextualInsight[] {
+  const prompt: AlertDetailsContextualInsight[] = [];
+  if (!isEmpty(serviceSummary)) {
+    prompt.push({
+      key: 'serviceSummary',
+      description: 'Metadata for the service where the alert occurred',
+      data: serviceSummary,
+    });
   }
 
-    ${
-      !isEmpty(downstreamDependencies)
-        ? `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}":
-${JSON.stringify(downstreamDependencies, null, 2)}`
-        : ''
-    }
-    
-    ${
-      !isEmpty(serviceChangePoints)
-        ? `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate:
-    ${JSON.stringify(serviceChangePoints, null, 2)}`
-        : ''
-    }
-  
-    ${
-      !isEmpty(exitSpanChangePoints)
-        ? `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies:
-    ${JSON.stringify(exitSpanChangePoints, null, 2)}`
-        : ''
-    }
-    
-    ${
-      !isEmpty(logCategories)
-        ? `Log events occurring around the time of the alert:
-    ${JSON.stringify(logCategories, null, 2)}`
-        : ''
-    }
-  
-    ${
-      !isEmpty(anomalies)
-        ? `Anomalies for services running in the environment "${serviceEnvironment}":
-    ${anomalies}`
-        : ''
-    }          
-    `;
+  if (!isEmpty(downstreamDependencies)) {
+    prompt.push({
+      key: 'downstreamDependencies',
+      description: `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}"`,
+      data: downstreamDependencies,
+    });
+  }
 
-  return obsAlertContext;
+  if (!isEmpty(serviceChangePoints)) {
+    prompt.push({
+      key: 'serviceChangePoints',
+      description: `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate`,
+      data: serviceChangePoints,
+    });
+  }
+
+  if (!isEmpty(exitSpanChangePoints)) {
+    prompt.push({
+      key: 'exitSpanChangePoints',
+      description: `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies`,
+      data: exitSpanChangePoints,
+    });
+  }
+
+  if (!isEmpty(logCategories)) {
+    prompt.push({
+      key: 'logCategories',
+      description: `Log events occurring around the time of the alert`,
+      data: logCategories,
+    });
+  }
+
+  if (!isEmpty(anomalies)) {
+    prompt.push({
+      key: 'anomalies',
+      description: `Anomalies for services running in the environment "${serviceEnvironment}"`,
+      data: anomalies,
+    });
+  }
+
+  return prompt;
 }

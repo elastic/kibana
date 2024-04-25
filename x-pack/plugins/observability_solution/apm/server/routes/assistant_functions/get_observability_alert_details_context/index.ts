@@ -8,7 +8,10 @@
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext, Logger } from '@kbn/core/server';
-import { AlertDetailsContextualInsightsHandlerQuery } from '@kbn/observability-plugin/server/services';
+import {
+  AlertDetailsContextualInsight,
+  AlertDetailsContextualInsightsHandlerQuery,
+} from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -40,7 +43,7 @@ export async function getObservabilityAlertDetailsContext({
   logger: Logger;
   mlClient?: MlClient;
   query: AlertDetailsContextualInsightsHandlerQuery;
-}): Promise<Record<string, any>> {
+}): Promise<AlertDetailsContextualInsight[]> {
   const alertStartedAt = query.alert_started_at;
   const serviceEnvironment = query['service.environment'];
   const hostName = query['host.name'];
@@ -164,29 +167,14 @@ export async function getObservabilityAlertDetailsContext({
     anomaliesPromise,
   ]);
 
-  if (query.as_json) {
-    return {
-      serviceName,
-      serviceEnvironment,
-      serviceSummary,
-      downstreamDependencies,
-      logCategories,
-      serviceChangePoints,
-      exitSpanChangePoints,
-      anomalies,
-    };
-  }
-
-  return {
-    context: getApmAlertDetailsContextPrompt({
-      serviceName,
-      serviceEnvironment,
-      serviceSummary,
-      downstreamDependencies,
-      logCategories,
-      serviceChangePoints,
-      exitSpanChangePoints,
-      anomalies,
-    }),
-  };
+  return getApmAlertDetailsContextPrompt({
+    serviceName,
+    serviceEnvironment,
+    serviceSummary,
+    downstreamDependencies,
+    logCategories,
+    serviceChangePoints,
+    exitSpanChangePoints,
+    anomalies,
+  });
 }

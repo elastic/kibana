@@ -13,6 +13,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { concat } from 'lodash';
 
 export const observabilityAlertDetailsContextRt = t.intersection([
   t.type({
@@ -38,6 +39,13 @@ export const observabilityAlertDetailsContextRt = t.intersection([
 export type AlertDetailsContextualInsightsHandlerQuery = t.TypeOf<
   typeof observabilityAlertDetailsContextRt
 >;
+
+export interface AlertDetailsContextualInsight {
+  key: string;
+  description: string;
+  data: unknown;
+}
+
 export interface AlertDetailsContextualInsightsRequestContext {
   request: KibanaRequest;
   core: Promise<{
@@ -57,7 +65,7 @@ export interface AlertDetailsContextualInsightsRequestContext {
 type AlertDetailsContextualInsightsHandler = (
   context: AlertDetailsContextualInsightsRequestContext,
   query: AlertDetailsContextualInsightsHandlerQuery
-) => Promise<string>;
+) => Promise<AlertDetailsContextualInsight[]>;
 
 export class AlertDetailsContextualInsightsService {
   private handlers: AlertDetailsContextualInsightsHandler[] = [];
@@ -71,9 +79,10 @@ export class AlertDetailsContextualInsightsService {
   getAlertDetailsContext(
     context: AlertDetailsContextualInsightsRequestContext,
     query: AlertDetailsContextualInsightsHandlerQuery
-  ): Promise<string> {
-    return Promise.all(this.handlers.map((handler) => handler(context, query))).then(
-      (results: string[]) => results.join('\n')
-    );
+  ): Promise<AlertDetailsContextualInsight[]> {
+    return Promise.all(this.handlers.map((handler) => handler(context, query))).then((results) => {
+      const [head, ...rest] = results;
+      return concat(head, ...rest);
+    });
   }
 }

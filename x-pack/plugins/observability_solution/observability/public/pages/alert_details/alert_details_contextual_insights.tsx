@@ -28,7 +28,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
     }
 
     try {
-      const { context: obsAlertContext } = await http.get<{ context: string }>(
+      const prompt = await http.get<Array<{ description: string; data: unknown }>>(
         '/internal/apm/assistant/get_obs_alert_details_context',
         {
           query: {
@@ -47,6 +47,10 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
           },
         }
       );
+
+      const obsAlertContext = prompt
+        .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
+        .join('\n\n');
 
       return observabilityAIAssistant.getContextualInsightMessages({
         message: `I'm looking at an alert and trying to understand why it was triggered`,

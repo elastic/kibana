@@ -180,8 +180,8 @@ async function executor(
   const backgroundInstruction = await getBackgroundProcessInstruction(
     execOptions.params.rule,
     execOptions.params.alerts,
-    (alert: Record<string, any>) =>
-      alertDetailsContextService.getAlertDetailsContext(
+    async (alert: Record<string, any>) => {
+      const prompt = await alertDetailsContextService.getAlertDetailsContext(
         {
           core: resources.context.core,
           licensing: resources.context.licensing,
@@ -193,7 +193,11 @@ async function executor(
           'service.environment': get(alert, 'service.environment'),
           'host.name': get(alert, 'host.name'),
         }
-      )
+      );
+      return prompt
+        .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
+        .join('\n\n');
+    }
   );
 
   client
