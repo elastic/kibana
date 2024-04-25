@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
 import { useBulkGetRulesSources } from '../../../../../rule_management/api/hooks/use_bulk_get_sources';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
@@ -126,6 +127,13 @@ const InvestigationFieldsFormComponent = ({
     if (!isValid) {
       return;
     }
+
+    const event = data.overwrite
+      ? TELEMETRY_EVENT.SET_INVESTIGATION_FIELDS
+      : editAction === 'delete_investigation_fields'
+      ? TELEMETRY_EVENT.DELETE_INVESTIGATION_FIELDS
+      : TELEMETRY_EVENT.ADD_INVESTIGATION_FIELDS;
+    track(METRIC_TYPE.CLICK, event);
 
     onConfirm({
       value: { field_names: data.investigationFields },
