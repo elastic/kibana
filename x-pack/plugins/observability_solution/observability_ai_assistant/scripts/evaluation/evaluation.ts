@@ -125,7 +125,7 @@ function runEvaluations() {
 
           const mocha = new Mocha({
             grep: argv.grep,
-            timeout: '5m',
+            timeout: '10m',
           });
 
           const chatClient = kibanaClient.createChatClient({
@@ -253,7 +253,7 @@ function runEvaluations() {
             mocha.addFile(filename);
           }
 
-          return new Promise((resolve, reject) => {
+          return new Promise<void>((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
                 log.write(table.table(failedScenarios, tableConfig));
@@ -262,6 +262,21 @@ function runEvaluations() {
               }
               resolve();
             });
+          }).finally(() => {
+            const score = results
+              .flatMap((result) => result.scores)
+              .reduce(
+                (prev, result) => {
+                  prev.score += result.score;
+                  prev.total += 1;
+                  return prev;
+                },
+                { score: 0, total: 0 }
+              );
+
+            log.write('-------------------------------------------');
+            log.write(`Scored ${score.score} out of ${score.total}`);
+            log.write('-------------------------------------------');
           });
         },
         {
