@@ -99,7 +99,7 @@ export class ESQLSource
   }
 
   async getDisplayName() {
-    const pattern: string = await getIndexPatternFromESQLQuery(this._descriptor.esql);
+    const pattern: string = getIndexPatternFromESQLQuery(this._descriptor.esql);
     return pattern ? pattern : 'ES|QL';
   }
 

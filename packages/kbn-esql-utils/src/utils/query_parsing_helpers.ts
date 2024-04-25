@@ -27,31 +27,12 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
 }
 
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
-export async function getIndexPatternFromESQLQuery(esql?: string) {
-  const { ast } = await getAstAndSyntaxErrors(esql);
+export function getIndexPatternFromESQLQuery(esql?: string) {
+  const { ast } = getAstAndSyntaxErrors(esql);
   const fromCommand = ast.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.text).join(',');
-}
-
-// retrieves the index pattern from the aggregate query for ES|QL
-// this can fail if from is mentioned in comments etc
-export function getIndexPatternFromESQLQueryDeprecated(esql?: string): string {
-  let fromPipe = (esql || '').split('|')[0];
-  const splitFroms = fromPipe?.split(new RegExp(/FROM\s/, 'ig'));
-  const fromsLength = splitFroms?.length ?? 0;
-  if (splitFroms && splitFroms?.length > 2) {
-    fromPipe = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
-  }
-  const parsedString = fromPipe?.replaceAll('`', '');
-  // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;\s]+)/, 'i');
-  const matches = parsedString?.match(regex);
-  if (matches) {
-    return matches[1]?.trim();
-  }
-  return '';
 }
 
 export function getLimitFromESQLQuery(esql: string): number {

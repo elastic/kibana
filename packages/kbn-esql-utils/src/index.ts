@@ -13,7 +13,6 @@ export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
-  getIndexPatternFromESQLQueryDeprecated,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
 } from './utils/query_parsing_helpers';

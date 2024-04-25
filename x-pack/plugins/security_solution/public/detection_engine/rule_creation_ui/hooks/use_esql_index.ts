@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { getIndexPatternFromESQLQueryDeprecated } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getIndexListFromIndexString } from '@kbn/securitysolution-utils';
 
 import type { Query } from '@kbn/es-query';
@@ -30,7 +30,7 @@ export const useEsqlIndex = (
       return '';
     }
     const esqlQuery = typeof query === 'string' && isEsqlRule(ruleType) ? query : undefined;
-    return getIndexPatternFromESQLQueryDeprecated(esqlQuery);
+    return getIndexPatternFromESQLQuery(esqlQuery);
   }, [query, isQueryReadEnabled, ruleType]);
 
   const index = useMemo(() => getIndexListFromIndexString(indexString), [indexString]);

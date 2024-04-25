@@ -135,7 +135,7 @@ export async function getIndexPatternFromTextBasedQuery(query: AggregateQuery): 
     indexPattern = getIndexPatternFromSQLQuery(query.sql);
   }
   if ('esql' in query) {
-    indexPattern = await getIndexPatternFromESQLQuery(query.esql);
+    indexPattern = getIndexPatternFromESQLQuery(query.esql);
   }
   // other textbased queries....
 

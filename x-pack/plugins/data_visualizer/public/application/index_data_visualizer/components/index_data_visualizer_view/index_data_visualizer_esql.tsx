@@ -26,7 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getIndexPatternFromESQLQueryDeprecated } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -98,8 +98,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const indexPattern = useMemo(() => {
     let indexPatternFromQuery = '';
     if (isESQLQuery(query)) {
-      // deprecated, use the async new getIndexPatternFromESQLQuery instead
-      indexPatternFromQuery = getIndexPatternFromESQLQueryDeprecated(query.esql);
+      indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
     }
     // we should find a better way to work with ESQL queries which dont need a dataview
     if (indexPatternFromQuery === '') {

@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getIndexPatternFromESQLQueryDeprecated } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 
 /**
  * parses ES|QL query and returns array of indices
  */
-// this should be changed to use the new getIndexPatternFromESQLQuery function
 export const getIndexListFromEsqlQuery = (query: string | undefined): string[] => {
-  const indexString = getIndexPatternFromESQLQueryDeprecated(query);
+  const indexString = getIndexPatternFromESQLQuery(query);
 
   return getIndexListFromIndexString(indexString);
 };

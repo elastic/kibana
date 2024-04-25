@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getIndexPatternFromESQLQueryDeprecated } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getIndexListFromEsqlQuery } from './get_index_list_from_esql_query';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getIndexPatternFromESQLQueryDeprecated: jest.fn(),
+    getIndexPatternFromESQLQuery: jest.fn(),
   };
 });
 
-const getIndexPatternFromESQLQueryMock = getIndexPatternFromESQLQueryDeprecated as jest.Mock;
+const getIndexPatternFromESQLQueryMock = getIndexPatternFromESQLQuery as jest.Mock;
 
 describe('getIndexListFromEsqlQuery', () => {
   it('should return empty array if index string is empty', () => {

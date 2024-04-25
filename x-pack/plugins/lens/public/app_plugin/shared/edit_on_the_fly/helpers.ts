@@ -52,7 +52,7 @@ export const getSuggestions = async (
       indexPattern = getIndexPatternFromSQLQuery(query.sql);
     }
     if ('esql' in query) {
-      indexPattern = await getIndexPatternFromESQLQuery(query.esql);
+      indexPattern = getIndexPatternFromESQLQuery(query.esql);
     }
     const dataViewSpec = adHocDataViews.find((adHoc) => {
       return adHoc.name === indexPattern;

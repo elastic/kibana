@@ -98,8 +98,8 @@ test('getAdhocDataviews', () => {
 });
 
 describe('getDatasetIndex', () => {
-  test('returns index if provided', async () => {
-    const result = await getDatasetIndex({
+  test('returns index if provided', () => {
+    const result = getDatasetIndex({
       index: 'test',
       timeFieldName: '@timestamp',
     });
@@ -111,8 +111,8 @@ describe('getDatasetIndex', () => {
     `);
   });
 
-  test('extracts index from esql query', async () => {
-    const result = await getDatasetIndex({
+  test('extracts index from esql query', () => {
+    const result = getDatasetIndex({
       esql: 'from test_index | limit 10',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -123,8 +123,8 @@ describe('getDatasetIndex', () => {
     `);
   });
 
-  test('returns undefined if no query or iundex provided', async () => {
-    const result = await getDatasetIndex({
+  test('returns undefined if no query or iundex provided', () => {
+    const result = getDatasetIndex({
       type: 'datatable',
       columns: [],
       rows: [],

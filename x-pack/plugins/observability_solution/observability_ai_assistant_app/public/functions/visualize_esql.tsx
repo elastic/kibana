@@ -84,8 +84,6 @@ interface VisualizeESQLProps {
   columns: DatatableColumn[];
   /** The ES|QL query */
   query: string;
-  // indexPattern parsed from query
-  indexPattern: string;
   /** Actions handler */
   onActionClick: ChatActionClickHandler;
   /** Optional, overwritten ES|QL Lens chart attributes
@@ -114,9 +112,9 @@ export function VisualizeESQL({
   preferredChartType,
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
-  indexPattern,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
+  const indexPattern = getIndexPatternFromESQLQuery(query);
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
@@ -124,7 +122,6 @@ export function VisualizeESQL({
   const dataViewAsync = useAsync(() => {
     return getESQLAdHocDataview(indexPattern, dataViews);
   }, [indexPattern]);
-
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -414,10 +411,6 @@ export function registerVisualizeQueryRenderFunction({
 
       const trimmedQuery = query.trim();
 
-      const indexPatternAsync = useAsync(() => {
-        return getIndexPatternFromESQLQuery(query);
-      }, [query]);
-
       return (
         <VisualizeESQL
           ObservabilityAIAssistantMultipaneFlyoutContext={
@@ -432,7 +425,6 @@ export function registerVisualizeQueryRenderFunction({
           userOverrides={userOverrides}
           preferredChartType={preferredChartType}
           errorMessages={errorMessages}
-          indexPattern={indexPatternAsync?.value ?? ''}
         />
       );
     }
