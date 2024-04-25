@@ -31,6 +31,7 @@ import {
   XYChartSeriesIdentifier,
   Tooltip,
 } from '@elastic/charts';
+import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -58,7 +59,6 @@ import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
