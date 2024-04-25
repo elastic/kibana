@@ -128,11 +128,13 @@ async function fetchDocumentsTimeRange({
               earliest_timestamp: {
                 min: {
                   field: dataView.timeFieldName,
+                  format: 'strict_date_optional_time',
                 },
               },
               latest_timestamp: {
                 max: {
                   field: dataView.timeFieldName,
+                  format: 'strict_date_optional_time',
                 },
               },
             },
