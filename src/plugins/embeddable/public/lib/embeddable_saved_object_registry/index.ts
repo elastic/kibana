@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableExplorerPlugin } from './plugin';
-
-export const plugin = () => new EmbeddableExplorerPlugin();
+export {
+  type ReactEmbeddableSavedObject,
+  getReactEmbeddableSavedObjects,
+  registerReactEmbeddableSavedObject,
+} from './embeddable_saved_object_registry';
