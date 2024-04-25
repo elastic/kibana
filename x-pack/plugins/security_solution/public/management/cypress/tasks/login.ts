@@ -19,7 +19,7 @@ export const ROLE = Object.freeze<Record<SecurityTestUser, SecurityTestUser>>({
 });
 
 interface CyLoginTask {
-  (user?: SecurityTestUser): ReturnType<typeof sendApiLoginRequest> | void;
+  (user?: SecurityTestUser): ReturnType<typeof sendApiLoginRequest>;
 
   /**
    * Login using any username/password
