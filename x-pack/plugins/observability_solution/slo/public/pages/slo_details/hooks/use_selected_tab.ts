@@ -32,7 +32,7 @@ export const useSelectedTab = () => {
   }, [selectedTabId, tabId]);
 
   return {
-    selectedTabId,
+    selectedTabId: selectedTabId || OVERVIEW_TAB_ID,
     setSelectedTabId,
   };
 };
