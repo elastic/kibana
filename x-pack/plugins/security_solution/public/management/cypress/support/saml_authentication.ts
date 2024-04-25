@@ -35,11 +35,14 @@ export const samlAuthentication = async (
     ): Promise<{ cookie: string; username: string; password: string }> => {
       // If config.env.PROXY_ORG is set, it means that proxy service is used to create projects. Define the proxy org filename to override the roles.
       const rolesFilename = config.env.PROXY_ORG ? `${config.env.PROXY_ORG}.json` : undefined;
-      const sessionManager = new SamlSessionManager({
-        hostOptions,
-        log,
-        isCloud: config.env.CLOUD_SERVERLESS,
-      }, rolesFilename);
+      const sessionManager = new SamlSessionManager(
+        {
+          hostOptions,
+          log,
+          isCloud: config.env.CLOUD_SERVERLESS,
+        },
+        rolesFilename
+      );
       return sessionManager.getSessionCookieForRole(role).then((cookie) => {
         return {
           cookie,
