@@ -160,7 +160,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subActionParams: {
             command: 'lift_containment',
             ids: ['1-2-3'],
-            comment: 'Action triggered from Elastic Security by user  for action : test comment',
+            comment: 'Action triggered from Elastic Security by user foo for action : test comment',
           },
         },
       });

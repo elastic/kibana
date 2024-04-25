@@ -120,9 +120,12 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
-  private async getEventDetailsById(agentId: string): Promise<{
-    crowdstrike: { event: { HostName: string } };
-  }> {
+  private async getEventDetailsById(agentId: string): Promise<
+    | {}
+    | {
+        crowdstrike: { event: { HostName: string } };
+      }
+  > {
     const search = {
       index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
       fields: [{ field: 'crowdstrike.event.HostName' }],
@@ -136,7 +139,11 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         },
       },
     };
-    const result = await this.options.esClient
+    const result:
+      | {
+          crowdstrike: { event: { HostName: string } };
+        }
+      | {} = await this.options.esClient
       .search(search, {
         ignore: [404],
       })
@@ -144,9 +151,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         return expandDottedObject(
           eventDetails.hits.hits?.[0]?.fields as ExpandedEventFieldsObject,
           true
-        ) as {
-          crowdstrike: { event: { HostName: string } };
-        };
+        );
       })
       .catch((err) => {
         throw new ResponseActionsClientError(
@@ -287,7 +292,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
       const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        reqIndexOptions.user?.id,
+        this.options.username,
         reqIndexOptions.actionId
       );
       if (!error) {
