@@ -52,7 +52,6 @@ import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -110,7 +109,6 @@ export interface DashboardStartDependencies {
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  security?: SecurityPluginStart;
 }
 
 export interface DashboardSetup {
