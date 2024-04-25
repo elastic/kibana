@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
@@ -79,6 +79,12 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
     authc: {
       getCurrentUser: jest.fn(),
+    },
+    audit: {
+      logger: {
+        log: jest.fn(),
+        enabled: true,
+      },
     },
   };
   return mock;
