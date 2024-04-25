@@ -126,5 +126,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
   ],
 }
