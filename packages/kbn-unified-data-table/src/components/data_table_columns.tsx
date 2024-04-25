@@ -118,19 +118,17 @@ function buildEuiGridColumn({
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
-  const dataViewField = dataView.getFieldByName(columnName);
-  const textBasedField =
-    isPlainRecord && !dataViewField
-      ? new DataViewField({
-          name: columnName,
-          type: columnsMeta?.[columnName]?.type ?? 'unknown',
-          esTypes: columnsMeta?.[columnName]?.type
-            ? ([columnsMeta[columnName].esType] as string[])
-            : undefined,
-          searchable: true,
-          aggregatable: false,
-        })
-      : undefined;
+  const dataViewField = !isPlainRecord
+    ? dataView.getFieldByName(columnName)
+    : new DataViewField({
+        name: columnName,
+        type: columnsMeta?.[columnName]?.type ?? 'unknown',
+        esTypes: columnsMeta?.[columnName]?.esType
+          ? ([columnsMeta[columnName].esType] as string[])
+          : undefined,
+        searchable: true,
+        aggregatable: false,
+      });
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -149,8 +147,6 @@ function buildEuiGridColumn({
   } else {
     cellActions = dataViewField
       ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
-      : textBasedField
-      ? buildCellActions(textBasedField, toastNotifications, valueToStringConverter, onFilter)
       : [];
   }
 
