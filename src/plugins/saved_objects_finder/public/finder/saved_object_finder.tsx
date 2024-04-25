@@ -347,9 +347,6 @@ export class SavedObjectFinderUi extends React.Component<
       },
       box: {
         incremental: true,
-        placeholder: i18n.translate('savedObjectsFinder.searchPlaceholder', {
-          defaultMessage: 'Search',
-        }),
         'data-test-subj': 'savedObjectFinderSearchInput',
       },
       filters: this.props.showFilter
