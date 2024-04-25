@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiButton,
   EuiFlyout,
   EuiButtonIcon,
   EuiInMemoryTable,
@@ -42,7 +41,7 @@ import { getSeverityColor } from '../../detections/components/alerts_kpis/severi
 import { AssetCriticalityBadge } from '../components/asset_criticality/asset_criticality_badge';
 import { RiskScoreLevel } from '../components/severity/common';
 import { useEntityHistory } from '../api/hooks/use_get_entity_history';
-import { EntityTimelinePOC } from './timeline_flyout_poc';
+import { EntityTimelineHistory } from './entity_history';
 const useViewEntityFlyout = () => {
   const [isViewEntityPanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
   const [viewEntityPanelData, setViewEntityPanelData] = React.useState<any | null>(null);
@@ -208,8 +207,15 @@ const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void })
       ),
     },
     {
+      id: 'timeline',
+      name: 'Timeline',
+      content: (
+        <EntityTimelineHistory isLoading={isLoadingHistoryData} data={historyData?.history} />
+      ),
+    },
+    {
       id: 'raw',
-      name: 'Raw Data',
+      name: 'Raw Host Data',
       content: (
         <EuiCodeBlock language="json" fontSize="m" paddingSize="m" isCopyable>
           {JSON.stringify(data, null, 2)}
@@ -218,7 +224,7 @@ const ViewEntityFlyout = ({ data, onClose }: { data: any; onClose: () => void })
     },
     {
       id: 'history',
-      name: 'Raw History',
+      name: 'Raw History Data',
       content: historyContent,
     },
   ];
@@ -264,15 +270,6 @@ export const EntityStorePage = () => {
     closeViewEntityPanel,
     viewEntityPanelData,
   } = useViewEntityFlyout();
-
-  const [isTimelinePanelVisible, setIsViewEntityPanelVisible] = React.useState(false);
-  const closeTimelinePanel = useCallback(() => {
-    setIsViewEntityPanelVisible(false);
-  }, []);
-
-  const openTimelinePanel = useCallback((data: any) => {
-    setIsViewEntityPanelVisible(true);
-  }, []);
 
   useEffect(() => {
     searchDonutChart({
@@ -452,7 +449,6 @@ export const EntityStorePage = () => {
           {isViewEntityPanelVisible && (
             <ViewEntityFlyout data={viewEntityPanelData} onClose={closeViewEntityPanel} />
           )}
-          {isTimelinePanelVisible && <EntityTimelinePOC onClose={closeTimelinePanel} />}
           <EuiFlexGroup direction="row" gutterSize="m">
             <EuiFlexItem grow={1}>
               <EuiPanel hasBorder>
@@ -486,7 +482,7 @@ export const EntityStorePage = () => {
             sorting
           />
           <EuiSpacer size="l" />
-          <EuiButton onClick={openTimelinePanel}>{'Open Timeline POC'}</EuiButton>
+          {/* <EuiButton onClick={openTimelinePanel}>{'Open Timeline POC'}</EuiButton> */}
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     </>
