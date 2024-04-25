@@ -2978,13 +2978,6 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" > 0",
-      "error": [
-        "Argument of [>] must be [number], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = to_ip(\"127.0.0.1\") > to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
@@ -3000,6 +2993,26 @@
         "Argument of [>] must be [number], found value [false] type [boolean]",
         "Argument of [>] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" > now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" > 42",
+      "error": [],
       "warning": []
     },
     {
@@ -3025,13 +3038,6 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" >= 0",
-      "error": [
-        "Argument of [>=] must be [number], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = to_ip(\"127.0.0.1\") >= to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
@@ -3047,6 +3053,26 @@
         "Argument of [>=] must be [number], found value [false] type [boolean]",
         "Argument of [>=] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" >= now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" >= 42",
+      "error": [],
       "warning": []
     },
     {
@@ -3072,13 +3098,6 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" < 0",
-      "error": [
-        "Argument of [<] must be [number], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = to_ip(\"127.0.0.1\") < to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
@@ -3094,6 +3113,26 @@
         "Argument of [<] must be [number], found value [false] type [boolean]",
         "Argument of [<] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" < now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" < 42",
+      "error": [],
       "warning": []
     },
     {
@@ -3119,13 +3158,6 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" <= 0",
-      "error": [
-        "Argument of [<=] must be [number], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = to_ip(\"127.0.0.1\") <= to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
@@ -3141,6 +3173,26 @@
         "Argument of [<=] must be [number], found value [false] type [boolean]",
         "Argument of [<=] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" <= now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" <= 42",
+      "error": [],
       "warning": []
     },
     {
@@ -3166,13 +3218,6 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" == 0",
-      "error": [
-        "Argument of [==] must be [number], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = to_ip(\"127.0.0.1\") == to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
@@ -3184,6 +3229,26 @@
     },
     {
       "query": "row var = false == false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" == now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" == 42",
       "error": [],
       "warning": []
     },
@@ -3210,13 +3275,6 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" != 0",
-      "error": [
-        "Argument of [!=] must be [number], found value [\"a\"] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row var = to_ip(\"127.0.0.1\") != to_ip(\"127.0.0.1\")",
       "error": [],
       "warning": []
@@ -3232,6 +3290,26 @@
       "warning": []
     },
     {
+      "query": "row var = now() != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" != now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" != 42",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = 1 + 1",
       "error": [],
       "warning": []
@@ -3243,7 +3321,9 @@
     },
     {
       "query": "row var = now() + now()",
-      "error": [],
+      "error": [
+        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -3258,7 +3338,9 @@
     },
     {
       "query": "row var = now() - now()",
-      "error": [],
+      "error": [
+        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5323,13 +5405,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField > 0",
-      "error": [
-        "Argument of [>] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where stringField > stringField",
       "error": [],
       "warning": []
@@ -5358,6 +5433,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | where numberField > stringField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > numberField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField > stringField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > dateField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > 0",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > now()",
+      "error": [
+        "Argument of [>] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where numberField >= 0",
       "error": [],
       "warning": []
@@ -5380,13 +5507,6 @@
     {
       "query": "from a_index | where 1 >= 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField >= 0",
-      "error": [
-        "Argument of [>=] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -5418,6 +5538,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | where numberField >= stringField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= numberField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField >= stringField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= dateField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= 0",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= now()",
+      "error": [
+        "Argument of [>=] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where numberField < 0",
       "error": [],
       "warning": []
@@ -5440,13 +5612,6 @@
     {
       "query": "from a_index | where 1 < 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField < 0",
-      "error": [
-        "Argument of [<] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -5478,6 +5643,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | where numberField < stringField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < numberField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField < stringField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < dateField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < 0",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < now()",
+      "error": [
+        "Argument of [<] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where numberField <= 0",
       "error": [],
       "warning": []
@@ -5500,13 +5717,6 @@
     {
       "query": "from a_index | where 1 <= 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField <= 0",
-      "error": [
-        "Argument of [<=] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -5538,6 +5748,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | where numberField <= stringField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= numberField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField <= stringField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= dateField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= 0",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= now()",
+      "error": [
+        "Argument of [<=] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where numberField == 0",
       "error": [],
       "warning": []
@@ -5560,13 +5822,6 @@
     {
       "query": "from a_index | where 1 == 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField == 0",
-      "error": [
-        "Argument of [==] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -5595,6 +5850,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | where numberField == stringField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == numberField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField == stringField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == dateField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == 0",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == now()",
+      "error": [
+        "Argument of [==] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where numberField != 0",
       "error": [],
       "warning": []
@@ -5620,13 +5927,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where stringField != 0",
-      "error": [
-        "Argument of [!=] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where stringField != stringField",
       "error": [],
       "warning": []
@@ -5649,6 +5949,58 @@
     {
       "query": "from a_index | where ipField != ipField",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField != stringField",
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != numberField",
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField != stringField",
+      "error": [
+        "Argument of [!=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != dateField",
+      "error": [
+        "Argument of [!=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != 0",
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != now()",
+      "error": [
+        "Argument of [!=] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -11771,13 +12123,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField > 0",
-      "error": [
-        "Argument of [>] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval stringField > stringField",
       "error": [],
       "warning": []
@@ -11806,6 +12151,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval numberField > stringField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > numberField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField > stringField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > dateField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > 0",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > now()",
+      "error": [
+        "Argument of [>] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField >= 0",
       "error": [],
       "warning": []
@@ -11828,13 +12225,6 @@
     {
       "query": "from a_index | eval 1 >= 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField >= 0",
-      "error": [
-        "Argument of [>=] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -11866,6 +12256,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval numberField >= stringField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= numberField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField >= stringField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= dateField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= 0",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= now()",
+      "error": [
+        "Argument of [>=] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField < 0",
       "error": [],
       "warning": []
@@ -11888,13 +12330,6 @@
     {
       "query": "from a_index | eval 1 < 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField < 0",
-      "error": [
-        "Argument of [<] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -11926,6 +12361,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval numberField < stringField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < numberField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField < stringField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < dateField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < 0",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < now()",
+      "error": [
+        "Argument of [<] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField <= 0",
       "error": [],
       "warning": []
@@ -11948,13 +12435,6 @@
     {
       "query": "from a_index | eval 1 <= 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField <= 0",
-      "error": [
-        "Argument of [<=] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -11986,6 +12466,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval numberField <= stringField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= numberField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField <= stringField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= dateField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= 0",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= now()",
+      "error": [
+        "Argument of [<=] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField == 0",
       "error": [],
       "warning": []
@@ -12008,13 +12540,6 @@
     {
       "query": "from a_index | eval 1 == 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField == 0",
-      "error": [
-        "Argument of [==] must be [number], found value [stringField] type [string]"
-      ],
       "warning": []
     },
     {
@@ -12043,6 +12568,58 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval numberField == stringField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == numberField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField == stringField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == dateField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == 0",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == now()",
+      "error": [
+        "Argument of [==] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField + 1",
       "error": [],
       "warning": []
@@ -12059,7 +12636,9 @@
     },
     {
       "query": "from a_index | eval now() + now()",
-      "error": [],
+      "error": [
+        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -12079,7 +12658,9 @@
     },
     {
       "query": "from a_index | eval now() - now()",
-      "error": [],
+      "error": [
+        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
