@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { AuditLogger } from './audit_logging/audit_logger';
 

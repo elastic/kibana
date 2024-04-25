@@ -22,7 +22,7 @@ export interface SecurityPluginSetup {
   /**
    * Exposes services for audit logging.
    */
-  audit: AuditServiceSetup; // must move to core start
+  audit: AuditServiceSetup;
   /**
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
