@@ -49,7 +49,7 @@ export function validateLogarithmicExtent(extent?: { lowerBound?: number; upperB
  * @param extent
  * @returns boolean
  */
-export function validateAxisDomain(extents: { lowerBound?: number; upperBound?: number }) {
+export function validateAxisDomain(extents?: { lowerBound?: number; upperBound?: number }) {
   return (
     extents &&
     extents.lowerBound != null &&
