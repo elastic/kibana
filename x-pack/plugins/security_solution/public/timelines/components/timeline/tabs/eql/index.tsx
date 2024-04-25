@@ -213,62 +213,58 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           />
           <FullWidthFlexGroup>
             <ScrollableFlexItem grow={2}>
-              <EuiFlexGroup gutterSize="s" direction="column">
-                <EqlTabHeader
-                  activeTab={activeTab}
-                  setTimelineFullScreen={setTimelineFullScreen}
-                  timelineFullScreen={timelineFullScreen}
-                  timelineId={timelineId}
-                />
-                <EuiFlexItem grow={true}>
-                  <EventDetailsWidthProvider>
-                    <StyledEuiFlyoutBody
-                      data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
-                      className="timeline-flyout-body"
-                    >
-                      <StatefulBody
-                        activePage={pageInfo.activePage}
-                        browserFields={browserFields}
-                        data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
-                        id={timelineId}
-                        refetch={refetch}
-                        renderCellValue={renderCellValue}
-                        rowRenderers={rowRenderers}
-                        sort={TIMELINE_NO_SORTING}
-                        tabType={TimelineTabs.eql}
-                        totalPages={calculateTotalPages({
-                          itemsCount: totalCount,
-                          itemsPerPage,
-                        })}
-                        leadingControlColumns={leadingControlColumns}
-                        trailingControlColumns={timelineEmptyTrailingControlColumns}
-                      />
-                    </StyledEuiFlyoutBody>
+              <EqlTabHeader
+                activeTab={activeTab}
+                setTimelineFullScreen={setTimelineFullScreen}
+                timelineFullScreen={timelineFullScreen}
+                timelineId={timelineId}
+              />
+              <EventDetailsWidthProvider>
+                <StyledEuiFlyoutBody
+                  data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
+                  className="timeline-flyout-body"
+                >
+                  <StatefulBody
+                    activePage={pageInfo.activePage}
+                    browserFields={browserFields}
+                    data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
+                    id={timelineId}
+                    refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    sort={TIMELINE_NO_SORTING}
+                    tabType={TimelineTabs.eql}
+                    totalPages={calculateTotalPages({
+                      itemsCount: totalCount,
+                      itemsPerPage,
+                    })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={timelineEmptyTrailingControlColumns}
+                  />
+                </StyledEuiFlyoutBody>
 
-                    <StyledEuiFlyoutFooter
-                      data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
-                      className="timeline-flyout-footer"
-                    >
-                      {!isBlankTimeline && (
-                        <Footer
-                          activePage={pageInfo?.activePage ?? 0}
-                          data-test-subj="timeline-footer"
-                          updatedAt={refreshedAt}
-                          height={footerHeight}
-                          id={timelineId}
-                          isLive={isLive}
-                          isLoading={isQueryLoading || loadingSourcerer}
-                          itemsCount={isBlankTimeline ? 0 : events.length}
-                          itemsPerPage={itemsPerPage}
-                          itemsPerPageOptions={itemsPerPageOptions}
-                          onChangePage={loadPage}
-                          totalCount={isBlankTimeline ? 0 : totalCount}
-                        />
-                      )}
-                    </StyledEuiFlyoutFooter>
-                  </EventDetailsWidthProvider>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <StyledEuiFlyoutFooter
+                  data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
+                  className="timeline-flyout-footer"
+                >
+                  {!isBlankTimeline && (
+                    <Footer
+                      activePage={pageInfo?.activePage ?? 0}
+                      data-test-subj="timeline-footer"
+                      updatedAt={refreshedAt}
+                      height={footerHeight}
+                      id={timelineId}
+                      isLive={isLive}
+                      isLoading={isQueryLoading || loadingSourcerer}
+                      itemsCount={isBlankTimeline ? 0 : events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangePage={loadPage}
+                      totalCount={isBlankTimeline ? 0 : totalCount}
+                    />
+                  )}
+                </StyledEuiFlyoutFooter>
+              </EventDetailsWidthProvider>
             </ScrollableFlexItem>
             {showExpandedDetails && (
               <>
