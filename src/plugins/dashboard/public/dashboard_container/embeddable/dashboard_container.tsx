@@ -566,7 +566,6 @@ export class DashboardContainer
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
-        version: serialized.version,
       };
     }
     return panel;
