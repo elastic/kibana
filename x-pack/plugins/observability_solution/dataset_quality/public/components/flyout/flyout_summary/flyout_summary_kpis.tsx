@@ -36,6 +36,7 @@ export function FlyoutSummaryKpis({
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
+    timeRangeConfig: timeRange,
   });
 
   const kpis = useMemo(
