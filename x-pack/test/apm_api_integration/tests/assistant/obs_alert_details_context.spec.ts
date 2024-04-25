@@ -231,7 +231,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const serviceSummary = response.body.context.find(
               ({ key }) => key === 'serviceSummary'
             );
-            expect(serviceSummary).to.eql({
+            expect(serviceSummary?.data).to.eql({
               'service.name': 'non-existing-service',
               'service.environment': [],
               instances: 1,
@@ -385,7 +385,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const serviceSummary = response.body.context.find(
               ({ key }) => key === 'serviceSummary'
             );
-            expect(serviceSummary).to.eql({
+            expect(serviceSummary?.data).to.eql({
               'service.name': 'non-existing-service',
               'service.environment': [],
               instances: 1,
