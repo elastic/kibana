@@ -90,6 +90,24 @@ export const processVersionedRouter = (
   return { paths };
 };
 
+const extractVersionedRequestBody = (
+  route: VersionedRouterRoute,
+  converter: OasConverter
+): OpenAPIV3.RequestBodyObject['content'] => {
+  const contentType = extractContentType(route.options.options?.body);
+  return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
+    const schemas = extractValidationSchemaFromVersionedHandler(handler);
+    if (!schemas?.request) return acc;
+    const schema = converter.convert(schemas.request.body);
+    return {
+      ...acc,
+      [getVersionedContentTypeString(handler.options.version, contentType)]: {
+        schema,
+      },
+    };
+  }, {});
+};
+
 const extractVersionedResponses = (
   route: VersionedRouterRoute,
   converter: OasConverter
@@ -114,23 +132,5 @@ const extractVersionedResponses = (
       };
     }
     return acc;
-  }, {});
-};
-
-const extractVersionedRequestBody = (
-  route: VersionedRouterRoute,
-  converter: OasConverter
-): OpenAPIV3.RequestBodyObject['content'] => {
-  const contentType = extractContentType(route.options.options?.body);
-  return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
-    const schemas = extractValidationSchemaFromVersionedHandler(handler);
-    if (!schemas?.request) return acc;
-    const schema = converter.convert(schemas.request.body);
-    return {
-      ...acc,
-      [getVersionedContentTypeString(handler.options.version, contentType)]: {
-        schema,
-      },
-    };
   }, {});
 };
