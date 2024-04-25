@@ -287,6 +287,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
     useScheduleDateTime();
 
+  const isSingleAgentFleetServer =
+    isSingleAgent && fleetServerAgents.map((agent) => agent.id).includes(agents[0].id);
+
   const isSubmitButtonDisabled = useMemo(
     () =>
       isSubmitting ||
@@ -294,6 +297,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       !selectedVersion[0].value ||
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
+        !isSingleAgentFleetServer &&
         !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
     [
       agents,
@@ -303,6 +307,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       isUpdating,
       selectedVersion,
       updatingAgents,
+      isSingleAgentFleetServer,
     ]
   );
 
