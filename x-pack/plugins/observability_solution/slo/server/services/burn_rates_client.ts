@@ -19,22 +19,23 @@ import {
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Duration, IndicatorData, SLODefinition } from '../domain/models';
-import { InternalQueryError } from '../errors';
+import { DateRange, Duration, SLODefinition } from '../domain/models';
+import { computeBurnRate, computeSLI } from '../domain/services';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';
-
-export interface SLIClient {
-  fetchSLIDataFrom(
-    slo: SLODefinition,
-    instanceId: string,
-    lookbackWindows: LookbackWindow[]
-  ): Promise<Record<WindowName, IndicatorData>>;
-}
+import { InternalQueryError } from '../errors';
+import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
 
 type WindowName = string;
+export interface BurnRatesClient {
+  calculate(
+    slo: SLODefinition,
+    instanceId: string,
+    lookbackWindows: LookbackWindow[],
+    remoteName?: string
+  ): Promise<Array<{ burnRate: number; sli: number; name: WindowName }>>;
+}
 
 interface LookbackWindow {
   name: WindowName;
@@ -43,15 +44,15 @@ interface LookbackWindow {
 
 type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 
-export class DefaultSLIClient implements SLIClient {
+export class DefaultBurnRatesClient implements BurnRatesClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchSLIDataFrom(
+  async calculate(
     slo: SLODefinition,
     instanceId: string,
     lookbackWindows: LookbackWindow[],
     remoteName?: string
-  ): Promise<Record<WindowName, IndicatorData>> {
+  ): Promise<Array<{ burnRate: number; sli: number; name: WindowName }>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
       a.duration.isShorterThan(b.duration) ? 1 : -1
     );
@@ -67,35 +68,23 @@ export class DefaultSLIClient implements SLIClient {
       ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
       : SLO_DESTINATION_INDEX_PATTERN;
 
-    if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-      const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, instanceId, longestDateRange),
-        index,
-        aggs: toLookbackWindowsAggregationsQuery(
-          longestDateRange.to,
-          sortedLookbackWindows,
-          delayInSeconds
-        ),
-      });
+    const result = await this.esClient.search<unknown, EsAggregations>({
+      ...commonQuery(slo, instanceId, longestDateRange),
+      index,
+      aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+        ? toLookbackWindowsAggregationsQuery(
+            longestDateRange.to,
+            sortedLookbackWindows,
+            delayInSeconds
+          )
+        : toLookbackWindowsSlicedAggregationsQuery(
+            longestDateRange.to,
+            sortedLookbackWindows,
+            delayInSeconds
+          ),
+    });
 
-      return handleWindowedResult(result.aggregations, lookbackWindows);
-    }
-
-    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-      const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, instanceId, longestDateRange),
-        index,
-        aggs: toLookbackWindowsSlicedAggregationsQuery(
-          longestDateRange.to,
-          sortedLookbackWindows,
-          delayInSeconds
-        ),
-      });
-
-      return handleWindowedResult(result.aggregations, lookbackWindows);
-    }
-
-    assertNever(slo.budgetingMethod);
+    return handleWindowedResult(result.aggregations, lookbackWindows, slo);
   }
 }
 
@@ -210,14 +199,14 @@ function toLookbackWindowsSlicedAggregationsQuery(
 
 function handleWindowedResult(
   aggregations: Record<WindowName, AggregationsDateRangeAggregate> | undefined,
-  lookbackWindows: LookbackWindow[]
-): Record<WindowName, IndicatorData> {
+  lookbackWindows: LookbackWindow[],
+  slo: SLODefinition
+): Array<{ burnRate: number; sli: number; name: WindowName }> {
   if (aggregations === undefined) {
     throw new InternalQueryError('Invalid aggregation response');
   }
 
-  const indicatorDataPerLookbackWindow: Record<WindowName, IndicatorData> = {};
-  for (const lookbackWindow of lookbackWindows) {
+  return lookbackWindows.map((lookbackWindow) => {
     const windowAggBuckets = aggregations[lookbackWindow.name]?.buckets ?? [];
     if (!Array.isArray(windowAggBuckets) || windowAggBuckets.length === 0) {
       throw new InternalQueryError('Invalid aggregation bucket response');
@@ -229,12 +218,26 @@ function handleWindowedResult(
       throw new InternalQueryError('Invalid aggregation sum bucket response');
     }
 
-    indicatorDataPerLookbackWindow[lookbackWindow.name] = {
-      good,
-      total,
-      dateRange: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
-    };
-  }
+    let sliValue;
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      const dateRange = {
+        from: new Date(bucket.from_as_string!),
+        to: new Date(bucket.to_as_string!),
+      };
+      const totalSlices = computeTotalSlicesFromDateRange(
+        dateRange,
+        slo.objective.timesliceWindow!
+      );
 
-  return indicatorDataPerLookbackWindow;
+      sliValue = computeSLI(good, total, totalSlices);
+    } else {
+      sliValue = computeSLI(good, total);
+    }
+
+    return {
+      name: lookbackWindow.name,
+      burnRate: computeBurnRate(slo, sliValue),
+      sli: sliValue,
+    };
+  });
 }

@@ -20,6 +20,7 @@ import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/mo
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
+import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
 
 interface Params {
   slo: SLODefinition;
@@ -116,30 +117,25 @@ export class DefaultSummaryClient implements SummaryClient {
     const source = result.aggregations?.last_doc?.hits?.hits?.[0]?._source;
     const groupings = source?.slo?.groupings;
 
-    const sliValue = computeSLI(good, total);
-    const initialErrorBudget = 1 - slo.objective.target;
-    let errorBudget;
-
-    if (
-      calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
-      timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ) {
+    let sliValue;
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const totalSlices = computeTotalSlicesFromDateRange(
         dateRange,
         slo.objective.timesliceWindow!
       );
-      const consumedErrorBudget =
-        sliValue < 0 ? 0 : (total - good) / (totalSlices * initialErrorBudget);
 
-      errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
+      sliValue = computeSLI(good, total, totalSlices);
     } else {
-      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
-      errorBudget = toErrorBudget(
-        initialErrorBudget,
-        consumedErrorBudget,
-        calendarAlignedTimeWindowSchema.is(slo.timeWindow)
-      );
+      sliValue = computeSLI(good, total);
     }
+
+    const initialErrorBudget = 1 - slo.objective.target;
+    const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+    const errorBudget = toErrorBudget(
+      initialErrorBudget,
+      consumedErrorBudget,
+      calendarAlignedTimeWindowSchema.is(slo.timeWindow)
+    );
 
     return {
       summary: {
@@ -151,14 +147,6 @@ export class DefaultSummaryClient implements SummaryClient {
       meta: getMetaFields(slo, source ?? {}),
     };
   }
-}
-
-function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
-  const dateRangeDurationInUnit = moment(dateRange.to).diff(
-    dateRange.from,
-    toMomentUnitOfTime(timesliceWindow.unit)
-  );
-  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
 
 function getMetaFields(
