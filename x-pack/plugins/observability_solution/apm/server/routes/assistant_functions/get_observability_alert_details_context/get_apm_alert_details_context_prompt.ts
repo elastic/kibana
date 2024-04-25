@@ -6,6 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
+import { APMDownstreamDependency } from '../get_apm_downstream_dependencies';
+import { ServiceSummary } from '../get_apm_service_summary';
+import { LogCategories } from '../get_log_categories';
+import { ApmAnomalies } from '../get_apm_service_summary/get_anomalies';
+import { ChangePointGrouping } from '../get_changepoints';
 
 export function getApmAlertDetailsContextPrompt({
   serviceName,
@@ -16,7 +21,16 @@ export function getApmAlertDetailsContextPrompt({
   serviceChangePoints,
   exitSpanChangePoints,
   anomalies,
-}: any): string {
+}: {
+  serviceName?: string;
+  serviceEnvironment?: string;
+  serviceSummary?: ServiceSummary;
+  downstreamDependencies?: APMDownstreamDependency[];
+  logCategories: LogCategories;
+  serviceChangePoints?: ChangePointGrouping[];
+  exitSpanChangePoints?: ChangePointGrouping[];
+  anomalies?: ApmAnomalies;
+}): string {
   const obsAlertContext = `${
     !isEmpty(serviceSummary)
       ? `Metadata for the service where the alert occurred:

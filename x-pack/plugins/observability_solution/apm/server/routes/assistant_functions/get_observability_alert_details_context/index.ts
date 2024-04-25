@@ -10,18 +10,17 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext, Logger } from '@kbn/core/server';
 import { AlertDetailsContextHandlerQuery } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { getApmServiceSummary } from '../get_apm_service_summary';
 import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogCategories } from '../get_log_categories';
-import { ApmTimeseriesType, getApmTimeseries } from '../get_apm_timeseries';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
 import { getApmAlertDetailsContextPrompt } from './get_apm_alert_details_context_prompt';
+import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
 
 export async function getObservabilityAlertDetailsContext({
   coreContext,
@@ -190,133 +189,4 @@ export async function getObservabilityAlertDetailsContext({
       anomalies,
     }),
   };
-}
-
-async function getServiceChangePoints({
-  apmEventClient,
-  alertStartedAt,
-  serviceName,
-  serviceEnvironment,
-  transactionType,
-  transactionName,
-}: {
-  apmEventClient: APMEventClient;
-  alertStartedAt: string;
-  serviceName: string | undefined;
-  serviceEnvironment: string | undefined;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
-}) {
-  if (!serviceName) {
-    return [];
-  }
-
-  const res = await getApmTimeseries({
-    apmEventClient,
-    arguments: {
-      start: moment(alertStartedAt).subtract(12, 'hours').toISOString(),
-      end: alertStartedAt,
-      stats: [
-        {
-          title: 'Latency',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.transactionLatency,
-            function: LatencyAggregationType.p95,
-            'transaction.type': transactionType,
-            'transaction.name': transactionName,
-          },
-        },
-        {
-          title: 'Throughput',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.transactionThroughput,
-            'transaction.type': transactionType,
-            'transaction.name': transactionName,
-          },
-        },
-        {
-          title: 'Failure rate',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.transactionFailureRate,
-            'transaction.type': transactionType,
-            'transaction.name': transactionName,
-          },
-        },
-        {
-          title: 'Error events',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.errorEventRate,
-          },
-        },
-      ],
-    },
-  });
-
-  return res
-    .filter((timeseries) => timeseries.changes.length > 0)
-    .map((timeseries) => ({
-      title: timeseries.stat.title,
-      grouping: timeseries.id,
-      changes: timeseries.changes,
-    }));
-}
-
-async function getExitSpanChangePoints({
-  apmEventClient,
-  alertStartedAt,
-  serviceName,
-  serviceEnvironment,
-}: {
-  apmEventClient: APMEventClient;
-  alertStartedAt: string;
-  serviceName: string | undefined;
-  serviceEnvironment: string | undefined;
-}) {
-  if (!serviceName) {
-    return [];
-  }
-
-  const res = await getApmTimeseries({
-    apmEventClient,
-    arguments: {
-      start: moment(alertStartedAt).subtract(30, 'minute').toISOString(),
-      end: alertStartedAt,
-      stats: [
-        {
-          title: 'Exit span latency',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.exitSpanLatency,
-          },
-        },
-        {
-          title: 'Exit span failure rate',
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          timeseries: {
-            name: ApmTimeseriesType.exitSpanFailureRate,
-          },
-        },
-      ],
-    },
-  });
-
-  return res
-    .filter((timeseries) => timeseries.changes.length > 0)
-    .map((timeseries) => {
-      return {
-        title: timeseries.stat.title,
-        grouping: timeseries.id,
-        changes: timeseries.changes,
-      };
-    });
 }
