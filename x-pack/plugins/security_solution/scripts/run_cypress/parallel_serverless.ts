@@ -487,7 +487,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               await waitForKibanaLogin(project.kb_url, credentials);
 
               // Check if proxy service is used to define which org executes the tests.
-              let proxyOrg =
+              const proxyOrg =
                 cloudHandler instanceof ProxyHandler ? project.proxy_org_name : undefined;
               log.info(`Proxy Organization used id : ${proxyOrg}`);
 
