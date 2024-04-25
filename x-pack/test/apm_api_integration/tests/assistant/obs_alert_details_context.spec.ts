@@ -227,9 +227,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
           });
 
-          it('only returns empty service summary', () => {
-            expect(response.body.context).to.have.length(1);
-            expect(response.body.context[0]?.data).to.eql({
+          it('returns empty service summary', () => {
+            const serviceSummary = response.body.context.find(
+              ({ key }) => key === 'serviceSummary'
+            );
+            expect(serviceSummary).to.eql({
               'service.name': 'non-existing-service',
               'service.environment': [],
               instances: 1,
@@ -237,6 +239,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               alerts: [],
               deployments: [],
             });
+          });
+
+          it('returns no downstream dependencies', async () => {
+            const downstreamDependencies = response.body.context.find(
+              ({ key }) => key === 'downstreamDependencies'
+            );
+            expect(downstreamDependencies).to.eql(undefined);
+          });
+
+          it('returns log categories', () => {
+            const logCategories = response.body.context.find(({ key }) => key === 'logCategories');
+            expect(logCategories?.data).to.have.length(1);
           });
         });
       });

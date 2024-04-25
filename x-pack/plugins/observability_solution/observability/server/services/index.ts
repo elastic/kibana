@@ -73,10 +73,12 @@ export class AlertDetailsContextualInsightsService {
     this.handlers.push(handler);
   }
 
-  getAlertDetailsContext(
+  async getAlertDetailsContext(
     context: AlertDetailsContextualInsightsRequestContext,
     query: AlertDetailsContextualInsightsHandlerQuery
   ): Promise<AlertDetailsContextualInsight[]> {
+    if (this.handlers.length === 0) return [];
+
     return Promise.all(this.handlers.map((handler) => handler(context, query))).then((results) => {
       const [head, ...rest] = results;
       return concat(head, ...rest);
