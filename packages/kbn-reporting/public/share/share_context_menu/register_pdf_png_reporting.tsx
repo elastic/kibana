@@ -59,8 +59,8 @@ export const reportingScreenshotShareProvider = ({
   apiClient,
   license,
   application,
-  startServices$,
   usesUiCapabilities,
+  startServices$,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -180,7 +180,6 @@ export const reportingScreenshotShareProvider = ({
         title: pdfPanelTitle,
         content: (
           <ScreenCapturePanelContent
-            startServices$={startServices$}
             apiClient={apiClient}
             reportType={pdfReportType}
             objectId={objectId}
@@ -189,6 +188,7 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            startServices$={startServices$}
           />
         ),
       },

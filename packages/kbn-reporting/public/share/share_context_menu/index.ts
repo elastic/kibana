@@ -29,19 +29,19 @@ export type StartServices = [
 ];
 
 export interface ExportModalShareOpts {
-  startServices$: Rx.Observable<StartServices>;
   apiClient: ReportingAPIClient;
   usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
+  startServices$: Rx.Observable<StartServices>;
 }
 
 export interface ExportPanelShareOpts {
-  startServices$: Rx.Observable<StartServices>;
   apiClient: ReportingAPIClient;
   usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
+  startServices$: Rx.Observable<StartServices>;
 }
 
 export interface ReportingSharingData {
