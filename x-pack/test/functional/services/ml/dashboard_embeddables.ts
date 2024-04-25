@@ -130,7 +130,12 @@ export function MachineLearningDashboardEmbeddablesProvider(
         await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
 
         await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
-        await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
+
+        if (mlEmbeddableType === 'ml_single_metric_viewer') {
+          await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Single metric viewer');
+        } else {
+          await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
+        }
 
         await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
       });
