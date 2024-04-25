@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
