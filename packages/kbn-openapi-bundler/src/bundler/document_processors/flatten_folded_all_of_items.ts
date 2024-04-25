@@ -8,7 +8,7 @@
 
 import { DocumentNodeProcessor } from '../types';
 
-export function createFlattenFoldedAllOfProcessor(): DocumentNodeProcessor {
+export function createFlattenFoldedAllOfItemsProcessor(): DocumentNodeProcessor {
   return {
     leave(node) {
       if (!('allOf' in node) || !Array.isArray(node.allOf)) {

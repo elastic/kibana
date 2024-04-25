@@ -23,7 +23,7 @@ import { inlineRef } from './utils/inline_ref';
  * is not passed only bundling happens.
  */
 export class BundleRefProcessor {
-  private refs: ResolvedRef[] = [];
+  private refs = new Map<string, ResolvedRef>();
   private nodesToInline = new Set<Readonly<DocumentNode>>();
 
   constructor(private inliningPropName: string) {}
@@ -43,8 +43,6 @@ export class BundleRefProcessor {
 
     if (this.nodesToInline.has(node) || this.nodesToInline.has(resolvedRef.refNode)) {
       inlineRef(node, resolvedRef);
-
-      // removeInliningPropName(node, this.inliningPropName);
     } else {
       const rootDocument = this.extractRootDocument(context);
 
@@ -56,12 +54,17 @@ export class BundleRefProcessor {
         resolvedRef,
         rootDocument.components as Record<string, unknown>
       );
-      this.refs.push(resolvedRef);
+
+      const refKey = `${resolvedRef.absolutePath}#${resolvedRef.pointer}`;
+
+      if (!this.refs.has(refKey)) {
+        this.refs.set(refKey, resolvedRef);
+      }
     }
   }
 
-  getBundledRefs(): ResolvedRef[] {
-    return this.refs;
+  getBundledRefs(): IterableIterator<ResolvedRef> {
+    return this.refs.values();
   }
 
   private saveComponent(ref: ResolvedRef, components: Record<string, unknown>): string {

@@ -19,7 +19,9 @@ import { createModifyRequiredProcessor } from './document_processors/modify_requ
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
 import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
-import { createFlattenFoldedAllOfProcessor } from './document_processors/flatten_folded_all_of';
+import { createFlattenFoldedAllOfItemsProcessor } from './document_processors/flatten_folded_all_of_items';
+import { createMergeNonConflictingAllOfItemsProcessor } from './document_processors/merge_non_conflicting_all_of_items';
+import { createUnfoldSingleAllOfItemProcessor } from './document_processors/unfold_single_all_of_item';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -74,7 +76,9 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
     createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED]),
-    createFlattenFoldedAllOfProcessor(),
+    createFlattenFoldedAllOfItemsProcessor(),
+    createMergeNonConflictingAllOfItemsProcessor(),
+    createUnfoldSingleAllOfItemProcessor(),
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
@@ -91,7 +95,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     );
   }
 
-  return { ...resolvedDocument, bundledRefs: bundleRefsProcessor.getBundledRefs() };
+  return { ...resolvedDocument, bundledRefs: Array.from(bundleRefsProcessor.getBundledRefs()) };
 }
 
 interface MaybeObjectWithPaths {
