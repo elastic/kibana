@@ -14,7 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless essentials tier api access', () => {
     it('should not find init api', async () => {
-      await riskEngineRoutes.init(404);
+      await riskEngineRoutes.init(100);
     });
 
     it('should not find getStatus api', async () => {

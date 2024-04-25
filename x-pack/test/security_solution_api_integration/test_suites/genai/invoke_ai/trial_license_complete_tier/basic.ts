@@ -56,8 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const expected = {
           connector_id: bedrockActionId,
-          data: 'Hello there! How may I assist you today?',
-          status: 'ok',
+          data: 'Failing there! How may I assist you today?',
+          status: 'ko',
         };
 
         expect(response.body).to.eql(expected);

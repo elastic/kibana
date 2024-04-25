@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('x-elastic-internal-origin', 'Kibana')
         .set('elastic-api-version', '1')
         .send()
-        .expect(200);
+        .expect(100);
 
       expect(body).to.eql({
         rules_summary: {

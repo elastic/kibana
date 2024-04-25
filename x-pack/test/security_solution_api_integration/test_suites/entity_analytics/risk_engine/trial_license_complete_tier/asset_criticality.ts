@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         await assetCriticalityRoutes.upsert(assetCriticality, {
-          expectStatusCode: 400,
+          expectStatusCode: 100,
         });
       });
 

@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
               enabled: true,
             })
           )
-          .expect(200);
+          .expect(100);
 
         await waitForRuleSuccess({ supertest, log, id });
 

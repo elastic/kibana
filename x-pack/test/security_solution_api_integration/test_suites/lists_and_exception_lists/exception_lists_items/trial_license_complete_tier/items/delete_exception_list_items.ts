@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post(EXCEPTION_LIST_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateExceptionListMinimalSchemaMock())
-          .expect(200);
+          .expect(100);
 
         // create an exception list item
         await supertest
