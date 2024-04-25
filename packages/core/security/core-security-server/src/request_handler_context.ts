@@ -7,7 +7,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { AuditLogger } from './audit/audit_logger';
+import { AuditLogger } from './audit_logging/audit_logger';
 
 export interface SecurityRequestHandlerContext {
   authc: AuthcRequestHandlerContext;

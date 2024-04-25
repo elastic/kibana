@@ -8,7 +8,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import type { AuditLogger } from './audit/audit_logger';
+import type { AuditLogger } from './audit_logging/audit_logger';
 
 export interface CoreAuditService {
   /**
