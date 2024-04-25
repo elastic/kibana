@@ -34,6 +34,7 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
+    "@kbn/field-utils",
   ],
   "exclude": ["target/**/*"]
 }
