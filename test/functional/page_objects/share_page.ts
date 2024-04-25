@@ -16,7 +16,7 @@ export class SharePageObject extends FtrService {
   async closeShareModal() {
     if (await this.isShareModalOpen()) {
       await this.find.clickByCssSelector(
-        '[data-test-subj="shareContextModal"] .euiModal__closeIcon'
+        '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
       );
     }
   }
