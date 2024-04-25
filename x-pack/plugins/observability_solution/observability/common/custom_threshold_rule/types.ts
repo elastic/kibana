@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
@@ -19,15 +20,6 @@ export const ThresholdFormatterTypeRT = rt.keyof({
   highPrecision: null,
 });
 export type ThresholdFormatterType = rt.TypeOf<typeof ThresholdFormatterTypeRT>;
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
-}
 
 export enum Aggregators {
   COUNT = 'count',
@@ -77,8 +69,8 @@ export interface BaseMetricExpressionParams {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: Comparator;
-  warningComparator?: Comparator;
+  comparator: COMPARATORS;
+  warningComparator?: COMPARATORS;
   warningThreshold?: number[];
 }
 

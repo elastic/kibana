@@ -9,10 +9,10 @@ import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import {
   Aggregators,
-  Comparator,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../../../common';
@@ -102,7 +102,7 @@ const BASE_ARGS: Partial<CustomEquationEditorProps> = {
     timeSize: 1,
     timeUnit: 'm' as TimeUnitChar,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
   fields: [
     { name: 'system.cpu.user.pct', normalizedType: 'number' },
@@ -128,7 +128,7 @@ CustomEquationEditorWithEquationErrors.args = {
     timeSize: 1,
     timeUnit: 'm' as TimeUnitChar,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   },
   errors: {
     equation:

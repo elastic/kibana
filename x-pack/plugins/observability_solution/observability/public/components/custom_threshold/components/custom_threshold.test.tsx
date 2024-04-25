@@ -10,13 +10,13 @@ import { LIGHT_THEME } from '@elastic/charts';
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './custom_threshold';
 import React from 'react';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {
     const defaultProps: Props = {
       chartProps: { baseTheme: LIGHT_THEME },
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       id: 'componentId',
       threshold: [90],
       title: 'Threshold breached',
@@ -43,7 +43,7 @@ describe('Threshold', () => {
 
   it('shows component for between', () => {
     const component = renderComponent({
-      comparator: Comparator.BETWEEN,
+      comparator: COMPARATORS.BETWEEN,
       threshold: [90, 95],
     });
     expect(component.queryByTestId('thresholdRule-90-95-93')).toBeTruthy();

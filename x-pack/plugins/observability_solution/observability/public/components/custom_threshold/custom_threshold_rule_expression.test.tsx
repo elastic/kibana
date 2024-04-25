@@ -13,7 +13,8 @@ import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react-dom/test-utils';
-import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
@@ -152,7 +153,7 @@ describe('Expression', () => {
             aggType: Aggregators.COUNT,
           },
         ],
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
         threshold: [100],
         timeSize: 1,
         timeUnit: 'm',
@@ -178,7 +179,7 @@ describe('Expression', () => {
             { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
             { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
           ],
-          comparator: Comparator.LT_OR_EQ,
+          comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
           equation: 'A * B',
           label: 'prefill label',
           threshold: [500],
@@ -200,7 +201,7 @@ describe('Expression', () => {
           { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
           { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
         ],
-        comparator: Comparator.LT_OR_EQ,
+        comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
         equation: 'A * B',
         label: 'prefill label',
         threshold: [500],

@@ -19,34 +19,18 @@ import React, { useCallback, useMemo, useState, ReactElement } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
-  builtInComparators,
-  COMPARATORS,
   IErrorObject,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 import { isPercent } from '../helpers/threshold_unit';
-
-// Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
-const updatedBuiltInComparators = { ...builtInComparators };
-delete updatedBuiltInComparators[COMPARATORS.NOT_BETWEEN];
-
-const customComparators = {
-  ...updatedBuiltInComparators,
-  [Comparator.OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.outsideRangeLabel', {
-      defaultMessage: 'Is not between',
-    }),
-    value: Comparator.OUTSIDE_RANGE,
-    requiredValues: 2,
-  },
-};
 
 interface ExpressionRowProps {
   title: ReactElement;
@@ -83,14 +67,14 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     title,
   } = props;
 
-  const { metrics, comparator = Comparator.GT, threshold = [] } = expression;
+  const { metrics, comparator = COMPARATORS.GREATER_THAN, threshold = [] } = expression;
 
   const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
@@ -225,9 +209,8 @@ const ThresholdElement: React.FC<{
   return (
     <>
       <ThresholdExpression
-        thresholdComparator={comparator || Comparator.GT}
+        thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
         threshold={displayedThreshold}
-        customComparators={customComparators}
         onChangeSelectedThresholdComparator={updateComparator}
         onChangeSelectedThreshold={updateThreshold}
         errors={errors}
