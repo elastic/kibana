@@ -120,12 +120,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     return actionSendResponse;
   }
 
-  private async getEventDetailsById(agentId: string): Promise<
-    | {}
-    | {
-        crowdstrike: { event: { HostName: string } };
-      }
-  > {
+  private async getEventDetailsById(agentId: string): Promise<{
+    crowdstrike: { event: { HostName: string } };
+  }> {
     const search = {
       index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
       fields: [{ field: 'crowdstrike.event.HostName' }],
@@ -139,11 +136,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         },
       },
     };
-    const result:
-      | {
-          crowdstrike: { event: { HostName: string } };
-        }
-      | {} = await this.options.esClient
+    const result = await this.options.esClient
       .search(search, {
         ignore: [404],
       })
@@ -151,7 +144,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         return expandDottedObject(
           eventDetails.hits.hits?.[0]?.fields as ExpandedEventFieldsObject,
           true
-        );
+        ) as { crowdstrike: { event: { HostName: string } } };
       })
       .catch((err) => {
         throw new ResponseActionsClientError(
