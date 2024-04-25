@@ -64,7 +64,7 @@ export const IgnoreFilterTour = ({ dataViews = [] }: { dataViews: DataView[] }) 
               })
             }
           >
-            Go to Advanced Settings
+            {filterTourStrings.advancedSettingsLink}
           </EuiLink>
         </EuiText>
       }
@@ -76,7 +76,7 @@ export const IgnoreFilterTour = ({ dataViews = [] }: { dataViews: DataView[] }) 
       offset={0}
       decoration="beacon"
       footerAction={
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="baseline">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               compressed
