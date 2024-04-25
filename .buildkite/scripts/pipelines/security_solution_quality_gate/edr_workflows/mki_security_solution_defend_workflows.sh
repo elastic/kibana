@@ -24,4 +24,5 @@ set +e
 
 export BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate serverless-cypress-defend-workflows)
 
+echo "--- Running the tests for target $1"
 BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status

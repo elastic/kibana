@@ -245,6 +245,7 @@ export const cli = () => {
       });
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
+      // This works for either local executions or fallback in case proxy service is unavailable.
       if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
         log.error('The API key for the environment needs to be provided with the env var API_KEY.');
         log.error(
@@ -262,10 +263,17 @@ export const cli = () => {
         ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
 
+      log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
+      log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
+      log.info(`PROXY_SECRET is defined : ${PROXY_SECRET !== undefined}`);
+      log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
+
       let cloudHandler: ProjectHandler;
       if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+        log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
+        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
@@ -478,6 +486,11 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // Wait until application is ready
               await waitForKibanaLogin(project.kb_url, credentials);
 
+              // Check if proxy service is used to define which org executes the tests.
+              let proxyOrg =
+                cloudHandler instanceof ProxyHandler ? project.proxy_org_name : undefined;
+              log.info(`Proxy Organization used id : ${proxyOrg}`);
+
               // Normalized the set of available env vars in cypress
               const cyCustomEnv = {
                 BASE_URL: project.kb_url,
@@ -487,7 +500,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ELASTICSEARCH_PASSWORD: credentials.password,
 
                 // Used in order to handle the correct role_users file loading.
-                PROXY_ORG: PROXY_URL ? project.proxy_org_name : undefined,
+                PROXY_ORG: proxyOrg,
 
                 KIBANA_URL: project.kb_url,
                 KIBANA_USERNAME: credentials.username,
