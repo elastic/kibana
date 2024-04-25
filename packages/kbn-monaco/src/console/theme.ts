@@ -9,7 +9,7 @@
 import { makeHighContrastColor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { darkMode } from '@kbn/ui-theme';
-import { LIGHT_THEME, DARK_THEME } from '@kbn/code-editor';
+import { buildLightTheme, buildDarkTheme } from '../code_editor';
 import { themeRuleGroupBuilderFactory } from '../common/theme';
 import { monaco } from '../monaco_imports';
 
@@ -20,7 +20,7 @@ const booleanTextColor = '#585CF6';
 const methodTextColor = '#DD0A73';
 const urlTextColor = '#00A69B';
 export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
-  const euiTheme = darkMode ? DARK_THEME : LIGHT_THEME;
+  const euiTheme = darkMode ? buildDarkTheme() : buildLightTheme();
   return {
     ...euiTheme,
     rules: [

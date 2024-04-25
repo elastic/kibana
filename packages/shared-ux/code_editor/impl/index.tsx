@@ -85,10 +85,3 @@ export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props)
     </EuiErrorBoundary>
   );
 };
-
-export {
-  DARK_THEME,
-  LIGHT_THEME,
-  DARK_THEME_TRANSPARENT,
-  LIGHT_THEME_TRANSPARENT,
-} from './editor.styles';
