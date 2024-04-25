@@ -257,6 +257,8 @@ export class DashboardPlugin
         const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
+        const [coreStart] = await core.getStartServices();
+
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
           scopedHistory: () => this.currentHistory!,
@@ -265,7 +267,7 @@ export class DashboardPlugin
         };
 
         return mountApp({
-          core,
+          coreStart,
           appUnMounted,
           element: params.element,
           mountContext,

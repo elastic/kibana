@@ -82,7 +82,8 @@ describe('observabilityAIAssistant rule_connector', () => {
         service: {
           getClient: async () => ({ complete: completeMock }),
           getFunctionClient: async () => ({
-            getContexts: () => [{ name: 'core', description: 'my_system_message' }],
+            getFunctions: () => [],
+            getInstructions: () => [],
           }),
         },
         context: {
@@ -119,6 +120,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(result).toEqual({ actionId: 'observability-ai-assistant', status: 'ok' });
       expect(initResources).toHaveBeenCalledTimes(1);
       expect(completeMock).toHaveBeenCalledTimes(1);
+
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
@@ -130,7 +132,7 @@ describe('observabilityAIAssistant rule_connector', () => {
               '@timestamp': expect.any(String),
               message: {
                 role: MessageRole.System,
-                content: 'my_system_message',
+                content: '',
               },
             },
             {
