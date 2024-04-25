@@ -34,7 +34,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
-import { AlertDetailsContextService } from '@kbn/observability-plugin/server/services';
+import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
@@ -91,7 +91,7 @@ export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOp
 
 export function getObsAIAssistantConnectorType(
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
-  alertDetailsContextService: AlertDetailsContextService
+  alertDetailsContextService: AlertDetailsContextualInsightsService
 ): ObsAIAssistantConnectorType {
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
@@ -137,7 +137,7 @@ function renderParameterTemplates(
 async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
-  alertDetailsContextService: AlertDetailsContextService
+  alertDetailsContextService: AlertDetailsContextualInsightsService
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const request = execOptions.request;
   const alerts = execOptions.params.alerts;

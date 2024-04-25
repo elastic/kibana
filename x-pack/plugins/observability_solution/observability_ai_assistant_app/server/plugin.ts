@@ -117,7 +117,7 @@ export class ObservabilityAIAssistantAppPlugin
     plugins.actions.registerType(
       getObsAIAssistantConnectorType(
         initResources,
-        plugins.observability.alertDetailsContextService
+        plugins.observability.alertDetailsContextualInsightsService
       )
     );
     plugins.alerting.registerConnectorAdapter(getObsAIAssistantConnectorAdapter());

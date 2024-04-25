@@ -16,7 +16,7 @@ import {
 } from '.';
 import { Observable } from 'rxjs';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import { AlertDetailsContextService } from '@kbn/observability-plugin/server/services';
+import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 
 describe('observabilityAIAssistant rule_connector', () => {
   describe('getObsAIAssistantConnectorAdapter', () => {
@@ -59,7 +59,7 @@ describe('observabilityAIAssistant rule_connector', () => {
         .mockResolvedValue({} as ObservabilityAIAssistantRouteHandlerResources);
       const connectorType = getObsAIAssistantConnectorType(
         initResources,
-        new AlertDetailsContextService()
+        new AlertDetailsContextualInsightsService()
       );
       expect(connectorType.id).toEqual(OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID);
       expect(connectorType.isSystemActionType).toEqual(true);
@@ -70,10 +70,9 @@ describe('observabilityAIAssistant rule_connector', () => {
       const initResources = jest
         .fn()
         .mockResolvedValue({} as ObservabilityAIAssistantRouteHandlerResources);
-      const alertContextService = { getAlertDetailsContext: jest.fn().mockResolvedValue('') };
       const connectorType = getObsAIAssistantConnectorType(
         initResources,
-        new AlertDetailsContextService()
+        new AlertDetailsContextualInsightsService()
       );
       const result = await connectorType.executor({
         actionId: 'observability-ai-assistant',
@@ -116,7 +115,7 @@ describe('observabilityAIAssistant rule_connector', () => {
 
       const connectorType = getObsAIAssistantConnectorType(
         initResources,
-        new AlertDetailsContextService()
+        new AlertDetailsContextualInsightsService()
       );
       const result = await connectorType.executor({
         actionId: 'observability-ai-assistant',
