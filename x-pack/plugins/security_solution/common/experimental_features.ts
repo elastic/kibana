@@ -80,8 +80,9 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV1Enabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously as well as support
-   * for more response actions.
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: false,
 
@@ -200,7 +201,9 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneDataInAnalyzerEnabled: true,
 
   /**
-   * Enables SentinelOne manual host manipulation actions
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
 

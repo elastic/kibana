@@ -47,9 +47,11 @@ function createComparisonDefinition(
   {
     name,
     description,
+    extraSignatures = [],
   }: {
     name: string;
     description: string;
+    extraSignatures?: FunctionDefinition['signatures'];
   },
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -82,6 +84,30 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
+      {
+        params: [
+          { name: 'left', type: 'ip' },
+          { name: 'right', type: 'ip' },
+        ],
+        returnType: 'boolean',
+      },
+      ...['date', 'number'].flatMap((type) => [
+        {
+          params: [
+            { name: 'left', type },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
+            { name: 'right', type },
+          ],
+          returnType: 'boolean',
+        },
+      ]),
+      ...extraSignatures,
     ],
   };
 }
@@ -89,14 +115,14 @@ function createComparisonDefinition(
 export const builtinFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
@@ -180,6 +206,15 @@ export const builtinFunctions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
         defaultMessage: 'Equal to',
       }),
+      extraSignatures: [
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+      ],
     },
     {
       name: '!=',
@@ -189,6 +224,15 @@ export const builtinFunctions: FunctionDefinition[] = [
           defaultMessage: 'Not equal to',
         }
       ),
+      extraSignatures: [
+        {
+          params: [
+            { name: 'left', type: 'boolean' },
+            { name: 'right', type: 'boolean' },
+          ],
+          returnType: 'boolean',
+        },
+      ],
     },
     {
       name: '<',
