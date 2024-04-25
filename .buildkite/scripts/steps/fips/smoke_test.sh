@@ -44,7 +44,7 @@ for config in "${configs[@]}"; do
 done
 
 if [[ "$failedConfigs" ]]; then
-  buildkite-agent meta-data set "$failedConfigs"
+  echo "$failedConfigs" >/home/vagrant/ftr_failed_configs
 fi
 
 echo "--- FIPS smoke test complete"

@@ -58,7 +58,12 @@ trap "echoKibanaLogs" EXIT
 if [[ "$TEST_PACKAGE" == "fips" ]]; then
   set +e
   vagrant ssh $TEST_PACKAGE -t -c "/home/vagrant/kibana/.buildkite/scripts/steps/fips/smoke_test.sh"
+  vagrant ssh $TEST_PACKAGE -c "cat /home/vagrant/ftr_failed_configs 2>/dev/null" >ftr_failed_configs
   set -e
+
+  if [ -s ftr_failed_configs ]; then
+    buildkite-agent meta-data set "$(cat ftr_failed_configs)"
+  fi
 else
   vagrant provision "$TEST_PACKAGE"
 
