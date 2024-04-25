@@ -15,7 +15,11 @@ import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
-import { getSignalValueMap } from './utils';
+import {
+  FAILED_CREATE_QUERY_MAX_CLAUSE,
+  getSignalValueMap,
+  MANY_NESTED_CLAUSES_ERR,
+} from './utils';
 
 export const createEventSignal = async ({
   bulkCreate,
@@ -109,10 +113,11 @@ export const createEventSignal = async ({
       // in that we call getSignalsQueryMapFromThreatIndex which can *throw* an error
       // rather than *return* one.
       if (
-        exc.message.includes('Query contains too many nested clauses; maxClauseCount is set to')
+        exc.message.includes(MANY_NESTED_CLAUSES_ERR) ||
+        exc.message.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
       ) {
-        // @ts-expect-error
-        return { errors: [exc.message] };
+        currentResult.errors.push(exc.message);
+        return currentResult;
       } else {
         throw exc;
       }

@@ -25,8 +25,10 @@ import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../../constants';
 import {
   buildExecutionIntervalValidator,
   combineConcurrentResults,
+  FAILED_CREATE_QUERY_MAX_CLAUSE,
   getMatchedFields,
   getMaxClauseCountErrorValue,
+  MANY_NESTED_CLAUSES_ERR,
 } from './utils';
 import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
 
@@ -185,7 +187,7 @@ export const createThreatSignals = async ({
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
 
-      const maxClauseCountValue = getMaxClauseCountErrorValue(
+      const { maxClauseCountValue, errorType } = getMaxClauseCountErrorValue(
         searchesPerformed,
         threatFieldsLength,
         eventsTelemetry
@@ -211,15 +213,15 @@ export const createThreatSignals = async ({
           searchesPerformed.filter((search) =>
             search.errors.some(
               (err) =>
-                !err.includes('failed to create query: maxClauseCount is set to') &&
-                !err.includes('Query contains too many nested clauses; maxClauseCount is set to')
+                !err.includes(FAILED_CREATE_QUERY_MAX_CLAUSE) &&
+                !err.includes(MANY_NESTED_CLAUSES_ERR)
             )
           )
         );
 
         // push warning message to appear in rule execution log
         results.warningMessages.push(
-          `maxClauseCount error received from elasticsearch, setting IM rule page size to ${maxClauseCountValue}`
+          `maxClauseCount error received from elasticsearch (${errorType})`
         );
       } else {
         results = combineConcurrentResults(results, searchesPerformed);

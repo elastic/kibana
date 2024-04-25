@@ -26,6 +26,10 @@ import type {
   ThreatMatchNamedQuery,
 } from './types';
 
+export const MANY_NESTED_CLAUSES_ERR =
+  'Query contains too many nested clauses; maxClauseCount is set to';
+export const FAILED_CREATE_QUERY_MAX_CLAUSE = 'failed to create query: maxClauseCount is set to';
+
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
  * Max(timer_array_1) + Max(timer_array_2)
@@ -249,48 +253,57 @@ export const getMaxClauseCountErrorValue = (
   threatEntriesCount: number,
   eventsTelemetry: ITelemetryEventsSender | undefined
 ) =>
-  searchesPerformed.reduce<number>((acc, search) => {
-    const failedToCreateQueryMessage: string | undefined = search.errors.find((err) =>
-      err.includes('failed to create query: maxClauseCount is set to')
-    );
+  searchesPerformed.reduce<{
+    maxClauseCountValue: number;
+    errorType: string;
+  }>(
+    (acc, search) => {
+      const failedToCreateQueryMessage: string | undefined = search.errors.find((err) =>
+        err.includes(FAILED_CREATE_QUERY_MAX_CLAUSE)
+      );
 
-    // the below error is specific to an error returned by getSignalsQueryMapFromThreatIndex
-    const tooManyNestedClausesMessage: string | undefined = search.errors.find((err) =>
-      err.includes('Query contains too many nested clauses; maxClauseCount is set to')
-    );
+      // the below error is specific to an error returned by getSignalsQueryMapFromThreatIndex
+      const tooManyNestedClausesMessage: string | undefined = search.errors.find((err) =>
+        err.includes(MANY_NESTED_CLAUSES_ERR)
+      );
 
-    const regex = /[0-9]+/g;
-    const foundMaxClauseCountValue = failedToCreateQueryMessage?.match(regex)?.[0];
-    const foundNestedClauseCountValue = tooManyNestedClausesMessage?.match(regex)?.[0];
+      const regex = /[0-9]+/g;
+      const foundMaxClauseCountValue = failedToCreateQueryMessage?.match(regex)?.[0];
+      const foundNestedClauseCountValue = tooManyNestedClausesMessage?.match(regex)?.[0];
 
-    if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
-      const tempVal = parseInt(foundNestedClauseCountValue, 10);
-      eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
-        `Query contains too many nested clauses error received during IM search`,
-      ]);
+      if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
+        const tempVal = parseInt(foundNestedClauseCountValue, 10);
+        eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+          `Query contains too many nested clauses error received during IM search`,
+        ]);
 
-      // minus 1 since the max clause count value is exclusive
-      // multiplying by two because we need to account for the
-      // threat fields and event fields. A single threat entries count
-      // is comprised of two fields, one field from the threat index
-      // and another field from the event index. so we need to multiply by 2
-      // to cover the fact that the nested clause error happens
-      // because we are searching over event and threat fields.
-      // so we need to make this smaller than a single 'failed to create query'
-      // max clause count error.
-      const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1)));
-      return val;
-    } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
-      const tempVal = parseInt(foundMaxClauseCountValue, 10);
-      eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
-        `failed to create query error received during IM search`,
-      ]);
-      // minus 1 since the max clause count value is exclusive
-      // and we add 1 to threatEntries to increase the number of "buckets"
-      // that our searches are spread over, smaller buckets means less clauses
-      const val = Math.floor((tempVal - 1) / (threatEntriesCount + 1));
-      return val;
-    } else {
-      return acc;
+        // minus 1 since the max clause count value is exclusive
+        // multiplying by two because we need to account for the
+        // threat fields and event fields. A single threat entries count
+        // is comprised of two fields, one field from the threat index
+        // and another field from the event index. so we need to multiply by 2
+        // to cover the fact that the nested clause error happens
+        // because we are searching over event and threat fields.
+        // so we need to make this smaller than a single 'failed to create query'
+        // max clause count error.
+        const val = Math.floor((tempVal - 1) / (2 * (threatEntriesCount + 1)));
+        return { maxClauseCountValue: val, errorType: MANY_NESTED_CLAUSES_ERR };
+      } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+        const tempVal = parseInt(foundMaxClauseCountValue, 10);
+        eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+          `failed to create query error received during IM search`,
+        ]);
+        // minus 1 since the max clause count value is exclusive
+        // and we add 1 to threatEntries to increase the number of "buckets"
+        // that our searches are spread over, smaller buckets means less clauses
+        const val = Math.floor((tempVal - 1) / (threatEntriesCount + 1));
+        return { maxClauseCountValue: val, errorType: FAILED_CREATE_QUERY_MAX_CLAUSE };
+      } else {
+        return acc;
+      }
+    },
+    {
+      maxClauseCountValue: Number.NEGATIVE_INFINITY,
+      errorType: 'no helpful error message available',
     }
-  }, Number.NEGATIVE_INFINITY);
+  );
