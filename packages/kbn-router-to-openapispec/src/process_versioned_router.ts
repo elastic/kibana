@@ -21,7 +21,6 @@ import {
   assignToPathsObject,
   getVersionedHeaderParam,
   getVersionedContentTypeString,
-  extractValidationSchemaFromVersionedHandler,
 } from './util';
 
 export const processVersionedRouter = (
@@ -133,4 +132,12 @@ const extractVersionedResponses = (
     }
     return acc;
   }, {});
+};
+
+const extractValidationSchemaFromVersionedHandler = (
+  handler: VersionedRouterRoute['handlers'][0]
+) => {
+  if (handler.options.validate === false) return undefined;
+  if (typeof handler.options.validate === 'function') return handler.options.validate();
+  return handler.options.validate;
 };

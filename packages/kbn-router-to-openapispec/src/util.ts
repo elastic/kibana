@@ -24,14 +24,6 @@ export const getPathParameters = (path: string): KnownParameters => {
   }, {});
 };
 
-export const extractValidationSchemaFromVersionedHandler = (
-  handler: VersionedRouterRoute['handlers'][0]
-) => {
-  if (handler.options.validate === false) return undefined;
-  if (typeof handler.options.validate === 'function') return handler.options.validate();
-  return handler.options.validate;
-};
-
 export const extractContentType = (body: undefined | RouteConfigOptionsBody) => {
   if (body?.accepts) {
     return Array.isArray(body.accepts) ? body.accepts : [body.accepts];
