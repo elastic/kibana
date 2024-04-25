@@ -1348,8 +1348,7 @@ export const runActionTestSuite = ({
       );
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/167288
-    it.skip('returns a left es_response_too_large error when a read batch exceeds the maxResponseSize', async () => {
+    it('returns a left es_response_too_large error when a read batch exceeds the maxResponseSize', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
