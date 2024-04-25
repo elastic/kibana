@@ -131,7 +131,8 @@ export class DefaultSummaryClient implements SummaryClient {
     const errorBudget = toErrorBudget(
       initialErrorBudget,
       consumedErrorBudget,
-      calendarAlignedTimeWindowSchema.is(slo.timeWindow)
+      calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+        occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
     );
 
     return {
