@@ -49,6 +49,7 @@ export const ObservabilityLogsExplorerMainRoute = () => {
       toasts={notifications.toasts}
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
+      analytics={services.analytics}
     >
       <LogsExplorerTopNavMenu />
       <LazyOriginInterpreter history={history} toasts={notifications.toasts} />
