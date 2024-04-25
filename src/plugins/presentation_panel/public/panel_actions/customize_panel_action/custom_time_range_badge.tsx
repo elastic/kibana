@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PrettyDuration } from '@elastic/eui';
+import { EuiBadge, PrettyDuration } from '@elastic/eui';
 import {
   Action,
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -31,16 +30,38 @@ export class CustomTimeRangeBadge
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
-    const timeRange = embeddable.timeRange$.value;
-    if (!timeRange) return '';
-    return renderToString(
-      <PrettyDuration
-        timeTo={timeRange.to}
-        timeFrom={timeRange.from}
-        dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
-      />
-    );
+    /**
+     * WARNING - we would not normally return an empty string here - but in order for i18n to be
+     * handled properly by the `PrettyDuration` component, we need it to handle the aria label.
+     */
+    return '';
   }
+
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+    const { embeddable } = context;
+    if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
+
+    const timeRange = embeddable.timeRange$.getValue();
+    if (!timeRange) {
+      throw new IncompatibleActionError();
+    }
+    return (
+      <EuiBadge
+        key={CUSTOM_TIME_RANGE_BADGE}
+        className="embPanel__headerBadge"
+        iconType={this.getIconType()}
+        onClick={() => this.execute(context)}
+        data-test-subj={`embeddablePanelBadge-${this.id}`}
+        onClickAriaLabel={this.getDisplayName(context)}
+      >
+        <PrettyDuration
+          timeTo={timeRange.to}
+          timeFrom={timeRange.from}
+          dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
+        />
+      </EuiBadge>
+    );
+  };
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
     return apiPublishesTimeRange(embeddable);
