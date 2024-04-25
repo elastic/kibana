@@ -227,7 +227,7 @@ export class ChromeService {
     const bodyClasses$ = combineLatest([
       headerBanner$,
       this.isVisible$!,
-      chromeStyle$,
+      chromeStyleSubject$,
       application.currentActionMenu$,
     ]).pipe(
       map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
