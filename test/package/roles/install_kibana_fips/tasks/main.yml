@@ -41,17 +41,6 @@
   args:
     executable: /bin/bash
 
-# TODO: possibly need when pipeline is active
-# - name: install yarn
-#   npm:
-#     name: yarn
-#     global: true
-
-# - name: bootstrap kibana
-#   shell:
-#     chdir: "{{ kibana_src_path }}"
-#     cmd: "yarn kbn reset && yarn kbn bootstrap"
-
 - name: "ensure {{ kibana_dist_path }} dir exists"
   become: yes
   file:
