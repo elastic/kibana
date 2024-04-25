@@ -85,6 +85,9 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   panels: {},
   title: '',
   tags: [],
+  executionContext: {
+    type: 'dashboard',
+  },
 
   // options
   useMargins: true,

@@ -3446,6 +3446,10 @@
                 "path": "packages/core/status/core-status-server-internal/src/routes/status_preboot.ts"
               },
               {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.ts"
+              },
+              {
                 "plugin": "@kbn/core-rendering-server-internal",
                 "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.ts"
               },
@@ -3460,10 +3464,6 @@
               {
                 "plugin": "@kbn/core-deprecations-server-internal",
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/routes/get.ts"
-              },
-              {
-                "plugin": "@kbn/core-i18n-server-internal",
-                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.ts"
               },
               {
                 "plugin": "@kbn/core-apps-server-internal",
@@ -3864,10 +3864,6 @@
               {
                 "plugin": "banners",
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
-              },
-              {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
                 "plugin": "savedObjectsTagging",
@@ -4608,6 +4604,10 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/get_well_known_email_service.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -5714,6 +5714,10 @@
                 "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.test.ts"
               },
               {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-rendering-server-internal",
                 "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.test.ts"
               },
@@ -6456,10 +6460,6 @@
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/create_tag.ts"
               },
@@ -7106,6 +7106,10 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/valid_slack_api_channels.ts"
               },
               {
                 "plugin": "upgradeAssistant",
