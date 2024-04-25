@@ -19,6 +19,9 @@ import {
 } from '@kbn/presentation-publishing';
 
 export interface State {
+  /*
+   * Time range only applied to this embeddable, overrides parentApi.timeRange$
+   */
   timeRange: TimeRange | undefined;
 }
 
