@@ -125,7 +125,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }> {
     const search = {
       index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
-      fields: [{ field: '*' }],
+      fields: [{ field: 'crowdstrike.event.HostName' }],
+      size: 1,
       _source: false,
       body: {
         query: {
@@ -227,7 +228,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
       const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        reqIndexOptions.user?.id,
+        this.options.username,
         reqIndexOptions.actionId
       );
 

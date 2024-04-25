@@ -120,9 +120,6 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
-    user?: {
-      id: string;
-    };
   };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
@@ -133,12 +130,6 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   actionId: string;
 } & Pick<LogsEndpointActionResponse<TOutputContent, TMeta>, 'error' | 'meta'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
-
-export interface ResponseActionsClientGetEventDetailsOptions {
-  index: string | string[];
-  term: Record<string, string>;
-  fields?: Array<Record<'field', string>>;
-}
 
 export type ResponseActionsClientValidateRequestResponse =
   | {

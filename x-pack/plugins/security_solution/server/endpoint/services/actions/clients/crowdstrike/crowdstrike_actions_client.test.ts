@@ -77,9 +77,7 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe(`#isolate()`, () => {
     it('should send action to Crowdstrike', async () => {
-      await crowdstrikeActionsClient.isolate(
-        createCrowdstrikeIsolationOptions({ user: { id: 'test-user-id' } })
-      );
+      await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
         params: {
@@ -87,7 +85,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subActionParams: {
             actionParameters: {
               comment:
-                'Action triggered from Elastic Security by user test-user-id for action : test comment',
+                'Action triggered from Elastic Security by user foo for action : test comment',
             },
             command: 'contain',
             ids: ['1-2-3'],

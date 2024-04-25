@@ -600,7 +600,10 @@ export const getActionRequestExpiration = (): string => {
   return moment().add(2, 'weeks').toISOString();
 };
 
-export const ELASTIC_RESPONSE_ACTION_MESSAGE = (username?: string, responseActionId?: string) =>
+export const ELASTIC_RESPONSE_ACTION_MESSAGE = (
+  username?: string,
+  responseActionId?: string
+): string =>
   i18n.translate('xpack.securitySolution.responseActions.comment.message', {
     values: { username, responseActionId },
     defaultMessage: `Action triggered from Elastic Security by user {username} for action {responseActionId}`,
