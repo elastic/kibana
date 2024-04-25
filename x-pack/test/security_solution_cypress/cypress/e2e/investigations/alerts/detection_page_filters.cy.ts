@@ -43,7 +43,7 @@ import {
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
-  editFilterGroupControls,
+  switchFilterGroupControlsToEditMode,
   editSingleFilterControl,
   saveFilterGroupControls,
 } from '../../../tasks/common/filter_group';
@@ -122,7 +122,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     it('should be able to customize Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
-      editFilterGroupControls();
+      switchFilterGroupControlsToEditMode();
       cy.log('should be able delete an existing control');
       deleteFilterGroupControl(3);
       cy.get(CONTROL_FRAMES).should((sub) => {
@@ -145,7 +145,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       cy.log('should be able to edit an existing control');
       // ================================================
 
-      editFilterGroupControls();
+      switchFilterGroupControlsToEditMode();
       editFilterGroupControl({ idx: 3, fieldName, label });
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
       discardFilterGroupControls();
@@ -154,7 +154,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
 
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
-        editFilterGroupControls();
+        switchFilterGroupControlsToEditMode();
         deleteFilterGroupControl(3);
         addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
         cy.url().should('eq', urlString);
@@ -350,10 +350,9 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('should take timeRange into account', () => {
-      const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
-      const endDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
-      setStartDate(startDateWithZeroAlerts);
-      setEndDate(endDateWithZeroAlerts);
+      const dateRangeWithZeroAlerts = ['Jan 1, 2002 @ 00:00:00.000', 'Jan 1, 2002 @ 00:00:00.000'];
+      setStartDate(dateRangeWithZeroAlerts[0]);
+      setEndDate(dateRangeWithZeroAlerts[1]);
 
       refreshPage();
       waitForPageFilters();
@@ -365,7 +364,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   it('should not show number fields are not visible in field edit panel', () => {
     const idx = 3;
     const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
-    editFilterGroupControls();
+    switchFilterGroupControlsToEditMode();
     editSingleFilterControl(idx);
     cy.get(FILTER_FIELD_TYPE).click();
     cy.get(FIELD_TYPES.STRING).should('be.visible');

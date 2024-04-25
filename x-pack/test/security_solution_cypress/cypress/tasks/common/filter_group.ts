@@ -52,7 +52,7 @@ export const resetFilterGroup = () => {
   cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click();
 };
 
-export const editFilterGroupControls = () => {
+export const switchFilterGroupControlsToEditMode = () => {
   openFilterGroupContextMenu();
   cy.get(FILTER_GROUP_CONTEXT_EDIT_CONTROLS).click();
 };
