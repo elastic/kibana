@@ -47,7 +47,12 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   onClearFilters,
   showCategories = true,
 }) => {
-  const ruleTypesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
+  const ruleTypesList = [...ruleTypes].sort((a, b) => {
+    if (a.enabledInLicense === b.enabledInLicense) {
+      return a.name.localeCompare(b.name);
+    }
+    return a.enabledInLicense ? -1 : 1;
+  });
   const { euiTheme } = useEuiTheme();
 
   const facetList = useMemo(
@@ -154,6 +159,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
               }
               style={{ marginRight: '8px', flexGrow: 0 }}
               data-test-subj={`${rule.id}-SelectOption`}
+              isDisabled={rule.enabledInLicense === false}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
