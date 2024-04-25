@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { memo, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -47,7 +47,12 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
 }) => {
-  return ({
+  /**
+   *
+   * memo is imperative here otherwise the cell will re-render on every hover on every cell
+   *
+   */
+  return memo(function UnifiedRenderCellValue({
     rowIndex,
     columnId,
     isDetails,
@@ -55,7 +60,7 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-  }: EuiDataGridCellValueElementProps) => {
+  }: EuiDataGridCellValueElementProps) {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
@@ -73,6 +78,31 @@ export const getRenderCellValueFn = ({
         setCellProps({ style: undefined });
       }
     }, [ctx, row, setCellProps]);
+
+    /**
+     * when using the fields api this code is used to show top level objects
+     * this is used for legacy stuff like displaying products of our ecommerce dataset
+     */
+    const useTopLevelObjectColumns = Boolean(
+      useNewFieldsApi &&
+        !field &&
+        row?.raw.fields &&
+        !(row.raw.fields as Record<string, unknown[]>)[columnId]
+    );
+
+    const popoverContent = useMemo(
+      () =>
+        renderPopoverContent({
+          row,
+          field,
+          columnId,
+          dataView,
+          useTopLevelObjectColumns,
+          fieldFormats,
+          closePopover,
+        }),
+      [row, field, columnId, useTopLevelObjectColumns]
+    );
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;
@@ -98,27 +128,8 @@ export const getRenderCellValueFn = ({
       );
     }
 
-    /**
-     * when using the fields api this code is used to show top level objects
-     * this is used for legacy stuff like displaying products of our ecommerce dataset
-     */
-    const useTopLevelObjectColumns = Boolean(
-      useNewFieldsApi &&
-        !field &&
-        row?.raw.fields &&
-        !(row.raw.fields as Record<string, unknown[]>)[columnId]
-    );
-
     if (isDetails) {
-      return renderPopoverContent({
-        row,
-        field,
-        columnId,
-        dataView,
-        useTopLevelObjectColumns,
-        fieldFormats,
-        closePopover,
-      });
+      return popoverContent;
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
@@ -146,7 +157,7 @@ export const getRenderCellValueFn = ({
         }}
       />
     );
-  };
+  });
 };
 
 /**
@@ -161,7 +172,7 @@ function renderPopoverContent({
   fieldFormats,
   closePopover,
 }: {
-  row: DataTableRecord;
+  row: DataTableRecord | undefined;
   field: DataViewField | undefined;
   columnId: string;
   dataView: DataView;
@@ -169,6 +180,7 @@ function renderPopoverContent({
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
 }) {
+  if (!row) return null;
   const closeButton = (
     <EuiButtonIcon
       aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
@@ -200,6 +212,7 @@ function renderPopoverContent({
       data-test-subj="dataTableExpandCellActionPopover"
     >
       <EuiFlexItem>
+        <span>{`Hello ${columnId}`}</span>
         <DataTablePopoverCellValue>
           <span
             // formatFieldValue guarantees sanitized values

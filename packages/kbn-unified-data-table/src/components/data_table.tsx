@@ -84,6 +84,7 @@ import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 
 export type SortOrder = [string, string];
 
@@ -371,6 +372,13 @@ export interface UnifiedDataTableProps {
    * This data is sent directly to actions.
    */
   cellActionsMetadata?: Record<string, unknown>;
+
+  /**
+   *
+   * Custom cell Popover Render Component.
+   *
+   */
+  renderCellPopover?: EuiDataGridProps['renderCellPopover'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -438,6 +446,7 @@ export const UnifiedDataTable = ({
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
   enableComparisonMode,
+  renderCellPopover,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -605,6 +614,11 @@ export const UnifiedDataTable = ({
       externalCustomRenderers,
       isPlainRecord,
     ]
+  );
+
+  const renderCustomPopover = useMemo(
+    () => renderCellPopover ?? getCustomCellPopoverRenderer(),
+    [renderCellPopover]
   );
 
   /**
@@ -1055,6 +1069,7 @@ export const UnifiedDataTable = ({
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={customTrailingControlColumn}
+              renderCellPopover={renderCustomPopover}
             />
           )}
         </div>
