@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 
-export function getContextMessage({
+export function getApmAlertDetailsContextPrompt({
   serviceName,
   serviceEnvironment,
   serviceSummary,

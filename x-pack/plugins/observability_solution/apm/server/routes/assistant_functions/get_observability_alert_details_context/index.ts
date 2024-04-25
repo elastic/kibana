@@ -21,7 +21,7 @@ import { ApmTimeseriesType, getApmTimeseries } from '../get_apm_timeseries';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
-import { getContextMessage } from './get_context_message';
+import { getApmAlertDetailsContextPrompt } from './get_apm_alert_details_context_prompt';
 
 export async function getObservabilityAlertDetailsContext({
   coreContext,
@@ -41,7 +41,7 @@ export async function getObservabilityAlertDetailsContext({
   logger: Logger;
   mlClient?: MlClient;
   query: AlertDetailsContextHandlerQuery;
-}) {
+}): Promise<Record<string, any>> {
   const alertStartedAt = query.alert_started_at;
   const serviceEnvironment = query['service.environment'];
   const hostName = query['host.name'];
@@ -165,16 +165,31 @@ export async function getObservabilityAlertDetailsContext({
     anomaliesPromise,
   ]);
 
-  return getContextMessage({
-    serviceName,
-    serviceEnvironment,
-    serviceSummary,
-    downstreamDependencies,
-    logCategories,
-    serviceChangePoints,
-    exitSpanChangePoints,
-    anomalies,
-  });
+  if (query.as_json) {
+    return {
+      serviceName,
+      serviceEnvironment,
+      serviceSummary,
+      downstreamDependencies,
+      logCategories,
+      serviceChangePoints,
+      exitSpanChangePoints,
+      anomalies,
+    };
+  }
+
+  return {
+    context: getApmAlertDetailsContextPrompt({
+      serviceName,
+      serviceEnvironment,
+      serviceSummary,
+      downstreamDependencies,
+      logCategories,
+      serviceChangePoints,
+      exitSpanChangePoints,
+      anomalies,
+    }),
+  };
 }
 
 async function getServiceChangePoints({

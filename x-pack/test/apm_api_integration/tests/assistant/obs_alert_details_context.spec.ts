@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
             params: {
               query: {
+                as_json: true,
                 alert_started_at: new Date(end).toISOString(),
               },
             },
@@ -67,6 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                 },
               },
@@ -82,9 +84,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns 1 log category', async () => {
-            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
-              'Error message from container my-container-a',
-            ]);
+            expect(
+              response.body.logCategories?.map(
+                ({ errorCategory }: { errorCategory: string }) => errorCategory
+              )
+            ).to.eql(['Error message from container my-container-a']);
           });
         });
 
@@ -95,6 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'service.name': 'Backend',
                 },
@@ -145,6 +150,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'container.id': 'my-container-a',
                 },
@@ -195,6 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'container.id': 'non-existing-container',
                 },
@@ -219,6 +226,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'service.name': 'non-existing-service',
                 },
@@ -282,6 +290,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                 },
               },
@@ -293,10 +302,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns 1 log category', async () => {
-            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
-              'Error message from service',
-              'Error message from container my-container-c',
-            ]);
+            expect(
+              response.body.logCategories?.map(
+                ({ errorCategory }: { errorCategory: string }) => errorCategory
+              )
+            ).to.eql(['Error message from service', 'Error message from container my-container-c']);
           });
         });
 
@@ -307,6 +317,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'service.name': 'Backend',
                 },
@@ -333,6 +344,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'container.id': 'my-container-a',
                 },
@@ -359,6 +371,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
               params: {
                 query: {
+                  as_json: true,
                   alert_started_at: new Date(end).toISOString(),
                   'service.name': 'non-existing-service',
                 },
@@ -378,9 +391,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('does not return log categories', () => {
-            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
-              'Error message from container my-container-c',
-            ]);
+            expect(
+              response.body.logCategories?.map(
+                ({ errorCategory }: { errorCategory: string }) => errorCategory
+              )
+            ).to.eql(['Error message from container my-container-c']);
           });
         });
       });

@@ -30,7 +30,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   params: t.type({
     query: observabilityAlertDetailsContextRt,
   }),
-  handler: async (resources): Promise<{ context: string }> => {
+  handler: async (resources): Promise<Record<string, any>> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
 
@@ -60,7 +60,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
       query,
     });
 
-    return { context: obsAlertContext };
+    return obsAlertContext;
   },
 });
 

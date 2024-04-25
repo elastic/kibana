@@ -17,7 +17,7 @@ const getObservabilityAlertDetailsContextRoute = createObservabilityServerRoute(
   params: t.type({
     query: observabilityAlertDetailsContextRt,
   }),
-  handler: async ({ request, context, dependencies, params }): Promise<{ context: string }> => {
+  handler: async ({ request, context, dependencies, params }): Promise<Record<string, any>> => {
     const requestContext = {
       ...context,
       request,
