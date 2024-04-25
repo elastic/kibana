@@ -18,7 +18,8 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
-const FINISHED_CHECKS = 3;
+const FINISHED_CHECKS = 10;
+const FINISHED_CHECKS_INTERVAL_MS = 2 * 1000;
 const ERROR_ATTEMPTS = 3;
 const BACK_FILL_BUCKETS = 8;
 
@@ -120,7 +121,7 @@ export const DocCountChart: FC<{
       if (counter !== 0) {
         setTimeout(() => {
           finishedChecks(counter - 1);
-        }, 2 * 1000);
+        }, FINISHED_CHECKS_INTERVAL_MS);
       }
     },
     [loadData]
