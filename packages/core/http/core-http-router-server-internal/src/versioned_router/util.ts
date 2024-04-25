@@ -26,6 +26,7 @@ export function isCustomValidation(
  * Utility for unwrapping versioned router response validation to
  * {@link RouteValidationSpec}.
  *
+ * @param validation - versioned response body validation
  * @internal
  */
 export function unwrapVersionedResponseBodyValidation(
