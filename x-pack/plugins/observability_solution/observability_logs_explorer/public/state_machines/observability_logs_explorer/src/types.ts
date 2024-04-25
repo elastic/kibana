@@ -43,6 +43,10 @@ export type ObservabilityLogsExplorerEvent =
   | {
       type: 'LOGS_EXPLORER_STATE_CHANGED';
       state: LogsExplorerPublicState;
+    }
+  | {
+      type: 'LOGS_EXPLORER_DATA_RECEIVED';
+      rowCount: number;
     };
 
 export type ObservabilityLogsExplorerTypeState =
