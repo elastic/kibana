@@ -127,6 +127,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
   const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
 
+  const [inferenceValue, setValue] = useState<string>('elser_model_2');
   useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
   useFieldEffect(form, 'name', setNameValue);
 
@@ -148,6 +149,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   }, [form, inferenceId, inferenceToModelIdMap]);
 
   const handleSemanticText = (data: Field) => {
+    data.inferenceId = inferenceValue;
     if (data.inferenceId === undefined) {
       return;
     }
@@ -370,7 +372,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 }}
               </FormDataProvider>
               {/* Field inference_id for semantic_text field type */}
-              <InferenceIdCombo inferenceToModelIdMap={inferenceToModelIdMap} />
+              <InferenceIdCombo inferenceToModelIdMap={inferenceToModelIdMap} setValue={setValue} />
               {renderFormActions()}
             </div>
           </div>
@@ -396,11 +398,12 @@ function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
   );
 }
 
-function InferenceIdCombo({
-  inferenceToModelIdMap,
-}: {
+interface InferenceProps {
   inferenceToModelIdMap?: InferenceToModelIdMap;
-}) {
+  setValue: (value: string) => void;
+}
+
+function InferenceIdCombo({ setValue }: InferenceProps) {
   const [{ type }] = useFormData({ watch: 'type' });
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
@@ -411,7 +414,7 @@ function InferenceIdCombo({
     <>
       <EuiSpacer />
       <UseField path="inferenceId">
-        {(field) => <SelectInferenceId onChange={field.setValue} />}
+        {(field) => <SelectInferenceId onChange={field.setValue} setValue={setValue} />}
       </UseField>
     </>
   );
