@@ -44,12 +44,6 @@ export const buildGetSearchBarFilter = ({
           })
         );
       },
-      noOptionsMessage: i18n.translate(
-        'xpack.savedObjectsTagging.uiApi.searchBar.noOptionsFoundMessage',
-        {
-          defaultMessage: 'No options found',
-        }
-      ),
     };
   };
 };
