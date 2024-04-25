@@ -17,6 +17,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { EndpointFleetServicesFactory } from '../../../../endpoint/services/fleet';
 import type { StartPlugins } from '../../../../plugin';
 import { entityStoreServiceFactory } from '../entity_store_service';
@@ -56,7 +57,9 @@ export const registerEntityStoreTask = ({
   logger,
   taskManager,
   telemetry,
+  auditLogger,
 }: {
+  auditLogger: AuditLogger | undefined;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: StartServicesAccessor<StartPlugins>;
   kibanaVersion: string;
@@ -78,6 +81,7 @@ export const registerEntityStoreTask = ({
         esClient,
         logger,
         namespace,
+        auditLogger,
       });
       const assetCriticalityService = assetCriticalityServiceFactory({
         assetCriticalityDataClient,
@@ -94,6 +98,7 @@ export const registerEntityStoreTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,

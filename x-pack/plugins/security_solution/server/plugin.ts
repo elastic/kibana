@@ -226,6 +226,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       taskManager: plugins.taskManager,
       telemetry: core.analytics,
+      auditLogger: plugins.security?.audit.withoutRequest,
     });
 
     const requestContextFactory = new RequestContextFactory({
