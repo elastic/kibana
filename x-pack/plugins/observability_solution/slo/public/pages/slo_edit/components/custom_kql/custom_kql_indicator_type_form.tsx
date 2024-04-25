@@ -32,7 +32,7 @@ export function CustomKqlIndicatorTypeForm() {
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
-          <IndexSelection />
+          <IndexSelection selectedDataView={dataView} />
         </EuiFlexItem>
 
         <IndexFieldSelector

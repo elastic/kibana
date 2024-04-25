@@ -21,6 +21,7 @@
       "dataViews",
       "lens",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "fieldFormats",
       "observability",
       "observabilityShared",

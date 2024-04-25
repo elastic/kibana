@@ -20,9 +20,9 @@ export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
 const INDEX_FIELD = 'indicator.params.index';
 const TIMESTAMP_FIELD = 'indicator.params.timestampField';
 
-export function IndexSelection() {
+export function IndexSelection({ selectedDataView }: { selectedDataView?: DataView }) {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
-  const { dataViews: dataViewsService } = useKibana().services;
+  const { dataViews: dataViewsService, dataViewFieldEditor } = useKibana().services;
 
   const { isLoading: isDataViewsLoading, data: dataViews = [], refetch } = useFetchDataViews();
 
@@ -106,6 +106,18 @@ export function IndexSelection() {
                 }
               });
             }}
+            onAddField={
+              currentDataViewId && selectedDataView
+                ? () => {
+                    dataViewFieldEditor.openEditor({
+                      ctx: {
+                        dataView: selectedDataView,
+                      },
+                      onSave: () => {},
+                    });
+                  }
+                : undefined
+            }
             currentDataViewId={field.value ?? getDataViewIdByIndexPattern(currentIndexPattern)?.id}
             onDataViewCreated={() => {
               dataViewEditor.openEditor({
