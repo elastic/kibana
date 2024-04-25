@@ -130,11 +130,8 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
         onIntegrationsLoadMore={onIntegrationsLoadMore}
         onIntegrationsSearch={setSearch}
         onIntegrationsSort={setSearch}
-        onIntegrationsStreamsSearch={setSearch}
-        onIntegrationsStreamsSort={setSearch}
         onSelectionChange={onSelectionChange}
         onUncategorizedSearch={setSearch}
-        onUncategorizedSort={setSearch}
       />
     </KibanaReactContext.Provider>
   );
@@ -149,10 +146,11 @@ Basic.args = {
   isLoadingIntegrations: false,
   isLoadingUncategorized: false,
   isSearchingIntegrations: false,
+  isDataViewAllowed: () => true,
   onDataViewsReload: () => alert('Reload data views...'),
   onDataViewsTabClick: () => console.log('Load data views...'),
   onIntegrationsReload: () => alert('Reload integrations...'),
-  onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
+  onUncategorizedLoad: () => console.log('Load uncategorized streams...'),
   onUncategorizedReload: () => alert('Reloading streams...'),
 };
 

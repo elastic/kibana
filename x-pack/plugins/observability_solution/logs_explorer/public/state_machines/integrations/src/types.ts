@@ -93,10 +93,6 @@ export type IntegrationTypestate =
   | {
       value: { loaded: 'debounceSearchingIntegrations' };
       context: LoadedIntegrationsContext;
-    }
-  | {
-      value: { loaded: 'debounceSearchingIntegrationsStreams' };
-      context: LoadedIntegrationsContext;
     };
 
 export type IntegrationsContext = IntegrationTypestate['context'];
@@ -114,14 +110,6 @@ export type IntegrationsEvent =
     }
   | {
       type: 'SORT_INTEGRATIONS';
-      search: IntegrationsSearchParams;
-    }
-  | {
-      type: 'SEARCH_INTEGRATIONS_STREAMS';
-      search: IntegrationsSearchParams;
-    }
-  | {
-      type: 'SORT_INTEGRATIONS_STREAMS';
       search: IntegrationsSearchParams;
     }
   | DoneInvokeEvent<FindIntegrationsValue | Error>;

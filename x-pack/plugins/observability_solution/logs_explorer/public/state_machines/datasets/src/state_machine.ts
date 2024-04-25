@@ -20,7 +20,7 @@ import type {
 export const createPureDatasetsStateMachine = (
   initialContext: DefaultDatasetsContext = createDefaultContext()
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgOgFcA7AS1PRNQBsSAvSAYgBkB5AQWQH1k2AVNgMoBRXgIDaABgC6iUAAcA9rBIUFRWSAAeiAGwBmAJx4DAdh0BWHQCZzAGhABPRAA4AjHnMBfT-bSZsuHhUCqgQZFAMEGpgeGQAbgoA1jF+WDj4waHhCPEKAMYYJGqSUiUaisqq6khauobGZpY29k4IACzOVh7evhhpgZlhRBFgAE6jCqN4clQYAGaTALZ4qQEZIUNQOUQJBVUlZTUVKkXVoNoIrlddEhImbs2OiDZG5lcGEm1mrh9fPSCrdJBDbhBjCNgAJQAwgAJbh8QQicTScpKE5qDQXHQmNp4Ex6Np6Ex2J6XZzmYyuHTUmm0-T-QEDEHDMEsCG8eH8YSiQ7yNFVTGID5GQnElqIK4mPA6NpWK56CQGcxWPTOO4MvprYGhRjg6FwnhcpG8kDHAU1C5UiR4NrmPSuR6tKwSPSUunuvQa-xAwa6tkcw2Inkoo7806Cy46a22+2OxB6VV4-Girw+AGaoEQMAAIwUxDyYAEYFQozyAAtwozYGChJDYZyg8iZKHKuGLYg2rc8HKOinxZdO9001W8Fnc-nC8XSxXhlWGJpYJh0DFUHNl6MABQKiQASgYI7HeaIBaLJfLlYzuBNZrb5zqRlMFmsJKdeh0Nqp7rpXv66yywwAMVQEgqEYCEhFYDgG25JtUVbDF20ua48Fue4HRfZ5FRQ95Pm+X4TG8NMiAULN4BqKs4PRM5agQABaHR+3on8tWIMgTmoOhIEo8073aAxXSpTtrDaAxRLEtp+06ZifWZKBuNvGjnAMXFn37OUjEVZVVU0lU1QI4dLz-LMIHkhDeNlfstJQ8w2h0ZxiWkwJDwnU9pwvb1cFM6iLiJa0CSJDDLgMHRHKM8IgJAriWyoiNXHtZw8VcRUAv7KlXiVXSdO0-TvCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgOgFcA7AS1PRNQBsSAvSAYgBkB5AQWQH1k2AVNgMoBRXgIDaABgC6iUAAcA9rBIUFRWSAAeiAIwAOAMx49OgEwBWCVevWAbABoQAT10AWU3gsBfL47SZsXDwqBVQIMigGCDUwPDIANwUAa1j-LBx8ELCIhASFAGMMEjVJKVKNRWVVdSQtRFsdAE48CQMzc0cXBHN9PANTVvafPwx0oKzwokiwACcZhRm8OSoMADMFgFs8NMDM0MmoXKJEwurS8trKlWKa0G0EBubBi07dW3MWwwNvn9-XYZAOwywX2EQYwjYACUAMIACW4fEEInE0gqSmuag090eLTaL2ciFcrlsAKB432jAhMPhPH4wlEF3k6OqWN0EnMzVsEh05ls+K6vNseAA7OZSaNdngIGAAEYKYj5MACMCoGb5AAWETJsHBQihcIRdORjJAVxZtXuZkazQMtn6Jn5iAMwua5jFvkBEuB0rlCqVKrVmqm2oYmlgmHQsVQq0jMwAFAYrABKBjaqWy+VERXK1UarVe3Ams03VkIHQ6b6fDnOjoEhD9IWi8UBYETCIAMVQJCojEhQlYHENSIZqMuzJLFvqvLwjWFtj5BnMi55fNeZZ0rjw5i+v13-wBRAU0vgtW1aKqE7uiAAtA469eBn1idzXInTMKXU2PWniGRrtQ6Egc8MVuOoEHcNcNw8L8RhbclsimYDzSvethR0PBbFcPRX1FGwrDvLpy2abxvwLPYwiAscL0xScEEaCRhTwVwNwkPlawFWxGJI2CxnwH1M2zAM82DMikMvMCzFsZpXEaUx9FFNdXw+dlm14kEEKgTtu0oplqNA+49EaD4+T0bDGiw1xtzXTi8B5AxZ3MiQZPM18fB8IA */
   createMachine<DatasetsContext, DatasetsEvent, DatasetsTypestate>(
     {
       context: initialContext,
@@ -46,19 +46,11 @@ export const createPureDatasetsStateMachine = (
           },
           on: {
             SEARCH_DATASETS: 'debounceSearchingDatasets',
-            SORT_DATASETS: {
-              target: 'loading',
-              actions: 'storeSearch',
-            },
           },
         },
         loaded: {
           on: {
             SEARCH_DATASETS: 'debounceSearchingDatasets',
-            SORT_DATASETS: {
-              target: 'loading',
-              actions: 'storeSearch',
-            },
           },
         },
         debounceSearchingDatasets: {
