@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /api/console/es_config', () => {
     it('returns es host', async () => {
-      const roleAuthc: RoleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      const roleAuthc: RoleCredentials = await svlUserManager.createApiKeyForDefaultRole();
       const { body } = await supertestWithoutAuth
         .get('/api/console/es_config')
         .set('kbn-xsrf', 'true')

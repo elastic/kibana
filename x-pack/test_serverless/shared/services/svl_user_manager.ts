@@ -72,6 +72,13 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const DEFAULT_ROLE = getDefaultRole();
 
   return {
+    async createApiKeyForDefaultRole() {
+      log.debug(`Creating api key for [${this.DEFAULT_ROLE}]...`);
+      const apiKey = await this.createApiKeyForRole(this.DEFAULT_ROLE);
+      log.debug(`> api key for [${this.DEFAULT_ROLE}] created`);
+
+      return apiKey;
+    },
     async getSessionCookieForRole(role: string) {
       return sessionManager.getSessionCookieForRole(role);
     },
