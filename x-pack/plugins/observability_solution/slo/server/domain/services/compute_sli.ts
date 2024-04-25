@@ -9,10 +9,20 @@ import { toHighPrecision } from '../../utils/number';
 
 const NO_DATA = -1;
 
-export function computeSLI(good: number, total: number, nullAsNoData?: boolean): number | null {
+export function computeSLI(good: number, total: number): number {
   if (total === 0) {
-    return nullAsNoData ? null : NO_DATA;
+    return NO_DATA;
   }
 
   return toHighPrecision(good / total);
+}
+
+export function computeSLIForPreview(good: number, total: number): number | null {
+  const sliValue = computeSLI(good, total);
+
+  if (sliValue === NO_DATA) {
+    return null;
+  }
+
+  return sliValue;
 }
