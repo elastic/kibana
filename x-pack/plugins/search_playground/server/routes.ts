@@ -9,17 +9,17 @@ import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { fetchFields } from './utils/fetch_query_source_fields';
-import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
-import { ConversationalChain } from './utils/conversational_chain';
-import { errorHandler } from './utils/error_handler';
+import { fetchFields } from './lib/fetch_query_source_fields';
+import { AssistClientOptionsWithClient, createAssist as Assist } from './lib/assist';
+import { ConversationalChain } from './lib/conversational_chain';
+import { errorHandler } from './lib/error_handler';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
-import { getChatParams } from './utils/get_chat_params';
-import { fetchIndices } from './utils/fetch_indices';
+import { getChatParams } from './lib/get_chat_params';
+import { fetchIndices } from './lib/fetch_indices';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
