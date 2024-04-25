@@ -26,7 +26,7 @@ export function QualityIndicator({
 
   return (
     <EuiHealth color={qualityColors[quality]}>
-      <EuiText size="s" color={isColoredDescription ? qualityColors[quality] : 'default'}>
+      <EuiText size="s" color={isColoredDescription ? qualityColors[quality] : 'white'}>
         {description}
       </EuiText>
     </EuiHealth>

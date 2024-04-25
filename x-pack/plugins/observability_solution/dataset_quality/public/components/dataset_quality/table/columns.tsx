@@ -123,7 +123,6 @@ const datasetQualityColumnTooltip = (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <QualityIndicator
-              isColoredDescription
               quality="poor"
               description={` ${degradedDocsDescription(
                 'Poor',
@@ -134,7 +133,6 @@ const datasetQualityColumnTooltip = (
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
-              isColoredDescription
               quality="degraded"
               description={` ${degradedDocsDescription(
                 'Degraded',
@@ -145,7 +143,6 @@ const datasetQualityColumnTooltip = (
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
-              isColoredDescription
               quality="good"
               description={` ${degradedDocsDescription(
                 'Good',
