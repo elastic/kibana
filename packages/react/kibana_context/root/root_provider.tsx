@@ -17,7 +17,7 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   /** The `I18nStart` API from `CoreStart`. */
   i18n: I18nStart;
   /** The `AnalyticsServiceStart` API from `CoreStart`. */
-  analytics?: AnalyticsServiceStart;
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 /**

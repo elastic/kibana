@@ -34,8 +34,7 @@ export async function showCategorizeFlyout(
   originatingApp: string,
   additionalFilter?: CategorizationAdditionalFilter
 ): Promise<void> {
-  const { analytics, http, theme, overlays, application, notifications, uiSettings, i18n } =
-    coreStart;
+  const { overlays, application, i18n } = coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -45,15 +44,10 @@ export async function showCategorizeFlyout(
       };
 
       const appDependencies: AiopsAppDependencies = {
-        analytics,
-        notifications,
-        uiSettings,
-        http,
-        theme,
-        application,
-        i18n,
+        ...coreStart,
         ...plugins,
       };
+      const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
       const datePickerDeps: DatePickerDependencies = {
         ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
         i18n,
@@ -82,7 +76,7 @@ export async function showCategorizeFlyout(
               </DatePickerContextProvider>
             </AiopsAppContext.Provider>
           </KibanaContextProvider>,
-          { theme, i18n }
+          startServices
         ),
         {
           'data-test-subj': 'aiopsCategorizeFlyout',

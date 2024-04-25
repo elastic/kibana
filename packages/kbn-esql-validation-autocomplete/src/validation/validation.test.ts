@@ -657,18 +657,42 @@ describe('validation logic', () => {
           }
         }
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = (numberField ${op} 0)`, ['Unknown column [numberField]']);
         testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
-        testErrorsAndWarnings(`row var = "a" ${op} 0`, [
-          `Argument of [${op}] must be [number], found value ["a"] type [string]`,
-        ]);
+        testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
+        testErrorsAndWarnings(`row var = now() ${op} now()`, []);
+        testErrorsAndWarnings(
+          `row var = false ${op} false`,
+          ['==', '!='].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+              ]
+        );
+        for (const [valueTypeA, valueTypeB] of [
+          ['now()', '"2022"'],
+          ['42', '"2022"'],
+        ]) {
+          testErrorsAndWarnings(`row var = ${valueTypeA} ${op} ${valueTypeB}`, []);
+          testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
+        }
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
         testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
+        testErrorsAndWarnings(
+          `row var = now() ${op} now()`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            : [
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+              ]
+        );
       }
 
       for (const op of ['like', 'rlike']) {
@@ -1065,14 +1089,48 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where ${nValue} > 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT ${nValue} > 0`, []);
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`from a_index | where numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | where (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
+
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | where ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
+
+        // Implicit casting of literal values tests
+        testErrorsAndWarnings(`from a_index | where numberField ${op} stringField`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where stringField ${op} numberField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where numberField ${op} "2022"`, []);
+
+        testErrorsAndWarnings(`from a_index | where dateField ${op} stringField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where stringField ${op} dateField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where dateField ${op} "2022"`, []);
+
+        // Check that the implicit cast doesn't apply for fields
+        testErrorsAndWarnings(`from a_index | where stringField ${op} 0`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where stringField ${op} now()`, [
+          `Argument of [${op}] must be [string], found value [now()] type [date]`,
         ]);
       }
 
@@ -1641,14 +1699,55 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | eval (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | eval ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
+        // Implicit casting of literal values tests
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} stringField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} numberField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} "2022"`, []);
+
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} stringField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} dateField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
+
+        // Check that the implicit cast doesn't apply for fields
         testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
+          `Argument of [${op}] must be [string], found value [now()] type [date]`,
         ]);
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 1`, []);
+        testErrorsAndWarnings(
+          `from a_index | eval now() ${op} now()`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            : [
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+              ]
+        );
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
@@ -1745,6 +1844,17 @@ describe('validation logic', () => {
 
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
+
+      testErrorsAndWarnings(`from a_index | eval result = case(false, 0, 1), round(result)`, []);
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats sum(result)`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)`,
+        []
+      );
+      testErrorsAndWarnings(`from a_index | eval round(case(false, 0, 1))`, []);
 
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [
@@ -2285,6 +2395,9 @@ describe('validation logic', () => {
         `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
         []
       );
+
+      testErrorsAndWarnings(`from a_index | stats sum(case(false, 0, 1))`, []);
+      testErrorsAndWarnings(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
 
       describe('constant-only parameters', () => {
         testErrorsAndWarnings('from index | stats by bucket(dateField, abs(numberField), "", "")', [

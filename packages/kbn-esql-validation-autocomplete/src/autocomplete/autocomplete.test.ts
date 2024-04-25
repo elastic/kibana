@@ -277,6 +277,7 @@ describe('autocomplete', () => {
           // still not sure how accurate this is...
           .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label));
 
+        expect(suggestionInertTextSorted).toHaveLength(expected.length);
         for (const [index, receivedSuggestion] of suggestionInertTextSorted.entries()) {
           if (typeof expected[index] !== 'object') {
             expect(receivedSuggestion.text).toEqual(expected[index]);
@@ -1102,7 +1103,7 @@ describe('autocomplete', () => {
             if (i < signature.params.length) {
               const canHaveMoreArgs =
                 i + 1 < (signature.minParams ?? 0) ||
-                signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
+                signature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
 
               const allPossibleParamTypes = Array.from(
                 new Set(fn.signatures.map((s) => s.params[i].type))

@@ -3275,6 +3275,36 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ASSET_DETAILS_FLYOUT_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ASSET_DETAILS_FLYOUT_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ASSET_DETAILS_FLYOUT_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_flyout_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ASSET_DETAILS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ASSET_DETAILS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ASSET_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.casesFeatureId",
         "type": "string",
         "tags": [],

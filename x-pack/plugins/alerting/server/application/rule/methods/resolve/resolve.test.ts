@@ -23,6 +23,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 describe('resolve', () => {
   const taskManager = taskManagerMock.createStart();
@@ -33,6 +34,7 @@ describe('resolve', () => {
   const actionsAuthorization = actionsAuthorizationMock.create();
   const auditLogger = auditLoggerMock.create();
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+  const backfillClient = backfillClientMock.create();
 
   const kibanaVersion = 'v8.2.0';
   const createAPIKeyMock = jest.fn();
@@ -60,6 +62,7 @@ describe('resolve', () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
     getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+    backfillClient,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
     getAlertIndicesAlias: jest.fn(),

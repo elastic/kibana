@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
-
-import { registerGetAllRoute } from './register_get_route';
-
-export function registerInferenceModelRoutes(dependencies: RouteDependencies) {
-  registerGetAllRoute(dependencies);
-}
+export { registerInferenceModelRoutes } from './register_inference_route';
