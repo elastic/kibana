@@ -7,10 +7,10 @@
 import { riskScorePreviewRoute } from './preview';
 import { riskScoreCalculationRoute } from './calculation';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { riskScoreCalculationEntityRoute } from './calculation_entity';
+import { riskScoreEntityCalculationRoute } from './entity_calculation';
 
 export const registerRiskScoreRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
   riskScorePreviewRoute(router, logger);
   riskScoreCalculationRoute(router, logger);
-  riskScoreCalculationEntityRoute(router, logger);
+  riskScoreEntityCalculationRoute(router, logger);
 };

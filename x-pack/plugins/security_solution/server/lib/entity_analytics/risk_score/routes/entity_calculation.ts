@@ -9,9 +9,9 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { APP_ID, RISK_SCORE_CALCULATION_ENTITY_URL } from '../../../../../common/constants';
+import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import type { AfterKeys } from '../../../../../common/entity_analytics/risk_engine';
-import { riskScoreCalculationEntityRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation_entity/request_schema';
+import { riskScoreEntityCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_entity_calculation/request_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { CalculateAndPersistScoresResponse, EntityAnalyticsRoutesDeps } from '../../types';
@@ -21,13 +21,13 @@ import { convertRangeToISO } from '../tasks/helpers';
 import { buildRiskScoreServiceForRequest } from './helpers';
 import { getFieldForIdentifier } from '../helpers';
 
-export const riskScoreCalculationEntityRoute = (
+export const riskScoreEntityCalculationRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned
     .post({
-      path: RISK_SCORE_CALCULATION_ENTITY_URL,
+      path: RISK_SCORE_ENTITY_CALCULATION_URL,
       access: 'internal',
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
@@ -37,7 +37,7 @@ export const riskScoreCalculationEntityRoute = (
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidation(riskScoreCalculationEntityRequestSchema) },
+          request: { body: buildRouteValidation(riskScoreEntityCalculationRequestSchema) },
         },
       },
       async (context, request, response) => {

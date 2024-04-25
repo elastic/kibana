@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { identifierTypeSchema } from '../identifier_types';
 
-export const riskScoreCalculationEntityRequestSchema = t.exact(
+export const riskScoreEntityCalculationRequestSchema = t.exact(
   t.type({
     identifier_type: identifierTypeSchema,
     identifier: t.string,
