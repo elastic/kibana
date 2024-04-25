@@ -120,6 +120,7 @@ const PackageListGridWrapper = ({
             categories={[]}
             setUrlandReplaceHistory={() => {}}
             setUrlandPushHistory={() => {}}
+            showCardLabels={false}
           />
         )}
       </div>
