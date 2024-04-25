@@ -16,8 +16,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, isArray, last, once } from 'lodash';
+import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -290,8 +292,19 @@ export function Insight({
   };
 
   const {
-    services: { http },
+    services: {
+      http,
+      plugins: {
+        start: { licensing },
+      },
+    },
   } = useKibana();
+
+  const license = useObservable<ILicense | null>(licensing.license$);
+  const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
+  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense) {
+    return null;
+  }
 
   let children: React.ReactNode = null;
 

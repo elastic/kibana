@@ -29,6 +29,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util-plugin",
     "@kbn/unified-field-list",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/core-application-browser",
+    "@kbn/developer-examples-plugin"
   ]
 }

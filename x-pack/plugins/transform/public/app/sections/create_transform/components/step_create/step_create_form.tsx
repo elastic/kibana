@@ -84,7 +84,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const toastNotifications = useToastNotifications();
-    const { application, i18n: i18nStart, share, theme } = useAppDependencies();
+    const { application, share, ...startServices } = useAppDependencies();
     const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
@@ -200,13 +200,13 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
             defaultMessage: 'An error occurred getting the progress percentage:',
           }),
-          text: toMountPoint(<ToastNotificationText text={getErrorMessage(stats)} />, {
-            theme,
-            i18n: i18nStart,
-          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(stats)} />,
+            startServices
+          ),
         });
       }
-    }, [i18nStart, stats, theme, toastNotifications, transformConfig, transformId]);
+    }, [stats, toastNotifications, transformConfig, transformId, startServices]);
 
     function getTransformConfigDevConsoleStatement() {
       return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;

@@ -99,7 +99,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     );
   }
   .udtTimeline .euiDataGridRow:has(.eqlSequence) {
-    .euiDataGridRowCell--firstColumn {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--lastColumn {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary};`}
     }
     background: repeating-linear-gradient(
@@ -111,7 +112,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     );
   }
   .udtTimeline .euiDataGridRow:has(.eqlNonSequence) {
-    .euiDataGridRowCell--firstColumn {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--lastColumn {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
     background: repeating-linear-gradient(
@@ -122,11 +124,17 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(221, 10, 115, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.nonRawEvent) .euiDataGridRowCell--firstColumn {
-    ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
+  .udtTimeline .euiDataGridRow:has(.nonRawEvent) {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--lastColumn {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
+    }
   }
-  .udtTimeline .euiDataGridRow:has(.rawEvent) .euiDataGridRowCell--firstColumn {
-    ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
+  .udtTimeline .euiDataGridRow:has(.rawEvent) {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--lastColumn {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
+    }
   }
 
   .udtTimeline .rowCellWrapper {

@@ -71,7 +71,15 @@
             "signature": [
               "({ pluginPaths, http }: ",
               "PrebootDeps",
-              ") => Promise<void>"
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-i18n-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nServerInternalPluginApi",
+                "section": "def-common.InternalI18nServicePreboot",
+                "text": "InternalI18nServicePreboot"
+              },
+              ">"
             ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
             "deprecated": false,
@@ -142,7 +150,38 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-common.InternalI18nServicePreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalI18nServicePreboot",
+        "description": [],
+        "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-common.InternalI18nServicePreboot.getTranslationHash",
+            "type": "Function",
+            "tags": [],
+            "label": "getTranslationHash",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

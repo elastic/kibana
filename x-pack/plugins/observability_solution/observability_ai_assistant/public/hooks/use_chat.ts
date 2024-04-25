@@ -18,11 +18,7 @@ import {
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common';
-import {
-  getAssistantSystemMessage,
-  type ObservabilityAIAssistantChatService,
-  type ObservabilityAIAssistantService,
-} from '..';
+import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 import { useUserPreferredLanguage } from './use_user_preferred_language';
@@ -75,13 +71,11 @@ function useChatWithoutContext({
   persist,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
-
   const systemMessage = useMemo(() => {
-    return getAssistantSystemMessage({ contexts: chatService.getContexts() });
+    return chatService.getSystemMessage();
   }, [chatService]);
 
   useOnce(initialMessages);
-
   useOnce(initialConversationId);
 
   const [conversationId, setConversationId] = useState(initialConversationId);
