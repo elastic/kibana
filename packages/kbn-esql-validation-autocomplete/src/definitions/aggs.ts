@@ -223,4 +223,92 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         },
       ],
     },
+    {
+      name: 'bucket',
+      alias: ['bin'],
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definitions.autoBucketDoc',
+        {
+          defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
+        }
+      ),
+      type: 'agg',
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [
+            { name: 'field', type: 'date' },
+            { name: 'buckets', type: 'time_literal', constantOnly: true },
+          ],
+          returnType: 'date',
+          examples: ['from index | eval hd = bucket(hire_date, 1 hour)'],
+        },
+        {
+          params: [
+            { name: 'field', type: 'number' },
+            { name: 'buckets', type: 'time_literal', constantOnly: true },
+          ],
+          returnType: 'number',
+          examples: ['from index | eval hd = bucket(bytes, 1 hour)'],
+        },
+        {
+          params: [
+            { name: 'field', type: 'date' },
+            { name: 'buckets', type: 'number', constantOnly: true },
+            { name: 'startDate', type: 'string', constantOnly: true },
+            { name: 'endDate', type: 'string', constantOnly: true },
+          ],
+          returnType: 'date',
+          examples: [
+            'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+          ],
+        },
+        {
+          params: [
+            { name: 'field', type: 'date' },
+            { name: 'buckets', type: 'number', constantOnly: true },
+            { name: 'startDate', type: 'date', constantOnly: true },
+            { name: 'endDate', type: 'date', constantOnly: true },
+          ],
+          returnType: 'date',
+          examples: [
+            'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+          ],
+        },
+        {
+          params: [
+            { name: 'field', type: 'date' },
+            { name: 'buckets', type: 'number', constantOnly: true },
+            { name: 'startDate', type: 'string', constantOnly: true },
+            { name: 'endDate', type: 'date', constantOnly: true },
+          ],
+          returnType: 'date',
+          examples: [
+            'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+          ],
+        },
+        {
+          params: [
+            { name: 'field', type: 'date' },
+            { name: 'buckets', type: 'number', constantOnly: true },
+            { name: 'startDate', type: 'date', constantOnly: true },
+            { name: 'endDate', type: 'string', constantOnly: true },
+          ],
+          returnType: 'date',
+          examples: [
+            'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+          ],
+        },
+        {
+          params: [
+            { name: 'field', type: 'number' },
+            { name: 'buckets', type: 'number', constantOnly: true },
+            { name: 'startValue', type: 'number', constantOnly: true },
+            { name: 'endValue', type: 'number', constantOnly: true },
+          ],
+          returnType: 'number',
+          examples: ['from index | eval bs = bucket(bytes, 20, 25324, 74999)'],
+        },
+      ],
+    },
   ]);
