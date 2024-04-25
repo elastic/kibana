@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/field_renderers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -32,8 +32,8 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       <span
         data-test-subj="entity-table-label"
         css={css`
-          font-weight: ${euiLightVars.euiFontWeightMedium};
-          color: ${euiLightVars.euiTitleColor};
+          font-weight: ${euiThemeVars.euiFontWeightMedium};
+          color: ${euiThemeVars.euiTitleColor};
         `}
       >
         {label ?? field}

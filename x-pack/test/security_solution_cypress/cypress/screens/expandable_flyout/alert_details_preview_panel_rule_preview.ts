@@ -32,5 +32,6 @@ export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT =
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER = getDataTestSubjectSelector(
   'securitySolutionFlyoutRulePreviewFooter'
 );
-export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK =
-  getDataTestSubjectSelector('goToRuleDetails');
+export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK = getDataTestSubjectSelector(
+  'securitySolutionFlyoutRulePreviewFooterLinkToRuleDetails'
+);
