@@ -1,19 +1,17 @@
-# Entity Store Transforms & Kibana Task Implementation Prototype
+# Entity Store Proof of Concept
 
 > Note this code is designed to be thrown away is is by no means production ready! 
 
-this prototype creates a basic entity store which combines data seen in the `logs-*` index pattern with asset criticality data to form basic entities. 
 
-![High Level Flowchart](./readme_images/high_level_flowchart.png)
+> use config `xpack.securitySolution.entityAnalytics.entityStore.demoMode: true` to put the entity store into demo mode
 
-Some key limitations to start with:
+This prototype creates a basic host-only entity store which uses a transform to extract host information from logs and metrics. The entity store also polls for agent, asset criticality and risk information.
 
-- only extracts host entities
-- very limited field set, only host name, first seen, last seen, an IP history and asset criticality are currently stored
+Entities are stored in the entity index `.entities.entities-default` and also every version of an entity is stored in the entity history index `.entities.entity-history-default`.
+
+![High Level Flowchart](./readme_images/entity_store_architecture.png)
 
 The transform takes log data and uses a scripted metric aggregation to create "composites" these are 1 minute snapshots of an entity, with all IPs seen during that time, here is an example composite document from `.entities.entity-composites.*`
-
-
 
 
 ```
@@ -127,7 +125,13 @@ you should now see the transform running in kibana.
 
 ### 3 - Load some test data
 
-#### Option 1 - load some log data
+#### Option 1 - use the security document generator
+
+clone the https://github.com/elastic/security-documents-generator repo.
+
+then run `npm start entity-store` selecting which data you want to load.
+
+#### Option 2 - load some log data with known IPs
 
 > It can take a couple of minutes for the transform to pick up the new documents event though it runs every minute, so be patient!
 
@@ -149,7 +153,7 @@ Will create another 10 log documents in `logs-testdata-default` with host.ips st
 
 This is a good way of testing the IP history feature. 
 
-#### Option 2 - load an asset criticality
+#### Option 3 - load a single asset criticality
 
 > criticality is much quicker to run as it is picked up directly by the task
 
