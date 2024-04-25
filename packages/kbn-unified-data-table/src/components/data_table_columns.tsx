@@ -150,13 +150,7 @@ function buildEuiGridColumn({
     cellActions = dataViewField
       ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
       : textBasedField
-      ? buildCellActions(
-          textBasedField,
-          toastNotifications,
-          valueToStringConverter,
-          onFilter,
-          isPlainRecord
-        )
+      ? buildCellActions(textBasedField, toastNotifications, valueToStringConverter, onFilter)
       : [];
   }
 

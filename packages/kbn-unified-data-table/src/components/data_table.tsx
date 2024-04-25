@@ -508,7 +508,6 @@ export const UnifiedDataTable = ({
       },
       valueToStringConverter,
       componentsTourSteps,
-      isPlainRecord,
     }),
     [
       componentsTourSteps,
@@ -517,7 +516,6 @@ export const UnifiedDataTable = ({
       displayedRows,
       expandedDoc,
       isFilterActive,
-      isPlainRecord,
       onFilter,
       setExpandedDoc,
       usedSelectedDocs,

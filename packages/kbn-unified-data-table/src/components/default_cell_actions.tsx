@@ -25,14 +25,9 @@ function onFilterCell(
   const row = context.rows[rowIndex];
   const value = row.flattened[columnId];
   const field = context.dataView.fields.getByName(columnId);
-  const isPlainRecord = Boolean(context.isPlainRecord);
 
-  if (field && context.onFilter && !isPlainRecord) {
+  if (field && context.onFilter) {
     context.onFilter(field, value, mode);
-  }
-
-  if (context.onFilter && isPlainRecord) {
-    context.onFilter(columnId, value, mode);
   }
 }
 
@@ -128,8 +123,7 @@ export function buildCellActions(
   field: DataViewField,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  onFilter?: DocViewFilterFn,
-  isPlainRecord?: boolean
+  onFilter?: DocViewFilterFn
 ) {
   return [
     ...(onFilter && field.filterable ? [FilterInBtn, FilterOutBtn] : []),
