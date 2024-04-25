@@ -17,7 +17,7 @@ import {
   PostEvaluateResponse,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';

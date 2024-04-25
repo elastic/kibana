@@ -38,6 +38,7 @@
     "@kbn/utility-types",
     "@kbn/core-plugins-contracts-browser",
     "@kbn/core-security-browser-mocks",
+    "@kbn/core-user-profile-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
