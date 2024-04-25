@@ -23,6 +23,7 @@ export const useQueryIndices = (
       }>(APIRoutes.GET_INDICES, {
         query: {
           search_query: query,
+          size: 10,
         },
       });
 

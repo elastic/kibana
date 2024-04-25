@@ -10,9 +10,9 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { fetchFields } from './lib/fetch_query_source_fields';
-import { AssistClientOptionsWithClient, createAssist as Assist } from './lib/assist';
+import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
-import { errorHandler } from './lib/error_handler';
+import { errorHandler } from './utils/error_handler';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
@@ -20,6 +20,7 @@ import {
 } from './types';
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
+import { isNotNullish } from '../common/is_not_nullish';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -207,20 +208,23 @@ export function defineRoutes({
       validate: {
         query: schema.object({
           search_query: schema.maybe(schema.string()),
+          size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
     },
     errorHandler(async (context, request, response) => {
-      const { search_query: searchQuery } = request.query;
+      const { search_query: searchQuery, size } = request.query;
       const {
         client: { asCurrentUser },
       } = (await context.core).elasticsearch;
 
       const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
 
+      const indexNameSlice = indexNames.slice(0, size).filter(isNotNullish);
+
       return response.ok({
         body: {
-          indices: indexNames,
+          indices: indexNameSlice,
         },
         headers: { 'content-type': 'application/json' },
       });
