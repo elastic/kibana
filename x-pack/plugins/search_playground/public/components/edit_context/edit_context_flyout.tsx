@@ -30,6 +30,7 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface EditContextFlyoutProps {
   onClose: () => void;
@@ -64,22 +65,22 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
-    usageTracker.click('edit_context_field_toggled');
+    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
-    usageTracker.click('edit_context_save');
+    usageTracker.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    usageTracker.click('edit_context_doc_size_changed');
+    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
     setDocSize(Number(e.target.value));
   };
 
   useEffect(() => {
-    usageTracker.load('edit_context_flyout_opened');
+    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
   }, [usageTracker]);
 
   return (

@@ -11,6 +11,7 @@ import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface InstructionsFieldProps {
   value?: string;
@@ -21,7 +22,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
   const usageTracker = useUsageTracker();
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
-    usageTracker.click('instructions_field_changed');
+    usageTracker.click(AnalyticsEvents.instructionsFieldChanged);
   };
 
   return (

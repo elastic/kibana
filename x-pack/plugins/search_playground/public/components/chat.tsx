@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
@@ -67,13 +68,13 @@ export const Chat = () => {
         data: buildFormData(data),
       }
     );
-    usageTracker.click('chat_question_sent');
+    usageTracker.click(AnalyticsEvents.chatQuestionSent);
 
     resetField(ChatFormFields.question);
   };
   const handleStopRequest = () => {
     stopRequest();
-    usageTracker.click('chat_request_stopped');
+    usageTracker.click(AnalyticsEvents.chatRequestStopped);
   };
   const chatMessages = useMemo(
     () => [
@@ -100,15 +101,15 @@ export const Chat = () => {
     });
     setIsRegenerating(false);
 
-    usageTracker.click('chat_regenerate_messages');
+    usageTracker.click(AnalyticsEvents.chatRegenerateMessages);
   };
   const handleClearChat = () => {
     setMessages([]);
-    usageTracker.click('chat_cleared');
+    usageTracker.click(AnalyticsEvents.chatCleared);
   };
 
   useEffect(() => {
-    usageTracker.load('chat_page_loaded');
+    usageTracker.load(AnalyticsEvents.chatPageLoaded);
   }, [usageTracker]);
 
   return (

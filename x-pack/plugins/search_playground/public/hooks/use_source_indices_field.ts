@@ -19,6 +19,7 @@ import {
   IndexFields,
 } from '../utils/create_query';
 import { useUsageTracker } from './use_usage_tracker';
+import { AnalyticsEvents } from '../analytics/constants';
 
 export const getIndicesWithNoSourceFields = (
   defaultSourceFields: IndexFields
@@ -90,7 +91,7 @@ export const useSourceIndicesFields = () => {
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
-      usageTracker.count('source_fields_loaded', Object.values(fields)?.flat()?.length);
+      usageTracker.count(AnalyticsEvents.sourceFieldsLoaded, Object.values(fields)?.flat()?.length);
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,14 +101,14 @@ export const useSourceIndicesFields = () => {
     const newIndices = [...selectedIndices, newIndex];
     setLoading(true);
     onIndicesChange(newIndices);
-    usageTracker.count('source_index_added', newIndices.length);
+    usageTracker.count(AnalyticsEvents.sourceIndexAdded, newIndices.length);
   };
 
   const removeIndex = (index: IndexName) => {
     const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
     setLoading(true);
     onIndicesChange(newIndices);
-    usageTracker.count('source_index_removed', newIndices.length);
+    usageTracker.count(AnalyticsEvents.sourceIndexRemoved, newIndices.length);
   };
 
   return {

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AnalyticsEvents } from '../analytics/constants';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { useKibana } from '../hooks/use_kibana';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
@@ -35,19 +36,19 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
     setConnectorFlyoutOpen(false);
   };
   const handleSetupGenAiConnector = () => {
-    usageTracker.click('gen_ai_connector_create');
+    usageTracker.click(AnalyticsEvents.genAiConnectorCreated);
     setConnectorFlyoutOpen(true);
   };
 
   useEffect(() => {
     if (connectors?.length) {
       if (showCallout) {
-        usageTracker.load('gen_ai_connector_added');
+        usageTracker.load(AnalyticsEvents.genAiConnectorAdded);
       } else {
-        usageTracker.load('gen_ai_connector_exists');
+        usageTracker.load(AnalyticsEvents.genAiConnectorExists);
       }
     } else {
-      usageTracker.load('gen_ai_connector_setup');
+      usageTracker.load(AnalyticsEvents.genAiConnectorSetup);
     }
   }, [connectors?.length, showCallout, usageTracker]);
 

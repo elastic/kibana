@@ -14,6 +14,7 @@ import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
 import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
 import { ChatFormFields } from '../types';
+import { AnalyticsEvents } from '../analytics/constants';
 
 const maxWidthPage = 640;
 
@@ -28,7 +29,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
-    usageTracker.load('setup_chat_page_loaded');
+    usageTracker.load(AnalyticsEvents.startNewChatPageLoaded);
   }, [usageTracker]);
 
   return (

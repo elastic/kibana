@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface IncludeCitationsFieldProps {
   checked: boolean;
@@ -22,7 +23,7 @@ export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
   const usageTracker = useUsageTracker();
   const handleChange = (value: boolean) => {
     onChange(value);
-    usageTracker.click(`include_citations_${String(value)}`);
+    usageTracker.click(`${AnalyticsEvents.includeCitations}_${String(value)}`);
   };
 
   return (

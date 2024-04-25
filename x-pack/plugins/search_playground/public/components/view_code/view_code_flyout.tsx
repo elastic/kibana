@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
@@ -67,11 +68,11 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedLanguage(e.target.value);
 
-    usageTracker.click(`view_code_language_change_${e.target.value}`);
+    usageTracker.click(`${AnalyticsEvents.viewCodeLanguageChange}_${e.target.value}`);
   };
 
   useEffect(() => {
-    usageTracker.load('view_code_flyout_opened');
+    usageTracker.load(AnalyticsEvents.viewCodeFlyoutOpened);
   }, [usageTracker]);
 
   return (

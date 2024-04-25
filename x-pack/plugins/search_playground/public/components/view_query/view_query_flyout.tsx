@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
@@ -77,7 +78,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       ...tempQueryFields,
       [index]: newFields,
     });
-    usageTracker.count('view_query_fields_updated', newFields.length);
+    usageTracker.count(AnalyticsEvents.viewQueryFieldsUpdated, newFields.length);
   };
 
   const saveQuery = () => {
@@ -85,21 +86,21 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
 
-    usageTracker.click('view_query_save');
+    usageTracker.click(AnalyticsEvents.viewQuerySaved);
     usageTracker.count(
-      'view_query_sparse_fields',
+      AnalyticsEvents.viewQuerySparseFields,
       Object.values(tempQueryFields)
         .flat()
         .filter((field) => SUGGESTED_SPARSE_FIELDS.includes(field)).length
     );
     usageTracker.count(
-      'view_query_bm25_fields',
+      AnalyticsEvents.viewQueryBm25Fields,
       Object.values(tempQueryFields)
         .flat()
         .filter((field) => SUGGESTED_BM25_FIELDS.includes(field)).length
     );
     usageTracker.count(
-      'view_query_dense_vector_fields',
+      AnalyticsEvents.viewQueryDenseVectorFields,
       Object.values(tempQueryFields)
         .flat()
         .filter((field) => SUGGESTED_DENSE_VECTOR_FIELDS.includes(field)).length
@@ -107,7 +108,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
   };
 
   useEffect(() => {
-    usageTracker.load('view_query_flyout_opened');
+    usageTracker.load(AnalyticsEvents.viewQueryFlyoutOpened);
   }, [usageTracker]);
 
   return (
