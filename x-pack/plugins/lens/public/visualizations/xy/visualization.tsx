@@ -1015,7 +1015,7 @@ export const getXyVisualization = ({
               shortMessage: '',
               longMessage: (
                 <FormattedMessage
-                  id="xpack.lens.xyVisualization.mixedLogScaleWarning"
+                  id="xpack.lens.xyVisualization.mixedLogScaleDimensionWarning"
                   defaultMessage="This metric is used on logarithmic scale and contains positive and negative data."
                 />
               ),
