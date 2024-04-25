@@ -99,7 +99,9 @@ gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMM
 gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
 echo "--- Validate CDN assets"
-ts-node .buildkite/scripts/steps/artifacts/validate_cdn_assets.ts "$GCS_SA_CDN_BUCKET" "$CDN_ASSETS_FOLDER"
+ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  "$GCS_SA_CDN_BUCKET" \
+  "$CDN_ASSETS_FOLDER"
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
