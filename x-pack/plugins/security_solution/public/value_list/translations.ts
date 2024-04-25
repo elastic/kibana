@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_LIST_ITEM = i18n.translate('xpack.securitySolution.listItems.addListItem', {
-  defaultMessage: 'Add list item',
+  defaultMessage: 'Create list item',
 });
 
 export const SUCCESSFULLY_ADDED_ITEM = i18n.translate(
@@ -23,20 +23,13 @@ export const VALUE_REQUIRED = i18n.translate('xpack.securitySolution.listItems.v
 });
 
 export const VALUE_LABEL = i18n.translate('xpack.securitySolution.listItems.valueLabel', {
-  defaultMessage: 'Value',
+  defaultMessage: 'Enter a new value for the list',
 });
-
-export const ADD_VALUE_LIST_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.listItems.addValueListPlaceholder',
-  {
-    defaultMessage: 'Add list item..',
-  }
-);
 
 export const ADD_LIST_ITEM_BUTTON = i18n.translate(
   'xpack.securitySolution.listItems.addListItemButton',
   {
-    defaultMessage: 'Add',
+    defaultMessage: 'Add list item',
   }
 );
 
@@ -75,19 +68,19 @@ export const COLUMN_VALUE = i18n.translate('xpack.securitySolution.listItems.col
 export const COLUMN_UPDATED_AT = i18n.translate(
   'xpack.securitySolution.listItems.columnUpdatedAt',
   {
-    defaultMessage: 'Updated At',
+    defaultMessage: 'Updated at',
   }
 );
 
 export const COLUMN_UPDATED_BY = i18n.translate(
   'xpack.securitySolution.listItems.columnUpdatedBy',
   {
-    defaultMessage: 'Updated By',
+    defaultMessage: 'Updated by',
   }
 );
 
 export const COLUMN_ACTIONS = i18n.translate('xpack.securitySolution.listItems.columnActions', {
-  defaultMessage: 'Actions',
+  defaultMessage: 'Action',
 });
 
 export const FAILED_TO_FETCH_LIST_ITEM = i18n.translate(
@@ -131,7 +124,7 @@ export const FAILED_TO_UPLOAD_LIST_ITEM_TITLE = i18n.translate(
 );
 
 export const UPLOAD_TOOLTIP = i18n.translate('xpack.securitySolution.listItems.uploadTooltip', {
-  defaultMessage: 'All items from the file will be added as new items',
+  defaultMessage: 'All items from the file will be added to the value list.',
 });
 
 export const UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT = i18n.translate(
@@ -163,6 +156,10 @@ export const INFO_TOTAL_ITEMS = i18n.translate('xpack.securitySolution.listItems
 
 export const getInfoTotalItems = (listType: string) =>
   i18n.translate('xpack.securitySolution.listItems.searchBar', {
-    defaultMessage: 'Filter your data using KQL syntax - {listType}:*',
+    defaultMessage: 'Filter your data using KQL syntax, for example: {listType}:*',
     values: { listType },
   });
+
+export const NOT_FOUND_ITEMS = i18n.translate('xpack.securitySolution.listItems.notFoundItems', {
+  defaultMessage: '0 list items match your search criteria.',
+});
