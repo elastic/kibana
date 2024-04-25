@@ -21,7 +21,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
-  builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
@@ -35,17 +34,6 @@ import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
-
-const customComparators = {
-  ...builtInComparators,
-  [COMPARATORS.NOT_BETWEEN]: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
-      defaultMessage: 'Is not between',
-    }),
-    value: COMPARATORS.NOT_BETWEEN,
-    requiredValues: 2,
-  },
-};
 
 interface ExpressionRowProps {
   fields: DerivedIndexPattern['fields'];
@@ -387,7 +375,6 @@ const ThresholdElement: React.FC<{
         <ThresholdExpression
           thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
           threshold={displayedThreshold}
-          customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}

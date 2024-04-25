@@ -23,7 +23,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
-  builtInComparators,
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
@@ -702,20 +701,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 };
 
-// Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
-const updatedBuiltInComparators = { ...builtInComparators };
-delete updatedBuiltInComparators[COMPARATORS.NOT_BETWEEN];
-const customComparators = {
-  ...builtInComparators,
-  [COMPARATORS.NOT_BETWEEN]: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
-      defaultMessage: 'Is not between',
-    }),
-    value: COMPARATORS.NOT_BETWEEN,
-    requiredValues: 2,
-  },
-};
-
 const ThresholdElement: React.FC<{
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
@@ -730,7 +715,6 @@ const ThresholdElement: React.FC<{
         <ThresholdExpression
           thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
           threshold={threshold}
-          customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}
