@@ -141,7 +141,7 @@ export function useCustomCardsForCategory(
           id: 'system-logs',
           type: 'virtual',
           title: 'Stream host system logs',
-          description: 'The quickest path to onboard log data from your own machine or server',
+          description: 'Collect system logs from your machine or server',
           name: 'system-logs-virtual',
           categories: ['observability'],
           icons: [
