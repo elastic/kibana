@@ -27,6 +27,8 @@ import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -34,16 +36,11 @@ import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details'
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const {
-    dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-    eventId,
-    indexName,
-    getFieldsData,
-    scopeId,
-    isPreview,
-  } = useRightPanelContext();
+  const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
+    useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
+
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
@@ -60,18 +57,14 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const {
-    show: showAlertsByAncestry,
-    documentId,
-    indices,
-  } = useShowRelatedAlertsByAncestry({
+  const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
-    dataFormattedForFieldBrowser,
     eventId,
     isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
+    eventId,
     getFieldsData,
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
@@ -117,14 +110,18 @@ export const CorrelationsOverview: React.FC = () => {
             <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType={ruleType} />
           )}
           {showCases && <RelatedCases eventId={eventId} />}
-          {showSameSourceAlerts && originalEventId && (
+          {showSameSourceAlerts && (
             <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
           )}
           {showAlertsBySession && entityId && (
             <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
           )}
-          {showAlertsByAncestry && documentId && indices && (
-            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          {showAlertsByAncestry && (
+            <RelatedAlertsByAncestry
+              documentId={documentId}
+              indices={selectedPatterns}
+              scopeId={scopeId}
+            />
           )}
         </EuiFlexGroup>
       ) : (
