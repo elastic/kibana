@@ -666,7 +666,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
       {
         defaultMessage:
-          'Controls the kernel whether to report loopback network events. Default: false.',
+          'Controls whether the kernel reports loopback network events. Default: false.',
       }
     ),
   },
