@@ -63,9 +63,7 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
         <EuiTextColor color="warning">{i18n.LESS_THAN_WARNING(maxAlertsPerRun)}</EuiTextColor>
       );
     }
-    const defaultToNumber =
-      maxAlertsPerRun < DEFAULT_MAX_SIGNALS ? maxAlertsPerRun : DEFAULT_MAX_SIGNALS;
-    textToRender.push(i18n.MAX_SIGNALS_HELP_TEXT(defaultToNumber));
+    textToRender.push(i18n.MAX_SIGNALS_HELP_TEXT(DEFAULT_MAX_SIGNALS));
     return textToRender;
   }, [hasWarning, maxAlertsPerRun]);
 
