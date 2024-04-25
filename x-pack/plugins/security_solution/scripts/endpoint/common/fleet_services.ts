@@ -395,6 +395,7 @@ export const fetchIntegrationPolicyList = async (
  * Returns the Agent Version that matches the current stack version. Will use `SNAPSHOT` if
  * appropriate too.
  * @param kbnClient
+ * @param log
  */
 export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient,
@@ -514,6 +515,24 @@ export const getAgentDownloadUrl = async (
     fileName: agentFile,
     dirName: fileNameWithoutExtension,
   };
+};
+
+/**
+ * Fetches the latest version of the Elastic Agent available for download
+ * @param kbnClient
+ */
+
+export const fetchFleetAvailableVersions = async (kbnClient: KbnClient): Promise<string> => {
+  return kbnClient
+    .request<{ items: string[] }>({
+      method: 'GET',
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+    })
+    .then((response) => response.data.items[0])
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**

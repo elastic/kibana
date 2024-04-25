@@ -9,12 +9,14 @@ import type { Client } from '@elastic/elasticsearch';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
+import { kibanaPackageJson } from '@kbn/repo-info/target/types';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { HostVm } from '../../../../scripts/endpoint/common/types';
 import type { BaseVmCreateOptions } from '../../../../scripts/endpoint/common/vm_services';
 import { createVm } from '../../../../scripts/endpoint/common/vm_services';
 import {
   fetchAgentPolicyEnrollmentKey,
+  fetchFleetAvailableVersions,
   fetchFleetServerUrl,
   getAgentDownloadUrl,
   getAgentFileName,
@@ -40,6 +42,8 @@ export interface CreateAndEnrollEndpointHostCIOptions
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
   useClosestVersionMatch?: boolean;
+  /** If the environment is MKI */
+  isMkiEnvironment?: boolean;
 }
 
 export interface CreateAndEnrollEndpointHostCIResponse {
@@ -60,12 +64,19 @@ export const createAndEnrollEndpointHostCI = async ({
   disk,
   memory,
   hostname,
-  version = '8.14.0',
+  version = kibanaPackageJson.version,
   useClosestVersionMatch = true,
+  isMkiEnvironment = false,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
+  let agentVersion = version;
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
 
-  const fileNameNoExtension = getAgentFileName(version);
+  if (isMkiEnvironment) {
+    // MKI env provides own fleet server. We must be sure that currently deployed FS is compatible with agent version we want to deploy.
+    agentVersion = await fetchFleetAvailableVersions(kbnClient);
+  }
+
+  const fileNameNoExtension = getAgentFileName(agentVersion);
   const agentFileName = `${fileNameNoExtension}.tar.gz`;
   let agentDownload: DownloadedAgentInfo | undefined;
 
@@ -77,7 +88,7 @@ export const createAndEnrollEndpointHostCI = async ({
     log.warning(
       `There is no agent installer for ${agentFileName} present on disk, trying to download it now.`
     );
-    const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
+    const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
     agentDownload = await downloadAndStoreAgent(agentUrl, agentFileName);
   }
 
