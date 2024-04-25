@@ -6,23 +6,28 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 import {
   ADD_SAVED_BOOK_ACTION_ID,
   ADD_SAVED_BOOK_BY_REFERENCE_ACTION_ID,
   SAVED_BOOK_ID,
 } from './constants';
-import { BookSerializedState } from './types';
+import { SavedBookEditor } from './saved_book_editor';
+import { BookSerializedState, BookStateManager } from './types';
 
 const storage = new Storage(localStorage);
 
-export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart) => {
+export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SAVED_BOOK_ACTION_ID,
     getIconType: () => 'folderClosed',
@@ -31,13 +36,29 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart) =
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      const newPanelStateManager: BookStateManager = {
+        bookTitle: new BehaviorSubject('Pillars of the earth'),
+        authorName: new BehaviorSubject('Ken follett'),
+        numberOfPages: new BehaviorSubject(973),
+        bookDescription: new BehaviorSubject<string | undefined>(
+          'A spellbinding epic set in 12th-century England, The Pillars of the Earth tells the story of the struggle to build the greatest Gothic cathedral the world has known.'
+        ),
+      };
+
+      core.overlays.openFlyout(
+        toMountPoint(<SavedBookEditor bookStateManager={newPanelStateManager} />, {
+          theme: core.theme,
+          i18n: core.i18n,
+        })
+      );
+
       embeddable.addNewPanel<BookSerializedState>({
         panelType: SAVED_BOOK_ID,
         initialState: {
           attributes: {
-            bookTitle: 'Pillars of the Earth',
-            authorName: 'Ken Follett',
-            numberOfPages: 973,
+            bookTitle: newPanelStateManager.bookTitle.value,
+            authorName: newPanelStateManager.authorName.value,
+            numberOfPages: newPanelStateManager.numberOfPages.value,
           },
         },
       });

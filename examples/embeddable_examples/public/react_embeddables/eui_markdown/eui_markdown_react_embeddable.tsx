@@ -30,7 +30,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     /**
      * Here we can run clientside migrations and inject references.
      */
-    return state.rawState as MarkdownEditorSerializedState;
+    return state.rawState;
   },
   /**
    * The buildEmbeddable function is async so you can async import the component or load a saved

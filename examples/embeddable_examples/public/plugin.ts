@@ -144,7 +144,7 @@ export class EmbeddableExamplesPlugin
       return getSearchEmbeddableFactory(deps);
     });
 
-    registerCreateSavedBookAction(deps.uiActions);
+    registerCreateSavedBookAction(deps.uiActions, core);
     registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
       const { savedBookEmbeddableFactory } = await import(
         './react_embeddables/saved_book/saved_book_react_embeddable'

@@ -8,6 +8,7 @@
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { SavesExternalState, SerializedTitles } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 
 export interface BookAttributes {
   bookTitle: string;
@@ -15,6 +16,10 @@ export interface BookAttributes {
   numberOfPages: number;
   bookDescription?: string;
 }
+
+export type BookStateManager = {
+  [key in keyof Required<BookAttributes>]: BehaviorSubject<BookAttributes[key]>;
+};
 
 export interface BookByValueSerializedState {
   attributes: BookAttributes;
