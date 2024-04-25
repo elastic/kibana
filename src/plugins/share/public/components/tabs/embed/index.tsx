@@ -73,10 +73,6 @@ export const embedTab: IEmbedTab = {
   name: i18n.translate('share.contextMenu.embedCodeTab', {
     defaultMessage: 'Embed',
   }),
-  description: i18n.translate('share.dashboard.embed.description', {
-    defaultMessage:
-      'Embed this dashboard into another webpage. Select which menu items to include in the embeddable view.',
-  }),
   reducer: embedTabReducer,
   content: EmbedTabContent,
 };
