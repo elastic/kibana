@@ -341,7 +341,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await discardNewRuleCreation();
     });
 
-    it('should do no type override when adding a second action', async () => {
+    it('should not do a type override when adding a second action', async () => {
       // create a new rule
       const ruleName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(ruleName);
