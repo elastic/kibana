@@ -7,7 +7,6 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   getRequestValidation,
   type RouteConfigOptionsBody,
