@@ -7,7 +7,7 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +42,7 @@ import { useMinimumTimeRange } from './use_minimum_time_range';
 
 import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
 import { useOpenInDiscover } from '../category_table/use_open_in_discover';
+import { OpenInDiscoverButtons } from '../category_table/table_header';
 
 export interface LogCategorizationPageProps {
   onClose: () => void;
@@ -341,16 +342,28 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       setOptionsMenu(
         <>
           {randomSampler !== undefined ? (
-            <EmbeddableMenu
-              randomSampler={randomSampler}
-              reload={() => loadCategories()}
-              fields={fields}
-              setSelectedField={setSelectedField}
-              selectedField={selectedField}
-              minimumTimeRangeOption={minimumTimeRangeOption}
-              setMinimumTimeRangeOption={setMinimumTimeRangeOption}
-              categoryCount={data?.totalCategories}
-            />
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="none">
+                {selectedCategories.length > 0 ? (
+                  <EuiFlexItem>
+                    <OpenInDiscoverButtons openInDiscover={openInDiscover} showText={false} />
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem>
+                  <EmbeddableMenu
+                    randomSampler={randomSampler}
+                    reload={() => loadCategories()}
+                    fields={fields}
+                    setSelectedField={setSelectedField}
+                    selectedField={selectedField}
+                    minimumTimeRangeOption={minimumTimeRangeOption}
+                    setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+                    categoryCount={data?.totalCategories}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           ) : null}
         </>
       );
@@ -369,6 +382,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       setPatternCount,
       setMinimumTimeRangeOption,
       minimumTimeRangeOption,
+      selectedCategories.length,
+      openInDiscover,
     ]
   );
 

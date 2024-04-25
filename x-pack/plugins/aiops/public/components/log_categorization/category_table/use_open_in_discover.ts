@@ -21,7 +21,7 @@ import { getLabels } from './labels';
 
 export interface OpenInDiscover {
   openFunction: (mode: QueryMode, category?: Category) => void;
-  labels: any;
+  labels: ReturnType<typeof getLabels>;
 }
 
 export function useOpenInDiscover(

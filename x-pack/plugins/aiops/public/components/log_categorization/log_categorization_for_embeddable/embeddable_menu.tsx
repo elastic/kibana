@@ -67,7 +67,7 @@ export const EmbeddableMenu: FC<Props> = ({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => togglePopover()}
-      css={{ marginTop: '4px', marginRight: '4px' }}
+      css={{ marginRight: '4px' }}
     >
       Options
     </EuiButtonEmpty>
