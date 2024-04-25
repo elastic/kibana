@@ -179,7 +179,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         'Dataset Name',
         'Namespace',
         'Size',
-        'Degraded Docs',
+        'Dataset Quality',
+        'Degraded Docs (%)',
         'Last Activity',
         'Actions',
       ]);
