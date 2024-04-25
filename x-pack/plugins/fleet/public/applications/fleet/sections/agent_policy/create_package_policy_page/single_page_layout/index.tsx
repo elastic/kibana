@@ -228,6 +228,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
       setAgentCount(0);
+      return;
     }
 
     if (isFleetEnabled && agentPolicyId) {

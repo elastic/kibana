@@ -70,15 +70,13 @@ export function useSetupTechnology({
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (agentlessPolicy) {
-          setCurrentAgentPolicy(agentlessPolicy);
-          updateAgentPolicy(currentAgentPolicy || agentlessPolicy);
+          updateAgentPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
         updateAgentPolicy(undefined);
-        setCurrentAgentPolicy(undefined);
       }
       setSelectedSetupTechnology(setupTechnology);
     },
