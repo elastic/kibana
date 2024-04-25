@@ -104,8 +104,8 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -160,7 +160,7 @@ export const expectedDsl = {
         ],
       },
     },
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };
