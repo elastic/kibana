@@ -33,5 +33,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/home-plugin",
     "@kbn/management-plugin",
+    "@kbn/ui-actions-plugin",
   ]
 }
