@@ -23,7 +23,7 @@ export function isCustomValidation(
   return 'custom' in v;
 }
 
-export function unwrapResponseBodyValidation(
+export function unwrapVersionedResponseBodyValidation(
   validation: VersionedRouteResponseValidation[number]['body']
 ): RouteValidationFunction<unknown> | Type<unknown> {
   if (isCustomValidation(validation)) {

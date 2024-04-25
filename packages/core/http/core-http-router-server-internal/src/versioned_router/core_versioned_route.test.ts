@@ -16,7 +16,7 @@ import type {
 import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
-import { CoreVersionedRouter, unwrapResponseBodyValidation } from '.';
+import { CoreVersionedRouter, unwrapVersionedResponseBodyValidation } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
@@ -243,12 +243,12 @@ describe('Versioned route', () => {
       const res200 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
         .response![200].body;
 
-      expect(isConfigSchema(unwrapResponseBodyValidation(res200))).toBe(true);
+      expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res200))).toBe(true);
 
       const res404 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
         .response![404].body;
 
-      expect(isConfigSchema(unwrapResponseBodyValidation(res404))).toBe(true);
+      expect(isConfigSchema(unwrapVersionedResponseBodyValidation(res404))).toBe(true);
 
       expect(status).toBe(200);
     }

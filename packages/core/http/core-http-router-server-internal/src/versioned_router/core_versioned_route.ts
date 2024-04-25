@@ -37,7 +37,7 @@ import {
 import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
-import { prepareVersionedRouteValidation, unwrapResponseBodyValidation } from './util';
+import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -194,7 +194,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         validate(
           { body: response.payload },
           {
-            body: unwrapResponseBodyValidation(responseValidation.body),
+            body: unwrapVersionedResponseBodyValidation(responseValidation.body),
             unsafe: { body: unsafe?.body },
           }
         );

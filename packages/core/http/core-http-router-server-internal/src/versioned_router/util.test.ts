@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { VersionedRouteResponseValidation } from '@kbn/core-http-server';
-import { isCustomValidation, unwrapResponseBodyValidation } from './util';
+import { isCustomValidation, unwrapVersionedResponseBodyValidation } from './util';
 
 test.each([
   [() => schema.object({}), false],
@@ -17,7 +17,7 @@ test.each([
   expect(isCustomValidation(input)).toBe(result);
 });
 
-test('unwrapResponseBodyValidation', () => {
+test('unwrapVersionedResponseBodyValidation', () => {
   const mySchema = schema.object({});
   const custom = () => ({ value: 'ok' });
   const validation: VersionedRouteResponseValidation = {
@@ -29,6 +29,6 @@ test('unwrapResponseBodyValidation', () => {
     },
   };
 
-  expect(unwrapResponseBodyValidation(validation[200].body)).toBe(mySchema);
-  expect(unwrapResponseBodyValidation(validation[404].body)).toBe(custom);
+  expect(unwrapVersionedResponseBodyValidation(validation[200].body)).toBe(mySchema);
+  expect(unwrapVersionedResponseBodyValidation(validation[404].body)).toBe(custom);
 });
