@@ -7,8 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewField,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import { NotificationsStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
@@ -17,8 +24,10 @@ import debounce from 'lodash/debounce';
 import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
-import type { FieldFormatsStart } from '../../shared_imports';
+import type { FieldFormatsStart, RuntimeType } from '../../shared_imports';
 import { valueTypeToSelectedType } from './field_preview_context';
+import { Field } from '../../types';
+import { pluginName } from '../../constants';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
@@ -29,6 +38,12 @@ interface PreviewControllerDependencies {
   dataView: DataView;
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
+  usageCollection: UsageCollectionStart;
+  notifications: NotificationsStart;
+  dataViews: DataViewsPublicPluginStart;
+  onSave: (field: DataViewField[]) => void;
+  fieldToEdit?: Field;
+  fieldTypeToProcess?: 'runtime' | 'concrete';
 }
 
 const previewStateDefault: PreviewState = {
@@ -58,13 +73,31 @@ const previewStateDefault: PreviewState = {
   isPreviewAvailable: true,
   /** Flag to show/hide the preview panel */
   isPanelVisible: true,
+  isSaving: false,
 };
 
 export class PreviewController {
-  constructor({ dataView, search, fieldFormats }: PreviewControllerDependencies) {
+  constructor({
+    dataView,
+    dataViews,
+    search,
+    fieldFormats,
+    notifications,
+    onSave,
+    usageCollection,
+    fieldToEdit,
+    fieldTypeToProcess,
+  }: PreviewControllerDependencies) {
     this.dataView = dataView;
     this.search = search;
     this.fieldFormats = fieldFormats;
+    this.usageCollection = usageCollection;
+    this.notifications = notifications;
+    this.dataViews = dataViews;
+    this.onSave = onSave;
+
+    this.fieldToEdit = fieldToEdit;
+    this.fieldTypeToProcess = fieldTypeToProcess;
 
     this.internalState$ = new BehaviorSubject<PreviewState>({
       ...previewStateDefault,
@@ -79,11 +112,22 @@ export class PreviewController {
   private dataView: DataView;
   private search: ISearchStart;
   private fieldFormats: FieldFormatsStart;
+  private usageCollection: UsageCollectionStart;
+  private notifications: NotificationsStart;
+  private dataViews: DataViewsPublicPluginStart;
+  private onSave: (field: DataViewField[]) => void;
+  private fieldToEdit?: Field;
+  private fieldTypeToProcess?: 'runtime' | 'concrete';
 
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
 
   private previewCount = 0;
+
+  private namesNotAllowed?: {
+    fields: string[];
+    runtimeComposites: string[];
+  };
 
   private updateState = (newState: Partial<PreviewState>) => {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
@@ -97,6 +141,143 @@ export class PreviewController {
     type: null,
     script: undefined,
     documentId: undefined,
+  };
+
+  getNamesNotAllowed = () => {
+    if (!this.namesNotAllowed) {
+      const fieldNames = this.dataView.fields.map((fld) => fld.name);
+      const runtimeCompositeNames = Object.entries(this.dataView.getAllRuntimeFields())
+        .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
+        .map(([_runtimeFieldName]) => _runtimeFieldName);
+      this.namesNotAllowed = {
+        fields: fieldNames,
+        runtimeComposites: runtimeCompositeNames,
+      };
+    }
+
+    return this.namesNotAllowed;
+  };
+
+  getExistingConcreteFields = () => {
+    const existing: Array<{ name: string; type: string }> = [];
+
+    this.dataView.fields
+      .filter((fld) => {
+        const isFieldBeingEdited = this.fieldToEdit?.name === fld.name;
+        return !isFieldBeingEdited && fld.isMapped;
+      })
+      .forEach((fld) => {
+        existing.push({
+          name: fld.name,
+          type: (fld.esTypes && fld.esTypes[0]) || '',
+        });
+      });
+
+    return existing;
+  };
+
+  updateConcreteField = (updatedField: Field): DataViewField[] => {
+    const editedField = this.dataView.getFieldByName(updatedField.name);
+
+    if (!editedField) {
+      throw new Error(
+        `Unable to find field named '${
+          updatedField.name
+        }' on index pattern '${this.dataView.getIndexPattern()}'`
+      );
+    }
+
+    // Update custom label, popularity and format
+    this.dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+    this.dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
+
+    editedField.count = updatedField.popularity || 0;
+    if (updatedField.format) {
+      this.dataView.setFieldFormat(updatedField.name, updatedField.format!);
+    } else {
+      this.dataView.deleteFieldFormat(updatedField.name);
+    }
+
+    return [editedField];
+  };
+
+  updateRuntimeField = (updatedField: Field): DataViewField[] => {
+    const nameHasChanged =
+      Boolean(this.fieldToEdit) && this.fieldToEdit!.name !== updatedField.name;
+    const typeHasChanged =
+      Boolean(this.fieldToEdit) && this.fieldToEdit!.type !== updatedField.type;
+    const hasChangeToOrFromComposite =
+      typeHasChanged &&
+      (this.fieldToEdit!.type === 'composite' || updatedField.type === 'composite');
+
+    const { script } = updatedField;
+
+    if (this.fieldTypeToProcess === 'runtime') {
+      try {
+        this.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
+        // eslint-disable-next-line no-empty
+      } catch {}
+      // rename an existing runtime field
+      if (nameHasChanged || hasChangeToOrFromComposite) {
+        this.dataView.removeRuntimeField(this.fieldToEdit!.name);
+      }
+
+      this.dataView.addRuntimeField(updatedField.name, {
+        type: updatedField.type as RuntimeType,
+        script,
+        fields: updatedField.fields,
+      });
+    } else {
+      try {
+        this.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return this.dataView.addRuntimeField(updatedField.name, updatedField);
+  };
+
+  saveField = async (updatedField: Field) => {
+    try {
+      this.usageCollection.reportUiCounter(
+        pluginName,
+        METRIC_TYPE.COUNT,
+        this.fieldTypeToProcess === 'runtime' ? 'save_runtime' : 'save_concrete'
+      );
+      // eslint-disable-next-line no-empty
+    } catch {}
+
+    this.setIsSaving(true);
+
+    try {
+      const editedFields: DataViewField[] =
+        this.fieldTypeToProcess === 'runtime'
+          ? this.updateRuntimeField(updatedField)
+          : this.updateConcreteField(updatedField as Field);
+
+      const afterSave = () => {
+        const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+          defaultMessage: "Saved '{fieldName}'",
+          values: { fieldName: updatedField.name },
+        });
+        this.notifications.toasts.addSuccess(message);
+        this.setIsSaving(false);
+        this.onSave(editedFields);
+      };
+
+      if (this.dataView.isPersisted()) {
+        await this.dataViews.updateSavedObject(this.dataView);
+      }
+      afterSave();
+
+      this.setIsSaving(false);
+    } catch (e) {
+      const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
+        defaultMessage: 'Failed to save field changes',
+      });
+      this.notifications.toasts.addError(e, { title });
+      this.setIsSaving(false);
+    }
   };
 
   togglePinnedField = (fieldName: string) => {
@@ -201,6 +382,10 @@ export class PreviewController {
         error,
       },
     });
+  };
+
+  private setIsSaving = (isSaving: boolean) => {
+    this.updateState({ isSaving });
   };
 
   private setIsFetchingDocument = (isFetchingDocument: boolean) => {
