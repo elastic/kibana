@@ -354,7 +354,12 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink href={docLinks.connectors} target="_blank">
+                    <EuiLink
+                      data-test-subj="entSearchContent-connector-configuration-connectorDocumentationLink"
+                      data-telemetry-id="entSearchContent-connector-configuration-connectorDocumentationLink"
+                      href={docLinks.connectors}
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.viewDocumentation.label',
                         {
@@ -375,6 +380,8 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="entSearchContent-connector-configuration-readmeLink"
+                      data-telemetry-id="entSearchContent-connector-configuration-readmeLink"
                       href="https://github.com/elastic/connectors-python/blob/main/README.md"
                       target="_blank"
                     >
@@ -388,7 +395,12 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   {docsUrl && (
                     <EuiFlexItem>
-                      <EuiLink href={docsUrl} target="_blank">
+                      <EuiLink
+                        data-test-subj="entSearchContent-connector-configuration-deployWithDockerLink"
+                        data-telemetry-id="entSearchContent-connector-configuration-deployWithDockerLink"
+                        href={docsUrl}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.connector_detail.configurationConnector.support.dockerDeploy.label',
                           {
@@ -400,6 +412,8 @@ export const ConnectorConfiguration: React.FC = () => {
                   )}
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="entSearchContent-connector-configuration-deployWithoutDockerLink"
+                      data-telemetry-id="entSearchContent-connector-configuration-deployWithoutDockerLink"
                       href="https://github.com/elastic/connectors-python/blob/main/docs/CONFIG.md#run-the-connector-service-for-a-custom-connector"
                       target="_blank"
                     >
