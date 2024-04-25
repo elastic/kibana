@@ -320,9 +320,9 @@ export const getUiSettings: (
         'This setting enables ES|QL in Kibana. By switching it off, you hide the ES|QL options from the various applications. You can still use your saved searches, ES|QL visualizations etc. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
-          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
+          `<a href="https://ela.st/esql-feedback" target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
+            defaultMessage: 'https://ela.st/esql-feedback',
           }) +
           '</a>',
       },
