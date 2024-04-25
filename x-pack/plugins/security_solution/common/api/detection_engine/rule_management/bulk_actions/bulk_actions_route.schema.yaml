@@ -76,6 +76,7 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
+        - INVESTIGATION_FIELDS_FEATURE
 
     NormalizedRuleError:
       type: object
