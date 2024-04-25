@@ -355,9 +355,7 @@ export abstract class Container<
     });
   }
 
-  public async untilReactEmbeddableLoaded<ApiType>(
-    id: string
-  ): Promise<ApiType | undefined> {
+  public async untilReactEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
     }
