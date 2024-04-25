@@ -25,13 +25,13 @@ import {
   MappingsTemplates,
   RuntimeFields,
 } from './types';
-import { extractMappingsDefinition } from './lib';
 import { useDispatch, useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
 import { useConfig } from './config_context';
 import { DocLinksStart } from './shared_imports';
 import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
 import { SearchResult } from './components/document_fields/search_fields';
+import { parseMappings } from '../../shared/parse_mappings';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
@@ -56,50 +56,10 @@ export interface Props {
 
 export const MappingsEditor = React.memo(
   ({ onChange, value, docLinks, indexSettings, esNodesPlugins }: Props) => {
-    const { parsedDefaultValue, multipleMappingsDeclared } =
-      useMemo<MappingsEditorParsedMetadata>(() => {
-        const mappingsDefinition = extractMappingsDefinition(value);
-
-        if (mappingsDefinition === null) {
-          return { multipleMappingsDeclared: true };
-        }
-
-        const {
-          _source,
-          _meta,
-          _routing,
-          _size,
-          dynamic,
-          properties,
-          runtime,
-          /* eslint-disable @typescript-eslint/naming-convention */
-          numeric_detection,
-          date_detection,
-          dynamic_date_formats,
-          dynamic_templates,
-          /* eslint-enable @typescript-eslint/naming-convention */
-        } = mappingsDefinition;
-
-        const parsed = {
-          configuration: {
-            _source,
-            _meta,
-            _routing,
-            _size,
-            dynamic,
-            numeric_detection,
-            date_detection,
-            dynamic_date_formats,
-          },
-          fields: properties,
-          templates: {
-            dynamic_templates,
-          },
-          runtime,
-        };
-        return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
-      }, [value]);
-
+    const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
+      () => parseMappings(value),
+      [value]
+    );
     /**
      * Hook that will listen to:
      * 1. "value" prop changes in order to reset the mappings editor

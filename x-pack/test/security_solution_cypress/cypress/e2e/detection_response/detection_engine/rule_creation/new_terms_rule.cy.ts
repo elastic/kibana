@@ -74,7 +74,7 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_ma
 describe(
   'New Terms rules',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       // alertSuppressionForNewTermsRuleEnabled feature flag is also enabled in a global config
       kbnServerArgs: [
