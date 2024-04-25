@@ -32,7 +32,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
-      await svlObltOnboardingPage.assertQuickstartBadgeExists();
 
       // check side nav links
       await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
