@@ -9,8 +9,8 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 
-import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import { StartServices } from '..';
 import { ReportingAPIClient } from '../..';
@@ -96,7 +96,7 @@ export function getSharedComponents(
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
-            reportType={PDF_REPORT_TYPE_V2}
+            reportType={PDF_REPORT_TYPE}
             apiClient={apiClient}
             layoutOption={'canvas' as const}
             startServices$={startServices$}
@@ -110,7 +110,7 @@ export function getSharedComponents(
         return (
           <ScreenCapturePanelContent
             requiresSavedState={false}
-            reportType={PDF_REPORT_TYPE_V2}
+            reportType={PNG_REPORT_TYPE}
             apiClient={apiClient}
             layoutOption={'canvas' as const}
             startServices$={startServices$}
