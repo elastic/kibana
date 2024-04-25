@@ -72,7 +72,7 @@ export interface DocTableProps {
   /**
    * Filter callback
    */
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   /**
    * Sorting callback
    */
