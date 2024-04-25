@@ -115,16 +115,19 @@ const extractVersionedResponses = (
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
     const schemas = extractValidationSchemaFromVersionedHandler(handler);
     if (!schemas?.response) return acc;
-    const statusCodes = Object.keys(schemas.response);
-    for (const statusCode of statusCodes) {
-      const maybeSchema = schemas.response[statusCode as unknown as number].body;
+    const { unsafe, ...responses } = schemas.response;
+    for (const [statusCode, responseSchema] of Object.entries(responses)) {
+      const maybeSchema = responseSchema.body;
       const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
         description: route.options.description ?? 'No description',
         content: {
           ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-          [getVersionedContentTypeString(handler.options.version, contentType)]: {
+          [getVersionedContentTypeString(
+            handler.options.version,
+            responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
+          )]: {
             schema,
           },
         },

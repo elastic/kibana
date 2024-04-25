@@ -39,6 +39,8 @@ const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
     mutations.processMap(ctx, schema);
   } else if (schema.type === 'string') {
     mutations.processString(schema);
+  } else if ((schema.type as string) === 'stream') {
+    mutations.processStream(schema);
   } else if (schema.type) {
     // Do nothing
   } else {

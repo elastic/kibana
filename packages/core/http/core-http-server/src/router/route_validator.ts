@@ -131,10 +131,27 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
 
 /**
  * Map of status codes to response schemas.
+ *
+ * @example
+ * ```ts
+ * {
+ *    200: {
+ *       body: schema.stream()
+ *       bodyContentType: 'application/octet-stream'
+ *    }
+ * }
+ * ```
  * @public
  */
 export interface RouteValidatorFullConfigResponse {
-  [statusCode: number]: { body: ObjectType | Type<any> };
+  [statusCode: number]: {
+    /**
+     * A string representing the mime type of the response body.
+     * @public
+     */
+    bodyContentType?: string;
+    body: ObjectType | Type<any>;
+  };
   unsafe?: {
     body?: boolean;
   };

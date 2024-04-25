@@ -89,27 +89,32 @@ type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
 const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
   const responses: OpenAPIV3.ResponsesObject = {};
   if (!route.validationSchemas) return responses;
-  const validationSchemas = getResponseValidation(route.validationSchemas);
+  const fullConfig = getResponseValidation(route.validationSchemas);
 
-  const contentType = extractContentType(route.options?.body);
-
-  return !!validationSchemas
-    ? Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
-        (acc, [statusCode, schema]) => {
-          const oasSchema = converter.convert(schema.body);
-          acc[statusCode] = {
-            ...acc[statusCode],
-            description: route.options.description ?? 'No description',
-            content: {
-              ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-              [getVersionedContentTypeString(LATEST_SERVERLESS_VERSION, contentType)]: {
-                schema: oasSchema,
-              },
+  if (fullConfig) {
+    const { unsafe, ...validationSchemas } = fullConfig;
+    const contentType = extractContentType(route.options?.body);
+    return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
+      (acc, [statusCode, schema]) => {
+        const oasSchema = converter.convert(schema.body);
+        acc[statusCode] = {
+          ...acc[statusCode],
+          description: route.options.description ?? 'No description',
+          content: {
+            ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+            [getVersionedContentTypeString(
+              LATEST_SERVERLESS_VERSION,
+              schema.bodyContentType ? [schema.bodyContentType] : contentType
+            )]: {
+              schema: oasSchema,
             },
-          };
-          return acc;
-        },
-        responses
-      )
-    : responses;
+          },
+        };
+        return acc;
+      },
+      responses
+    );
+  }
+
+  return responses;
 };

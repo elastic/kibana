@@ -202,9 +202,29 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 /** @public */
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
-/** @public */
+/**
+ * Map of status codes to response schemas.
+ *
+ * @example
+ * ```ts
+ * {
+ *    200: {
+ *       body: schema.stream()
+ *       bodyContentType: 'application/octet-stream'
+ *    }
+ * }
+ * ```
+ * @public
+ */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  [statusCode: number]: {
+    /**
+     * A string representing the mime type of the response body.
+     * @public
+     */
+    bodyContentType?: string;
+    body: RouteValidationFunction<unknown> | Type<unknown>;
+  };
   unsafe?: { body?: boolean };
 }
 
