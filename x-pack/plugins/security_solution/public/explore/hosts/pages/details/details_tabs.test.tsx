@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 
 import '../../../../common/mock/match_media';
 import {
@@ -64,7 +64,7 @@ jest.mock('../../../../common/components/query_bar', () => ({
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+jest.mock('use-resize-observer');
 mockUseResizeObserver.mockImplementation(() => ({}));
 jest.mock('../../../../common/components/visualization_actions/actions');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');

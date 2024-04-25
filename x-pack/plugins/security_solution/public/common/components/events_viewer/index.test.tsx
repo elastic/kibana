@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 
 import '../../mock/match_media';
 import { render } from '@testing-library/react';
@@ -47,7 +47,7 @@ jest.mock('../../../timelines/components/fields_browser', () => ({
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+jest.mock('use-resize-observer');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const from = '2019-08-27T22:10:56.794Z';

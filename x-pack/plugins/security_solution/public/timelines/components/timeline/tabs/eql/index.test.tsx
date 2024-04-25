@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -43,7 +43,7 @@ jest.mock('../../../../../common/containers/sourcerer/use_signal_helpers', () =>
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+jest.mock('use-resize-observer');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');

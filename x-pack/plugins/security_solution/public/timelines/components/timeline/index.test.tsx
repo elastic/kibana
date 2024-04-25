@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
@@ -51,7 +51,7 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+jest.mock('use-resize-observer');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../common/hooks/use_resolve_conflict', () => {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, within } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 
 import '../../../common/mock/match_media';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
@@ -75,7 +75,7 @@ jest.mock('../../../timelines/components/fields_browser', () => ({
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+jest.mock('use-resize-observer');
 mockUseResizeObserver.mockImplementation(() => ({}));
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();

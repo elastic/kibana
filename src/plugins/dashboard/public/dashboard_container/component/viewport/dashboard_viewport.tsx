@@ -8,7 +8,7 @@
 
 import { debounce } from 'lodash';
 import classNames from 'classnames';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
@@ -81,7 +81,7 @@ export const DashboardViewportComponent = () => {
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
+        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid -
             otherwise, there is a race condition where the panels can end up being squashed */}
         {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>

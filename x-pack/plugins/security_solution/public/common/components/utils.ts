@@ -7,7 +7,7 @@
 
 import { throttle } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
+import useResizeObserver from 'use-resize-observer';
 import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
 import moment from 'moment-timezone';
 import type {
