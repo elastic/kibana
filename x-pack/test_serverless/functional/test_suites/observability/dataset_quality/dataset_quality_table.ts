@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
       expect(namespaceColCellTexts).to.eql([defaultNamespace, defaultNamespace, defaultNamespace]);
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('ascending');
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      expect(Object.keys(cols).length).to.eql(7);
+      expect(Object.keys(cols).length).to.eql(8);
 
       const datasetNameCol = cols['Dataset Name'];
 
