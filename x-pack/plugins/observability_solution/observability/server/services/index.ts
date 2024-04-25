@@ -20,9 +20,6 @@ export const observabilityAlertDetailsContextRt = t.intersection([
     alert_started_at: t.string,
   }),
   t.partial({
-    as_json: t.boolean,
-  }),
-  t.partial({
     // apm fields
     'service.name': t.string,
     'service.environment': t.string,
