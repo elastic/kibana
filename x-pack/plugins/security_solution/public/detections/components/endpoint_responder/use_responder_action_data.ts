@@ -10,7 +10,10 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import type { ThirdPartyAgentInfo } from '../../../../common/types';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  EndpointCapabilities,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import {
@@ -144,7 +147,7 @@ export const useResponderActionData = ({
       showResponseActionsConsole({
         agentId: hostInfo.metadata.agent.id,
         agentType: 'endpoint',
-        capabilities: hostInfo.metadata.Endpoint.capabilities ?? [],
+        capabilities: (hostInfo.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
         hostName: hostInfo.metadata.host.name,
       });
     }

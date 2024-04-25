@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -22,6 +22,7 @@ import { useSetInitialValue } from './use_set_initial_value';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
 import { useSetupAutosave } from './use_setup_autosave';
+import { useResizeCheckerUtils } from './use_resize_checker_utils';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -41,13 +42,25 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   } = useServicesContext();
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
+
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
-  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
-  }, []);
+  const editorDidMountCallback = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      setupResizeChecker(divRef.current!, editor);
+    },
+    [setupResizeChecker]
+  );
+
+  const editorWillUnmountCallback = useCallback(() => {
+    destroyResizeChecker();
+  }, [destroyResizeChecker]);
 
   const getCurlCallback = useCallback(async (): Promise<string> => {
     const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
@@ -64,11 +77,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const [value, setValue] = useState(initialTextValue);
 
-  const setInitialValue = useSetInitialValue;
-
-  useEffect(() => {
-    setInitialValue({ initialTextValue, setValue, toasts });
-  }, [initialTextValue, setInitialValue, toasts]);
+  useSetInitialValue({ initialTextValue, setValue, toasts });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
@@ -79,6 +88,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       css={css`
         width: 100%;
       `}
+      ref={divRef}
     >
       <EuiFlexGroup
         className="conApp__editorActions"
@@ -120,12 +130,13 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         onChange={setValue}
         fullWidth={true}
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
+        editorDidMount={editorDidMountCallback}
+        editorWillUnmount={editorWillUnmountCallback}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
         }}
-        editorDidMount={editorDidMountCallback}
       />
     </div>
   );
