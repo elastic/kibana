@@ -12,8 +12,6 @@ import { fields } from '../../../filters/stubs';
 import { nodeTypes } from '../..';
 import { getFields } from './get_fields';
 
-jest.mock('../../grammar');
-
 describe('getFields', () => {
   let indexPattern: DataViewBase;
 

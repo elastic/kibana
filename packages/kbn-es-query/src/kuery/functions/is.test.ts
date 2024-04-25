@@ -16,8 +16,6 @@ import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import { KqlIsFunctionNode } from './is';
 
-jest.mock('../grammar');
-
 describe('kuery functions', () => {
   describe('is', () => {
     let indexPattern: DataViewBase;

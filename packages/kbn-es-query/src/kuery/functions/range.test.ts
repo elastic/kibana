@@ -15,8 +15,6 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import { KqlRangeFunctionNode } from './range';
 
-jest.mock('../grammar');
-
 describe('kuery functions', () => {
   describe('range', () => {
     let indexPattern: DataViewBase;
