@@ -11,13 +11,12 @@ import type {
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
-  VersionedResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
 import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
-import { CoreVersionedRouter } from '.';
+import { CoreVersionedRouter, unwrapResponseBodyValidation } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
@@ -241,23 +240,15 @@ describe('Versioned route', () => {
         },
       ] = route.handlers;
 
-      expect(
-        isConfigSchema(
-          (
-            (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)().response![200]
-              .body as VersionedResponseValidation
-          )()
-        )
-      ).toBe(true);
+      const res200 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
+        .response![200].body;
 
-      expect(
-        isConfigSchema(
-          (
-            (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)().response![404]
-              .body as VersionedResponseValidation
-          )()
-        )
-      ).toBe(true);
+      expect(isConfigSchema(unwrapResponseBodyValidation(res200))).toBe(true);
+
+      const res404 = (validate as () => VersionedRouteValidation<unknown, unknown, unknown>)()
+        .response![404].body;
+
+      expect(isConfigSchema(unwrapResponseBodyValidation(res404))).toBe(true);
 
       expect(status).toBe(200);
     }
