@@ -9,13 +9,12 @@
 import { once } from 'lodash';
 import type {
   AddVersionOpts,
-  RouteValidationFunction,
+  RouteValidationSpec,
   VersionedCustomRouteValidation,
   VersionedResponseValidation,
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
-import { Type } from '@kbn/config-schema';
 
 export function isCustomValidation(
   v: VersionedCustomRouteValidation | VersionedResponseValidation
@@ -23,9 +22,15 @@ export function isCustomValidation(
   return 'custom' in v;
 }
 
+/**
+ * Utility for unwrapping versioned router response validation to
+ * {@link RouteValidationSpec}.
+ *
+ * @internal
+ */
 export function unwrapVersionedResponseBodyValidation(
   validation: VersionedRouteResponseValidation[number]['body']
-): RouteValidationFunction<unknown> | Type<unknown> {
+): RouteValidationSpec<unknown> {
   if (isCustomValidation(validation)) {
     return validation.custom;
   }
