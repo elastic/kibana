@@ -53,10 +53,6 @@ export const RedirectToHostDetailViaIP = ({
     }
   }, [baseLocator, location.search, location.state, name]);
 
-  if (name) {
-    return null;
-  }
-
   if (error) {
     return (
       <Error
@@ -66,6 +62,10 @@ export const RedirectToHostDetailViaIP = ({
         })}
       />
     );
+  }
+
+  if (name) {
+    return null;
   }
 
   return (

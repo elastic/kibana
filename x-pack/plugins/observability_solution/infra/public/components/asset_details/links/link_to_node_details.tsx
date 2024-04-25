@@ -7,7 +7,6 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
-// import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useNodeDetailsRedirect } from '../../../pages/link_to';
