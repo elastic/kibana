@@ -45,7 +45,7 @@ interface CyLoginTask {
  */
 export const login: CyLoginTask = (
   user: SecurityTestUser = ROLE.endpoint_operations_analyst
-): ReturnType<typeof sendApiLoginRequest> | void => {
+): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
   const isServerless = Cypress.env('IS_SERVERLESS');
@@ -53,10 +53,22 @@ export const login: CyLoginTask = (
 
   if (isServerless && isCloudServerless) {
     // MKI QA Cloud Serverless
-    cy.task('getSessionCookie', user).then((cookie) => {
-      cy.setCookie('sid', cookie as string);
-    });
-    cy.visit('/');
+    return cy
+      .task('getSessionCookie', user)
+      .then((result) => {
+        username = result.username;
+        password = result.password;
+        // Set cookie asynchronously
+        return cy.setCookie('sid', result.cookie as string);
+      })
+      .then(() => {
+        // Visit URL after setting cookie
+        return cy.visit('/');
+      })
+      .then(() => {
+        // Return username and password
+        return { username, password };
+      });
   } else if (user) {
     return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
       username = loadedUser.username;

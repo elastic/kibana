@@ -30,13 +30,21 @@ export const samlAuthentication = async (
   };
 
   on('task', {
-    getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
+    getSessionCookie: async (
+      role: string | SecurityRoleName
+    ): Promise<{ cookie: string; username: string; password: string }> => {
       const sessionManager = new SamlSessionManager({
         hostOptions,
         log,
         isCloud: config.env.CLOUD_SERVERLESS,
       });
-      return sessionManager.getSessionCookieForRole(role);
+      return sessionManager.getSessionCookieForRole(role).then((cookie) => {
+        return {
+          cookie,
+          username: hostOptions.username,
+          password: hostOptions.password,
+        };
+      });
     },
   });
 };
