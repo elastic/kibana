@@ -287,4 +287,7 @@ export const filterTourStrings = {
   closeButton: i18n.translate('dashboard.topNav.filterTour.closeButtonLabel', {
     defaultMessage: 'Dismiss',
   }),
+  advancedSettingsLink: i18n.translate('dashboard.topNav.filterTour.advancedSettingsLink', {
+    defaultMessage: 'Change in Advanced Settings',
+  }),
 };
