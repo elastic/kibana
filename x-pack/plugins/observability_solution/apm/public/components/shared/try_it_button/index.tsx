@@ -207,15 +207,15 @@ export function TryItButton({
   function HideThisButton() {
     return (
       <EuiFlexItem grow={false}>
-        <EuiLink
-          onClick={() => {
-            setShowFastFilterTryCallout(false);
-          }}
-        >
-          {i18n.translate('xpack.apm.tryItButton.dismiss', {
-            defaultMessage: 'Hide this',
-          })}
-        </EuiLink>
+        <EuiToolTip content="Hide this">
+          <EuiButtonIcon
+            data-test-subj="apmHideThisButtonButton"
+            iconType="cross"
+            onClick={() => {
+              setShowFastFilterTryCallout(false);
+            }}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }
