@@ -129,7 +129,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Alerts Insights feature and API endpoint
    */
-  assistantAlertsInsights: true,
+  assistantAlertsInsights: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -256,7 +256,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: true,
+  aiAssistantFlyoutMode: false,
 
   /**
    * Enables the new modal for the value list items

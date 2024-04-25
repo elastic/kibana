@@ -12,6 +12,9 @@ import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
 import { useConversation } from '../use_conversation';
+import { getDefaultConnector } from '../helpers';
+import { getGenAiConfig } from '../../connectorland/helpers';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 
 interface UseAssistantOverlay {
   showAssistantOverlay: (show: boolean, silent?: boolean) => void;
@@ -74,6 +77,13 @@ export const useAssistantOverlay = (
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
+  const { http } = useAssistantContext();
+  const { data: connectors } = useLoadConnectors({
+    http,
+  });
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
+
   const { getConversation, createConversation } = useConversation();
 
   // memoize the props so that we can use them in the effect below:
@@ -112,9 +122,14 @@ export const useAssistantOverlay = (
         /* empty */
       }
 
-      if (!conversation) {
+      if (!conversation && defaultConnector) {
         try {
           conversation = await createConversation({
+            apiConfig: {
+              ...apiConfig,
+              actionTypeId: defaultConnector?.actionTypeId,
+              connectorId: defaultConnector?.id,
+            },
             category: 'assistant',
             title: conversationTitle ?? '',
             id: promptContextId,
@@ -133,9 +148,11 @@ export const useAssistantOverlay = (
       }
     },
     [
+      apiConfig,
       assistantContextShowOverlay,
       conversationTitle,
       createConversation,
+      defaultConnector,
       getConversation,
       promptContextId,
     ]

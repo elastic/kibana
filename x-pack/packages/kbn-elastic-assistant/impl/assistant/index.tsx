@@ -182,7 +182,7 @@ const AssistantComponent: React.FC<Props> = ({
   } = useFetchAnonymizationFields();
 
   // Connector details
-  const { data: connectors, isFetched: areConnectorsFetched } = useLoadConnectors({
+  const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);

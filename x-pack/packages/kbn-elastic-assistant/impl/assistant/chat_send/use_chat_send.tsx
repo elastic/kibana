@@ -65,7 +65,7 @@ export const useChatSend = ({
     toasts,
   } = useAssistantContext();
 
-  const { isLoading, mutateAsync: sendMessage, reset: abortStream } = useSendMessage();
+  const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
