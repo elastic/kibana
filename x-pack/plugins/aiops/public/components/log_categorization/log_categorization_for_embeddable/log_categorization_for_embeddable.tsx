@@ -47,7 +47,6 @@ import { OpenInDiscoverButtons } from '../category_table/table_header';
 export interface LogCategorizationPageProps {
   onClose: () => void;
   embeddingOrigin: string;
-  additionalFilter?: CategorizationAdditionalFilter;
   input: Readonly<EmbeddableLogCategorizationInput>;
 }
 
@@ -56,7 +55,6 @@ const BAR_TARGET = 20;
 export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   onClose,
   embeddingOrigin,
-  additionalFilter,
   input,
 }) => {
   const {
@@ -244,24 +242,24 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     setData(null);
     setFieldValidationResult(null);
 
-    const tempAdditionalFilter: CategorizationAdditionalFilter = {
+    const additionalFilter: CategorizationAdditionalFilter = {
       from: earliest,
       to: latest,
     };
 
-    const timeRange = await getMinimumTimeRange(
-      index,
-      timeField,
-      tempAdditionalFilter,
-      minimumTimeRangeOption,
-      searchQuery
-    );
-
-    if (mounted.current !== true) {
-      return;
-    }
-
     try {
+      const timeRange = await getMinimumTimeRange(
+        index,
+        timeField,
+        additionalFilter,
+        minimumTimeRangeOption,
+        searchQuery
+      );
+
+      if (mounted.current !== true) {
+        return;
+      }
+
       const [validationResult, categorizationResult] = await Promise.all([
         runValidateFieldRequest(index, selectedField.name, timeField, timeRange, searchQuery, {
           [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
@@ -273,7 +271,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
           { to: timeRange.to, from: timeRange.from },
           searchQuery,
           intervalMs,
-          timeRange.useSubAgg ? tempAdditionalFilter : undefined
+          timeRange.useSubAgg ? additionalFilter : undefined
         ),
       ]);
       // eslint-disable-next-line no-console
@@ -309,11 +307,15 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         });
       }
     } catch (error) {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
-          defaultMessage: 'Error loading categories',
-        }),
-      });
+      if (error.name === 'AbortError') {
+        // ignore error
+      } else {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
+            defaultMessage: 'Error loading categories',
+          }),
+        });
+      }
     }
 
     if (mounted.current === true) {

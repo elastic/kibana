@@ -48,6 +48,7 @@ export function useMinimumTimeRange() {
         timeFieldName: timeField,
         query: queryIn,
         path: '/internal/file_upload/time_field_range',
+        signal: abortController.current.signal,
       });
 
       // the index isn't big enough to get a wider time range
