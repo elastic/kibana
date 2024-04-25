@@ -224,7 +224,7 @@ export class APMPlugin
       })
     );
 
-    plugins.observability.alertDetailsContextService.registerHandler(
+    plugins.observability.alertDetailsContextualInsightsService.registerHandler(
       async (requestContext, query) => {
         const resources = {
           getApmIndices: async () => {
