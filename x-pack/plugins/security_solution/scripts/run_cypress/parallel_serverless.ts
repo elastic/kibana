@@ -31,42 +31,9 @@ import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 
-interface ProductType {
-  product_line: string;
-  product_tier: string;
-}
-
-interface OverrideEntry {
-  docker_image: string;
-}
-
-interface ProductOverrides {
-  kibana?: OverrideEntry;
-  elasticsearch?: OverrideEntry;
-  fleet?: OverrideEntry;
-  cluster?: OverrideEntry;
-}
-
-interface CreateProjectRequestBody {
-  name: string;
-  region_id: string;
-  product_types?: ProductType[];
-  overrides?: ProductOverrides;
-}
-
-interface Project {
-  name: string;
-  id: string;
-  region: string;
-  es_url: string;
-  kb_url: string;
-  product: string;
-}
-
-interface Credentials {
-  username: string;
-  password: string;
-}
+import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
+import { CloudHandler } from './project_handler/cloud_project_handler';
+import { ProxyHandler } from './project_handler/proxy_project_handler';
 
 const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'security', product_tier: 'complete' },
@@ -74,7 +41,6 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'endpoint', product_tier: 'complete' },
 ] as const;
 
-const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 let log: ToolingLog;
@@ -99,165 +65,27 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   }
 };
 
-// Method to invoke the create project API for serverless.
-async function createSecurityProject(
-  projectName: string,
-  apiKey: string,
-  productTypes: ProductType[],
-  commit: string
-): Promise<Project | undefined> {
-  const body: CreateProjectRequestBody = {
-    name: projectName,
-    region_id: DEFAULT_REGION,
-    product_types: productTypes,
+// Check if proxy service is up and running executing a healthcheck call.
+function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
+  const fetchHealthcheck = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
+
+    const response = await axios.get(`${proxyUrl}/healthcheck`);
+    log.info(`The proxy service is available.`);
+    return response.status === 200;
   };
-
-  log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
-  if (
-    (process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
-      process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1') ||
-    commit
-  ) {
-    const override = commit ? commit : process.env.BUILDKITE_COMMIT;
-    const kibanaOverrideImage = `${override?.substring(0, 12)}`;
-    log.info(
-      `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
-    );
-    body.overrides = {
-      kibana: {
-        docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`,
-      },
-    };
-  }
-
-  try {
-    const response = await axios
-      .post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-        },
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-
-    log.verbose('Create Security Project response:\n', response);
-
-    return {
-      name: response.data.name,
-      id: response.data.id,
-      region: response.data.region_id,
-      es_url: `${response.data.endpoints.elasticsearch}:443`,
-      kb_url: `${response.data.endpoints.kibana}:443`,
-      product: response.data.type,
-    };
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      const errorData = JSON.stringify(error.response?.data);
-      log.error(`${error.response?.status}:${errorData}`);
-    } else {
-      log.error(`${error.message}`);
-    }
-  }
-}
-
-// Method to invoke the delete project API for serverless.
-async function deleteSecurityProject(
-  projectId: string,
-  projectName: string,
-  apiKey: string
-): Promise<void> {
-  try {
-    await axios
-      .delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-        },
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-    log.info(`Project ${projectName} was successfully deleted!`);
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      log.error(`${error.response?.status}:${error.response?.data}`);
-    } else {
-      log.error(`${error.message}`);
-    }
-  }
-}
-
-// Method to reset the credentials for the created project.
-async function resetCredentials(
-  projectId: string,
-  runnerId: string,
-  apiKey: string
-): Promise<Credentials | undefined> {
-  log.info(`${runnerId} : Reseting credentials`);
-
-  const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
-    const response = await axios
-      .post(
-        `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-internal-credentials`,
-        {},
-        {
-          headers: {
-            Authorization: `ApiKey ${apiKey}`,
-          },
-        }
-      )
-      .catch(catchAxiosErrorFormatAndThrow);
-    log.info('Credentials have ben reset');
-    log.verbose(response);
-    return {
-      password: response.data.password,
-      username: response.data.username,
-    };
-  };
-
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. A retry will be triggered soon..');
-      } else {
-        log.error(`${error.message}`);
+      if (error instanceof AxiosError) {
+        log.info(`The proxy service is not available. A retry will be triggered soon...`);
       }
     },
-    retries: 100,
+    retries: 4,
     factor: 2,
     maxTimeout: 20000,
   };
 
-  return pRetry(fetchResetCredentialsStatusAttempt, retryOptions);
-}
-
-// Wait until Project is initialized
-function waitForProjectInitialized(projectId: string, apiKey: string): Promise<void> {
-  const fetchProjectStatusAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-    const response = await axios
-      .get(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/status`, {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-        },
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-    if (response.data.phase !== 'initialized') {
-      log.info(response.data);
-      throw new Error(`Project not yet initialized [${response.data.phase}]. Retrying...`);
-    } else {
-      log.info('Project is initialized');
-    }
-  };
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. A retry will be triggered soon...');
-      } else {
-        log.error(`${error.message}`);
-      }
-    },
-    retries: 100,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-  return pRetry(fetchProjectStatusAttempt, retryOptions);
+  return pRetry(fetchHealthcheck, retryOptions);
 }
 
 // Wait until elasticsearch status goes green
@@ -426,9 +254,24 @@ export const cli = () => {
         return process.exit(1);
       }
 
+      const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
+      const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
+      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
+
       const API_KEY = process.env.CLOUD_QA_API_KEY
         ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
+
+      let cloudHandler: ProjectHandler;
+      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+        cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
+      } else if (API_KEY) {
+        cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
+      } else {
+        log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(1);
+      }
 
       const PARALLEL_COUNT = process.env.PARALLEL_COUNT ? Number(process.env.PARALLEL_COUNT) : 1;
 
@@ -437,7 +280,6 @@ export const cli = () => {
           'The cloud environment to be provided with the env var CLOUD_ENV. Currently working only for QA so the script can proceed.'
         );
         // Abort when more environments will be integrated
-
         // return process.exit(0);
       }
 
@@ -489,14 +331,14 @@ ${JSON.stringify(argv, null, 2)}
       const isOpen = argv._.includes('open');
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-      // KIBANA_MKI_USE_LATEST_COMMIT === 1 means that we are overriding the image for the periodic pipeline execution.
-      // We don't override the image when executing the tests on the second quality gate.
-      if (
-        !process.env.KIBANA_MKI_USE_LATEST_COMMIT ||
-        process.env.KIBANA_MKI_USE_LATEST_COMMIT !== '1'
-      ) {
-        cypressConfigFile.env.grepTags =
-          '@serverlessQA --@skipInServerless --@skipInServerlessMKI ';
+
+      // if KIBANA_MKI_QUALITY_GATE exists and has a value, it means that we are running the tests against the second
+      // quality gate.
+      if (process.env.KIBANA_MKI_QUALITY_GATE) {
+        log.info(
+          'KIBANA_MKI_QUALITY_GATE is provided, so @serverlessQA --@skipInServerless --@skipInServerlessMKI tags will run.'
+        );
+        cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless --@skipInServerlessMKI';
       }
 
       if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
@@ -587,17 +429,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
               log.info(`Running spec file: ${filePath}`);
-              if (!API_KEY) {
-                log.error('API KEY to create project could not be retrieved.');
-                // eslint-disable-next-line no-process-exit
-                return process.exit(1);
-              }
-
               log.info(`${id}: Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
-              const project = await createSecurityProject(
+              const project = await cloudHandler.createSecurityProject(
                 PROJECT_NAME,
-                API_KEY,
                 productTypes,
                 commit
               );
@@ -609,12 +444,15 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               }
 
               context.addCleanupTask(() => {
-                const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
-                exec(command);
+                let command: string;
+                if (cloudHandler instanceof CloudHandler) {
+                  command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+                  exec(command);
+                }
               });
 
               // Reset credentials for elastic user
-              const credentials = await resetCredentials(project.id, id, API_KEY);
+              const credentials = await cloudHandler.resetCredentials(project.id, id);
 
               if (!credentials) {
                 log.error('Credentials could not be reset.');
@@ -623,7 +461,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               }
 
               // Wait for project to be initialized
-              await waitForProjectInitialized(project.id, API_KEY);
+              await cloudHandler.waitForProjectInitialized(project.id);
 
               // Base64 encode the credentials in order to invoke ES and KB APIs
               const auth = btoa(`${credentials.username}:${credentials.password}`);
@@ -647,6 +485,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ELASTICSEARCH_URL: project.es_url,
                 ELASTICSEARCH_USERNAME: credentials.username,
                 ELASTICSEARCH_PASSWORD: credentials.password,
+
+                // Used in order to handle the correct role_users file loading.
+                PROXY_ORG: PROXY_URL ? project.proxy_org_name : undefined,
 
                 KIBANA_URL: project.kb_url,
                 KIBANA_USERNAME: credentials.username,
@@ -703,7 +544,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   }
                   // Delete serverless project
                   log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-                  await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
+                  await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
                 } catch (error) {
                   // False positive
                   // eslint-disable-next-line require-atomic-updates

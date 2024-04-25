@@ -26,6 +26,7 @@ import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
+import { useVirtualSearchResults } from './use_virtual_search_results';
 
 interface UseCaseOption {
   id: Category;
@@ -140,6 +141,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     createCollectionCardHandler,
     searchParams.get('category') as Category | null
   );
+  const virtualSearchResults = useVirtualSearchResults();
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -216,10 +218,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             setSearchQuery={setIntegrationSearch}
             flowCategory={searchParams.get('category')}
             ref={packageListRef}
-            customCards={customCards?.filter(
-              // Filter out collection cards and regular integrations that show up via search anyway
-              (card) => card.type === 'virtual' && !card.isCollectionCard
-            )}
+            customCards={customCards
+              ?.filter(
+                // Filter out collection cards and regular integrations that show up via search anyway
+                (card) => card.type === 'virtual' && !card.isCollectionCard
+              )
+              .concat(virtualSearchResults)}
             joinCardLists
           />
         </>
