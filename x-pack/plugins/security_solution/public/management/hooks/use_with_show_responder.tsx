@@ -7,19 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  TECHNICAL_PREVIEW,
-  TECHNICAL_PREVIEW_TOOLTIP,
-  UPGRADE_AGENT_FOR_RESPONDER,
-} from '../../common/translations';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
-import type { ImmutableArray } from '../../../common/endpoint/types';
-import {
-  type ConsoleResponseActionCommands,
-  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
-  type ResponseActionAgentType,
-} from '../../../common/endpoint/service/response_actions/constants';
-import { isResponseActionSupported } from '../../../common/endpoint/service/response_actions/is_response_action_supported';
+import type { MaybeImmutable } from '../../../common/endpoint/types';
+import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
+import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
 import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
@@ -39,16 +31,16 @@ type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 export interface BasicConsoleProps {
   agentId: string;
   hostName: string;
+  /** Required for Endpoint agents. */
+  capabilities: MaybeImmutable<EndpointCapabilities[]>;
 }
 
 type ResponderInfoProps =
   | (BasicConsoleProps & {
       agentType: Extract<ResponseActionAgentType, 'endpoint'>;
-      capabilities: ImmutableArray<string>;
     })
   | (BasicConsoleProps & {
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
-      capabilities: ImmutableArray<string>;
       platform: string;
     });
 
@@ -85,33 +77,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             endpointAgentId: agentId,
             endpointCapabilities: capabilities,
             endpointPrivileges,
-          }).map((command) => {
-            if (command.name !== 'status') {
-              return {
-                ...command,
-                helpHidden: !isResponseActionSupported(
-                  agentType,
-                  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
-                    command.name as ConsoleResponseActionCommands
-                  ],
-                  'manual',
-                  endpointPrivileges
-                ),
-              };
-            } else if (agentType !== 'endpoint') {
-              // do not show 'status' for non-endpoint agents
-              return {
-                ...command,
-                helpHidden: true,
-                validate: () => {
-                  return UPGRADE_AGENT_FOR_RESPONDER(
-                    agentType,
-                    command.name as ConsoleResponseActionCommands
-                  );
-                },
-              };
-            }
-            return command;
           }),
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
@@ -138,6 +103,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             meta: {
               agentId,
               hostName,
+              capabilities,
             },
             consoleProps,
             PageTitleComponent: () => {
