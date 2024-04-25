@@ -14,7 +14,8 @@ import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -113,9 +114,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
-    const I18nContext = this.services[0].i18n.Context;
-    const theme$ = this.services[0].theme.theme$;
-
+    const startServices = pick(this.services[0], 'analytics', 'i18n', 'theme');
     const datePickerDeps: DatePickerDependencies = {
       ...pick(this.services[0], ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       data: this.services[1].data,
@@ -124,36 +123,34 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
     };
 
     ReactDOM.render(
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              mlServices: {
-                ...this.services[2],
-              },
-              ...this.services[0],
-              ...this.services[1],
-            }}
-          >
-            <DatePickerContextProvider {...datePickerDeps}>
-              <Suspense fallback={<EmbeddableLoading />}>
-                <EmbeddableSingleMetricViewerContainer
-                  id={this.input.id}
-                  embeddableContext={this}
-                  embeddableInput$={this.getInput$()}
-                  services={this.services}
-                  refresh={this.reload$.asObservable()}
-                  onInputChange={this.updateInput.bind(this)}
-                  onOutputChange={this.updateOutput.bind(this)}
-                  onRenderComplete={this.onRenderComplete.bind(this)}
-                  onLoading={this.onLoading.bind(this)}
-                  onError={this.onError.bind(this)}
-                />
-              </Suspense>
-            </DatePickerContextProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>,
+      <KibanaRenderContextProvider {...startServices}>
+        <KibanaContextProvider
+          services={{
+            mlServices: {
+              ...this.services[2],
+            },
+            ...this.services[0],
+            ...this.services[1],
+          }}
+        >
+          <DatePickerContextProvider {...datePickerDeps}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <EmbeddableSingleMetricViewerContainer
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput$={this.getInput$()}
+                services={this.services}
+                refresh={this.reload$.asObservable()}
+                onInputChange={this.updateInput.bind(this)}
+                onOutputChange={this.updateOutput.bind(this)}
+                onRenderComplete={this.onRenderComplete.bind(this)}
+                onLoading={this.onLoading.bind(this)}
+                onError={this.onError.bind(this)}
+              />
+            </Suspense>
+          </DatePickerContextProvider>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>,
       node
     );
   }
