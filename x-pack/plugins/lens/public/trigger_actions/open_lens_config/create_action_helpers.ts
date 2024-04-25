@@ -98,7 +98,7 @@ export async function executeCreateAction({
     dataView,
   });
 
-  const embeddable = await api.addNewPanel<unknown, Embeddable>({
+  const embeddable = await api.addNewPanel<object, Embeddable>({
     panelType: 'lens',
     initialState: {
       attributes: attrs,

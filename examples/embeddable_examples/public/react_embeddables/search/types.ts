@@ -9,21 +9,16 @@
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
 import {
   HasParentApi,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesUnifiedSearch,
   PublishesWritableUnifiedSearch,
+  SerializedTimeRange,
 } from '@kbn/presentation-publishing';
 
-export interface SearchSerializedState {
-  /*
-   * Time range only applied to this embeddable, overrides parentApi.timeRange$
-   */
-  timeRange?: TimeRange | undefined;
-}
+export type SearchSerializedState = SerializedTimeRange;
 
 export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
   PublishesDataViews &
