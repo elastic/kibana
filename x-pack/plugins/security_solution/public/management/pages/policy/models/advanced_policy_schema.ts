@@ -660,6 +660,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.network_report_loopback',
+    first_supported_version: '8.14.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
+      {
+        defaultMessage:
+          'Controls the kernel whether to report loopback network events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.fileopen',
     first_supported_version: '7.9',
     documentation: i18n.translate(
