@@ -7,6 +7,7 @@
 
 export {
   brushSelectionUpdate,
+  cancel,
   clearSelection,
   setAnalysisType,
   setAutoRunAnalysis,
@@ -14,6 +15,7 @@ export {
   setIsBrushCleared,
   setStickyHistogram,
   setWindowParameters,
+  start,
   type BrushSelectionUpdatePayload,
 } from './log_rate_analysis_slice';
 export {
