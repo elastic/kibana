@@ -89,7 +89,7 @@ export const processVersionedRouter = (
   return { paths };
 };
 
-const extractVersionedRequestBody = (
+export const extractVersionedRequestBody = (
   route: VersionedRouterRoute,
   converter: OasConverter
 ): OpenAPIV3.RequestBodyObject['content'] => {
@@ -107,7 +107,7 @@ const extractVersionedRequestBody = (
   }, {});
 };
 
-const extractVersionedResponses = (
+export const extractVersionedResponses = (
   route: VersionedRouterRoute,
   converter: OasConverter
 ): OpenAPIV3.ResponsesObject => {

@@ -85,8 +85,8 @@ export const processRouter = (
   return { paths };
 };
 
-type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
-const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
+export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
+export const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
   const responses: OpenAPIV3.ResponsesObject = {};
   if (!route.validationSchemas) return responses;
   const fullConfig = getResponseValidation(route.validationSchemas);
