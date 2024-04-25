@@ -17,8 +17,10 @@ export interface AssetDocument extends Fields {
   'asset.first_seen': string;
   'asset.last_seen': string;
   'asset.identifying_metadata': string[];
-  'asset.has_logs'?: boolean;
-  'asset.has_traces'?: boolean;
+  'asset.signalTypes': {
+    'asset.traces'?: boolean;
+    'asset.logs'?: boolean;
+  };
 }
 
 export class Asset<F extends AssetDocument> extends Serializable<F> {}

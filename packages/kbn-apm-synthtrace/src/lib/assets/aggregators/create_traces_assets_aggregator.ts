@@ -6,38 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
-import { identity, noop } from 'lodash';
+import { ApmFields } from '@kbn/apm-synthtrace-client';
 import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
 
-export const createAssetsAggregator = createAssetsAggregatorFactory<ApmFields>();
-
-const KEY_FIELDS: Array<keyof ApmFields> = ['service.name'];
-
-export function createTracesAssetsAggregator() {
-  return createAssetsAggregator(
-    {
-      filter: (event) => event['processor.event'] === 'transaction',
-      getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
-        return hashKeysOf(event as ApmFields, KEY_FIELDS as Array<keyof ApmFields>);
-      },
-      init: (event, firstSeen, lastSeen) => {
-        return {
-          'asset.id': event['service.name'],
-          'asset.type': 'service',
-          'asset.identifying_metadata': ['service.name'],
-          'asset.has_traces': true,
-          'asset.first_seen': firstSeen,
-          'asset.last_seen': lastSeen,
-          'service.environment': event['service.environment'],
-          'service.name': event['service.name'],
-          'service.node.name': event['service.node.name'],
-          'service.language.name': event['service.language.name'],
-        };
-      },
-    },
-    noop,
-    identity
-  );
-}
+export const createTracesAssetsAggregator = createAssetsAggregatorFactory<ApmFields>();

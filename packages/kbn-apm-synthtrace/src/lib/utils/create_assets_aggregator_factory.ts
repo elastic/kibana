@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { appendHash, Fields } from '@kbn/apm-synthtrace-client';
+import { appendHash, AssetDocument, Fields } from '@kbn/apm-synthtrace-client';
 import { Duplex, PassThrough } from 'stream';
 
 export function createAssetsAggregatorFactory<TFields extends Fields>() {
-  return function <TAsset extends Record<string, any>, TOutput extends Record<string, any>>(
+  return function <TAsset extends AssetDocument>(
     {
       filter,
       getAggregateKey,
@@ -21,7 +21,7 @@ export function createAssetsAggregatorFactory<TFields extends Fields>() {
       init: (event: TFields, firstSeen: string, lastSeen: string) => TAsset;
     },
     reduce: (asset: TAsset, event: TFields) => void,
-    serialize: (asset: TAsset) => TOutput
+    serialize: (asset: TAsset) => TAsset
   ) {
     const assets: Map<string, TAsset> = new Map();
     let toFlush: TAsset[] = [];
