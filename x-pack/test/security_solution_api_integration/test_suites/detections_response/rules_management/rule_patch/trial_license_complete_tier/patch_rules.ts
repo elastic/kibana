@@ -41,7 +41,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for pulling kibana username, similar to getService('es')
@@ -655,54 +654,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.investigation_fields.field_names).to.eql(['blob', 'boop']);
         });
-      });
-    });
-
-    describe('max signals', () => {
-      afterEach(async () => {
-        await deleteAllRules(supertest, log);
-      });
-
-      it('should overwrite max_signals field on patch', async () => {
-        await createRule(supertest, log, {
-          ...getSimpleRule('rule-1'),
-          max_signals: 100,
-        });
-
-        const rulePatch = {
-          rule_id: 'rule-1',
-          max_signals: 200,
-        };
-
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: rulePatch,
-          })
-          .expect(200);
-
-        expect(body.max_signals).to.eql(200);
-      });
-
-      it('does NOT patch a rule when max_signals is less than 1', async () => {
-        await createRule(supertest, log, {
-          ...getSimpleRule('rule-1'),
-          max_signals: 100,
-        });
-
-        const rulePatch = {
-          rule_id: 'rule-1',
-          max_signals: 0,
-        };
-
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: rulePatch,
-          })
-          .expect(400);
-
-        expect(body.message).to.be(
-          '[request body]: max_signals: Number must be greater than or equal to 1'
-        );
       });
     });
 

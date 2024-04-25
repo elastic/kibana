@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -17,6 +17,7 @@ import {
   getSimpleMlRuleUpdate,
   getSimpleRule,
   updateUsername,
+  getCustomQueryRuleParams,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -61,7 +62,34 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
+      });
+
+      it('should update a rule with defaultable fields', async () => {
+        const expectedRule = getCustomQueryRuleParams({
+          rule_id: 'rule-1',
+          max_signals: 200,
+        });
+
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+        });
+
+        const { body: updatedRuleResponse } = await securitySolutionApi
+          .updateRule({
+            body: expectedRule,
+          })
+          .expect(200);
+
+        expect(updatedRuleResponse).toMatchObject(expectedRule);
+
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(updatedRule).toMatchObject(expectedRule);
       });
 
       it('@skipInServerless should return a 403 forbidden if it is a machine learning job', async () => {
@@ -75,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: updatedRule }).expect(403);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           message: 'Your license does not support machine learning. Please upgrade your license.',
           status_code: 403,
         });
@@ -100,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
@@ -120,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should change the revision of a rule when it updates enabled and another property', async () => {
@@ -140,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
@@ -165,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should give a 404 if it is given a fake id', async () => {
@@ -175,7 +203,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: simpleRule }).expect(404);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           status_code: 404,
           message: 'id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" not found',
         });
@@ -188,9 +216,56 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body } = await securitySolutionApi.updateRule({ body: simpleRule }).expect(404);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           status_code: 404,
           message: 'rule_id: "fake_id" not found',
+        });
+      });
+
+      describe('max signals', () => {
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should reset max_signals field to default value on update when not present', async () => {
+          const expectedRule = getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            max_signals: 100,
+          });
+
+          await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 200 }),
+          });
+
+          const { body: updatedRuleResponse } = await securitySolutionApi
+            .updateRule({
+              body: getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                max_signals: undefined,
+              }),
+            })
+            .expect(200);
+
+          expect(updatedRuleResponse).toMatchObject(expectedRule);
+        });
+
+        it('does NOT update a rule when max_signals is less than 1', async () => {
+          await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 100 }),
+          });
+
+          const { body } = await securitySolutionApi
+            .updateRule({
+              body: getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                max_signals: 0,
+              }),
+            })
+            .expect(400);
+
+          expect(body.message).toEqual(
+            '[request body]: max_signals: Number must be greater than or equal to 1'
+          );
         });
       });
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
@@ -16,6 +16,7 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
   getSimpleRuleOutput,
+  getCustomQueryRuleParams,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -65,7 +66,28 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(body);
         const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
+      });
+
+      it('should create a rule with defaultable fields', async () => {
+        const expectedRule = getCustomQueryRuleParams({
+          rule_id: 'rule-1',
+          max_signals: 200,
+        });
+
+        const { body: createdRuleResponse } = await securitySolutionApi
+          .createRule({ body: expectedRule })
+          .expect(200);
+
+        expect(createdRuleResponse).toMatchObject(expectedRule);
+
+        const { body: createdRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(createdRule).toMatchObject(expectedRule);
       });
 
       it('should create a single rule without an input index', async () => {
@@ -120,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
           ELASTICSEARCH_USERNAME
         );
 
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should create a single rule without a rule_id', async () => {
@@ -134,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
           ELASTICSEARCH_USERNAME
         );
 
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
@@ -144,9 +166,40 @@ export default ({ getService }: FtrProviderContext) => {
           .createRule({ body: getSimpleRule() })
           .expect(409);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           message: 'rule_id: "rule-1" already exists',
           status_code: 409,
+        });
+      });
+
+      describe('max_signals', () => {
+        beforeEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('creates a rule with max_signals defaulted to 100 when not present', async () => {
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: getCustomQueryRuleParams(),
+            })
+            .expect(200);
+
+          expect(body.max_signals).toEqual(100);
+        });
+
+        it('does NOT create a rule when max_signals is less than 1', async () => {
+          const { body } = await securitySolutionApi
+            .createRule({
+              body: {
+                ...getCustomQueryRuleParams(),
+                max_signals: 0,
+              },
+            })
+            .expect(400);
+
+          expect(body.message).toBe(
+            '[request body]: max_signals: Number must be greater than or equal to 1'
+          );
         });
       });
     });

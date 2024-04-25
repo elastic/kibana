@@ -758,62 +758,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('max signals', () => {
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-        });
-
-        it('should overwrite max_signals field on update', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            max_signals: 100,
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            max_signals: 200,
-          };
-
-          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
-
-          expect(body.max_signals).to.eql(200);
-        });
-
-        it('should reset max_signals field to default value on update when not present', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            max_signals: 200,
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            max_signals: undefined,
-          };
-
-          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
-
-          expect(body.max_signals).to.eql(100);
-        });
-
-        it('does NOT update a rule when max_signals is less than 1', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            max_signals: 100,
-          });
-
-          const ruleUpdate = {
-            ...getSimpleRuleUpdate('rule-1'),
-            max_signals: 0,
-          };
-
-          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(400);
-
-          expect(body.message).to.be(
-            '[request body]: max_signals: Number must be greater than or equal to 1'
-          );
-        });
-      });
-
       describe('setup guide', () => {
         it('should overwrite setup value on update', async () => {
           await createRule(supertest, log, {
