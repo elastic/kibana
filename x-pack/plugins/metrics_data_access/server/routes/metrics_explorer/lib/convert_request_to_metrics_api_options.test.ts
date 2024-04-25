@@ -83,6 +83,20 @@ describe('convertRequestToMetricsAPIOptions', () => {
     });
   });
 
+  it('should work with groupInstance arrays', () => {
+    expect(
+      convertRequestToMetricsAPIOptions({
+        ...BASE_REQUEST,
+        groupBy: ['host.name', 'cloud.availability_zone'],
+        groupInstance: ['host-1', 'cloud.availability_zone-1'],
+      })
+    ).toEqual({
+      ...BASE_METRICS_UI_OPTIONS,
+      groupBy: ['host.name', 'cloud.availability_zone'],
+      groupInstance: ['host-1', 'cloud.availability_zone-1'],
+    });
+  });
+
   it('should work with filterQuery json string', () => {
     const filter = { bool: { filter: [{ match: { 'host.name': 'example-01' } }] } };
     expect(

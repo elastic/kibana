@@ -20,7 +20,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
-import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  TAGS,
+} from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -33,6 +39,8 @@ import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explore
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricThresholdRuleTypeParams } from '..';
 import { ExpressionChart } from './expression_chart';
+import { Groups } from './groups';
+import { Tags } from './tags';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<
@@ -41,7 +49,18 @@ export type MetricThresholdRule = Rule<
     groupBy?: string | string[];
   }
 >;
-export type MetricThresholdAlert = TopAlert;
+
+interface Group {
+  field: string;
+  value: string;
+}
+
+interface MetricThresholdAlertField {
+  [ALERT_EVALUATION_VALUES]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
+}
+
+export type MetricThresholdAlert = TopAlert<MetricThresholdAlertField>;
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
@@ -63,6 +82,9 @@ export function AlertDetailsAppSection({
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceContext();
   const { euiTheme } = useEuiTheme();
+  const groupInstance = alert.fields[ALERT_GROUP]?.map((group: Group) => group.value);
+  const groups = alert.fields[ALERT_GROUP];
+  const tags = alert.fields[TAGS];
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
@@ -90,19 +112,36 @@ export function AlertDetailsAppSection({
     />,
   ];
   useEffect(() => {
-    setAlertSummaryFields([
-      {
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
-          defaultMessage: 'Rule',
+    const alertSummaryFields = [];
+    if (groups) {
+      alertSummaryFields.push({
+        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.source', {
+          defaultMessage: 'Source',
         }),
-        value: (
-          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
-            {rule.name}
-          </EuiLink>
-        ),
-      },
-    ]);
-  }, [rule, ruleLink, setAlertSummaryFields]);
+        value: <Groups groups={groups} />,
+      });
+    }
+    if (tags && tags.length > 0) {
+      alertSummaryFields.push({
+        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.tags', {
+          defaultMessage: 'Tags',
+        }),
+        value: <Tags tags={tags} />,
+      });
+    }
+    alertSummaryFields.push({
+      label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
+        defaultMessage: 'Rule',
+      }),
+      value: (
+        <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
+          {rule.name}
+        </EuiLink>
+      ),
+    });
+
+    setAlertSummaryFields(alertSummaryFields);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
@@ -153,6 +192,7 @@ export function AlertDetailsAppSection({
                   expression={criterion}
                   filterQuery={rule.params.filterQueryText}
                   groupBy={rule.params.groupBy}
+                  groupInstance={groupInstance}
                   hideTitle
                   source={source}
                   timeRange={timeRange}
