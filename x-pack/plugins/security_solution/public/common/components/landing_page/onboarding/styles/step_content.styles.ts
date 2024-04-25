@@ -83,6 +83,8 @@ export const useStepContentStyles = () => {
       euiTheme.size.s,
       euiTheme.size.xl,
       imageShadow,
+      descriptionHeader.fontSize,
+      descriptionHeader.lineHeight,
     ]
   );
 

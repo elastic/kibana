@@ -26,7 +26,7 @@ const FooterComponent = () => {
           <img src={item.icon} alt={item.title} height="64" width="64" />
           <EuiSpacer size="m" />
           <EuiTitle>
-            <h2 className={titleStyle}>{item.title}</h2>
+            <h3 className={titleStyle}>{item.title}</h3>
           </EuiTitle>
           <p className={descriptionStyle}>{item.description}</p>
           <EuiSpacer size="m" />
