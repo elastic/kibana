@@ -102,8 +102,8 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
-
+export type { AggregationType, ValidNormalizedTypes } from './common';
+export type { Comparator } from '../common/types';
 export {
   WhenExpression,
   OfExpression,
