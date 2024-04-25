@@ -131,10 +131,9 @@ paths:
           schema:
             type: string
           description: >-
-            An agent policy ID to scope the enrollment settings to, for example
-            that policy's fleet server host, its proxy, download location, etc.
-            If not provided, the default fleet server policy will be used (if
-            any).
+            An agent policy ID to scope the enrollment settings to. For example,
+            that policy's Fleet Server host, its proxy, download location, etc.
+            If not provided, the default Fleet Server policy is used (if any).
       responses:
         '200':
           description: OK
@@ -409,7 +408,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -571,7 +570,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
@@ -758,7 +757,7 @@ paths:
             type: boolean
             default: false
           description: >-
-            skip data stream rollover during index template mapping or settings
+            Skip data stream rollover during index template mapping or settings
             update
       requestBody:
         content:
