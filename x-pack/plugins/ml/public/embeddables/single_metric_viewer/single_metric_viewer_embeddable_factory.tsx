@@ -7,9 +7,9 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiResizeObserver } from '@elastic/eui';
@@ -20,7 +20,7 @@ import {
   apiHasExecutionContext,
   initializeTimeRange,
   initializeTitles,
-  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -132,8 +132,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
             mlTimeSeriesExplorerService,
             toastNotificationService,
           } = services[2];
-          const I18nContext = services[0].i18n.Context;
-          const theme = services[0].theme;
+          const startServices = pick(services[0], 'analytics', 'i18n', 'theme');
           const datePickerDeps: DatePickerDependencies = {
             ...pick(services[0], ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
             data: services[1].data,
@@ -145,8 +144,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
-          const [{ singleMetricViewerData, bounds, lastRefresh }, error] =
-            useBatchedPublishingSubjects(singleMetricViewerData$, blockingError);
+          const { singleMetricViewerData, bounds, lastRefresh } =
+            useStateFromPublishingSubject(singleMetricViewerData$);
 
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
@@ -252,63 +251,61 @@ export const getSingleMetricViewerEmbeddableFactory = (
           );
 
           return (
-            <I18nContext>
-              <KibanaThemeProvider theme={theme}>
-                <KibanaContextProvider
-                  services={{
-                    mlServices: {
-                      ...services[2],
-                    },
-                    ...services[0],
-                    ...services[1],
-                  }}
-                >
-                  <DatePickerContextProvider {...datePickerDeps}>
-                    <EuiResizeObserver onResize={resizeHandler}>
-                      {(resizeRef) => (
-                        <div
-                          id={`mlSingleMetricViewerEmbeddableWrapper-${api.uuid}`}
-                          style={{
-                            width: '100%',
-                            overflowY: 'auto',
-                            overflowX: 'hidden',
-                            padding: '8px',
-                          }}
-                          data-test-subj={`mlSingleMetricViewer_${api.uuid}`}
-                          ref={resizeRef}
-                          className="ml-time-series-explorer"
-                        >
-                          {singleMetricViewerData !== undefined &&
-                            autoZoomDuration !== undefined &&
-                            jobsLoaded && (
-                              <TimeSeriesExplorerEmbeddableChart
-                                chartWidth={chartWidth - containerPadding}
-                                dataViewsService={services[1].data.dataViews}
-                                toastNotificationService={toastNotificationService}
-                                appStateHandler={appStateHandler}
-                                autoZoomDuration={autoZoomDuration}
-                                bounds={bounds}
-                                dateFormatTz={moment.tz.guess()}
-                                lastRefresh={lastRefresh ?? 0}
-                                previousRefresh={previousRefresh}
-                                selectedJobId={selectedJobId}
-                                selectedDetectorIndex={singleMetricViewerData.selectedDetectorIndex}
-                                selectedEntities={singleMetricViewerData.selectedEntities}
-                                selectedForecastId={selectedForecastId}
-                                tableInterval="auto"
-                                tableSeverity={0}
-                                zoom={zoom}
-                                functionDescription={functionDescription}
-                                selectedJob={selectedJob}
-                              />
-                            )}
-                        </div>
-                      )}
-                    </EuiResizeObserver>
-                  </DatePickerContextProvider>
-                </KibanaContextProvider>
-              </KibanaThemeProvider>
-            </I18nContext>
+            <KibanaRenderContextProvider {...startServices}>
+              <KibanaContextProvider
+                services={{
+                  mlServices: {
+                    ...services[2],
+                  },
+                  ...services[0],
+                  ...services[1],
+                }}
+              >
+                <DatePickerContextProvider {...datePickerDeps}>
+                  <EuiResizeObserver onResize={resizeHandler}>
+                    {(resizeRef) => (
+                      <div
+                        id={`mlSingleMetricViewerEmbeddableWrapper-${api.uuid}`}
+                        style={{
+                          width: '100%',
+                          overflowY: 'auto',
+                          overflowX: 'hidden',
+                          padding: '8px',
+                        }}
+                        data-test-subj={`mlSingleMetricViewer_${api.uuid}`}
+                        ref={resizeRef}
+                        className="ml-time-series-explorer"
+                      >
+                        {singleMetricViewerData !== undefined &&
+                          autoZoomDuration !== undefined &&
+                          jobsLoaded && (
+                            <TimeSeriesExplorerEmbeddableChart
+                              chartWidth={chartWidth - containerPadding}
+                              dataViewsService={services[1].data.dataViews}
+                              toastNotificationService={toastNotificationService}
+                              appStateHandler={appStateHandler}
+                              autoZoomDuration={autoZoomDuration}
+                              bounds={bounds}
+                              dateFormatTz={moment.tz.guess()}
+                              lastRefresh={lastRefresh ?? 0}
+                              previousRefresh={previousRefresh}
+                              selectedJobId={selectedJobId}
+                              selectedDetectorIndex={singleMetricViewerData.selectedDetectorIndex}
+                              selectedEntities={singleMetricViewerData.selectedEntities}
+                              selectedForecastId={selectedForecastId}
+                              tableInterval="auto"
+                              tableSeverity={0}
+                              zoom={zoom}
+                              functionDescription={functionDescription}
+                              selectedJob={selectedJob}
+                            />
+                          )}
+                      </div>
+                    )}
+                  </EuiResizeObserver>
+                </DatePickerContextProvider>
+              </KibanaContextProvider>
+            </KibanaRenderContextProvider>
           );
         },
       };
