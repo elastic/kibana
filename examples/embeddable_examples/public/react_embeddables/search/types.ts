@@ -18,14 +18,14 @@ import {
   PublishesWritableUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
-export interface State {
+export interface SearchSerializedState {
   /*
    * Time range only applied to this embeddable, overrides parentApi.timeRange$
    */
-  timeRange: TimeRange | undefined;
+  timeRange?: TimeRange | undefined;
 }
 
-export type Api = DefaultEmbeddableApi<State> &
+export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
   PublishesDataViews &
   PublishesDataLoading &
   Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'> &

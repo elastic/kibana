@@ -69,14 +69,8 @@ export interface AnomalySwimlaneEmbeddableUserInput {
 
 export interface AnomalySwimlaneEmbeddableCustomInput
   extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
   perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
+  timeRange?: TimeRange | undefined;
 }
 
 export interface AnomalySwimlaneServices {
@@ -89,16 +83,6 @@ export type AnomalySwimlaneEmbeddableServices = [
   MlDependencies,
   AnomalySwimlaneServices
 ];
-
-export interface AnomalySwimlaneEmbeddableCustomOutput {
-  perPage?: number;
-  fromPage?: number;
-  interval?: number;
-  indexPatterns: DataView[];
-}
-
-export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
-  AnomalySwimlaneEmbeddableCustomOutput;
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
   Partial<HasParentApi<PublishesUnifiedSearch>>;

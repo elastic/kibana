@@ -87,9 +87,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
     AnomalySwimLaneEmbeddableApi
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-    deserializeState: (state) => {
-      return state.rawState as AnomalySwimLaneEmbeddableState;
-    },
+    deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
