@@ -502,50 +502,52 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         <EuiFlexGroup direction="column">
           <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={filterByFieldTypeButton}
-                isOpen={isFilterByPopoverVisible}
-                closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
-                anchorPosition="downCenter"
-                data-test-subj="indexDetailsMappingsFilter"
-              >
-                <EuiSelectable
-                  searchable
-                  data-test-subj="filterItem"
-                  searchProps={{
-                    placeholder: i18n.translate(
-                      'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.searchPlaceholder',
-                      {
-                        defaultMessage: 'Filter list ',
-                      }
-                    ),
-                  }}
-                  options={
-                    !isAddingFields
-                      ? state.filter.selectedOptions
-                      : previousState.filter.selectedOptions
-                  }
-                  onChange={(options) => {
-                    if (!isAddingFields) {
-                      setSelectedOptions(options);
-                    } else {
-                      setPreviousStateSelectedOptions(options);
-                    }
-                  }}
+              <EuiFilterGroup>
+                <EuiPopover
+                  button={filterByFieldTypeButton}
+                  isOpen={isFilterByPopoverVisible}
+                  closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
+                  anchorPosition="downCenter"
+                  data-test-subj="indexDetailsMappingsFilter"
                 >
-                  {(list, search) => (
-                    <div style={{ width: 200 }}>
-                      <EuiPopoverTitle
-                        paddingSize="s"
-                        data-test-subj="indexDetailsMappingsFilterByFieldTypeSearch"
-                      >
-                        {search}
-                      </EuiPopoverTitle>
-                      {list}
-                    </div>
-                  )}
-                </EuiSelectable>
-              </EuiPopover>
+                  <EuiSelectable
+                    searchable
+                    data-test-subj="filterItem"
+                    searchProps={{
+                      placeholder: i18n.translate(
+                        'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.searchPlaceholder',
+                        {
+                          defaultMessage: 'Filter list ',
+                        }
+                      ),
+                    }}
+                    options={
+                      !isAddingFields
+                        ? state.filter.selectedOptions
+                        : previousState.filter.selectedOptions
+                    }
+                    onChange={(options) => {
+                      if (!isAddingFields) {
+                        setSelectedOptions(options);
+                      } else {
+                        setPreviousStateSelectedOptions(options);
+                      }
+                    }}
+                  >
+                    {(list, search) => (
+                      <div style={{ width: 200 }}>
+                        <EuiPopoverTitle
+                          paddingSize="s"
+                          data-test-subj="indexDetailsMappingsFilterByFieldTypeSearch"
+                        >
+                          {search}
+                        </EuiPopoverTitle>
+                        {list}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
             </EuiFlexItem>
             <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
             {!index.hidden && (
