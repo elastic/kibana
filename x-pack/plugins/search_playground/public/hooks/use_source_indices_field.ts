@@ -88,6 +88,8 @@ export const useSourceIndicesFields = () => {
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
+    } else {
+      setNoFieldsIndicesWarning(null);
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
