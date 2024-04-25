@@ -68,7 +68,12 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
       gutterSize="s"
       data-test-subj="unifiedDocViewLogsOverviewMessage"
     >
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
+      <EuiFlexGroup
+        alignItems="flexEnd"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
         <EuiText color="subdued" size="xs">
           {field}
         </EuiText>

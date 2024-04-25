@@ -90,5 +90,5 @@ export function HighlightSection({
 
 // Applying this custom css rule remove the need for custom runtime js to compute a responsive column layout
 const gridStyle = css`
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 `;
