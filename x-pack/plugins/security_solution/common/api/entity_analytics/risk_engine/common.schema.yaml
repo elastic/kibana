@@ -33,12 +33,20 @@ components:
 
     Filter:
       description: An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
-      $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
+      # $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
 
     PageSize:
       description: Specifies how many scores will be involved in a given calculation. Note that this value is per `identifier_type`, i.e. a value of 10 will calculate 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
       default: 1000
       type: number
+
+    KibanaDate:
+      type: string
+      # oneOf:
+      #   - format: date
+      #   - format: date-time
+      #   - format: datemath
+      example: '2017-07-21T17:32:28Z'
 
     DateRange:
       description: Defines the time period on which risk inputs will be filtered.
@@ -52,19 +60,43 @@ components:
         end:
           $ref: '#/components/schemas/KibanaDate'
 
-    KibanaDate:
-      type: string
-      oneOf:
-        - format: date
-        - format: date-time
-        - format: datemath
-      example: '2017-07-21T17:32:28Z'
-
     IdentifierType:
       type: string
       enum:
         - host
         - user
+
+    RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          description: The unique identifier (`_id`) of the original source document
+        index:
+          type: string
+          example: .internal.alerts-security.alerts-default-000001
+          description: The unique index (`_index`) of the original source document
+        category:
+          type: string
+          example: category_1
+          description: The risk category of the risk input document.
+        description:
+          type: string
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          description: A human-readable description of the risk input document.
+        risk_score:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: The weighted risk score of the risk input document.
+        timestamp:
+          type: string
+          example: '2017-07-21T17:32:28Z'
+          description: The @timestamp of the risk input document.
+
 
     RiskScore:
       type: object
@@ -135,37 +167,6 @@ components:
           description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
-
-    RiskScoreInput:
-      description: A generic representation of a document contributing to a Risk Score.
-      type: object
-      properties:
-        id:
-          type: string
-          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
-          description: The unique identifier (`_id`) of the original source document
-        index:
-          type: string
-          example: .internal.alerts-security.alerts-default-000001
-          description: The unique index (`_index`) of the original source document
-        category:
-          type: string
-          example: category_1
-          description: The risk category of the risk input document.
-        description:
-          type: string
-          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
-          description: A human-readable description of the risk input document.
-        risk_score:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 100
-          description: The weighted risk score of the risk input document.
-        timestamp:
-          type: string
-          example: '2017-07-21T17:32:28Z'
-          description: The @timestamp of the risk input document.
 
     RiskScoreWeight:
       description: "Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1')."
