@@ -101,7 +101,6 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async openForecastTab(jobId: string) {
-      await jobTable.ensureDetailsOpen(jobId);
       await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
       await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
     },
