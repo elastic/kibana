@@ -110,7 +110,10 @@ export function Dashboards() {
       viewMode: ViewMode.VIEW,
       timeRange: { from: dateRange.from, to: dateRange.to },
     });
-    return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
+    return Promise.resolve<DashboardCreationOptions>({
+      getInitialInput,
+      useControlGroupIntegration: true,
+    });
   }, [dateRange.from, dateRange.to]);
 
   useEffect(() => {

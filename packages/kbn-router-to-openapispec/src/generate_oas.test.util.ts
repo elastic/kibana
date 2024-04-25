@@ -79,7 +79,12 @@ const getVersionedRouterDefaults = () => ({
       fn: jest.fn(),
       options: {
         validate: {
-          request: { body: schema.object({ foo: schema.string() }) },
+          request: {
+            body: schema.object({
+              foo: schema.string(),
+              deprecatedFoo: schema.maybe(schema.string({ meta: { deprecated: true } })),
+            }),
+          },
           response: {
             [200]: { body: () => schema.object({ fooResponse: schema.string() }) },
           },
