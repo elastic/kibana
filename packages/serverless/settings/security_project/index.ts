@@ -7,8 +7,10 @@
  */
 
 import * as settings from '@kbn/management-settings-ids';
+import * as discoverSettings from '@kbn/discover-utils';
 
 export const SECURITY_PROJECT_SETTINGS = [
+  discoverSettings.ENABLE_ESQL,
   settings.ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID,
   settings.ML_ANOMALY_DETECTION_RESULTS_TIME_DEFAULTS_ID,
   settings.SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID,
