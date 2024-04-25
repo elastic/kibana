@@ -826,7 +826,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             const downloadUrl = s1ActivityDoc?.sentinel_one.activity.data.downloaded.url ?? '';
             const error = !downloadUrl
               ? {
-                  message: `File retrieval failed (No download URL defined in SentinelOne activity log id [${activityLogEntryId}]`,
+                  message: `File retrieval failed (No download URL defined in SentinelOne activity log id [${activityLogEntryId}])`,
                 }
               : undefined;
 

@@ -27,11 +27,16 @@ import type {
   LogsEndpointActionResponse,
   SentinelOneActivityEsDoc,
   SentinelOneIsolationRequestMeta,
+  SentinelOneActivityDataForType80,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  SentinelOneGetFileRequestMeta,
 } from '../../../../../../common/endpoint/types';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
 import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -509,7 +514,7 @@ describe('SentinelOneActionsClient class', () => {
               ],
             },
           },
-          size: 1000,
+          size: ACTIONS_SEARCH_PAGE_SIZE,
           sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
         });
       });
@@ -549,10 +554,124 @@ describe('SentinelOneActionsClient class', () => {
               ],
             },
           },
-          size: 1000,
+          size: ACTIONS_SEARCH_PAGE_SIZE,
           sort: [{ 'sentinel_one.activity.updated_at': { order: 'asc' } }],
         });
       });
+    });
+
+    describe('for Get File', () => {
+      let s1ActivityHits: Array<
+        SearchHit<SentinelOneActivityEsDoc<SentinelOneActivityDataForType80>>
+      >;
+
+      beforeEach(() => {
+        const s1DataGenerator = new SentinelOneDataGenerator('seed');
+        const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateActionEsHit<
+            ResponseActionGetFileParameters,
+            ResponseActionGetFileOutputContent,
+            SentinelOneGetFileRequestMeta
+          >({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: { data: { command: 'get-file' } },
+            meta: {
+              agentId: 's1-agent-a',
+              agentUUID: 'agent-uuid-1',
+              hostName: 's1-host-name',
+              commandBatchUuid: 'batch-111',
+              activityId: 'activity-222',
+            },
+          }),
+        ]);
+        const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+          LogsEndpointActionResponse | EndpointActionResponse
+        >([]);
+        const s1ActivitySearchResponse = s1DataGenerator.generateActivityEsSearchResponse([
+          s1DataGenerator.generateActivityEsSearchHit<SentinelOneActivityDataForType80>({
+            sentinel_one: {
+              activity: {
+                id: 'activity-222',
+                data: s1DataGenerator.generateActivityFetchFileResponseData({
+                  flattened: {
+                    commandBatchUuid: 'batch-111',
+                  },
+                }),
+                agent: {
+                  id: 's1-agent-a',
+                },
+                type: 80,
+              },
+            },
+          }),
+        ]);
+
+        s1ActivityHits = s1ActivitySearchResponse.hits.hits;
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: actionRequestsSearchResponse,
+          pitUsage: true,
+        });
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          response: actionResponsesSearchResponse,
+        });
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          response: s1ActivitySearchResponse,
+        });
+      });
+
+      it('should search for S1 activity with correct query', async () => {
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(classConstructorOptions.esClient.search).toHaveBeenNthCalledWith(4, {
+          index: SENTINEL_ONE_ACTIVITY_INDEX,
+          size: ACTIONS_SEARCH_PAGE_SIZE,
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              must: [
+                {
+                  term: {
+                    'sentinel_one.activity.type': 80,
+                  },
+                },
+              ],
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          'sentinel_one.activity.agent.id': 's1-agent-a',
+                        },
+                      },
+                      {
+                        term: {
+                          'sentinel_one.activity.data.flattened.commandBatchUuid': 'batch-111',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        });
+      });
+
+      it.todo(
+        'should complete action as a failure if no S1 agentId/commandBatchUuid present in action request doc'
+      );
+
+      it.todo('should generate an action response doc');
     });
   });
 
