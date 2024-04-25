@@ -63,6 +63,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
   /** {@inheritDoc SavedObjectsClientContract.create} */
   async create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) {
+    console.log(JSON.stringify({ type, attributes, options }, null, 2));
     return await this._repository.create(type, attributes, options);
   }
 

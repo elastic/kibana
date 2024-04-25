@@ -95,16 +95,21 @@ class DownloadSourceService {
       data.source_id = options?.id;
     }
 
-    const newSo = await soClient.create<DownloadSourceSOAttributes>(
-      DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-      data,
-      {
-        id: options?.id,
-        overwrite: options?.overwrite ?? false,
-      }
-    );
-    logger.debug(`Creating new download source ${options?.id}`);
-    return savedObjectToDownloadSource(newSo);
+    try {
+      const newSo = await soClient.create<DownloadSourceSOAttributes>(
+        DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+        data,
+        {
+          id: options?.id,
+          overwrite: options?.overwrite ?? false,
+        }
+      );
+      logger.debug(`Creating new download source ${options?.id}`);
+      return savedObjectToDownloadSource(newSo);
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+      throw err;
+    }
   }
 
   public async update(

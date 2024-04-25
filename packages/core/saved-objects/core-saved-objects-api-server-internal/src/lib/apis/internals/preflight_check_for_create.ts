@@ -107,6 +107,7 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
  * @internal
  */
 export async function preflightCheckForCreate(params: PreflightCheckForCreateParams) {
+  console.log('running preflightCheckForCreate');
   const { registry, client, serializer, getIndexForType, createPointInTimeFinder, objects } =
     params;
 
@@ -189,6 +190,8 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
       results.push({ type, id, existingDocument });
     }
   }
+
+  console.log(JSON.stringify(results, null, 2));
   return results;
 }
 

@@ -80,6 +80,7 @@ export const performCreate = async <T>(
   if (registry.isSingleNamespace(type)) {
     savedObjectNamespace = initialNamespaces ? normalizeNamespace(initialNamespaces[0]) : namespace;
   } else if (registry.isMultiNamespace(type)) {
+    console.log('Registry is multi-namespace');
     if (options.id) {
       // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
       // note: this check throws an error if the object is found but does not exist in this namespace
