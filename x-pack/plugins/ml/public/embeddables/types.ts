@@ -69,8 +69,14 @@ export interface AnomalySwimlaneEmbeddableUserInput {
 
 export interface AnomalySwimlaneEmbeddableCustomInput
   extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
+  id?: string;
   perPage?: number;
-  timeRange?: TimeRange | undefined;
+
+  // Embeddable inputs which are not included in the default interface
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange: TimeRange | undefined;
 }
 
 export interface AnomalySwimlaneServices {

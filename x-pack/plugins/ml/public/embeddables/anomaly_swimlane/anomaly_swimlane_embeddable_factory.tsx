@@ -42,7 +42,11 @@ import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddab
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import type {
+  AnomalySwimLaneEmbeddableApi,
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimlaneRuntimeState,
+} from './types';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -84,7 +88,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     AnomalySwimLaneEmbeddableState,
-    AnomalySwimLaneEmbeddableApi
+    AnomalySwimLaneEmbeddableApi,
+    AnomalySwimlaneRuntimeState
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,
@@ -152,6 +157,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           serializeState: () => {
             return {
               rawState: {
+                timeRange: undefined,
                 ...serializeTitles(),
                 ...serializeTimeRange(),
                 ...serializeSwimLaneState(),
