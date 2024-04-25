@@ -16,7 +16,7 @@ describe('useAlertSuppression', () => {
       .mockReturnValue(false);
   });
 
-  (['new_terms', 'threat_match', 'saved_query', 'query', 'threshold'] as Type[]).forEach(
+  (['new_terms', 'threat_match', 'saved_query', 'query', 'threshold', 'eql'] as Type[]).forEach(
     (ruleType) => {
       it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
         const { result } = renderHook(() => useAlertSuppression(ruleType));
