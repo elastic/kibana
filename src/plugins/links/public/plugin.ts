@@ -17,6 +17,7 @@ import {
   EmbeddableStart,
   registerReactEmbeddableFactory,
   registerEmbeddablePlacementStrategy,
+  registerReactEmbeddableSavedObject,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -103,6 +104,20 @@ export class LinksPlugin
     setKibanaServices(core, plugins);
     untilPluginStartServicesReady().then(() => {
       registerCreateLinksPanelAction();
+
+      registerReactEmbeddableSavedObject({
+        onAdd: (container, savedObject) => {
+          container.addNewPanel({
+            panelType: CONTENT_ID,
+            initialState: { savedObjectId: savedObject.id },
+          });
+        },
+        embeddableType: CONTENT_ID,
+        savedObjectType: CONTENT_ID,
+        savedObjectName: APP_NAME,
+        getIconForSavedObject: () => APP_ICON,
+      });
+
       registerEmbeddablePlacementStrategy(CONTENT_ID, (serializedState: LinksSerializedState) => {
         if (!serializedState) return {};
         const isHorizontal = serializedState.attributes?.layout === 'horizontal';
@@ -110,6 +125,7 @@ export class LinksPlugin
         const height = isHorizontal ? 4 : (serializedState.attributes?.links?.length ?? 1 * 3) + 4;
         return { width, height, strategy: 'placeAtTop' };
       });
+
       registerReactEmbeddableFactory(CONTENT_ID, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
