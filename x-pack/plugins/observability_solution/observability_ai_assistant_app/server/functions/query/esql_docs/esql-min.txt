@@ -1,7 +1,20 @@
 MIN
 
-The minimum value of a numeric field.
+Syntax
+MIN(expression)
+Parameters
+expression
+Expression from which to return the minimum value.
+DescriptionReturns the minimum value of a numeric expression.Example
 ```esql
 FROM employees
 | STATS MIN(languages)
+```
+
+The expression can use inline functions. For example, to calculate the minimum
+over an average of a multivalued column, use MV_AVG to first average the
+multiple values per row, and use the result with the MIN function:
+```esql
+FROM employees
+| STATS min_avg_salary_change = MIN(MV_AVG(salary_change))
 ```

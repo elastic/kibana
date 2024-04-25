@@ -18,7 +18,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
 import { Api, Services, SearchSerializedState } from './types';
@@ -58,8 +58,14 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       const error$ = new BehaviorSubject<Error | undefined>(undefined);
       const count$ = new BehaviorSubject<number>(0);
+      let prevRequestAbortController: AbortController | undefined;
       const fetchSubscription = fetch$(api)
         .pipe(
+          tap(() => {
+            if (prevRequestAbortController) {
+              prevRequestAbortController.abort();
+            }
+          }),
           switchMap(async (fetchContext) => {
             error$.next(undefined);
             if (!defaultDataView) {
@@ -68,6 +74,8 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
             try {
               dataLoading$.next(true);
+              const abortController = new AbortController();
+              prevRequestAbortController = abortController;
               const count = await getCount(
                 defaultDataView,
                 services.data,
@@ -82,11 +90,13 @@ export const getSearchEmbeddableFactory = (services: Services) => {
                       to: new Date(fetchContext.timeslice[1]).toISOString(),
                       mode: 'absolute' as 'absolute',
                     }
-                  : fetchContext.timeRange
+                  : fetchContext.timeRange,
+                abortController.signal,
+                fetchContext.searchSessionId
               );
               return { count };
             } catch (error) {
-              return { error };
+              return error.name === 'AbortError' ? undefined : { error };
             }
           })
         )

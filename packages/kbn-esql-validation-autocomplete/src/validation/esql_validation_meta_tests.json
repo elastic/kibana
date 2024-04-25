@@ -33,8 +33,16 @@
       "type": "cartesian_point"
     },
     {
+      "name": "cartesianShapeField",
+      "type": "cartesian_shape"
+    },
+    {
       "name": "geoPointField",
       "type": "geo_point"
+    },
+    {
+      "name": "geoShapeField",
+      "type": "geo_shape"
     },
     {
       "name": "any#Char$Field",
@@ -804,22 +812,52 @@
       "warning": []
     },
     {
-      "query": "row var = auto_bucket(now(), 5, \"a\", \"a\")",
+      "query": "row var = bucket(now(), 5, \"a\", \"a\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row auto_bucket(now(), 5, \"a\", \"a\")",
+      "query": "row bucket(now(), 5, \"a\", \"a\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row var = auto_bucket(now(), 5, 5, 5)",
+      "query": "row var = bucket(now(), 5, now(), now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "row auto_bucket(now(), 5, 5, 5)",
+      "query": "row bucket(now(), 5, now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = bucket(now(), 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bucket(now(), 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = bucket(now(), 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bucket(now(), 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = bucket(5, 5, 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bucket(5, 5, 5, 5)",
       "error": [],
       "warning": []
     },
@@ -1371,6 +1409,16 @@
       "warning": []
     },
     {
+      "query": "row var = mv_slice(\"a\", 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_slice(\"a\", 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sort(\"a\", \"asc\")",
       "error": [],
       "warning": []
@@ -1399,6 +1447,30 @@
       "query": "row var = mv_sum(\"a\")",
       "error": [
         "Argument of [mv_sum] must be [number], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(\"a\", \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_zip(\"a\", \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(to_string(\"a\"), to_string(\"a\"), to_string(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(5, 5, 5)",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [5] type [number]",
+        "Argument of [mv_zip] must be [string], found value [5] type [number]",
+        "Argument of [mv_zip] must be [string], found value [5] type [number]"
       ],
       "warning": []
     },
@@ -1558,6 +1630,28 @@
       "warning": []
     },
     {
+      "query": "row var = signum(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row signum(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = signum(to_integer(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = signum(\"a\")",
+      "error": [
+        "Argument of [signum] must be [number], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = sin(5)",
       "error": [],
       "warning": []
@@ -1643,6 +1737,830 @@
       "query": "row var = sqrt(\"a\")",
       "error": [
         "Argument of [sqrt] must be [number], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_within(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_within(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_x(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_x(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_x(to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_x(\"a\")",
+      "error": [
+        "Argument of [st_x] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_x(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_x(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_x(to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_x(\"a\")",
+      "error": [
+        "Argument of [st_x] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_y(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(\"a\")",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_y(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(\"a\")",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -2060,10 +2978,41 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" > 0",
+      "query": "row var = to_ip(\"127.0.0.1\") > to_ip(\"127.0.0.1\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() > now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = false > false",
       "error": [
-        "Argument of [>] must be [number], found value [\"a\"] type [string]"
+        "Argument of [>] must be [number], found value [false] type [boolean]",
+        "Argument of [>] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" > now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" > 42",
+      "error": [],
       "warning": []
     },
     {
@@ -2089,10 +3038,41 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" >= 0",
+      "query": "row var = to_ip(\"127.0.0.1\") >= to_ip(\"127.0.0.1\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() >= now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = false >= false",
       "error": [
-        "Argument of [>=] must be [number], found value [\"a\"] type [string]"
+        "Argument of [>=] must be [number], found value [false] type [boolean]",
+        "Argument of [>=] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" >= now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" >= 42",
+      "error": [],
       "warning": []
     },
     {
@@ -2118,10 +3098,41 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" < 0",
+      "query": "row var = to_ip(\"127.0.0.1\") < to_ip(\"127.0.0.1\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() < now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = false < false",
       "error": [
-        "Argument of [<] must be [number], found value [\"a\"] type [string]"
+        "Argument of [<] must be [number], found value [false] type [boolean]",
+        "Argument of [<] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" < now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" < 42",
+      "error": [],
       "warning": []
     },
     {
@@ -2147,10 +3158,41 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" <= 0",
+      "query": "row var = to_ip(\"127.0.0.1\") <= to_ip(\"127.0.0.1\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() <= now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = false <= false",
       "error": [
-        "Argument of [<=] must be [number], found value [\"a\"] type [string]"
+        "Argument of [<=] must be [number], found value [false] type [boolean]",
+        "Argument of [<=] must be [number], found value [false] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" <= now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" <= 42",
+      "error": [],
       "warning": []
     },
     {
@@ -2176,10 +3218,95 @@
       "warning": []
     },
     {
-      "query": "row var = \"a\" == 0",
+      "query": "row var = to_ip(\"127.0.0.1\") == to_ip(\"127.0.0.1\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() == now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = false == false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" == now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" == 42",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 5 != 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = NOT 5 != 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = (numberField != 0)",
       "error": [
-        "Argument of [==] must be [number], found value [\"a\"] type [string]"
+        "Unknown column [numberField]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = (NOT (5 != 0))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = to_ip(\"127.0.0.1\") != to_ip(\"127.0.0.1\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() != now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = false != false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" != now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = 42 != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = \"2022\" != 42",
+      "error": [],
       "warning": []
     },
     {
@@ -2193,6 +3320,13 @@
       "warning": []
     },
     {
+      "query": "row var = now() + now()",
+      "error": [
+        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = 1 - 1",
       "error": [],
       "warning": []
@@ -2200,6 +3334,13 @@
     {
       "query": "row var = (5 - 1)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - now()",
+      "error": [
+        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -2213,6 +3354,14 @@
       "warning": []
     },
     {
+      "query": "row var = now() * now()",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = 1 / 1",
       "error": [],
       "warning": []
@@ -2223,6 +3372,14 @@
       "warning": []
     },
     {
+      "query": "row var = now() / now()",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = 1 % 1",
       "error": [],
       "warning": []
@@ -2230,6 +3387,14 @@
     {
       "query": "row var = (5 % 1)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() % now()",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -4240,9 +5405,82 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField > 0",
+      "query": "from a_index | where stringField > stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField > numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField > dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where booleanField > booleanField",
+      "error": [
+        "Argument of [>] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where ipField > ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField > stringField",
       "error": [
         "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > numberField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField > stringField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > dateField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > 0",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField > now()",
+      "error": [
+        "Argument of [>] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -4272,9 +5510,82 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField >= 0",
+      "query": "from a_index | where stringField >= stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField >= numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField >= dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where booleanField >= booleanField",
+      "error": [
+        "Argument of [>=] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where ipField >= ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField >= stringField",
       "error": [
         "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= numberField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField >= stringField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= dateField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= 0",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField >= now()",
+      "error": [
+        "Argument of [>=] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -4304,9 +5615,82 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField < 0",
+      "query": "from a_index | where stringField < stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField < numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField < dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where booleanField < booleanField",
+      "error": [
+        "Argument of [<] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where ipField < ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField < stringField",
       "error": [
         "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < numberField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField < stringField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < dateField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < 0",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField < now()",
+      "error": [
+        "Argument of [<] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -4336,9 +5720,82 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField <= 0",
+      "query": "from a_index | where stringField <= stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField <= numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField <= dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where booleanField <= booleanField",
+      "error": [
+        "Argument of [<=] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where ipField <= ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField <= stringField",
       "error": [
         "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= numberField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField <= stringField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= dateField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= 0",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField <= now()",
+      "error": [
+        "Argument of [<=] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -4368,9 +5825,181 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval stringField == 0",
+      "query": "from a_index | where stringField == stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField == numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField == dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where booleanField == booleanField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where ipField == ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField == stringField",
       "error": [
         "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == numberField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField == stringField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == dateField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == 0",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == now()",
+      "error": [
+        "Argument of [==] must be [string], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField != 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where NOT numberField != 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where (numberField != 0)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where (NOT (numberField != 0))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where 1 != 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField != numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField != dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where booleanField != booleanField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where ipField != ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField != stringField",
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != numberField",
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where numberField != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField != stringField",
+      "error": [
+        "Argument of [!=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != dateField",
+      "error": [
+        "Argument of [!=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField != \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != 0",
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField != now()",
+      "error": [
+        "Argument of [!=] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -5131,6 +6760,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where cartesianShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where geoPointField IS NULL",
       "error": [],
       "warning": []
@@ -5171,6 +6840,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where geoShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where stringField == \"a\" or null",
       "error": [],
       "warning": []
@@ -5186,34 +6895,6 @@
       "query": "from a_index | where avg(numberField) > 0",
       "error": [
         "WHERE does not support function avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where max(numberField)",
-      "error": [
-        "WHERE does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where max(numberField) > 0",
-      "error": [
-        "WHERE does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where min(numberField)",
-      "error": [
-        "WHERE does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where min(numberField) > 0",
-      "error": [
-        "WHERE does not support function min"
       ],
       "warning": []
     },
@@ -5270,6 +6951,62 @@
       "query": "from a_index | where percentile(numberField, 5) > 0",
       "error": [
         "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(numberField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(numberField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(dateField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(dateField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(numberField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(numberField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(dateField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(dateField) > 0",
+      "error": [
+        "WHERE does not support function min"
       ],
       "warning": []
     },
@@ -5359,6 +7096,18 @@
       "error": [
         "Argument of [atan2] must be [number], found value [stringField] type [string]",
         "Argument of [atan2] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where bucket(numberField, 5, 5, 5) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where bucket(stringField, 5, 5, 5) > 0",
+      "error": [
+        "Argument of [bucket] must be [number], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -5458,7 +7207,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where log(numberField) > 0",
+      "query": "from a_index | where log(numberField, numberField) > 0",
       "error": [],
       "warning": []
     },
@@ -5544,6 +7293,20 @@
       "warning": []
     },
     {
+      "query": "from a_index | where length(mv_zip(stringField, stringField, stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(mv_zip(numberField, numberField, numberField)) > 0",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where pi() > 0",
       "error": [],
       "warning": []
@@ -5594,7 +7357,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where round(numberField) > 0",
+      "query": "from a_index | where round(numberField, numberField) > 0",
       "error": [],
       "warning": []
     },
@@ -5615,6 +7378,18 @@
       "query": "from a_index | where length(rtrim(numberField)) > 0",
       "error": [
         "Argument of [rtrim] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where signum(numberField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where signum(stringField) > 0",
+      "error": [
+        "Argument of [signum] must be [number], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -6124,6 +7899,41 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval cartesianShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval geoPointField IS NULL",
       "error": [],
       "warning": []
@@ -6155,6 +7965,41 @@
     },
     {
       "query": "from a_index | eval geoPointField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -6628,62 +8473,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = max(numberField)",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = max(numberField) > 0",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval max(numberField)",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval max(numberField) > 0",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = min(numberField)",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = min(numberField) > 0",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval min(numberField)",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval min(numberField) > 0",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = sum(numberField)",
       "error": [
         "EVAL does not support function sum"
@@ -6796,6 +8585,118 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = max(numberField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(numberField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(numberField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(numberField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(dateField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(dateField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(dateField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(dateField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(numberField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(numberField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(numberField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(numberField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(dateField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(dateField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(dateField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(dateField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = count(stringField)",
       "error": [
         "EVAL does not support function count"
@@ -6852,58 +8753,58 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(cartesianPointField)",
+      "query": "from a_index | eval var = st_centroid_agg(cartesianPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(cartesianPointField) > 0",
+      "query": "from a_index | eval var = st_centroid_agg(cartesianPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(cartesianPointField)",
+      "query": "from a_index | eval st_centroid_agg(cartesianPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(cartesianPointField) > 0",
+      "query": "from a_index | eval st_centroid_agg(cartesianPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(geoPointField)",
+      "query": "from a_index | eval var = st_centroid_agg(geoPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(geoPointField) > 0",
+      "query": "from a_index | eval var = st_centroid_agg(geoPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(geoPointField)",
+      "query": "from a_index | eval st_centroid_agg(geoPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(geoPointField) > 0",
+      "query": "from a_index | eval st_centroid_agg(geoPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
@@ -7110,38 +9011,97 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, \"a\", \"a\")",
+      "query": "from a_index | eval var = bucket(dateField, 5, \"a\", \"a\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, \"a\", \"a\")",
+      "query": "from a_index | eval bucket(dateField, 5, \"a\", \"a\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, stringField, stringField)",
+      "query": "from a_index | eval bucket(dateField, numberField, stringField, stringField)",
       "error": [
-        "Argument of [auto_bucket] must be a constant, received [stringField]",
-        "Argument of [auto_bucket] must be a constant, received [stringField]"
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [stringField]",
+        "Argument of [bucket] must be a constant, received [stringField]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, 5, 5)",
+      "query": "from a_index | eval var = bucket(dateField, 5, now(), now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, 5, 5)",
+      "query": "from a_index | eval bucket(dateField, 5, now(), now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, numberField, numberField)",
+      "query": "from a_index | eval bucket(dateField, numberField, dateField, dateField)",
       "error": [
-        "Argument of [auto_bucket] must be a constant, received [numberField]",
-        "Argument of [auto_bucket] must be a constant, received [numberField]"
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [dateField]",
+        "Argument of [bucket] must be a constant, received [dateField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = bucket(dateField, 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval bucket(dateField, 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval bucket(dateField, numberField, stringField, dateField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [stringField]",
+        "Argument of [bucket] must be a constant, received [dateField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = bucket(dateField, 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval bucket(dateField, 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval bucket(dateField, numberField, dateField, stringField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [dateField]",
+        "Argument of [bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = bucket(numberField, 5, 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval bucket(numberField, 5, 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval bucket(numberField, numberField, numberField, numberField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [numberField]"
       ],
       "warning": []
     },
@@ -7924,6 +9884,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_slice(stringField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_slice(stringField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = mv_sort(stringField, \"asc\")",
       "error": [],
       "warning": []
@@ -7966,6 +9936,37 @@
       "query": "from a_index | eval var = mv_sum(*)",
       "error": [
         "Using wildcards (*) in mv_sum is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_zip(stringField, stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(stringField, stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_zip(to_string(stringField), to_string(stringField), to_string(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(numberField, numberField, numberField)",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(stringField, stringField, stringField, extraArg)",
+      "error": [
+        "Error: [mv_zip] function expects exactly 3 arguments, got 4."
       ],
       "warning": []
     },
@@ -8181,6 +10182,42 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = signum(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval signum(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = signum(to_integer(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval signum(stringField)",
+      "error": [
+        "Argument of [signum] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval signum(numberField, extraArg)",
+      "error": [
+        "Error: [signum] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = signum(*)",
+      "error": [
+        "Using wildcards (*) in signum is not allowed"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = sin(numberField)",
       "error": [],
       "warning": []
@@ -8315,6 +10352,1110 @@
       "query": "from a_index | eval var = sqrt(*)",
       "error": [
         "Using wildcards (*) in sqrt is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_within(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(stringField, stringField)",
+      "error": [
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_within] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_within(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_x(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_x(to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(stringField)",
+      "error": [
+        "Argument of [st_x] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(geoPointField, extraArg)",
+      "error": [
+        "Error: [st_x] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_x(*)",
+      "error": [
+        "Using wildcards (*) in st_x is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_x(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_x(to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(stringField)",
+      "error": [
+        "Argument of [st_x] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_x] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_x(*)",
+      "error": [
+        "Using wildcards (*) in st_x is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(stringField)",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(geoPointField, extraArg)",
+      "error": [
+        "Error: [st_y] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(*)",
+      "error": [
+        "Using wildcards (*) in st_y is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(stringField)",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_y] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(*)",
+      "error": [
+        "Using wildcards (*) in st_y is not allowed"
       ],
       "warning": []
     },
@@ -8982,9 +12123,82 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval stringField > stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField > numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField > dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval booleanField > booleanField",
+      "error": [
+        "Argument of [>] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [>] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField > ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField > stringField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > numberField",
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField > stringField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > dateField",
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField > \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval stringField > 0",
       "error": [
         "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField > now()",
+      "error": [
+        "Argument of [>] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -9014,9 +12228,82 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval stringField >= stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField >= numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField >= dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval booleanField >= booleanField",
+      "error": [
+        "Argument of [>=] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [>=] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField >= ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField >= stringField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= numberField",
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField >= stringField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= dateField",
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField >= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval stringField >= 0",
       "error": [
         "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField >= now()",
+      "error": [
+        "Argument of [>=] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -9046,9 +12333,82 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval stringField < stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField < numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField < dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval booleanField < booleanField",
+      "error": [
+        "Argument of [<] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [<] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField < ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField < stringField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < numberField",
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField < stringField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < dateField",
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField < \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval stringField < 0",
       "error": [
         "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField < now()",
+      "error": [
+        "Argument of [<] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -9078,9 +12438,82 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval stringField <= stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField <= numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField <= dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval booleanField <= booleanField",
+      "error": [
+        "Argument of [<=] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [<=] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField <= ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField <= stringField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= numberField",
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField <= stringField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= dateField",
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField <= \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval stringField <= 0",
       "error": [
         "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField <= now()",
+      "error": [
+        "Argument of [<=] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -9110,9 +12543,79 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval stringField == stringField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField == numberField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField == dateField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval booleanField == booleanField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ipField == ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField == stringField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == numberField",
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval numberField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField == stringField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == dateField",
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval dateField == \"2022\"",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval stringField == 0",
       "error": [
         "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField == now()",
+      "error": [
+        "Argument of [==] must be [string], found value [now()] type [date]"
       ],
       "warning": []
     },
@@ -9132,6 +12635,13 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval now() + now()",
+      "error": [
+        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField - 1",
       "error": [],
       "warning": []
@@ -9144,6 +12654,13 @@
     {
       "query": "from a_index | eval 1 - 1",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval now() - now()",
+      "error": [
+        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -9162,6 +12679,14 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval now() * now()",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField / 1",
       "error": [],
       "warning": []
@@ -9177,6 +12702,14 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval now() / now()",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [now()] type [date]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval numberField % 1",
       "error": [],
       "warning": []
@@ -9189,6 +12722,14 @@
     {
       "query": "from a_index | eval 1 % 1",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval now() % now()",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -9467,6 +13008,26 @@
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval result = case(false, 0, 1), round(result)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval result = case(false, 0, 1) | stats sum(result)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval round(case(false, 0, 1))",
       "error": [],
       "warning": []
     },
@@ -10612,6 +14173,44 @@
       "warning": []
     },
     {
+      "query": "from index | eval bucket(dateField, abs(numberField), \"\", \"\")",
+      "error": [
+        "Argument of [bucket] must be a constant, received [abs(numberField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index | eval bucket(dateField, abs(length(numberField)), \"\", \"\")",
+      "error": [
+        "Argument of [bucket] must be a constant, received [abs(length(numberField))]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index | eval bucket(dateField, pi(), \"\", \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | eval bucket(dateField, 1 + 30 / 10, \"\", \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | eval bucket(dateField, 1 + 30 / 10, concat(\"\", \"\"), \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | eval bucket(dateField, numberField, stringField, stringField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [stringField]",
+        "Argument of [bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats ",
       "error": [
         "At least one aggregation or grouping expression required in [STATS]"
@@ -11329,262 +14928,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(max(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(max(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(max(numberField)) + max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(max(numberField)) + max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField) by round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = max(numberField) by var1 = round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = max(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(stringField)",
-      "error": [
-        "Argument of [max] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = max(*)",
-      "error": [
-        "Using wildcards (*) in max is not allowed"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(min(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(min(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(min(numberField)) + min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(min(numberField)) + min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField) by round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = min(numberField) by var1 = round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = min(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(stringField)",
-      "error": [
-        "Argument of [min] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = min(*)",
-      "error": [
-        "Using wildcards (*) in min is not allowed"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | stats var = sum(numberField)",
       "error": [],
       "warning": []
@@ -12097,6 +15440,378 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(numberField)) + max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(numberField)) + max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = max(numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(stringField)",
+      "error": [
+        "Argument of [max] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(*)",
+      "error": [
+        "Using wildcards (*) in max is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(dateField)) + max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(dateField)) + max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(stringField)",
+      "error": [
+        "Argument of [max] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(*)",
+      "error": [
+        "Using wildcards (*) in max is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(numberField)) + min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(numberField)) + min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = min(numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(stringField)",
+      "error": [
+        "Argument of [min] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(*)",
+      "error": [
+        "Using wildcards (*) in min is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(dateField)) + min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(dateField)) + min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(stringField)",
+      "error": [
+        "Argument of [min] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(*)",
+      "error": [
+        "Using wildcards (*) in min is not allowed"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = count(stringField)",
       "error": [],
       "warning": []
@@ -12157,78 +15872,78 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(cartesianPointField)",
+      "query": "from a_index | stats var = st_centroid_agg(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(cartesianPointField)",
+      "query": "from a_index | stats st_centroid_agg(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(avg(numberField))",
+      "query": "from a_index | stats var = st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(avg(numberField))",
+      "query": "from a_index | stats st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(stringField)",
+      "query": "from a_index | stats st_centroid_agg(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
+        "Argument of [st_centroid_agg] must be [cartesian_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(*)",
+      "query": "from a_index | stats var = st_centroid_agg(*)",
       "error": [
-        "Using wildcards (*) in st_centroid is not allowed"
+        "Using wildcards (*) in st_centroid_agg is not allowed"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(geoPointField)",
+      "query": "from a_index | stats var = st_centroid_agg(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(geoPointField)",
+      "query": "from a_index | stats st_centroid_agg(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(avg(numberField))",
+      "query": "from a_index | stats var = st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(avg(numberField))",
+      "query": "from a_index | stats st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(stringField)",
+      "query": "from a_index | stats st_centroid_agg(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
+        "Argument of [st_centroid_agg] must be [cartesian_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(*)",
+      "query": "from a_index | stats var = st_centroid_agg(*)",
       "error": [
-        "Using wildcards (*) in st_centroid is not allowed"
+        "Using wildcards (*) in st_centroid_agg is not allowed"
       ],
       "warning": []
     },
@@ -12249,6 +15964,16 @@
     },
     {
       "query": "FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL `round(numberField) + 1` / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats sum(case(false, 0, 1))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = sum( case(false, 0, 1))",
       "error": [],
       "warning": []
     },

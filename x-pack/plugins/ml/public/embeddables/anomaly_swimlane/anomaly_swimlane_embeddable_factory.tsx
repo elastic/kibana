@@ -14,13 +14,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import {
+  apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
@@ -90,6 +91,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       return state.rawState as AnomalySwimLaneEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      if (!apiHasExecutionContext(parentApi)) {
+        throw new Error('Parent API does not have execution context');
+      }
+
       const services = await getServices(getStartServices);
 
       const [coreStartServices, pluginsStartServices, anomalySwimLaneServices] = services;
@@ -205,17 +210,18 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const { theme, i18n, uiSettings } = coreStartServices;
+          const { uiSettings } = coreStartServices;
           const { uiActions } = pluginsStartServices;
 
-          const I18nContext = i18n.Context;
           const timeBuckets = useTimeBuckets(uiSettings);
+
+          if (!apiHasExecutionContext(parentApi)) {
+            throw new Error('Parent API does not have execution context');
+          }
 
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
-            // TODO https://github.com/elastic/kibana/issues/180055
-            // @ts-ignore
-            parentApi?.executionContext?.value ?? { name: 'dashboard' },
+            parentApi.executionContext,
             ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
             uuid
           );
@@ -259,7 +265,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 title={
                   <FormattedMessage
                     id="xpack.ml.swimlaneEmbeddable.errorMessage"
-                    defaultMessage="Unable to load the ML swim lane data"
+                    defaultMessage="Unable to load the data for the swim lane"
                   />
                 }
                 color="danger"
@@ -272,61 +278,59 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           }
 
           return (
-            <I18nContext>
-              <KibanaThemeProvider theme={theme}>
-                <KibanaContextProvider services={{ ...coreStartServices }}>
-                  <div
-                    css={css`
-                      width: 100%;
-                      padding: 8px;
-                    `}
-                    data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
-                  >
-                    <SwimlaneContainer
-                      id={uuid}
-                      data-test-subj={`mlSwimLaneEmbeddable_${uuid}`}
-                      timeBuckets={timeBuckets}
-                      swimlaneData={swimlaneData!}
-                      swimlaneType={swimlaneType}
-                      fromPage={fromPage}
-                      perPage={perPage}
-                      swimlaneLimit={
-                        isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined
+            <KibanaRenderContextProvider {...coreStartServices}>
+              <KibanaContextProvider services={{ ...coreStartServices }}>
+                <div
+                  css={css`
+                    width: 100%;
+                    padding: 8px;
+                  `}
+                  data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
+                >
+                  <SwimlaneContainer
+                    id={uuid}
+                    data-test-subj={`mlSwimLaneEmbeddable_${uuid}`}
+                    timeBuckets={timeBuckets}
+                    swimlaneData={swimlaneData!}
+                    swimlaneType={swimlaneType}
+                    fromPage={fromPage}
+                    perPage={perPage}
+                    swimlaneLimit={
+                      isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined
+                    }
+                    onResize={(size) => chartWidth$.next(size)}
+                    selection={selectedCells}
+                    onCellsSelection={onCellsSelection}
+                    onPaginationChange={(update) => {
+                      if (update.fromPage) {
+                        api.updatePagination({ fromPage: update.fromPage });
                       }
-                      onResize={(size) => chartWidth$.next(size)}
-                      selection={selectedCells}
-                      onCellsSelection={onCellsSelection}
-                      onPaginationChange={(update) => {
-                        if (update.fromPage) {
-                          api.updatePagination({ fromPage: update.fromPage });
-                        }
-                        if (update.perPage) {
-                          api.updatePagination({ perPage: update.perPage, fromPage: 1 });
-                        }
-                      }}
-                      isLoading={dataLoading.value!}
-                      yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
-                      noDataWarning={
-                        <EuiEmptyPrompt
-                          titleSize="xxs"
-                          css={{ padding: 0 }}
-                          title={
-                            <h2>
-                              <FormattedMessage
-                                id="xpack.ml.swimlaneEmbeddable.noDataFound"
-                                defaultMessage="No anomalies found"
-                              />
-                            </h2>
-                          }
-                        />
+                      if (update.perPage) {
+                        api.updatePagination({ perPage: update.perPage, fromPage: 1 });
                       }
-                      chartsService={pluginsStartServices.charts}
-                      onRenderComplete={onRenderComplete}
-                    />
-                  </div>
-                </KibanaContextProvider>
-              </KibanaThemeProvider>
-            </I18nContext>
+                    }}
+                    isLoading={dataLoading.value!}
+                    yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
+                    noDataWarning={
+                      <EuiEmptyPrompt
+                        titleSize="xxs"
+                        css={{ padding: 0 }}
+                        title={
+                          <h2>
+                            <FormattedMessage
+                              id="xpack.ml.swimlaneEmbeddable.noDataFound"
+                              defaultMessage="No anomalies found"
+                            />
+                          </h2>
+                        }
+                      />
+                    }
+                    chartsService={pluginsStartServices.charts}
+                    onRenderComplete={onRenderComplete}
+                  />
+                </div>
+              </KibanaContextProvider>
+            </KibanaRenderContextProvider>
           );
         },
       };

@@ -42,10 +42,7 @@ export const SERVICE_GROUP_SUPPORTED_FIELDS = [
 ];
 
 export function isSupportedField(fieldName: string) {
-  return (
-    fieldName.startsWith(LABELS) ||
-    SERVICE_GROUP_SUPPORTED_FIELDS.includes(fieldName)
-  );
+  return fieldName.startsWith(LABELS) || SERVICE_GROUP_SUPPORTED_FIELDS.includes(fieldName);
 }
 
 export function validateServiceGroupKuery(kuery: string): {
@@ -55,9 +52,7 @@ export function validateServiceGroupKuery(kuery: string): {
 } {
   try {
     const kueryFields = getKueryFields([fromKueryExpression(kuery)]);
-    const unsupportedKueryFields = kueryFields.filter(
-      (fieldName) => !isSupportedField(fieldName)
-    );
+    const unsupportedKueryFields = kueryFields.filter((fieldName) => !isSupportedField(fieldName));
     if (unsupportedKueryFields.length === 0) {
       return { isValidFields: true, isValidSyntax: true };
     }

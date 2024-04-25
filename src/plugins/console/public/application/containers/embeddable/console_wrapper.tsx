@@ -29,10 +29,9 @@ import {
   History,
   Settings,
   Storage,
-  createStorage,
   createHistory,
   createSettings,
-  setStorage,
+  getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
 import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
@@ -78,11 +77,7 @@ const loadDependencies = async (
 
   await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: 'sense:',
-  });
-  setStorage(storage);
+  const storage = getStorage();
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
@@ -106,13 +101,17 @@ const loadDependencies = async (
   };
 };
 
-interface ConsoleWrapperProps extends Omit<EmbeddableConsoleDependencies, 'setDispatch'> {
+interface ConsoleWrapperProps
+  extends Omit<
+    EmbeddableConsoleDependencies,
+    'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
+  > {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
 }
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown } = props;
+  const { core, usageCollection, onKeyDown, isMonacoEnabled } = props;
 
   useEffect(() => {
     if (dependencies === null) {
@@ -164,6 +163,9 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             autocompleteInfo,
           },
           theme$,
+          config: {
+            isMonacoEnabled,
+          },
         }}
       >
         <RequestContextProvider>

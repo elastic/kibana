@@ -9,7 +9,7 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
   type PublishingSubject,
   apiPublishesPanelTitle,
@@ -34,8 +34,7 @@ import {
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TrackContentfulRender } from '@kbn/presentation-containers';
 import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -141,10 +140,14 @@ export class DashboardContainer
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
+  public lastReloadRequestTime$ = new BehaviorSubject<string | undefined>(undefined);
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public reload$ = new Subject<void>();
+  public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+
+  public readonly executionContext: KibanaExecutionContext;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -162,7 +165,8 @@ export class DashboardContainer
   private creationOptions?: DashboardCreationOptions;
   private analyticsService: DashboardAnalyticsService;
   private showWriteControls: DashboardCapabilitiesService['showWriteControls'];
-  private theme$;
+  private i18n: I18nStart;
+  private theme;
   private chrome;
   private customBranding;
 
@@ -208,9 +212,7 @@ export class DashboardContainer
 
     ({
       analytics: this.analyticsService,
-      settings: {
-        theme: { theme$: this.theme$ },
-      },
+      settings: { theme: this.theme, i18n: this.i18n },
       chrome: this.chrome,
       customBranding: this.customBranding,
       dashboardCapabilities: { showWriteControls: this.showWriteControls },
@@ -280,10 +282,21 @@ export class DashboardContainer
         'syncTooltips'
       ),
     };
+    this.timeRestore$ = embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+      this.publishingSubscription,
+      this,
+      'timeRestore'
+    );
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput
     >(this.publishingSubscription, this, 'timeslice');
+    this.lastReloadRequestTime$ = embeddableInputToSubject<
+      string | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'lastReloadRequestTime');
+
+    this.executionContext = initialInput.executionContext;
   }
 
   public getAppContext() {
@@ -340,17 +353,19 @@ export class DashboardContainer
     this.domNode.className = 'dashboardContainer';
 
     ReactDOM.render(
-      <I18nProvider>
+      <KibanaRenderContextProvider
+        analytics={this.analyticsService}
+        i18n={this.i18n}
+        theme={this.theme}
+      >
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
         >
-          <KibanaThemeProvider theme$={this.theme$}>
-            <DashboardContainerContext.Provider value={this}>
-              <DashboardViewport />
-            </DashboardContainerContext.Provider>
-          </KibanaThemeProvider>
+          <DashboardContainerContext.Provider value={this}>
+            <DashboardViewport />
+          </DashboardContainerContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
-      </I18nProvider>,
+      </KibanaRenderContextProvider>,
       dom
     );
   }
@@ -840,12 +855,4 @@ export class DashboardContainer
     }
     if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
-
-  public getFilters() {
-    return this.getInput().filters;
-  }
-
-  public getQuery(): Query | undefined {
-    return this.getInput().query;
-  }
 }

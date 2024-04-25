@@ -81,8 +81,16 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
-          await core.getStartServices();
+        const [
+          coreStart,
+          {
+            dataViews,
+            urlForwarding: urlForwardingStart,
+            guidedOnboarding,
+            share: shareStart,
+            cloud: cloudStart,
+          },
+        ] = await core.getStartServices();
 
         setServices({
           share,
@@ -108,15 +116,17 @@ export class HomePublicPlugin
           welcomeService: this.welcomeService,
           guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
-          openModal: coreStart.overlays.openModal,
+          cloudStart,
+          overlays: coreStart.overlays,
           theme: core.theme,
           i18nStart: coreStart.i18n,
+          shareStart,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, params.theme$, coreStart, params.history);
+        return await renderApp(params.element, coreStart, params.history);
       },
     });
     urlForwarding.forwardApp('home', 'home');

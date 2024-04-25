@@ -278,6 +278,10 @@ export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
   return ruleName;
 };
 
+export const fillCustomQueryInput = (ruleQuery: string = ruleFields.ruleQuery) => {
+  getCustomQueryInput().type(ruleQuery);
+};
+
 export const fillDescription = (description: string = ruleFields.ruleDescription) => {
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(description, { force: true });
@@ -524,7 +528,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
@@ -540,7 +544,10 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
+};
 
+export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+  fillDefineEqlRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 

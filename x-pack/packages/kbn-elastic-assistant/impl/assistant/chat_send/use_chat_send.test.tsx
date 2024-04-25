@@ -104,7 +104,7 @@ describe('use chat send', () => {
       expect(sendMessage).toHaveBeenCalled();
       const appendMessageSend = sendMessage.mock.calls[0][0].message;
       expect(appendMessageSend).toEqual(
-        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
+        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n${promptText}`
       );
     });
   });
@@ -124,7 +124,7 @@ describe('use chat send', () => {
     await waitFor(() => {
       expect(sendMessage).toHaveBeenCalled();
       const messages = setCurrentConversation.mock.calls[0][0].messages;
-      expect(messages[messages.length - 1].content).toEqual(`\n\n${promptText}`);
+      expect(messages[messages.length - 1].content).toEqual(promptText);
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
@@ -155,7 +155,7 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
-        conversationId: testProps.currentConversation.title,
+        conversationId: testProps.currentConversation?.title,
         role: 'user',
         isEnabledKnowledgeBase: false,
         isEnabledRAGAlerts: false,
@@ -164,7 +164,7 @@ describe('use chat send', () => {
         provider: 'OpenAI',
       });
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
-        conversationId: testProps.currentConversation.title,
+        conversationId: testProps.currentConversation?.title,
         role: 'assistant',
         isEnabledKnowledgeBase: false,
         isEnabledRAGAlerts: false,

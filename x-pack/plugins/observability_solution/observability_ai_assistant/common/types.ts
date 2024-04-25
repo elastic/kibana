@@ -51,7 +51,7 @@ export interface TokenCount {
 
 export interface Conversation {
   '@timestamp': string;
-  user: {
+  user?: {
     id?: string;
     name: string;
   };
@@ -69,7 +69,7 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string; token_count?: TokenCount };
+  conversation: { title: string; token_count?: TokenCount; id?: string };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
@@ -93,6 +93,8 @@ export interface UserInstruction {
   doc_id: string;
   text: string;
 }
+
+export type UserInstructionOrPlainText = string | UserInstruction;
 
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;

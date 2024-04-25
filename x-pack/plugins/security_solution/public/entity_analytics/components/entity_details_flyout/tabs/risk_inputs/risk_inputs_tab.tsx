@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut, EuiText } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash/fp';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+
+import { get } from 'lodash/fp';
+import type {
+  InputAlert,
+  UseRiskContributingAlertsResult,
+} from '../../../../hooks/use_risk_contributing_alerts';
+import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
-import { ActionColumn } from '../../components/action_column';
-import { RiskInputsUtilityBar } from '../../components/utility_bar';
-import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
+
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
 import type { HostRiskScore, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
@@ -26,16 +31,12 @@ import {
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
+import { RiskInputsUtilityBar } from '../../components/utility_bar';
+import { ActionColumn } from '../../components/action_column';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
-}
-
-export interface AlertRawData {
-  fields: Record<string, string[]>;
-  _index: string;
-  _id: string;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -44,7 +45,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
-  const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
+  const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
     if (entityType === RiskScoreEntity.host) {
@@ -67,24 +68,19 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
-  const {
-    loading: loadingAlerts,
-    data: alertsData,
-    error: riskAlertsError,
-  } = useRiskContributingAlerts({ riskScore });
+
+  const alerts = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(
     () => ({
-      onSelectionChange: (selected: AlertRawData[]) => {
-        setSelectedItems(selected);
-      },
       initialSelected: [],
       selectable: () => true,
+      onSelectionChange: setSelectedItems,
     }),
     []
   );
 
-  const alertsColumns: Array<EuiBasicTableColumn<AlertRawData>> = useMemo(
+  const inputColumns: Array<EuiBasicTableColumn<InputAlert>> = useMemo(
     () => [
       {
         name: (
@@ -94,12 +90,10 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
           />
         ),
         width: '80px',
-        render: (alert: AlertRawData) => {
-          return <ActionColumn alert={alert} />;
-        },
+        render: (data: InputAlert) => <ActionColumn input={data} />,
       },
       {
-        field: 'fields.@timestamp',
+        field: 'input.timestamp',
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.dateColumn"
@@ -113,7 +107,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         render: (timestamp: string) => <PreferenceFormattedDate value={new Date(timestamp)} />,
       },
       {
-        field: 'fields',
+        field: 'alert',
         'data-test-subj': 'risk-input-table-description-cell',
         name: (
           <FormattedMessage
@@ -124,33 +118,30 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         truncateText: true,
         mobileOptions: { show: true },
         sortable: true,
-        render: (fields: AlertRawData['fields']) => get(ALERT_RULE_NAME, fields),
+        render: (alert: InputAlert['alert']) => get(ALERT_RULE_NAME, alert),
+      },
+      {
+        field: 'input.contribution_score',
+        'data-test-subj': 'risk-input-table-contribution-cell',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contributionColumn"
+            defaultMessage="Contribution"
+          />
+        ),
+        truncateText: false,
+        mobileOptions: { show: true },
+        sortable: true,
+        align: 'right',
+        render: formatContribution,
       },
     ],
     []
   );
 
-  const [currentPage, setCurrentPage] = useState<{
-    index: number;
-    size: number;
-  }>({ index: 0, size: 10 });
-
-  const onTableChange = useCallback(({ page }) => {
-    setCurrentPage(page);
-  }, []);
-
-  const pagination: Pagination = useMemo(
-    () => ({
-      totalItemCount: alertsData?.length ?? 0,
-      pageIndex: currentPage.index,
-      pageSize: currentPage.size,
-    }),
-    [currentPage.index, currentPage.size, alertsData?.length]
-  );
-
   const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
 
-  if (riskScoreError || riskAlertsError) {
+  if (riskScoreError) {
     return (
       <EuiCallOut
         title={
@@ -183,79 +174,177 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         </h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <RiskInputsUtilityBar pagination={pagination} selectedAlerts={selectedItems} />
-      <EuiSpacer size="xs" />
+      <RiskInputsUtilityBar riskInputs={selectedItems} />
       <EuiInMemoryTable
-        compressed={true}
-        loading={loadingRiskScore || loadingAlerts}
-        items={alertsData ?? []}
-        columns={alertsColumns}
-        pagination
+        compressed
+        loading={loadingRiskScore || alerts.loading}
+        items={alerts.data || []}
+        columns={inputColumns}
         sorting
         selection={euiTableSelectionProps}
-        onTableChange={onTableChange}
-        isSelectable
         itemId="_id"
       />
+      <EuiSpacer size="s" />
+      <ExtraAlertsMessage riskScore={riskScore} alerts={alerts} />
     </>
   );
 
   return (
     <>
       {isAssetCriticalityEnabled && (
-        <RiskInputsAssetCriticalitySection loading={loadingRiskScore} riskScore={riskScore} />
+        <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
       )}
+      <EuiSpacer size="m" />
       {riskInputsAlertSection}
     </>
   );
 };
 
-const RiskInputsAssetCriticalitySection: React.FC<{
+RiskInputsTab.displayName = 'RiskInputsTab';
+
+const ContextsSection: React.FC<{
   riskScore?: UserRiskScore | HostRiskScore;
   loading: boolean;
 }> = ({ riskScore, loading }) => {
-  const criticalityLevel = useMemo(() => {
+  const criticality = useMemo(() => {
     if (!riskScore) {
       return undefined;
     }
 
     if (isUserRiskScore(riskScore)) {
-      return riskScore.user.risk.criticality_level;
+      return {
+        level: riskScore.user.risk.criticality_level,
+        contribution: riskScore.user.risk.category_2_score,
+      };
     }
 
-    return riskScore.host.risk.criticality_level;
+    return {
+      level: riskScore.host.risk.criticality_level,
+      contribution: riskScore.host.risk.category_2_score,
+    };
   }, [riskScore]);
 
-  if (loading || criticalityLevel === undefined) {
+  if (loading || criticality === undefined) {
     return null;
   }
 
   return (
     <>
-      <EuiTitle size="xs" data-test-subj="risk-input-asset-criticality-title">
+      <EuiTitle size="xs" data-test-subj="risk-input-contexts-title">
         <h3>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityTitle"
-            defaultMessage="Asset Criticality"
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTitle"
+            defaultMessage="Contexts"
           />
         </h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityDescription"
-          defaultMessage="The criticality assigned at the time of the risk score calculation."
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      <AssetCriticalityBadge
-        criticalityLevel={criticalityLevel}
-        dataTestSubj="risk-inputs-asset-criticality-badge"
+      <EuiInMemoryTable
+        compressed={true}
+        loading={loading}
+        columns={contextColumns}
+        items={[
+          {
+            field: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityField"
+                defaultMessage="Asset Criticality Level"
+              />
+            ),
+            value: (
+              <AssetCriticalityBadge
+                criticalityLevel={criticality.level}
+                dataTestSubj="risk-inputs-asset-criticality-badge"
+              />
+            ),
+            contribution: formatContribution(criticality.contribution || 0),
+          },
+        ]}
       />
-
-      <EuiSpacer size="m" />
     </>
   );
 };
 
-RiskInputsTab.displayName = 'RiskInputsTab';
+interface ContextRow {
+  field: ReactNode;
+  value: ReactNode;
+  contribution: string;
+}
+
+const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
+  {
+    field: 'field',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.fieldColumn"
+        defaultMessage="Field"
+      />
+    ),
+    width: '30%',
+    render: (field: ContextRow['field']) => field,
+  },
+  {
+    field: 'value',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.valueColumn"
+        defaultMessage="Value"
+      />
+    ),
+    width: '30%',
+    render: (val: ContextRow['value']) => val,
+  },
+  {
+    field: 'contribution',
+    width: '30%',
+    align: 'right',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.contributionColumn"
+        defaultMessage="Contribution"
+      />
+    ),
+    render: (score: ContextRow['contribution']) => score,
+  },
+];
+
+interface ExtraAlertsMessageProps {
+  riskScore?: UserRiskScore | HostRiskScore;
+  alerts: UseRiskContributingAlertsResult;
+}
+const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, alerts }) => {
+  const totals = !riskScore
+    ? { count: 0, score: 0 }
+    : isUserRiskScore(riskScore)
+    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
+    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+
+  const displayed = {
+    count: alerts.data?.length || 0,
+    score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
+  };
+
+  if (displayed.count >= totals.count) {
+    return null;
+  }
+  return (
+    <EuiCallOut
+      data-test-subj="risk-input-extra-alerts-message"
+      size="s"
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.extraAlertsMessage"
+          defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
+          values={{
+            count: totals.count - displayed.count,
+            score: formatContribution(totals.score - displayed.score),
+          }}
+        />
+      }
+      iconType="annotation"
+    />
+  );
+};
+
+const formatContribution = (value: number) =>
+  value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);

@@ -74,7 +74,8 @@
     "@kbn/ml-creation-wizard-utils",
     "@kbn/alerts-as-data-utils",
     "@kbn/code-editor",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*",

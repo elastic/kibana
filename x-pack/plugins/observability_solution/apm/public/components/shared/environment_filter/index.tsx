@@ -45,9 +45,7 @@ export function ApmEnvironmentFilter() {
       serviceName={serviceName}
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
-      onChange={(changeValue: string) =>
-        updateEnvironmentUrl(history, location, changeValue)
-      }
+      onChange={(changeValue: string) => updateEnvironmentUrl(history, location, changeValue)}
     />
   );
 }

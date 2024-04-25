@@ -8,7 +8,6 @@
 import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesGetMappingIndexMappingRecord,
-  IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Direction } from '@elastic/eui';
 
@@ -119,7 +118,7 @@ export interface PatternRollup {
   pattern: string;
   results: Record<string, DataQualityCheckResult> | undefined;
   sizeInBytes: number | undefined;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }
 
 export interface CheckIndexRequest {
@@ -175,10 +174,32 @@ export interface SelectedIndex {
   pattern: string;
 }
 
+export interface MeteringStatsIndex {
+  uuid?: string;
+  name: string;
+  num_docs: number | null;
+  size_in_bytes: number | null;
+  data_stream?: string;
+}
+
+export interface MeteringIndicesStatsResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    failed: number;
+  };
+  indices: MeteringStatsIndex[];
+  datastreams: Array<{ name: string; num_docs: number; size_in_bytes: number }>;
+  total: {
+    num_docs: number;
+    size_in_bytes: number;
+  };
+}
+
 export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams & {
   errorCount?: number;
   ilmPhase?: string;
-  indexId: string;
+  indexId?: string | null;
   indexName: string;
   sameFamilyFields?: string[];
   unallowedMappingFields?: string[];
