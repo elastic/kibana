@@ -285,6 +285,22 @@
             "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.LogsExplorerNavigationParams.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [
+              "\nOptionally set chart's breakdown field"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
