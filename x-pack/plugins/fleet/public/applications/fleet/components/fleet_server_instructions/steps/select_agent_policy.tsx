@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 
 import { SelectCreateAgentPolicy } from '../..';
 
-import type { GetAgentPoliciesResponseItem } from '../../../types';
+import type { EnrollmentSettingsFleetServerPolicy } from '../../../types';
 
 export const getSelectAgentPolicyStep = ({
   policyId,
@@ -21,7 +21,7 @@ export const getSelectAgentPolicyStep = ({
 }: {
   policyId?: string;
   setPolicyId: (v?: string) => void;
-  eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
+  eligibleFleetServerPolicies: EnrollmentSettingsFleetServerPolicy[];
   refreshEligibleFleetServerPolicies: () => void;
 }): EuiStepProps => {
   return {
@@ -48,7 +48,7 @@ export const getSelectAgentPolicyStep = ({
 const SelectAgentPolicyStepContent: React.FunctionComponent<{
   policyId?: string;
   setPolicyId: (v?: string) => void;
-  eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
+  eligibleFleetServerPolicies: EnrollmentSettingsFleetServerPolicy[];
   refreshEligibleFleetServerPolicies: () => void;
 }> = ({
   policyId,

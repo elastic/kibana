@@ -4639,7 +4639,17 @@
           "PartialC",
           "<{ transactionName: ",
           "StringC",
-          "; }>, ",
+          "; filters: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          ", string, unknown>; }>, ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -4711,7 +4721,15 @@
           "RollupInterval",
           ".None>]>; }>]>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
-          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          " | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {
@@ -4899,7 +4917,17 @@
           "PartialC",
           "<{ transactionName: ",
           "StringC",
-          "; }>, ",
+          "; filters: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          ", string, unknown>; }>, ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -4973,7 +5001,15 @@
           "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { transactionType: string; latencyAggregationType: ",
           "LatencyAggregationType",
-          "; bucketSizeInSeconds: number; useDurationSummary: boolean; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          "; bucketSizeInSeconds: number; useDurationSummary: boolean; } & { transactionName?: string | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          " | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {
@@ -6075,7 +6111,17 @@
           "PartialC",
           "<{ transactionName: ",
           "StringC",
-          "; }>, ",
+          "; filters: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          ", string, unknown>; }>, ",
           "IntersectionC",
           "<[",
           "TypeC",
@@ -6147,7 +6193,15 @@
           "RollupInterval",
           ".None>]>; }>]>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
-          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+          " & { params: { path: { serviceName: string; }; query: { transactionType: string; bucketSizeInSeconds: number; } & { transactionName?: string | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BoolQuery",
+            "text": "BoolQuery"
+          },
+          " | undefined; } & { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
           "<string, ",
           {

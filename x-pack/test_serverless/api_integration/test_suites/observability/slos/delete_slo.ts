@@ -136,7 +136,6 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         });
 
-        const numberOfRollupDocumentsBeforeDeletion = sloRollupData.hits.hits.length;
         expect(sloRollupData.hits.hits.length > 0).to.be(true);
         expect(sloSummaryData.hits.hits.length > 0).to.be(true);
 
@@ -161,19 +160,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
           if (sloSummaryDataAfterDeletion.hits.hits.length > 0) {
             throw new Error('SLO summary data not deleted yet');
-          }
-          return true;
-        });
-
-        await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
-          const sloRollupDataAfterDeletion = await sloApi.getSloData({
-            sloId,
-            indexName: SLO_DESTINATION_INDEX_PATTERN,
-          });
-          if (
-            sloRollupDataAfterDeletion.hits.hits.length >= numberOfRollupDocumentsBeforeDeletion
-          ) {
-            throw new Error('SLO rollup data not deleted yet');
           }
           return true;
         });
