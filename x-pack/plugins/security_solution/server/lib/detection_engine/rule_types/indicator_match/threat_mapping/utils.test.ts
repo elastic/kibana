@@ -969,9 +969,10 @@ describe('utils', () => {
       const noMaxClauseCountErrorFound = getMaxClauseCountErrorValue(
         searchesPerformed,
         2,
+        10000,
         undefined
       );
-      expect(noMaxClauseCountErrorFound).toEqual(Number.NEGATIVE_INFINITY);
+      expect(noMaxClauseCountErrorFound.maxClauseCountValue).toEqual(Number.NEGATIVE_INFINITY);
     });
 
     test('should return parsed max clause count when error message received is "failed to create query"', () => {
@@ -998,11 +999,12 @@ describe('utils', () => {
       const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
         searchesPerformed,
         2,
+        10000,
         undefined
       );
 
       const newPageSize = (4096 - 1) / (threatEntries + 1); // 1365
-      expect(maxClauseCountErrorValueFound).toEqual(newPageSize);
+      expect(maxClauseCountErrorValueFound.maxClauseCountValue).toEqual(newPageSize);
     });
 
     test('should return parsed max clause count when error message received is "Query contains too many nested clauses"', () => {
@@ -1029,11 +1031,53 @@ describe('utils', () => {
       const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
         searchesPerformed,
         2,
+        10000,
         undefined
       );
 
       const newPageSize = Math.floor((9362 - 1) / (2 * (threatEntries + 1))); // 1560
-      expect(maxClauseCountErrorValueFound).toEqual(newPageSize);
+      expect(maxClauseCountErrorValueFound.maxClauseCountValue).toEqual(newPageSize);
+    });
+
+    test('should return parsed max clause count when error message received is "Query contains too many nested clauses" and previously calculated chunk size was not small enough', () => {
+      const threatEntries = 2;
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: false,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [
+            'Searching events operation failed: ResponseError: search_phase_execution_exception\
+	Root causes:\
+		too_many_nested_clauses: too_many_nested_clauses: Query contains too many nested clauses; maxClauseCount is set to 9362',
+          ],
+          warningMessages: [],
+        },
+      ];
+
+      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        10000,
+        undefined
+      );
+
+      const newPageSize = Math.floor((9362 - 1) / (2 * (threatEntries + 1))); // 1560
+      expect(maxClauseCountErrorValueFound.maxClauseCountValue).toEqual(newPageSize);
+
+      const newMaxClouseCountErrorValue = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        2,
+        maxClauseCountErrorValueFound.maxClauseCountValue,
+        undefined
+      );
+      const betterValue = Math.floor(maxClauseCountErrorValueFound.maxClauseCountValue / 2); // 780
+      expect(newMaxClouseCountErrorValue.maxClauseCountValue).toEqual(betterValue);
     });
   });
 

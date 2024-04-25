@@ -292,7 +292,10 @@ export const getMaxClauseCountErrorValue = (
         // error message. In that case we want to make sure we don't fall into an infinite loop
         // and so we send a new value that is guaranteed to be smaller than the previous one.
         if (val >= previousChunkSize) {
-          return { maxClauseCountValue: previousChunkSize / 2, errorType: MANY_NESTED_CLAUSES_ERR };
+          return {
+            maxClauseCountValue: Math.floor(previousChunkSize / 2),
+            errorType: MANY_NESTED_CLAUSES_ERR,
+          };
         }
         return { maxClauseCountValue: val, errorType: MANY_NESTED_CLAUSES_ERR };
       } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
