@@ -335,7 +335,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           />
           <Settings
             baseTheme={chartTheme.baseTheme}
-            theme={{ chartMargins: { top: 40 } }}
+            theme={{ chartMargins: { top: 35 } }}
             locale={i18n.getLocale()}
           />
           <Tooltip {...tooltipProps} />
