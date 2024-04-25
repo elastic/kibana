@@ -4032,6 +4032,14 @@
             "section": "def-common.SecurityServiceStart",
             "text": "SecurityServiceStart"
           },
+          " | undefined; userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-common.UserProfileService",
+            "text": "UserProfileService"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
