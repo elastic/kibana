@@ -26,9 +26,10 @@ const getLayers = (
     legendOpen !== undefined ? (legendOpen ? LegendDisplay.SHOW : LegendDisplay.HIDE) : undefined;
 
   const showValuesInLegend =
-    vis.params.labels.values ?? vis.params.legendStats
+    vis.params.labels.values ??
+    (vis.params.legendStats
       ? vis.params.legendStats?.[0] === LegendStats.values
-      : vis.type.visConfig.defaults.showValuesInLegend;
+      : vis.type.visConfig.defaults.showValuesInLegend);
 
   return [
     {
