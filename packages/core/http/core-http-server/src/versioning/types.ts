@@ -214,6 +214,7 @@ export interface VersionedRouteCustomResponseBodyValidation {
 export type VersionedResponseBodyValidation =
   | LazyValidator
   | VersionedRouteCustomResponseBodyValidation;
+
 /**
  * Map of response status codes to response schemas
  *
@@ -260,7 +261,6 @@ export interface VersionedRouteValidation<P, Q, B> {
   request?: VersionedRouteRequestValidation<P, Q, B>;
   /**
    * Validation to run against route output.
-   *
    *
    * @note This validation is only intended to run in development. Do not use this
    *       for setting default values!
