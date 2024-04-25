@@ -43,9 +43,8 @@ const mountComponentWithProviders = (props: Props): ReactWrapper => {
 jest.mock('../../../link_to', () => ({
   useNodeDetailsRedirect: jest.fn(() => ({
     getNodeDetailUrl: jest.fn(() => ({
-      app: 'metrics',
-      pathname: 'link-to/pod-detail/example-01',
-      search: { from: '1546340400000', to: '1546344000000' },
+      onClick: jest.fn(),
+      href: '/ftw/app/r?l=ASSET_DETAILS_LOCATOR&v=8.15.0&lz=N4IghgzhCmAuAicwEsA2EQC5gF8A0IA%2BmFqLMgLbSkgBmATgPYVYgCMA7GwCwAMArADZB3NgCZBADhAFYjVpx69BvMaInSc%2BcFDgAVAJ4AHaphAALRhFgydMWAEkAJqwBUt62FinQjesgBzZAA7AEEjI2dWKlh%2FAGMMAj9AkIBlaDB6OPNWAH4Y%2BIgAUQAPI1Q%2FaHoAXgAKbMzYAHkjckZgiExazziAa0wAQlo8WGNoTFQQ6DwDUJLkCABZRidxhmYALSrGAEo8Rlbkds7asACA%2BmgAryPgzDAANwC8AuQEwdrT88vrtrvH55xRgVeiYIEg3h4WjIaCoJyYCAGazQCgAOjiRgArqi5LAwKhUcE%2FGijHFYHsvhcrjd2vcnnhwX4wcC%2FGwoTC4ZhepiAEZVYJwaAQVFGFborGozEQM7QQkrWWk8l4Sk%2FGn%2FemM0GasTs2HwpyMPpVcXY3H4kVknZ7CCMTFZcarWhgTGoJXkKj0MDBALjWrrCiYIkAdwAtGxzHgQt56A98ZgAKQAZiKSfgbF4EBGjEDjCDVoAZK8EqVypV6AA1GFB5zVADkvFrtmSQWCAAUvOZgmAqKwAPTQMogqogLRAA%3D',
     })),
   })),
 }));
