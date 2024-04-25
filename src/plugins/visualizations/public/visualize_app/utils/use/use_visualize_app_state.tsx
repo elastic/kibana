@@ -13,7 +13,7 @@ import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
@@ -128,11 +128,7 @@ export const useVisualizeAppState = (
               title: i18n.translate('visualizations.visualizationLoadingFailedErrorMessage', {
                 defaultMessage: 'Failed to load the visualization',
               }),
-              text: toMountPoint(
-                <KibanaThemeProvider theme$={services.theme.theme$}>
-                  <Markdown readOnly>{error.message}</Markdown>
-                </KibanaThemeProvider>
-              ),
+              text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services.core),
             });
 
             services.history.replace(

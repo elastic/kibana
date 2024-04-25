@@ -39,6 +39,7 @@
     "@kbn/mapbox-gl",
     "@kbn/config-schema",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",
