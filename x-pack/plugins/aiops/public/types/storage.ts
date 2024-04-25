@@ -6,8 +6,7 @@
  */
 
 import { type FrozenTierPreference } from '@kbn/ml-date-picker';
-
-type MinimumTimeRangeOption = 'No minimum' | '1 week' | '1 month' | '3 months' | '6 months';
+import type { MinimumTimeRangeOption } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 
 import {
   type RandomSamplerOption,
