@@ -8,7 +8,7 @@
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext, Logger } from '@kbn/core/server';
-import { AlertDetailsContextHandlerQuery } from '@kbn/observability-plugin/server/services';
+import { AlertDetailsContextualInsightsHandlerQuery } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -39,7 +39,7 @@ export async function getObservabilityAlertDetailsContext({
   esClient: ElasticsearchClient;
   logger: Logger;
   mlClient?: MlClient;
-  query: AlertDetailsContextHandlerQuery;
+  query: AlertDetailsContextualInsightsHandlerQuery;
 }): Promise<Record<string, any>> {
   const alertStartedAt = query.alert_started_at;
   const serviceEnvironment = query['service.environment'];

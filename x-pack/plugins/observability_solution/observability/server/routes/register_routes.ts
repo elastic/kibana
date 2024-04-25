@@ -19,7 +19,7 @@ import axios from 'axios';
 import * as t from 'io-ts';
 import { ObservabilityConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
-import { AlertDetailsContextService } from '../services';
+import { AlertDetailsContextualInsightsService } from '../services';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
 
@@ -37,7 +37,9 @@ export interface RegisterRoutesDependencies {
   };
   spaces?: SpacesPluginStart;
   ruleDataService: RuleDataPluginService;
-  alertDetailsContextService: AlertDetailsContextService;
+  assistant: {
+    alertDetailsContextualInsightsService: AlertDetailsContextualInsightsService;
+  };
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
 }
 

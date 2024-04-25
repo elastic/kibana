@@ -35,8 +35,10 @@ export const observabilityAlertDetailsContextRt = t.intersection([
   }),
 ]);
 
-export type AlertDetailsContextHandlerQuery = t.TypeOf<typeof observabilityAlertDetailsContextRt>;
-export interface AlertDetailsRequestContext {
+export type AlertDetailsContextualInsightsHandlerQuery = t.TypeOf<
+  typeof observabilityAlertDetailsContextRt
+>;
+export interface AlertDetailsContextualInsightsRequestContext {
   request: KibanaRequest;
   core: Promise<{
     elasticsearch: {
@@ -52,23 +54,23 @@ export interface AlertDetailsRequestContext {
   }>;
   licensing: Promise<LicensingApiRequestHandlerContext>;
 }
-type AlertDetailsContextHandler = (
-  context: AlertDetailsRequestContext,
-  query: AlertDetailsContextHandlerQuery
+type AlertDetailsContextualInsightsHandler = (
+  context: AlertDetailsContextualInsightsRequestContext,
+  query: AlertDetailsContextualInsightsHandlerQuery
 ) => Promise<string>;
 
-export class AlertDetailsContextService {
-  private handlers: AlertDetailsContextHandler[] = [];
+export class AlertDetailsContextualInsightsService {
+  private handlers: AlertDetailsContextualInsightsHandler[] = [];
 
   constructor() {}
 
-  registerHandler(handler: AlertDetailsContextHandler) {
+  registerHandler(handler: AlertDetailsContextualInsightsHandler) {
     this.handlers.push(handler);
   }
 
   getAlertDetailsContext(
-    context: AlertDetailsRequestContext,
-    query: AlertDetailsContextHandlerQuery
+    context: AlertDetailsContextualInsightsRequestContext,
+    query: AlertDetailsContextualInsightsHandlerQuery
   ): Promise<string> {
     return Promise.all(this.handlers.map((handler) => handler(context, query))).then(
       (results: string[]) => results.join('\n')
