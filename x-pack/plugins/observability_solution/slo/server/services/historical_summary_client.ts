@@ -11,7 +11,6 @@ import {
   ALL_VALUE,
   BudgetingMethod,
   calendarAlignedTimeWindowSchema,
-  Duration,
   DurationUnit,
   FetchHistoricalSummaryParams,
   fetchHistoricalSummaryResponseSchema,
@@ -31,8 +30,10 @@ import {
   Objective,
   SLOId,
   TimeWindow,
+  toCalendarAlignedTimeWindowMomentUnit,
 } from '../domain/models';
-import { computeSLI, computeSummaryStatus, toDateRange, toErrorBudget } from '../domain/services';
+import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
+import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
 
 interface DailyAggBucket {
   key_as_string: string;
@@ -108,12 +109,26 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
       const buckets = (result.responses[i].aggregations?.daily?.buckets as DailyAggBucket[]) || [];
 
       if (rollingTimeWindowSchema.is(timeWindow)) {
-        historicalSummary.push({
-          sloId,
-          instanceId,
-          data: handleResultForRolling(objective, timeWindow, buckets),
-        });
-        continue;
+        if (timeslicesBudgetingMethodSchema.is(budgetingMethod)) {
+          historicalSummary.push({
+            sloId,
+            instanceId,
+            data: handleResultForRollingAndTimeslices(objective, timeWindow, buckets),
+          });
+
+          continue;
+        }
+
+        if (occurrencesBudgetingMethodSchema.is(budgetingMethod)) {
+          historicalSummary.push({
+            sloId,
+            instanceId,
+            data: handleResultForRolling(objective, timeWindow, buckets),
+          });
+          continue;
+        }
+
+        assertNever(budgetingMethod);
       }
 
       if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
@@ -175,13 +190,13 @@ function handleResultForCalendarAlignedAndTimeslices(
   dateRange: DateRange
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
+  const totalSlices = computeTotalSlicesFromDateRange(dateRange, objective.timesliceWindow!);
 
   return buckets.map((bucket: DailyAggBucket): HistoricalSummary => {
     const good = bucket.cumulative_good?.value ?? 0;
     const total = bucket.cumulative_total?.value ?? 0;
-    const sliValue = computeSLI(good, total);
-    const totalSlices = computeTotalSlicesFromDateRange(dateRange, objective.timesliceWindow!);
-    const consumedErrorBudget = (total - good) / (totalSlices * initialErrorBudget);
+    const sliValue = computeSLI(good, total, totalSlices);
+    const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
     const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
     return {
@@ -210,7 +225,39 @@ function handleResultForRolling(
     .map((bucket: DailyAggBucket): HistoricalSummary => {
       const good = bucket.cumulative_good?.value ?? 0;
       const total = bucket.cumulative_total?.value ?? 0;
+
       const sliValue = computeSLI(good, total);
+      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+      const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
+
+      return {
+        date: new Date(bucket.key_as_string),
+        errorBudget,
+        sliValue,
+        status: computeSummaryStatus(objective, sliValue, errorBudget),
+      };
+    });
+}
+
+function handleResultForRollingAndTimeslices(
+  objective: Objective,
+  timeWindow: TimeWindow,
+  buckets: DailyAggBucket[]
+): HistoricalSummary[] {
+  const initialErrorBudget = 1 - objective.target;
+  const rollingWindowDurationInDays = moment
+    .duration(timeWindow.duration.value, toMomentUnitOfTime(timeWindow.duration.unit))
+    .asDays();
+
+  const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
+  const totalSlices = timeWindow.duration.asSeconds() / objective.timesliceWindow!.asSeconds();
+
+  return buckets
+    .slice(-bucketsPerDay * rollingWindowDurationInDays)
+    .map((bucket: DailyAggBucket): HistoricalSummary => {
+      const good = bucket.cumulative_good?.value ?? 0;
+      const total = bucket.cumulative_total?.value ?? 0;
+      const sliValue = computeSLI(good, total, totalSlices);
       const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
       const errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
 
@@ -343,18 +390,15 @@ function getDateRange(timeWindow: TimeWindow) {
     };
   }
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    return toDateRange(timeWindow);
+    const now = moment();
+    const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
+    const from = moment.utc(now).startOf(unit);
+    const to = moment.utc(now).endOf(unit);
+
+    return { from: from.toDate(), to: to.toDate() };
   }
 
   assertNever(timeWindow);
-}
-
-function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
-  const dateRangeDurationInUnit = moment(dateRange.to).diff(
-    dateRange.from,
-    toMomentUnitOfTime(timesliceWindow.unit)
-  );
-  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
 
 export function getFixedIntervalAndBucketsPerDay(durationInDays: number): {

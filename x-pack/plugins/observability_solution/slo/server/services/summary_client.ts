@@ -9,14 +9,11 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   calendarAlignedTimeWindowSchema,
-  Duration,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
-  toMomentUnitOfTime,
 } from '@kbn/slo-schema';
-import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
+import { Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
