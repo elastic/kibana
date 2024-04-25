@@ -6,23 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { AuditLogger, CoreAuditService } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AuditLogger } from '@kbn/core-security-server';
+
+export type MockedAuditLogger = jest.Mocked<AuditLogger>;
 
 export const auditLoggerMock = {
-  create() {
+  create(): MockedAuditLogger {
     return {
       log: jest.fn(),
       enabled: true,
-    } as jest.Mocked<AuditLogger>;
+    };
   },
 };
 
+export interface MockedAuditService {
+  asScoped: (request: KibanaRequest) => MockedAuditLogger;
+  withoutRequest: MockedAuditLogger;
+}
+
 export const auditServiceMock = {
-  create() {
+  create(): MockedAuditService {
     return {
-      // getLogger: jest.fn(),
       asScoped: jest.fn().mockReturnValue(auditLoggerMock.create()),
       withoutRequest: auditLoggerMock.create(),
-    } as jest.Mocked<CoreAuditService>;
+    };
   },
 };
