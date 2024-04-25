@@ -673,8 +673,8 @@ export const formattedSearchStrategyResponse = {
                 format: 'strict_date_optional_time',
               },
             ],
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -742,7 +742,7 @@ export const expectedDsl = {
         format: 'strict_date_optional_time',
       },
     ],
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };

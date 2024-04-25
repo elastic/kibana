@@ -195,7 +195,7 @@ export class Server {
       const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
 
       // setup i18n prior to any other service, to have translations ready
-      await this.i18n.preboot({ http: httpPreboot, pluginPaths });
+      const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
       this.capabilities.preboot({ http: httpPreboot });
 
@@ -203,7 +203,11 @@ export class Server {
 
       await this.status.preboot({ http: httpPreboot });
 
-      const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
+      const renderingPreboot = await this.rendering.preboot({
+        http: httpPreboot,
+        uiPlugins,
+        i18n: i18nPreboot,
+      });
 
       const httpResourcesPreboot = this.httpResources.preboot({
         http: httpPreboot,
@@ -328,6 +332,7 @@ export class Server {
       uiPlugins,
       customBranding: customBrandingSetup,
       userSettings: userSettingsServiceSetup,
+      i18n: i18nServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
