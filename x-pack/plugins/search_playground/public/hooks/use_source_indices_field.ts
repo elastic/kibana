@@ -101,14 +101,14 @@ export const useSourceIndicesFields = () => {
     const newIndices = [...selectedIndices, newIndex];
     setLoading(true);
     onIndicesChange(newIndices);
-    usageTracker.count(AnalyticsEvents.sourceIndexAdded, newIndices.length);
+    usageTracker.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
   const removeIndex = (index: IndexName) => {
     const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
     setLoading(true);
     onIndicesChange(newIndices);
-    usageTracker.count(AnalyticsEvents.sourceIndexRemoved, newIndices.length);
+    usageTracker.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
   return {

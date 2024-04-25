@@ -30,15 +30,31 @@ import { useController } from 'react-hook-form';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, ChatFormFields } from '../../types';
-import {
-  createQuery,
-  getDefaultQueryFields,
-  IndexFields,
-  SUGGESTED_BM25_FIELDS,
-  SUGGESTED_DENSE_VECTOR_FIELDS,
-  SUGGESTED_SPARSE_FIELDS,
-} from '../../utils/create_query';
+import { ChatForm, ChatFormFields, IndicesQuerySourceFields } from '../../types';
+import { createQuery, getDefaultQueryFields, IndexFields } from '../../utils/create_query';
+
+const groupFields = (
+  fields: IndicesQuerySourceFields,
+  queryFields: IndexFields
+): { bm25: number; denseVector: number; sparse: number } =>
+  Object.entries(queryFields).reduce(
+    (results, [index, selectedFields]) => {
+      const indexFields = fields[index];
+
+      results.bm25 += selectedFields.filter((field) =>
+        indexFields.bm25_query_fields.includes(field)
+      ).length;
+      results.denseVector += selectedFields.filter((field) =>
+        indexFields.dense_vector_query_fields.find((vectorField) => vectorField.field === field)
+      ).length;
+      results.sparse += selectedFields.filter((field) =>
+        indexFields.elser_query_fields.find((elserField) => elserField.field === field)
+      ).length;
+
+      return results;
+    },
+    { bm25: 0, denseVector: 0, sparse: 0 }
+  );
 
 interface ViewQueryFlyoutProps {
   onClose: () => void;
@@ -86,25 +102,12 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
 
+    const groupedQueryFields = groupFields(fields, tempQueryFields);
+
     usageTracker.click(AnalyticsEvents.viewQuerySaved);
-    usageTracker.count(
-      AnalyticsEvents.viewQuerySparseFields,
-      Object.values(tempQueryFields)
-        .flat()
-        .filter((field) => SUGGESTED_SPARSE_FIELDS.includes(field)).length
-    );
-    usageTracker.count(
-      AnalyticsEvents.viewQueryBm25Fields,
-      Object.values(tempQueryFields)
-        .flat()
-        .filter((field) => SUGGESTED_BM25_FIELDS.includes(field)).length
-    );
-    usageTracker.count(
-      AnalyticsEvents.viewQueryDenseVectorFields,
-      Object.values(tempQueryFields)
-        .flat()
-        .filter((field) => SUGGESTED_DENSE_VECTOR_FIELDS.includes(field)).length
-    );
+    usageTracker.count(AnalyticsEvents.viewQuerySparseFields, groupedQueryFields.sparse);
+    usageTracker.count(AnalyticsEvents.viewQueryBm25Fields, groupedQueryFields.bm25);
+    usageTracker.count(AnalyticsEvents.viewQueryDenseVectorFields, groupedQueryFields.denseVector);
   };
 
   useEffect(() => {
