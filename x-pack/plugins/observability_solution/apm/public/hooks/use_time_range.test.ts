@@ -8,10 +8,7 @@ import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { useTimeRange } from './use_time_range';
 
 describe('useTimeRange', () => {
-  let hook: RenderHookResult<
-    Parameters<typeof useTimeRange>[0],
-    ReturnType<typeof useTimeRange>
-  >;
+  let hook: RenderHookResult<Parameters<typeof useTimeRange>[0], ReturnType<typeof useTimeRange>>;
 
   beforeEach(() => {
     Date.now = jest.fn(() => new Date(Date.UTC(2021, 0, 1, 12)).valueOf());

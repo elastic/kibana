@@ -77,11 +77,13 @@
     "@kbn/core-security-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme",
     "@kbn/core-security-common",
-    "@kbn/react-kibana-context-common",
+    "@kbn/react-kibana-context-render",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-theme-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-user-profile-server",
+    "@kbn/core-user-profile-browser"
   ],
   "exclude": [
     "target/**/*",

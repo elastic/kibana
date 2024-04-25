@@ -18,10 +18,7 @@ import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../transaction_charts/helper';
+import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { MLHeader } from '../transaction_charts/ml_header';
 import * as urlHelpers from '../../links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
@@ -64,21 +61,15 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const transactionName =
-    'transactionName' in query ? query.transactionName : null;
+  const transactionName = 'transactionName' in query ? query.transactionName : null;
 
-  const {
-    latencyChartsData,
-    latencyChartsStatus,
-    bucketSizeInSeconds,
-    start,
-    end,
-  } = useTransactionLatencyChartsFetcher({
-    kuery,
-    environment,
-    transactionName,
-    latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
-  });
+  const { latencyChartsData, latencyChartsStatus, bucketSizeInSeconds, start, end } =
+    useTransactionLatencyChartsFetcher({
+      kuery,
+      environment,
+      transactionName,
+      latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
+    });
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
@@ -95,8 +86,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
-  const setScreenContext =
-    useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
     return setScreenContext?.(
@@ -128,20 +118,15 @@ export function LatencyChart({ height, kuery }: Props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
-                    {i18n.translate(
-                      'xpack.apm.serviceOverview.latencyChartTitle',
-                      {
-                        defaultMessage: 'Latency',
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.serviceOverview.latencyChartTitle', {
+                      defaultMessage: 'Latency',
+                    })}
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <LatencyAggregationTypeSelect
-                  latencyAggregationType={
-                    latencyAggregationType as LatencyAggregationType
-                  }
+                  latencyAggregationType={latencyAggregationType as LatencyAggregationType}
                   setLatencyAggregationType={(type) => {
                     urlHelpers.push(history, {
                       query: {

@@ -19,10 +19,7 @@ export function useFiltersForEmbeddableCharts({
 }) {
   return useMemo(
     () =>
-      [
-        ...termQuery(SERVICE_NAME, serviceName),
-        ...environmentQuery(environment),
-      ].map((query) => ({
+      [...termQuery(SERVICE_NAME, serviceName), ...environmentQuery(environment)].map((query) => ({
         meta: {},
         query,
       })),

@@ -48,17 +48,13 @@ export function registerAssistantFunctions({
   ruleDataClient: IRuleDataClient;
   plugins: APMRouteHandlerResources['plugins'];
 }): RegistrationCallback {
-  return async ({
-    resources,
-    functions: { registerContext, registerFunction },
-  }) => {
+  return async ({ resources, functions: { registerFunction } }) => {
     const apmRouteHandlerResources: MinimalAPMRouteHandlerResources = {
       context: resources.context,
       request: resources.request,
       core: {
         setup: coreSetup,
-        start: () =>
-          coreSetup.getStartServices().then(([coreStart]) => coreStart),
+        start: () => coreSetup.getStartServices().then(([coreStart]) => coreStart),
       },
       params: {
         query: {

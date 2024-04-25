@@ -158,7 +158,6 @@ describe('createConversations', () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() =>
         createConversations(
-          [],
           coreMock.createStart().notifications,
           http,
           mockStorage as unknown as Storage
@@ -181,7 +180,6 @@ describe('createConversations', () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() =>
         createConversations(
-          [],
           coreMock.createStart().notifications,
           http,
           mockStorage as unknown as Storage
