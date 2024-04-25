@@ -8,19 +8,25 @@
 import * as t from 'io-ts';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import {
+  AlertDetailsContextualInsight,
   AlertDetailsContextualInsightsRequestContext,
   observabilityAlertDetailsContextRt,
 } from '../../services';
 
 const getObservabilityAlertDetailsContextRoute = createObservabilityServerRoute({
-  endpoint: 'GET /internal/observability/assistant/get_obs_alert_details_context',
+  endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
   options: {
     tags: [],
   },
   params: t.type({
     query: observabilityAlertDetailsContextRt,
   }),
-  handler: async ({ request, context, dependencies, params }): Promise<Record<string, any>> => {
+  handler: async ({
+    request,
+    context,
+    dependencies,
+    params,
+  }): Promise<AlertDetailsContextualInsight[]> => {
     const requestContext = {
       ...context,
       request,
@@ -31,7 +37,7 @@ const getObservabilityAlertDetailsContextRoute = createObservabilityServerRoute(
         requestContext,
         params.query
       );
-    return { context: alertDetailsContext };
+    return alertDetailsContext;
   },
 });
 

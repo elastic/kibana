@@ -25,7 +25,7 @@ import {
 import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_apm_timeseries';
 
 const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+  endpoint: 'GET /internal/apm/assistant/alert_details_contextual_insights',
   options: {
     tags: ['access:apm'],
   },
@@ -33,7 +33,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
   params: t.type({
     query: observabilityAlertDetailsContextRt,
   }),
-  handler: async (resources): Promise<AlertDetailsContextualInsight[]> => {
+  handler: async (resources): Promise<{ context: AlertDetailsContextualInsight[] }> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
 
@@ -63,7 +63,7 @@ const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
       query,
     });
 
-    return obsAlertContext;
+    return { context: obsAlertContext };
   },
 });
 

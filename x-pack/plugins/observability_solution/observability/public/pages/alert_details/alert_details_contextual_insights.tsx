@@ -28,27 +28,26 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
     }
 
     try {
-      const prompt = await http.get<Array<{ description: string; data: unknown }>>(
-        '/internal/apm/assistant/get_obs_alert_details_context',
-        {
-          query: {
-            alert_started_at: new Date(alert.formatted.start).toISOString(),
+      const { context } = await http.get<{
+        context: Array<{ description: string; data: unknown }>;
+      }>('/internal/observability/assistant/alert_details_contextual_insights', {
+        query: {
+          alert_started_at: new Date(alert.formatted.start).toISOString(),
 
-            // service fields
-            'service.name': fields['service.name'],
-            'service.environment': fields['service.environment'],
-            'transaction.type': fields['transaction.type'],
-            'transaction.name': fields['transaction.name'],
+          // service fields
+          'service.name': fields['service.name'],
+          'service.environment': fields['service.environment'],
+          'transaction.type': fields['transaction.type'],
+          'transaction.name': fields['transaction.name'],
 
-            // infra fields
-            'host.name': fields['host.name'],
-            'container.id': fields['container.id'],
-            'kubernetes.pod.name': fields['kubernetes.pod.name'],
-          },
-        }
-      );
+          // infra fields
+          'host.name': fields['host.name'],
+          'container.id': fields['container.id'],
+          'kubernetes.pod.name': fields['kubernetes.pod.name'],
+        },
+      });
 
-      const obsAlertContext = prompt
+      const obsAlertContext = context
         .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
         .join('\n\n');
 
