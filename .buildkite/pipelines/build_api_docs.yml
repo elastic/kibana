@@ -12,7 +12,7 @@ steps:
       preemptible: true
     timeout_in_minutes: 50
 
-  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
+  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh --wait-for-typecheck
     label: 'Build API Docs'
     agents:
       image: family/kibana-ubuntu-2004

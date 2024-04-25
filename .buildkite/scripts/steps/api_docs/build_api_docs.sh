@@ -24,8 +24,11 @@ echo "--- Build API Docs"
 node --max-old-space-size=12000 scripts/build_api_docs
 
 if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
-  echo "--- Wait for typecheck to complete"
-  wait_for_typecheck
+
+  if [[ "${1:-}" == "--wait-for-typecheck" ]]; then
+    echo "--- Wait for typecheck to complete"
+    wait_for_typecheck
+  fi
 
   echo "--- Publish API Docs"
 
