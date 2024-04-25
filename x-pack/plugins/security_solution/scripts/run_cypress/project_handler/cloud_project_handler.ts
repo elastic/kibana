@@ -37,13 +37,10 @@ export class CloudHandler extends ProjectHandler {
       product_types: productTypes,
     };
 
-    
     if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
       const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
-      this.log.info(
-        `Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`
-      );
+      this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
         `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:git-${kibanaOverrideImage}`
       );
