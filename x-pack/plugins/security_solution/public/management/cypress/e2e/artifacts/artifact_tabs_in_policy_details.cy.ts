@@ -140,12 +140,12 @@ describe(
             cy.getByTestSubj('policyDetailsPage').should('not.exist');
             cy.getByTestSubj('backToOrigin').contains(/^Back to .+ policy$/);
 
-          cy.getByTestSubj('backToOrigin').click();
-          cy.getByTestSubj('policyDetailsPage').should('exist');
-          clickArtifactTab(testData.nextTabId); // Make sure the next tab is accessible and backLink doesn't throw errors
-          cy.getByTestSubj('policyDetailsPage');
+            cy.getByTestSubj('backToOrigin').click();
+            cy.getByTestSubj('policyDetailsPage').should('exist');
+            clickArtifactTab(testData.nextTabId); // Make sure the next tab is accessible and backLink doesn't throw errors
+            cy.getByTestSubj('policyDetailsPage');
+          });
         });
-      });
 
         context(`Given there are no assigned ${testData.title} entries`, () => {
           beforeEach(() => {
