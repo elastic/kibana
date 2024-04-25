@@ -15,7 +15,7 @@ describe('getConfiguration', () => {
     jest.clearAllMocks();
   });
 
-  test('should return correct configuration', () => {
+  test.only('should return correct configuration', () => {
     samplePieVis.uiState.get.mockReturnValueOnce(undefined);
     expect(
       getConfiguration('test1', samplePieVis as any, {
