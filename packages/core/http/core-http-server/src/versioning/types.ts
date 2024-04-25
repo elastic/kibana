@@ -208,9 +208,7 @@ export interface VersionedRouteCustomResponseBodyValidation {
   custom: RouteValidationFunction<unknown>;
 }
 
-/**
- * @public
- */
+/** @public */
 export type VersionedResponseBodyValidation =
   | LazyValidator
   | VersionedRouteCustomResponseBodyValidation;
