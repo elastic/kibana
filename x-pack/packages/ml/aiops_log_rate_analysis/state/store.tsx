@@ -12,8 +12,8 @@ import { Provider } from 'react-redux';
 import useMount from 'react-use/lib/useMount';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import { logRateAnalysisResultsSlice } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
+import type { WindowParameters } from '../window_parameters';
 
 import type { GroupTableItem } from './types';
 

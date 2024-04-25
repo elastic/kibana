@@ -18,7 +18,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { LogRateAnalysisReduxProvider } from '@kbn/aiops-components';
+import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';

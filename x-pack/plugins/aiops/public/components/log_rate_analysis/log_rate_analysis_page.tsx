@@ -23,7 +23,7 @@ import {
   useCurrentSelectedSignificantItem,
   useCurrentSelectedGroup,
   setInitialAnalysisStart,
-} from '@kbn/aiops-components';
+} from '@kbn/aiops-log-rate-analysis/state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';

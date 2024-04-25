@@ -33,18 +33,17 @@ import {
   type LogRateHistogramItem,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
+import {
+  setAutoRunAnalysis,
+  useAppSelector,
+  useAppDispatch,
+} from '@kbn/aiops-log-rate-analysis/state';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
-
-import {
-  setAutoRunAnalysis,
-  useAppSelector,
-  useAppDispatch,
-} from '../log_rate_analysis_state_provider';
 
 import { BrushBadge } from './brush_badge';
 

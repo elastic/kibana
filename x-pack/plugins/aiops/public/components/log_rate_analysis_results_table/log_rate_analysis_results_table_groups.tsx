@@ -28,15 +28,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { stringHash } from '@kbn/ml-string-hash';
 import {
   setPinnedGroup,
   setSelectedGroup,
   useAppDispatch,
   useAppSelector,
   type GroupTableItem,
-} from '@kbn/aiops-components';
+} from '@kbn/aiops-log-rate-analysis/state';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -99,7 +99,6 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const pinnedGroup = useAppSelector((s) => s.logRateAnalysis.pinnedGroup);
   const selectedGroup = useAppSelector((s) => s.logRateAnalysis.selectedGroup);
   const dispatch = useAppDispatch();
-  const dataViewId = dataView.id;
   const isMounted = useMountedState();
 
   const toggleDetails = (item: GroupTableItem) => {

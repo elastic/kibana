@@ -14,22 +14,3 @@ export {
   type BrushSelectionUpdateHandler,
 } from './src/document_count_chart';
 export type { DocumentCountChartProps } from './src/document_count_chart';
-export {
-  useAppDispatch,
-  useAppSelector,
-  useAppStore,
-  useCurrentSelectedGroup,
-  useCurrentSelectedSignificantItem,
-  clearAllRowState,
-  setAutoRunAnalysis,
-  setInitialAnalysisStart,
-  setPinnedGroup,
-  setPinnedSignificantItem,
-  setSelectedGroup,
-  setSelectedSignificantItem,
-  setStickyHistogram,
-  LogRateAnalysisReduxProvider,
-  type GroupTableItem,
-  type GroupTableItemGroup,
-  type TableItemAction,
-} from './src/log_rate_analysis_state_provider';

@@ -24,6 +24,11 @@ import {
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
+import {
+  clearAllRowState,
+  useAppDispatch,
+  useAppSelector,
+} from '@kbn/aiops-log-rate-analysis/state';
 import { useFetchStreamRedux } from '@kbn/ml-response-stream/client';
 import {
   LOG_RATE_ANALYSIS_TYPE,
@@ -36,7 +41,6 @@ import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
-import { clearAllRowState, useAppDispatch, useAppSelector } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';

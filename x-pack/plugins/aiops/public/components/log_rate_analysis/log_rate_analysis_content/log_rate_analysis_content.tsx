@@ -24,7 +24,6 @@ import {
   type LogRateAnalysisType,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
 import {
   clearAllRowState,
   setAutoRunAnalysis,
@@ -34,7 +33,8 @@ import {
   useCurrentSelectedGroup,
   useCurrentSelectedSignificantItem,
   type GroupTableItem,
-} from '@kbn/aiops-components';
+} from '@kbn/aiops-log-rate-analysis/state';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { useData } from '../../../hooks/use_data';
 import { useDataSource } from '../../../hooks/use_data_source';

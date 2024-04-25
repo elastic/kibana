@@ -18,7 +18,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import type { GroupTableItem } from '@kbn/aiops-components';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
 

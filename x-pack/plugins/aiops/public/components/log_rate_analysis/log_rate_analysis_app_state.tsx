@@ -16,8 +16,8 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
 
-import { LogRateAnalysisReduxProvider } from '@kbn/aiops-components';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';

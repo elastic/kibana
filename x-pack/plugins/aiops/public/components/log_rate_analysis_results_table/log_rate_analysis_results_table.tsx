@@ -12,15 +12,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { EuiTableSortingType } from '@elastic/eui';
 import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
-import { type SignificantItem } from '@kbn/ml-agg-utils';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
+import type { SignificantItem } from '@kbn/ml-agg-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import {
   setPinnedSignificantItem,
   setSelectedSignificantItem,
   useAppDispatch,
   useAppSelector,
-} from '@kbn/aiops-components';
+} from '@kbn/aiops-log-rate-analysis/state';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useColumns, SIG_ITEMS_TABLE } from './use_columns';
