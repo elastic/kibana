@@ -7,6 +7,7 @@
 
 import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { _IGNORED } from '../../../../common/es_fields';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
@@ -24,7 +25,7 @@ export const DegradedDocsPercentageLink = ({
 
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat,
-    query: { language: 'kuery', query: '_ignored:*' },
+    query: { language: 'kuery', query: `${_IGNORED}: *` },
   });
 
   return (

@@ -94,14 +94,21 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render null if error', () => {
+  it('should render no data message if error', () => {
     (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
     });
 
-    const { container } = renderRelatedAlertsBySameSourceEvent();
-    expect(container).toBeEmptyDOMElement();
+    const { getByText } = renderRelatedAlertsBySameSourceEvent();
+    expect(getByText('No related source events.')).toBeInTheDocument();
   });
 
   it('should render no data message', () => {
