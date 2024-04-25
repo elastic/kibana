@@ -14,8 +14,6 @@ import {
   flyoutDegradedDocsTrendText,
 } from '../../../../common/translations';
 
-const dataViewId = uuidv4();
-
 enum DatasetQualityLensColumn {
   Date = 'date_column',
   DegradedDocs = 'degraded_docs_column',
@@ -30,14 +28,18 @@ const MAX_BREAKDOWN_SERIES = 5;
 interface GetLensAttributesParams {
   color: string;
   dataStream: string;
+  datasetTitle: string;
   breakdownFieldName?: string;
 }
 
 export function getLensAttributes({
   color,
   dataStream,
+  datasetTitle,
   breakdownFieldName,
 }: GetLensAttributesParams) {
+  const dataViewId = uuidv4();
+
   const columnOrder = [
     DatasetQualityLensColumn.Date,
     DatasetQualityLensColumn.CountIgnored,
@@ -51,13 +53,12 @@ export function getLensAttributes({
   }
 
   const columns = getChartColumns(breakdownFieldName);
-
   return {
     visualizationType: 'lnsXY',
     title: flyoutDegradedDocsTrendText,
     references: [],
     state: {
-      ...getAdHocDataViewState(dataViewId, dataStream),
+      ...getAdHocDataViewState(dataViewId, dataStream, datasetTitle),
       datasourceStates: {
         formBased: {
           layers: {
@@ -128,7 +129,7 @@ export function getLensAttributes({
   } as TypedLensByValueInput['attributes'];
 }
 
-function getAdHocDataViewState(id: string, title: string) {
+function getAdHocDataViewState(id: string, dataStream: string, title: string) {
   return {
     internalReferences: [
       {
@@ -145,7 +146,7 @@ function getAdHocDataViewState(id: string, title: string) {
     adHocDataViews: {
       [id]: {
         id,
-        title,
+        title: dataStream,
         timeFieldName: '@timestamp',
         sourceFilters: [],
         fieldFormats: {},

@@ -78,13 +78,22 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   );
 
   useEffect(() => {
+    const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+
     const lensAttributes = getLensAttributes({
       color: euiTheme.colors.danger,
-      dataStream: dataStream ?? DEFAULT_LOGS_DATA_VIEW,
+      dataStream: dataStreamName,
+      datasetTitle: dataStreamStat?.title ?? dataStreamName,
       breakdownFieldName: breakdownDataViewField?.name,
     });
     setAttributes(lensAttributes);
-  }, [breakdownDataViewField?.name, euiTheme.colors.danger, setAttributes, dataStream]);
+  }, [
+    breakdownDataViewField?.name,
+    euiTheme.colors.danger,
+    setAttributes,
+    dataStream,
+    dataStreamStat?.title,
+  ]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
