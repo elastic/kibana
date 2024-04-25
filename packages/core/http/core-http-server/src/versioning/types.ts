@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -18,6 +17,7 @@ import type {
   RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
   RouteValidationFunction,
+  LazyValidator,
 } from '../..';
 
 type RqCtx = RequestHandlerContextBase;
@@ -203,13 +203,17 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
 /** @public */
-export interface VersionedCustomRouteValidation {
+export interface VersionedRouteCustomResponseBodyValidation {
+  /** A custom validation function */
   custom: RouteValidationFunction<unknown>;
 }
 
-/** @public */
-export type VersionedResponseValidation = () => Type<unknown>;
-
+/**
+ * @public
+ */
+export type VersionedResponseBodyValidation =
+  | LazyValidator
+  | VersionedRouteCustomResponseBodyValidation;
 /**
  * Map of response status codes to response schemas
  *
@@ -239,7 +243,7 @@ export type VersionedResponseValidation = () => Type<unknown>;
  */
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
-    body: VersionedCustomRouteValidation | VersionedResponseValidation;
+    body: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };
 }

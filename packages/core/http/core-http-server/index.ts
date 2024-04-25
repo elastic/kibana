@@ -104,6 +104,7 @@ export type {
   RouteValidatorRequestAndResponses,
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
+  LazyValidator,
 } from './src/router';
 export {
   validBodyOutput,
@@ -151,8 +152,8 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
-  VersionedCustomRouteValidation,
-  VersionedResponseValidation,
+  VersionedRouteCustomResponseBodyValidation,
+  VersionedResponseBodyValidation,
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';

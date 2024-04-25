@@ -10,15 +10,15 @@ import { once } from 'lodash';
 import type {
   AddVersionOpts,
   RouteValidationSpec,
-  VersionedCustomRouteValidation,
-  VersionedResponseValidation,
+  VersionedRouteCustomResponseBodyValidation,
+  VersionedResponseBodyValidation,
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
 
 export function isCustomValidation(
-  v: VersionedCustomRouteValidation | VersionedResponseValidation
-): v is VersionedCustomRouteValidation {
+  v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation
+): v is VersionedRouteCustomResponseBodyValidation {
   return 'custom' in v;
 }
 

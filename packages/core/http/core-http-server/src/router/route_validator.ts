@@ -157,7 +157,7 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
  * @public
  */
 export interface RouteValidatorFullConfigResponse {
-  [statusCode: number]: { body: () => ObjectType | Type<any> };
+  [statusCode: number]: { body: LazyValidator };
   unsafe?: {
     body?: boolean;
   };
@@ -183,3 +183,14 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
 export type RouteValidator<P, Q, B> =
   | RouteValidatorFullConfigRequest<P, Q, B>
   | RouteValidatorRequestAndResponses<P, Q, B>;
+
+/**
+ * A validation schema factory.
+ *
+ * @note Often used to lazily create schemas that are otherwise not needed
+ * @note assume that these factory will only be called once
+ *
+ * @return A @kbn/config-schema schema
+ * @public
+ */
+export type LazyValidator = () => ObjectType | Type<unknown>;
