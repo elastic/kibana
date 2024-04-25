@@ -19,48 +19,42 @@ export enum COMPARATORS {
 
 export const builtInComparators: { [key: string]: Comparator } = {
   [COMPARATORS.GREATER_THAN]: {
-    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isAboveLabel', {
+    text: i18n.translate('xpack.kbnAlerting.comparators.isAboveLabel', {
       defaultMessage: 'Is above',
     }),
     value: COMPARATORS.GREATER_THAN,
     requiredValues: 1,
   },
   [COMPARATORS.GREATER_THAN_OR_EQUALS]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.common.constants.comparators.isAboveOrEqualsLabel',
-      {
-        defaultMessage: 'Is above or equals',
-      }
-    ),
+    text: i18n.translate('xpack.kbnAlerting.comparators.isAboveOrEqualsLabel', {
+      defaultMessage: 'Is above or equals',
+    }),
     value: COMPARATORS.GREATER_THAN_OR_EQUALS,
     requiredValues: 1,
   },
   [COMPARATORS.LESS_THAN]: {
-    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isBelowLabel', {
+    text: i18n.translate('xpack.kbnAlerting.comparators.isBelowLabel', {
       defaultMessage: 'Is below',
     }),
     value: COMPARATORS.LESS_THAN,
     requiredValues: 1,
   },
   [COMPARATORS.LESS_THAN_OR_EQUALS]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.common.constants.comparators.isBelowOrEqualsLabel',
-      {
-        defaultMessage: 'Is below or equals',
-      }
-    ),
+    text: i18n.translate('xpack.kbnAlerting.comparators.isBelowOrEqualsLabel', {
+      defaultMessage: 'Is below or equals',
+    }),
     value: COMPARATORS.LESS_THAN_OR_EQUALS,
     requiredValues: 1,
   },
   [COMPARATORS.BETWEEN]: {
-    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isBetweenLabel', {
+    text: i18n.translate('xpack.kbnAlerting.comparators.isBetweenLabel', {
       defaultMessage: 'Is between',
     }),
     value: COMPARATORS.BETWEEN,
     requiredValues: 2,
   },
   [COMPARATORS.NOT_BETWEEN]: {
-    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isNotBetweenLabel', {
+    text: i18n.translate('xpack.kbnAlerting.comparators.isNotBetweenLabel', {
       defaultMessage: 'Not between',
     }),
     value: COMPARATORS.NOT_BETWEEN,
