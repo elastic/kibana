@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type {
@@ -79,6 +80,10 @@ export const useBulkActions = ({
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
+
+  const isBulkCustomHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
+    'bulkCustomHighlightedFieldsEnabled'
+  );
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -328,13 +333,17 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 1,
             },
-            {
-              key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
-              name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
-              'data-test-subj': 'investigationFieldsBulkEditRule',
-              disabled: isEditDisabled,
-              panel: 3,
-            },
+            ...(isBulkCustomHighlightedFieldsEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+                    name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
+                    'data-test-subj': 'investigationFieldsBulkEditRule',
+                    disabled: isEditDisabled,
+                    panel: 3,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -500,6 +509,7 @@ export const useBulkActions = ({
       selectedRuleIds,
       hasActionsPrivileges,
       isAllSelected,
+      isBulkCustomHighlightedFieldsEnabled,
       loadingRuleIds,
       startTransaction,
       hasMlPermissions,

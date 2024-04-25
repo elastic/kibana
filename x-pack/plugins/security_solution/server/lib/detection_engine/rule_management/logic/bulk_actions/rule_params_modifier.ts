@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
@@ -108,7 +109,8 @@ const shouldSkipInvestigationFieldsBulkAction = (
 // eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
-  action: BulkActionEditForRuleParams
+  action: BulkActionEditForRuleParams,
+  experimentalFeatures: ExperimentalFeatures
 ): {
   ruleParams: RuleAlertType['params'];
   isActionSkipped: boolean;
@@ -196,6 +198,11 @@ const applyBulkActionEditToRuleParams = (
     }
     // investigation_fields actions
     case BulkActionEditTypeEnum.add_investigation_fields: {
+      invariant(
+        experimentalFeatures.bulkCustomHighlightedFieldsEnabled,
+        "Custom highlighted fields can't be added. Feature is disabled."
+      );
+
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;
@@ -212,6 +219,11 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.delete_investigation_fields: {
+      invariant(
+        experimentalFeatures.bulkCustomHighlightedFieldsEnabled,
+        "Custom highlighted fields can't be deleted. Feature is disabled."
+      );
+
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;
@@ -234,6 +246,11 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.set_investigation_fields: {
+      invariant(
+        experimentalFeatures.bulkCustomHighlightedFieldsEnabled,
+        "Custom highlighted fields can't be overwritten. Feature is disabled."
+      );
+
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;
@@ -283,12 +300,17 @@ const applyBulkActionEditToRuleParams = (
  */
 export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
-  actions: BulkActionEditForRuleParams[]
+  actions: BulkActionEditForRuleParams[],
+  experimentalFeatures: ExperimentalFeatures
 ): RuleParamsModifierResult<RuleAlertType['params']> => {
   let isParamsUpdateSkipped = true;
 
   const modifiedParams = actions.reduce((acc, action) => {
-    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(acc, action);
+    const { ruleParams, isActionSkipped } = applyBulkActionEditToRuleParams(
+      acc,
+      action,
+      experimentalFeatures
+    );
 
     // The rule was updated with at least one action, so mark our rule as updated
     if (!isActionSkipped) {

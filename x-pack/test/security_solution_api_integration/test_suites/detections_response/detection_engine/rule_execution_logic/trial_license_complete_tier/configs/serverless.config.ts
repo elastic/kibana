@@ -20,6 +20,7 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'alertSuppressionForNonSequenceEqlRuleEnabled',
       'alertSuppressionForNewTermsRuleEnabled',
+      'bulkCustomHighlightedFieldsEnabled',
     ])}`,
   ],
 });

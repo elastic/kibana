@@ -8,6 +8,11 @@
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
+import type { ExperimentalFeatures } from '../../../../../../common';
+
+const mockExperimentalFeatures = {
+  bulkCustomHighlightedFieldsEnabled: true,
+} as ExperimentalFeatures;
 
 describe('addItemsToArray', () => {
   test('should add single item to array', () => {
@@ -45,22 +50,30 @@ describe('ruleParamsModifier', () => {
   } as RuleAlertType['params'];
 
   test('should increment version if rule is custom (immutable === false)', () => {
-    const { modifiedParams } = ruleParamsModifier(ruleParamsMock, [
-      {
-        type: BulkActionEditTypeEnum.add_index_patterns,
-        value: ['my-index-*'],
-      },
-    ]);
+    const { modifiedParams } = ruleParamsModifier(
+      ruleParamsMock,
+      [
+        {
+          type: BulkActionEditTypeEnum.add_index_patterns,
+          value: ['my-index-*'],
+        },
+      ],
+      mockExperimentalFeatures
+    );
     expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
   test('should not increment version if rule is prebuilt (immutable === true)', () => {
-    const { modifiedParams } = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
-      {
-        type: BulkActionEditTypeEnum.add_index_patterns,
-        value: ['my-index-*'],
-      },
-    ]);
+    const { modifiedParams } = ruleParamsModifier(
+      { ...ruleParamsMock, immutable: true },
+      [
+        {
+          type: BulkActionEditTypeEnum.add_index_patterns,
+          value: ['my-index-*'],
+        },
+      ],
+      mockExperimentalFeatures
+    );
     expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version);
   });
 
@@ -133,7 +146,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.add_index_patterns,
                 value: indexPatternsToAdd,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -197,7 +211,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: indexPatternsToDelete,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -252,7 +267,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.set_index_patterns,
                 value: indexPatternsToOverwrite,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -270,7 +286,8 @@ describe('ruleParamsModifier', () => {
             type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index-2-*'],
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).not.toHaveProperty('index');
       expect(isParamsUpdateSkipped).toBe(true);
@@ -285,7 +302,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(isParamsUpdateSkipped).toBe(false);
@@ -300,7 +318,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(isParamsUpdateSkipped).toBe(false);
@@ -315,7 +334,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(modifiedParams).toHaveProperty('index', ['test-*']);
@@ -331,7 +351,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(modifiedParams).toHaveProperty('index', undefined);
@@ -340,12 +361,16 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.add_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'machine_learning' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.add_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
@@ -353,12 +378,16 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on deleting index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.delete_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'machine_learning' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.delete_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
@@ -366,12 +395,16 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on overwriting index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.set_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'machine_learning' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.set_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
@@ -379,34 +412,46 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on adding index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.add_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'esql' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.add_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
     });
 
     test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.delete_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'esql' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.delete_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
     });
 
     test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.set_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'esql' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.set_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
@@ -506,7 +551,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.add_investigation_fields,
                 value: investigationFieldsToAdd,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty(
             'investigationFields',
@@ -594,7 +640,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.delete_investigation_fields,
                 value: investigationFieldsToDelete,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty(
             'investigationFields',
@@ -673,7 +720,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.set_investigation_fields,
                 value: investigationFieldsToOverwrite,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty(
             'investigationFields',
@@ -683,19 +731,85 @@ describe('ruleParamsModifier', () => {
         }
       );
     });
+
+    describe('Inv 3', () => {
+      test('should throw error on adding investigation fields if feature is disabled', () => {
+        expect(() =>
+          ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: ['field-1', 'field-2', 'field-3'],
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.add_investigation_fields,
+                value: { field_names: ['field-4'] },
+              },
+            ],
+            {
+              bulkCustomHighlightedFieldsEnabled: false,
+            } as ExperimentalFeatures
+          )
+        ).toThrow("Custom highlighted fields can't be added. Feature is disabled.");
+      });
+
+      test('should throw error on overwriting investigation fields if feature is disabled', () => {
+        expect(() =>
+          ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: ['field-1', 'field-2', 'field-3'],
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_investigation_fields,
+                value: { field_names: ['field-4'] },
+              },
+            ],
+            {
+              bulkCustomHighlightedFieldsEnabled: false,
+            } as ExperimentalFeatures
+          )
+        ).toThrow("Custom highlighted fields can't be overwritten. Feature is disabled.");
+      });
+
+      test('should throw error on deleting investigation fields if feature is disabled', () => {
+        expect(() =>
+          ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: ['field-1', 'field-2', 'field-3'],
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.delete_investigation_fields,
+                value: { field_names: ['field-1'] },
+              },
+            ],
+            {
+              bulkCustomHighlightedFieldsEnabled: false,
+            } as ExperimentalFeatures
+          )
+        ).toThrow("Custom highlighted fields can't be deleted. Feature is disabled.");
+      });
+    });
   });
 
   describe('timeline', () => {
     test('should set timeline', () => {
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
-        {
-          type: BulkActionEditTypeEnum.set_timeline,
-          value: {
-            timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
-            timeline_title: 'Test timeline',
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
+        ruleParamsMock,
+        [
+          {
+            type: BulkActionEditTypeEnum.set_timeline,
+            value: {
+              timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
+              timeline_title: 'Test timeline',
+            },
           },
-        },
-      ]);
+        ],
+        mockExperimentalFeatures
+      );
 
       expect(modifiedParams.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
       expect(modifiedParams.timelineTitle).toBe('Test timeline');
@@ -708,15 +822,19 @@ describe('ruleParamsModifier', () => {
       const INTERVAL_IN_MINUTES = 5;
       const LOOKBACK_IN_MINUTES = 1;
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
-        {
-          type: BulkActionEditTypeEnum.set_schedule,
-          value: {
-            interval: `${INTERVAL_IN_MINUTES}m`,
-            lookback: `${LOOKBACK_IN_MINUTES}m`,
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
+        ruleParamsMock,
+        [
+          {
+            type: BulkActionEditTypeEnum.set_schedule,
+            value: {
+              interval: `${INTERVAL_IN_MINUTES}m`,
+              lookback: `${LOOKBACK_IN_MINUTES}m`,
+            },
           },
-        },
-      ]);
+        ],
+        mockExperimentalFeatures
+      );
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((modifiedParams as any).interval).toBeUndefined();
