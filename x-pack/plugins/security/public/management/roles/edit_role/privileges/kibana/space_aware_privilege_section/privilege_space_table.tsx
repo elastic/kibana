@@ -224,10 +224,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         actions: [
           {
             render: (record: TableRow) => {
-              if (privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)) {
-                return <></>;
-              }
-
               return (
                 <EuiButtonIcon
                   aria-label={i18n.translate(
@@ -240,16 +236,13 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'primary'}
                   iconType={'pencil'}
                   onClick={() => this.props.onEdit(record.privilegeIndex)}
+                  data-test-subj={`privilegeEditAction-${privilegeIndex}`}
                 />
               );
             },
           },
           {
             render: (record: TableRow) => {
-              if (privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)) {
-                return <></>;
-              }
-
               return (
                 <EuiButtonIcon
                   aria-label={i18n.translate(
@@ -262,6 +255,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'danger'}
                   iconType={'trash'}
                   onClick={() => this.onDeleteSpacePrivilege(record)}
+                  data-test-subj={`privilegeDeleteAction-${privilegeIndex}`}
                 />
               );
             },
