@@ -6,16 +6,18 @@
  */
 
 export {
-  clearAllRowState,
   setAutoRunAnalysis,
   setInitialAnalysisStart,
+  setStickyHistogram,
+} from './log_rate_analysis_slice';
+export {
+  clearAllRowState,
   setPinnedGroup,
   setPinnedSignificantItem,
   setSelectedGroup,
   setSelectedSignificantItem,
-  setStickyHistogram,
-  LogRateAnalysisReduxProvider,
-} from './store';
+} from './log_rate_analysis_table_row_slice';
+export { LogRateAnalysisReduxProvider } from './store';
 export { useAppDispatch, useAppSelector, useAppStore } from './hooks';
 export { useCurrentSelectedGroup } from './use_current_selected_group';
 export { useCurrentSelectedSignificantItem } from './use_current_selected_significant_item';

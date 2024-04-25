@@ -64,7 +64,6 @@ interface LogRateAnalysisResultsTableProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -76,9 +75,10 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
-  zeroDocsFallback = false,
 }) => {
   const prevSkippedColumns = usePrevious(skippedColumns);
+
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -96,8 +96,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysis.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysis.selectedGroup);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
   const dispatch = useAppDispatch();
   const isMounted = useMountedState();
 

@@ -258,7 +258,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
-  const { significantItems, zeroDocsFallback } = data;
+  const { significantItems } = data;
 
   useEffect(
     () => setUniqueFieldNames(uniq(significantItems.map((d) => d.fieldName)).sort()),
@@ -455,10 +455,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       {showLogRateAnalysisResultsTable && currentAnalysisType !== undefined && (
         <>
           <EuiSpacer size="s" />
-          <LogRateAnalysisTypeCallOut
-            analysisType={currentAnalysisType}
-            zeroDocsFallback={zeroDocsFallback}
-          />
+          <LogRateAnalysisTypeCallOut analysisType={currentAnalysisType} />
           <EuiSpacer size="xs" />
         </>
       )}
@@ -556,7 +553,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
-            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
@@ -568,7 +564,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
-            zeroDocsFallback={zeroDocsFallback}
           />
         ) : null}
       </div>

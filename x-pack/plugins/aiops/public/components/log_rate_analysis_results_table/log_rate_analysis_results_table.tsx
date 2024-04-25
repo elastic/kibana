@@ -42,7 +42,6 @@ interface LogRateAnalysisResultsTableProps {
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
   skippedColumns: string[];
-  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -54,15 +53,19 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   barColorOverride,
   barHighlightColorOverride,
   skippedColumns,
-  zeroDocsFallback = false,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysis.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysis.selectedGroup);
-  const pinnedSignificantItem = useAppSelector((s) => s.logRateAnalysis.pinnedSignificantItem);
-  const selectedSignificantItem = useAppSelector((s) => s.logRateAnalysis.selectedSignificantItem);
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
+  const pinnedSignificantItem = useAppSelector(
+    (s) => s.logRateAnalysisTableRow.pinnedSignificantItem
+  );
+  const selectedSignificantItem = useAppSelector(
+    (s) => s.logRateAnalysisTableRow.selectedSignificantItem
+  );
 
   const dispatch = useAppDispatch();
 
