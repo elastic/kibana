@@ -149,7 +149,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
-    background: 'red';
     z-index: 1001 !important;
   }
 `;

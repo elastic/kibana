@@ -212,7 +212,6 @@ function renderPopoverContent({
       data-test-subj="dataTableExpandCellActionPopover"
     >
       <EuiFlexItem>
-        <span>{`Hello ${columnId}`}</span>
         <DataTablePopoverCellValue>
           <span
             // formatFieldValue guarantees sanitized values
