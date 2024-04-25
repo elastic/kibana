@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
@@ -164,38 +165,32 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle'], dataStream) => {
-      const usingEffectiveRetention = lifecycle?.enabled && lifecycle?.effective_retention;
-      const usingDataRetention = lifecycle?.enabled && lifecycle?.data_retention;
+    render: (lifecycle: DataStream['lifecycle'], dataStream) => (
+      <ConditionalWrap
+        condition={dataStream.isDataStreamFullyManagedByILM}
+        wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
+      >
+        <>
+          {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}{' '}
 
-      return (
-        <ConditionalWrap
-          condition={dataStream.isDataStreamFullyManagedByILM}
-          wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
-        >
-          <>
-            {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}{' '}
-            {(usingEffectiveRetention || usingDataRetention) && (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
-                  {
-                    defaultMessage: `This data stream is using {retentionType}.`,
-                    values: {
-                      retentionType: usingEffectiveRetention
-                        ? 'effective retention'
-                        : 'customer defined retention',
-                    },
-                  }
-                )}
-              >
-                <EuiIcon size="s" color="subdued" type="iInCircle" />
-              </EuiToolTip>
-            )}
-          </>
-        </ConditionalWrap>
-      );
-    },
+          {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
+                {
+                  defaultMessage: `This data stream is using the maximum allowed data retention: [{effectiveRetention}].`,
+                  values: {
+                    effectiveRetention: lifecycle?.effective_retention
+                  },
+                }
+              )}
+            >
+              <EuiIcon size="s" color="subdued" type="iInCircle" />
+            </EuiToolTip>
+          )}
+        </>
+      </ConditionalWrap>
+    )
   });
 
   columns.push({
