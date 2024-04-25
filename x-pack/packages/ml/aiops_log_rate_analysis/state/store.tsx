@@ -10,6 +10,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import useMount from 'react-use/lib/useMount';
 
+import { streamSlice } from '@kbn/ml-response-stream/client';
+
 import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
 
 import { logRateAnalysisSlice } from './log_rate_analysis_slice';
@@ -19,8 +21,13 @@ import type { InitialAnalysisStart } from './log_rate_analysis_slice';
 const getReduxStore = () =>
   configureStore({
     reducer: {
+      // General page state
       logRateAnalysis: logRateAnalysisSlice.reducer,
+      // Analysis results
       logRateAnalysisResults: logRateAnalysisResultsSlice.reducer,
+      // Handles running the analysis
+      logRateAnalysisStream: streamSlice.reducer,
+      // Handles hovering and pinning table rows
       logRateAnalysisTableRow: logRateAnalysisTableRowSlice.reducer,
     },
   });

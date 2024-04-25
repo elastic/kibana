@@ -24,10 +24,9 @@ import {
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
+import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 import {
-  cancel,
   clearAllRowState,
-  start,
   useAppDispatch,
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
@@ -172,9 +171,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
   const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
-  const isRunning = useAppSelector((s) => s.logRateAnalysis.isRunning);
+  const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
   const stickyHistogram = useAppSelector((s) => s.logRateAnalysis.stickyHistogram);
-  const streamErrors = useAppSelector((s) => s.logRateAnalysis.errors);
+  const streamErrors = useAppSelector((s) => s.logRateAnalysisStream.errors);
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
@@ -234,7 +233,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     if (abortSignal.current) {
       abortSignal.current();
     }
-    dispatch(cancel());
+    dispatch(cancelStream());
   }
 
   useEffect(() => {
@@ -337,7 +336,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (shouldStart) {
-      const promise = dispatch(start(startParams));
+      const promise = dispatch(startStream(startParams));
       abortSignal.current = promise.abort;
       setShouldStart(false);
     }
@@ -347,7 +346,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   useEffect(() => {
     setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
-    const promise = dispatch(start(startParams));
+    const promise = dispatch(startStream(startParams));
     abortSignal.current = promise.abort;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
