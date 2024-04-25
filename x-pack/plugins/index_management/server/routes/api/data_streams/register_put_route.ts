@@ -36,10 +36,20 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
           await client.asCurrentUser.indices.deleteDataLifecycle({ name });
         } else {
           // Otherwise, we create or update the data retention policy.
-          await client.asCurrentUser.indices.putDataLifecycle({
+          //
+          // Be aware that in serverless it could happen that the user defined
+          // data retention wont be the effective retention as there might be a
+          // global data retention limit set.
+          const { headers } = await client.asCurrentUser.indices.putDataLifecycle({
             name,
             data_retention: dataRetention,
-          });
+          }, { meta: true });
+
+          return response.ok({ body: {
+            success: true,
+            // ...(headers.warning ? { warning: headers.warning } : {}),
+            warning: 'Infinite retention is not allowed for this project. The default retention of [7d] will be applied.'
+          }});
         }
 
         return response.ok({ body: { success: true } });
