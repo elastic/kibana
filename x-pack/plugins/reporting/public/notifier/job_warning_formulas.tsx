@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { CoreStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { JobId } from '@kbn/reporting-common/types';
 import { DownloadButton } from './job_download_button';
 
@@ -20,7 +20,7 @@ export const getWarningFormulasToast = (
   job: JobSummary,
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string,
-  theme: ThemeServiceStart
+  core: CoreStart
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
@@ -28,7 +28,7 @@ export const getWarningFormulasToast = (
       defaultMessage="{reportType} may contain formulas"
       values={{ reportType: job.jobtype }}
     />,
-    { theme$: theme.theme$ }
+    core
   ),
   text: toMountPoint(
     <>
@@ -44,7 +44,7 @@ export const getWarningFormulasToast = (
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </>,
-    { theme$: theme.theme$ }
+    core
   ),
   'data-test-subj': 'completeReportCsvFormulasWarning',
 });

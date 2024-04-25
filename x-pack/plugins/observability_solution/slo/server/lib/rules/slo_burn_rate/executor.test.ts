@@ -198,6 +198,7 @@ describe('BurnRateRuleExecutor', () => {
         executor({
           params: someRuleParamsWithWindows({ sloId: 'non-existent' }),
           startedAt: new Date(),
+          startedAtOverridden: false,
           services: servicesMock,
           executionId: 'irrelevant',
           logger: loggerMock,
@@ -219,6 +220,7 @@ describe('BurnRateRuleExecutor', () => {
       const result = await executor({
         params: someRuleParamsWithWindows({ sloId: slo.id }),
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
@@ -268,6 +270,7 @@ describe('BurnRateRuleExecutor', () => {
       await executor({
         params: ruleParams,
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
@@ -314,6 +317,7 @@ describe('BurnRateRuleExecutor', () => {
       await executor({
         params: ruleParams,
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
@@ -370,6 +374,7 @@ describe('BurnRateRuleExecutor', () => {
       await executor({
         params: ruleParams,
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
@@ -503,6 +508,7 @@ describe('BurnRateRuleExecutor', () => {
       await executor({
         params: ruleParams,
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
@@ -614,6 +620,7 @@ describe('BurnRateRuleExecutor', () => {
       await executor({
         params: ruleParams,
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,

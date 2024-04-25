@@ -28,6 +28,7 @@ import { migrateLegacyActions } from '../lib';
 import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -79,6 +80,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
 };

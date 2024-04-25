@@ -45,7 +45,7 @@ interface Props {
 
 const dateRange = {
   from: 'now-30d',
-  to: 'now',
+  to: 'now+1d',
 };
 
 export function AlertHistoryChart({ rule, dataView, alert }: Props) {
@@ -102,7 +102,10 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
           label: String(annotation.doc_count),
           key: {
             type: 'point_in_time',
-            timestamp: moment(new Date(annotation.key_as_string!)).toISOString(),
+            timestamp: moment(new Date(annotation.key_as_string!))
+              .startOf('day')
+              .add(12, 'h')
+              .toISOString(),
           },
           lineWidth: 2,
           color: euiTheme.colors.danger,

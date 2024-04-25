@@ -8,7 +8,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { settingsRoutesService } from '../../services';
-import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
+import type {
+  PutSettingsResponse,
+  PutSettingsRequest,
+  GetSettingsResponse,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
+} from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -61,5 +67,23 @@ export function sendPutSettings(body: PutSettingsRequest['body']) {
     path: settingsRoutesService.getUpdatePath(),
     version: API_VERSIONS.public.v1,
     body,
+  });
+}
+
+export function useGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return useRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
+
+export function sendGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return sendRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
   });
 }
