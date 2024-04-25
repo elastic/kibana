@@ -83,6 +83,20 @@ describe('convertRequestToMetricsAPIOptions', () => {
     });
   });
 
+  it('should work with groupBy and groupInstance as string', () => {
+    expect(
+      convertRequestToMetricsAPIOptions({
+        ...BASE_REQUEST,
+        groupBy: 'host.name',
+        groupInstance: 'host-1',
+      })
+    ).toEqual({
+      ...BASE_METRICS_UI_OPTIONS,
+      groupBy: ['host.name'],
+      groupInstance: ['host-1'],
+    });
+  });
+
   it('should work with groupInstance arrays', () => {
     expect(
       convertRequestToMetricsAPIOptions({
