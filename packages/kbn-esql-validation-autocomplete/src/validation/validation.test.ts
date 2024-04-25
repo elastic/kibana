@@ -18,6 +18,7 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 
 const fieldTypes = [
   'number',
@@ -612,11 +613,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['bucket', 'to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1491,11 +1492,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['bucket', 'to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1788,30 +1789,6 @@ describe('validation logic', () => {
             ]);
           }
         }
-      });
-
-      describe('constant-only parameters', () => {
-        testErrorsAndWarnings('from index | eval bucket(dateField, abs(numberField), "", "")', [
-          'Argument of [bucket] must be a constant, received [abs(numberField)]',
-        ]);
-        testErrorsAndWarnings(
-          'from index | eval bucket(dateField, abs(length(numberField)), "", "")',
-          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
-        );
-        testErrorsAndWarnings('from index | eval bucket(dateField, pi(), "", "")', []);
-        testErrorsAndWarnings('from index | eval bucket(dateField, 1 + 30 / 10, "", "")', []);
-        testErrorsAndWarnings(
-          'from index | eval bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-          []
-        );
-        testErrorsAndWarnings(
-          'from index | eval bucket(dateField, numberField, stringField, stringField)',
-          [
-            'Argument of [bucket] must be a constant, received [numberField]',
-            'Argument of [bucket] must be a constant, received [stringField]',
-            'Argument of [bucket] must be a constant, received [stringField]',
-          ]
-        );
       });
     });
 
@@ -2153,11 +2130,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // to_version is a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['bucket', 'to_version', 'mv_sort'].includes(name)
+            !['to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
@@ -2240,6 +2217,63 @@ describe('validation logic', () => {
           }
         }
       }
+
+      for (const { name, alias, signatures, ...defRest } of groupingFunctionDefinitions) {
+        for (const { params, ...signRest } of signatures) {
+          const fieldMapping = getFieldMapping(params);
+
+          const correctSignature = getFunctionSignatures(
+            { name, ...defRest, signatures: [{ params: fieldMapping, ...signRest }] },
+            { withTypes: false }
+          )[0].declaration;
+          testErrorsAndWarnings(`from a_index | stats by ${correctSignature}`, []);
+
+          if (params.some(({ constantOnly }) => constantOnly)) {
+            const fieldReplacedType = params
+              .filter(({ constantOnly }) => constantOnly)
+              .map(({ type }) => type);
+            // create the mapping without the literal flag
+            // this will make the signature wrong on purpose where in place on constants
+            // the arg will be a column of the same type
+            const fieldMappingWithoutLiterals = getFieldMapping(
+              params.map(({ constantOnly, ...rest }) => rest)
+            );
+            testErrorsAndWarnings(
+              `from a_index | stats by ${
+                getFunctionSignatures(
+                  {
+                    name,
+                    ...defRest,
+                    signatures: [{ params: fieldMappingWithoutLiterals, ...signRest }],
+                  },
+                  { withTypes: false }
+                )[0].declaration
+              }`,
+              fieldReplacedType
+                // if a param of type time_literal or chrono_literal it will always be a literal
+                // so no way to test the constantOnly thing
+                .filter((type) => !['time_literal', 'chrono_literal'].includes(type))
+                .map((type) => `Argument of [${name}] must be a constant, received [${type}Field]`)
+            );
+          }
+
+          if (alias) {
+            for (const otherName of alias) {
+              const signatureStringWithAlias = getFunctionSignatures(
+                {
+                  name: otherName,
+                  ...defRest,
+                  signatures: [{ params: fieldMapping, ...signRest }],
+                },
+                { withTypes: false }
+              )[0].declaration;
+
+              testErrorsAndWarnings(`from a_index | stats by ${signatureStringWithAlias}`, []);
+            }
+          }
+        }
+      }
+
       testErrorsAndWarnings(
         `FROM index
     | EVAL numberField * 3.281
@@ -2251,6 +2285,30 @@ describe('validation logic', () => {
         `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
         []
       );
+
+      describe('constant-only parameters', () => {
+        testErrorsAndWarnings('from index | stats by bucket(dateField, abs(numberField), "", "")', [
+          'Argument of [bucket] must be a constant, received [abs(numberField)]',
+        ]);
+        testErrorsAndWarnings(
+          'from index | stats by bucket(dateField, abs(length(numberField)), "", "")',
+          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
+        );
+        testErrorsAndWarnings('from index | stats by bucket(dateField, pi(), "", "")', []);
+        testErrorsAndWarnings('from index | stats by bucket(dateField, 1 + 30 / 10, "", "")', []);
+        testErrorsAndWarnings(
+          'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+          []
+        );
+        testErrorsAndWarnings(
+          'from index | stats by bucket(dateField, numberField, stringField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+          ]
+        );
+      });
     });
 
     describe('sort', () => {

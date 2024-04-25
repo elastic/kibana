@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SuggestionRawDefinition } from './types';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
@@ -22,7 +23,9 @@ import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
-const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
+const allFunctions = statsAggregationFunctionDefinitions
+  .concat(evalFunctionsDefinitions)
+  .concat(groupingFunctionDefinitions);
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -75,11 +78,13 @@ export const getCompatibleFunctionDefinition = (
   returnTypes?: string[],
   ignored: string[] = []
 ): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions.filter(
-    ({ name, supportedCommands, supportedOptions }) =>
-      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-      !ignored.includes(name)
-  );
+  const fnSupportedByCommand = allFunctions
+    .filter(
+      ({ name, supportedCommands, supportedOptions }) =>
+        (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+        !ignored.includes(name)
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
   if (!returnTypes) {
     return fnSupportedByCommand.map(getSuggestionFunctionDefinition);
   }

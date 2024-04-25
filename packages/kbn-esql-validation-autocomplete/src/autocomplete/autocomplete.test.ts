@@ -16,6 +16,7 @@ import { TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { SuggestionRawDefinition } from './types';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -84,14 +85,22 @@ function getFunctionSignaturesByReturnType(
   _expectedReturnType: string | string[],
   {
     agg,
+    grouping,
     evalMath,
     builtin,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
-  }: { agg?: boolean; evalMath?: boolean; builtin?: boolean; skipAssign?: boolean } = {},
+  }: {
+    agg?: boolean;
+    grouping?: boolean;
+    evalMath?: boolean;
+    builtin?: boolean;
+    skipAssign?: boolean;
+  } = {},
   paramsTypes?: string[],
-  ignored?: string[]
+  ignored?: string[],
+  option?: string
 ) {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -101,6 +110,9 @@ function getFunctionSignaturesByReturnType(
   if (agg) {
     list.push(...statsAggregationFunctionDefinitions);
   }
+  if (grouping) {
+    list.push(...groupingFunctionDefinitions);
+  }
   // eval functions (eval is a special keyword in JS)
   if (evalMath) {
     list.push(...evalFunctionsDefinitions);
@@ -109,11 +121,11 @@ function getFunctionSignaturesByReturnType(
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
   return list
-    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, name }) => {
+    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
-      if (!supportedCommands.includes(command)) {
+      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
         return false;
       }
       const filteredByReturnType = signatures.filter(
@@ -144,6 +156,7 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map(({ type, name, signatures }) => {
       if (type === 'builtin') {
         return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
@@ -260,7 +273,10 @@ describe('autocomplete', () => {
         );
         const suggestionInertTextSorted = suggestions
           // simulate the editor behaviour for sorting suggestions
-          .sort((a, b) => (a.sortText || '').localeCompare(b.sortText || ''));
+          // copied from https://github.com/microsoft/vscode/blob/0a141d23179c76c5771df25a43546d9d9b6ed71c/src/vs/workbench/contrib/testing/browser/testingDecorations.ts#L971-L972
+          // still not sure how accurate this is...
+          .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label));
+
         for (const [index, receivedSuggestion] of suggestionInertTextSorted.entries()) {
           if (typeof expected[index] !== 'object') {
             expect(receivedSuggestion.text).toEqual(expected[index]);
@@ -591,15 +607,23 @@ describe('autocomplete', () => {
     const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
       agg: true,
     });
-    const allEvaFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
-      evalMath: true,
-    });
+    const allEvaFunctions = getFunctionSignaturesByReturnType(
+      'stats',
+      'any',
+      {
+        evalMath: true,
+        grouping: true,
+      },
+      undefined,
+      undefined,
+      'by'
+    );
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a ', [
       { text: '= $0', asSnippet: true, command: TRIGGER_SUGGESTION_COMMAND },
     ]);
     testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions('from a | stats a=max(b) by ', [
+    testSuggestions.only('from a | stats a=max(b) by ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,

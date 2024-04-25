@@ -812,56 +812,6 @@
       "warning": []
     },
     {
-      "query": "row var = bucket(now(), 5, \"a\", \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row bucket(now(), 5, \"a\", \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = bucket(now(), 5, now(), now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row bucket(now(), 5, now(), now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = bucket(now(), 5, \"a\", now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row bucket(now(), 5, \"a\", now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = bucket(now(), 5, now(), \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row bucket(now(), 5, now(), \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = bucket(5, 5, 5, 5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row bucket(5, 5, 5, 5)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = case(true, \"a\")",
       "error": [],
       "warning": []
@@ -6389,18 +6339,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where bucket(numberField, 5, 5, 5) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where bucket(stringField, 5, 5, 5) > 0",
-      "error": [
-        "Argument of [bucket] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where ceil(numberField) > 0",
       "error": [],
       "warning": []
@@ -8296,101 +8234,6 @@
       "query": "from a_index | eval atan2(numberField, numberField, extraArg)",
       "error": [
         "Error: [atan2] function expects exactly 2 arguments, got 3."
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = bucket(dateField, 5, \"a\", \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, 5, \"a\", \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, numberField, stringField, stringField)",
-      "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [stringField]",
-        "Argument of [bucket] must be a constant, received [stringField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = bucket(dateField, 5, now(), now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, 5, now(), now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, numberField, dateField, dateField)",
-      "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [dateField]",
-        "Argument of [bucket] must be a constant, received [dateField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = bucket(dateField, 5, \"a\", now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, 5, \"a\", now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, numberField, stringField, dateField)",
-      "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [stringField]",
-        "Argument of [bucket] must be a constant, received [dateField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = bucket(dateField, 5, now(), \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, 5, now(), \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(dateField, numberField, dateField, stringField)",
-      "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [dateField]",
-        "Argument of [bucket] must be a constant, received [stringField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = bucket(numberField, 5, 5, 5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(numberField, 5, 5, 5)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval bucket(numberField, numberField, numberField, numberField)",
-      "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [numberField]"
       ],
       "warning": []
     },
@@ -13042,44 +12885,6 @@
       "warning": []
     },
     {
-      "query": "from index | eval bucket(dateField, abs(numberField), \"\", \"\")",
-      "error": [
-        "Argument of [bucket] must be a constant, received [abs(numberField)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index | eval bucket(dateField, abs(length(numberField)), \"\", \"\")",
-      "error": [
-        "Argument of [bucket] must be a constant, received [abs(length(numberField))]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index | eval bucket(dateField, pi(), \"\", \"\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index | eval bucket(dateField, 1 + 30 / 10, \"\", \"\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index | eval bucket(dateField, 1 + 30 / 10, concat(\"\", \"\"), \"\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index | eval bucket(dateField, numberField, stringField, stringField)",
-      "error": [
-        "Argument of [bucket] must be a constant, received [numberField]",
-        "Argument of [bucket] must be a constant, received [stringField]",
-        "Argument of [bucket] must be a constant, received [stringField]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | stats ",
       "error": [
         "At least one aggregation or grouping expression required in [STATS]"
@@ -14827,6 +14632,131 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats by bucket(dateField, 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(dateField, 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(numberField, 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(numberField, 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(numberField, 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, 5, \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, numberField, stringField, stringField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [stringField]",
+        "Argument of [bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(dateField, 5, \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, 5, now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, numberField, dateField, dateField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [dateField]",
+        "Argument of [bucket] must be a constant, received [dateField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(dateField, 5, now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, numberField, stringField, dateField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [stringField]",
+        "Argument of [bucket] must be a constant, received [dateField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(dateField, 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(dateField, numberField, dateField, stringField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [dateField]",
+        "Argument of [bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(dateField, 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(numberField, 5, 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(numberField, numberField, numberField, numberField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bin(numberField, 5, 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "FROM index\n    | EVAL numberField * 3.281\n    | STATS avg_numberField = AVG(`numberField * 3.281`)",
       "error": [],
       "warning": []
@@ -14834,6 +14764,44 @@
     {
       "query": "FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL `round(numberField) + 1` / 2",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | stats by bucket(dateField, abs(numberField), \"\", \"\")",
+      "error": [
+        "Argument of [bucket] must be a constant, received [abs(numberField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index | stats by bucket(dateField, abs(length(numberField)), \"\", \"\")",
+      "error": [
+        "Argument of [bucket] must be a constant, received [abs(length(numberField))]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index | stats by bucket(dateField, pi(), \"\", \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | stats by bucket(dateField, 1 + 30 / 10, \"\", \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | stats by bucket(dateField, 1 + 30 / 10, concat(\"\", \"\"), \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | stats by bucket(dateField, numberField, stringField, stringField)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]",
+        "Argument of [bucket] must be a constant, received [stringField]",
+        "Argument of [bucket] must be a constant, received [stringField]"
+      ],
       "warning": []
     },
     {
