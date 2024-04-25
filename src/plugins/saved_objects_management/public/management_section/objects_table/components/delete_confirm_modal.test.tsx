@@ -84,7 +84,7 @@ describe('DeleteConfirmModal', () => {
         allowedTypes={allowedTypes}
       />
     );
-    expect(wrapper.find('.euiTableRow')).toHaveLength(3);
+    expect(wrapper.find('tr.euiTableRow')).toHaveLength(3);
   });
 
   it('calls `onCancel` when clicking on the cancel button', () => {
@@ -135,7 +135,7 @@ describe('DeleteConfirmModal', () => {
           allowedTypes={allowedTypes}
         />
       );
-      expect(wrapper.find('.euiTableRow')).toHaveLength(1);
+      expect(wrapper.find('tr.euiTableRow')).toHaveLength(1);
     });
 
     it('displays a callout when at least one object cannot be deleted', () => {

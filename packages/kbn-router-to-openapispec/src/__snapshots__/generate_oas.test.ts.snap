@@ -9,6 +9,17 @@ Object {
         "type": "string",
       },
     },
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
   },
   "externalDocs": undefined,
   "info": Object {
@@ -87,9 +98,6 @@ Object {
     Object {
       "basicAuth": Array [],
     },
-    Object {
-      "apiKeyAuth": Array [],
-    },
   ],
   "servers": Array [
     Object {
@@ -104,6 +112,17 @@ exports[`generateOpenApiDocument @kbn/config-schema generates the expected OpenA
 Object {
   "components": Object {
     "schemas": Object {},
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
   },
   "externalDocs": undefined,
   "info": Object {
@@ -136,6 +155,10 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "type": "string",
+                  },
                   "foo": Object {
                     "type": "string",
                   },
@@ -333,9 +356,6 @@ Object {
   "security": Array [
     Object {
       "basicAuth": Array [],
-    },
-    Object {
-      "apiKeyAuth": Array [],
     },
   ],
   "servers": Array [

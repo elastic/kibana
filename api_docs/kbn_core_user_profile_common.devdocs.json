@@ -1,0 +1,364 @@
+{
+  "id": "@kbn/core-user-profile-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-common",
+        "id": "def-common.UserProfile",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfile",
+        "description": [
+          "\nIMPORTANT:\n\nThe types in this file are duplicated at\n`packages/kbn-user-profile-components/src/user_profile.ts`\n\nWhen making changes please ensure to keep both files in sync.\n\nDescribes basic properties stored in user profile."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<D>"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfile.uid",
+            "type": "string",
+            "tags": [],
+            "label": "uid",
+            "description": [
+              "\nUnique ID for of the user profile."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfile.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIndicates whether user profile is enabled or not."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfile.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nInformation about the user that owns profile."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileUserInfo",
+                "text": "UserProfileUserInfo"
+              }
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfile.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nUser specific data associated with the profile."
+            ],
+            "signature": [
+              "{ [P in keyof D]?: D[P] | undefined; }"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-common",
+        "id": "def-common.UserProfileUserInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileUserInfo",
+        "description": [
+          "\nBasic user information returned in user profile."
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileUserInfo.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [
+              "\nUsername of the user."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileUserInfo.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [
+              "\nOptional email of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileUserInfo.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [
+              "\nOptional full name of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-common",
+        "id": "def-common.UserProfileUserInfoWithSecurity",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileUserInfoWithSecurity",
+        "description": [
+          "\nExtended user information returned in user profile (both basic and security related properties)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileUserInfoWithSecurity",
+            "text": "UserProfileUserInfoWithSecurity"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileUserInfo",
+            "text": "UserProfileUserInfo"
+          }
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileUserInfoWithSecurity.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nList of the user roles."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileUserInfoWithSecurity.realm_name",
+            "type": "string",
+            "tags": [],
+            "label": "realm_name",
+            "description": [
+              "\nName of the Elasticsearch security realm that was used to authenticate user."
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileUserInfoWithSecurity.realm_domain",
+            "type": "string",
+            "tags": [],
+            "label": "realm_domain",
+            "description": [
+              "\nOptional name of the security domain that Elasticsearch security realm that was\nused to authenticate user resides in (if any)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-common",
+        "id": "def-common.UserProfileWithSecurity",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileWithSecurity",
+        "description": [
+          "\nDescribes all properties stored in user profile (both basic and security related properties)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfileWithSecurity",
+            "text": "UserProfileWithSecurity"
+          },
+          "<D, L> extends ",
+          {
+            "pluginId": "@kbn/core-user-profile-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileCommonPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<D>"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileWithSecurity.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nInformation about the user that owns profile."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileUserInfoWithSecurity",
+                "text": "UserProfileUserInfoWithSecurity"
+              }
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-common",
+            "id": "def-common.UserProfileWithSecurity.labels",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "labels",
+            "description": [
+              "\nUser specific _searchable_ labels associated with the profile. Note that labels are considered\nsecurity related field since it's going to be used to store user's space ID."
+            ],
+            "signature": [
+              "L"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-common",
+        "id": "def-common.UserProfileData",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileData",
+        "description": [
+          "\nPlaceholder for data stored in user profile."
+        ],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-common",
+        "id": "def-common.UserProfileLabels",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileLabels",
+        "description": [
+          "\nType of the user profile labels structure (currently"
+        ],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
+        "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
