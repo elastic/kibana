@@ -17,10 +17,10 @@ import {
 } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
-import { renderTemplate } from './render_template';
+import { renderTemplate } from '../utils/render_template';
 
-import { AssistClient } from './assist';
-import { getCitations } from './get_citations';
+import { AssistClient } from '../utils/assist';
+import { getCitations } from '../utils/get_citations';
 
 interface RAGOptions {
   index: string;

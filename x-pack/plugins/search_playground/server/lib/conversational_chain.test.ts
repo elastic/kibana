@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createAssist as Assist } from './assist';
+import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain } from './conversational_chain';
 import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
