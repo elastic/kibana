@@ -8,10 +8,11 @@
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { PublishesDataViews, SerializedTitles } from '@kbn/presentation-publishing';
+import { PublishesSelectedFields } from './publishes_selected_fields';
 
 export type FieldListSerializedStateState = SerializedTitles & {
   dataViewId?: string;
   selectedFieldNames?: string[];
 };
 
-export type FieldListApi = DefaultEmbeddableApi & PublishesDataViews;
+export type FieldListApi = DefaultEmbeddableApi & PublishesSelectedFields & PublishesDataViews;

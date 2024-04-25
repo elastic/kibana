@@ -15,7 +15,8 @@
       "data",
       "charts",
       "fieldFormats",
-      "developerExamples"
+      "developerExamples",
+      "dataViewFieldEditor"
     ],
     "requiredBundles": ["presentationUtil"],
     "extraPublicDirs": ["public/hello_world"]

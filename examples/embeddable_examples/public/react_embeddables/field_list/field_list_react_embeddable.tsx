@@ -117,6 +117,7 @@ export const getFieldListFactory = (
         {
           ...titlesApi,
           dataViews: dataViews$,
+          selectedFields: selectedFieldNames$,
           serializeState: () => {
             const dataViewId = selectedDataViewId$.getValue();
             const references: Reference[] = dataViewId
