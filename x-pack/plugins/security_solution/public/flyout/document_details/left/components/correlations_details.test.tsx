@@ -27,6 +27,7 @@ import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_re
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../mocks/mock_context';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
@@ -42,6 +43,11 @@ jest.mock('../../shared/hooks/use_fetch_related_alerts_by_session');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');
 jest.mock('../../shared/hooks/use_fetch_related_cases');
+
+jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn(),
+}));
+const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
 
 const renderCorrelationDetails = () => {
   return render(
@@ -62,12 +68,13 @@ const NO_DATA_MESSAGE = 'No correlations data available.';
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
   });
 
   it('renders all sections', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, documentId: 'event-id', indices: ['index1'] });
+      .mockReturnValue({ show: true, documentId: 'event-id' });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
@@ -115,7 +122,7 @@ describe('CorrelationsDetails', () => {
   it('should render no section and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, documentId: 'event-id', indices: ['index1'] });
+      .mockReturnValue({ show: false, documentId: 'event-id' });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
@@ -141,31 +148,5 @@ describe('CorrelationsDetails', () => {
       queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
     ).not.toBeInTheDocument();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
-  });
-
-  it('should render no section if values are null', () => {
-    jest
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, documentId: 'event-id' });
-    jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
-    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
-    jest.mocked(useShowRelatedCases).mockReturnValue(false);
-    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
-
-    const { queryByTestId } = renderCorrelationDetails();
-
-    expect(
-      queryByTestId(CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID)
-    ).not.toBeInTheDocument();
-    expect(
-      queryByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)
-    ).not.toBeInTheDocument();
-    expect(
-      queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
-    ).not.toBeInTheDocument();
-    expect(queryByTestId(CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID)).not.toBeInTheDocument();
-    expect(
-      queryByTestId(CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_TITLE_TEST_ID)
-    ).not.toBeInTheDocument();
   });
 });

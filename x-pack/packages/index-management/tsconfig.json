@@ -17,10 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/core-application-browser",
-    "@kbn/usage-collection-plugin",
-    "@kbn/management-plugin",
-    "@kbn/share-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/console-plugin",
   ]
 }

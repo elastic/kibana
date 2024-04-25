@@ -5,66 +5,54 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { getLensAttributes } from './lens_attributes';
+import { useDegradedDocsChart } from '../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
   'ACTION_CUSTOMIZE_PANEL',
   'ACTION_CONFIGURE_IN_LENS',
+  'ACTION_OPEN_IN_DISCOVER',
   'create-ml-ad-job-action',
 ];
 
-export function DegradedDocsChart({
-  dataStream,
-  timeRange,
-  lastReloadTime,
-  dataView,
-  breakdownDataViewField,
-}: {
-  dataStream?: string;
+interface DegradedDocsChartProps
+  extends Pick<
+    ReturnType<typeof useDegradedDocsChart>,
+    'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
+  > {
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
-  dataView?: DataView;
-  breakdownDataViewField?: DataViewField;
-}) {
+  onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
+}
+
+export function DegradedDocsChart({
+  attributes,
+  isChartLoading,
+  onChartLoading,
+  extraActions,
+  timeRange,
+  lastReloadTime,
+  onTimeRangeChange,
+}: DegradedDocsChartProps) {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
 
-  const { euiTheme } = useEuiTheme();
-
-  const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
-  const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
-    undefined
+  const handleBrushEnd = useCallback(
+    ({ range: [start, end] }: { range: number[] }) => {
+      onTimeRangeChange({ start: new Date(start).toISOString(), end: new Date(end).toISOString() });
+    },
+    [onTimeRangeChange]
   );
-
-  const handleChartLoading = useCallback((isLoading: boolean) => {
-    setIsChartLoading(isLoading);
-  }, []);
-
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
-
-  useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes(
-        euiTheme.colors.danger,
-        dataView,
-        breakdownDataViewField?.name
-      );
-
-      setAttributes(lensAttributes);
-    }
-  }, [lens, euiTheme.colors.danger, dataView, breakdownDataViewField]);
 
   return (
     <>
@@ -80,21 +68,22 @@ export function DegradedDocsChart({
           ) : (
             <lens.EmbeddableComponent
               id="datasetQualityFlyoutDegradedDocsTrend"
-              style={{ height: CHART_HEIGHT }}
               css={lensEmbeddableComponentStyles}
+              style={{ height: CHART_HEIGHT }}
+              overrides={{
+                settings: { legendAction: 'ignore' },
+              }}
               viewMode={ViewMode.VIEW}
               hidePanelTitles={true}
               disabledActions={DISABLED_ACTIONS}
               timeRange={timeRange}
               attributes={attributes!}
               withDefaultActions={true}
+              extraActions={extraActions}
               disableTriggers={false}
               lastReloadRequestTime={lastReloadTime}
-              query={{
-                language: 'kuery',
-                query: filterQuery || '',
-              }}
-              onLoad={handleChartLoading}
+              onLoad={onChartLoading}
+              onBrushEnd={handleBrushEnd}
             />
           )}
         </EuiFlexGroup>
