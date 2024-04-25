@@ -7,3 +7,4 @@
  */
 
 export { securityServiceMock } from './src/security_service.mock';
+export type { InternalSecurityStartMock, SecurityStartMock } from './src/security_service.mock';
