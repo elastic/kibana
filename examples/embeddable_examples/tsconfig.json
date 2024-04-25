@@ -31,6 +31,12 @@
     "@kbn/unified-field-list",
     "@kbn/presentation-containers",
     "@kbn/core-application-browser",
-    "@kbn/developer-examples-plugin"
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/discover-utils",
+    "@kbn/cell-actions",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/unified-data-table"
   ]
 }
