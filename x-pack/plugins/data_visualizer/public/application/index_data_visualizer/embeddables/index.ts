@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { DataVisualizerGridEmbeddableFactory } from './grid_embeddable/grid_embeddable_factory';
-import type { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../plugin';
-
-export function registerEmbeddables(
-  embeddable: EmbeddableSetup,
-  core: CoreSetup<DataVisualizerStartDependencies, DataVisualizerPluginStart>
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DataVisualizerCoreSetup,
+  DataVisualizerSetupDependencies,
+} from '../../common/types/data_visualizer_plugin';
+import { FIELD_STATS_EMBED_ID } from './grid_embeddable/constants';
+import { registerFieldStatsUIActions } from './grid_embeddable/ui_actions/create_field_stats_embeddable_ui_action';
+export function registerReactEmbeddablesAndActions(
+  core: DataVisualizerCoreSetup,
+  plugins: DataVisualizerSetupDependencies
 ) {
-  const dataVisualizerGridEmbeddableFactory = new DataVisualizerGridEmbeddableFactory(
-    core.getStartServices
-  );
-  embeddable.registerEmbeddableFactory(
-    dataVisualizerGridEmbeddableFactory.type,
-    dataVisualizerGridEmbeddableFactory
-  );
+  // Embeddable factory for field stats table
+  if (plugins.uiActions) {
+    registerFieldStatsUIActions(core, plugins.uiActions);
+  }
+  registerReactEmbeddableFactory(FIELD_STATS_EMBED_ID, async () => {
+    const { getFieldStatsTableFactory } = await import(
+      './grid_embeddable/field_stats_embeddable_factory'
+    );
+    return getFieldStatsTableFactory(core);
+  });
 }

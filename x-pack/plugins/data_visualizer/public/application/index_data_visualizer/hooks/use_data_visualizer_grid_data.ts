@@ -127,7 +127,11 @@ export const useDataVisualizerGridData = (
     return getFieldsWithSubFields({
       input,
       currentDataView,
-      shouldGetSubfields: input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
+      // @todo: test if this is good
+      shouldGetSubfields:
+        input.shouldGetSubfields !== undefined
+          ? input.shouldGetSubfields
+          : input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);

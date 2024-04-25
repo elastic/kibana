@@ -7,7 +7,6 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { type UnifiedFieldListSidebarContainerProps } from '@kbn/unified-field-list';
 import React, { Suspense, useMemo } from 'react';
 import { initializeTitles } from '@kbn/presentation-publishing';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -15,23 +14,35 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { BehaviorSubject } from 'rxjs';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { FIELD_STATS_EMBED_ID } from './constants';
 import type { FieldListApi, FieldListSerializedStateState } from './types';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
-const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
-  return {
-    originatingApp: '',
-    localStorageKeyPrefix: 'examples',
-    timeRangeUpdatesType: 'timefilter',
-    compressed: true,
-    showSidebarToggleButton: false,
-    disablePopularFields: true,
-  };
-};
 
 const LazyFieldStatsEmbeddableWrapper = React.lazy(
   () => import('./field_stats_embeddable_wrapper')
 );
+const useReactEmbeddableExecutionContext = (
+  executionContextStart: ExecutionContextStart,
+  parentExecutionContext: KibanaExecutionContext,
+  embeddableType: string,
+  id: string
+) => {
+  const embeddableExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: embeddableType,
+      id,
+    };
+
+    return {
+      ...parentExecutionContext,
+      child,
+    };
+  }, [embeddableType, id, parentExecutionContext]);
+
+  useExecutionContext(executionContextStart, embeddableExecutionContext);
+};
 
 export const getFieldStatsTableFactory = (core: CoreStart) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
@@ -44,12 +55,42 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
     },
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const id = uuid.toString();
+
+      // @todo: Remove usage of deprecated React rendering utilities
+      // see https://github.com/elastic/kibana/pull/181094
+      const startServices = await core.getStartServices();
+      const I18nContext = startServices[0].i18n.Context;
+      const servicesToOverride = parentApi.overrideServices ?? {};
+      const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };
+      const datePickerDeps = {
+        ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+        uiSettingsKeys: UI_SETTINGS,
+      };
+      const dataViews = services.data.dataViews;
+
       const showDistributions$ =
         // @ts-ignore
         (initialState.showPreviewByDefault !== undefined
           ? new BehaviorSubject(initialState.showPreviewByDefault)
           : parentApi?.showDistributions$) ?? new BehaviorSubject(undefined);
 
+      // set up data views
+      const defaultDataViewId = await dataViews.getDefaultId();
+      const initialDataViewId = initialState.dataViewId ?? defaultDataViewId;
+      const dataView = await dataViews.get(initialDataViewId);
+      const queryBarState = services.data.query.getState();
+
+      const embeddableState$ = parentApi.embeddableState$
+        ? parentApi.embeddableState$
+        : new BehaviorSubject<FieldStatisticsTableEmbeddableState | undefined>({
+            id: 'dashboard_field_stats_embeddable',
+            dataView,
+            query: queryBarState.query,
+            filters: queryBarState.filters,
+            shouldGetSubfields: false,
+          });
+
+      const onAddFilter = parentApi.onAddFilter;
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const api = buildApi(
         {
@@ -67,27 +108,14 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
           ...titleComparators,
         }
       );
-
-      // @todo: Remove usage of deprecated React rendering utilities
-      // see https://github.com/elastic/kibana/pull/181094
-      const startServices = await core.getStartServices();
-      const I18nContext = startServices[0].i18n.Context;
-      const servicesToOverride = parentApi.overrideServices ?? {};
-      const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };
-      const datePickerDeps = {
-        ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
-        uiSettingsKeys: UI_SETTINGS,
-      };
-
       return {
         api,
         Component: () => {
-          const embeddableState$ = useMemo(
-            () =>
-              parentApi.embeddableState
-                ? parentApi.embeddableState
-                : new BehaviorSubject<FieldStatisticTableEmbeddableState | undefined>(),
-            []
+          useReactEmbeddableExecutionContext(
+            services.executionContext,
+            parentApi?.executionContext?.value ?? { name: 'dashboard' },
+            FIELD_STATS_EMBED_ID,
+            uuid
           );
 
           return (
@@ -98,8 +126,8 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
                     <Suspense fallback={<EmbeddableLoading />}>
                       <LazyFieldStatsEmbeddableWrapper
                         id={uuid}
-                        embeddableState$={parentApi.embeddableState$}
-                        onAddFilter={parentApi.onAddFilter}
+                        embeddableState$={embeddableState$}
+                        onAddFilter={onAddFilter}
                         onApiUpdate={(changes) => {
                           if ('showDistributions' in changes && Object.keys(changes).length === 1) {
                             showDistributions$.next(changes.showDistributions);

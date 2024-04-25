@@ -15,21 +15,61 @@ import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_vi
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 export interface FieldStatisticTableEmbeddableProps<T = Query> {
+  /**
+   * Data view is required for esql:false or non-ESQL mode
+   */
   dataView?: DataView;
+  /**
+   * Kibana saved search object
+   */
   savedSearch?: SavedSearch | null;
+  /**
+   * Kibana query
+   */
   query?: T;
+  /**
+   * List of fields to visibile show in the table
+   * set shouldGetSubfields: true if table needs to show the sub multi-field like .keyword
+   */
   visibleFieldNames?: string[];
+  /**
+   * List of filters
+   */
   filters?: Filter[];
+  /**
+   * Whether to show the preview/mini distribution chart on the tables upon first table mounting
+   */
   showPreviewByDefault?: boolean;
+  /**
+   * If true, will show a button action to edit the data view field in every row
+   */
   allowEditDataView?: boolean;
+  /**
+   * Optional id to identify the embeddable
+   */
   id?: string;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Optional search sessionId to save and restore long running search
+   * If not provided, will generate its own sessionId
+   */
   sessionId?: string;
+  /**
+   * Optional list of fields provided to table to fetch a subset of fields only
+   * so it doesn't need to fetch all fields
+   */
   fieldsToFetch?: string[];
+  /**
+   * Optional total documents count provided to help table have context of the fetch size
+   * so it can reduce redundant API requests
+   */
   totalDocuments?: number;
+  /**
+   * For non-ESQL mode, the sampling option is used to determine the sampling strategy
+   */
   samplingOption?: SamplingOption;
   /**
    * If esql:true, switch table to ES|QL mode
@@ -39,12 +79,17 @@ export interface FieldStatisticTableEmbeddableProps<T = Query> {
    * If esql:true, the index pattern is used to validate time field
    */
   indexPattern?: string;
+  /**
+   * If true, the table will try to retrieve subfield information as well based on visibleFields
+   * For example: visibleFields: ['field1', 'field2'] => will show ['field1', 'field1.keyword', 'field2', 'field2.keyword']
+   */
+  shouldGetSubfields?: boolean;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = FieldStatisticTableEmbeddableProps<ESQLQuery>;
 
-export type FieldStatisticTableEmbeddableState = FieldStatisticTableEmbeddableProps;
-export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticTableEmbeddableState>;
+export type FieldStatisticsTableEmbeddableState = FieldStatisticTableEmbeddableProps;
+export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticsTableEmbeddableState>;
 
 export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 

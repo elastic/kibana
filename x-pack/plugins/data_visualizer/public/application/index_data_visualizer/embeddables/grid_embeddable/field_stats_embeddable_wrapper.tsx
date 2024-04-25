@@ -5,22 +5,18 @@
  * 2.0.
  */
 import type { Observable } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { DataVisualizerStartDependencies } from '../../../../plugin';
 import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
 import type {
-  FieldStatisticTableEmbeddableState,
+  FieldStatisticsTableEmbeddableState,
   ESQLDataVisualizerGridEmbeddableState,
 } from './types';
-export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
-export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 
 function isESQLFieldStatisticTableEmbeddableState(
   input: unknown
@@ -30,13 +26,13 @@ function isESQLFieldStatisticTableEmbeddableState(
 
 function isFieldStatisticTableEmbeddableState(
   input: unknown
-): input is Required<FieldStatisticTableEmbeddableState, 'dataView'> {
+): input is Required<FieldStatisticsTableEmbeddableState, 'dataView'> {
   return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
 }
 
 const FieldStatisticsWrapper = (props: {
   id: string;
-  embeddableState$: Readonly<Observable<FieldStatisticTableEmbeddableState>>;
+  embeddableState$: Readonly<Observable<FieldStatisticsTableEmbeddableState>>;
   onApiUpdate?: (output: any) => void;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }) => {

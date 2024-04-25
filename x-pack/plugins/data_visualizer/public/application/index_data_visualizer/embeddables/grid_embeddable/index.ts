@@ -4,5 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { DataVisualizerGridEmbeddable } from './grid_embeddable';
-export { DataVisualizerGridEmbeddableFactory } from './grid_embeddable_factory';
+export { getFieldStatsTableFactory } from './field_stats_embeddable_factory';

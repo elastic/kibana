@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
-import type { FieldStatisticTableEmbeddableState } from './types';
+import type { FieldStatisticsTableEmbeddableState } from './types';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -25,7 +25,7 @@ export const EmbeddableFieldStatsTableWrapper = ({
   onApiUpdate,
   onAddFilter,
 }: {
-  input: Required<FieldStatisticTableEmbeddableState, 'dataView'>;
+  input: Required<FieldStatisticsTableEmbeddableState, 'dataView'>;
   onApiUpdate?: (ouput: any) => void;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }) => {

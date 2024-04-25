@@ -13,16 +13,11 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { DataVisualizerCoreSetup } from '../../../../common/types/data_visualizer_plugin';
 import { FIELD_STATS_EMBED_ID, CREATE_FIELD_STATS_ACTION_ID } from '../constants';
 
-export const PLUGIN_ID = 'ml';
-export const PLUGIN_ICON = 'machineLearningApp';
-export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
+const PLUGIN_ID = 'ml';
+const PLUGIN_ICON = 'machineLearningApp';
+const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
   defaultMessage: 'Machine Learning',
 });
-
-export type CreateFieldStatsPanelActionContext = EmbeddableApiContext & {
-  // @todo
-  // embeddable: FieldStatisticEmbeddableApi;
-};
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -53,7 +48,6 @@ function createFieldStatsGridAction(
         defaultMessage: 'Visualize field statistics.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      // @todo fix logic
       return true;
     },
     async execute(context) {

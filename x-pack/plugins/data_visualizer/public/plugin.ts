@@ -8,15 +8,12 @@
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { Plugin } from '@kbn/core/public';
 
-import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 import type { ConfigSchema } from '../common/app';
-import { FIELD_STATS_EMBED_ID } from './application/index_data_visualizer/embeddables/grid_embeddable/constants';
-import { registerFieldStatsUIActions } from './application/index_data_visualizer/embeddables/grid_embeddable/ui_actions/create_field_stats_embeddable_ui_action';
 import type {
   DataVisualizerCoreSetup,
   DataVisualizerPluginSetup,
@@ -24,6 +21,7 @@ import type {
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
+import { registerReactEmbeddablesAndActions } from './application/index_data_visualizer/embeddables';
 export class DataVisualizerPlugin
   implements
     Plugin<
@@ -52,16 +50,7 @@ export class DataVisualizerPlugin
       registerHomeFeatureCatalogue(plugins.home);
     }
 
-    if (plugins.uiActions) {
-      registerFieldStatsUIActions(core, plugins.uiActions);
-    }
-
-    registerReactEmbeddableFactory(FIELD_STATS_EMBED_ID, async () => {
-      const { getFieldStatsTableFactory } = await import(
-        './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_embeddable_factory'
-      );
-      return getFieldStatsTableFactory(core);
-    });
+    registerReactEmbeddablesAndActions(core, plugins);
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 

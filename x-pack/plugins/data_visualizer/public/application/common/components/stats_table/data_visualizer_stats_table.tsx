@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
 import { css } from '@emotion/react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import type { SupportedFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
@@ -102,13 +103,16 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     },
     [items]
   );
+  const isMounted = useMountedState();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       // When window or table is resized,
       // update the column widths and other settings accordingly
-      setDimensions(calculateTableColumnsDimensions(e.width));
+      if (isMounted()) {
+        setDimensions(calculateTableColumnsDimensions(e.width));
+      }
     }, 500),
     []
   );
