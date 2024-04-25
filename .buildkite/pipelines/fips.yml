@@ -1,3 +1,5 @@
+env:
+  DISABLE_CI_STATS_SHIPPING: "true"
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
