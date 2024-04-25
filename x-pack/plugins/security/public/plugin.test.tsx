@@ -84,7 +84,7 @@ describe('Security Plugin', () => {
       });
     });
 
-    it('calls core.security.registerSecurityApi', () => {
+    it('calls core.security.registerSecurityDelegate', () => {
       const coreSetupMock = getCoreSetupMock();
 
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
@@ -93,7 +93,19 @@ describe('Security Plugin', () => {
         licensing: licensingMock.createSetup(),
       });
 
-      expect(coreSetupMock.security.registerSecurityApi).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      const coreSetupMock = getCoreSetupMock();
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
     });
   });
 

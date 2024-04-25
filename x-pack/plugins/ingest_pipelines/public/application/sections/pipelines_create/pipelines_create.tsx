@@ -130,6 +130,9 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
         isSaving={isSaving}
         saveError={saveError}
       />
+      {services.consolePlugin?.EmbeddableConsole ? (
+        <services.consolePlugin.EmbeddableConsole />
+      ) : null}
     </>
   );
 };
