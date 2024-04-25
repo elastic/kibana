@@ -38,7 +38,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
 
   return (
     <EuiCallOut
-      color="warning"
+      color="danger"
       iconType="warning"
       title={i18n.translate('xpack.slo.sloDetails.healthCallout.title', {
         defaultMessage: 'This SLO has issues with its transforms',
@@ -93,10 +93,11 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             )}
           </ul>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="sloSloHealthCalloutInspectTransformButton"
-            color="warning"
+            color="danger"
             fill
             href={http?.basePath.prepend('/app/management/data/transform')}
           >

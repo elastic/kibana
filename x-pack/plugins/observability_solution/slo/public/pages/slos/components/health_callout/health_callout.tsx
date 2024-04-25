@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiCopy,
@@ -51,16 +52,15 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     (result) => result.health.summary === 'unhealthy'
   );
 
-  const onDismiss = () => {
+  const dismiss = () => {
     setShowCallOut(false);
     sessionStorage.setItem('slo_health_callout_hidden', 'true');
   };
 
   return (
     <EuiCallOut
-      color="warning"
+      color="danger"
       iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-      onDismiss={onDismiss}
       size="s"
       onClick={(e) => {
         setIsOpen(!isOpen);
@@ -68,7 +68,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
       title={
         <FormattedMessage
           id="xpack.slo.sloList.healthCallout.title"
-          defaultMessage="Some SLOs have issues with their transforms"
+          defaultMessage="Transform error detected"
         />
       }
     >
@@ -131,19 +131,35 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
               ))}
             </ul>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="sloHealthCalloutInspectTransformButton"
-              color="warning"
-              fill
-              href={http?.basePath.prepend('/app/management/data/transform')}
-            >
-              <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.buttonTransformLabel"
-                defaultMessage="Inspect transform"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="sloHealthCalloutInspectTransformButton"
+                color="danger"
+                size="s"
+                fill
+                href={http?.basePath.prepend('/app/management/data/transform')}
+              >
+                <FormattedMessage
+                  id="xpack.slo.sloList.healthCallout.buttonTransformLabel"
+                  defaultMessage="Inspect transform"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="sloHealthCalloutDimissButton"
+                color="text"
+                size="s"
+                onClick={dismiss}
+              >
+                <FormattedMessage
+                  id="xpack.slo.sloList.healthCallout.buttonDimissLabel"
+                  defaultMessage="Dismiss"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       )}
     </EuiCallOut>
