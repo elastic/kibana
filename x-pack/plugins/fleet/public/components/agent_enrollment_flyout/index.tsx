@@ -79,14 +79,14 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
 
-  const { fleetServerHosts, fleetProxy, downloadSource, isLoadingInitialRequest } =
+  const { fleetServerHost, fleetProxy, downloadSource, isLoadingInitialRequest } =
     useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
     : findPolicyById(agentPolicies, selectedPolicyId);
 
-  const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
   useEffect(() => {
     if (selectedPolicy) {
@@ -189,11 +189,11 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           ) : undefined
         }
       >
-        {isLoadingInitialAgentPolicies ? (
+        {isLoadingInitialAgentPolicies || isLoadingAgentPolicies ? (
           <Loading size="l" />
         ) : (
           <Instructions
-            fleetServerHosts={fleetServerHosts}
+            fleetServerHost={fleetServerHost}
             fleetProxy={fleetProxy}
             downloadSource={downloadSource}
             setSelectedPolicyId={setSelectedPolicyId}
