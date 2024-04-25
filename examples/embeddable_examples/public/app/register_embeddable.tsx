@@ -40,7 +40,7 @@ export const RegisterEmbeddable = () => {
         </p>
         <p>
           Add your own embeddables to <em>Add panel</em> menu by attaching an action to the{' '}
-          <strong>ADD_PANEL_TRIGGER</strong> trigger. Notice usage of <strong>grouping</strong> key
+          <strong>ADD_PANEL_TRIGGER</strong> trigger. Notice usage of <strong>grouping</strong>
           to nest related panel types and avoid bloating <em>Add panel</em> menu. Please reach out
           to @elastic/kibana-presentation team to coordinate menu updates.
         </p>
