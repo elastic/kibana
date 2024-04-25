@@ -339,11 +339,19 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const sendCancelRequest = once(() => {
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
-    });
+    const sendCancelRequest = once(() =>
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+    );
 
-    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
+    const cancel = async () => {
+      if (!id || isSavedToBackground) return;
+      try {
+        await sendCancelRequest();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    };
 
     // Async search requires a series of requests
     // 1) POST /<index pattern>/_async_search/

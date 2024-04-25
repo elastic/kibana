@@ -500,6 +500,50 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
+    test('should not leak unresolved promises if DELETE fails', async () => {
+      mockCoreSetup.http.delete.mockRejectedValueOnce({ status: 404, statusText: 'Not Found' });
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: 1,
+          },
+        },
+        {
+          time: 10,
+          value: {
+            statusCode: 500,
+            message: 'oh no',
+            id: 1,
+          },
+          isError: true,
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+      // Long enough to reach the timeout but not long enough to reach the next response
+      await timeTravel(10);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(Error);
+      expect((error.mock.calls[0][0] as Error).message).toBe('oh no');
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
+    });
+
     test('should NOT DELETE a running SAVED async search on abort', async () => {
       const sessionId = 'sessionId';
       sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);

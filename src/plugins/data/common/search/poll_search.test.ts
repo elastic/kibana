@@ -85,6 +85,25 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(1);
   });
 
+  test('Does not leak unresolved promises on cancel', async () => {
+    const searchFn = getMockedSearch$(20);
+    const cancelFn = jest.fn().mockRejectedValueOnce({ error: 'Oh no!' });
+    const abortController = new AbortController();
+    const poll = pollSearch(searchFn, cancelFn, {
+      abortSignal: abortController.signal,
+    }).toPromise();
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    abortController.abort();
+
+    await expect(poll).rejects.toThrow(AbortError);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    expect(searchFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(1);
+  });
+
   test("Stops, but doesn't cancel on unsubscribe", async () => {
     const searchFn = getMockedSearch$(20);
     const cancelFn = jest.fn();

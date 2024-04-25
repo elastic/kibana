@@ -14,7 +14,7 @@ import { isAbortResponse, isRunningResponse } from '..';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
-  cancel?: () => void,
+  cancel?: () => Promise<void>,
   { pollInterval, abortSignal }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   const getPollInterval = (elapsedTime: number): number => {
@@ -41,8 +41,13 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
       throw new AbortError();
     }
 
+    const safeCancel = () =>
+      cancel?.().catch((e) => {
+        console.error(e); // eslint-disable-line no-console
+      });
+
     if (cancel) {
-      abortSignal?.addEventListener('abort', cancel, { once: true });
+      abortSignal?.addEventListener('abort', safeCancel, { once: true });
     }
 
     const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
