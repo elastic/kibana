@@ -339,15 +339,6 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   );
 };
 
-interface AlertSuppressionTitleProps {
-  title: string;
-  ruleType: Type | undefined;
-}
-
-const AlertSuppressionTitle = ({ title, ruleType }: AlertSuppressionTitleProps) => {
-  return <AlertSuppressionLabel label={title} ruleType={ruleType} />;
-};
-
 interface SuppressAlertsByFieldProps {
   fields: string[];
 }
@@ -673,8 +664,8 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-            <AlertSuppressionTitle
-              title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL}
+            <AlertSuppressionLabel
+              label={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL}
               ruleType={rule.type}
             />
           </span>
@@ -686,8 +677,8 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="alertSuppressionDurationPropertyTitle">
-          <AlertSuppressionTitle
-            title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL}
+          <AlertSuppressionLabel
+            label={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL}
             ruleType={rule.type}
           />
         </span>
@@ -699,8 +690,8 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
-            <AlertSuppressionTitle
-              title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL}
+            <AlertSuppressionLabel
+              label={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL}
               ruleType={rule.type}
             />
           </span>
