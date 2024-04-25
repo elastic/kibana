@@ -8,10 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  TraceSearchQuery,
-  TraceSearchType,
-} from '../../../../common/trace_explorer';
+import { TraceSearchQuery, TraceSearchType } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
@@ -32,13 +29,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
 
   const {
     query,
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      query: queryFromUrlParams,
-      type: typeFromUrlParams,
-    },
+    query: { rangeFrom, rangeTo, environment, query: queryFromUrlParams, type: typeFromUrlParams },
   } = useApmParams('/traces/explorer');
 
   const history = useHistory();

@@ -28,9 +28,7 @@ const SUPPORTED_ES_FIELD_TYPES = [
 export const shouldBeExcluded = (fieldName: string) => {
   return (
     FIELDS_TO_EXCLUDE_AS_CANDIDATE.has(fieldName) ||
-    FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE.some((prefix) =>
-      fieldName.startsWith(prefix)
-    )
+    FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE.some((prefix) => fieldName.startsWith(prefix))
   );
 };
 
@@ -84,9 +82,7 @@ export async function fetchDurationFieldCandidates({
 
   Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
-    const isSupportedType = fieldTypes.some((type) =>
-      SUPPORTED_ES_FIELD_TYPES.includes(type)
-    );
+    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
     // Definitely include if field name matches any of the wild card
     if (hasPrefixToInclude(key) && isSupportedType) {
       finalFieldCandidates.add(key);

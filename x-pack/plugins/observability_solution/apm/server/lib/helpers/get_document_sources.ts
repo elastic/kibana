@@ -80,9 +80,7 @@ export async function getDocumentSources({
   enableContinuousRollups: boolean;
 }): Promise<TimeRangeMetadata['sources']> {
   const documentTypesToCheck = [
-    ...(enableServiceTransactionMetrics
-      ? [ApmDocumentType.ServiceTransactionMetric as const]
-      : []),
+    ...(enableServiceTransactionMetrics ? [ApmDocumentType.ServiceTransactionMetric as const] : []),
     ApmDocumentType.TransactionMetric as const,
   ];
 
@@ -95,9 +93,7 @@ export async function getDocumentSources({
     documentTypesToCheck,
   });
 
-  const hasAnySourceDocBefore = documentTypesInfo.some(
-    (source) => source.hasDocBefore
-  );
+  const hasAnySourceDocBefore = documentTypesInfo.some((source) => source.hasDocBefore);
 
   return [
     ...mapToSources(documentTypesInfo, hasAnySourceDocBefore),
@@ -135,19 +131,11 @@ const getDocumentTypesInfo = async ({
   const sourceRequests = documentTypesToCheck.flatMap(getRequests);
 
   const allSearches = sourceRequests
-    .flatMap(({ before, current, durationSummaryCheck }) => [
-      before,
-      current,
-      durationSummaryCheck,
-    ])
-    .filter(
-      (request): request is ReturnType<typeof getRequest> =>
-        request !== undefined
-    );
+    .flatMap(({ before, current, durationSummaryCheck }) => [before, current, durationSummaryCheck])
+    .filter((request): request is ReturnType<typeof getRequest> => request !== undefined);
 
-  const allResponses = (
-    await apmEventClient.msearch('get_document_availability', ...allSearches)
-  ).responses;
+  const allResponses = (await apmEventClient.msearch('get_document_availability', ...allSearches))
+    .responses;
 
   return sourceRequests.map(({ documentType, rollupInterval, ...queries }) => {
     const numberOfQueries = Object.values(queries).filter(Boolean).length;
@@ -213,18 +201,10 @@ const getDocumentTypeRequestsFn =
     }));
   };
 
-const mapToSources = (
-  sources: DocumentTypeData[],
-  hasAnySourceDocBefore: boolean
-) => {
+const mapToSources = (sources: DocumentTypeData[], hasAnySourceDocBefore: boolean) => {
   return sources.map((source) => {
-    const {
-      documentType,
-      hasDocAfter,
-      hasDocBefore,
-      rollupInterval,
-      allHaveDurationSummary,
-    } = source;
+    const { documentType, hasDocAfter, hasDocBefore, rollupInterval, allHaveDurationSummary } =
+      source;
 
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
 

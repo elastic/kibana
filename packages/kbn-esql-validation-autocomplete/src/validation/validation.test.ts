@@ -173,8 +173,9 @@ function getFieldMapping(
   const literalValues = {
     string: `"a"`,
     number: '5',
+    date: 'now()',
   };
-  return params.map(({ name: _name, type, literalOnly, literalOptions, ...rest }) => {
+  return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
     if (fieldTypes.includes(typeString)) {
       if (useLiterals && literalOptions) {
@@ -186,7 +187,7 @@ function getFieldMapping(
       }
 
       const fieldName =
-        literalOnly && typeString in literalValues
+        constantOnly && typeString in literalValues
           ? literalValues[typeString as keyof typeof literalValues]!
           : getFieldName(typeString, {
               useNestedFunction,
@@ -227,10 +228,15 @@ function generateIncorrectlyTypedParameters(
     number: '5',
   };
   const wrongFieldMapping = currentParams.map(
-    ({ name: _name, literalOnly, literalOptions, type, ...rest }, i) => {
+    ({ name: _name, constantOnly, literalOptions, type, ...rest }, i) => {
       // this thing is complex enough, let's not make it harder for constants
-      if (literalOnly) {
-        return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
+      if (constantOnly) {
+        return {
+          name: literalValues[type as keyof typeof literalValues],
+          type,
+          wrong: false,
+          ...rest,
+        };
       }
       const canBeFieldButNotString = Boolean(
         fieldTypes.filter((t) => t !== 'string').includes(type) &&
@@ -247,7 +253,7 @@ function generateIncorrectlyTypedParameters(
           : canBeFieldButNotNumber
           ? values.numberField
           : values.booleanField;
-      return { name: nameValue, type, ...rest };
+      return { name: nameValue, type, wrong: true, ...rest };
     }
   );
 
@@ -257,8 +263,28 @@ function generateIncorrectlyTypedParameters(
     [values.booleanField]: 'boolean',
   };
 
-  const expectedErrors = signatures[0].params
-    .filter(({ literalOnly }) => !literalOnly)
+  // Try to predict which signature will be used to generate the errors
+  // in the validation engine. The validator currently uses the signature
+  // which generates the fewest errors.
+  //
+  // Approximate this by finding the signature that best matches the INCORRECT field mapping
+  //
+  // This is not future-proof...
+  const misMatchesBySignature = signatures.map(({ params: fnParams }) => {
+    const typeMatches = fnParams.map(({ type }, i) => {
+      if (wrongFieldMapping[i].wrong) {
+        const typeFromIncorrectMapping = generatedFieldTypes[wrongFieldMapping[i].name];
+        return type === typeFromIncorrectMapping;
+      }
+      return type === wrongFieldMapping[i].type;
+    });
+    return typeMatches.filter((t) => !t).length;
+  })!;
+  const signatureToUse =
+    signatures[misMatchesBySignature.indexOf(Math.min(...misMatchesBySignature))]!;
+
+  const expectedErrors = signatureToUse.params
+    .filter(({ constantOnly }) => !constantOnly)
     .map(({ type }, i) => {
       const fieldName = wrongFieldMapping[i].name;
       if (
@@ -586,11 +612,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -630,18 +656,42 @@ describe('validation logic', () => {
           }
         }
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`row var = 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = NOT 5 ${op} 0`, []);
         testErrorsAndWarnings(`row var = (numberField ${op} 0)`, ['Unknown column [numberField]']);
         testErrorsAndWarnings(`row var = (NOT (5 ${op} 0))`, []);
-        testErrorsAndWarnings(`row var = "a" ${op} 0`, [
-          `Argument of [${op}] must be [number], found value ["a"] type [string]`,
-        ]);
+        testErrorsAndWarnings(`row var = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
+        testErrorsAndWarnings(`row var = now() ${op} now()`, []);
+        testErrorsAndWarnings(
+          `row var = false ${op} false`,
+          ['==', '!='].includes(op)
+            ? []
+            : [
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+                `Argument of [${op}] must be [number], found value [false] type [boolean]`,
+              ]
+        );
+        for (const [valueTypeA, valueTypeB] of [
+          ['now()', '"2022"'],
+          ['42', '"2022"'],
+        ]) {
+          testErrorsAndWarnings(`row var = ${valueTypeA} ${op} ${valueTypeB}`, []);
+          testErrorsAndWarnings(`row var = ${valueTypeB} ${op} ${valueTypeA}`, []);
+        }
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`row var = 1 ${op} 1`, []);
         testErrorsAndWarnings(`row var = (5 ${op} 1)`, []);
+        testErrorsAndWarnings(
+          `row var = now() ${op} now()`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            : [
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+              ]
+        );
       }
 
       for (const op of ['like', 'rlike']) {
@@ -1038,14 +1088,48 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | where ${nValue} > 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT ${nValue} > 0`, []);
       }
-      for (const op of ['>', '>=', '<', '<=', '==']) {
+      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
         testErrorsAndWarnings(`from a_index | where numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where NOT numberField ${op} 0`, []);
         testErrorsAndWarnings(`from a_index | where (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | where (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
+
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | where ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
+
+        // Implicit casting of literal values tests
+        testErrorsAndWarnings(`from a_index | where numberField ${op} stringField`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where stringField ${op} numberField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where numberField ${op} "2022"`, []);
+
+        testErrorsAndWarnings(`from a_index | where dateField ${op} stringField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where stringField ${op} dateField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where dateField ${op} "2022"`, []);
+
+        // Check that the implicit cast doesn't apply for fields
+        testErrorsAndWarnings(`from a_index | where stringField ${op} 0`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | where stringField ${op} now()`, [
+          `Argument of [${op}] must be [string], found value [now()] type [date]`,
         ]);
       }
 
@@ -1200,16 +1284,12 @@ describe('validation logic', () => {
       });
       for (const { name, signatures, ...rest } of numericOrStringFunctions) {
         const supportedSignatures = signatures.filter(({ returnType }) =>
+          // TODO — not sure why the tests have this limitation... seems like any type
+          // that can be part of a boolean expression should be allowed in a where clause
           ['number', 'string'].includes(returnType)
         );
         for (const { params, returnType, ...restSign } of supportedSignatures) {
-          const correctMapping = params
-            .filter(({ optional }) => !optional)
-            .map(({ type }) =>
-              ['number', 'string'].includes(Array.isArray(type) ? type.join(', ') : type)
-                ? { name: `${type}Field`, type }
-                : { name: `numberField`, type }
-            );
+          const correctMapping = getFieldMapping(params);
           testErrorsAndWarnings(
             `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
               // hijacking a bit this function to produce a function call
@@ -1426,15 +1506,15 @@ describe('validation logic', () => {
             }`,
             []
           );
-          if (params.some(({ literalOnly }) => literalOnly)) {
+          if (params.some(({ constantOnly }) => constantOnly)) {
             const fieldReplacedType = params
-              .filter(({ literalOnly }) => literalOnly)
+              .filter(({ constantOnly }) => constantOnly)
               .map(({ type }) => type);
             // create the mapping without the literal flag
             // this will make the signature wrong on purpose where in place on constants
             // the arg will be a column of the same type
             const fieldMappingWithoutLiterals = getFieldMapping(
-              params.map(({ literalOnly, ...rest }) => rest)
+              params.map(({ constantOnly, ...rest }) => rest)
             );
             testErrorsAndWarnings(
               `from a_index | eval ${
@@ -1469,11 +1549,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1618,14 +1698,55 @@ describe('validation logic', () => {
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 0)`, []);
         testErrorsAndWarnings(`from a_index | eval (NOT (numberField ${op} 0))`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 0`, []);
+        for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+          testErrorsAndWarnings(
+            `from a_index | eval ${type}Field ${op} ${type}Field`,
+            type !== 'boolean' || ['==', '!='].includes(op)
+              ? []
+              : [
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                  `Argument of [${op}] must be [number], found value [${type}Field] type [${type}]`,
+                ]
+          );
+        }
+        // Implicit casting of literal values tests
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} stringField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} numberField`, [
+          `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval numberField ${op} "2022"`, []);
+
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} stringField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} dateField`, [
+          `Argument of [${op}] must be [string], found value [dateField] type [date]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval dateField ${op} "2022"`, []);
+
+        // Check that the implicit cast doesn't apply for fields
         testErrorsAndWarnings(`from a_index | eval stringField ${op} 0`, [
           `Argument of [${op}] must be [number], found value [stringField] type [string]`,
+        ]);
+        testErrorsAndWarnings(`from a_index | eval stringField ${op} now()`, [
+          `Argument of [${op}] must be [string], found value [now()] type [date]`,
         ]);
       }
       for (const op of ['+', '-', '*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | eval numberField ${op} 1`, []);
         testErrorsAndWarnings(`from a_index | eval (numberField ${op} 1)`, []);
         testErrorsAndWarnings(`from a_index | eval 1 ${op} 1`, []);
+        testErrorsAndWarnings(
+          `from a_index | eval now() ${op} now()`,
+          ['+', '-'].includes(op)
+            ? [`Argument of [${op}] must be [time_literal], found value [now()] type [date]`]
+            : [
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+                `Argument of [${op}] must be [number], found value [now()] type [date]`,
+              ]
+        );
       }
       for (const divideByZeroExpr of ['1/0', 'var = 1/0', '1 + 1/0']) {
         testErrorsAndWarnings(
@@ -1723,6 +1844,17 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
 
+      testErrorsAndWarnings(`from a_index | eval result = case(false, 0, 1), round(result)`, []);
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats sum(result)`,
+        []
+      );
+      testErrorsAndWarnings(
+        `from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)`,
+        []
+      );
+      testErrorsAndWarnings(`from a_index | eval round(case(false, 0, 1))`, []);
+
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [
           'EVAL does not support [date_period] in expression [1 anno]',
@@ -1766,6 +1898,30 @@ describe('validation logic', () => {
             ]);
           }
         }
+      });
+
+      describe('constant-only parameters', () => {
+        testErrorsAndWarnings('from index | eval bucket(dateField, abs(numberField), "", "")', [
+          'Argument of [bucket] must be a constant, received [abs(numberField)]',
+        ]);
+        testErrorsAndWarnings(
+          'from index | eval bucket(dateField, abs(length(numberField)), "", "")',
+          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
+        );
+        testErrorsAndWarnings('from index | eval bucket(dateField, pi(), "", "")', []);
+        testErrorsAndWarnings('from index | eval bucket(dateField, 1 + 30 / 10, "", "")', []);
+        testErrorsAndWarnings(
+          'from index | eval bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+          []
+        );
+        testErrorsAndWarnings(
+          'from index | eval bucket(dateField, numberField, stringField, stringField)',
+          [
+            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+          ]
+        );
       });
     });
 
@@ -1977,15 +2133,15 @@ describe('validation logic', () => {
             );
           }
 
-          if (params.some(({ literalOnly }) => literalOnly)) {
+          if (params.some(({ constantOnly }) => constantOnly)) {
             const fieldReplacedType = params
-              .filter(({ literalOnly }) => literalOnly)
+              .filter(({ constantOnly }) => constantOnly)
               .map(({ type }) => type);
             // create the mapping without the literal flag
             // this will make the signature wrong on purpose where in place on constants
             // the arg will be a column of the same type
             const fieldMappingWithoutLiterals = getFieldMapping(
-              params.map(({ literalOnly, ...rest }) => rest)
+              params.map(({ constantOnly, ...rest }) => rest)
             );
             testErrorsAndWarnings(
               `from a_index | stats ${
@@ -2107,11 +2263,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
@@ -2119,7 +2275,7 @@ describe('validation logic', () => {
               useLiterals: false,
             });
             const nestedAggsExpectedErrors = params
-              .filter(({ literalOnly }) => !literalOnly)
+              .filter(({ constantOnly }) => !constantOnly)
               .map(
                 (_) =>
                   `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
@@ -2205,6 +2361,9 @@ describe('validation logic', () => {
         `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
         []
       );
+
+      testErrorsAndWarnings(`from a_index | stats sum(case(false, 0, 1))`, []);
+      testErrorsAndWarnings(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
     });
 
     describe('sort', () => {

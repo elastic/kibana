@@ -12,7 +12,6 @@ import {
   type Message,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { getAssistantSystemMessage } from '@kbn/observability-ai-assistant-plugin/public';
 
 type BuildMessageProps = DeepPartial<Message> & {
   message: {
@@ -104,7 +103,7 @@ export function buildFunctionResponseMessage(
   );
 }
 
-export function buildConversation(params?: Partial<Conversation>) {
+export function buildConversation(params?: Partial<Conversation>): Conversation {
   return {
     '@timestamp': '',
     user: {
@@ -115,10 +114,11 @@ export function buildConversation(params?: Partial<Conversation>) {
       title: '',
       last_updated: '',
     },
-    messages: [getAssistantSystemMessage({ contexts: [] })],
+    messages: [buildSystemMessage()],
     labels: {},
     numeric_labels: {},
     namespace: '',
+    public: false,
     ...params,
   };
 }

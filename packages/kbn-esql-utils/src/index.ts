@@ -16,3 +16,4 @@ export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
 } from './utils/query_parsing_helpers';
+export { appendToESQLQuery } from './utils/append_to_query';

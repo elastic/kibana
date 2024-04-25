@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 
 interface UseCreateDataViewProps {
-  indexPatternString: string | undefined;
+  indexPatternString?: string;
 }
 
 export function useCreateDataView({ indexPatternString }: UseCreateDataViewProps) {

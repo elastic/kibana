@@ -7,6 +7,7 @@
 
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import {
   RiskEngineStatus,
@@ -23,6 +24,8 @@ import {
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
+import { RiskEngineAuditActions } from './audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface InitOpts {
   namespace: string;
@@ -36,6 +39,7 @@ interface RiskEngineDataClientOpts {
   esClient: ElasticsearchClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
+  auditLogger: AuditLogger | undefined;
 }
 
 export class RiskEngineDataClient {
@@ -52,6 +56,15 @@ export class RiskEngineDataClient {
 
     try {
       result.legacyRiskEngineDisabled = await this.disableLegacyRiskEngine({ namespace });
+      this.options.auditLogger?.log({
+        message: 'System disabled the legacy risk engine.',
+        event: {
+          action: RiskEngineAuditActions.RISK_ENGINE_DISABLE_LEGACY_ENGINE,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
     } catch (e) {
       result.legacyRiskEngineDisabled = false;
       result.errors.push(e.message);
@@ -97,6 +110,17 @@ export class RiskEngineDataClient {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
     const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+
+    this.options.auditLogger?.log({
+      message: 'User checked if the risk engine is enabled',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_STATUS_GET,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.ACCESS,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+
     return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
   }
 
@@ -116,9 +140,30 @@ export class RiskEngineDataClient {
         taskManager,
       });
 
+      this.options.auditLogger?.log({
+        message: 'User started risk scoring service',
+        event: {
+          action: RiskEngineAuditActions.RISK_ENGINE_START,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+
       return configurationResult;
     } catch (e) {
       this.options.logger.error(`Error while enabling risk engine: ${e.message}`);
+
+      this.options.auditLogger?.log({
+        message: 'System stopped risk scoring service after error occurred',
+        event: {
+          action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.CHANGE,
+          outcome: AUDIT_OUTCOME.FAILURE,
+        },
+        error: e,
+      });
 
       await this.disableRiskEngine({ taskManager });
 
@@ -131,6 +176,16 @@ export class RiskEngineDataClient {
       namespace: this.options.namespace,
       taskManager,
       logger: this.options.logger,
+    });
+
+    this.options.auditLogger?.log({
+      message: 'User removed risk scoring task',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_REMOVE_TASK,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.CHANGE,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
     });
 
     return updateSavedObjectAttribute({
@@ -185,6 +240,16 @@ export class RiskEngineDataClient {
         savedObjectsClient: this.options.soClient,
       });
 
+      this.options.auditLogger?.log({
+        message: 'System checked if the risk engine is enabled in each space',
+        event: {
+          action: RiskEngineAuditActions.RISK_ENGINE_STATUS_FOR_ALL_SPACES_GET,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.ACCESS,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+
       return amountOfEnabledConfigurations >= MAX_SPACES_COUNT;
     } catch (e) {
       this.options.logger.error(`Error while getting amount of enabled risk engines: ${e.message}`);
@@ -194,6 +259,16 @@ export class RiskEngineDataClient {
 
   private async getLegacyStatus({ namespace }: { namespace: string }) {
     const transforms = await getLegacyTransforms({ namespace, esClient: this.options.esClient });
+
+    this.options.auditLogger?.log({
+      message: 'System checked if the legacy risk engine is enabled',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_GET_LEGACY_ENGINE_STATUS_GET,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.ACCESS,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
 
     if (transforms.length === 0) {
       return RiskEngineStatus.NOT_INSTALLED;
