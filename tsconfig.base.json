@@ -762,8 +762,6 @@
       "@kbn/embeddable-enhanced-plugin/*": ["x-pack/plugins/embeddable_enhanced/*"],
       "@kbn/embeddable-examples-plugin": ["examples/embeddable_examples"],
       "@kbn/embeddable-examples-plugin/*": ["examples/embeddable_examples/*"],
-      "@kbn/embeddable-explorer-plugin": ["examples/embeddable_explorer"],
-      "@kbn/embeddable-explorer-plugin/*": ["examples/embeddable_explorer/*"],
       "@kbn/embeddable-plugin": ["src/plugins/embeddable"],
       "@kbn/embeddable-plugin/*": ["src/plugins/embeddable/*"],
       "@kbn/embedded-lens-example-plugin": ["x-pack/examples/embedded_lens_example"],
