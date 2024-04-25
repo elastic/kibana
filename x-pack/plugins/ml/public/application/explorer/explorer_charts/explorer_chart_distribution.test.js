@@ -25,14 +25,6 @@ const utilityProps = {
   },
 };
 
-const servicesMock = {
-  mlServices: {
-    mlFieldFormatService: {
-      getFieldFormat: jest.fn(),
-    },
-  },
-};
-
 describe('ExplorerChart', () => {
   const mlSelectSeverityServiceMock = {
     state: {
@@ -54,10 +46,11 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <ExplorerChartDistribution
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
+          severity={0}
           {...utilityProps}
         />
       </KibanaContextProvider>
@@ -81,11 +74,12 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <ExplorerChartDistribution
           seriesConfig={config}
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
+          severity={0}
           {...utilityProps}
         />
       </KibanaContextProvider>
@@ -106,6 +100,7 @@ describe('ExplorerChart', () => {
     const config = {
       ...seriesConfig,
       chartData,
+      chartLimits: { min: 201039318, max: 625736376 },
     };
 
     const mockTooltipService = {
@@ -115,12 +110,13 @@ describe('ExplorerChart', () => {
 
     // We create the element including a wrapper which sets the width:
     return mountWithIntl(
-      <KibanaContextProvider services={servicesMock}>
+      <KibanaContextProvider services={kibanaContextMock.services}>
         <div style={{ width: '500px' }}>
           <ExplorerChartDistribution
             seriesConfig={config}
             mlSelectSeverityService={mlSelectSeverityServiceMock}
             tooltipService={mockTooltipService}
+            severity={0}
             {...utilityProps}
           />
         </div>
@@ -156,7 +152,7 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
-    expect([...xAxisTicks]).toHaveLength(1);
+    expect([...xAxisTicks]).toHaveLength(6);
     const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(5);
     const emphasizedAxisLabel = wrapper

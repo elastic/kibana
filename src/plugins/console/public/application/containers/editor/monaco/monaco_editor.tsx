@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -37,6 +37,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       settings: settingsService,
       autocompleteInfo,
     },
+    docLinkVersion,
   } = useServicesContext();
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
@@ -53,17 +54,17 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     return curl ?? '';
   }, [esHostService]);
 
+  const getDocumenationLink = useCallback(async () => {
+    return actionsProvider.current!.getDocumentationLink(docLinkVersion);
+  }, [docLinkVersion]);
+
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
   }, [dispatch, http, toasts, trackUiMetric]);
 
   const [value, setValue] = useState(initialTextValue);
 
-  const setInitialValue = useSetInitialValue;
-
-  useEffect(() => {
-    setInitialValue({ initialTextValue, setValue, toasts });
-  }, [initialTextValue, setInitialValue, toasts]);
+  useSetInitialValue({ initialTextValue, setValue, toasts });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
@@ -103,9 +104,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         <EuiFlexItem>
           <ConsoleMenu
             getCurl={getCurlCallback}
-            getDocumentation={() => {
-              return Promise.resolve(null);
-            }}
+            getDocumentation={getDocumenationLink}
             autoIndent={() => {}}
             notifications={notifications}
           />

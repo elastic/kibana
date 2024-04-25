@@ -49,9 +49,7 @@ const stories: Meta<{}> = {
           routePath="/services?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d"
           apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
         >
-          <AnomalyDetectionJobsContext.Provider
-            value={anomlyDetectionJobsContextValue}
-          >
+          <AnomalyDetectionJobsContext.Provider value={anomlyDetectionJobsContextValue}>
             <StoryComponent />
           </AnomalyDetectionJobsContext.Provider>
         </MockApmPluginStorybook>

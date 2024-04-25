@@ -38,9 +38,7 @@ import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 
 function getContentsComponent(
-  selectedElementData:
-    | cytoscape.NodeDataDefinition
-    | cytoscape.EdgeDataDefinition,
+  selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition,
   isTraceExplorerEnabled: boolean
 ) {
   if (
@@ -56,11 +54,7 @@ function getContentsComponent(
     return ResourceContents;
   }
 
-  if (
-    isTraceExplorerEnabled &&
-    selectedElementData.source &&
-    selectedElementData.target
-  ) {
+  if (isTraceExplorerEnabled && selectedElementData.source && selectedElementData.target) {
     return EdgeContents;
   }
 
@@ -84,13 +78,7 @@ interface PopoverProps {
   end: string;
 }
 
-export function Popover({
-  focusedServiceName,
-  environment,
-  kuery,
-  start,
-  end,
-}: PopoverProps) {
+export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const [selectedElement, setSelectedElement] = useState<
@@ -187,10 +175,7 @@ export function Popover({
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(
-    selectedElementData,
-    isTraceExplorerEnabled
-  );
+  const ContentsComponent = getContentsComponent(selectedElementData, isTraceExplorerEnabled);
 
   return (
     <EuiPopover
@@ -201,11 +186,7 @@ export function Popover({
       ref={popoverRef}
       style={popoverStyle}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        style={{ minWidth: popoverWidth }}
-      >
+      <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }}>
@@ -213,13 +194,9 @@ export function Popover({
               {kuery && (
                 <EuiToolTip
                   position="bottom"
-                  content={i18n.translate(
-                    'xpack.apm.serviceMap.kqlFilterInfo',
-                    {
-                      defaultMessage:
-                        'The KQL filter is not applied in the displayed stats.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                    defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                  })}
                 >
                   <EuiIcon tabIndex={0} type="iInCircle" />
                 </EuiToolTip>
