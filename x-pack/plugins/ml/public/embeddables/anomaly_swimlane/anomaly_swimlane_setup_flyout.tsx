@@ -23,7 +23,7 @@ export async function resolveAnomalySwimlaneUserInput(
   dataViews: DataViewsContract,
   input?: Partial<AnomalySwimLaneEmbeddableState>
 ): Promise<AnomalySwimlaneEmbeddableUserInput> {
-  const { http, overlays, theme, i18n } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
 
   const { getJobs } = mlApiServicesProvider(new HttpService(http));
 
@@ -52,7 +52,7 @@ export async function resolveAnomalySwimlaneUserInput(
               reject();
             }}
           />,
-          { theme, i18n }
+          startServices
         )
       );
     } catch (error) {
