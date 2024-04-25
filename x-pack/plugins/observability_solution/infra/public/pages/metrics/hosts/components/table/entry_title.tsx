@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
-import { useNodeDetailsLinkProps } from '../../../../link_to/use_node_details_redirect';
+import { useNodeDetailsRedirect } from '../../../../link_to/use_node_details_redirect';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
@@ -19,8 +19,9 @@ interface EntryTitleProps {
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
   const { parsedDateRange } = useUnifiedSearchContext();
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
 
-  const nodeDetailMenuItemLink = useNodeDetailsLinkProps({
+  const link = getNodeDetailUrl({
     assetId: name,
     assetType: 'host',
     search: {
@@ -49,7 +50,7 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
           <EuiLink
             data-test-subj="hostsViewTableEntryTitleLink"
             className="eui-displayBlock eui-textTruncate"
-            {...nodeDetailMenuItemLink}
+            {...link}
           >
             {name}
           </EuiLink>

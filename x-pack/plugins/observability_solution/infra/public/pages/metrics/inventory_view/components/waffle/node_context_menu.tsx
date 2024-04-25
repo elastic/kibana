@@ -24,10 +24,10 @@ import {
 import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { useNodeDetailsLinkProps } from '../../../../link_to/use_node_details_redirect';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {
@@ -39,6 +39,7 @@ interface Props {
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
+    const { getNodeDetailUrl } = useNodeDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -86,7 +87,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeDetailMenuItemLink = useNodeDetailsLinkProps({
+    const nodeDetailMenuItemLinkProps = getNodeDetailUrl({
       assetType: nodeType,
       assetId: node.id,
       search: {
@@ -123,7 +124,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} metrics',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      href: nodeDetailMenuItemLink.href,
+      href: nodeDetailMenuItemLinkProps.href,
+      onClick: nodeDetailMenuItemLinkProps.onClick,
       isDisabled: !showDetail,
     };
 

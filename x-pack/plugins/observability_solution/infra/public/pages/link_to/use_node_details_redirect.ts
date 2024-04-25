@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -40,11 +40,7 @@ export interface NodeDetailsRedirectParams<T extends InventoryItemType> {
   search: SearchParams<T>;
 }
 
-export const useNodeDetailsLinkProps = <T extends InventoryItemType>({
-  assetType,
-  assetId,
-  search,
-}: NodeDetailsRedirectParams<T>): RouterLinkProps => {
+export const useNodeDetailsRedirect = () => {
   const location = useLocation();
   const {
     services: {
@@ -54,72 +50,58 @@ export const useNodeDetailsLinkProps = <T extends InventoryItemType>({
   } = useKibanaContextForPlugin();
   const appId = useObservable(currentAppId$);
   const locator = share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-  const { from, to, ...additionalParams } = search;
 
-  const nodeDetailsLocatorParams = useMemo(() => {
-    const assetDetails =
-      Object.keys(additionalParams).length > 0
-        ? {
-            ...additionalParams,
-            dateRange: {
-              from: from ? new Date(from).toISOString() : undefined,
-              to: to ? new Date(to).toISOString() : undefined,
-            },
-          }
-        : {};
-
-    const _a = {
-      time: {
-        ...(from ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: `${from}` } : undefined),
-        ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: `${to}` } : undefined),
-      },
-    };
-
-    return {
-      assetDetails,
-      _a,
+  const getNodeDetailUrl = useCallback(
+    <T extends InventoryItemType>({
       assetType,
       assetId,
-      state: {
-        ...(location.state ?? {}),
-        ...(location.key
-          ? ({
-              originAppId: appId,
-              originSearch: location.search,
-              originPathname: location.pathname,
-            } as RouteState)
-          : {}),
-      },
-    };
-  }, [
-    additionalParams,
-    appId,
-    assetId,
-    assetType,
-    from,
-    location.key,
-    location.pathname,
-    location.search,
-    location.state,
-    to,
-  ]);
+      search,
+    }: NodeDetailsRedirectParams<T>): RouterLinkProps => {
+      const { from, to, ...additionalParams } = search;
+      const assetDetails =
+        Object.keys(additionalParams).length > 0
+          ? {
+              ...additionalParams,
+              dateRange: {
+                from: from ? new Date(from).toISOString() : undefined,
+                to: to ? new Date(to).toISOString() : undefined,
+              },
+            }
+          : {};
 
-  const nodeDetailsUrl = useMemo(
-    () => locator?.getRedirectUrl(nodeDetailsLocatorParams),
-    [locator, nodeDetailsLocatorParams]
-  );
+      const _a = {
+        time: {
+          ...(from ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: `${from}` } : undefined),
+          ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: `${to}` } : undefined),
+        },
+      };
 
-  const navigateToNodeDetails = useMemo(
-    () => () => {
-      locator?.navigate(nodeDetailsLocatorParams, { replace: false });
+      const nodeDetailsLocatorParams = {
+        assetDetails,
+        _a,
+        assetType,
+        assetId,
+        state: {
+          ...(location.state ?? {}),
+          ...(location.key
+            ? ({
+                originAppId: appId,
+                originSearch: location.search,
+                originPathname: location.pathname,
+              } as RouteState)
+            : {}),
+        },
+      };
+      const nodeDetailsLinkProps = getRouterLinkProps({
+        href: locator?.getRedirectUrl(nodeDetailsLocatorParams),
+        onClick: () => {
+          locator?.navigate(nodeDetailsLocatorParams, { replace: false });
+        },
+      });
+
+      return nodeDetailsLinkProps;
     },
-    [locator, nodeDetailsLocatorParams]
+    [appId, location.key, location.pathname, location.search, location.state, locator]
   );
-
-  const nodeDetailsLinkProps = getRouterLinkProps({
-    href: nodeDetailsUrl,
-    onClick: navigateToNodeDetails,
-  });
-
-  return nodeDetailsLinkProps;
+  return { getNodeDetailUrl };
 };
