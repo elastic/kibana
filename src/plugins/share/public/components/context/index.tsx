@@ -28,7 +28,6 @@ export interface IShareContext extends ShareContext {
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
-  objectTypeTitle?: string;
   isEmbedded: boolean;
   theme: ThemeServiceSetup;
   i18n: I18nStart;

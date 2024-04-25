@@ -182,6 +182,11 @@ export const getTopNavLinks = ({
         shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
+        objectTypeMeta: {
+          title: i18n.translate('discover.share.shareModal.title', {
+            defaultMessage: 'Share this search',
+          }),
+        },
         sharingData: {
           isTextBased,
           locatorParams: [{ id: locator.id, params }],

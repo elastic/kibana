@@ -31,6 +31,12 @@ export type BrowserUrlService = UrlService<
  * */
 export interface ShareContext {
   objectType: string;
+  /**
+   * Allows for passing contextual information that each consumer can provide to customize the share menu
+   */
+  objectTypeMeta: {
+    title: string;
+  };
   objectId?: string;
   /**
    * Current url for sharing. This can be set in cases where `window.location.href`

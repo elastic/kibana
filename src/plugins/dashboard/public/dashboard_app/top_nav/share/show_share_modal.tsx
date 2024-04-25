@@ -176,6 +176,11 @@ export function ShowShareModal({
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
+    objectTypeMeta: {
+      title: i18n.translate('dashboard.share.shareModal.title', {
+        defaultMessage: 'Share this dashboard',
+      }),
+    },
     sharingData: {
       title:
         dashboardTitle ||

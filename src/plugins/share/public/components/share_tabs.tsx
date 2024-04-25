@@ -28,7 +28,8 @@ export const ShareMenuTabs = () => {
     return null;
   }
 
-  const { allowEmbed, objectType, onClose, shareMenuItems } = shareContext;
+  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems } = shareContext;
+
   const tabs = [];
 
   tabs.push(linkTab);
@@ -41,15 +42,12 @@ export const ShareMenuTabs = () => {
     tabs.push(embedTab);
   }
 
-  const formattedTitle =
-    objectType === 'lens' ? `Share this Lens visualization` : `Share this ${objectType}`;
-
   return (
     <TabbedModal
       tabs={tabs}
       modalWidth={498}
       onClose={onClose}
-      modalTitle={formattedTitle}
+      modalTitle={objectTypeMeta.title}
       defaultSelectedTabId="link"
     />
   );

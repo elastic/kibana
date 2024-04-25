@@ -628,9 +628,11 @@ export const LensTopNavMenu = ({
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
-              objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
-                defaultMessage: 'visualization',
-              }),
+              objectTypeMeta: {
+                title: i18n.translate('xpack.lens.app.shareModal.title', {
+                  defaultMessage: 'Share this Lens visualization',
+                }),
+              },
               sharingData,
               isDirty: isCurrentStateDirty,
               // disable the menu if both shortURL permission and the visualization has not been saved
