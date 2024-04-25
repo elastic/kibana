@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -15,7 +15,6 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { isTextBasedQuery } from '../../../utils/is_text_based_query';
 
 export interface Params {
   dataView?: DataView;
@@ -33,14 +32,12 @@ export interface OccurrencesRange {
 }
 
 export interface Result {
-  range: OccurrencesRange | null | undefined;
-  refetch: () => Promise<OccurrencesRange | null | undefined>;
+  fetch: () => Promise<OccurrencesRange | null | undefined>;
 }
 
 export const useFetchOccurrencesRange = (params: Params): Result => {
   const data = params.services.data;
   const uiSettings = params.services.uiSettings;
-  const [range, setRange] = useState<OccurrencesRange | null | undefined>(undefined);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef<boolean>(true);
 
@@ -73,13 +70,9 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
         }
       }
 
-      if (mountedRef.current) {
-        setRange(occurrencesRange);
-      }
-
       return occurrencesRange;
     },
-    [abortControllerRef, setRange, mountedRef, data, uiSettings]
+    [abortControllerRef, mountedRef, data, uiSettings]
   );
 
   useEffect(() => {
@@ -89,15 +82,8 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
     };
   }, [abortControllerRef, mountedRef]);
 
-  useEffect(() => {
-    if (!isTextBasedQuery(params.query)) {
-      fetchOccurrences(params.dataView, params.query, params.filters);
-    }
-  }, [fetchOccurrences, params.query, params.filters, params.dataView]);
-
   return {
-    range,
-    refetch: () => fetchOccurrences(params.dataView, params.query, params.filters),
+    fetch: () => fetchOccurrences(params.dataView, params.query, params.filters),
   };
 };
 

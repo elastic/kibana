@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   isOfQueryType,
@@ -30,6 +30,13 @@ import { hasActiveFilter } from '../../layout/utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useFetchOccurrencesRange } from './use_fetch_occurances_range';
 import { NoResultsIllustration } from './assets/no_results_illustration';
+
+enum TimeRangeExtendingStatus {
+  initial = 'initial',
+  loading = 'loading',
+  success = 'success',
+  notFound = 'notFound',
+}
 
 interface NoResultsSuggestionProps {
   dataView: DataView;
@@ -53,8 +60,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
     (isOfQueryType(query) && !!query?.query) || (!!query && isOfAggregateQueryType(query));
   const hasFilters = hasActiveFilter(filters);
 
-  const [isExtending, setIsExtending] = useState<boolean>(false);
-  const { range: occurrencesRange, refetch } = useFetchOccurrencesRange({
+  const [timeRangeExtendingStatus, setTimeRangeExtendingStatus] =
+    useState<TimeRangeExtendingStatus>(TimeRangeExtendingStatus.initial);
+  const { fetch } = useFetchOccurrencesRange({
     dataView,
     query,
     filters,
@@ -64,22 +72,22 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
     },
   });
 
-  const extendTimeRange = async () => {
-    setIsExtending(true);
-    const range = await refetch();
+  const extendTimeRange = useCallback(async () => {
+    setTimeRangeExtendingStatus(TimeRangeExtendingStatus.loading);
+    const range = await fetch();
     if (range?.from && range?.to) {
       timefilter.setTime({
         from: range.from,
         to: range.to,
       });
     } else {
-      setIsExtending(false);
+      setTimeRangeExtendingStatus(TimeRangeExtendingStatus.notFound);
     }
-  };
+  }, [fetch, setTimeRangeExtendingStatus, timefilter]);
 
-  const canExtendTimeRange =
-    !isTextBasedQuery(query) && Boolean(occurrencesRange?.from && occurrencesRange.to);
-  const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
+  const canExpandTimeRange =
+    isTimeBased && timeRangeExtendingStatus !== TimeRangeExtendingStatus.notFound;
+  const canAdjustSearchCriteria = canExpandTimeRange || hasFilters || hasQuery;
 
   const body = canAdjustSearchCriteria ? (
     <>
@@ -93,7 +101,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
           display: inline-block;
         `}
       >
-        {isTimeBased && (
+        {canExpandTimeRange && (
           <li>
             <NoResultsSuggestionWhenTimeRange />
           </li>
@@ -112,9 +120,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
         )}
       </ul>
     </>
-  ) : (
+  ) : timeRangeExtendingStatus !== TimeRangeExtendingStatus.notFound ? (
     <NoResultsSuggestionDefault dataView={dataView} />
-  );
+  ) : null;
 
   return (
     <EuiEmptyPrompt
@@ -132,28 +140,35 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       }
       body={body}
       actions={
-        <div
-          css={css`
-            min-block-size: ${euiTheme.size.xxl};
-          `}
-        >
-          {typeof occurrencesRange === 'undefined' ? (
-            !isTextBasedQuery(query) && <EuiLoadingSpinner />
-          ) : canExtendTimeRange ? (
-            <EuiButton
-              color="primary"
-              fill
-              onClick={extendTimeRange}
-              isLoading={isExtending}
-              data-test-subj="discoverNoResultsViewAllMatches"
-            >
-              <FormattedMessage
-                id="discover.noResults.suggestion.viewAllMatchesButtonText"
-                defaultMessage="View all matches"
-              />
-            </EuiButton>
-          ) : null}
-        </div>
+        !isTextBasedQuery(query) ? (
+          <div
+            css={css`
+              min-block-size: ${euiTheme.size.xxl};
+            `}
+          >
+            {timeRangeExtendingStatus === TimeRangeExtendingStatus.notFound ? (
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="discover.noResults.suggestion.searchAllMatchesButtonGivesNoResultsText"
+                  defaultMessage="Expanding the time range gives no results too."
+                />
+              </EuiText>
+            ) : (
+              <EuiButton
+                color="primary"
+                fill
+                onClick={extendTimeRange}
+                isLoading={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+                data-test-subj="discoverNoResultsViewAllMatches"
+              >
+                <FormattedMessage
+                  id="discover.noResults.suggestion.searchAllMatchesButtonText"
+                  defaultMessage="Search entire time range"
+                />
+              </EuiButton>
+            )}
+          </div>
+        ) : undefined
       }
     />
   );
