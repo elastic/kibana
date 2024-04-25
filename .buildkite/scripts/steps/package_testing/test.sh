@@ -62,7 +62,7 @@ if [[ "$TEST_PACKAGE" == "fips" ]]; then
   set -e
 
   if [ -s ftr_failed_configs ]; then
-    buildkite-agent meta-data set "$(cat ftr_failed_configs)"
+    buildkite-agent meta-data set "ftr-failed-configs" <./ftr_failed_configs
   fi
 else
   vagrant provision "$TEST_PACKAGE"
