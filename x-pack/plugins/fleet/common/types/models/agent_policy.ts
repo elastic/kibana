@@ -40,6 +40,7 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
   overrides?: { [key: string]: any } | null;
   advanced_settings?: { [key: string]: any } | null;
+  keep_monitoring_alive?: boolean | null;
 }
 
 // SO definition for this type is declared in server/types/interfaces
@@ -53,7 +54,6 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   revision: number;
   agents?: number;
   is_protected: boolean;
-  keep_monitoring_alive?: boolean;
 }
 
 export interface FullAgentPolicyInputStream {
