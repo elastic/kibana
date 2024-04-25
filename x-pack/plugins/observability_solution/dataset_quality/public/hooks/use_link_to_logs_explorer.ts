@@ -21,10 +21,12 @@ export const useLinkToLogsExplorer = ({
   dataStreamStat,
   query,
   timeRangeConfig,
+  breakdownField,
 }: {
   dataStreamStat: DataStreamStat | FlyoutDataset;
   query?: Query | AggregateQuery;
   timeRangeConfig?: TimeRangeConfig;
+  breakdownField?: string;
 }) => {
   const {
     services: { share },
@@ -48,6 +50,7 @@ export const useLinkToLogsExplorer = ({
         values: [dataStreamStat.namespace],
       },
     },
+    breakdownField,
   };
 
   const singleDatasetLocator =

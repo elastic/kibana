@@ -88,7 +88,12 @@ const getVersionedRouterDefaults = () => ({
       options: {
         validate: {
           request: {
-            body: schema.object({ foo: schema.string() }, { meta: { description: 'foo' } }),
+            body: schema.object({
+              foo: schema.string(),
+              deprecatedFoo: schema.maybe(
+                schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
+              ),
+            }),
           },
           response: {
             [200]: {

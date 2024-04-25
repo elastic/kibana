@@ -155,8 +155,12 @@ Object {
             "application/json; Elastic-Api-Version=oas-test-version-1": Object {
               "schema": Object {
                 "additionalProperties": false,
-                "description": "foo",
                 "properties": Object {
+                  "deprecatedFoo": Object {
+                    "deprecated": true,
+                    "description": "deprecated foo",
+                    "type": "string",
+                  },
                   "foo": Object {
                     "type": "string",
                   },
