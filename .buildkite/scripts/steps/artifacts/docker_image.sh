@@ -105,7 +105,7 @@ echo "--- Validate CDN assets"
   for CDN_ASSET in **/*; do
     if [[ -f "$CDN_ASSET" ]]; then
       echo -n "Testing $CDN_ASSET..."
-      curl --retry 10 --retry-max-time 600  --connect-timeout 120 --max-time 120 -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_URL/$CDN_ASSET" &
+      curl --retry 10 --retry-max-time 600 --connect-timeout 120 --max-time 120 -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_URL/$CDN_ASSET" &
     fi
   done
 )
