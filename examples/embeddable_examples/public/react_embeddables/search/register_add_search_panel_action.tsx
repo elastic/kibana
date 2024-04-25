@@ -9,12 +9,14 @@
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { addPanelGrouping } from '../add_panel_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
 
 export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SEARCH_ACTION_ID,
-    getDisplayName: () => 'Unified search example',
+    grouping: [addPanelGrouping],
+    getDisplayName: () => 'Search example',
     getDisplayNameTooltip: () =>
       'Demonstrates how to use global filters, global time range, panel time range, and global query state in an embeddable',
     getIconType: () => 'search',
