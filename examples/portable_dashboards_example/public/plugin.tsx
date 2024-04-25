@@ -26,13 +26,8 @@ export interface StartDeps {
   navigation: NavigationPublicPluginStart;
 }
 
-export class PortableDashboardsExamplePlugin
-  implements Plugin<void, void, SetupDeps, StartDeps>
-{
-  public setup(
-    core: CoreSetup<StartDeps>,
-    { developerExamples }: SetupDeps
-  ) {
+export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, { developerExamples }: SetupDeps) {
     core.application.register({
       id: PLUGIN_ID,
       title: 'Portable dashboard examples',
@@ -54,9 +49,7 @@ export class PortableDashboardsExamplePlugin
 
   public async start() {
     registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
-      const { factory } = await import(
-        './filter_debugger_embeddable'
-      );
+      const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });
   }

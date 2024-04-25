@@ -18,8 +18,8 @@ import {
   DashboardRenderer,
   DashboardCreationOptions,
 } from '@kbn/dashboard-plugin/public';
-import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();

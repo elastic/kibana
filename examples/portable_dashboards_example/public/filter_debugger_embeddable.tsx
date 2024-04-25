@@ -16,10 +16,9 @@ import {
 import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
-type State = {};
-export type Api = DefaultEmbeddableApi<State>;
+export type Api = DefaultEmbeddableApi<{}>;
 
-export const factory: ReactEmbeddableFactory<State, Api> = {
+export const factory: ReactEmbeddableFactory<{}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
   deserializeState: () => {
     return {};
