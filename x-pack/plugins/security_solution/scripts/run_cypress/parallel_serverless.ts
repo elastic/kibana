@@ -427,13 +427,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               context.addCleanupTask(() => {
                 let command: string;
-                if (cloudHandler instanceof ProxyHandler) {
-                  // command = `curl DELETE ${PROXY_URL}/projects/${project.id}`;
-                  command = "echo 'Delete env'";
-                } else {
+                if (cloudHandler instanceof CloudHandler) {
                   command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+                  exec(command);
                 }
-                exec(command);
               });
 
               // Reset credentials for elastic user
