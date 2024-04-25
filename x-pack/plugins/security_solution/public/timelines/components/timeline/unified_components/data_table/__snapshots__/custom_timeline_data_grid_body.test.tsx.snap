@@ -22,7 +22,6 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   >
     <div
       class="c1 rowCellWrapper"
-      role="row"
     >
       <div>
         Cell-0-0
@@ -44,7 +43,6 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   >
     <div
       class="c1 rowCellWrapper"
-      role="row"
     >
       <div>
         Cell-1-0

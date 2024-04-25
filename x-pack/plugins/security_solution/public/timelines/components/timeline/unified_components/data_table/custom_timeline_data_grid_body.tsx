@@ -77,7 +77,6 @@ const CustomGridRow = styled.div.attrs<{
 }))`
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
-  min-height: '40px';
 `;
 
 const CustomLazyRowPlaceholder = styled.div`
@@ -88,7 +87,7 @@ const CustomLazyRowPlaceholder = styled.div`
  *
  * A Simple Wrapper component for displaying a custom data grid `cell`
  */
-const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper', role: 'row' })`
+const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper' })`
   display: flex;
 `;
 
@@ -170,23 +169,23 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         <>
           <CustomGridRowCellWrapper>
             {visibleColumns.map((column, colIndex) => {
-              // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
-              if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
-                return (
-                  <>
-                    <Cell
-                      style={cellCustomStyle}
-                      colIndex={colIndex}
-                      visibleRowIndex={rowIndex}
-                      key={`${rowIndex},${colIndex}`}
-                    />
-                  </>
-                );
-              }
-              return null;
+              return (
+                <React.Fragment key={`${rowIndex}-${colIndex}`}>
+                  {
+                    // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
+                    column.id !== TIMELINE_EVENT_DETAIL_ROW_ID ? (
+                      <Cell
+                        style={cellCustomStyle}
+                        colIndex={colIndex}
+                        visibleRowIndex={rowIndex}
+                      />
+                    ) : null
+                  }
+                </React.Fragment>
+              );
             })}
           </CustomGridRowCellWrapper>
-          {/* Timeline Expanded Row */}
+          {/* Timeline Event Detail Row Renderer */}
           {canShowRowRenderer ? (
             <Cell
               colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index

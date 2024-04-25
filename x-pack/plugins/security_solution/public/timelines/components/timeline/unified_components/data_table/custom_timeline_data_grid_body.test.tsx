@@ -56,11 +56,25 @@ const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {
   );
 };
 
+const mockIntersectionObserverReturnValue = {
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+};
+
 describe('CustomTimelineDataGridBody', () => {
   beforeEach(() => {
     (useStatefulRowRenderer as jest.Mock).mockReturnValue({
       canShowRowRenderer: true,
     });
+
+    const mockIntersectionObserver = jest.fn((cb) => {
+      cb([{ isIntersecting: true, intersectionRatio: 1 }]);
+      return mockIntersectionObserverReturnValue;
+    });
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    window.IntersectionObserver = mockIntersectionObserver as unknown as any;
   });
 
   afterEach(() => {
@@ -75,13 +89,17 @@ describe('CustomTimelineDataGridBody', () => {
   });
 
   it('should render the additional Row when row Renderer is available', () => {
-    // No additional row for first result
-    (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
-      canShowRowRenderer: false,
-    });
-    // Additional row for second result
-    (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
-      canShowRowRenderer: true,
+    (useStatefulRowRenderer as jest.Mock).mockImplementation(({ data }: { data: TimelineItem }) => {
+      if (data._id === '1') {
+        return {
+          // No row renderer for first result
+          canShowRowRenderer: false,
+        };
+      }
+
+      return {
+        canShowRowRenderer: true,
+      };
     });
     const { getByText, queryByText } = renderTestComponents();
     expect(queryByText('Cell-0-3')).toBeFalsy();
