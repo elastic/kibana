@@ -17,6 +17,7 @@ export type {
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuditRequestHandlerContext,
 } from './src/request_handler_context';
 export type { AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './src/audit/audit_events';
 export type { AuditLogger } from './src/audit/audit_logger';
