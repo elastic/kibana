@@ -553,7 +553,5 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/sources/index_information/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/sources/index_information/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/sources/index_information/trial_license_complete_tier/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/sources/index_information/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
