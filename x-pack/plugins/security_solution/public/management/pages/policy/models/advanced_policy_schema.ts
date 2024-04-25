@@ -661,7 +661,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.kernel.network_report_loopback',
-    first_supported_version: '8.14.1',
+    first_supported_version: '8.15',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
       {
