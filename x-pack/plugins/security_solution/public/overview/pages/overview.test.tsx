@@ -10,7 +10,6 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
 
-import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';

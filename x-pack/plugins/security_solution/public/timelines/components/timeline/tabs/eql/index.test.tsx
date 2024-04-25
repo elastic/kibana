@@ -12,7 +12,6 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 
 import type { Props as EqlTabContentComponentProps } from '.';

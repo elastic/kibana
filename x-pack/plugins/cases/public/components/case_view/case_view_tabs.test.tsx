@@ -14,7 +14,6 @@ import type { UseGetCase } from '../../containers/use_get_case';
 import type { CaseViewTabsProps } from './case_view_tabs';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import '../../common/mock/match_media';
 import { createAppMockRenderer } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import { useGetCase } from '../../containers/use_get_case';

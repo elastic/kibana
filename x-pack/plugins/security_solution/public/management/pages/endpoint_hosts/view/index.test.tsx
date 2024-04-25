@@ -9,7 +9,6 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointList } from '.';
-import '../../../../common/mock/match_media';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 import {

@@ -8,7 +8,6 @@
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import '../../mock/match_media';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 

@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import type { ActionCreator } from 'typescript-fsa';
 
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { networkModel } from '../../store';
 

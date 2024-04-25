@@ -12,7 +12,6 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import '../../../../common/mock/match_media';
 import '../../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import type { OpenTimelineResult } from '../types';

@@ -10,7 +10,6 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 
 import type { Filter } from '@kbn/es-query';
-import '../../../common/mock/match_media';
 import { TestProviders, createMockStore } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { inputsActions } from '../../../common/store/inputs';
