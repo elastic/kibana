@@ -662,7 +662,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
 
-  describe('@serverless @serverlessQA @ess Timeline Details', () => {
+  describe('@serverless @ess Timeline Details', () => {
     before(
       async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
     );

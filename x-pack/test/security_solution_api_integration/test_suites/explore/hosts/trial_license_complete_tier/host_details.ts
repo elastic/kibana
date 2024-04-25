@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
 
-  describe('@serverless @serverlessQA @ess Host Details', () => {
+  describe('@serverless @ess Host Details', () => {
     describe('With filebeat', () => {
       before(
         async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')

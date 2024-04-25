@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('@serverless @serverlessQA @ess Timeline', () => {
+  describe('@serverless @ess Timeline', () => {
     describe('timelines', () => {
       it('Make sure that we get Timeline data', async () => {
         const titleToSaved = 'hello timeline';

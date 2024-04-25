@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('sources', () => {
+  describe('@serverless @ess sources', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/default'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/default'));
 

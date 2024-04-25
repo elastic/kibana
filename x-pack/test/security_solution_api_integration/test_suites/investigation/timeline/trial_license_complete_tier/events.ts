@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   });
 
-  describe('@serverless @serverlessQA @ess Timeline', () => {
+  describe('@serverless @ess Timeline', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
-    it('@serverless @serverlessQA @ess returns Timeline data', async () => {
+    it('@serverless @ess returns Timeline data', async () => {
       const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
         supertest,
         options: {

@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
 
-  describe('@serverless @serverlessQA @ess hosts', () => {
+  describe('@serverless @ess hosts', () => {
     before(async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
 
     after(
