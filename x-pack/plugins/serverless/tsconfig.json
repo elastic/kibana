@@ -26,6 +26,7 @@
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/i18n",
     "@kbn/management-cards-navigation",
+    "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
   ]
 }

@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -39,12 +39,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       id: 'logs',
       label: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.collectAndAnalyzeMyLabel',
-        { defaultMessage: 'Collect and analyze my logs' }
+        { defaultMessage: 'Collect and analyze logs' }
       ),
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
-          defaultMessage: 'Detect patterns, troubleshoot in real time, gain insights from logs.',
+          defaultMessage:
+            'Detect patterns, gain insights from logs, get alerted when surpassing error thresholds',
         }
       ),
     },
@@ -57,7 +58,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
-          defaultMessage: 'Collect distributed traces and catch application performance problems.',
+          defaultMessage:
+            'Catch application problems, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
     },
@@ -65,13 +67,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       id: 'infra',
       label: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyInfrastructureLabel',
-        { defaultMessage: 'Monitor my infrastructure' }
+        { defaultMessage: 'Monitor infrastructure' }
       ),
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.builtOnPowerfulElasticsearchLabel',
         {
           defaultMessage:
-            'Stream infrastructure metrics and accelerate root cause detection by breaking down silos.',
+            'Check my system’s health, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
     },
@@ -81,21 +83,57 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
-  const [integrationSearch, setIntegrationSearch] = useState('');
+
+  const [hasPackageListLoaded, setHasPackageListLoaded] = useState<boolean>(false);
+  const onPackageListLoaded = useCallback(() => {
+    setHasPackageListLoaded(true);
+  }, []);
+  const packageListRef = useRef<HTMLDivElement | null>(null);
+  const customCardsRef = useRef<HTMLDivElement | null>(null);
+  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+  const selectedCategory: Category | null = searchParams.get('category') as Category | null;
+
+  useEffect(() => {
+    if (selectedCategory === null || !hasPackageListLoaded) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      customCardsRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    }, 10);
+
+    return () => clearTimeout(timeout);
+  }, [selectedCategory, hasPackageListLoaded]);
+
+  useEffect(() => {
+    const searchParam = searchParams.get('search') ?? '';
+    if (integrationSearch === searchParam) return;
+    const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    if (integrationSearch) {
+      entries.search = integrationSearch;
+    } else {
+      delete entries.search;
+    }
+    setSearchParams(entries, { replace: true });
+  }, [integrationSearch, searchParams, setSearchParams]);
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListSearchBarRef.current) {
-        packageListSearchBarRef.current.focus();
-        packageListSearchBarRef.current.scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-        });
+      if (packageListRef.current) {
+        // adding a slight delay causes the search bar to be rendered
+        new Promise((r) => setTimeout(r, 10)).then(() =>
+          packageListRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          })
+        );
       }
     },
-    [setIntegrationSearch]
+    []
   );
 
   const customCards = useCustomCardsForCategory(
@@ -104,7 +142,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder paddingSize="xl">
       <TitleWithIcon
         iconType="indexRollupApp"
         title={i18n.translate(
@@ -116,11 +154,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={customMargin} gutterSize="m" direction="column">
+      <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
         {options.map((option) => (
           <EuiFlexItem key={option.id}>
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
+              data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
               name={radioGroupId}
               label={
                 <>
@@ -132,7 +171,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() => setSearchParams({ category: option.id }, { replace: true })}
+              onChange={() => {
+                setIntegrationSearch('');
+                setSearchParams({ category: option.id }, { replace: true });
+              }}
             />
           </EuiFlexItem>
         ))}
@@ -149,9 +191,17 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               }
             )}
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
-          {Array.isArray(customCards) && <OnboardingFlowPackageList customCards={customCards} />}
+          {Array.isArray(customCards) && (
+            <OnboardingFlowPackageList
+              ref={customCardsRef}
+              customCards={customCards}
+              flowSearch={integrationSearch}
+              flowCategory={searchParams.get('category')}
+              onLoaded={onPackageListLoaded}
+            />
+          )}
 
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
@@ -162,8 +212,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           <OnboardingFlowPackageList
             showSearchBar={true}
             searchQuery={integrationSearch}
+            flowSearch={integrationSearch}
             setSearchQuery={setIntegrationSearch}
-            ref={packageListSearchBarRef}
+            flowCategory={searchParams.get('category')}
+            ref={packageListRef}
+            customCards={customCards?.filter(
+              // Filter out collection cards and regular integrations that show up via search anyway
+              (card) => card.type === 'virtual' && !card.isCollectionCard
+            )}
+            joinCardLists
           />
         </>
       )}
@@ -179,10 +236,25 @@ interface TitleWithIconProps {
 const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
+      <EuiAvatar
+        size="l"
+        name={title}
+        iconType={iconType}
+        iconSize="l"
+        color="subdued"
+        css={{
+          /**
+           * Nudges the icon a bit to the
+           * right because it's not symmetrical and
+           * look off-center by default. This makes
+           * it visually centered.
+           */
+          padding: '24px 22px 24px 26px',
+        }}
+      />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <strong>{title}</strong>
       </EuiTitle>
     </EuiFlexItem>

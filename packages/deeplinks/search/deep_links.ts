@@ -26,9 +26,9 @@ export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPL
 export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 
-export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers' | 'playground';
+export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
 
-export type ApplicationsLinkId = 'searchApplications';
+export type ApplicationsLinkId = 'searchApplications' | 'playground';
 
 export type AppsearchLinkId = 'engines';
 
