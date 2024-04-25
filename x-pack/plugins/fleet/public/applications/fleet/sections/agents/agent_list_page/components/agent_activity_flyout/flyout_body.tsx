@@ -65,7 +65,10 @@ export const FlyoutBody: React.FunctionComponent<{
 }) => {
   const scrollToTopRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    scrollToTopRef.current?.scrollIntoView();
+    // Condition needed for jest tests as scrollIntoView is not implemented in jsdom
+    if (scrollToTopRef.current?.scrollIntoView) {
+      scrollToTopRef.current.scrollIntoView();
+    }
   }, [dateFilter]);
   // Loading
   if (isFirstLoading) {
