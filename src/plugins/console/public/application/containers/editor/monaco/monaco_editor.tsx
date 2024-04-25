@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -64,11 +64,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const [value, setValue] = useState(initialTextValue);
 
-  const setInitialValue = useSetInitialValue;
-
-  useEffect(() => {
-    setInitialValue({ initialTextValue, setValue, toasts });
-  }, [initialTextValue, setInitialValue, toasts]);
+  useSetInitialValue({ initialTextValue, setValue, toasts });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
