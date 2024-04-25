@@ -204,15 +204,6 @@ describe('only global', () => {
     ]);
   });
 
-  it('base *', () => {
-    const props = buildProps([{ spaces: ['*'], base: ['*'], feature: {} }]);
-    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
-    const actualTable = getTableFromComponent(component);
-    expect(actualTable).toEqual([
-      { spaces: ['*'], privileges: { summary: '*', overridden: false } },
-    ]);
-  });
-
   it('base read', () => {
     const props = buildProps([{ spaces: ['*'], base: ['read'], feature: {} }]);
     const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);

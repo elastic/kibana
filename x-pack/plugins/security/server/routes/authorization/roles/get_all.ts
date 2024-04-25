@@ -6,7 +6,7 @@
  */
 
 import type { RouteDefinitionParams } from '../..';
-import { compareRoles, transformElasticsearchRoleToRole } from '../../../authorization';
+import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
@@ -45,7 +45,7 @@ export function defineGetAllRolesRoutes({
             .filter((role) => {
               return !hideReservedRoles || !role.metadata?._reserved;
             })
-            .sort(compareRoles),
+            .sort(compareRolesByName),
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

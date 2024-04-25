@@ -10,10 +10,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { Role, RoleKibanaPrivilege } from '../../../common';
-import {
-  PRIVILEGES_ALL_WILDCARD,
-  RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
-} from '../../../common/constants';
+import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
@@ -29,9 +26,6 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
   remote_indices?: Role['elasticsearch']['remote_indices'];
   run_as: Role['elasticsearch']['run_as'];
 };
-
-const isReservedPrivilege = (app: string) => app === RESERVED_PRIVILEGES_APPLICATION_WILDCARD;
-const isWildcardPrivilage = (app: string) => app === PRIVILEGES_ALL_WILDCARD;
 
 export function transformElasticsearchRoleToRole(
   features: KibanaFeature[],
@@ -74,8 +68,7 @@ function transformRoleApplicationsToKibanaPrivileges(
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
       roleApplication.application === application ||
-      isReservedPrivilege(roleApplication.application) ||
-      isWildcardPrivilage(roleApplication.application)
+      roleApplication.application === RESERVED_PRIVILEGES_APPLICATION_WILDCARD
   );
 
   // if any application entry contains an empty resource, we throw an error
@@ -88,11 +81,9 @@ function transformRoleApplicationsToKibanaPrivileges(
   if (
     roleKibanaApplications.some(
       (entry) =>
-        (isReservedPrivilege(entry.application) || isWildcardPrivilage(entry.application)) &&
-        !entry.privileges.every(
-          (privilege) =>
-            PrivilegeSerializer.isSerializedReservedPrivilege(privilege) ||
-            isWildcardPrivilage(privilege)
+        entry.application === RESERVED_PRIVILEGES_APPLICATION_WILDCARD &&
+        !entry.privileges.every((privilege) =>
+          PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
         )
     )
   ) {
@@ -105,8 +96,7 @@ function transformRoleApplicationsToKibanaPrivileges(
   if (
     roleKibanaApplications.some(
       (entry) =>
-        !isReservedPrivilege(entry.application) &&
-        !isWildcardPrivilage(entry.application) &&
+        entry.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD &&
         entry.privileges.some((privilege) =>
           PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
         )
@@ -181,9 +171,7 @@ function transformRoleApplicationsToKibanaPrivileges(
   }
 
   const allResources = roleKibanaApplications
-    .filter(
-      (entry) => !isReservedPrivilege(entry.application) && !isWildcardPrivilage(entry.application)
-    )
+    .filter((entry) => entry.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD)
     .flatMap((entry) => entry.resources);
 
   // if we have improperly formatted resource entries, we can't transform these
@@ -324,8 +312,7 @@ const extractUnrecognizedApplicationNames = (
       .filter(
         (roleApplication) =>
           roleApplication.application !== application &&
-          !isReservedPrivilege(roleApplication.application) &&
-          !isWildcardPrivilage(roleApplication.application)
+          roleApplication.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD
       )
       .map((roleApplication) => roleApplication.application)
   );
@@ -346,3 +333,4 @@ export const compareRoles = (roleA: Role, roleB: Role) => {
 
   return 0;
 };
+

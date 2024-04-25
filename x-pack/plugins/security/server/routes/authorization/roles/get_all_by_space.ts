@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
 import { ALL_SPACES_ID } from '../../../../common/constants';
-import { compareRoles, transformElasticsearchRoleToRole } from '../../../authorization';
+import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
@@ -24,7 +24,7 @@ export function defineGetAllRolesBySpaceRoutes({
     {
       path: '/internal/security/roles/{spaceId}',
       options: {
-        tags: ['access:spacesManagement'],
+        tags: ['access:manageSpaces'],
       },
       validate: {
         params: schema.object({ spaceId: schema.string({ minLength: 1 }) }),
@@ -62,7 +62,7 @@ export function defineGetAllRolesBySpaceRoutes({
                     privilege.spaces.includes(ALL_SPACES_ID)
                 )
             )
-            .sort(compareRoles),
+            .sort(compareRolesByName),
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

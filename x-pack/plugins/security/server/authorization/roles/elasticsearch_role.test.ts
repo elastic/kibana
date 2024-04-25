@@ -289,39 +289,4 @@ describe('#transformElasticsearchRoleToRole', () => {
       { name: 'default-malformed', _transform_error: ['kibana'] },
     ]
   );
-
-  it('#When application privilege is set to * return it correctly', () => {
-    const role = {
-      name: 'global-all',
-      cluster: [],
-      indices: [],
-      applications: [
-        {
-          application: '*',
-          privileges: ['*'],
-          resources: ['*'],
-        },
-      ],
-      run_as: [],
-      metadata: {},
-      transient_metadata: {
-        enabled: true,
-      },
-    };
-
-    const transformedRole = transformElasticsearchRoleToRole(
-      featuresWithRequireAllSpaces,
-      omit(role, 'name'),
-      role.name,
-      'kibana-.kibana',
-      loggerMock.create()
-    );
-
-    const [privilege] = transformedRole.kibana;
-    const [basePrivilege] = privilege.base;
-    const [spacePrivilege] = privilege.spaces;
-
-    expect(basePrivilege).toBe('*');
-    expect(spacePrivilege).toBe('*');
-  });
 });
