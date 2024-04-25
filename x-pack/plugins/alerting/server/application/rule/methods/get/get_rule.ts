@@ -38,7 +38,7 @@ export async function getRule<Params extends RuleParams = never>(
   try {
     getRuleParamsSchema.validate(params);
   } catch (error) {
-    throw Boom.badRequest(`Error validating update data - ${error.message}`);
+    throw Boom.badRequest(`Error validating get data - ${error.message}`);
   }
 
   const result = await getRuleSo({
@@ -70,7 +70,6 @@ export async function getRule<Params extends RuleParams = never>(
     })
   );
 
-  context.ruleTypeRegistry.ensureRuleTypeEnabled(result.attributes.alertTypeId);
   const ruleType = context.ruleTypeRegistry.get(result.attributes.alertTypeId);
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
