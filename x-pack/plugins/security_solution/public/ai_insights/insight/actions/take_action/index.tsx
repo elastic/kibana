@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useAssistantContext } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
@@ -16,7 +15,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common';
 import { getAlertsInsightMarkdown } from '../../../get_alerts_insight_markdown/get_alerts_insight_markdown';
@@ -24,20 +22,14 @@ import * as i18n from './translations';
 import type { AlertsInsight } from '../../../types';
 import { useAddToNewCase } from '../use_add_to_case';
 import { useAddToExistingCase } from '../use_add_to_existing_case';
+import { useViewInAiAssistant } from '../../view_in_ai_assistant/use_view_in_ai_assistant';
 
 interface Props {
-  conversationTitle?: string;
   insight: AlertsInsight;
-  promptContextId: string | undefined;
   replacements?: Replacements;
 }
 
-const TakeActionComponent: React.FC<Props> = ({
-  conversationTitle,
-  insight,
-  promptContextId,
-  replacements,
-}) => {
+const TakeActionComponent: React.FC<Props> = ({ insight, replacements }) => {
   // get dependencies for creating / adding to cases:
   const { cases } = useKibana().services;
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
@@ -52,19 +44,6 @@ const TakeActionComponent: React.FC<Props> = ({
   const { onAddToExistingCase } = useAddToExistingCase({
     canUserCreateAndReadCases,
   });
-
-  // get dependencies for viewing insights in the AI assistant:
-  const { hasAssistantPrivilege } = useAssistantAvailability();
-  const { showAssistantOverlay } = useAssistantContext();
-
-  // proxy show / hide calls to the assistant context, using our internal prompt context id:
-  const showOverlay = useCallback(() => {
-    showAssistantOverlay({
-      conversationTitle,
-      promptContextId,
-      showOverlay: true,
-    });
-  }, [conversationTitle, promptContextId, showAssistantOverlay]);
 
   // boilerplate for the take action popover:
   const takeActionContextMenuPopoverId = useGeneratedHtmlId({
@@ -105,10 +84,15 @@ const TakeActionComponent: React.FC<Props> = ({
     });
   }, [closePopover, insight.alertIds, markdown, onAddToExistingCase, replacements]);
 
+  const { showAssistantOverlay, disabled: viewInAiAssistantDisabled } = useViewInAiAssistant({
+    insight,
+    replacements,
+  });
+
   const onViewInAiAssistant = useCallback(() => {
     closePopover();
-    showOverlay();
-  }, [closePopover, showOverlay]);
+    showAssistantOverlay?.();
+  }, [closePopover, showAssistantOverlay]);
 
   // button for the popover:
   const button = useMemo(
@@ -124,11 +108,6 @@ const TakeActionComponent: React.FC<Props> = ({
       </EuiButtonEmpty>
     ),
     [onButtonClick]
-  );
-
-  const viewInAiAssistantDisabled = useMemo(
-    () => !hasAssistantPrivilege || promptContextId == null,
-    [hasAssistantPrivilege, promptContextId]
   );
 
   // items for the popover:

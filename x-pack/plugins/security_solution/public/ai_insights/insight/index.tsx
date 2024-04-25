@@ -7,24 +7,14 @@
 
 import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionableSummary } from './actionable_summary';
 import { Actions } from './actions';
-import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
-import { getAlertsInsightMarkdown } from '../get_alerts_insight_markdown/get_alerts_insight_markdown';
 import { Tabs } from './tabs';
 import { Title } from './title';
 import type { AlertsInsight } from '../types';
-
-const useAssistantNoop = () => ({ promptContextId: undefined });
-
-/**
- * This category is provided in the prompt context for the assistant
- */
-const category = 'insight';
 
 interface Props {
   initialIsOpen?: boolean;
@@ -43,33 +33,6 @@ const InsightComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  // get assistant privileges:
-  const { hasAssistantPrivilege } = useAssistantAvailability();
-  const useAssistantHook = useMemo(
-    () => (hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop),
-    [hasAssistantPrivilege]
-  );
-
-  // the prompt context for this insight:
-  const getPromptContext = useCallback(
-    async () =>
-      getAlertsInsightMarkdown({
-        insight,
-        // note: we do NOT want to replace the replacements here
-      }),
-    [insight]
-  );
-  const { promptContextId } = useAssistantHook(
-    category,
-    insight.title, // conversation title
-    insight.title, // description used in context pill
-    getPromptContext,
-    null, // accept the UUID default for this prompt context
-    null, // suggestedUserPrompt
-    null, // tooltip
-    replacements ?? null
-  );
-
   const htmlId = useGeneratedHtmlId({
     prefix: 'insightAccordion',
   });
@@ -82,10 +45,8 @@ const InsightComponent: React.FC<Props> = ({
   }, [isOpen, onToggle]);
 
   const actions = useMemo(
-    () => (
-      <Actions insight={insight} promptContextId={promptContextId} replacements={replacements} />
-    ),
-    [insight, promptContextId, replacements]
+    () => <Actions insight={insight} replacements={replacements} />,
+    [insight, replacements]
   );
 
   const buttonContent = useMemo(
@@ -111,7 +72,6 @@ const InsightComponent: React.FC<Props> = ({
 
         <ActionableSummary
           insight={insight}
-          promptContextId={promptContextId}
           replacements={replacements}
           showAnonymized={showAnonymized}
         />
@@ -127,12 +87,7 @@ const InsightComponent: React.FC<Props> = ({
           data-test-subj="insightTabsPanel"
           hasBorder={true}
         >
-          <Tabs
-            insight={insight}
-            promptContextId={promptContextId}
-            replacements={replacements}
-            showAnonymized={showAnonymized}
-          />
+          <Tabs insight={insight} replacements={replacements} showAnonymized={showAnonymized} />
         </EuiPanel>
       )}
     </>

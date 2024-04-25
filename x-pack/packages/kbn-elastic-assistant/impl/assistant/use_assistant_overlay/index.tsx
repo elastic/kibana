@@ -11,9 +11,10 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
+import { useConversation } from '../use_conversation';
 
 interface UseAssistantOverlay {
-  showAssistantOverlay: (show: boolean) => void;
+  showAssistantOverlay: (show: boolean, silent?: boolean) => void;
   promptContextId: string;
 }
 
@@ -73,6 +74,8 @@ export const useAssistantOverlay = (
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
+  const { getConversation, createConversation } = useConversation();
+
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);
@@ -99,8 +102,28 @@ export const useAssistantOverlay = (
   } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
+  // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    (showOverlay: boolean) => {
+    async (showOverlay: boolean, silent?: boolean) => {
+      let conversation;
+      try {
+        conversation = await getConversation(promptContextId, silent);
+      } catch (e) {
+        /* empty */
+      }
+
+      if (!conversation) {
+        try {
+          conversation = await createConversation({
+            category: 'assistant',
+            title: conversationTitle ?? '',
+            id: promptContextId,
+          });
+        } catch (e) {
+          /* empty */
+        }
+      }
+
       if (promptContextId != null) {
         assistantContextShowOverlay({
           showOverlay,
@@ -109,7 +132,13 @@ export const useAssistantOverlay = (
         });
       }
     },
-    [assistantContextShowOverlay, conversationTitle, promptContextId]
+    [
+      assistantContextShowOverlay,
+      conversationTitle,
+      createConversation,
+      getConversation,
+      promptContextId,
+    ]
   );
 
   useEffect(() => {

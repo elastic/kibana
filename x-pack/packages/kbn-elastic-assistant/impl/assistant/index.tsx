@@ -208,6 +208,10 @@ const AssistantComponent: React.FC<Props> = ({
       if (conversationId) {
         const updatedConversation = await getConversation(conversationId);
 
+        if (updatedConversation) {
+          setCurrentConversation(updatedConversation);
+        }
+
         return updatedConversation;
       }
     },
@@ -360,10 +364,11 @@ const AssistantComponent: React.FC<Props> = ({
     parent.scrollTop = parent.scrollHeight;
 
     if (isFlyoutMode) {
-      // @ts-expect-error
-      commentsContainerRef.current?.childNodes[0].childNodes[0].lastElementChild?.scrollIntoView();
+      (
+        commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
+      ).lastElementChild?.scrollIntoView();
     }
-  }, [isFlyoutMode]);
+  });
 
   const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
     isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
@@ -395,9 +400,6 @@ const AssistantComponent: React.FC<Props> = ({
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
-        if (refetchedConversation) {
-          setCurrentConversation(refetchedConversation);
-        }
         setCurrentConversationId(cId);
       }
     },

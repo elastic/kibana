@@ -18,11 +18,10 @@ import type { AlertsInsight } from '../../types';
 
 interface Props {
   insight: AlertsInsight;
-  promptContextId: string | undefined;
   replacements?: Replacements;
 }
 
-const ActionsComponent: React.FC<Props> = ({ insight, promptContextId, replacements }) => {
+const ActionsComponent: React.FC<Props> = ({ insight, replacements }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -88,11 +87,7 @@ const ActionsComponent: React.FC<Props> = ({ insight, promptContextId, replaceme
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <TakeAction
-          insight={insight}
-          promptContextId={promptContextId}
-          replacements={replacements}
-        />
+        <TakeAction insight={insight} replacements={replacements} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

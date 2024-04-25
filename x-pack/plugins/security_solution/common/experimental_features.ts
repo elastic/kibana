@@ -129,7 +129,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Alerts Insights feature and API endpoint
    */
-  assistantAlertsInsights: false,
+  assistantAlertsInsights: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
