@@ -204,8 +204,7 @@ export const EmbedContent = ({
     setUrlHelper();
     getUrlParamExtensions(url);
     window.addEventListener('hashchange', resetUrl, false);
-    isMounted();
-  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted]);
+  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url]);
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {

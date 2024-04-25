@@ -42,7 +42,6 @@ interface UrlParams {
 
 export const LinkContent = ({
   objectType,
-  objectId,
   isDirty,
   shareableUrl,
   shareableUrlForSavedObject,
@@ -54,10 +53,6 @@ export const LinkContent = ({
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
   const [, setShortUrlCache] = useState<string | undefined>(undefined);
-
-  const isNotSaved = useCallback(() => {
-    return isDirty;
-  }, [isDirty]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -103,7 +98,7 @@ export const LinkContent = ({
   );
 
   const getSavedObjectUrl = useCallback(() => {
-    if (isNotSaved()) {
+    if (isDirty) {
       return;
     }
 
@@ -132,7 +127,7 @@ export const LinkContent = ({
       }),
     });
     return updateUrlParams(formattedUrl);
-  }, [getSnapshotUrl, isNotSaved, updateUrlParams]);
+  }, [getSnapshotUrl, isDirty, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {
     if (shareableUrlLocatorParams) {
@@ -169,13 +164,6 @@ export const LinkContent = ({
     setTextCopied(true);
   }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl, url]);
 
-  const lensOnClick = () => {
-    if (objectType === 'lens' && !isDirty) {
-      return copyUrlHelper();
-    } else {
-      return copyUrlHelper();
-    }
-  };
   return (
     <>
       <EuiForm>
@@ -211,7 +199,7 @@ export const LinkContent = ({
               data-test-subj="copyShareUrlButton"
               data-share-url={url}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
-              onClick={lensOnClick}
+              onClick={copyUrlHelper}
               disabled={objectType === 'lens' && isDirty}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 
 import {
@@ -25,7 +25,6 @@ import {
   EuiToolTip,
   type EuiRadioGroupOption,
 } from '@elastic/eui';
-import useMountedState from 'react-use/lib/useMountedState';
 import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
 
@@ -42,16 +41,8 @@ const ExportContentUi = ({
   intl,
   onClose,
 }: ExportProps) => {
-  const [, setIsStale] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
-
   const [usePrintLayout, setPrintLayout] = useState(false);
-  const isMounted = useMountedState();
-
-  const markAsStale = useCallback(() => {
-    if (!isMounted) return;
-    setIsStale(true);
-  }, [isMounted]);
 
   const radioOptions = useMemo(() => {
     return aggregateReportTypes
@@ -128,11 +119,6 @@ const ExportContentUi = ({
       );
     }
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
-
-  useEffect(() => {
-    isMounted();
-    markAsStale();
-  }, [aggregateReportTypes, markAsStale, isMounted]);
 
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
