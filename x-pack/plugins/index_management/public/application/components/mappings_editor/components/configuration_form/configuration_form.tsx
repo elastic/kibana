@@ -8,6 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
@@ -97,6 +98,10 @@ const formDeserializer = (formData: GenericObject) => {
 };
 
 export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
+  const {
+    config: { enableMappingsSourceField },
+  } = useAppContext();
+
   const isMounted = useRef(false);
 
   const { form } = useForm({
@@ -159,8 +164,11 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      <SourceFieldSection />
-      <EuiSpacer size="xl" />
+      {enableMappingsSourceField && (
+        <>
+          <SourceFieldSection /> <EuiSpacer size="xl" />
+        </>
+      )}
       <RoutingSection />
       {isMapperSizeSectionVisible && <MapperSizePluginSection />}
     </Form>

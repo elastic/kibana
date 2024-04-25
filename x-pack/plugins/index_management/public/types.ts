@@ -38,4 +38,5 @@ export interface ClientConfigType {
   enableIndexStats?: boolean;
   editableIndexSettings?: 'all' | 'limited';
   enableDataStreamsStorageColumn?: boolean;
+  enableMappingsSourceField?: boolean;
 }
