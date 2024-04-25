@@ -708,9 +708,6 @@ export class TaskRunner<
 
     const getTaskRunError = (state: Result<RuleTaskStateAndMetrics, Error>) => {
       if (isErr(state)) {
-        this.logger.error(state.error.message, {
-          tags: [this.ruleType.id, ruleId, 'rule-run-failed', getErrorSource(state.error)],
-        });
         return {
           taskRunError: createTaskRunError(state.error, getErrorSource(state.error)),
         };
@@ -745,7 +742,9 @@ export class TaskRunner<
             const message = `Executing Rule ${spaceId}:${
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-            this.logger.debug(message);
+            this.logger.debug(message, {
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', getErrorSource(err)],
+            });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
             const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
@@ -753,7 +752,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', getErrorSource(err)],
               error: { stack_trace: stack },
             });
           }
