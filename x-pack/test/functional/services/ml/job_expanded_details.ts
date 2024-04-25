@@ -48,11 +48,10 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async assertForecastElements(jobId: string): Promise<void> {
-      await jobTable.withDetailsOpen(jobId, async () => {
-        await this.openForecastTab(jobId);
-        await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
-          timeout: 3_000,
-        });
+      await jobTable.ensureDetailsOpen(jobId);
+      await this.openForecastTab(jobId);
+      await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
+        timeout: 3_000,
       });
     },
 
