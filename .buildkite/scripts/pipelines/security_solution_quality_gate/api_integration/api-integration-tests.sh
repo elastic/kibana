@@ -5,15 +5,15 @@ if [ -z "$1" ]
     exit 1
 fi
 
-source .buildkite/scripts/common/util.sh
-.buildkite/scripts/bootstrap.sh
+# source .buildkite/scripts/common/util.sh
+# .buildkite/scripts/bootstrap.sh
 
-buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
+# buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
 source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 
 cd x-pack/test/security_solution_api_integration
-set +e
+# set +e
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
@@ -48,7 +48,7 @@ if [ -z "${KIBANA_MKI_IMAGE_COMMIT+x}" ]; then
           "region_id": "aws-eu-west-1"}' | jq '.')
 else
   # A commit is provided so it will be used to run the tests against this qualified image.
-  KBN_COMMIT_HASH=${BUILDKITE_COMMIT:0:12}
+  KBN_COMMIT_HASH=${KIBANA_MKI_IMAGE_COMMIT:0:12}
   ENVIRONMENT_DETAILS=$(curl --location "$CREATE_URL" \
     --header "Authorization: $AUTH" \
     --header 'Content-Type: application/json' \
