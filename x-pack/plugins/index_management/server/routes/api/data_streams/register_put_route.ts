@@ -47,8 +47,7 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
 
           return response.ok({ body: {
             success: true,
-            // ...(headers.warning ? { warning: headers.warning } : {}),
-            warning: 'Infinite retention is not allowed for this project. The default retention of [7d] will be applied.'
+            ...(headers.warning ? { warning: headers.warning } : {}),
           }});
         }
 
