@@ -21,7 +21,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Detection rules, Alert Suppression for Essentials tier',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [
