@@ -13,15 +13,7 @@ import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { listenForCompatibleApi } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, fetch$ } from '@kbn/presentation-publishing';
-import {
-  auditTime,
-  BehaviorSubject,
-  combineLatest,
-  lastValueFrom,
-  map,
-  Subscription,
-  switchMap,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { v4 } from 'uuid';
 import { StartDeps } from '../../plugin';
 import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
@@ -119,7 +111,6 @@ export const initializeDataTableQueries = async (
   dataSubscription.add(
     combineLatest([fetch$(api), dataView$])
       .pipe(
-        auditTime(50),
         map(([{ filters, timeRange, query }, dataView]) => ({
           filters,
           timeRange,

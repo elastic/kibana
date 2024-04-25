@@ -18,7 +18,7 @@
       "developerExamples",
       "dataViewFieldEditor"
     ],
-    "requiredBundles": ["presentationUtil"],
+    "requiredBundles": ["presentationUtil", "kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["public/hello_world"]
   }
 }
