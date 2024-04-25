@@ -20,7 +20,6 @@
     "@kbn/ml-response-stream",
     "@kbn/security-plugin",
     "@kbn/user-profile-components",
-    "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/navigation-plugin",
@@ -35,6 +34,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/logging",
+    "@kbn/react-kibana-context-render",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin"
   ],

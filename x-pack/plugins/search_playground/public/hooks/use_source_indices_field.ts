@@ -92,6 +92,8 @@ export const useSourceIndicesFields = () => {
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
       usageTracker.count(AnalyticsEvents.sourceFieldsLoaded, Object.values(fields)?.flat()?.length);
+    } else {
+      setNoFieldsIndicesWarning(null);
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
