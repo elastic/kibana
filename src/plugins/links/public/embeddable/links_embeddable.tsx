@@ -93,7 +93,6 @@ export const getLinksEmbeddableFactory = () => {
           ...titlesApi,
           ...linksApi,
           ...intializeLibraryTransforms(linksApi.attributes$.value, serializeState, isByReference),
-          isEditingEnabled: () => true,
           getTypeDisplayName: () => APP_NAME,
           serializeState,
         },

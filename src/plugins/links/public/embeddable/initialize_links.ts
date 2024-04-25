@@ -10,7 +10,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, distinctUntilKeyChanged, filter, switchMap } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
-import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
+import { PanelIncompatibleError, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LinksAttributes } from '../../common/content_management';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
@@ -27,9 +27,19 @@ export async function initializeLinks(
   parentApi: unknown
 ) {
   if (!isParentApiCompatible(parentApi)) throw new PanelIncompatibleError();
-  const { attributes } = state.savedObjectId ? await loadFromLibrary(state.savedObjectId) : state;
 
   const error$ = new BehaviorSubject<Error | undefined>(undefined);
+  const isEditable$ = new BehaviorSubject<boolean>(true);
+
+  let attributes: LinksAttributes | undefined;
+  try {
+    const loadedState = state.savedObjectId ? await loadFromLibrary(state.savedObjectId) : state;
+    if (loadedState.attributes) attributes = loadedState.attributes;
+  } catch (e) {
+    error$.next(new PanelNotFoundError());
+    isEditable$.next(false);
+  }
+
   const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>([]);
 
   const attributes$ = new BehaviorSubject(attributes);
@@ -92,6 +102,7 @@ export async function initializeLinks(
       defaultPanelDescription,
       blockingError: error$,
       onEdit,
+      isEditingEnabled: () => isEditable$.value,
       resolvedLinks$,
       attributes$,
       savedObjectId$,
