@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('compression', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('developer');
     });
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);

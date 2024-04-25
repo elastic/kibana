@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('translations', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('developer');
     });
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
@@ -30,13 +30,16 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => {
           expect(response.body.locale).to.eql('en');
 
-        expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
-        expect(response.header).to.have.property(
-          'cache-control',
-          'public, max-age=31536000, immutable'
-        );
-        expect(response.header).not.to.have.property('etag');
-      });
+          expect(response.header).to.have.property(
+            'content-type',
+            'application/json; charset=utf-8'
+          );
+          expect(response.header).to.have.property(
+            'cache-control',
+            'public, max-age=31536000, immutable'
+          );
+          expect(response.header).not.to.have.property('etag');
+        });
     });
 
     it(`returns a 404 when not using the correct locale`, async () => {
