@@ -333,4 +333,3 @@ export const compareRoles = (roleA: Role, roleB: Role) => {
 
   return 0;
 };
-
