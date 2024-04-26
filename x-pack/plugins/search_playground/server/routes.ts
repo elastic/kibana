@@ -202,6 +202,8 @@ export function defineRoutes({
     })
   );
 
+  // SECURITY: We don't apply any authorization tags to this route because all actions performed
+  // on behalf of the user making the request and governed by the user's own cluster privileges.
   router.get(
     {
       path: APIRoutes.GET_INDICES,
