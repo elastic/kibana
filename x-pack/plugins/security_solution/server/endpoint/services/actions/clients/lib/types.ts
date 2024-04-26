@@ -63,6 +63,12 @@ export interface ProcessPendingActionsMethodOptions {
   abortSignal: AbortSignal;
 }
 
+export interface GetFileDownloadMethodResponse {
+  stream: Readable;
+  fileName: string;
+  mimeType?: string;
+}
+
 /**
  * The interface required for a Response Actions provider
  */
@@ -125,8 +131,5 @@ export interface ResponseActionsClient {
    * @param actionId
    * @param fileId
    */
-  getFileDownload(
-    actionId: string,
-    fileId: string
-  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }>;
+  getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse>;
 }

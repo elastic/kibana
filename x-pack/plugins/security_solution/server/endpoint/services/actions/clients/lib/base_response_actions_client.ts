@@ -14,6 +14,7 @@ import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
+import { validateActionId } from '../../validate_action_id';
 import { fetchActionResponses } from '../../fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
@@ -498,6 +499,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
 
     usageService.notifyUsage(featureKey);
+  }
+
+  protected async ensureValidActionId(actionId: string): Promise<void> {
+    return validateActionId(this.options.esClient, actionId);
   }
 
   protected fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
