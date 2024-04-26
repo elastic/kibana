@@ -315,12 +315,12 @@ describe('The custom threshold alert type', () => {
       await execute(COMPARATORS.BETWEEN, [0, 0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
-    test('alerts as expected with the outside range comparator', async () => {
-      setResults(COMPARATORS.OUTSIDE_RANGE, [0, 0.75], true);
-      await execute(COMPARATORS.OUTSIDE_RANGE, [0, 0.75]);
+    test('alerts as expected with the not between comparator', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 0.75]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(COMPARATORS.OUTSIDE_RANGE, [0, 1.5], false);
-      await execute(COMPARATORS.OUTSIDE_RANGE, [0, 1.5]);
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('reports expected values to the action context', async () => {

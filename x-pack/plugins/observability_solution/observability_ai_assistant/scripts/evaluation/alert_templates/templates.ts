@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
-}
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 export enum Aggregators {
   COUNT = 'count',
@@ -49,7 +42,7 @@ export const customThresholdAIAssistantLogCount = {
     params: {
       criteria: [
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [10],
           timeSize: 2,
           timeUnit: 'h',
@@ -82,7 +75,7 @@ export const customThresholdAIAssistantMetricAvg = {
     params: {
       criteria: [
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [0.5],
           timeSize: 2,
           timeUnit: 'h',
