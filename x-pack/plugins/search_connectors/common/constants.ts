@@ -8,6 +8,8 @@
 import { ConnectorClientSideDefinition } from './types';
 import { docLinks } from './doc_links';
 
+// needs to be a function because, docLinks are only populated with actual
+// documentation links in browser after SearchConnectorsPlugin starts
 export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinition> => ({
   azure_blob_storage: {
     docsUrl: docLinks.connectorsAzureBlobStorage,
