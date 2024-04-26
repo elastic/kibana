@@ -12,6 +12,7 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import * as connectionDetails from '@kbn/cloud/connection_details';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
 interface CloudLinksDepsSetup {
@@ -31,7 +32,9 @@ export class CloudLinksPlugin
 {
   public setup() {}
 
-  public start(core: CoreStart, { cloud, security, guidedOnboarding, share }: CloudLinksDepsStart) {
+  public start(core: CoreStart, plugins: CloudLinksDepsStart) {
+    const { cloud, security, guidedOnboarding, share } = plugins;
+
     if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       if (guidedOnboarding?.guidedOnboardingApi?.isEnabled) {
         core.chrome.registerGlobalHelpExtensionMenuLink({
@@ -54,6 +57,13 @@ export class CloudLinksPlugin
         });
       }
     }
+
+    connectionDetails.setGlobalDependencies({
+      start: {
+        core,
+        plugins,
+      },
+    });
   }
 
   public stop() {}

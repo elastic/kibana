@@ -26,6 +26,7 @@ import type {
 import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
 import { SharedProviders } from './utils/shared_providers';
 import { LazyNavControl } from './components/nav_control/lazy_nav_control';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
@@ -124,12 +125,17 @@ export class ObservabilityAIAssistantAppPlugin
       order: 1001,
     });
 
-    pluginsStart.observabilityAIAssistant.service.register(async ({ registerRenderFunction }) => {
+    const service = pluginsStart.observabilityAIAssistant.service;
+
+    service.register(async ({ registerRenderFunction }) => {
       const { registerFunctions } = await import('./functions');
 
       await registerFunctions({ pluginsStart, registerRenderFunction });
     });
 
+    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+      getObsAIAssistantConnectorType(service)
+    );
     return {};
   }
 }

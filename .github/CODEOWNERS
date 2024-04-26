@@ -313,6 +313,13 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
+packages/core/user-profile/core-user-profile-browser @elastic/kibana-core
+packages/core/user-profile/core-user-profile-browser-internal @elastic/kibana-core
+packages/core/user-profile/core-user-profile-browser-mocks @elastic/kibana-core
+packages/core/user-profile/core-user-profile-common @elastic/kibana-core
+packages/core/user-profile/core-user-profile-server @elastic/kibana-core
+packages/core/user-profile/core-user-profile-server-internal @elastic/kibana-core
+packages/core/user-profile/core-user-profile-server-mocks @elastic/kibana-core
 packages/core/user-settings/core-user-settings-server @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
@@ -377,7 +384,6 @@ test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
 examples/embeddable_examples @elastic/kibana-presentation
-examples/embeddable_explorer @elastic/kibana-presentation
 src/plugins/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
@@ -481,6 +487,7 @@ x-pack/plugins/index_lifecycle_management @elastic/kibana-management
 x-pack/packages/index-management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
@@ -1125,6 +1132,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
+/x-pack/test_serverless/api_integration/test_suites/observability/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team

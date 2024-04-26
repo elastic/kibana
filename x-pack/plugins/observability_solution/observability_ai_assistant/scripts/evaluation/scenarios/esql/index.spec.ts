@@ -34,7 +34,7 @@ async function evaluateEsqlQuery({
       : []),
     ...(execute
       ? [`The query successfully executed without an error`]
-      : [`The query was not executed`]),
+      : [`The query was not executed, it was only explained`]),
     ...criteria,
   ]);
 
@@ -154,7 +154,8 @@ describe('ES|QL query generation', () => {
           question:
             'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page',
           criteria: [
-            'The assistant should mention that pagination is currently not supported in ES|QL',
+            'The assistant should clearly mention that pagination is currently not supported in ES|QL',
+            'IF the assistant decides to execute the query, it should correctly execute, and the Assistant should clearly mention pagination is not currently supported',
           ],
         });
       });
@@ -180,7 +181,7 @@ describe('ES|QL query generation', () => {
     it('logs avg cpu', async () => {
       await evaluateEsqlQuery({
         question:
-          'My metric data (ECS) is in .ds-metrics-apm* Show me a query that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m. ',
+          'My metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
         expected: `FROM .ds-metrics-apm*
         | WHERE @timestamp >= NOW() - 15 minutes
         | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
@@ -193,7 +194,7 @@ describe('ES|QL query generation', () => {
 
     it('metricbeat avg cpu', async () => {
       await evaluateEsqlQuery({
-        question: `From metricbeat*, using ES|QL, show me a query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by hostname`,
+        question: `Assume my data is in \`metricbeat*\`. Show me a query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by host name`,
         expected: `FROM metricbeat*
       | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
       | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
@@ -205,7 +206,7 @@ describe('ES|QL query generation', () => {
     it('postgres avg duration dissect', async () => {
       await evaluateEsqlQuery({
         question:
-          'Show me an ESQL query to extract the query duration from postgres log messages in postgres-logs*, with this format "2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table", using ECS fields, and calculate the avg',
+          'Show me an example ESQL query to extract the query duration from postgres log messages in postgres-logs*, with this format:\n `2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table`. \n Use ECS fields, and calculate the avg.',
         expected: `FROM postgres-logs*
       | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
       | EVAL duration_double = TO_DOUBLE(duration)
@@ -256,14 +257,12 @@ describe('ES|QL query generation', () => {
       );
     });
 
-    it('metrics avg duration', async () => {
+    // histograms are not supported yet in ES|QL
+    it.skip('metrics avg duration', async () => {
       await evaluateEsqlQuery({
         question:
           'Execute a query for metrics-apm*, filtering on metricset.name:service_transaction and metricset.interval:1m, the average duration (via transaction.duration.histogram), in 50 buckets.',
         execute: true,
-        criteria: [
-          'The assistant know that transaction.duration.histogram cannot be used in ESQL and proposes an alertative solution',
-        ],
       });
     });
 
@@ -274,8 +273,7 @@ describe('ES|QL query generation', () => {
         expected: `FROM traces-apm*
       | WHERE @timestamp >= NOW() - 24 hours
       | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
-      | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), total_failures = SUM(is_failure), total_success = SUM(is_success) BY service.name
-      | EVAL success_rate = total_success / (total_failures + total_success)
+      | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = SUM(is_success) / COUNT(*) BY service.name
       | KEEP service.name, avg_duration, success_rate, total_requests`,
         execute: true,
       });
@@ -328,9 +326,12 @@ describe('ES|QL query generation', () => {
         expected: `FROM logs-apm*
         | SORT @timestamp DESC
         | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
-        | KEEP formatted_date, log.level, message
+        | KEEP formatted_date, processor.event, message
         | LIMIT 5`,
         execute: true,
+        criteria: [
+          'The Assistant uses KEEP, to make sure the AT LEAST the formatted date, processor event and message fields are displayed. More columns are fine, fewer are not',
+        ],
       });
     });
 

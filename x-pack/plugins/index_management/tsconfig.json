@@ -47,9 +47,10 @@
     "@kbn/shared-ux-utility",
     "@kbn/index-management",
     "@kbn/utility-types",
-    "@kbn/react-kibana-context-render",
+    "@kbn/inference_integration_flyout",
+    "@kbn/ml-plugin",
+    "@kbn/ml-error-utils",
+    "@kbn/react-kibana-context-render"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

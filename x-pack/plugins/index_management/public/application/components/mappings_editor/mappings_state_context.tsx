@@ -59,6 +59,7 @@ export const StateProvider: React.FC = ({ children }) => {
       selectedOptions: [],
       selectedDataTypes: [],
     },
+    inferenceToModelIdMap: {},
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);

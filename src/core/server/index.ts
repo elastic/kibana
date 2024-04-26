@@ -130,6 +130,20 @@ export type {
   AuthenticationProvider,
 } from '@kbn/core-security-common';
 
+export type {
+  UserProfileUserInfo,
+  UserProfile,
+  UserProfileUserInfoWithSecurity,
+  UserProfileWithSecurity,
+  UserProfileLabels,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileRequestHandlerContext,
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+} from '@kbn/core-user-profile-server';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
