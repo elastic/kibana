@@ -55,7 +55,6 @@ components:
         type: object
         required:
           - success
-          - score
         properties:
           success: 
             type: boolean

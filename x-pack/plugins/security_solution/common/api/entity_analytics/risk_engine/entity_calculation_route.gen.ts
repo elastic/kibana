@@ -35,5 +35,5 @@ export type RiskScoresEntityCalculationResponse = z.infer<
 >;
 export const RiskScoresEntityCalculationResponse = z.object({
   success: z.boolean(),
-  score: RiskScore,
+  score: RiskScore.optional(),
 });
