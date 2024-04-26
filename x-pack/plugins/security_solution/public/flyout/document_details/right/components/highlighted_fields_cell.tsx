@@ -9,7 +9,7 @@ import type { VFC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { SentinelOneAgentStatus } from '../../../../detections/components/host_isolation/sentinel_one_agent_status';
+import { AgentStatus } from '../../../../management/components/agent_status/agent_status';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useRightPanelContext } from '../context';
@@ -18,7 +18,7 @@ import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
@@ -97,8 +97,9 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
               <LinkFieldCell value={value} />
             ) : field === AGENT_STATUS_FIELD_NAME &&
               originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
-              <SentinelOneAgentStatus
+              <AgentStatus
                 agentId={String(value ?? '')}
+                agentType="sentinel_one"
                 data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
               />
             ) : field === AGENT_STATUS_FIELD_NAME ? (

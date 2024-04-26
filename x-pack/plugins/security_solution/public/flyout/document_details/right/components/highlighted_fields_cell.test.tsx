@@ -22,7 +22,7 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
-} from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+} from '../../../../management/hooks/agents/use_get_agent_status';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');

@@ -12,7 +12,7 @@ import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
 import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
 import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
-import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
+import { AgentInfo } from '../components/endpoint_responder/components/header_info/agent_info/agent_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
@@ -33,6 +33,7 @@ export interface BasicConsoleProps {
   hostName: string;
   /** Required for Endpoint agents. */
   capabilities: MaybeImmutable<EndpointCapabilities[]>;
+  platform: string;
 }
 
 type ResponderInfoProps =
@@ -41,7 +42,6 @@ type ResponderInfoProps =
     })
   | (BasicConsoleProps & {
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
-      platform: string;
     });
 
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
@@ -51,10 +51,12 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+  console.log('agentStatusClientEnabled: ', agentStatusClientEnabled);
 
   return useCallback(
     (props: ResponderInfoProps) => {
-      const { agentId, agentType, capabilities, hostName } = props;
+      const { agentId, agentType, capabilities, hostName, platform } = props;
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
@@ -81,18 +83,21 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
-            if (agentType === 'endpoint') {
-              return <HeaderEndpointInfo endpointId={agentId} />;
-            }
-            if (agentType === 'sentinel_one') {
+            if (agentStatusClientEnabled || agentType === 'sentinel_one') {
               return (
-                <HeaderSentinelOneInfo
+                <AgentInfo
                   agentId={agentId}
+                  agentType={agentType}
                   hostName={hostName}
                   platform={props.platform}
                 />
               );
             }
+            // TODO: 8.15 remove this if block when agentStatusClientEnabled is enabled/removed
+            if (agentType === 'endpoint') {
+              return <HeaderEndpointInfo endpointId={agentId} />;
+            }
+
             return null;
           },
         };
@@ -104,6 +109,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               agentId,
               hostName,
               capabilities,
+              platform,
             },
             consoleProps,
             PageTitleComponent: () => {

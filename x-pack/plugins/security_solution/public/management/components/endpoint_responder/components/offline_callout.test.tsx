@@ -15,7 +15,7 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
-} from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+} from '../../../hooks/agents/use_get_agent_status';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { OfflineCallout } from './offline_callout';

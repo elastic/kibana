@@ -19,7 +19,7 @@ import {
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
+import { AgentStatus } from '../../../../../management/components/agent_status/agent_status';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -273,7 +273,7 @@ const FormattedFieldValueComponent: React.FC<{
     fieldName === AGENT_STATUS_FIELD_NAME &&
     fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
   ) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
+    return <AgentStatus agentId={String(value ?? '')} agentType="sentinel_one" />;
   } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel

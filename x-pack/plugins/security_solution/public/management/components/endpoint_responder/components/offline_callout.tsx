@@ -10,7 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useAgentStatusHook } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useAgentStatusHook } from '../../../hooks/agents/use_get_agent_status';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
