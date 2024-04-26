@@ -16,3 +16,13 @@ export function computeSLI(good: number, total: number): number {
 
   return toHighPrecision(good / total);
 }
+
+export function computeSLIForPreview(good: number, total: number): number | null {
+  const sliValue = computeSLI(good, total);
+
+  if (sliValue === NO_DATA) {
+    return null;
+  }
+
+  return sliValue;
+}

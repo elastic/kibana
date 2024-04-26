@@ -56,6 +56,10 @@ const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
 
 const visitArtifactTab = (tabId: string) => {
   visitPolicyDetailsPage();
+  clickArtifactTab(tabId);
+};
+
+const clickArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
@@ -135,6 +139,8 @@ describe('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless']
 
           cy.getByTestSubj('backToOrigin').click();
           cy.getByTestSubj('policyDetailsPage').should('exist');
+          clickArtifactTab(testData.nextTabId); // Make sure the next tab is accessible and backLink doesn't throw errors
+          cy.getByTestSubj('policyDetailsPage');
         });
       });
 

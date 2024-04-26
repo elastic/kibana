@@ -9,6 +9,16 @@
 import type { IRouter } from '@kbn/core-http-server';
 import { registerTranslationsRoute } from './translations';
 
-export const registerRoutes = ({ router, locale }: { router: IRouter; locale: string }) => {
-  registerTranslationsRoute(router, locale);
+export const registerRoutes = ({
+  router,
+  locale,
+  isDist,
+  translationHash,
+}: {
+  router: IRouter;
+  locale: string;
+  isDist: boolean;
+  translationHash: string;
+}) => {
+  registerTranslationsRoute({ router, locale, isDist, translationHash });
 };
