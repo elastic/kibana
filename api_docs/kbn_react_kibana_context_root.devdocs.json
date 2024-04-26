@@ -247,6 +247,7 @@
               "The `AnalyticsServiceStart` API from `CoreStart`."
             ],
             "signature": [
+              "Pick<",
               {
                 "pluginId": "@kbn/core-analytics-browser",
                 "scope": "common",
@@ -254,7 +255,7 @@
                 "section": "def-common.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
-              " | undefined"
+              ", \"reportEvent\"> | undefined"
             ],
             "path": "packages/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
