@@ -17,13 +17,21 @@
       "name": "[Serverless] Security Solution Investigations - Cypress"
     },
     {
+      "key": "cypress/security_solution_threat_intelligence",
+      "name": "Security Solution Threat intelligence - Cypress"
+    },
+    {
+      "key": "cypress/security_serverless_threat_intelligence",
+      "name": "[Serverless] Security Solution Threat Intelligence - Cypress"
+    },
+    {
       "key": "cypress/security_solution_explore",
       "name": "Security Solution Explore - Cypress"
     },
     {
       "key": "cypress/security_serverless_explore",
       "name": "[Serverless] Security Solution Explore - Cypress"
-    },   
+    },
     {
       "key": "cypress/security_solution_rule_management",
       "name": "Security Solution Rule Management - Cypress"
