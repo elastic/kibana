@@ -58,9 +58,9 @@ const mockDataPoints = [
 
 const mockEmbeddableApi = {
   parentApi: {
-    localFilters: new BehaviorSubject([]),
-    localQuery: new BehaviorSubject({ query: 'test', language: 'kuery' }),
-    localTimeRange: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    filters$: new BehaviorSubject([]),
+    query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
+    timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
   },
 };
 
@@ -292,7 +292,7 @@ describe('UrlDrilldown', () => {
         { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
       ]),
       parentApi: {
-        localFilters: new BehaviorSubject([
+        filters$: new BehaviorSubject([
           {
             meta: {
               alias: 'asdf',
@@ -301,11 +301,11 @@ describe('UrlDrilldown', () => {
             },
           },
         ]),
-        localQuery: new BehaviorSubject({
+        query$: new BehaviorSubject({
           language: 'C++',
           query: 'std::cout << 123;',
         }),
-        localTimeRange: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
+        timeRange$: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
       },
       panelTitle: new BehaviorSubject('The Title'),
       savedObjectId: new BehaviorSubject('SAVED_OBJECT_ID'),

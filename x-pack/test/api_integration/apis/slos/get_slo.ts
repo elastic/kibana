@@ -94,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -152,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -220,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -287,6 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0,
             errorBudget: {

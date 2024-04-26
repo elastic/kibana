@@ -10,9 +10,9 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
-import { useApplication } from '../components/cases_context/use_application';
+import { useApplication } from './lib/kibana/use_application';
 
-jest.mock('../components/cases_context/use_application');
+jest.mock('./lib/kibana/use_application');
 
 const useApplicationMock = useApplication as jest.Mock;
 

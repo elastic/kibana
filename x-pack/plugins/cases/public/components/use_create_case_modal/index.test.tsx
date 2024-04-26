@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { render, act as reactAct } from '@testing-library/react';
 
 import { useKibana } from '../../common/lib/kibana';
 import type { UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
@@ -94,14 +93,6 @@ describe('useCreateCaseModal', () => {
 
     act(() => {
       result.current.openModal();
-    });
-
-    await reactAct(async () => {
-      const modal = result.current.modal;
-      render(<TestProviders>{modal}</TestProviders>);
-    });
-
-    act(() => {
       result.current.modal.props.onSuccess({ id: 'case-id' });
     });
 

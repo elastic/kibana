@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
@@ -28,14 +28,6 @@ import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
-
-const EuiFormRowExtended = styled(EuiFormRow)`
-  .euiFormRow__labelWrapper {
-    .euiFormRow__label {
-      width: 100%;
-    }
-  }
-`;
 
 export interface Props {
   actionTypes: ActionTypeConnector[];
@@ -101,8 +93,13 @@ const ConnectorsComponent: React.FC<Props> = ({
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
         data-test-subj="case-connectors-form-group"
       >
-        <EuiFormRowExtended
+        <EuiFormRow
           fullWidth
+          css={css`
+            label {
+              width: 100%;
+            }
+          `}
           label={dropDownLabel}
           data-test-subj="case-connectors-form-row"
         >
@@ -140,7 +137,7 @@ const ConnectorsComponent: React.FC<Props> = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </EuiFormRowExtended>
+        </EuiFormRow>
       </EuiDescribedFormGroup>
     </>
   );

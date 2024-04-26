@@ -66,7 +66,6 @@ const externals = {
    * big deps which are locked to a single version
    */
   rxjs: '__kbnSharedDeps__.Rxjs',
-  'rxjs/operators': '__kbnSharedDeps__.RxjsOperators',
   numeral: '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
@@ -99,6 +98,7 @@ const externals = {
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
+  '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

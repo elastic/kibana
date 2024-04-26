@@ -5,20 +5,57 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 import { mapPercentageToQuality } from './helpers';
 import { QualityIndicator } from './indicator';
 
-export function QualityPercentageIndicator({ percentage = 0 }: { percentage?: number }) {
+const FEW_DEGRADED_DOCS_THRESHOLD = 0.0005;
+
+export function QualityPercentageIndicator({
+  percentage,
+  degradedDocsCount,
+}: {
+  percentage: number;
+  degradedDocsCount?: number;
+}) {
   const quality = mapPercentageToQuality(percentage);
 
-  const description = (
-    <EuiText size="s">
-      <FormattedNumber value={percentage} />%
-    </EuiText>
+  const isFewDegradedDocsAvailable = percentage && percentage < FEW_DEGRADED_DOCS_THRESHOLD;
+
+  const description = isFewDegradedDocsAvailable ? (
+    <DatasetWithFewDegradedDocs degradedDocsCount={degradedDocsCount} />
+  ) : (
+    <DatasetWithManyDegradedDocs percentage={percentage} />
   );
 
   return <QualityIndicator quality={quality} description={description} />;
 }
+
+const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?: number }) => {
+  return (
+    <EuiText size="s">
+      ~0%{' '}
+      <EuiToolTip
+        content={i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
+          defaultMessage: '{degradedDocsCount} degraded docs in this dataset.',
+          values: {
+            degradedDocsCount,
+          },
+        })}
+      >
+        <EuiIcon type="warning" color="warning" size="s" />
+      </EuiToolTip>
+    </EuiText>
+  );
+};
+
+const DatasetWithManyDegradedDocs = ({ percentage }: { percentage: number }) => {
+  return (
+    <EuiText size="s">
+      <FormattedNumber value={percentage} />%
+    </EuiText>
+  );
+};

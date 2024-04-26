@@ -59,6 +59,23 @@ describe('TextBasedLanguagesEditor', () => {
     );
   }
   let props: TextBasedLanguagesEditorProps;
+  beforeAll(() => {
+    // Mocking matchMedia to resolve TypeError: window.matchMedia is not a function
+    // For more info, see https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // deprecated
+        removeListener: jest.fn(), // deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+  });
   beforeEach(() => {
     props = {
       query: { esql: 'from test' },
@@ -122,6 +139,44 @@ describe('TextBasedLanguagesEditor', () => {
     expect(
       component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
     ).toStrictEqual('@timestamp found');
+  });
+
+  it('should render the query history action if isLoading is defined', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      isLoading: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
+        .length
+    ).not.toBe(0);
+  });
+
+  it('should not render the query history action if isLoading is undefined', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
+        .length
+    ).toBe(0);
+  });
+
+  it('should not render the query history action if hideQueryHistory is set to true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      hideQueryHistory: true,
+    };
+    const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+    expect(
+      component.find('[data-test-subj="TextBasedLangEditor-toggle-query-history-button-container"]')
+        .length
+    ).toBe(0);
   });
 
   it('should  render the errors badge for the inline mode by default if errors are provided', async () => {

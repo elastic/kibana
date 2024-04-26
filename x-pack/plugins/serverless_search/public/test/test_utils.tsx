@@ -8,17 +8,20 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { userProfileMock } from '@kbn/security-plugin/common/model/user_profile.mock';
+import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
 
 export const core = coreMock.createStart();
 export const services = {
   cloud: cloudMock.createStart(),
+  searchConnectors: searchConnectorsMock.createStart(),
   share: sharePluginMock.createStartContract(),
   userProfile: userProfileMock.createWithSecurity(),
 };
@@ -31,7 +34,7 @@ const queryClient = new QueryClient({
 
 const AllTheProviders: React.FC = ({ children }) => {
   return (
-    <KibanaThemeProvider theme$={core.theme.theme$}>
+    <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
           <I18nProvider>{children}</I18nProvider>

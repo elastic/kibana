@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 
 import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { matchAllQuery } from '@kbn/ml-query-utils';
 
 import type { Dictionary } from '../../../../../../../common/types/common';
 import type { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
@@ -21,7 +22,6 @@ import type {
   PivotGroupByConfigDict,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../../common';
-import { matchAllQuery } from '../../../../../common';
 
 import type { StepDefineExposedState } from './types';
 import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';

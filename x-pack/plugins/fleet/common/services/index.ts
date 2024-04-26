@@ -80,3 +80,8 @@ export {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from './agent_policy_config';
+
+export {
+  getFleetServerVersionMessage,
+  isAgentVersionLessThanFleetServer,
+} from './check_fleet_server_versions';

@@ -13,8 +13,10 @@ import type {
 // We export the versioned service definition from this file and not the barrel to avoid adding
 // the schemas in the "public" js bundle
 
-import { serviceDefinition as v1 } from './v1/cm_services';
+import { serviceDefinition as v1 } from './v1';
+import { serviceDefinition as v2 } from './v2';
 
 export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
   1: v1,
+  2: v2,
 };

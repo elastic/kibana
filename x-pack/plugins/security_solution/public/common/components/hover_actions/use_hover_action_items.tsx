@@ -11,17 +11,14 @@ import type { DraggableId } from '@hello-pangea/dnd';
 
 import { isEmpty } from 'lodash';
 
-import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
 import { getSourcererScopeId, isActiveTimeline } from '../../../helpers';
-import { timelineSelectors } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/actions';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useDataViewId } from '../../hooks/use_data_view_id';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -85,7 +82,7 @@ export const useHoverActionItems = ({
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
   const dispatch = useDispatch();
-  const { timelines, uiSettings } = kibana.services;
+  const { timelines, timelineFilterManager } = kibana.services;
   const dataViewId = useDataViewId(getSourcererScopeId(scopeId ?? ''));
 
   // Common actions used by the alert table and alert flyout
@@ -97,22 +94,12 @@ export const useHoverActionItems = ({
     getFilterOutValueButton,
     getOverflowButton,
   } = timelines.getHoverActions();
-  const filterManagerBackup = useMemo(
-    () => kibana.services.data.query.filterManager,
-    [kibana.services.data.query.filterManager]
-  );
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  const activeFilterManager = useDeepEqualSelector((state) =>
-    isActiveTimeline(scopeId ?? '') ? getTimeline(state, scopeId ?? '')?.filterManager : undefined
-  );
-  const filterManager = useMemo(
-    () =>
-      isActiveTimeline(scopeId ?? '')
-        ? activeFilterManager ?? new FilterManager(uiSettings)
-        : filterManagerBackup,
-    [scopeId, activeFilterManager, uiSettings, filterManagerBackup]
-  );
+  const filterManager = useMemo(() => {
+    return isActiveTimeline(scopeId ?? '')
+      ? timelineFilterManager
+      : kibana.services.data.query.filterManager;
+  }, [scopeId, timelineFilterManager, kibana.services.data.query.filterManager]);
 
   /*
    *   Add to Timeline button, adds data to dataprovider but does not persists the Timeline

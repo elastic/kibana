@@ -17,7 +17,8 @@ export type {
   ConsoleUILocatorParams,
   ConsolePluginSetup,
   ConsolePluginStart,
-  EmbeddableConsoleProps as RemoteConsoleProps,
+  EmbeddedConsoleView,
+  EmbeddedConsoleViewButtonProps,
 } from './types';
 
 export { ConsoleUIPlugin as Plugin };

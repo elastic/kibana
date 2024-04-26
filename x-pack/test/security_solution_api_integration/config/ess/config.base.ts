@@ -79,10 +79,11 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'alertSuppressionForNewTermsRuleEnabled',
             'previewTelemetryUrlEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'alertSuppressionForIndicatorMatchRuleEnabled',
+            'alertSuppressionForNonSequenceEqlRuleEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
@@ -95,7 +96,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ],
       },
       mochaOpts: {
-        grep: '/^(?!.*@brokenInEss).*@ess.*/',
+        grep: '/^(?!.*@skipInEss).*@ess.*/',
       },
     };
   };

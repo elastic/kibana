@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
+  formatNumber,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -26,6 +28,7 @@ import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
+  BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { QualityIndicator } from '../../quality_indicator';
@@ -125,12 +128,14 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats,
   selectedDataset,
   openFlyout,
+  loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
   selectedDataset?: FlyoutDataset;
+  loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
@@ -144,7 +149,7 @@ export const getDatasetQualityTableColumns = ({
 
         return (
           <EuiButtonIcon
-            data-test-subj="datasetQualityGetDatasetQualityTableColumnsButton"
+            data-test-subj="datasetQualityExpandButton"
             size="m"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
@@ -194,8 +199,18 @@ export const getDatasetQualityTableColumns = ({
     },
     {
       name: sizeColumnName,
-      field: 'size',
+      field: 'sizeBytes',
       sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiSkeletonRectangle
+          width="60px"
+          height="20px"
+          borderRadius="m"
+          isLoading={loadingDataStreamStats}
+        >
+          {formatNumber(dataStreamStat.sizeBytes || 0, BYTE_NUMBER_FORMAT)}
+        </EuiSkeletonRectangle>
+      ),
       width: '100px',
     },
     {
@@ -207,7 +222,7 @@ export const getDatasetQualityTableColumns = ({
           </span>
         </EuiToolTip>
       ),
-      field: 'degradedDocs',
+      field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DegradedDocsPercentageLink
@@ -220,22 +235,27 @@ export const getDatasetQualityTableColumns = ({
     {
       name: lastActivityColumnName,
       field: 'lastActivity',
-      render: (timestamp: number) => {
-        if (!isActiveDataset(timestamp)) {
-          return (
+      render: (timestamp: number) => (
+        <EuiSkeletonRectangle
+          width="200px"
+          height="20px"
+          borderRadius="m"
+          isLoading={loadingDataStreamStats}
+        >
+          {!isActiveDataset(timestamp) ? (
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
               <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
                 <EuiIcon tabIndex={0} type="iInCircle" size="s" />
               </EuiToolTip>
             </EuiFlexGroup>
-          );
-        }
-
-        return fieldFormats
-          .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-          .convert(timestamp);
-      },
+          ) : (
+            fieldFormats
+              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+              .convert(timestamp)
+          )}
+        </EuiSkeletonRectangle>
+      ),
       width: '300px',
       sortable: true,
     },

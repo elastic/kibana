@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { pairwise, startWith } from 'rxjs/operators';
+import { pairwise, startWith } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -19,14 +19,17 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { AppWrapper } from './app_containers';
 
-export interface StartDeps {
+interface StartServices {
   analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+}
+
+export interface StartDeps extends StartServices {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
-  theme: ThemeServiceStart;
-  i18n: I18nStart;
 }
 
 /**
@@ -38,7 +41,7 @@ export interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ analytics, application, chrome, overlays, theme, i18n, targetDomElement }: StartDeps) {
+  start({ application, chrome, overlays, targetDomElement, ...startServices }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -53,12 +56,7 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <KibanaRootContextProvider
-        analytics={analytics}
-        i18n={i18n}
-        theme={theme}
-        globalStyles={true}
-      >
+      <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
           {/* Fixed headers */}
           {chromeHeader}

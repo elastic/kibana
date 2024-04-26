@@ -6,15 +6,13 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ISearchClient } from '@kbn/data-plugin/common';
-import { ESSearchRequest } from '@kbn/es-types';
-import { catchError, map, Observable } from 'rxjs';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   GetInfraMetricsRequestBodyPayload,
   InfraAssetMetricType,
 } from '../../../../../common/http_api/infra';
-import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
+import { BUCKET_KEY } from '../constants';
 
 export const createFilters = ({
   params,
@@ -26,92 +24,42 @@ export const createFilters = ({
   extraFilter?: estypes.QueryDslQueryContainer;
 }) => {
   const extrafilterClause = extraFilter?.bool?.filter;
+
   const extraFilterList = !!extrafilterClause
     ? Array.isArray(extrafilterClause)
       ? extrafilterClause
       : [extrafilterClause]
     : [];
-  const hostNamesFilter =
-    hostNamesShortList.length > 0
-      ? [
-          {
-            terms: {
-              'host.name': hostNamesShortList,
-            },
-          },
-        ]
-      : [];
 
   return [
-    ...hostNamesFilter,
     ...extraFilterList,
-    {
-      range: {
-        '@timestamp': {
-          gte: new Date(params.range.from).getTime(),
-          lte: new Date(params.range.to).getTime(),
-          format: 'epoch_millis',
-        },
-      },
-    },
+    ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
+    ...rangeQuery(new Date(params.range.from).getTime(), new Date(params.range.to).getTime()),
     {
       exists: {
-        field: 'host.name',
+        field: BUCKET_KEY,
       },
     },
   ];
 };
 
-export const runQuery = <T>(
-  serchClient: ISearchClient,
-  queryRequest: ESSearchRequest,
-  decoder: (aggregation: Record<string, estypes.AggregationsAggregate> | undefined) => T | undefined
-): Observable<T | undefined> => {
-  return serchClient
-    .search({
-      params: queryRequest,
-    })
-    .pipe(
-      map((res) => decoder(res.rawResponse.aggregations)),
-      catchError((err) => {
-        const error = {
-          message: err.message,
-          statusCode: err.statusCode,
-          attributes: err.errBody?.error,
-        };
-
-        throw error;
-      })
-    );
-};
-
-export const systemMetricsFilter = {
-  must: [
-    {
-      bool: {
-        should: [
-          {
-            term: {
-              'event.module': 'system',
-            },
-          },
-          {
-            term: {
-              'metricset.module': 'system', // Needed for hosts where metricbeat version < 8
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-
 export const getInventoryModelAggregations = (
+  assetType: 'host',
   metrics: InfraAssetMetricType[]
-): Record<string, estypes.AggregationsAggregationContainer> => {
-  const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
-  return metrics.reduce(
-    (acc, metric) => Object.assign(acc, inventoryModel.metrics.snapshot?.[metric]),
+) => {
+  const inventoryModel = findInventoryModel(assetType);
+  return metrics.reduce<
+    Partial<
+      Record<
+        InfraAssetMetricType,
+        typeof inventoryModel.metrics.snapshot[keyof typeof inventoryModel.metrics.snapshot]
+      >
+    >
+  >(
+    (acc, metric) =>
+      inventoryModel.metrics.snapshot?.[metric]
+        ? Object.assign(acc, inventoryModel.metrics.snapshot[metric])
+        : acc,
     {}
   );
 };

@@ -337,7 +337,7 @@ _meta:
                   number_of_shards: 1,
                   number_of_routing_shards: 30,
                   hidden: true,
-                  mapping: { total_fields: { limit: '10000' } },
+                  mapping: { total_fields: { limit: 1000 } },
                 },
               },
               mappings: {
@@ -402,7 +402,9 @@ _meta:
     // Destination index is not created before transform is created
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -626,7 +628,7 @@ _meta:
                   number_of_shards: 1,
                   number_of_routing_shards: 30,
                   hidden: true,
-                  mapping: { total_fields: { limit: '10000' } },
+                  mapping: { total_fields: { limit: 1000 } },
                 },
               },
               mappings: {
@@ -684,7 +686,9 @@ _meta:
     // Destination index is not created before transform is created
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -898,7 +902,7 @@ _meta:
           name: 'logs-endpoint.metadata_current-template@package',
           body: {
             template: {
-              settings: { index: { mapping: { total_fields: { limit: '10000' } } } },
+              settings: { index: { mapping: { total_fields: { limit: 1000 } } } },
               mappings: {
                 properties: {
                   '@timestamp': {
@@ -943,7 +947,9 @@ _meta:
     // Destination index is not created before transform is created
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -1094,7 +1100,9 @@ _meta:
       authorizationHeader,
     });
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     // Does not start transform because start is set to false in manifest.yml
     expect(esClient.transform.startTransform.mock.calls).toEqual([]);
   });
@@ -1211,7 +1219,9 @@ _meta:
         { ignore: [404] },
       ],
     ]);
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
   });
 
   test('retain old transforms and do nothing if fleet_transform_version is the same', async () => {

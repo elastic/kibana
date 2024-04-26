@@ -16,6 +16,7 @@ import {
   EVENT_ACTION,
   ALERT_TIME_RANGE,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(
@@ -72,6 +73,7 @@ export function getAlertsForNotification(
         trackedEvent.pendingRecoveredCount = 0;
       }
     }
+    trackedEvent.event[ALERT_CONSECUTIVE_MATCHES] = trackedEvent.activeCount;
     events.push(trackedEvent);
   }
   return events;

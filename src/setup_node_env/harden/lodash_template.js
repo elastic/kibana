@@ -6,28 +6,7 @@
  * Side Public License, v 1.
  */
 
-var ritm = require('require-in-the-middle');
 var isIterateeCall = require('lodash/_isIterateeCall');
-
-new ritm.Hook(['lodash'], function (lodash) {
-  // we use lodash.template here to harden third-party usage of this otherwise banned function.
-  // eslint-disable-next-line no-restricted-properties
-  lodash.template = createProxy(lodash.template);
-  return lodash;
-});
-
-new ritm.Hook(['lodash/template'], function (template) {
-  return createProxy(template);
-});
-
-new ritm.Hook(['lodash/fp'], function (fp) {
-  fp.template = createFpProxy(fp.template);
-  return fp;
-});
-
-new ritm.Hook(['lodash/fp/template'], function (template) {
-  return createFpProxy(template);
-});
 
 function createProxy(template) {
   return new Proxy(template, {
@@ -61,3 +40,5 @@ function createFpProxy(template) {
     },
   });
 }
+
+module.exports = { createProxy, createFpProxy };

@@ -42,6 +42,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.consecutive_matches": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
       "kibana.alert.duration.us": Object {
         "array": false,
         "required": false,
@@ -128,6 +133,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.rule.execution.timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
       },
       "kibana.alert.rule.execution.uuid": Object {
         "array": false,

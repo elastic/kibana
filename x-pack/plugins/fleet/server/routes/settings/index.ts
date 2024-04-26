@@ -12,9 +12,15 @@ import type { FleetAuthzRouter } from '../../services/security';
 
 import { SETTINGS_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
-import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
+import {
+  PutSettingsRequestSchema,
+  GetSettingsRequestSchema,
+  GetEnrollmentSettingsRequestSchema,
+} from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
+
+import { getEnrollmentSettingsHandler } from './enrollment_settings_handler';
 
 export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -70,7 +76,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
     })
     .addVersion(
@@ -84,7 +90,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
     })
     .addVersion(
@@ -93,5 +99,19 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: PutSettingsRequestSchema },
       },
       putSettingsHandler
+    );
+  router.versioned
+    .get({
+      path: SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
+      fleetAuthz: (authz) => {
+        return authz.fleet.addAgents || authz.fleet.addFleetServers;
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetEnrollmentSettingsRequestSchema },
+      },
+      getEnrollmentSettingsHandler
     );
 };

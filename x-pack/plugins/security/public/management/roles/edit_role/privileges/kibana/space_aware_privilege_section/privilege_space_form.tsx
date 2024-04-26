@@ -579,11 +579,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     }
 
     const form = this.state.role.kibana[this.state.privilegeIndex];
-    if (form.base.length === 0 && Object.keys(form.feature).length === 0) {
-      return false;
-    }
-
-    return true;
+    return !(form.base.length === 0 && Object.keys(form.feature).length === 0);
   };
 
   private isDefiningGlobalPrivilege = () => this.state.selectedSpaceIds.includes('*');

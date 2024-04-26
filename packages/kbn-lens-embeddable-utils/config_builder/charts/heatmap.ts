@@ -67,7 +67,7 @@ function buildFormulaLayer(
   layer: LensHeatmapConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const defaultLayer = {
     ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),

@@ -156,6 +156,7 @@ export const ApiKeyConfig: React.FC<{
               onClick={clickGenerateApiKey}
               isLoading={status === Status.LOADING}
               isDisabled={indexName.length === 0}
+              data-telemetry-id="entSearch-content-connector-generateApiKeyButton"
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
@@ -172,7 +173,12 @@ export const ApiKeyConfig: React.FC<{
         <>
           <EuiSpacer />
           <EuiFlexItem>
-            <ApiKey apiKey={data?.encoded} label="API Key" />
+            <ApiKey
+              apiKey={data?.encoded}
+              label={i18n.translate('xpack.enterpriseSearch.apiKeyConfig.apiKey.apiKeyLabel', {
+                defaultMessage: 'API Key',
+              })}
+            />
           </EuiFlexItem>
         </>
       )}

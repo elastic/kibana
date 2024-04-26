@@ -22,6 +22,7 @@ import {
 } from '../common/locators';
 import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
+import { DATA_RECEIVED_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { logsExplorerAppTitle } from '../common/translations';
 import type {
   ObservabilityLogsExplorerAppMountParameters,
@@ -44,7 +45,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share, serverless, discover } = _pluginsSetup;
+    const { share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -86,9 +87,7 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
-    if (serverless) {
-      discover.showLogsExplorerTabs();
-    }
+    core.analytics.registerEventType(DATA_RECEIVED_TELEMETRY_EVENT);
 
     // Register Locators
     const allDatasetsLocator = share.url.locators.create(

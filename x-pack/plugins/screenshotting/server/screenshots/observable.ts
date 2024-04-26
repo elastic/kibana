@@ -7,7 +7,7 @@
 
 import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
-import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
+import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs';
 import { errors } from '../../common';
 import {
   Context,

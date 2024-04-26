@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { DEFAULT_DEGRADED_DOCS } from '../constants';
 import { DataStreamType } from '../types';
 import { indexNameToDataStreamParts } from '../utils';
 import { Integration } from './integration';
+import { DegradedDocsStat } from './malformed_docs_stat';
 import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
@@ -20,7 +22,10 @@ export class DataStreamStat {
   sizeBytes?: DataStreamStatType['sizeBytes'];
   lastActivity?: DataStreamStatType['lastActivity'];
   integration?: Integration;
-  degradedDocs?: number;
+  degradedDocs: {
+    percentage: number;
+    count: number;
+  };
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -32,7 +37,10 @@ export class DataStreamStat {
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
     this.integration = dataStreamStat.integration;
-    this.degradedDocs = dataStreamStat.degradedDocs;
+    this.degradedDocs = {
+      percentage: dataStreamStat.degradedDocs.percentage,
+      count: dataStreamStat.degradedDocs.count,
+    };
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -42,14 +50,37 @@ export class DataStreamStat {
       rawName: dataStreamStat.name,
       type,
       name: dataset,
-      title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
+      title: dataset,
       namespace,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
-      integration: dataStreamStat.integration
-        ? Integration.create(dataStreamStat.integration)
-        : undefined,
+      degradedDocs: DEFAULT_DEGRADED_DOCS,
+    };
+
+    return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static fromDegradedDocStat({
+    degradedDocStat,
+    integrationMap,
+  }: {
+    degradedDocStat: DegradedDocsStat;
+    integrationMap: Record<string, { integration: Integration; title: string }>;
+  }) {
+    const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
+
+    const dataStreamStatProps = {
+      rawName: degradedDocStat.dataset,
+      type,
+      name: dataset,
+      title: integrationMap[dataset]?.title || dataset,
+      namespace,
+      integration: integrationMap[dataset]?.integration,
+      degradedDocs: {
+        percentage: degradedDocStat.percentage,
+        count: degradedDocStat.count,
+      },
     };
 
     return new DataStreamStat(dataStreamStatProps);

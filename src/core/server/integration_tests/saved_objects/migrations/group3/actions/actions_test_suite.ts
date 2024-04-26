@@ -1358,11 +1358,15 @@ export const runActionTestSuite = ({
         query: { match_all: {} },
         batchSize: 1, // small batch size so we don't exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 500, // set a small size to force the error
+        maxResponseSizeBytes: 5000, // make sure long ids don't cause es_response_too_large
       });
-      const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+      const rightResponse = await readWithPitTask();
 
-      await expect(Either.isRight(rightResponse)).toBe(true);
+      if (Either.isLeft(rightResponse)) {
+        throw new Error(
+          `Expected a successful response but got ${JSON.stringify(rightResponse.left)}`
+        );
+      }
 
       readWithPitTask = readWithPit({
         client,
@@ -1370,17 +1374,12 @@ export const runActionTestSuite = ({
         query: { match_all: {} },
         batchSize: 10, // a bigger batch will exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 500, // set a small size to force the error
+        maxResponseSizeBytes: 1000, // set a small size to force the error
       });
       const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
 
       expect(leftResponse.left.type).toBe('es_response_too_large');
-      // ES response contains a field that indicates how long it took ES to get the response, e.g.: "took": 7
-      // if ES takes more than 9ms, the payload will be 1 byte bigger.
-      // see https://github.com/elastic/kibana/issues/160994
-      // Thus, the statements below account for response times up to 99ms
       expect(leftResponse.left.contentLength).toBeGreaterThanOrEqual(3184);
-      expect(leftResponse.left.contentLength).toBeLessThanOrEqual(3185);
     });
 
     it('rejects if PIT does not exist', async () => {

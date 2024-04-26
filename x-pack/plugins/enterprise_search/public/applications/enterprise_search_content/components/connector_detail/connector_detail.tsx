@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-import { baseBreadcrumbs } from '../connectors/connectors';
+import { connectorsBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
@@ -45,19 +45,33 @@ export enum ConnectorDetailTabId {
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
-  const { startConnectorPoll } = useActions(ConnectorViewLogic);
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } =
+    useActions(ConnectorViewLogic);
   useEffect(() => {
+    stopConnectorPoll();
+    fetchConnectorApiReset();
     startConnectorPoll(connectorId);
-  }, []);
+  }, [connectorId]);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
   const {
-    productAccess: { hasAppSearchAccess },
+    guidedOnboarding,
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('databaseSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS = [
     {
@@ -123,7 +137,7 @@ export const ConnectorDetail: React.FC = () => {
       ? [
           {
             content: <ConnectorSyncRules />,
-            disabled: !index,
+            disabled: !connector?.index_name,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
@@ -144,7 +158,7 @@ export const ConnectorDetail: React.FC = () => {
       : []),
     {
       content: <ConnectorScheduling />,
-      disabled: !index,
+      disabled: !connector?.index_name,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
@@ -186,7 +200,7 @@ export const ConnectorDetail: React.FC = () => {
 
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
-    disabled: !index,
+    disabled: !connector?.index_name,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
@@ -226,7 +240,7 @@ export const ConnectorDetail: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, connector?.name ?? '...']}
+      pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
@@ -236,7 +250,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: getHeaderActions(index, connector),
         tabs,
       }}
     >

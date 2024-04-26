@@ -9,10 +9,12 @@ import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_TAGS,
   ALERT_TIME_RANGE,
   EVENT_ACTION,
@@ -40,6 +42,7 @@ interface BuildOngoingAlertOpts<
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
   payload?: DeepPartial<AlertData>;
+  runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
 }
@@ -60,6 +63,7 @@ export const buildOngoingAlert = <
   legacyAlert,
   payload,
   rule,
+  runTimestamp,
   timestamp,
   kibanaVersion,
 }: BuildOngoingAlertOpts<
@@ -80,6 +84,7 @@ export const buildOngoingAlert = <
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'active',
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
     // Because we're building this alert after the action execution handler has been
     // run, the scheduledExecutionOptions for the alert has been cleared and
     // the lastScheduledActions has been set. If we ever change the order of operations
@@ -93,6 +98,8 @@ export const buildOngoingAlert = <
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set latest match count
+    [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     // Set the time range
     ...(legacyAlert.getState().start
       ? {

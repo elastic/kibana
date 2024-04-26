@@ -28,7 +28,7 @@ export const createMockClients = () => {
 
 type MockClients = ReturnType<typeof createMockClients>;
 
-const convertRequestContextMock = <T>(context: T) => {
+const convertRequestContextMock = <T extends Record<string, unknown>>(context: T) => {
   return coreMock.createCustomRequestHandlerContext(context);
 };
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -284,6 +284,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    security: {
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
+    },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
+    },
   };
 }
 
@@ -360,5 +367,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    security: {
+      authc: deps.security.authc,
+    },
+    userProfile: deps.userProfile,
   };
 }

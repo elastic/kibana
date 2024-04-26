@@ -11,8 +11,8 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
-import type { TimeBucketsInterval, TimeRangeBounds } from '../util/time_buckets';
-import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
 import type {
   ExplorerJob,
   OverallSwimlaneData,

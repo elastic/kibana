@@ -23,6 +23,8 @@ import {
   EuiSkeletonText,
   EuiCallOut,
   EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -114,6 +116,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
@@ -492,11 +495,24 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       : i18n.CREATE_RULE_EXCEPTION;
   }, [listType]);
 
+  const exceptionFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'exceptionFlyoutTitle',
+  });
+
   return (
-    <EuiFlyout size="l" onClose={handleCloseFlyout} data-test-subj="addExceptionFlyout">
+    <EuiFlyout
+      size="l"
+      onClose={handleCloseFlyout}
+      data-test-subj="addExceptionFlyout"
+      aria-labelledby={exceptionFlyoutTitleId}
+      // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+      maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+    >
       <FlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="exceptionFlyoutTitle">{addExceptionMessage}</h2>
+          <h2 id={exceptionFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
+            {addExceptionMessage}
+          </h2>
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>

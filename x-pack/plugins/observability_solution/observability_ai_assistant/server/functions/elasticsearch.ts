@@ -8,13 +8,12 @@
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerElasticsearchFunction({
-  registerFunction,
+  functions,
   resources,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'elasticsearch',
-      contexts: ['core'],
       description:
         'Call Elasticsearch APIs on behalf of the user. Make sure the request body is valid for the API that you are using. Only call this function when the user has explicitly requested it.',
       descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
@@ -47,7 +46,7 @@ export function registerElasticsearchFunction({
         body,
       });
 
-      return { content: response };
+      return { content: { response } };
     }
   );
 }

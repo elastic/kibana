@@ -8,6 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
 
+import { isDefaultQuery } from './default_query';
+import { isFilterBasedDefaultQuery } from './filter_based_default_query';
+
 /**
  * Builds the base filter criteria used in queries,
  * adding criteria for the time range and an optional query.
@@ -38,7 +41,12 @@ export function buildBaseFilterCriteria(
     });
   }
 
-  if (query && typeof query === 'object') {
+  if (
+    query &&
+    typeof query === 'object' &&
+    !isDefaultQuery(query) &&
+    !isFilterBasedDefaultQuery(query)
+  ) {
     filterCriteria.push(query);
   }
 

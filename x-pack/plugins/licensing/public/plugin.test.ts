@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';
@@ -406,10 +406,15 @@ describe('licensing plugin', () => {
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
       await refresh();
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
-      expect(mountExpiredBannerMock).toHaveBeenCalledWith({
-        type: 'gold',
-        uploadUrl: '/app/management/stack/license_management/upload_license',
-      });
+      expect(mountExpiredBannerMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'gold',
+          uploadUrl: '/app/management/stack/license_management/upload_license',
+          analytics: expect.any(Object),
+          i18n: expect.any(Object),
+          theme: expect.any(Object),
+        })
+      );
     });
   });
 

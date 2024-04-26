@@ -59,6 +59,7 @@ export const flyoutRT = rt.exact(
   rt.partial({
     dataset: datasetRT,
     insightsTimeRange: timeRangeRT,
+    breakdownField: rt.string,
   })
 );
 
@@ -68,6 +69,7 @@ export const filtersRT = rt.exact(
     fullNames: rt.boolean,
     timeRange: timeRangeRT,
     integrations: rt.array(rt.string),
+    namespaces: rt.array(rt.string),
     query: rt.string,
   })
 );

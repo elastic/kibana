@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { getSecurityTelemetryStats, removeTimeFieldsFromTelemetryStats } from '../../../utils';
+import { getSecurityTelemetryStats, removeExtraFieldsFromTelemetryStats } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -43,10 +43,10 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllExceptions(supertest, log);
     });
 
-    it('@skipInQA should only have task metric values when no rules are running', async () => {
+    it('@skipInServerlessMKI should only have task metric values when no rules are running', async () => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
-        removeTimeFieldsFromTelemetryStats(stats);
+        removeExtraFieldsFromTelemetryStats(stats);
         expect(stats).to.eql({
           detection_rules: [
             [

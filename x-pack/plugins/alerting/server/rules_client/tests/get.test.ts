@@ -24,7 +24,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { formatLegacyActions } from '../lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
@@ -62,9 +64,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -112,11 +117,13 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -130,6 +137,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -186,18 +194,22 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "uuid": undefined,
           },
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "preconfigured",
             "params": Object {
               "foo": true,
             },
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -211,6 +223,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -265,16 +278,13 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
-          },
-          Object {
-            "group": "default",
-            "id": "system_action-id",
-            "params": Object {},
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -288,6 +298,14 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [
+          Object {
+            "actionTypeId": undefined,
+            "id": "system_action-id",
+            "params": Object {},
+            "uuid": undefined,
+          },
+        ],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -377,11 +395,13 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -396,6 +416,7 @@ describe('get()', () => {
           "interval": "10s",
         },
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);

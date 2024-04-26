@@ -86,6 +86,7 @@ export async function getDegradedDocsPaginated(options: {
     response.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       percentage: (bucket.degraded.doc_count * 100) / bucket.doc_count,
+      count: bucket.degraded.doc_count,
     })) ?? [];
 
   const degradedDocs = [...prevResults, ...currDegradedDocs];

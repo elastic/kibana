@@ -97,6 +97,12 @@ properties:
               - type: array
                 items:
                   type: string
+          otherFields:
+            type: object
+            additionalProperties: true
+            maxProperties: 20
+            description: >
+              Custom field identifiers and their values for Jira connectors.
           parent:
             type: string
             description: The ID or key of the parent issue for Jira connectors. Applies only to `Sub-task` types of issues.

@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return getPackageResponse.body.item.version ?? '';
   };
 
-  describe('@ess @serverless @skipInQA update_prebuilt_rules_package', () => {
+  describe('@ess @serverless @skipInServerlessMKI update_prebuilt_rules_package', () => {
     before(async () => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');
@@ -107,8 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         previousVersion,
-        retry,
-        log
+        retry
       );
 
       expect(installPreviousPackageResponse._meta.install_source).toBe('registry');
@@ -161,8 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         currentVersion,
-        retry,
-        log
+        retry
       );
       expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 

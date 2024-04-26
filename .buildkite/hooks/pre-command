@@ -1,8 +1,3 @@
 #!/usr/bin/env bash
 
-if [[ "$BUILDKITE_AGENT_NAME" =~ ^bk-agent ]]; then
-  echo "Pipeline file triggered from outside the kibana executors, skipping .buildkite/scripts/lifecycle/pre_command.sh"
-  export SONAR_LOGIN=$(vault read -field=token secret/ci/elastic-kibana/sonarqube)
-else
-  source .buildkite/scripts/lifecycle/pre_command.sh
-fi
+source .buildkite/scripts/lifecycle/pre_command.sh

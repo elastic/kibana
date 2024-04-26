@@ -6,9 +6,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs';
 
-import { DocLinksStart, NotificationsSetup, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
@@ -42,18 +42,14 @@ function getReportStatus(src: Job): JobSummary {
   };
 }
 
-function handleError(
-  err: Error,
-  notifications: NotificationsSetup,
-  theme: ThemeServiceStart
-): Rx.Observable<JobSummarySet> {
-  notifications.toasts.addDanger(
+function handleError(core: CoreStart, err: Error): Rx.Observable<JobSummarySet> {
+  core.notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
       err,
-      theme
+      core
     )
   );
   window.console.error(err);
@@ -63,12 +59,7 @@ function handleError(
 export class ReportingNotifierStreamHandler {
   private jobCompletionNotifications = jobCompletionNotifications();
 
-  constructor(
-    private notifications: NotificationsSetup,
-    private apiClient: ReportingAPIClient,
-    private theme: ThemeServiceStart,
-    private docLinks: DocLinksStart
-  ) {}
+  constructor(private apiClient: ReportingAPIClient, private core: CoreStart) {}
 
   public startPolling(interval: number, stop$: Rx.Observable<void>) {
     Rx.timer(0, interval)
@@ -81,7 +72,7 @@ export class ReportingNotifierStreamHandler {
         catchError((err) => {
           // eslint-disable-next-line no-console
           console.error(err);
-          return handleError(err, this.notifications, this.theme);
+          return handleError(this.core, err);
         })
       )
       .subscribe();
@@ -94,10 +85,10 @@ export class ReportingNotifierStreamHandler {
     completed: completedJobs,
     failed: failedJobs,
   }: JobSummarySet): Rx.Observable<JobSummarySet> {
-    const notifications = this.notifications;
+    const notifications = this.core.notifications;
     const apiClient = this.apiClient;
-    const theme = this.theme;
-    const docLinks = this.docLinks;
+    const core = this.core;
+    const docLinks = this.core.docLinks;
     const getManagementLink = apiClient.getManagementLink.bind(apiClient);
     const getDownloadLink = apiClient.getDownloadLink.bind(apiClient);
 
@@ -108,22 +99,22 @@ export class ReportingNotifierStreamHandler {
       for (const job of completedJobs ?? []) {
         if (job.csvContainsFormulas) {
           notifications.toasts.addWarning(
-            getWarningFormulasToast(job, getManagementLink, getDownloadLink, theme),
+            getWarningFormulasToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         } else if (job.maxSizeReached) {
           notifications.toasts.addWarning(
-            getWarningMaxSizeToast(job, getManagementLink, getDownloadLink, theme),
+            getWarningMaxSizeToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         } else if (job.status === JOB_STATUS.WARNINGS) {
           notifications.toasts.addWarning(
-            getWarningToast(job, getManagementLink, getDownloadLink, theme),
+            getWarningToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         } else {
           notifications.toasts.addSuccess(
-            getSuccessToast(job, getManagementLink, getDownloadLink, theme),
+            getSuccessToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         }
@@ -132,8 +123,8 @@ export class ReportingNotifierStreamHandler {
       // no download link available
       for (const job of failedJobs ?? []) {
         const errorText = await apiClient.getError(job.id);
-        this.notifications.toasts.addDanger(
-          getFailureToast(errorText, job, getManagementLink, theme, docLinks)
+        notifications.toasts.addDanger(
+          getFailureToast(errorText, job, getManagementLink, docLinks, core)
         );
       }
       return { completed: completedJobs, failed: failedJobs };
@@ -178,13 +169,13 @@ export class ReportingNotifierStreamHandler {
       }),
       catchError((err) => {
         // show connection refused toast
-        this.notifications.toasts.addDanger(
+        this.core.notifications.toasts.addDanger(
           getGeneralErrorToast(
             i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
               defaultMessage: 'Could not check Reporting job status!',
             }),
             err,
-            this.theme
+            this.core
           )
         );
         window.console.error(err);

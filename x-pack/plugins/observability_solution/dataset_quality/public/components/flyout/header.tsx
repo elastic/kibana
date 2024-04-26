@@ -32,7 +32,7 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow>
           <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
-            <EuiTitle>
+            <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
               <h3>{title}</h3>
             </EuiTitle>
             <div

@@ -22,13 +22,13 @@
       "taskManager",
       "screenshotMode",
       "share",
-      "features"
+      "features",
     ],
     "optionalPlugins": [
       "security",
       "spaces",
       "usageCollection",
-      "screenshotting"
+      "screenshotting",
     ],
     "requiredBundles": [
       "embeddable",

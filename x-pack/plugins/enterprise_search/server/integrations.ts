@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpServiceSetup } from '@kbn/core/server';
-
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
-
-import { CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/server';
 
 import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  http: HttpServiceSetup,
   customIntegrations: CustomIntegrationsPluginSetup,
-  isCloud: boolean
+  isCloud: boolean,
+  connectors: ConnectorServerSideDefinition[]
 ) => {
   const nativeSearchTag = config.hasNativeConnectors && isCloud ? ['native_search'] : [];
   if (config.canDeployEntSearch) {
@@ -52,7 +49,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/crawler',
+      uiInternalPath: '/app/enterprise_search/content/crawlers/new_crawler',
       icons: [
         {
           type: 'eui',
@@ -85,7 +82,7 @@ export const registerEnterpriseSearchIntegrations = (
   });
 
   if (config.hasConnectors) {
-    CONNECTOR_DEFINITIONS.forEach((connector) => {
+    connectors.forEach((connector) => {
       const connectorType = connector.isNative && isCloud ? 'native' : 'connector_client';
       const categories = connector.isNative
         ? [...(connector.categories || []), ...nativeSearchTag]
@@ -96,9 +93,7 @@ export const registerEnterpriseSearchIntegrations = (
         description: connector.description || '',
         icons: [
           {
-            src: http.basePath.prepend(
-              `/plugins/enterpriseSearch/assets/source_icons/${connector.iconPath}`
-            ),
+            src: connector.iconPath,
             type: 'svg',
           },
         ],
@@ -106,7 +101,7 @@ export const registerEnterpriseSearchIntegrations = (
         isBeta: connector.isBeta,
         shipper: 'enterprise_search',
         title: connector.name,
-        uiInternalPath: `/app/enterprise_search/content/search_indices/new_index/connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
+        uiInternalPath: `/app/enterprise_search/content/connectors/new_connector?connector_type=${connectorType}&service_type=${connector.serviceType}`,
       });
     });
   }

@@ -119,14 +119,6 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'tag',
   },
 
-  [AppIds.API_KEYS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
-      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
-    }),
-    icon: 'lockOpen',
-  },
-
   [AppIds.SERVERLESS_SETTINGS]: {
     category: appCategories.OTHER,
     description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
@@ -135,10 +127,19 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'gear',
   },
 
+  // Access section
+  [AppIds.API_KEYS]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
+    }),
+    icon: 'lockOpen',
+  },
   [AppIds.ROLES]: {
-    category: appCategories.OTHER,
+    category: appCategories.ACCESS,
     description: i18n.translate('management.landing.withCardNavigation.rolesDescription', {
-      defaultMessage: 'Allow custom roles to be created for users.',
+      defaultMessage:
+        'Create roles unique to this project and combine the exact set of privileges that your users need.',
     }),
     icon: 'usersRolesApp',
   },

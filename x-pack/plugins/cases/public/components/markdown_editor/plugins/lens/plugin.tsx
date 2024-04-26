@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import {
   EuiCodeBlock,
@@ -18,12 +18,13 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiBetaBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
@@ -31,18 +32,9 @@ import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
-import { ModalContainer } from './modal_container';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
-
-const BetaBadgeWrapper = styled.span`
-  display: inline-flex;
-
-  .euiToolTipAnchor {
-    display: inline-flex;
-  }
-`;
 
 const DEFAULT_TIMERANGE = {
   from: 'now-7d',
@@ -84,6 +76,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const commentEditorContext = useContext(CommentEditorContext);
   const markdownContext = useContext(EuiMarkdownContext);
   const isMainApplication = useIsMainApplication();
+  const { euiTheme } = useEuiTheme();
   const handleClose = useCallback(() => {
     if (currentAppId) {
       embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
@@ -287,7 +280,18 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   return (
-    <ModalContainer direction="column" gutterSize="none">
+    <EuiFlexGroup
+      css={css`
+        width: ${euiTheme.breakpoint.m};
+        height: 100%;
+
+        .euiModalBody {
+          min-height: 300px;
+        }
+      `}
+      direction="column"
+      gutterSize="none"
+    >
       <EuiModalHeader>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -299,7 +303,15 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <BetaBadgeWrapper>
+            <span
+              css={css`
+                display: inline-flex;
+
+                .euiToolTipAnchor {
+                  display: inline-flex;
+                }
+              `}
+            >
               <EuiBetaBadge
                 label={i18n.translate('xpack.cases.markdownEditor.plugins.lens.betaLabel', {
                   defaultMessage: 'Beta',
@@ -312,7 +324,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                   }
                 )}
               />
-            </BetaBadgeWrapper>
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
@@ -351,7 +363,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           />
         </EuiButton>
       </EuiModalFooter>
-    </ModalContainer>
+    </EuiFlexGroup>
   );
 };
 LensEditorComponent.displayName = 'LensEditor';

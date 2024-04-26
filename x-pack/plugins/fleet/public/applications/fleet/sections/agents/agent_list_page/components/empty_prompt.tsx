@@ -10,14 +10,14 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const EmptyPrompt: React.FunctionComponent<{
-  hasFleetAllPrivileges: boolean;
+  hasFleetAddAgentsPrivileges: boolean;
   setEnrollmentFlyoutState: (
     value: React.SetStateAction<{
       isOpen: boolean;
       selectedPolicyId?: string | undefined;
     }>
   ) => void;
-}> = ({ hasFleetAllPrivileges, setEnrollmentFlyoutState }) => {
+}> = ({ hasFleetAddAgentsPrivileges, setEnrollmentFlyoutState }) => {
   return (
     <EuiEmptyPrompt
       title={
@@ -29,7 +29,7 @@ export const EmptyPrompt: React.FunctionComponent<{
         </h2>
       }
       actions={
-        hasFleetAllPrivileges ? (
+        hasFleetAddAgentsPrivileges ? (
           <EuiButton
             fill
             iconType="plusInCircle"

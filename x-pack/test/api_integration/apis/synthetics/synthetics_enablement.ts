@@ -10,14 +10,14 @@ import {
   syntheticsApiKeyID,
   syntheticsApiKeyObjectType,
 } from '@kbn/synthetics-plugin/server/saved_objects/service_api_key';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const correctPrivileges = {
     applications: [],
-    cluster: ['monitor', 'read_ilm', 'read_pipeline'],
+    cluster: ['monitor', 'read_pipeline', 'read_ilm'],
     indices: [
       {
         allow_restricted_indices: false,
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               elasticsearch: {
                 cluster: [privilege],
-                indices: serviceApiKeyPrivileges.indices,
+                indices: getServiceApiKeyPrivileges(false).indices,
               },
             });
 
@@ -119,8 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -167,8 +167,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
               expiration: '1d',
               role_descriptors: {
                 'role-a': {
-                  cluster: serviceApiKeyPrivileges.cluster,
+                  cluster: getServiceApiKeyPrivileges(false).cluster,
                   indices: [
                     {
                       names: ['synthetics-*'],
@@ -269,8 +269,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -318,8 +318,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -449,8 +449,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 
@@ -562,8 +562,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             elasticsearch: {
-              cluster: serviceApiKeyPrivileges.cluster,
-              indices: serviceApiKeyPrivileges.indices,
+              cluster: getServiceApiKeyPrivileges(false).cluster,
+              indices: getServiceApiKeyPrivileges(false).indices,
             },
           });
 

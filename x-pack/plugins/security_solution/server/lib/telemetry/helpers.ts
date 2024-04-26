@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge, set } from 'lodash';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { copyAllowlistedFields, filterList } from './filterlists';
@@ -22,6 +22,7 @@ import type {
   ExceptionListItem,
   ExtraInfo,
   ListTemplate,
+  Nullable,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -38,6 +39,11 @@ import {
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
+import {
+  type TelemetryLogger,
+  TelemetryLoggerImpl,
+  tlog as telemetryLogger,
+} from './telemetry_logger';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -82,6 +88,10 @@ export const getPreviousDailyTaskTimestamp = (
 
   return lastExecutionTimestamp;
 };
+
+export function safeValue<T>(promise: PromiseSettledResult<T>, defaultValue: unknown = {}): T {
+  return promise.status === 'fulfilled' ? promise.value : (defaultValue as T);
+}
 
 /**
  * Chunks an Array<T> into an Array<Array<T>>
@@ -184,7 +194,7 @@ export const ruleExceptionListItemToTelemetryEvent = (
 export const templateExceptionList = (
   listData: ExceptionListItem[],
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined,
+  licenseInfo: Nullable<ESLicense>,
   listType: string
 ) => {
   return listData.map((item) => {
@@ -228,7 +238,7 @@ export const templateExceptionList = (
 /**
  * Convert counter label list to kebab case
  *
- * @param label_list the list of labels to create standardized UsageCounter from
+ * @param labelList the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
 export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
@@ -250,7 +260,7 @@ export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfi
 export const formatValueListMetaData = (
   valueListResponse: ValueListResponse,
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined
+  licenseInfo: Nullable<ESLicense>
 ) => ({
   '@timestamp': moment().toISOString(),
   cluster_uuid: clusterInfo.cluster_uuid,
@@ -281,31 +291,23 @@ export const formatValueListMetaData = (
 });
 
 export let isElasticCloudDeployment = false;
+export let clusterInfo: Nullable<ESClusterInfo>;
 export const setIsElasticCloudDeployment = (value: boolean) => {
   isElasticCloudDeployment = value;
 };
-
-export const tlog = (logger: Logger, message: string) => {
-  if (isElasticCloudDeployment) {
-    logger.info(message);
-  } else {
-    logger.debug(message);
-  }
+export const setClusterInfo = (info: Nullable<ESClusterInfo>) => {
+  clusterInfo = info;
 };
 
-export interface TelemetryLogger extends Logger {
-  l: (message: string) => void;
-}
+/**
+ * @deprecated use `new TelemetryLoggerImpl(...)` instead
+ */
+export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
+  telemetryLogger(logger, message, meta);
+};
 
 export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
-  return {
-    ...logger,
-    error: logger.error,
-    info: logger.info,
-    debug: logger.debug,
-    warn: logger.warn,
-    l: (message: string) => tlog(logger, message),
-  };
+  return new TelemetryLoggerImpl(logger);
 };
 
 function obfuscateString(clusterId: string, toHash: string): string {
@@ -362,6 +364,16 @@ export const ranges = (
   return { rangeFrom, rangeTo };
 };
 
+export const copyLicenseFields = (lic: ESLicense) => {
+  return {
+    uid: lic.uid,
+    status: lic.status,
+    type: lic.type,
+    ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
+    ...(lic.issuer ? { issuer: lic.issuer } : {}),
+  };
+};
+
 export class TelemetryTimelineFetcher {
   private receiver: ITelemetryReceiver;
   private extraInfo: Promise<ExtraInfo>;
@@ -402,13 +414,13 @@ export class TelemetryTimelineFetcher {
 
     let record;
     if (telemetryTimeline.length >= 1) {
-      const { clusterInfo, licenseInfo } = await this.extraInfo;
+      const extraInfo = await this.extraInfo;
       record = {
         '@timestamp': moment().toISOString(),
-        version: clusterInfo.version?.number,
-        cluster_name: clusterInfo.cluster_name,
-        cluster_uuid: clusterInfo.cluster_uuid,
-        license_uuid: licenseInfo?.uid,
+        version: extraInfo.clusterInfo.version?.number,
+        cluster_name: extraInfo.clusterInfo.cluster_name,
+        cluster_uuid: extraInfo.clusterInfo.cluster_uuid,
+        license_uuid: extraInfo.licenseInfo?.uid,
         alert_id: alertUUID,
         event_id: eventId,
         timeline: telemetryTimeline,
@@ -444,13 +456,13 @@ export class TelemetryTimelineFetcher {
       this.receiver.fetchLicenseInfo(),
     ]);
 
-    const clusterInfo: ESClusterInfo =
+    const _clusterInfo: ESClusterInfo =
       clusterInfoPromise.status === 'fulfilled' ? clusterInfoPromise.value : ({} as ESClusterInfo);
 
-    const licenseInfo: ESLicense | undefined =
+    const licenseInfo: Nullable<ESLicense> =
       licenseInfoPromise.status === 'fulfilled' ? licenseInfoPromise.value : ({} as ESLicense);
 
-    return { clusterInfo, licenseInfo };
+    return { clusterInfo: _clusterInfo, licenseInfo };
   }
 
   private calculateTimeFrame(): TimeFrame {

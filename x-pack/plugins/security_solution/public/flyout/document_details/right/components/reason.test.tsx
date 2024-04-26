@@ -14,13 +14,25 @@ import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import { TestProviders } from '../../../../common/mock';
 import { i18n } from '@kbn/i18n';
-
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -37,11 +49,13 @@ const panelContextValue = {
 
 const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
   render(
-    <IntlProvider locale="en">
-      <RightPanelContext.Provider value={panelContext}>
-        <Reason />
-      </RightPanelContext.Provider>
-    </IntlProvider>
+    <TestProviders>
+      <IntlProvider locale="en">
+        <RightPanelContext.Provider value={panelContext}>
+          <Reason />
+        </RightPanelContext.Provider>
+      </IntlProvider>
+    </TestProviders>
   );
 
 const NO_DATA_MESSAGE = "There's no source event information for this alert.";

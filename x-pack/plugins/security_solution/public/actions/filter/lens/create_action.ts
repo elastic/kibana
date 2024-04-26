@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addFilterIn, addFilterOut } from '@kbn/cell-actions';
+import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions';
 import {
   isValueSupportedByDefaultActions,
   valueToArray,
@@ -31,19 +31,21 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
+export interface CreateFilterLensActionParams {
+  id: string;
+  order: number;
+  store: SecurityAppStore;
+  services: StartServices;
+  negate?: boolean;
+}
+
 export const createFilterLensAction = ({
   id,
   order,
   store,
   services,
   negate,
-}: {
-  id: string;
-  order: number;
-  store: SecurityAppStore;
-  services: StartServices;
-  negate?: boolean;
-}) => {
+}: CreateFilterLensActionParams) => {
   const { application, notifications, data: dataService, topValuesPopover } = services;
 
   let currentAppId: string | undefined;
@@ -72,6 +74,7 @@ export const createFilterLensAction = ({
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
+      const isCounter = data[0]?.columnMeta?.sourceParams?.type === 'value_count';
       const rawValue = data[0]?.value;
       const mayBeDataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
       const dataViewId = typeof mayBeDataViewId === 'string' ? mayBeDataViewId : undefined;
@@ -87,15 +90,30 @@ export const createFilterLensAction = ({
 
       topValuesPopover.closePopover();
 
-      const addFilter = negate === true ? addFilterOut : addFilterIn;
-
       const timeline = getTimelineById(store.getState(), TimelineId.active);
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
-        ? timeline.filterManager
+        ? services.timelineFilterManager
         : dataService.query.filterManager;
 
-      addFilter({ filterManager, fieldName: field, value, dataViewId });
+      // If value type is value_count, we want to filter an `Exists` filter instead of a `Term` filter
+      if (isCounter) {
+        addExistsFilter({
+          filterManager,
+          key: field,
+          negate: !!negate,
+          dataViewId,
+        });
+        return;
+      }
+
+      const addFilter = negate === true ? addFilterOut : addFilterIn;
+      addFilter({
+        filterManager,
+        fieldName: field,
+        value,
+        dataViewId,
+      });
     },
   });
 };

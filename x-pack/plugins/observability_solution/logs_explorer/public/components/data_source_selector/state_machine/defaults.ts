@@ -22,4 +22,5 @@ export const DEFAULT_CONTEXT: DefaultDataSourceSelectorContext = {
   panelId: INTEGRATIONS_PANEL_ID,
   tabId: INTEGRATIONS_TAB_ID,
   search: defaultSearch,
+  dataViewsFilter: {},
 };

@@ -21,6 +21,7 @@ import {
 import Path from 'path';
 import { execSync } from 'child_process';
 import { argv } from 'yargs';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 // This script adds explicit return types to route handlers,
 // for performance reasons. See https://github.com/elastic/kibana/pull/123266
@@ -33,7 +34,7 @@ type ConvertibleDeclaration =
   | MethodDeclaration;
 
 const project = new Project({
-  tsConfigFilePath: Path.resolve(__dirname, '../../../../../tsconfig.json'),
+  tsConfigFilePath: Path.resolve(__dirname, `${REPO_ROOT}/tsconfig.json`),
 });
 
 const glob =
@@ -46,9 +47,7 @@ const changedFiles: SourceFile[] = [];
 
 files.forEach((file) => {
   file.getVariableDeclarations().forEach((declaration) => {
-    const initializer = declaration.getInitializerIfKind(
-      SyntaxKind.CallExpression
-    );
+    const initializer = declaration.getInitializerIfKind(SyntaxKind.CallExpression);
 
     const argument = initializer?.getArguments()[0];
 
@@ -79,10 +78,7 @@ files.forEach((file) => {
 
       const returnType = signature.getReturnType();
 
-      const txt = returnType.getText(
-        fnDeclaration,
-        TypeFormatFlags.NoTruncation
-      );
+      const txt = returnType.getText(fnDeclaration, TypeFormatFlags.NoTruncation);
 
       fnDeclaration = fnDeclaration.setReturnType(txt);
 
@@ -96,18 +92,14 @@ files.forEach((file) => {
         }
 
         if (ts.isImportTypeNode(node)) {
-          const literal = (node.argument as ts.LiteralTypeNode)
-            .literal as ts.StringLiteral;
+          const literal = (node.argument as ts.LiteralTypeNode).literal as ts.StringLiteral;
 
           // replace absolute paths with relative paths
           return ts.factory.updateImportTypeNode(
             node,
             ts.factory.createLiteralTypeNode(
               ts.factory.createStringLiteral(
-                `./${Path.relative(
-                  Path.dirname(file.getFilePath()),
-                  literal.text
-                )}`
+                `./${Path.relative(Path.dirname(file.getFilePath()), literal.text)}`
               )
             ),
             node.qualifier!,

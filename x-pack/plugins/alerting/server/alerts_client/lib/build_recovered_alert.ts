@@ -22,6 +22,8 @@ import {
   ALERT_END,
   ALERT_TIME_RANGE,
   ALERT_START,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
@@ -41,6 +43,7 @@ interface BuildRecoveredAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  runTimestamp?: string;
   recoveryActionGroup: string;
   payload?: DeepPartial<AlertData>;
   timestamp: string;
@@ -64,6 +67,7 @@ export const buildRecoveredAlert = <
   rule,
   timestamp,
   payload,
+  runTimestamp,
   recoveryActionGroup,
   kibanaVersion,
 }: BuildRecoveredAlertOpts<
@@ -84,6 +88,7 @@ export const buildRecoveredAlert = <
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'close',
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
     // Set the recovery action group
     [ALERT_ACTION_GROUP]: recoveryActionGroup,
     // Set latest flapping state
@@ -92,6 +97,8 @@ export const buildRecoveredAlert = <
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set latest match count, should be 0
+    [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     // Set status to 'recovered'
     [ALERT_STATUS]: 'recovered',
     // Set latest duration as recovered alerts should have updated duration

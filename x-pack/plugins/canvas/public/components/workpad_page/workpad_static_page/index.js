@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { withProps } from 'recompose';
+import { withProps } from 'react-recompose';
 import { simplePositioning } from '../positioning_utils';
 import { StaticWorkpadPage } from './static_workpad_page';
 

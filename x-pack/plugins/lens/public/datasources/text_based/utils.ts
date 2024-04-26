@@ -142,12 +142,16 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   return indexPattern;
 }
 
+export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
+  column?.meta?.type === 'number';
+export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
+
 export function canColumnBeDroppedInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],
   selectedColumnType?: string
 ): boolean {
   // check if at least one numeric field exists
-  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  const hasNumberTypeColumns = columns?.some(isNumeric);
   return !hasNumberTypeColumns || (hasNumberTypeColumns && selectedColumnType === 'number');
 }
 
@@ -156,7 +160,7 @@ export function canColumnBeUsedBeInMetricDimension(
   selectedColumnType?: string
 ): boolean {
   // check if at least one numeric field exists
-  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  const hasNumberTypeColumns = columns?.some(isNumeric);
   return (
     !hasNumberTypeColumns ||
     columns.length >= MAX_NUM_OF_COLUMNS ||

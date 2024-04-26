@@ -7,6 +7,7 @@
 
 import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { _IGNORED } from '../../../../common/es_fields';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
@@ -18,27 +19,29 @@ export const DegradedDocsPercentageLink = ({
   isLoading: boolean;
   dataStreamStat: DataStreamStat;
 }) => {
+  const {
+    degradedDocs: { percentage, count },
+  } = dataStreamStat;
+
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat,
-    query: { language: 'kuery', query: '_ignored:*' },
+    query: { language: 'kuery', query: `${_IGNORED}: *` },
   });
 
   return (
-    <>
-      <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          {dataStreamStat.degradedDocs ? (
-            <EuiLink
-              data-test-subj="datasetQualityDegradedDocsPercentageLink"
-              {...logsExplorerLinkProps}
-            >
-              <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
-            </EuiLink>
-          ) : (
-            <QualityPercentageIndicator percentage={dataStreamStat.degradedDocs} />
-          )}
-        </EuiFlexGroup>
-      </EuiSkeletonRectangle>
-    </>
+    <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        {percentage ? (
+          <EuiLink
+            data-test-subj="datasetQualityDegradedDocsPercentageLink"
+            {...logsExplorerLinkProps}
+          >
+            <QualityPercentageIndicator percentage={percentage} degradedDocsCount={count} />
+          </EuiLink>
+        ) : (
+          <QualityPercentageIndicator percentage={percentage} />
+        )}
+      </EuiFlexGroup>
+    </EuiSkeletonRectangle>
   );
 };

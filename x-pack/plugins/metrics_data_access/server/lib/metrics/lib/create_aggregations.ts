@@ -37,7 +37,7 @@ const createMetricHistogramAggs = (options: MetricsAPIRequest): HistogramAggrega
   return {
     histogram: {
       date_histogram: {
-        field: options.timerange.timeFieldName || TIMESTAMP_FIELD,
+        field: TIMESTAMP_FIELD,
         fixed_interval: intervalString,
         offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
         extended_bounds: {

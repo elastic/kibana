@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type {
+  GetActionStatusRequest,
   GetActionStatusResponse,
   GetAgentTagsResponse,
   GetAgentUploadsResponse,
@@ -14,6 +15,7 @@ import type {
   PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
   PostRequestBulkDiagnosticsRequest,
+  PostRequestDiagnosticsRequest,
   PostRequestDiagnosticsResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
@@ -206,10 +208,15 @@ export function sendPostAgentUpgrade(
   });
 }
 
-export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+export function sendPostRequestDiagnostics(
+  agentId: string,
+  body: PostRequestDiagnosticsRequest['body'],
+  options?: RequestOptions
+) {
   return sendRequest<PostRequestDiagnosticsResponse>({
     path: agentRouteService.getRequestDiagnosticsPath(agentId),
     method: 'post',
+    body,
     version: API_VERSIONS.public.v1,
     ...options,
   });
@@ -273,11 +280,12 @@ export function sendPostBulkAgentUpgrade(
   });
 }
 
-export function sendGetActionStatus() {
+export function sendGetActionStatus(query: GetActionStatusRequest['query'] = {}) {
   return sendRequest<GetActionStatusResponse>({
     path: agentRouteService.getActionStatusPath(),
     method: 'get',
     version: API_VERSIONS.public.v1,
+    query,
   });
 }
 

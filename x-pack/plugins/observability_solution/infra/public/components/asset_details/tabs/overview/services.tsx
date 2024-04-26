@@ -10,13 +10,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut, EuiLink } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { CollapsibleSection } from './section/collapsible_section';
-import { ServicesSectionTitle } from '../../components/section_titles';
+import { Section } from '../../components/section';
+import { ServicesSectionTitle } from './section_titles';
 import { useServices } from '../../hooks/use_services';
 import { HOST_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
 import { APM_HOST_FILTER_FIELD } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
+import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 export const ServicesContent = ({
   hostName,
@@ -25,9 +26,14 @@ export const ServicesContent = ({
   hostName: string;
   dateRange: TimeRange;
 }) => {
+  const { isServerlessEnv } = useKibanaEnvironmentContext();
   const linkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial/apm',
+  });
+  const serverlessLinkProps = useLinkProps({
+    app: 'apm',
+    pathname: '/onboarding',
   });
   const params = useMemo(
     () => ({
@@ -42,12 +48,12 @@ export const ServicesContent = ({
   const hasServices = services?.length;
 
   return (
-    <CollapsibleSection
-      title={ServicesSectionTitle}
+    <Section
+      title={<ServicesSectionTitle />}
       collapsible
       data-test-subj="infraAssetDetailsServicesCollapsible"
       id="services"
-      extraAction={<LinkToApmServices assetName={hostName} apmField={APM_HOST_FILTER_FIELD} />}
+      extraAction={<LinkToApmServices assetId={hostName} apmField={APM_HOST_FILTER_FIELD} />}
     >
       {error ? (
         <EuiCallOut
@@ -87,7 +93,10 @@ export const ServicesContent = ({
             defaultMessage="No services found on this host. Click {apmTutorialLink} to instrument your services with APM."
             values={{
               apmTutorialLink: (
-                <EuiLink data-test-subj="assetDetailsTooltiAPMTutorialLink" href={linkProps.href}>
+                <EuiLink
+                  data-test-subj="assetDetailsTooltiAPMTutorialLink"
+                  href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
+                >
                   <FormattedMessage
                     id="xpack.infra.assetDetails.table.services.noServices.tutorialLink"
                     defaultMessage="here"
@@ -98,6 +107,6 @@ export const ServicesContent = ({
           />
         </p>
       )}
-    </CollapsibleSection>
+    </Section>
   );
 };

@@ -741,6 +741,76 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.isLegacyTableEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "isLegacyTableEnabled",
+        "description": [],
+        "signature": [
+          "({\n  uiSettings,\n  isTextBasedQueryMode,\n}: { uiSettings: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "; isTextBasedQueryMode: boolean; }) => boolean"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.isLegacyTableEnabled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  uiSettings,\n  isTextBasedQueryMode,\n}",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.isLegacyTableEnabled.$1.uiSettings",
+                "type": "Object",
+                "tags": [],
+                "label": "uiSettings",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-ui-settings-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                    "section": "def-common.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.isLegacyTableEnabled.$1.isTextBasedQueryMode",
+                "type": "boolean",
+                "tags": [],
+                "label": "isTextBasedQueryMode",
+                "description": [],
+                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.isNestedFieldParent",
         "type": "Function",
         "tags": [],

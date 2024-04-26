@@ -11,6 +11,15 @@ import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
+jest.mock('../../../component_templates/component_templates_context', () => ({
+  useComponentTemplatesContext: jest.fn().mockReturnValue({
+    toasts: {
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+    },
+  }),
+}));
+
 describe('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
@@ -434,6 +443,48 @@ describe('Mappings editor: core', () => {
       delete updatedMappings.numeric_detection;
 
       expect(data).toEqual(updatedMappings);
+    });
+  });
+
+  describe('multi-fields support', () => {
+    it('allows multi-fields for most types', async () => {
+      const value = {
+        properties: {
+          name1: {
+            type: 'wildcard',
+          },
+        },
+      };
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component, exists } = testBed;
+      component.update();
+      expect(exists('addMultiFieldButton')).toBe(true);
+    });
+
+    it('keeps the fields property in the field', async () => {
+      const value = {
+        properties: {
+          name1: {
+            type: 'wildcard',
+            fields: {
+              text: {
+                type: 'match_only_text',
+              },
+            },
+          },
+        },
+      };
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component } = testBed;
+      component.update();
+      ({ data } = await getMappingsEditorData(component));
+      expect(data).toEqual(value);
     });
   });
 });

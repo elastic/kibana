@@ -12,15 +12,12 @@ import type { SecuritySolutionFactory } from '../types';
 import { allUsers } from './all';
 import { authentications } from './authentications';
 import { managedUserDetails } from './managed_details';
-import { usersKpiAuthentications } from './kpi/authentications';
-import { totalUsersKpi } from './kpi/total_users';
+
 import { observedUserDetails } from './observed_details';
 
 export const usersFactory: Record<UsersQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [UsersQueries.observedDetails]: observedUserDetails,
   [UsersQueries.managedDetails]: managedUserDetails,
-  [UsersQueries.kpiTotalUsers]: totalUsersKpi,
   [UsersQueries.users]: allUsers,
   [UsersQueries.authentications]: authentications,
-  [UsersQueries.kpiAuthentications]: usersKpiAuthentications,
 };

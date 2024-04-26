@@ -6,6 +6,7 @@
   "composed_of": [
     "ecs_8.0.0_base",
     "ecs_8.0.0_log",
+    "ecs_8.0.0_url",
     "ecs_8.0.0_http",
     "ecs_8.0.0_host"
   ],

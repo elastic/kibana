@@ -6,8 +6,9 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
@@ -21,7 +22,7 @@ export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams
 }
 
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION =
-  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts';
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Input should be a string.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts, or null if the
@@ -46,8 +47,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
     const {
       alertsIndexPattern,
-      allow,
-      allowReplacement,
+      anonymizationFields,
       esClient,
       onNewReplacements,
       replacements,
@@ -59,7 +59,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       func: async () => {
         const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
-          allow: allow ?? [],
+          anonymizationFields: anonymizationFields ?? [],
           size,
         });
 
@@ -67,18 +67,17 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
         // Accumulate replacements locally so we can, for example use the same
         // replacement for a hostname when we see it in multiple alerts:
-        let localReplacements = { ...replacements };
-        const localOnNewReplacements = (newReplacements: Record<string, string>) => {
-          localReplacements = { ...localReplacements, ...newReplacements }; // update the local state
-
+        let localReplacements: Replacements = replacements ?? {};
+        const localOnNewReplacements = (newReplacements: Replacements) => {
+          localReplacements = { ...localReplacements, ...newReplacements };
           onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
+          return Promise.resolve(localReplacements);
         };
 
         return JSON.stringify(
           result.hits?.hits?.map((x) =>
             transformRawData({
-              allow: allow ?? [],
-              allowReplacement: allowReplacement ?? [],
+              anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback

@@ -25,7 +25,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.observability.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
       {
         defaultMessage: 'Status',
       }
@@ -35,25 +35,34 @@ export const columns: Array<
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.durationColumnDescription', {
-      defaultMessage: 'Duration',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
+      {
+        defaultMessage: 'Duration',
+      }
+    ),
     id: ALERT_DURATION,
     initialWidth: 116,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.sloColumnDescription', {
-      defaultMessage: 'Rule name',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
+      {
+        defaultMessage: 'Rule name',
+      }
+    ),
     id: ALERT_RULE_NAME,
     initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonColumnDescription', {
-      defaultMessage: 'Reason',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
+      {
+        defaultMessage: 'Reason',
+      }
+    ),
     id: ALERT_REASON,
     linkField: '*',
   },

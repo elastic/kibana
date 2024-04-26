@@ -191,7 +191,6 @@ async function _deleteExistingData(
     (policy) =>
       agentPolicyService.delete(soClient, esClient, policy.id, {
         force: true,
-        removeFleetServerDocuments: true,
       }),
     {
       concurrency: 20,

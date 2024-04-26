@@ -95,6 +95,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       fields,
       forceRefresh,
       allowHidden,
+      fieldTypes,
       includeEmptyFields,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
@@ -110,6 +111,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
+        fieldTypes,
         // default to undefined to keep value out of URL params and improve caching
         allow_hidden: allowHidden || undefined,
         include_empty_fields: includeEmptyFields,

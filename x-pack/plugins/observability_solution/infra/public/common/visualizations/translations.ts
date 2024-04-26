@@ -11,6 +11,9 @@ export const METRICS_TOOLTIP = {
   hostCount: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.hostCount', {
     defaultMessage: 'Number of hosts returned by your search criteria.',
   }),
+  alertsCount: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.alertsCount', {
+    defaultMessage: 'The count of the active alerts',
+  }),
 
   cpuUsage: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.cpuUsage', {
     defaultMessage:

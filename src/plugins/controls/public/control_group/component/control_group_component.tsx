@@ -10,7 +10,6 @@ import '../control_group.scss';
 
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import {
   closestCenter,
@@ -38,28 +37,36 @@ import {
   EuiIcon,
   EuiPanel,
   EuiText,
+  EuiToolTip,
   EuiTourStep,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { ControlGroupStrings } from '../control_group_strings';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
-import { ControlGroupReduxState } from '../types';
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-
-const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
 export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = contextSelect((state) => state.explicitInput.panels);
-  const viewMode = contextSelect((state) => state.explicitInput.viewMode);
-  const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
-  const showAddButton = contextSelect((state) => state.componentState.showAddButton);
-  const controlWithInvalidSelectionsId = contextSelect(
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const showApplySelections = controlGroupSelector(
+    (state) => state.explicitInput.showApplySelections
+  );
+  const showAddButton = controlGroupSelector((state) => state.componentState.showAddButton);
+  const unpublishedFilters = controlGroupSelector(
+    (state) => state.componentState.unpublishedFilters
+  );
+  const controlWithInvalidSelectionsId = controlGroupSelector(
     (state) => state.componentState.controlWithInvalidSelectionsId
   );
+
   const [tourStepOpen, setTourStepOpen] = useState<boolean>(true);
   const [suppressTourChecked, setSuppressTourChecked] = useState<boolean>(false);
   const [renderTourStep, setRenderTourStep] = useState(false);
@@ -82,9 +89,48 @@ export const ControlGroup = () => {
      * This forces the tour step to get unmounted so that it can attach to the new invalid
      * control - otherwise, the anchor will remain attached to the old invalid control
      */
+    let mounted = true;
     setRenderTourStep(false);
-    setTimeout(() => setRenderTourStep(true), 100);
+    setTimeout(() => {
+      if (mounted) {
+        setRenderTourStep(true);
+      }
+    }, 100);
+    return () => {
+      mounted = false;
+    };
   }, [controlWithInvalidSelectionsId]);
+
+  const applyButtonEnabled = useMemo(() => {
+    /**
+     * this is undefined if there are no unpublished filters / timeslice; note that an empty filter array counts
+     * as unpublished filters and so the apply button should still be enabled in this case
+     */
+    return Boolean(unpublishedFilters);
+  }, [unpublishedFilters]);
+
+  const showAppendedButtonGroup = useMemo(
+    () => showAddButton || showApplySelections,
+    [showAddButton, showApplySelections]
+  );
+
+  const ApplyButtonComponent = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        size="m"
+        disabled={!applyButtonEnabled}
+        iconSize="m"
+        display="fill"
+        color={'success'}
+        iconType={'check'}
+        data-test-subj="controlGroup--applyFiltersButton"
+        aria-label={ControlGroupStrings.management.getApplyButtonTitle(applyButtonEnabled)}
+        onClick={() => {
+          if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);
+        }}
+      />
+    );
+  }, [applyButtonEnabled, unpublishedFilters, controlGroup]);
 
   const tourStep = useMemo(() => {
     if (
@@ -208,10 +254,11 @@ export const ControlGroup = () => {
         >
           <EuiFlexGroup
             wrap={false}
-            gutterSize="m"
+            gutterSize="s"
             direction="row"
             responsive={false}
-            alignItems="center"
+            alignItems="stretch"
+            justifyContent="center"
             data-test-subj="controls-group"
           >
             {tourStep}
@@ -254,16 +301,42 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
-            {showAddButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  iconSize="m"
-                  display="base"
-                  iconType={'plusInCircle'}
-                  aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                  onClick={() => controlGroup.openAddDataControlFlyout()}
-                />
+            {showAppendedButtonGroup && (
+              <EuiFlexItem
+                grow={false}
+                className="controlGroup--endButtonGroup"
+                data-test-subj="controlGroup--endButtonGroup"
+              >
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  {showAddButton && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                        <EuiButtonIcon
+                          size="m"
+                          iconSize="m"
+                          display="base"
+                          iconType={'plusInCircle'}
+                          data-test-subj="controlGroup--addControlButton"
+                          aria-label={ControlGroupStrings.management.getAddControlTitle()}
+                          onClick={() => controlGroup.openAddDataControlFlyout()}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                  {showApplySelections && (
+                    <EuiFlexItem grow={false}>
+                      {applyButtonEnabled ? (
+                        ApplyButtonComponent
+                      ) : (
+                        <EuiToolTip
+                          content={ControlGroupStrings.management.getApplyButtonTitle(false)}
+                        >
+                          {ApplyButtonComponent}
+                        </EuiToolTip>
+                      )}
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

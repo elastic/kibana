@@ -11,19 +11,18 @@ import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getUrlTracker } from '../../kibana_services';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 let bannerId: string | undefined;
 
 export function NotFoundRoute() {
   const services = useDiscoverServices();
-  const { urlForwarding, core, history } = services;
-  const currentLocation = history().location.pathname;
+  const { urlForwarding, urlTracker, core, history } = services;
+  const currentLocation = history.location.pathname;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
-    getUrlTracker().restorePreviousUrl();
+    urlTracker.restorePreviousUrl();
     urlForwarding.navigateToLegacyKibanaUrl(path);
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
@@ -39,7 +38,7 @@ export function NotFoundRoute() {
               id="discover.noMatchRoute.bannerText"
               defaultMessage="Discover application doesn't recognize this route: {route}"
               values={{
-                route: history().location.state.referrer,
+                route: history.location.state.referrer,
               }}
             />
           </p>
@@ -57,7 +56,7 @@ export function NotFoundRoute() {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core, history, urlForwarding]);
+  }, [core, history, urlForwarding, urlTracker]);
 
   return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }

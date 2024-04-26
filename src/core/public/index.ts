@@ -26,6 +26,8 @@
 
 import './index.scss';
 
+import 'reflect-metadata';
+
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 export type { I18nStart } from '@kbn/core-i18n-browser';
@@ -197,6 +199,34 @@ export type {
 } from '@kbn/core-http-browser';
 
 export type { IHttpFetchError } from '@kbn/core-http-browser';
+
+export type {
+  AuthenticatedUser,
+  User,
+  AuthenticationProvider,
+  UserRealm,
+} from '@kbn/core-security-common';
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+  CoreSecurityDelegateContract,
+} from '@kbn/core-security-browser';
+
+export type {
+  UserProfile,
+  UserProfileLabels,
+  UserProfileWithSecurity,
+  UserProfileUserInfoWithSecurity,
+  UserProfileUserInfo,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+  UserProfileService,
+  CoreUserProfileDelegateContract,
+} from '@kbn/core-user-profile-browser';
 
 export type {
   OverlayStart,

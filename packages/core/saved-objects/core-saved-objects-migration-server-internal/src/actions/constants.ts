@@ -16,7 +16,7 @@
  * reverse proxies like ELB ignore TCP keep-alive packets so unless there's a
  * request or response sent over the socket it will be dropped after 60s.
  */
-export const DEFAULT_TIMEOUT = '60s';
+export const DEFAULT_TIMEOUT = '300s';
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 export const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
 /** ES rule of thumb: shards should be several GB to 10's of GB, so Kibana is unlikely to cross that limit */

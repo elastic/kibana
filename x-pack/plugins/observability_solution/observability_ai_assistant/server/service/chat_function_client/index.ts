@@ -9,17 +9,17 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
-import {
-  ContextDefinition,
-  ContextRegistry,
-  FunctionResponse,
-  FunctionVisibility,
-  Message,
-  ObservabilityAIAssistantScreenContext,
-  RegisterContextDefinition,
-} from '../../../common/types';
+import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
+import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
-import type { FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
+import type {
+  ChatFn,
+  FunctionHandler,
+  FunctionHandlerRegistry,
+  RegisteredInstruction,
+  RegisterFunction,
+  RegisterInstruction,
+} from '../types';
 
 export class FunctionArgsValidationError extends Error {
   constructor(public readonly errors: ErrorObject[]) {
@@ -32,26 +32,27 @@ const ajv = new Ajv({
 });
 
 export class ChatFunctionClient {
-  private readonly contextRegistry: ContextRegistry = new Map();
+  private readonly instructions: RegisteredInstruction[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
-  constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContext[]) {
+  private readonly actions: Required<ObservabilityAIAssistantScreenContextRequest>['actions'];
+
+  constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContextRequest[]) {
     const allData = compact(screenContexts.flatMap((context) => context.data));
+
+    this.actions = compact(screenContexts.flatMap((context) => context.actions));
 
     if (allData.length) {
       this.registerFunction(
         {
           name: 'get_data_on_screen',
-          contexts: ['core'],
           description: dedent(`Get data that is on the screen:
             ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
           `),
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
-            additionalProperties: false,
-            additionalItems: false,
             properties: {
               data: {
                 type: 'array',
@@ -61,8 +62,6 @@ export class ChatFunctionClient {
                   type: 'string',
                   enum: allData.map((data) => data.name),
                 },
-                additionalItems: false,
-                additionalProperties: false,
               },
             },
             required: ['data' as const],
@@ -75,34 +74,48 @@ export class ChatFunctionClient {
         }
       );
     }
+
+    this.actions.forEach((action) => {
+      if (action.parameters) {
+        this.validators.set(action.name, ajv.compile(action.parameters));
+      }
+    });
   }
 
   registerFunction: RegisterFunction = (definition, respond) => {
-    this.validators.set(definition.name, ajv.compile(definition.parameters));
+    if (definition.parameters) {
+      this.validators.set(definition.name, ajv.compile(definition.parameters));
+    }
     this.functionRegistry.set(definition.name, { definition, respond });
   };
 
-  registerContext: RegisterContextDefinition = (context) => {
-    this.contextRegistry.set(context.name, context);
+  registerInstruction: RegisterInstruction = (instruction) => {
+    this.instructions.push(instruction);
   };
 
-  private validate(name: string, parameters: unknown) {
+  validate(name: string, parameters: unknown) {
     const validator = this.validators.get(name)!;
+    if (!validator) {
+      return;
+    }
+
     const result = validator(parameters);
     if (!result) {
       throw new FunctionArgsValidationError(validator.errors!);
     }
   }
 
-  getContexts(): ContextDefinition[] {
-    return Array.from(this.contextRegistry.values());
+  getInstructions(): RegisteredInstruction[] {
+    return this.instructions;
+  }
+
+  hasAction(name: string) {
+    return !!this.actions.find((action) => action.name === name)!;
   }
 
   getFunctions({
-    contexts,
     filter,
   }: {
-    contexts?: string[];
     filter?: string;
   } = {}): FunctionHandler[] {
     const allFunctions = Array.from(this.functionRegistry.values());
@@ -110,7 +123,6 @@ export class ChatFunctionClient {
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 
     const matchingDefinitions = filterFunctionDefinitions({
-      contexts,
       filter,
       definitions: allFunctions.map((fn) => fn.definition),
     });
@@ -118,17 +130,23 @@ export class ChatFunctionClient {
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
   }
 
+  getActions() {
+    return this.actions;
+  }
+
   hasFunction(name: string): boolean {
     return this.functionRegistry.has(name);
   }
 
   async executeFunction({
+    chat,
     name,
     args,
     messages,
     signal,
     connectorId,
   }: {
+    chat: ChatFn;
     name: string;
     args: string | undefined;
     messages: Message[];
@@ -146,7 +164,13 @@ export class ChatFunctionClient {
     this.validate(name, parsedArguments);
 
     return await fn.respond(
-      { arguments: parsedArguments, messages, connectorId, screenContexts: this.screenContexts },
+      {
+        arguments: parsedArguments,
+        messages,
+        connectorId,
+        screenContexts: this.screenContexts,
+        chat,
+      },
       signal
     );
   }
