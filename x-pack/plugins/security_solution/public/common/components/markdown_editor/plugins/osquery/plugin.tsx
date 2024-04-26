@@ -165,10 +165,8 @@ export const plugin = ({
     name: 'osquery',
     button: {
       label: interactionsUpsellingMessage ?? 'Osquery',
-      'aria-label': 'aria-label-test1',
       iconType: 'logoOsquery',
       isDisabled: !!interactionsUpsellingMessage,
-      'data-test-subj': 'test-test-test',
     },
     helpText: (
       <div>
