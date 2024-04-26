@@ -52,7 +52,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
     'responseActionsSentinelOneV1Enabled'
   );
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-  console.log('agentStatusClientEnabled: ', agentStatusClientEnabled);
 
   return useCallback(
     (props: ResponderInfoProps) => {
@@ -145,6 +144,12 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, isSentinelOneV1Enabled, consoleManager]
+    [
+      endpointPrivileges,
+      isEnterpriseLicense,
+      consoleManager,
+      agentStatusClientEnabled,
+      isSentinelOneV1Enabled,
+    ]
   );
 };

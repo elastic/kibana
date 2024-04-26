@@ -21,7 +21,7 @@ import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/stor
 import { OfflineCallout } from './offline_callout';
 
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
+jest.mock('../../../hooks/agents/use_get_agent_status');
 
 const getEndpointDetails = useGetEndpointDetails as jest.Mock;
 const getSentinelOneAgentStatus = useGetSentinelOneAgentStatus as jest.Mock;
