@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should export rules with defaultbale fields when values are set', async () => {
+    it('should export rules with defaultable fields when values are set', async () => {
       const defaultableFields: BaseDefaultableFields = {
         max_signals: 100,
       };
