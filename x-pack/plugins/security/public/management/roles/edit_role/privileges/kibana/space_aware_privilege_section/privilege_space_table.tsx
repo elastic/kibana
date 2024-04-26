@@ -236,7 +236,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'primary'}
                   iconType={'pencil'}
                   onClick={() => this.props.onEdit(record.privilegeIndex)}
-                  data-test-subj={`privilegeEditAction-${privilegeIndex}`}
+                  data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
                 />
               );
             },
@@ -255,7 +255,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'danger'}
                   iconType={'trash'}
                   onClick={() => this.onDeleteSpacePrivilege(record)}
-                  data-test-subj={`privilegeDeleteAction-${privilegeIndex}`}
+                  data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
                 />
               );
             },

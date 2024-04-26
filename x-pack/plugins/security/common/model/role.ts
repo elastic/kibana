@@ -81,7 +81,7 @@ export function getExtendedRoleDeprecationNotice(role: Partial<Role>) {
  * @param role the Role as returned by roles API
  */
 export function isRoleWithWildcardBasePrivilege(role: Partial<Role>): boolean {
-  return role.kibana.some((entry) => entry.base.includes('*'));
+  return role.kibana?.some((entry) => entry.base.includes('*'));
 }
 
 /**
