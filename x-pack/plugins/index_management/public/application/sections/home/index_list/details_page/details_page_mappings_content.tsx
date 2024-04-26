@@ -24,15 +24,11 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiCallOut,
-  EuiPopover,
-  EuiSelectable,
-  EuiPopoverTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { Index } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
@@ -58,6 +54,7 @@ import {
   getFieldsMatchingFilterFromState,
 } from '../../../../components/mappings_editor/lib';
 import { NormalizedFields, State } from '../../../../components/mappings_editor/types';
+import { MappingsFilter } from './details_page_filter_fields';
 
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
@@ -139,59 +136,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const [previousState, setPreviousState] = useState<State>(state);
 
-  const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
-
   const previousStateSelectedDataTypes: string[] = useMemo(() => {
     return previousState.filter.selectedOptions
       .filter((option) => option.checked === 'on')
       .map((option) => option.label);
   }, [previousState.filter.selectedOptions]);
-
-  const setPreviousStateSelectedOptions = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const selectedDataTypes: string[] = options
-        .filter((option) => option.checked === 'on')
-        .map((option) => option.label);
-
-      setPreviousState({
-        ...previousState,
-        filter: {
-          filteredFields: getFieldsFromState(
-            previousState.fields,
-            selectedDataTypes.length > 0 ? selectedDataTypes : undefined
-          ),
-          selectedOptions: options,
-          selectedDataTypes,
-        },
-        search: {
-          term: previousState.search.term,
-          result: searchFields(
-            previousState.search.term,
-            selectedDataTypes.length > 0
-              ? getFieldsMatchingFilterFromState(previousState, selectedDataTypes)
-              : previousState.fields.byId
-          ),
-        },
-      });
-    },
-    [previousState]
-  );
-
-  const setSelectedOptions = useCallback(
-    (options) => {
-      dispatch({
-        type: 'filter:update',
-        value: {
-          selectedOptions: options,
-        },
-      });
-      dispatch({
-        type: 'search:update',
-        value: state.search.term,
-      });
-    },
-    [dispatch, state.search.term]
-  );
 
   const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
@@ -308,35 +257,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       {data}
     </EuiCodeBlock>
   );
-  const filterByFieldTypeButton = (
-    <EuiFilterButton
-      iconType="arrowDown"
-      iconSide="right"
-      isDisabled={isJSONVisible}
-      onClick={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
-      numFilters={
-        !isAddingFields
-          ? state.filter.selectedOptions.length
-          : previousState.filter.selectedOptions.length
-      }
-      hasActiveFilters={
-        !isAddingFields
-          ? state.filter.selectedDataTypes.length > 0
-          : previousState.filter.selectedDataTypes.length > 0
-      }
-      numActiveFilters={
-        !isAddingFields
-          ? state.filter.selectedDataTypes.length
-          : previousState.filter.selectedDataTypes.length
-      }
-      isSelected={isFilterByPopoverVisible}
-      data-test-subj="indexDetailsMappingsFilterByFieldTypeButton"
-    >
-      {i18n.translate('xpack.idxMgmt.indexDetails.mappings.filterByFieldType.button', {
-        defaultMessage: 'Field types',
-      })}
-    </EuiFilterButton>
-  );
+
   const searchResultComponent = isAddingFields ? (
     <SearchResult
       result={previousState.search.result}
@@ -502,52 +423,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         <EuiFlexGroup direction="column">
           <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <EuiPopover
-                  button={filterByFieldTypeButton}
-                  isOpen={isFilterByPopoverVisible}
-                  closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
-                  anchorPosition="downCenter"
-                  data-test-subj="indexDetailsMappingsFilter"
-                >
-                  <EuiSelectable
-                    searchable
-                    data-test-subj="filterItem"
-                    searchProps={{
-                      placeholder: i18n.translate(
-                        'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.searchPlaceholder',
-                        {
-                          defaultMessage: 'Filter list ',
-                        }
-                      ),
-                    }}
-                    options={
-                      !isAddingFields
-                        ? state.filter.selectedOptions
-                        : previousState.filter.selectedOptions
-                    }
-                    onChange={(options) => {
-                      if (!isAddingFields) {
-                        setSelectedOptions(options);
-                      } else {
-                        setPreviousStateSelectedOptions(options);
-                      }
-                    }}
-                  >
-                    {(list, search) => (
-                      <div style={{ width: 200 }}>
-                        <EuiPopoverTitle
-                          paddingSize="s"
-                          data-test-subj="indexDetailsMappingsFilterByFieldTypeSearch"
-                        >
-                          {search}
-                        </EuiPopoverTitle>
-                        {list}
-                      </div>
-                    )}
-                  </EuiSelectable>
-                </EuiPopover>
-              </EuiFilterGroup>
+              <MappingsFilter
+                isAddingFields={isAddingFields}
+                isJSONVisible={isJSONVisible}
+                previousState={previousState}
+                setPreviousState={setPreviousState}
+                state={state}
+              />
             </EuiFlexItem>
             <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
             {!index.hidden && (
