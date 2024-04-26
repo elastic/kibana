@@ -156,6 +156,17 @@ export type SingleMetricViewerEmbeddableApi =
     PublishesWritablePanelTitle &
     SingleMetricViewerComponentApi;
 
+/**
+ * The subset of the single metric viewer Embeddable state that is actually used by the single metric viewer embeddable.
+ *
+ * TODO: Ideally this should be the same as the SingleMetricViewerEmbeddableState, but that type is used in many
+ * places, so we cannot change it at the moment.
+ */
+export type SingleMetricViewerRuntimeState = Omit<
+  SingleMetricViewerEmbeddableState,
+  'id' | 'filters' | 'query' | 'refreshConfig'
+>;
+
 export interface SingleMetricViewerComponentApi {
   functionDescription: PublishingSubject<string | undefined>;
   jobIds: PublishingSubject<JobId[]>;
