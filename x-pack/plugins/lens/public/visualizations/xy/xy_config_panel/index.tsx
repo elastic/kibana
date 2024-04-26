@@ -428,12 +428,15 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
-            renderValueInLegendSwitch={nonOrdinalXAxis}
-            valueInLegend={state?.valuesInLegend}
-            onValueInLegendChange={() => {
+            allowLegendStats={nonOrdinalXAxis}
+            legendStats={state?.legend.legendStats}
+            onLegendStatsChange={(newLegendStats) => {
               setState({
                 ...state,
-                valuesInLegend: !state.valuesInLegend,
+                legend: {
+                  ...state.legend,
+                  legendStats: newLegendStats,
+                },
               });
             }}
             legendSize={legendSize}
