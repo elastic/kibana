@@ -8,11 +8,12 @@
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React, { Suspense } from 'react';
 import { initializeTitles } from '@kbn/presentation-publishing';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { BehaviorSubject } from 'rxjs';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { DataVisualizerCoreSetup } from '../../../../plugin';
 import { FIELD_STATS_EMBED_ID } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
@@ -40,7 +41,6 @@ export const getFieldStatsTableFactory = (core: DataVisualizerCoreSetup) => {
       // @todo: Remove usage of deprecated React rendering utilities
       // see https://github.com/elastic/kibana/pull/181094
       const startServices = await core.getStartServices();
-      const I18nContext = startServices[0].i18n.Context;
       const servicesToOverride = parentApi.overrideServices ?? {};
       const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };
       const datePickerDeps = {
@@ -89,30 +89,30 @@ export const getFieldStatsTableFactory = (core: DataVisualizerCoreSetup) => {
           ...titleComparators,
         }
       );
+      const kibanaRenderServices = pick(services, 'analytics', 'i18n', 'theme');
+
       return {
         api,
         Component: () => {
           return (
-            <I18nContext>
-              <KibanaThemeProvider theme$={services.theme.theme$}>
-                <KibanaContextProvider services={services}>
-                  <DatePickerContextProvider {...datePickerDeps}>
-                    <Suspense fallback={<EmbeddableLoading />}>
-                      <LazyFieldStatsEmbeddableWrapper
-                        id={uuid}
-                        embeddableState$={embeddableState$}
-                        onAddFilter={onAddFilter}
-                        onApiUpdate={(changes) => {
-                          if ('showDistributions' in changes && Object.keys(changes).length === 1) {
-                            showDistributions$.next(changes.showDistributions);
-                          }
-                        }}
-                      />
-                    </Suspense>
-                  </DatePickerContextProvider>
-                </KibanaContextProvider>
-              </KibanaThemeProvider>
-            </I18nContext>
+            <KibanaRenderContextProvider {...kibanaRenderServices}>
+              <KibanaContextProvider services={services}>
+                <DatePickerContextProvider {...datePickerDeps}>
+                  <Suspense fallback={<EmbeddableLoading />}>
+                    <LazyFieldStatsEmbeddableWrapper
+                      id={uuid}
+                      embeddableState$={embeddableState$}
+                      onAddFilter={onAddFilter}
+                      onApiUpdate={(changes) => {
+                        if ('showDistributions' in changes && Object.keys(changes).length === 1) {
+                          showDistributions$.next(changes.showDistributions);
+                        }
+                      }}
+                    />
+                  </Suspense>
+                </DatePickerContextProvider>
+              </KibanaContextProvider>
+            </KibanaRenderContextProvider>
           );
         },
       };

@@ -39,10 +39,6 @@ export const PresentationPanelInternal = <
   componentProps,
 
   onPanelStatusChange,
-
-  // @todo: Remove when https://github.com/elastic/kibana/pull/181473 merges
-  hideInspector,
-  ...extraPanelProps
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);

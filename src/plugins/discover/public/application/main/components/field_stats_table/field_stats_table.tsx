@@ -200,16 +200,13 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         }}
         parentApi={parentApi}
         panelProps={{
-          // @ts-expect-error
-          css: css({
-            height: 'auto',
-            minHeight: 'auto',
-          }),
           hideHeader: true,
           hideInspector: true,
           showShadow: false,
           showBorder: false,
         }}
+        // Render embeddable without PresentationPanel wrapper
+        hidePanelChrome={true}
       />
     </EuiFlexItem>
   );
