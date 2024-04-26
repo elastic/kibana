@@ -62,7 +62,7 @@ const PackageListGridWrapper = ({
 }: WrapperProps) => {
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: true,
+    prereleaseIntegrationsEnabled: false,
   });
 
   const list: IntegrationCardItem[] = useIntegrationCardList(
@@ -97,8 +97,10 @@ const PackageListGridWrapper = ({
               box={{
                 incremental: true,
               }}
-              onChange={(arg) => {
-                setSearchQuery?.(arg.queryText);
+              onChange={({ queryText, error }) => {
+                if (error) return;
+
+                setSearchQuery?.(queryText);
               }}
               query={searchQuery ?? ''}
             />
