@@ -557,6 +557,7 @@ async function getExpressionSuggestionsByType(
 
   // enrich with assignment has some special rules who are handled somewhere else
   const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveFunctions = canHaveAssignments || command.name === 'sort';
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
@@ -594,7 +595,7 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: canHaveAssignments,
+              functions: canHaveFunctions,
               fields: !argDef.constantOnly,
               variables: anyVariables,
               literals: argDef.constantOnly,

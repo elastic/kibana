@@ -336,7 +336,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: true,
       params: [
-        { name: 'column', type: 'column' },
+        { name: 'expression', type: 'any' },
         { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
         { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
       ],
