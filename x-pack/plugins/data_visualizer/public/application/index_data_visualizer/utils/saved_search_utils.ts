@@ -64,7 +64,7 @@ function getSavedSearchSource(savedSearch?: SavedSearch | null) {
     : undefined;
 }
 
-function isQuery(query?: Query | AggregateQuery): query is Query {
+function isNonAggregateQuery(query?: Query | AggregateQuery): query is Query {
   return isPopulatedObject(query, ['query', 'language']);
 }
 
@@ -88,8 +88,9 @@ export function getEsQueryFromSavedSearch({
   filterManager?: FilterManager;
 }) {
   if (!dataView && !savedSearch) return;
-  // Cannot support AggregateQuery here
-  if (!isQuery(query)) return;
+
+  // Cannot support AggregateQuery (esql or sql) here
+  if (query && !isNonAggregateQuery(query)) return;
 
   const userQuery = query;
   const userFilters = filters;
