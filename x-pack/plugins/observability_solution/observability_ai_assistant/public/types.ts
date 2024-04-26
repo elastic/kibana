@@ -14,11 +14,7 @@ import type {
   MessageAddEvent,
   StreamingChatResponseEventWithoutError,
 } from '../common/conversation_complete';
-import type {
-  ContextDefinition,
-  FunctionDefinition,
-  FunctionResponse,
-} from '../common/functions/types';
+import type { FunctionDefinition, FunctionResponse } from '../common/functions/types';
 import type {
   Message,
   ObservabilityAIAssistantScreenContext,
@@ -60,9 +56,9 @@ export interface ObservabilityAIAssistantChatService {
     signal: AbortSignal;
     responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
+  getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,

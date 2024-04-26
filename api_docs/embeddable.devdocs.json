@@ -2237,7 +2237,7 @@
                 "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
-              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -2465,7 +2465,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -2639,7 +2639,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2867,7 +2867,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -3027,7 +3027,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3351,7 +3351,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -3543,7 +3543,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3675,7 +3675,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -3707,7 +3707,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean | undefined; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3839,7 +3839,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -3895,7 +3895,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4123,7 +4123,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -4259,7 +4259,7 @@
                 "section": "def-common.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -4487,7 +4487,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -4613,7 +4613,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => Error | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => Error | undefined; pipe: { (): ",
               "Observable",
               "<Error | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4745,7 +4745,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<Error | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -4832,7 +4832,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5060,7 +5060,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -5172,7 +5172,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean | undefined; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5304,7 +5304,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -5366,7 +5366,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5498,7 +5498,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -5551,7 +5551,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string[] | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string[] | undefined; pipe: { (): ",
               "Observable",
               "<string[] | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5683,7 +5683,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -5902,7 +5902,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -6034,7 +6034,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -8781,29 +8781,13 @@
         "signature": [
           "({ container, onAddPanel, onClose, }: { container: ",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
           },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          ">; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
+          "; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -8836,29 +8820,12 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.IContainer",
-                    "text": "IContainer"
-                  },
-                  "<{}, ",
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.ContainerInput",
-                    "text": "ContainerInput"
-                  },
-                  "<{}>, ",
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.ContainerOutput",
-                    "text": "ContainerOutput"
-                  },
-                  ">"
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.PresentationContainer",
+                    "text": "PresentationContainer"
+                  }
                 ],
                 "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -8977,7 +8944,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, panelProps, onAnyStateChange, }: { maybeId?: string | undefined; type: string; state: ",
+          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, panelProps, onAnyStateChange, hidePanelChrome, }: { maybeId?: string | undefined; type: string; state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -8993,7 +8960,7 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; onAnyStateChange?: ((state: ",
+          "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -9012,7 +8979,7 @@
             "id": "def-public.ReactEmbeddableRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n  panelProps,\n  onAnyStateChange,\n}",
+            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n  panelProps,\n  onAnyStateChange,\n  hidePanelChrome,\n}",
             "description": [],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
             "deprecated": false,
@@ -9127,6 +9094,20 @@
                     "text": "PresentationPanelProps"
                   },
                   "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.hidePanelChrome",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hidePanelChrome",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9275,17 +9256,369 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.registerSavedObjectToPanelMethod",
+        "id": "def-public.registerReactEmbeddableSavedObject",
         "type": "Function",
         "tags": [],
+        "label": "registerReactEmbeddableSavedObject",
+        "description": [
+          "\nRegister an embeddable API saved object with the Add from library flyout.\n"
+        ],
+        "signature": [
+          "<TSavedObjectAttributes extends ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">({ onAdd, embeddableType, savedObjectType, savedObjectName, getIconForSavedObject, getSavedObjectSubType, getTooltipForSavedObject, }: { onAdd: SOToEmbeddable<TSavedObjectAttributes>; embeddableType: string; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.SavedObjectCommon",
+            "text": "SavedObjectCommon"
+          },
+          "<TSavedObjectAttributes>) => ",
+          "IconType",
+          "; getSavedObjectSubType?: ((savedObject: ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.SavedObjectCommon",
+            "text": "SavedObjectCommon"
+          },
+          "<TSavedObjectAttributes>) => string) | undefined; getTooltipForSavedObject?: ((savedObject: ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.SavedObjectCommon",
+            "text": "SavedObjectCommon"
+          },
+          "<TSavedObjectAttributes>) => string) | undefined; }) => void"
+        ],
+        "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.registerReactEmbeddableSavedObject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onAdd,\n  embeddableType,\n  savedObjectType,\n  savedObjectName,\n  getIconForSavedObject,\n  getSavedObjectSubType,\n  getTooltipForSavedObject,\n}",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.onAdd",
+                "type": "Function",
+                "tags": [],
+                "label": "onAdd",
+                "description": [],
+                "signature": [
+                  "(container: ",
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.PresentationContainer",
+                    "text": "PresentationContainer"
+                  },
+                  ", savedObject: ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
+                  },
+                  "<TSavedObjectAttributes>) => void"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.registerReactEmbeddableSavedObject.$1.onAdd.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "container",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/presentation-containers",
+                        "scope": "common",
+                        "docId": "kibKbnPresentationContainersPluginApi",
+                        "section": "def-common.PresentationContainer",
+                        "text": "PresentationContainer"
+                      }
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.registerReactEmbeddableSavedObject.$1.onAdd.$2",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "savedObject",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/content-management-utils",
+                        "scope": "common",
+                        "docId": "kibKbnContentManagementUtilsPluginApi",
+                        "section": "def-common.SOWithMetadata",
+                        "text": "SOWithMetadata"
+                      },
+                      "<TSavedObjectAttributes>"
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.embeddableType",
+                "type": "string",
+                "tags": [],
+                "label": "embeddableType",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.savedObjectType",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectType",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.savedObjectName",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectName",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.getIconForSavedObject",
+                "type": "Function",
+                "tags": [],
+                "label": "getIconForSavedObject",
+                "description": [],
+                "signature": [
+                  "(savedObject: ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
+                  },
+                  "<TSavedObjectAttributes>) => ",
+                  "IconType"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.registerReactEmbeddableSavedObject.$1.getIconForSavedObject.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "savedObject",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "savedObjectsFinder",
+                        "scope": "common",
+                        "docId": "kibSavedObjectsFinderPluginApi",
+                        "section": "def-common.SavedObjectCommon",
+                        "text": "SavedObjectCommon"
+                      },
+                      "<TSavedObjectAttributes>"
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.getSavedObjectSubType",
+                "type": "Function",
+                "tags": [],
+                "label": "getSavedObjectSubType",
+                "description": [],
+                "signature": [
+                  "((savedObject: ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
+                  },
+                  "<TSavedObjectAttributes>) => string) | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.registerReactEmbeddableSavedObject.$1.getSavedObjectSubType.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "savedObject",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "savedObjectsFinder",
+                        "scope": "common",
+                        "docId": "kibSavedObjectsFinderPluginApi",
+                        "section": "def-common.SavedObjectCommon",
+                        "text": "SavedObjectCommon"
+                      },
+                      "<TSavedObjectAttributes>"
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.registerReactEmbeddableSavedObject.$1.getTooltipForSavedObject",
+                "type": "Function",
+                "tags": [],
+                "label": "getTooltipForSavedObject",
+                "description": [],
+                "signature": [
+                  "((savedObject: ",
+                  {
+                    "pluginId": "savedObjectsFinder",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsFinderPluginApi",
+                    "section": "def-common.SavedObjectCommon",
+                    "text": "SavedObjectCommon"
+                  },
+                  "<TSavedObjectAttributes>) => string) | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.registerReactEmbeddableSavedObject.$1.getTooltipForSavedObject.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "savedObject",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "savedObjectsFinder",
+                        "scope": "common",
+                        "docId": "kibSavedObjectsFinderPluginApi",
+                        "section": "def-common.SavedObjectCommon",
+                        "text": "SavedObjectCommon"
+                      },
+                      "<TSavedObjectAttributes>"
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.registerSavedObjectToPanelMethod",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
         "label": "registerSavedObjectToPanelMethod",
         "description": [],
         "signature": [
           "<TSavedObjectAttributes, TByValueAttributes>(savedObjectType: string, method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>) => void"
         ],
         "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/plugin.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/plugin.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/plugin.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/plugin.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/plugin.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/plugin.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/plugin.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/plugin.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "embeddable",

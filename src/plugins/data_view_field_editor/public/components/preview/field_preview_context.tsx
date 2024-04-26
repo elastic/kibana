@@ -287,8 +287,12 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       ...prev,
       fields: fields.map((field) => {
         const nextValue =
-          script === null && Boolean(document)
-            ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
+          // if its a concrete field, read from the fields
+          controller.getInternalFieldType() === 'concrete'
+            ? get(document?.fields, name ?? '')
+            : // if its a runtime field, look at source or the returned value
+            script === null && Boolean(document)
+            ? get(document?._source, name ?? '')
             : field?.value;
 
         const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
