@@ -282,7 +282,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       {data}
     </EuiCodeBlock>
   );
-
   const searchResultComponent = isAddingFields ? (
     <SearchResult
       result={previousState.search.result}

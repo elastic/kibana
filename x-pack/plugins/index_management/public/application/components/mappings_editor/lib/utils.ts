@@ -618,7 +618,7 @@ export const getFieldsMatchingFilterFromState = (
   [id: string]: NormalizedField;
 } => {
   const getFieldId = (fieldId: string) => {
-    if (filteredDataTypes.includes(state.fields.byId[fieldId].source.type)) {
+    if (filteredDataTypes.includes(TYPE_DEFINITION[state.fields.byId[fieldId].source.type].label)) {
       return fieldId;
     } else {
       return undefined;
