@@ -23,6 +23,12 @@ export const getFindingsFixture = (): CspFinding & { id: string } => ({
       filemode: chance.word(),
     },
   },
+  orchestrator: {
+    cluster: {
+      id: chance.guid(),
+      name: chance.string(),
+    },
+  },
   rule: {
     audit: chance.paragraph(),
     benchmark: {
@@ -32,6 +38,7 @@ export const getFindingsFixture = (): CspFinding & { id: string } => ({
       rule_number: '1.1.1',
       posture_type: 'kspm',
     },
+
     default_value: chance.sentence(),
     description: chance.paragraph(),
     id: chance.guid(),

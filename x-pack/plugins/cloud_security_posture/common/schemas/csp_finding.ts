@@ -9,11 +9,9 @@
 import type { EcsEvent } from '@elastic/ecs';
 import { CspBenchmarkRuleMetadata } from '../types/latest';
 
-export interface CspFinding {
+export interface CspFindingBase {
   '@timestamp': string;
   cluster_id: string;
-  orchestrator?: CspFindingOrchestrator;
-  cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
   rule: CspBenchmarkRuleMetadata;
@@ -24,6 +22,26 @@ export interface CspFinding {
     version: string;
   };
 }
+
+type CspFindingCSPM = CspFindingBase & {
+  cloud: CspFindingCloud;
+  rule: {
+    benchmark: {
+      posture_type?: 'cspm';
+    };
+  };
+};
+
+type CspFindingKSPM = CspFindingBase & {
+  orchestrator: CspFindingOrchestrator;
+  rule: {
+    benchmark: {
+      posture_type?: 'kspm';
+    };
+  };
+};
+
+export type CspFinding = CspFindingCSPM | CspFindingKSPM;
 
 interface CspFindingOrchestrator {
   cluster?: {
