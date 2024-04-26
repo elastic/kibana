@@ -38,6 +38,21 @@ const producerToDisplayName = (producer: string) => {
   return Reflect.get(PRODUCER_DISPLAY_NAMES, producer) ?? producer;
 };
 
+/**
+ * Sorts an array of objects (ruleTypes) based on two criteria:
+ * 1. First, sorts by the 'enabledInLicense' property.
+ *    - If 'enabledInLicense' is the same for both rules (a and b),
+ *      it sorts them based on the 'name' property using locale-sensitive string comparison.
+ * 2. If 'enabledInLicense' is different for a and b,
+ *    places the object with 'enabledInLicense' set to true before the one with 'enabledInLicense' set to false.
+ */
+const sortRuleTypes = (a: RuleTypeWithDescription, b: RuleTypeWithDescription) => {
+  if (a.enabledInLicense === b.enabledInLicense) {
+    return a.name.localeCompare(b.name);
+  }
+  return a.enabledInLicense ? -1 : 1;
+};
+
 export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   ruleTypes,
   onSelectRuleType,
@@ -47,12 +62,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   onClearFilters,
   showCategories = true,
 }) => {
-  const ruleTypesList = [...ruleTypes].sort((a, b) => {
-    if (a.enabledInLicense === b.enabledInLicense) {
-      return a.name.localeCompare(b.name);
-    }
-    return a.enabledInLicense ? -1 : 1;
-  });
+  const ruleTypesList = [...ruleTypes].sort(sortRuleTypes);
   const { euiTheme } = useEuiTheme();
 
   const facetList = useMemo(
