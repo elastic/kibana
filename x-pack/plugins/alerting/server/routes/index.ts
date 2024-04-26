@@ -66,6 +66,12 @@ import { registerAlertsValueSuggestionsRoute } from './suggestions/values_sugges
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
 
+// backfill API
+import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
+import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
+import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
+import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -139,4 +145,10 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   getQueryDelaySettingsRoute(router, licenseState);
   updateQueryDelaySettingsRoute(router, licenseState);
+
+  // backfill APIs
+  scheduleBackfillRoute(router, licenseState);
+  getBackfillRoute(router, licenseState);
+  findBackfillRoute(router, licenseState);
+  deleteBackfillRoute(router, licenseState);
 }
