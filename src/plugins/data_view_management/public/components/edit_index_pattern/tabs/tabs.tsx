@@ -377,7 +377,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item, _index) => {
+                    {indexedFieldTypes.map((item) => {
                       const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
                       return (
                         <EuiFilterSelectItem
