@@ -97,8 +97,10 @@ const PackageListGridWrapper = ({
               box={{
                 incremental: true,
               }}
-              onChange={(arg) => {
-                setSearchQuery?.(arg.queryText);
+              onChange={({ queryText, error }) => {
+                if (error) return;
+
+                setSearchQuery?.(queryText);
               }}
               query={searchQuery ?? ''}
             />
