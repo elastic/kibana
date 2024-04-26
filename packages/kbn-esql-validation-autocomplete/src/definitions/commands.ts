@@ -330,6 +330,7 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | sort a desc, b nulls last, c asc nulls first',
       '… | sort b nulls last',
       '… | sort c asc nulls first',
+      '… | sort a - abs(b)',
     ],
     options: [],
     modes: [],
