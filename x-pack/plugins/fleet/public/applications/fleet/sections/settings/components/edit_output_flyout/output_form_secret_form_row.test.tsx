@@ -57,7 +57,7 @@ describe('SecretFormRow', () => {
       </SecretFormRow>
     );
 
-    expect(getByText('Replace Test Secret')).toBeDisabled();
+    expect(getByText('Replace Test Secret').closest('button')).toBeDisabled();
   });
 
   it('should call the cancelEdit function when the cancel button is clicked', () => {
