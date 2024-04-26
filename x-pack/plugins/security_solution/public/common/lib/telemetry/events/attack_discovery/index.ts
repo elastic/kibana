@@ -9,7 +9,7 @@ import type { TelemetryEvent } from '../../types';
 import { TelemetryEventTypes } from '../../constants';
 
 export const insightsGeneratedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.InsightsGenerated,
+  eventType: TelemetryEventTypes.AttackDiscoveriesGenerated,
   schema: {
     actionTypeId: {
       type: 'keyword',

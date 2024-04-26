@@ -17,6 +17,6 @@ export interface ReportAttackDiscoveriesGeneratedParams {
 export type ReportAttackDiscoveryTelemetryEventParams = ReportAttackDiscoveriesGeneratedParams;
 
 export interface AttackDiscoveryTelemetryEvent {
-  eventType: TelemetryEventTypes.InsightsGenerated; // TODO: update this when TelemetryEventTypes reflects the rename from Insights to Attack discoveries
+  eventType: TelemetryEventTypes.AttackDiscoveriesGenerated;
   schema: RootSchema<ReportAttackDiscoveriesGeneratedParams>;
 }

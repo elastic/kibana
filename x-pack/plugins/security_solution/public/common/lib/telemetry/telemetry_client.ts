@@ -75,7 +75,7 @@ export class TelemetryClient implements TelemetryClientStart {
   };
 
   public reportAttackDiscoveriesGenerated = (params: ReportAttackDiscoveriesGeneratedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.InsightsGenerated, params); // TODO: update this when TelemetryEventTypes reflects the rename from Insights to Attack discoveries
+    this.analytics.reportEvent(TelemetryEventTypes.AttackDiscoveriesGenerated, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {

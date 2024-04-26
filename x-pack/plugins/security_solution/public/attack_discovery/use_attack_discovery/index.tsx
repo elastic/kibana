@@ -26,6 +26,7 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useKibana } from '../../common/lib/kibana';
 import { replaceNewlineLiterals } from '../helpers';
+import { useAttackDiscoveryTelemetry } from '../hooks/use_attack_discovery_telemetry';
 import {
   CACHED_ATTACK_DISCOVERIES_SESSION_STORAGE_KEY,
   GENERATION_INTERVALS_LOCAL_STORAGE_KEY,
@@ -63,6 +64,7 @@ export const useAttackDiscovery = ({
   setConnectorId?: (connectorId: string | undefined) => void;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
+  const { reportAttackDiscoveriesGenerated } = useAttackDiscoveryTelemetry();
   const spaceId = useSpaceId() ?? 'default';
 
   // get Kibana services and connectors
@@ -228,6 +230,7 @@ export const useAttackDiscovery = ({
       setAttackDiscoveries(newAttackDiscoveries);
       setLastUpdated(newLastUpdated);
       setConnectorId?.(connectorId);
+      reportAttackDiscoveriesGenerated({ actionTypeId });
     } catch (error) {
       toasts?.addDanger(error, {
         title: ERROR_GENERATING_ATTACK_DISCOVERIES,
@@ -249,6 +252,7 @@ export const useAttackDiscovery = ({
     http,
     knowledgeBase.latestAlerts,
     replacements,
+    reportAttackDiscoveriesGenerated,
     setConnectorId,
     setLoadingConnectorId,
     setLocalStorageGenerationIntervals,
