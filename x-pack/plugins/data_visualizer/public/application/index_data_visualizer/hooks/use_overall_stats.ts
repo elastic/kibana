@@ -19,6 +19,7 @@ import { getProcessedFields } from '@kbn/ml-data-grid';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -51,6 +52,18 @@ import {
   fetchDataWithTimeout,
   rateLimitingForkJoin,
 } from '../search_strategy/requests/fetch_utils';
+
+const getPopulatedFieldsInIndex = (
+  populatedFieldsInIndexWithoutRuntimeFields: Set<string> | undefined | null,
+  runtimeFieldMap: MappingRuntimeFields | undefined
+): Set<string> | undefined | null => {
+  if (!populatedFieldsInIndexWithoutRuntimeFields) return undefined;
+  const runtimeFields = runtimeFieldMap ? Object.keys(runtimeFieldMap) : undefined;
+  return runtimeFields && runtimeFields?.length > 0
+    ? new Set([...Array.from(populatedFieldsInIndexWithoutRuntimeFields), ...runtimeFields])
+    : populatedFieldsInIndexWithoutRuntimeFields;
+};
+
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   esql = false,
   searchStrategyParams: TParams | undefined,
@@ -76,23 +89,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     | null
   >();
 
-  const populatedFieldsInIndex: Set<string> | undefined | null = useMemo(
-    () => {
-      if (!populatedFieldsInIndexWithoutRuntimeFields) return undefined;
-      const runtimeFields = searchStrategyParams?.runtimeFieldMap
-        ? Object.keys(searchStrategyParams?.runtimeFieldMap)
-        : undefined;
-      return runtimeFields && runtimeFields?.length > 0
-        ? new Set([...Array.from(populatedFieldsInIndexWithoutRuntimeFields), ...runtimeFields])
-        : populatedFieldsInIndexWithoutRuntimeFields;
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      populatedFieldsInIndexWithoutRuntimeFields,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(searchStrategyParams?.runtimeFieldMap),
-    ]
-  );
-
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
@@ -109,7 +105,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       // If null, that means we tried to fetch populated fields already but it timed out
       // so don't try again
-      if (!searchStrategyParams || populatedFieldsInIndex === null) return;
+      if (!searchStrategyParams || populatedFieldsInIndexWithoutRuntimeFields === null) return;
 
       const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
 
@@ -169,15 +165,25 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       searchStrategyParams?.index,
     ]
   );
+
   const startFetch = useCallback(async () => {
     try {
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
 
-      if (!searchStrategyParams || lastRefresh === 0 || populatedFieldsInIndex === undefined) {
+      if (
+        !searchStrategyParams ||
+        lastRefresh === 0 ||
+        populatedFieldsInIndexWithoutRuntimeFields === undefined
+      ) {
         return;
       }
+
+      const populatedFieldsInIndex = getPopulatedFieldsInIndex(
+        populatedFieldsInIndexWithoutRuntimeFields,
+        searchStrategyParams.runtimeFieldMap
+      );
 
       setFetchState({
         ...getInitialProgress(),
@@ -397,7 +403,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         displayError(toasts, searchStrategyParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data, searchStrategyParams, toasts, lastRefresh, probability, populatedFieldsInIndex]);
+  }, [
+    data,
+    searchStrategyParams,
+    toasts,
+    lastRefresh,
+    probability,
+    populatedFieldsInIndexWithoutRuntimeFields,
+  ]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
