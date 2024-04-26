@@ -79,6 +79,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const state = useMappingsState();
   const dispatch = useDispatch();
   const mappingsDefinition = extractMappingsDefinition(jsonData);
+  const [previousState, setPreviousState] = useState<State>(state);
+
+  const previousStateSelectedDataTypes: string[] = useMemo(() => {
+    return previousState.filter.selectedOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+  }, [previousState.filter.selectedOptions]);
+
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     if (mappingsDefinition === null) {
       return { multipleMappingsDeclared: true };
@@ -134,14 +142,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     return Object.keys(state.fields.byId).length;
   }, [state.fields.byId]);
 
-  const [previousState, setPreviousState] = useState<State>(state);
-
-  const previousStateSelectedDataTypes: string[] = useMemo(() => {
-    return previousState.filter.selectedOptions
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.label);
-  }, [previousState.filter.selectedOptions]);
-
   const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
   const onToggleChange = () => {
@@ -176,6 +176,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       value: {
         ...state,
         fields: { ...state.fields, byId: {}, rootLevelFields: [] } as NormalizedFields,
+        filter: {
+          filteredFields: [],
+          selectedOptions: [],
+          selectedDataTypes: [],
+        },
         documentFields: {
           status: 'creatingField',
           editor: 'default',
