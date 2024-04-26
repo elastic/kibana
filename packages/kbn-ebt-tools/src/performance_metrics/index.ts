@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { withPerformanceMetrics, perfomanceMarks } from './with_performance_metrics';
-export type { WithPerformanceMetricsProps } from './types';
 export { PerformanceContextProvider } from './context/performance_context';
 export { usePerformanceContext } from './context/use_performance_context';

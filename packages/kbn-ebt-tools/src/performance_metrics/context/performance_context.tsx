@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React, { createContext, useMemo, useState } from 'react';
-import { perfomanceMarks } from '@kbn/ebt-tools';
+import { ttfmpPerfomanceMarkers } from '../performance_markers';
 import { useLocation } from 'react-router-dom';
 import afterFrame from '../after_frame';
 
 function measureInteraction() {
-  performance.mark(perfomanceMarks.startPageChange);
+  performance.mark(ttfmpPerfomanceMarkers.startPageChange);
 
   return {
     /**
@@ -18,14 +18,14 @@ function measureInteraction() {
      * @param pathname - The pathname of the page.
      */
     pageReady(pathname: string) {
-      performance.mark(perfomanceMarks.endPageReady);
+      performance.mark(ttfmpPerfomanceMarkers.endPageReady);
 
-      // Time To First Meaningful Paint
+      // Time To First Meaningful Paint (ttfmp)
 
       performance.measure(pathname, {
         detail: { eventName: 'TTFMP' },
-        start: perfomanceMarks.startPageChange,
-        end: perfomanceMarks.endPageReady,
+        start: ttfmpPerfomanceMarkers.startPageChange,
+        end: ttfmpPerfomanceMarkers.endPageReady,
       });
     },
   };

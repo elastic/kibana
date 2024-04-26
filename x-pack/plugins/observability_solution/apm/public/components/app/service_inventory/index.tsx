@@ -178,6 +178,7 @@ function useServicesDetailedStatisticsFetcher({
 
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
+  //
   const { onPageReady } = usePerformanceContext();
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
@@ -330,9 +331,6 @@ export function ServiceInventory() {
             onChangeTableSearchBarVisibility={() => {
               saveSingleSetting(apmEnableServiceInventoryTableSearchBar, !isTableSearchBarEnabled);
             }}
-            target="apm.services.table.services.list"
-            onMeasureComplete={mainStatisticsStatus === FETCH_STATUS.SUCCESS}
-            onMarkUpdate={mainStatisticsStatus === FETCH_STATUS.LOADING}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

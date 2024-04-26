@@ -24,7 +24,6 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { withPerformanceMetrics } from '@kbn/ebt-tools';
 
 function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
@@ -71,15 +70,13 @@ export function SparkPlot({
           comparisonSeries={comparisonSeries}
           comparisonSeriesColor={comparisonSeriesColor}
           compact={compact}
-          onMeasureComplete={!isLoading}
-          target="apm.services.table.column.sparkline"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function SparkPlotItemComponent({
+export function SparkPlotItem({
   type,
   color,
   isLoading,
@@ -208,5 +205,3 @@ function SparkPlotItemComponent({
     </div>
   );
 }
-
-export const SparkPlotItem = withPerformanceMetrics(SparkPlotItemComponent);

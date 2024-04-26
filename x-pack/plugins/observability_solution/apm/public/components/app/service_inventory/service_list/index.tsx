@@ -57,7 +57,6 @@ import {
 import { TryItButton } from '../../../shared/try_it_button';
 import { HealthBadge } from './health_badge';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
-import { withPerformanceMetrics } from '@kbn/ebt-tools';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -308,7 +307,7 @@ interface Props {
   isSavingSetting: boolean;
   onChangeTableSearchBarVisibility: () => void;
 }
-function ServiceListComponent({
+export function ServiceList({
   status,
   items,
   noItemsMessage,
@@ -483,5 +482,3 @@ function ServiceListComponent({
     </EuiFlexGroup>
   );
 }
-
-export const ServiceList = withPerformanceMetrics(ServiceListComponent);
