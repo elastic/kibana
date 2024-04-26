@@ -24,6 +24,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import type { IRuleDataClient } from '..';
@@ -65,6 +66,7 @@ const augmentAlerts = <T>({
     return {
       ...alert,
       _source: {
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: new Date(),
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
@@ -247,7 +249,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
+            alertWithPersistence: async (
+              alerts,
+              refresh,
+              maxAlerts = undefined,
+              enrichAlerts,
+              currentTimeOverride
+            ) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
@@ -299,7 +307,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
-                  currentTimeOverride: undefined,
+                  currentTimeOverride,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
