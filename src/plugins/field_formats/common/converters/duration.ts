@@ -128,8 +128,8 @@ export class DurationFormat extends FieldFormat {
 }
 
 // function to calculate the precision part of the value
-const calculatePrecision = (rawValue: number, unitValue: number, seconds: number) => {
-  return Math.floor(unitValue) + (rawValue - unitValue * seconds) / seconds;
+const calculatePrecision = (valueInSeconds: number, unitValue: number, secondsPerUnit: number) => {
+  return Math.floor(unitValue) + (valueInSeconds - unitValue * secondsPerUnit) / secondsPerUnit;
 };
 
 // Array of units is to find the first unit duration value that is not 0
@@ -150,7 +150,7 @@ const units = [
 ];
 
 function formatDuration(
-  rawValue: number,
+  valueInSeconds: number,
   duration: moment.Duration,
   outputPrecision: number,
   useShortSuffix: boolean,
@@ -173,7 +173,7 @@ function formatDuration(
       // So when 1 year is given as unit value and the raw value in seconds is more than that
       // the overflow in seconds is used to calculate fractional part of the returned value
       const finalValue =
-        unit.seconds >= 1 ? calculatePrecision(rawValue, unitValue, unit.seconds) : unitValue;
+        unit.seconds >= 1 ? calculatePrecision(valueInSeconds, unitValue, unit.seconds) : unitValue;
       return finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }
   }
