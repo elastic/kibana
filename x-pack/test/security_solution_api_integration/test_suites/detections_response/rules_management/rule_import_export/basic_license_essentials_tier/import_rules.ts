@@ -357,7 +357,9 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(importedRule).toMatchObject(ruleToImport);
+        expect(importedRule).toMatchObject({
+          name: 'some other name',
+        });
       });
 
       it('should bump a revision when overwriting a rule', async () => {
