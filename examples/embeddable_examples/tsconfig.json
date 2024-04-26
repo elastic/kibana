@@ -14,7 +14,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
@@ -29,6 +28,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util-plugin",
     "@kbn/unified-field-list",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/core-application-browser",
+    "@kbn/developer-examples-plugin"
   ]
 }
