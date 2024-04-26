@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { InferenceToModelIdMap } from '../components/document_fields/fields';
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
 import {
   Field,
-  FieldWithSemanticTextInfo,
   NormalizedFields,
   NormalizedRuntimeField,
   NormalizedRuntimeFields,
@@ -98,20 +98,22 @@ export interface State {
     result: SearchResult[];
   };
   templates: TemplatesFormState;
+  inferenceToModelIdMap?: InferenceToModelIdMap;
 }
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
+  | {
+      type: 'inferenceToModelIdMap.update';
+      value: { inferenceToModelIdMap?: InferenceToModelIdMap };
+    }
   | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
   | { type: 'configuration.save'; value: MappingsConfiguration }
   | { type: 'templates.update'; value: Partial<State['templates']> }
   | { type: 'templates.save'; value: MappingsTemplates }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
-  | {
-      type: 'field.addSemanticText';
-      value: FieldWithSemanticTextInfo;
-    }
+  | { type: 'field.addSemanticText'; value: Field }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }
   | { type: 'field.toggleExpand'; value: { fieldId: string; isExpanded?: boolean } }
