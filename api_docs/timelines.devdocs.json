@@ -4363,11 +4363,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/query/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/query/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
           },
           {
             "plugin": "securitySolution",

@@ -13,12 +13,12 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
   const es = getService('es');
+  const retry = getService('retry');
   const frameworkMappings = mappingFromFieldMap(alertFieldMap, 'strict');
   const legacyAlertMappings = mappingFromFieldMap(legacyAlertFieldMap, 'strict');
   const ecsMappings = mappingFromFieldMap(ecsFieldMap, 'strict');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/181296
-  describe.skip('install alerts as data resources', () => {
+  describe('install alerts as data resources', () => {
     it('should install common alerts as data resources on startup', async () => {
       const ilmPolicyName = '.alerts-ilm-policy';
       const frameworkComponentTemplateName = '.alerts-framework-mappings';
@@ -174,42 +174,43 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         },
       });
 
-      const contextIndex = await es.indices.get({
-        index: indexName,
-      });
+      await retry.try(async () => {
+        const contextIndex = await es.indices.get({
+          index: indexName,
+        });
+        expect(contextIndex[indexName].aliases).to.eql({
+          '.alerts-test.patternfiring.alerts-default': {
+            is_write_index: true,
+          },
+        });
+        expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);
+        expect(contextIndex[indexName].mappings?._meta?.namespace).to.eql('default');
+        expect(contextIndex[indexName].mappings?._meta?.kibana?.version).to.be.a('string');
+        expect(contextIndex[indexName].mappings?.dynamic).to.eql('false');
+        expect(contextIndex[indexName].mappings?.properties).to.eql({
+          ...contextSpecificMappings,
+          ...frameworkMappings.properties,
+        });
 
-      expect(contextIndex[indexName].aliases).to.eql({
-        '.alerts-test.patternfiring.alerts-default': {
-          is_write_index: true,
-        },
-      });
-      expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);
-      expect(contextIndex[indexName].mappings?._meta?.namespace).to.eql('default');
-      expect(contextIndex[indexName].mappings?._meta?.kibana?.version).to.be.a('string');
-      expect(contextIndex[indexName].mappings?.dynamic).to.eql('false');
-      expect(contextIndex[indexName].mappings?.properties).to.eql({
-        ...contextSpecificMappings,
-        ...frameworkMappings.properties,
-      });
+        expect(contextIndex[indexName].settings?.index?.lifecycle).to.eql({
+          name: '.alerts-ilm-policy',
+          rollover_alias: '.alerts-test.patternfiring.alerts-default',
+        });
 
-      expect(contextIndex[indexName].settings?.index?.lifecycle).to.eql({
-        name: '.alerts-ilm-policy',
-        rollover_alias: '.alerts-test.patternfiring.alerts-default',
-      });
+        expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
+          ignore_malformed: 'true',
+          total_fields: {
+            limit: '2500',
+          },
+        });
 
-      expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
-        ignore_malformed: 'true',
-        total_fields: {
-          limit: '2500',
-        },
+        expect(contextIndex[indexName].settings?.index?.hidden).to.eql('true');
+        expect(contextIndex[indexName].settings?.index?.number_of_shards).to.eql(1);
+        expect(contextIndex[indexName].settings?.index?.auto_expand_replicas).to.eql('0-1');
+        expect(contextIndex[indexName].settings?.index?.provided_name).to.eql(
+          '.internal.alerts-test.patternfiring.alerts-default-000001'
+        );
       });
-
-      expect(contextIndex[indexName].settings?.index?.hidden).to.eql('true');
-      expect(contextIndex[indexName].settings?.index?.number_of_shards).to.eql(1);
-      expect(contextIndex[indexName].settings?.index?.auto_expand_replicas).to.eql('0-1');
-      expect(contextIndex[indexName].settings?.index?.provided_name).to.eql(
-        '.internal.alerts-test.patternfiring.alerts-default-000001'
-      );
     });
   });
 }

@@ -20,7 +20,7 @@ export const getProjectFeaturesUrl = (cloud: CloudStart): string | undefined => 
   if (!projectsBaseUrl || !projectId) {
     return undefined;
   }
-  return `${projectsBaseUrl}/${SECURITY_PROJECT_TYPE}/${projectId}?open=securityProjectFeatures`;
+  return `${projectsBaseUrl}${SECURITY_PROJECT_TYPE}/${projectId}?open=securityProjectFeatures`;
 };
 
 export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {

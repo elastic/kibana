@@ -19,6 +19,7 @@ import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
 import type { FieldFormatsStart } from '../../shared_imports';
 import { valueTypeToSelectedType } from './field_preview_context';
+import { InternalFieldType } from '../../types';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
@@ -29,6 +30,7 @@ interface PreviewControllerDependencies {
   dataView: DataView;
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
+  fieldTypeToProcess: InternalFieldType;
 }
 
 const previewStateDefault: PreviewState = {
@@ -61,10 +63,16 @@ const previewStateDefault: PreviewState = {
 };
 
 export class PreviewController {
-  constructor({ dataView, search, fieldFormats }: PreviewControllerDependencies) {
+  constructor({
+    dataView,
+    search,
+    fieldFormats,
+    fieldTypeToProcess,
+  }: PreviewControllerDependencies) {
     this.dataView = dataView;
     this.search = search;
     this.fieldFormats = fieldFormats;
+    this.fieldTypeToProcess = fieldTypeToProcess;
 
     this.internalState$ = new BehaviorSubject<PreviewState>({
       ...previewStateDefault,
@@ -79,6 +87,7 @@ export class PreviewController {
   private dataView: DataView;
   private search: ISearchStart;
   private fieldFormats: FieldFormatsStart;
+  private fieldTypeToProcess: InternalFieldType;
 
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
@@ -98,6 +107,8 @@ export class PreviewController {
     script: undefined,
     documentId: undefined,
   };
+
+  public getInternalFieldType = () => this.fieldTypeToProcess;
 
   togglePinnedField = (fieldName: string) => {
     const currentState = this.state$.getValue();
