@@ -14,6 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
@@ -25,7 +26,7 @@ import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
 import { ExperimentalFeatures, SloConfig } from '../common/config';
-
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
@@ -91,14 +92,16 @@ export class SloPlugin
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
-        const registerSloOverviewEmbeddableFactory = async () => {
-          const { SloOverviewEmbeddableFactoryDefinition } = await import(
+        registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
+          const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+          const deps = { ...coreStart, ...pluginsStart };
+
+          const { getOverviewEmbeddableFactory } = await import(
             './embeddable/slo/overview/slo_embeddable_factory'
           );
-          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloOverviewEmbeddableFactory();
+          return getOverviewEmbeddableFactory(deps);
+        });
         const registerSloAlertsEmbeddableFactory = async () => {
           const { SloAlertsEmbeddableFactoryDefinition } = await import(
             './embeddable/slo/alerts/slo_alerts_embeddable_factory'

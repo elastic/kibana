@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { SLOView } from '../../../../pages/slos/components/toggle_slo_view';
-import { SloEmbeddableInput } from '../types';
+import { SloOverviewEmbeddableState } from '../types';
 import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
 import { buildCombinedKqlQuery } from './helpers/build_kql_query';
 
@@ -20,7 +20,7 @@ interface Props {
   sloView: SLOView;
   sort?: string;
   filters?: Filter[];
-  reloadGroupSubject: Subject<SloEmbeddableInput | undefined>;
+  reloadGroupSubject: Subject<SloOverviewEmbeddableState | undefined>;
 }
 
 export function GroupSloView({
