@@ -31,7 +31,7 @@ export function appendWhereClauseToESQLQuery(
 
   // checking that the value is not null
   if (field === '_exists_') {
-    fieldName = String(value);
+    fieldName = `\`${String(value)}\``;
     operator = ' is not null';
     filterValue = '';
   }
@@ -43,17 +43,17 @@ export function appendWhereClauseToESQLQuery(
   if (lastCommandIsWhere) {
     const whereCommand = ast[ast.length - 1];
     const whereAstText = whereCommand.text;
-    if (whereAstText.includes(fieldName) && whereAstText.includes(String(filterValue))) {
+    if (whereAstText.includes(field) && whereAstText.includes(String(filterValue))) {
       const pipesArray = baseESQLQuery.split('|');
       const whereClause = pipesArray[pipesArray.length - 1];
-      const matches = whereClause.match(new RegExp(fieldName + '(.*)' + String(filterValue)));
+      const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
       if (matches) {
-        const existingOperator = matches[1]?.trim();
+        const existingOperator = matches[1]?.trim().replace('`', '');
         if (existingOperator === operator) {
           return baseESQLQuery;
         } else {
-          const existingFilter = `${fieldName}${existingOperator}${filterValue}`;
-          const newFilter = `${fieldName}${operator}${filterValue}`;
+          const existingFilter = matches[0].trim();
+          const newFilter = existingFilter.replace(existingOperator, operator);
           return baseESQLQuery.replace(existingFilter, newFilter);
         }
       }

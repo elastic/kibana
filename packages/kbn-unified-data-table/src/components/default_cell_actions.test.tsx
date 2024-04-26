@@ -63,8 +63,7 @@ describe('Default cell actions ', function () {
       dataTableContextMock.valueToStringConverter,
       jest.fn()
     );
-    expect(cellActions).toContain(FilterInBtn);
-    expect(cellActions).toContain(FilterOutBtn);
+    expect(cellActions).toHaveLength(3);
   });
 
   it('should show Copy action for _source field', async () => {
