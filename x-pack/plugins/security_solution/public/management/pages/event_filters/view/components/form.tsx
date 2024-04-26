@@ -420,6 +420,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         }
 
         // handle wildcard with wrong operator case
+        setHasWildcardWithWrongOperator(false);
         arg.exceptionItems[0]?.entries.forEach((e) => {
           if (
             validateHasWildcardWithWrongOperator({
