@@ -40,6 +40,7 @@ import {
   TO_INDEX,
 } from '../time_utils';
 import { TimeSliderReduxState } from '../types';
+import { i18n } from '@kbn/i18n';
 
 export const TimeSliderControlContext = createContext<TimeSliderControlEmbeddable | null>(null);
 export const useTimeSlider = (): TimeSliderControlEmbeddable => {
@@ -374,6 +375,7 @@ export class TimeSliderControlEmbeddable
   private formatDate = (epoch: number) => {
     return moment
       .tz(epoch, getMomentTimezone(this.getTimezone()))
+      .locale(i18n.getLocale())
       .format(this.getState().componentState.format);
   };
 
