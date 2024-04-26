@@ -35,7 +35,7 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const defaultTitle$ = new BehaviorSubject(getErrorBudgetPanelTitle());
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
       const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
       const reload$ = new Subject<boolean>();
@@ -43,12 +43,14 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       const api = buildApi(
         {
           ...titlesApi,
+          defaultPanelTitle: defaultTitle$,
           serializeState: () => {
             return {
               rawState: {
                 ...serializeTitles(),
                 sloId: sloId$.getValue(),
                 sloInstanceId: sloInstanceId$.getValue(),
+                defaultPanelTitle: defaultTitle$.getValue(),
               },
             };
           },
@@ -69,24 +71,16 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       return {
         api,
         Component: () => {
-          const [sloId, sloInstanceId, panelTitle, defaultTitle] = useBatchedPublishingSubjects(
-            sloId$,
-            sloInstanceId$,
-            titlesApi.panelTitle,
-            defaultTitle$
-          );
+          const [sloId, sloInstanceId] = useBatchedPublishingSubjects(sloId$, sloInstanceId$);
+
           const I18nContext = deps.i18n.Context;
 
-          useEffect(() => {
-            if (panelTitle === undefined) {
-              api.setPanelTitle(defaultTitle);
-            }
-          }, [defaultTitle, panelTitle]);
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
             };
           }, []);
+
           return (
             <I18nContext>
               <Router history={createBrowserHistory()}>
