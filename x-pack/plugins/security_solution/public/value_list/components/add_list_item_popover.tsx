@@ -23,10 +23,10 @@ import {
   SUCCESSFULLY_ADDED_ITEM,
   VALUE_REQUIRED,
   VALUE_LABEL,
-  ADD_VALUE_LIST_PLACEHOLDER,
   ADDING_LIST_ITEM_BUTTON,
   ADD_LIST_ITEM_BUTTON,
 } from '../translations';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 export const AddListItemPopover = ({ listId }: { listId: string }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -53,6 +53,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
       }
     },
     onSubmit: async (values) => {
+      track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.CREATE_VALUE_LIST_ITEM);
       await createListItemMutation.mutateAsync({ listId, value: values.value, http });
       setIsPopoverOpen(false);
       formik.resetForm();
@@ -93,7 +94,6 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
                   name="value"
                   icon="listAdd"
                   data-test-subj="value-list-item-add-input"
-                  placeholder={ADD_VALUE_LIST_PLACEHOLDER}
                   isInvalid={!!formik.errors.value}
                 />
               </EuiFormRow>

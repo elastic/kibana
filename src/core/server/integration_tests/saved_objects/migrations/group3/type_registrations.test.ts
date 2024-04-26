@@ -13,6 +13,7 @@ import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 const previouslyRegisteredTypes = [
   'action',
   'action_task_params',
+  'ad_hoc_run_params',
   'alert',
   'api_key_pending_invalidation',
   'apm-custom-dashboards',
