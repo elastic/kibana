@@ -217,7 +217,9 @@ export default ({ getService }: FtrProviderContext) => {
         (metrics) =>
           metrics.metrics?.task_run?.value.by_type['alerting:siem__mlRule'].user_errors === 1
       );
-      expect(metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__mlRule']).toEqual(1);
+      expect(metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__mlRule']).toEqual(
+        expect.objectContaining({ user_errors: 1 })
+      );
     });
 
     it('@skipInServerlessMKI generates max alerts warning when circuit breaker is exceeded', async () => {
