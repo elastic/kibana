@@ -76,10 +76,18 @@ export const useDatasetQualityFilters = () => {
   );
 
   const integrationItems: IntegrationItem[] = useMemo(() => {
+    const integrationsMap = datasets.reduce(
+      (acc, dataset) => ({
+        ...acc,
+        ...(dataset.integration && !acc[dataset.integration.name]
+          ? { [dataset.integration.name]: dataset.integration }
+          : {}),
+      }),
+      {} as { [key: string]: Integration }
+    );
+
     const integrations = [
-      ...datasets
-        .map((dataset) => dataset.integration)
-        .filter((integration): integration is Integration => !!integration),
+      ...Object.values(integrationsMap),
       ...(datasets.some((dataset) => !dataset.integration)
         ? [Integration.create({ name: 'none', title: 'None' })]
         : []),
