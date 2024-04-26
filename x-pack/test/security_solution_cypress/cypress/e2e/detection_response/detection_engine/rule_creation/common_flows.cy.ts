@@ -103,6 +103,6 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
 
     cy.get(DESCRIPTION_SETUP_GUIDE_BUTTON).click();
-    cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', ruleFields.setup);
+    cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', 'test setup markdown'); // Markdown formatting should be removed
   });
 });
