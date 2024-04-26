@@ -5,4 +5,3 @@
  * 2.0.
  */
 export * from './src/comparators';
-export * from './src/comparators_type';

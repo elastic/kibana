@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Comparator } from './comparators_type';
-
+export interface Comparator {
+  text: string;
+  value: string;
+  requiredValues: number;
+}
 export enum COMPARATORS {
   GREATER_THAN = '>',
   GREATER_THAN_OR_EQUALS = '>=',
@@ -16,48 +18,3 @@ export enum COMPARATORS {
   LESS_THAN_OR_EQUALS = '<=',
   NOT_BETWEEN = 'notBetween',
 }
-
-export const builtInComparators: { [key: string]: Comparator } = {
-  [COMPARATORS.GREATER_THAN]: {
-    text: i18n.translate('xpack.kbnAlerting.comparators.isAboveLabel', {
-      defaultMessage: 'Is above',
-    }),
-    value: COMPARATORS.GREATER_THAN,
-    requiredValues: 1,
-  },
-  [COMPARATORS.GREATER_THAN_OR_EQUALS]: {
-    text: i18n.translate('xpack.kbnAlerting.comparators.isAboveOrEqualsLabel', {
-      defaultMessage: 'Is above or equals',
-    }),
-    value: COMPARATORS.GREATER_THAN_OR_EQUALS,
-    requiredValues: 1,
-  },
-  [COMPARATORS.LESS_THAN]: {
-    text: i18n.translate('xpack.kbnAlerting.comparators.isBelowLabel', {
-      defaultMessage: 'Is below',
-    }),
-    value: COMPARATORS.LESS_THAN,
-    requiredValues: 1,
-  },
-  [COMPARATORS.LESS_THAN_OR_EQUALS]: {
-    text: i18n.translate('xpack.kbnAlerting.comparators.isBelowOrEqualsLabel', {
-      defaultMessage: 'Is below or equals',
-    }),
-    value: COMPARATORS.LESS_THAN_OR_EQUALS,
-    requiredValues: 1,
-  },
-  [COMPARATORS.BETWEEN]: {
-    text: i18n.translate('xpack.kbnAlerting.comparators.isBetweenLabel', {
-      defaultMessage: 'Is between',
-    }),
-    value: COMPARATORS.BETWEEN,
-    requiredValues: 2,
-  },
-  [COMPARATORS.NOT_BETWEEN]: {
-    text: i18n.translate('xpack.kbnAlerting.comparators.isNotBetweenLabel', {
-      defaultMessage: 'Not between',
-    }),
-    value: COMPARATORS.NOT_BETWEEN,
-    requiredValues: 2,
-  },
-};
