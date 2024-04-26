@@ -13,7 +13,7 @@ import { APP_POLICIES_PATH } from '../../../../../../../common/constants';
 describe(
   'When displaying the Policy Details in Endpoint Essentials PLI',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

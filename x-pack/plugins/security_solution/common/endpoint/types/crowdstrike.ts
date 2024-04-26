@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const EXPERIMENTAL_ONBOARDING_APP_ROUTE = '/app/experimental-onboarding';
+export interface CrowdstrikeActionRequestCommonMeta {
+  /** The host name */
+  hostName: string;
+}
