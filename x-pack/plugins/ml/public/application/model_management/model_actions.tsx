@@ -58,10 +58,9 @@ export function useModelActions({
     services: {
       application: { navigateToUrl },
       overlays,
-      theme,
-      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
+      ...startServices
     },
   } = useMlKibana();
 
@@ -109,19 +108,18 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme, i18nStart),
-    [i18nStart, overlays, theme]
+    () => getUserConfirmationProvider(overlays, startServices),
+    [overlays, startServices]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
       getUserInputModelDeploymentParamsProvider(
         overlays,
-        theme,
-        i18nStart,
+        startServices,
         startModelDeploymentDocUrl
       ),
-    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(

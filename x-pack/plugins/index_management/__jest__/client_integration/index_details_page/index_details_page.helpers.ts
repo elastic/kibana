@@ -51,6 +51,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
       isSearchBarDisabled: () => boolean;
+      isSemanticTextBannerVisible: () => boolean;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -217,6 +218,9 @@ export const setup = async ({
     },
     isSearchBarDisabled: () => {
       return find('indexDetailsMappingsFieldSearch').prop('disabled');
+    },
+    isSemanticTextBannerVisible: () => {
+      return exists('indexDetailsMappingsSemanticTextBanner');
     },
     clickAddFieldButton: async () => {
       expect(exists('indexDetailsMappingsAddField')).toBe(true);
