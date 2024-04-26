@@ -38,7 +38,7 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(() => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
-  const { setHeaderActionMenu, ...startServices } = useKibana().services;
+  const { theme, setHeaderActionMenu, i18n: kibanaServiceI18n } = useKibana().services;
   const { pathname } = useLocation();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -55,7 +55,10 @@ export const GlobalHeader = React.memo(() => {
   useEffect(() => {
     if (setHeaderActionMenu) {
       setHeaderActionMenu((element) => {
-        const mount = toMountPoint(<OutPortal node={portalNode} />, startServices);
+        const mount = toMountPoint(<OutPortal node={portalNode} />, {
+          theme,
+          i18n: kibanaServiceI18n,
+        });
         return mount(element);
       });
 
@@ -68,7 +71,7 @@ export const GlobalHeader = React.memo(() => {
         setHeaderActionMenu(undefined);
       };
     }
-  }, [portalNode, setHeaderActionMenu, dashboardViewPath, startServices]);
+  }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
   return (
     <InPortal node={portalNode}>
