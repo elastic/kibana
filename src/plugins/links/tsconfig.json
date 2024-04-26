@@ -21,7 +21,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/utility-types",
     "@kbn/ui-actions-plugin",
     "@kbn/logging",
     "@kbn/core-plugins-server",
@@ -33,6 +32,8 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/embeddable-enhanced-plugin",
   ],
   "exclude": ["target/**/*"]
 }
