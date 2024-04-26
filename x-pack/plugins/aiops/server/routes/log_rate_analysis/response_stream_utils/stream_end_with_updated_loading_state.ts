@@ -12,8 +12,7 @@ import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import {
   updateLoadingStateAction,
   type AiopsLogRateAnalysisApiAction,
-} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
 
 /**
  * Helper function that will push a message to the stream that it's done and
@@ -21,9 +20,9 @@ import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-lo
  * This is implemented as a factory that receives the necessary dependencies
  * which then returns the actual helper function.
  */
-export const streamEndWithUpdatedLoadingStateFactory = <T extends ApiVersion>(
+export const streamEndWithUpdatedLoadingStateFactory = (
   streamEndCallback: () => void,
-  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push']
+  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction>['push']
 ) => {
   return function endWithUpdatedLoadingState() {
     push(
