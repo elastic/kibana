@@ -78,8 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should display a log level badge when available', async () => {
       await dataGrid.clickRowToggle({ columnIndex: 4 });
       await testSubjects.existOrFail('logsExplorerFlyoutLogLevel');
-      await dataGrid.closeFlyout();
+    });
 
+    it('should not display a log level badge when not available', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
       await testSubjects.missingOrFail('logsExplorerFlyoutLogLevel');
     });
@@ -87,8 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should display a message code block when available', async () => {
       await dataGrid.clickRowToggle({ columnIndex: 4 });
       await testSubjects.existOrFail('logsExplorerFlyoutLogMessage');
-      await dataGrid.closeFlyout();
+    });
 
+    it('should not display a message code block when not available', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
       await testSubjects.missingOrFail('logsExplorerFlyoutLogMessage');
     });
