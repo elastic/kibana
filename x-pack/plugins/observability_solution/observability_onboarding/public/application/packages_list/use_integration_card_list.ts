@@ -70,7 +70,7 @@ function formatCustomCards(
   for (const card of customCards) {
     if (card.type === 'featured' && !!featuredCards[card.name]) {
       cards.push(toCustomCard(rewriteUrl(featuredCards[card.name]!)));
-    } else if (card.type === 'generated') {
+    } else if (card.type === 'virtual') {
       cards.push(toCustomCard(rewriteUrl(card)));
     }
   }

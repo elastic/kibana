@@ -103,6 +103,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasExecutionContext",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasExecutionContext",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasExecutionContext",
+            "text": "HasExecutionContext"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasExecutionContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasLegacyLibraryTransforms",
         "type": "Function",
         "tags": [
@@ -2154,6 +2194,42 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasExecutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasExecutionContext",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasExecutionContext.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [],
+            "signature": [
+              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined; }"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_execution_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.HasLibraryTransforms",
         "type": "Interface",
         "tags": [],
@@ -2639,7 +2715,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => Error | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => Error | undefined; pipe: { (): ",
               "Observable",
               "<Error | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -2771,7 +2847,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<Error | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -2817,7 +2893,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean | undefined; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -2949,7 +3025,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -3019,7 +3095,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              "[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3247,7 +3323,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -3373,7 +3449,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string[] | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string[] | undefined; pipe: { (): ",
               "Observable",
               "<string[] | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3505,7 +3581,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -3567,7 +3643,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3699,7 +3775,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -3766,7 +3842,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3898,7 +3974,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -3930,7 +4006,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean | undefined; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4062,7 +4138,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -4153,7 +4229,7 @@
                 "section": "def-common.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -4381,7 +4457,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -4509,7 +4585,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4641,7 +4717,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -4711,7 +4787,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4939,7 +5015,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -5107,7 +5183,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: object | undefined; error: (err: any) => void; forEach: { (next: (value: object | undefined) => void): Promise<void>; (next: (value: object | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => object | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: object | undefined; error: (err: any) => void; forEach: { (next: (value: object | undefined) => void): Promise<void>; (next: (value: object | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => object | undefined; pipe: { (): ",
               "Observable",
               "<object | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5239,7 +5315,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<object | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -5327,7 +5403,7 @@
                 "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
-              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ",
+              ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -5555,7 +5631,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "<unknown>; }; closed: boolean; observers: ",
               "Observer",
               "<",
               {
@@ -6169,7 +6245,7 @@
         "signature": [
           "{ source: ",
           "Observable",
-          "<any> | undefined; readonly value: T; error: (err: any) => void; forEach: { (next: (value: T) => void): Promise<void>; (next: (value: T) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => T; pipe: { (): ",
+          "<any> | undefined; readonly value: T; error: (err: any) => void; forEach: { (next: (value: T) => void): Promise<void>; (next: (value: T) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => T; pipe: { (): ",
           "Observable",
           "<T>; <A>(op1: ",
           "OperatorFunction",
@@ -6301,7 +6377,7 @@
           "OperatorFunction",
           "<any, any>[]): ",
           "Observable",
-          "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+          "<unknown>; }; closed: boolean; observers: ",
           "Observer",
           "<T>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
           "Operator",

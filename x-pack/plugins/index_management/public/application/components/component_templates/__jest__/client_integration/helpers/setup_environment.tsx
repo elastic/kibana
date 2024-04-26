@@ -26,6 +26,7 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 // We provide the minimum deps required to make the tests pass
 const appDependencies = {
   docLinks: {} as any,
+  plugins: { ml: {} as any },
 } as any;
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => ({

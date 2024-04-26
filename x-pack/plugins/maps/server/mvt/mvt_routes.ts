@@ -27,11 +27,11 @@ const CACHE_TIMEOUT_SECONDS = 60 * 60;
 export function initMVTRoutes({
   router,
   logger,
-  core,
+  getCore,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
-  core: CoreStart;
+  getCore: () => Promise<CoreStart>;
 }) {
   router.versioned
     .get({
@@ -93,7 +93,7 @@ export function initMVTRoutes({
           abortController: makeAbortController(request),
           body: tileRequest.body,
           context,
-          core,
+          core: await getCore(),
           executionContext: makeExecutionContext({
             type: 'server',
             name: APP_ID,
@@ -173,7 +173,7 @@ export function initMVTRoutes({
           abortController: makeAbortController(request),
           body: tileRequest.body,
           context,
-          core,
+          core: await getCore(),
           executionContext: makeExecutionContext({
             type: 'server',
             name: APP_ID,

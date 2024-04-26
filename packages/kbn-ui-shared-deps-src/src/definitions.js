@@ -98,6 +98,7 @@ const externals = {
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
+  '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };
