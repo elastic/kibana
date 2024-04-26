@@ -13,7 +13,6 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Readable } from 'stream';
 import { validateActionId } from '../../utils/validate_action_id';
 import { fetchActionResponses } from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
@@ -33,8 +32,10 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  GetFileInfoResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
+  GetFileDownloadMethodResponse,
 } from './types';
 import type {
   ActionDetails,
@@ -502,7 +503,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected async ensureValidActionId(actionId: string): Promise<void> {
-    return validateActionId(this.options.esClient, actionId);
+    return validateActionId(this.options.esClient, actionId, this.agentType);
   }
 
   protected fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
@@ -663,7 +664,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   public async getFileDownload(
     actionId: string,
     fileId: string
-  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }> {
-    throw new ResponseActionsClientError(`Method not implemented`, 501);
+  ): Promise<GetFileDownloadMethodResponse> {
+    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+  }
+
+  public async getFileInfo(actionId: string, fileId: string): Promise<GetFileInfoResponse> {
+    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
   }
 }
