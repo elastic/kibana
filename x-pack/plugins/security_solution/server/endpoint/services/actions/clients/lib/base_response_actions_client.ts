@@ -14,7 +14,10 @@ import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { validateActionId } from '../../utils/validate_action_id';
-import { fetchActionResponses } from '../../utils/fetch_action_responses';
+import {
+  fetchActionResponses,
+  fetchEndpointActionResponses,
+} from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -143,6 +146,13 @@ export type ResponseActionsClientValidateRequestResponse =
       isValid: false;
       error: ResponseActionsClientError;
     };
+
+export interface FetchActionResponseEsDocsResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
+}
 
 /**
  * Base class for a Response Actions client
@@ -285,6 +295,35 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       this.options.endpointService.getEndpointMetadataService(),
       actionId
     );
+  }
+
+  /**
+   * Fetches the Response Action ES response documents for a given action id
+   * @param actionId
+   * @param agentIds
+   * @protected
+   */
+  protected async fetchActionResponseEsDocs<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionId: string,
+    /** Specific Agent IDs to retrieve. default is to retrieve all */
+    agentIds?: string[]
+  ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
+    const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
+      esClient: this.options.esClient,
+      actionIds: [actionId],
+      agentIds,
+    });
+
+    return responseDocs.reduce((acc, response) => {
+      const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
+
+      acc[agentId] = response;
+
+      return acc;
+    }, {} as FetchActionResponseEsDocsResponse<TOutputContent, TMeta>);
   }
 
   /**
