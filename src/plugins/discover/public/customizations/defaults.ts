@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './migrations_embeddable';
-export * from './migrations_embeddable_factory';
+import { DiscoverCustomizationContext } from './types';
+
+export const defaultCustomizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
+};
