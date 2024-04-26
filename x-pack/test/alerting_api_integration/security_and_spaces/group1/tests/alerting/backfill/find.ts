@@ -48,7 +48,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.duration).to.eql('12h');
       expect(data.enabled).to.eql(true);
       expect(data.start).to.eql('2023-10-19T12:00:00.000Z');
-      expect(data.end).to.eql('2023-10-20T12:00:00.000Z');
+      expect(data.end).to.eql('2023-10-25T12:00:00.000Z');
       expect(data.status).to.eql('pending');
       expect(data.space_id).to.eql(spaceId);
       expect(typeof data.created_at).to.be('string');
@@ -64,6 +64,56 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
           status: 'pending',
           interval: '12h',
         },
+        {
+          run_at: '2023-10-21T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-21T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-22T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-22T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-23T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-23T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-24T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-24T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-25T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-25T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
       ]);
     }
 
@@ -71,15 +121,30 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.id).to.eql(id);
       expect(data.duration).to.eql('12h');
       expect(data.enabled).to.eql(true);
-      expect(data.start).to.eql('2023-10-20T11:00:00.000Z');
-      expect(data.end).to.eql('2023-10-20T23:00:00.000Z');
+      expect(data.start).to.eql('2023-10-21T12:00:00.000Z');
+      expect(data.end).to.eql('2023-10-23T12:00:00.000Z');
       expect(data.status).to.eql('pending');
       expect(data.space_id).to.eql(spaceId);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
       expect(data.schedule).to.eql([
         {
-          run_at: '2023-10-20T23:00:00.000Z',
+          run_at: '2023-10-22T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-22T12:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-23T00:00:00.000Z',
+          status: 'pending',
+          interval: '12h',
+        },
+        {
+          run_at: '2023-10-23T12:00:00.000Z',
           status: 'pending',
           interval: '12h',
         },
@@ -161,9 +226,13 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               {
                 rule_id: ruleId1,
                 start: '2023-10-19T12:00:00.000Z',
-                end: '2023-10-20T12:00:00.000Z',
+                end: '2023-10-25T12:00:00.000Z',
               },
-              { rule_id: ruleId2, start: '2023-10-20T11:00:00.000Z' },
+              {
+                rule_id: ruleId2,
+                start: '2023-10-21T12:00:00.000Z',
+                end: '2023-10-23T12:00:00.000Z',
+              },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -244,7 +313,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?start=2023-10-21T08:00:00.000Z`
+              )}/internal/alerting/rules/backfill/_find?start=2023-10-22T08:00:00.000Z`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
@@ -254,7 +323,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?end=2023-10-21T00:00:00.000Z`
+              )}/internal/alerting/rules/backfill/_find?end=2023-10-26T00:00:00.000Z`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
@@ -264,7 +333,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?end=2023-10-20T18:00:00.000Z`
+              )}/internal/alerting/rules/backfill/_find?end=2023-10-24T18:00:00.000Z`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
@@ -284,7 +353,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?start=2023-10-19T00:00:00.000Z&end=2023-10-21T00:00:00.000Z`
+              )}/internal/alerting/rules/backfill/_find?start=2023-10-19T00:00:00.000Z&end=2023-10-26T00:00:00.000Z`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
@@ -294,7 +363,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?start=2023-10-19T00:00:00.000Z&end=2023-10-20T13:00:00.000Z`
+              )}/internal/alerting/rules/backfill/_find?start=2023-10-21T00:00:00.000Z&end=2023-10-23T13:00:00.000Z`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
@@ -501,10 +570,10 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               expect(resultFindWithEndOneRuleResponse.per_page).to.eql(10);
               expect(resultFindWithEndOneRuleResponse.total).to.eql(1);
               expect(resultFindWithEndOneRuleResponse.data.length).to.eql(1);
-              testExpectedBackfill1(
+              testExpectedBackfill2(
                 resultFindWithEndOneRuleResponse.data[0],
-                backfillId1,
-                ruleId1,
+                backfillId2,
+                ruleId2,
                 space.id
               );
 
@@ -539,10 +608,10 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               expect(resultFindWithStartAndEndOneRuleResponse.per_page).to.eql(10);
               expect(resultFindWithStartAndEndOneRuleResponse.total).to.eql(1);
               expect(resultFindWithStartAndEndOneRuleResponse.data.length).to.eql(1);
-              testExpectedBackfill1(
+              testExpectedBackfill2(
                 resultFindWithStartAndEndOneRuleResponse.data[0],
-                backfillId1,
-                ruleId1,
+                backfillId2,
+                ruleId2,
                 space.id
               );
 

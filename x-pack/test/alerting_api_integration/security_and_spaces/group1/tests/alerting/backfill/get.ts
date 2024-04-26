@@ -120,7 +120,11 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
                 start: '2023-10-19T12:00:00.000Z',
                 end: '2023-10-25T12:00:00.000Z',
               },
-              { rule_id: ruleId2, start: '2023-10-19T12:00:00.000Z' },
+              {
+                rule_id: ruleId2,
+                start: '2023-10-19T12:00:00.000Z',
+                end: '2023-10-23T12:00:00.000Z',
+              },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -252,7 +256,7 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
               expect(getResponse2.body.duration).to.eql('12h');
               expect(getResponse2.body.enabled).to.eql(true);
               expect(getResponse2.body.start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(getResponse2.body.end).to.eql('2023-10-20T00:00:00.000Z');
+              expect(getResponse2.body.end).to.eql('2023-10-23T12:00:00.000Z');
               expect(getResponse2.body.status).to.eql('pending');
               expect(getResponse2.body.space_id).to.eql(space.id);
               expect(typeof getResponse2.body.created_at).to.be('string');
@@ -260,6 +264,41 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
               expect(getResponse2.body.schedule).to.eql([
                 {
                   run_at: '2023-10-20T00:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-20T12:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-21T00:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-21T12:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-22T00:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-22T12:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-23T00:00:00.000Z',
+                  status: 'pending',
+                  interval: '12h',
+                },
+                {
+                  run_at: '2023-10-23T12:00:00.000Z',
                   status: 'pending',
                   interval: '12h',
                 },
