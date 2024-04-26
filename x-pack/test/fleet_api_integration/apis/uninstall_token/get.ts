@@ -17,7 +17,7 @@ import {
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { addUninstallTokenToPolicy, generateNPolicies } from '../../helpers';
+import { addUninstallTokenToPolicy, generateAgentPolicy, generateNPolicies } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -313,15 +313,32 @@ export default function (providerContext: FtrProviderContext) {
       describe('when `search` query param is used', () => {
         let generatedManagedPolicyArray: AgentPolicy[];
         let generatedPolicyArray: AgentPolicy[];
+        const specialCharactersForNameAndId = `!@#$%^&*-=_+()[]{}:;'\`|/<>,.?~`.split('');
+        const specialCharactersForNameOnly = `"\\`.split('');
 
         before(async () => {
-          generatedPolicyArray = await generateNPolicies(supertest, 8);
-          generatedPolicyArray.push(
-            ...(await generateNPolicies(supertest, 1, { name: 'Special: Policy' }))
+          generatedPolicyArray = [];
+          const promises: Array<Promise<AgentPolicy[]> | Promise<AgentPolicy>> = [];
+
+          promises.push(
+            // random policies
+            generateNPolicies(supertest, 8),
+            // policies with special characters in policy name
+            ...specialCharactersForNameAndId.map((c) =>
+              generateAgentPolicy(supertest, { name: `name ${c}${c}${c}` })
+            ),
+            ...specialCharactersForNameOnly.map((c) =>
+              generateAgentPolicy(supertest, { name: `name ${c}${c}${c}` })
+            ),
+            // policies with special characters in policy id
+            ...specialCharactersForNameAndId.map((c) =>
+              generateAgentPolicy(supertest, { id: `id ${c}${c}${c}${c}` })
+            )
           );
-          generatedPolicyArray.push(
-            ...(await generateNPolicies(supertest, 1, { name: 'Special<Policy' }))
-          );
+
+          const policies = (await Promise.all(promises)).flat();
+          generatedPolicyArray.push(...policies);
+
           generatedManagedPolicyArray = await generateNPolicies(supertest, 3, { is_managed: true });
         });
 
@@ -480,19 +497,37 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.items).to.eql([]);
         });
 
-        it('should remove special characters', async () => {
-          const response = await supertest
-            .get(uninstallTokensRouteService.getListPath())
-            .query({
-              search: 'Special Policy',
-            })
-            .expect(200);
+        describe('when searching from special characters', () => {
+          specialCharactersForNameAndId.forEach((c) => {
+            it(`should successfully search for ${c} both in name and id`, async () => {
+              const response = await supertest
+                .get(uninstallTokensRouteService.getListPath())
+                .query({
+                  search: `${c}${c}`,
+                })
+                .expect(200);
 
-          const body: GetUninstallTokensMetadataResponse = response.body;
-          expect(body.total).to.equal(2);
-          const returnedPolicyNames = body.items.map((item) => item.policy_name);
-          expect(returnedPolicyNames).to.contain('Special: Policy');
-          expect(returnedPolicyNames).to.contain('Special<Policy');
+              const body: GetUninstallTokensMetadataResponse = response.body;
+              expect(body.total).to.equal(2);
+              expect(body.items.map((item) => item.policy_name)).to.contain(`name ${c}${c}${c}`);
+              expect(body.items.map((item) => item.policy_id)).to.contain(`id ${c}${c}${c}${c}`);
+            });
+          });
+
+          specialCharactersForNameOnly.forEach((c) => {
+            it(`should successfully search for ${c} in name`, async () => {
+              const response = await supertest
+                .get(uninstallTokensRouteService.getListPath())
+                .query({
+                  search: `${c}${c}`,
+                })
+                .expect(200);
+
+              const body: GetUninstallTokensMetadataResponse = response.body;
+              expect(body.total).to.equal(1);
+              expect(body.items[0].policy_name).to.equal(`name ${c}${c}${c}`);
+            });
+          });
         });
 
         it('should return 400 if both `search` and `policyId` are used', async () => {
