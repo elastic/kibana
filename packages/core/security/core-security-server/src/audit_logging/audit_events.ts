@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { LogMeta } from '@kbn/core/server';
+import { LogMeta } from '@kbn/logging';
 
 /**
  * Audit kibana schema using ECS format
