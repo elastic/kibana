@@ -6,8 +6,9 @@
  */
 import React from 'react';
 
-import type { Step, StepId } from './types';
-import {
+import type {
+  Step,
+  StepId,
   SectionId,
   QuickStartSectionCardsId,
   OverviewSteps,
