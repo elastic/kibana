@@ -12,19 +12,9 @@ xpack.search.notebooks.enabled: false
 ## Fine-tune the security solution feature privileges.
 xpack.features.overrides:
   ### Dashboard feature is disabled since it's automatically granted by SIEM feature.
-  dashboard:
-    disabled: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
+  dashboard.disabled: true
   ### Discover feature is disabled since it's automatically granted by SIEM feature.
-  discover:
-    disabled: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
-  ### Shared image is disabled since it's not needed.
-  filesSharedImage.disabled: true
-  ### Maps feature is disabled since it's automatically granted by SIEM feature.
-  maps.disabled: true
+  discover.disabled: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
@@ -57,11 +47,6 @@ xpack.features.overrides:
           privileges: [ "read" ]
   ### Stack alerts is disabled since it's not needed.
   stackAlerts.disabled: true
-  ### Visualize feature is disabled since it's automatically granted by SIEM feature.
-  visualize:
-    disabled: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security

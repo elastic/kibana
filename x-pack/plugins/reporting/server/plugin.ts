@@ -80,7 +80,9 @@ export class ReportingPlugin
     // async background setup
     (async () => {
       // Feature registration relies on config, so it cannot be setup before here.
-      reportingCore.registerFeature();
+      reportingCore.registerFeatures(
+        this.initContext.env.packageInfo.buildFlavor === 'serverless' /** isServerless */
+      );
       this.logger.debug('Setup complete');
     })().catch((e) => {
       this.logger.error(`Error in Reporting setup, reporting may not function properly`);

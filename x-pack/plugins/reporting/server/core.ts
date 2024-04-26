@@ -8,9 +8,10 @@
 import * as Rx from 'rxjs';
 import { map, take } from 'rxjs';
 
-import type {
+import {
   AnalyticsServiceStart,
   CoreSetup,
+  DEFAULT_APP_CATEGORIES,
   DocLinksServiceSetup,
   IBasePath,
   IClusterClient,
@@ -49,6 +50,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import { i18n } from '@kbn/i18n';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -239,11 +241,31 @@ export class ReportingCore {
 
   /**
    * If xpack.reporting.roles.enabled === true, register Reporting as a feature
-   * that is controlled by user role names
+   * that is controlled by user role names. Also, for Serverless register a
+   * 'shell' Reporting Kibana feature.
    */
-  public registerFeature() {
+  public registerFeatures(isServerless: boolean) {
     const { features } = this.getPluginSetupDeps();
     const deprecatedRoles = this.getDeprecatedAllowedRoles();
+
+    // Register a 'shell' feature specifically for Serverless. If granted, it will automatically provide access to
+    // reporting capabilities in other features, such as Discover, Dashboards, and Visualizations. On its own, this
+    // feature doesn't grant any additional privileges.
+    if (isServerless) {
+      features.registerKibanaFeature({
+        id: 'reporting',
+        name: i18n.translate('xpack.reporting.features.reportingFeatureName', {
+          defaultMessage: 'Reporting',
+        }),
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: [],
+        privileges: {
+          all: { savedObject: { all: [], read: [] }, ui: [] },
+          // No read-only mode currently supported
+          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        },
+      });
+    }
 
     if (deprecatedRoles !== false) {
       // refer to roles.allow configuration (deprecated path)

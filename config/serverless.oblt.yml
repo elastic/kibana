@@ -10,55 +10,16 @@ xpack.search.notebooks.enabled: false
 
 ## Fine-tune the observability solution feature privileges.
 xpack.features.overrides:
-  ### Dashboards feature should be moved from Analytics category to the Observability one as the last item.
-  dashboard:
-    category: "observability"
-    privileges:
-      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
-      all.composedOf:
-        - feature: "maps"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
-      read.composedOf:
-        - feature: "maps"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-    ### Disable all sub-feature privileges, but include them all in `Read` privilege.
-    subFeatures:
-      privileges:
-        url_create:
-          disabled: true
-          includeIn: "read"
-        store_search_session.disabled: true
-        generate_report.disabled: true
+  ### Dashboards feature should be moved from Analytics category to the Observability one.
+  dashboard.category: "observability"
   ### Discover feature should be moved from Analytics category to the Observability one.
-  discover:
-    category: "observability"
-    ### The search sessions aren't available in Serverless, and short URL sub-feature privilege should be always granted.
-    subFeatures.privileges:
-      url_create:
-        disabled: true
-        includeIn: "read"
-      store_search_session.disabled: true
-  ### Shared image is disabled since it's not needed.
-  filesSharedImage.disabled: true
-  ### Maps feature is disabled since it's automatically granted by Dashboards feature.
-  maps.disabled: true
+  discover.category: "observability"
   ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
   ml:
-    name: "AI Ops"
     category: "observability"
     order: 1200
   ### Stack alerts is disabled since it's not needed.
   stackAlerts.disabled: true
-  ### Visualize feature is disabled since it's automatically granted by Dashboards feature.
-  visualize:
-    disabled: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
 
 ## Enable the slo plugin
 xpack.slo.enabled: true

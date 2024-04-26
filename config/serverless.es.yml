@@ -16,57 +16,17 @@ xpack.observabilityAIAssistant.enabled: false
 ## Fine-tune the search solution feature privileges.
 xpack.features.overrides:
   ### Dashboards feature is moved from Analytics category to the Search one.
-  ### The access to this feature should also grant access to the Visualize feature.
-  dashboard:
-    category: "enterpriseSearch"
-    privileges:
-      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
-      all.composedOf:
-        - feature: "maps"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
-      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
-      read.composedOf:
-        - feature: "maps"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-    ### The search sessions and PDF reports aren't available in Serverless, and short URL sub-feature privilege should
-    ### be always granted.
-    subFeatures.privileges:
-      url_create:
-        disabled: true
-        includeIn: "read"
-      store_search_session.disabled: true
-      generate_report.disabled: true
+  dashboard.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
-  discover:
-    category: "enterpriseSearch"
-    ### The search sessions aren't available in Serverless, and short URL sub-feature privilege should be always granted.
-    subFeatures.privileges:
-      url_create:
-        disabled: true
-        includeIn: "read"
-      store_search_session.disabled: true
-  ### Maps feature is disabled since it's automatically granted by Dashboards feature.
-  maps.disabled: true
+  discover.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
-  ### Shared image is disabled since it's not needed.
-  filesSharedImage.disabled: true
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
   stackAlerts:
     name: "Alerts"
     category: "enterpriseSearch"
-  ### Visualize feature is disabled since it's automatically granted by Dashboards feature.
-  visualize:
-    disabled: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
