@@ -1376,11 +1376,6 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/us
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
-/.buildkite/pipeline-resource-definitions/security-solution-ess/* @elastic/security-engineering-productivity 
-/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/* @elastic/security-engineering-productivity 
-/.buildkite/pipelines/security_solution/* @elastic/security-engineering-productivity 
-/.buildkite/pipelines/security_solution_quality_gate/* @elastic/security-engineering-productivity 
-/.buildkite/scripts/pipelines/security_solution_quality_gate/* @elastic/security-engineering-productivity 
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
