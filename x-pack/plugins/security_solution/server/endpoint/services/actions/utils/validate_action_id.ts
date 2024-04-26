@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { NotFoundError } from '../../../errors';
 import { catchAndWrapError } from '../../../utils';
 import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
@@ -19,7 +20,8 @@ import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants
  */
 export const validateActionId = async (
   esClient: ElasticsearchClient,
-  actionId: string
+  actionId: string,
+  agentType?: ResponseActionAgentType
 ): Promise<void> => {
   const response = await esClient
     .search<LogsEndpointAction>({
@@ -27,7 +29,11 @@ export const validateActionId = async (
       body: {
         query: {
           bool: {
-            filter: [{ term: { action_id: actionId } }, { term: { type: 'INPUT_ACTION' } }],
+            filter: [
+              { term: { action_id: actionId } },
+              { term: { type: 'INPUT_ACTION' } },
+              ...(agentType ? [{ term: { 'EndpointActions.input_type': agentType } }] : []),
+            ],
           },
         },
       },
@@ -37,6 +43,11 @@ export const validateActionId = async (
     .catch(catchAndWrapError);
 
   if (!(response.hits?.total as SearchTotalHits)?.value) {
-    throw new NotFoundError(`Action id [${actionId}] not found`, response);
+    throw new NotFoundError(
+      `Action id [${actionId}] not found${
+        agentType ? ` with an agent type of [${agentType}]` : ''
+      }`,
+      response
+    );
   }
 };

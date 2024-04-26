@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import { catchAndWrapError } from '../../../utils';
@@ -35,9 +34,9 @@ export const getActionAgentType = async (
     })
     .catch(catchAndWrapError);
 
-  if (!(response.hits?.total as SearchTotalHits)?.value) {
+  if (!response.hits.hits[0]._source?.EndpointActions.input_type) {
     throw new NotFoundError(`Action id [${actionId}] not found`, response);
   }
 
-  return response.hits.hits[0]._source.EndpointActions.input_type;
+  return { agentType: response.hits.hits[0]._source.EndpointActions.input_type };
 };
