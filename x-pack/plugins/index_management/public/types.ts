@@ -11,6 +11,7 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+
 export interface SetupDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
