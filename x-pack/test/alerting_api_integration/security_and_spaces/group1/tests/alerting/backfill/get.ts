@@ -86,7 +86,8 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      describe(scenario.id, () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/181875
+      describe.skip(scenario.id, () => {
         const apiOptions = {
           spaceId: space.id,
           username: user.username,
