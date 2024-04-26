@@ -193,7 +193,7 @@ interface CrowdstrikeEventSearchResponseMock {
     hits: Array<{
       _id: string;
       _index: string;
-      fields: Record<string, string[]>;
+      _source: Record<string, unknown>;
     }>;
   };
   _shards: { total: number; successful: number; failed: number };
@@ -207,8 +207,12 @@ const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => 
       {
         _id: '1-2-3',
         _index: 'logs-crowdstrike.fdr-default',
-        fields: {
-          'crowdstrike.event.HostName': ['Crowdstrike-1460'],
+        _source: {
+          crowdstrike: {
+            event: {
+              HostName: 'Crowdstrike-1460',
+            },
+          },
         },
       },
     ],

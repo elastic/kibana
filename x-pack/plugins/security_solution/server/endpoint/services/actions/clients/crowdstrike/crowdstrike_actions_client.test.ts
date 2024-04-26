@@ -77,7 +77,9 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe(`#isolate()`, () => {
     it('should send action to Crowdstrike', async () => {
-      await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
+      await crowdstrikeActionsClient.isolate(
+        createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
+      );
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
         params: {
@@ -85,7 +87,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subActionParams: {
             actionParameters: {
               comment:
-                'Action triggered from Elastic Security by user foo for action : test comment',
+                'Action triggered from Elastic Security by user foo for action 123-345-456: test comment',
             },
             command: 'contain',
             ids: ['1-2-3'],
@@ -152,7 +154,9 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe('#release()', () => {
     it('should send action to Crowdstrike', async () => {
-      await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
+      await crowdstrikeActionsClient.release(
+        createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
+      );
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
         params: {
@@ -160,7 +164,8 @@ describe('CrowdstrikeActionsClient class', () => {
           subActionParams: {
             command: 'lift_containment',
             ids: ['1-2-3'],
-            comment: 'Action triggered from Elastic Security by user foo for action : test comment',
+            comment:
+              'Action triggered from Elastic Security by user foo for action 123-345-456: test comment',
           },
         },
       });
