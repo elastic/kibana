@@ -322,7 +322,7 @@ function getUniqueList<T>(list: T[]) {
   return Array.from(new Set<T>(list));
 }
 
-export const compareRoles = (roleA: Role, roleB: Role) => {
+export const compareRolesByName = (roleA: Role, roleB: Role) => {
   if (roleA.name < roleB.name) {
     return -1;
   }
