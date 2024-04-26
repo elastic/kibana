@@ -44,7 +44,7 @@ describe('VegaVisualizations', () => {
     domNode = document.createElement('div');
 
     mockGetBoundingClientRect = jest
-      .spyOn(Element, 'getBoundingClientRect')
+      .spyOn(Element.prototype, 'getBoundingClientRect')
       .mockImplementation(() => ({ width: mockedWidthValue, height: mockedHeightValue }));
   };
 
