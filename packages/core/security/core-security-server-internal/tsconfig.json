@@ -20,6 +20,5 @@
     "@kbn/core-http-server",
     "@kbn/logging-mocks",
     "@kbn/core-base-server-mocks",
-    "@kbn/core-security-server-mocks",
   ]
 }
