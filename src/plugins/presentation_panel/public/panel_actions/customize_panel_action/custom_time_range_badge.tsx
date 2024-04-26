@@ -31,7 +31,7 @@ export class CustomTimeRangeBadge
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!apiPublishesTimeRange(embeddable)) throw new IncompatibleActionError();
     /**
-     * WARNING - we would not normally return an empty string here - but in order for i18n to be
+     * WARNING!! We would not normally return an empty string here - but in order for i18n to be
      * handled properly by the `PrettyDuration` component, we need it to handle the aria label.
      */
     return '';
@@ -46,20 +46,11 @@ export class CustomTimeRangeBadge
       throw new IncompatibleActionError();
     }
     return (
-      <EuiBadge
-        key={CUSTOM_TIME_RANGE_BADGE}
-        className="embPanel__headerBadge"
-        iconType={this.getIconType()}
-        onClick={() => this.execute(context)}
-        data-test-subj={`embeddablePanelBadge-${this.id}`}
-        onClickAriaLabel={this.getDisplayName(context)}
-      >
-        <PrettyDuration
-          timeTo={timeRange.to}
-          timeFrom={timeRange.from}
-          dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
-        />
-      </EuiBadge>
+      <PrettyDuration
+        timeTo={timeRange.to}
+        timeFrom={timeRange.from}
+        dateFormat={core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT) ?? 'Browser'}
+      />
     );
   };
 
