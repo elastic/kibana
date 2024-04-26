@@ -5,19 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
 // in these cases a base query such as "from index // comment" will result in errors or wrong data if we don't append in a new line
 export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): string {
   return `${baseESQLQuery}\n${appendedText}`;
 }
 
-export async function appendWhereClauseToESQLQuery(
+export function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
   field: string,
   value: unknown,
   operation: '+' | '-',
   fieldType?: string
-): Promise<string> {
+): string {
   let operator = operation === '+' ? '==' : '!=';
   let filterValue = typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
   let fieldName = field;
@@ -34,10 +36,10 @@ export async function appendWhereClauseToESQLQuery(
     filterValue = '';
   }
 
-  const { getAstAndSyntaxErrors } = await import('@kbn/esql-ast');
-  const { ast } = await getAstAndSyntaxErrors(baseESQLQuery);
+  const { ast } = getAstAndSyntaxErrors(baseESQLQuery);
 
   const lastCommandIsWhere = ast[ast.length - 1].name === 'where';
+  // if where command already exists in the end of the query
   if (lastCommandIsWhere) {
     const whereCommand = ast[ast.length - 1];
     const whereAstText = whereCommand.text;
@@ -56,9 +58,9 @@ export async function appendWhereClauseToESQLQuery(
         }
       }
     }
-    const whereClause = `and ${fieldName}${operator}${filterValue}`;
+    const whereClause = `and \`${fieldName}\`${operator}${filterValue}`;
     return appendToESQLQuery(baseESQLQuery, whereClause);
   }
-  const whereClause = `| where ${fieldName}${operator}${filterValue}`;
+  const whereClause = `| where \`${fieldName}\`${operator}${filterValue}`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }
