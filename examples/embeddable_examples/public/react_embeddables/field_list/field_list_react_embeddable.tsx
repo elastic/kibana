@@ -97,6 +97,9 @@ export const getFieldListFactory = (
       const initialDataView = await dataViews.get(initialDataViewId);
       const selectedDataViewId$ = new BehaviorSubject<string | undefined>(initialDataViewId);
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([initialDataView]);
+      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
+        initialState.selectedFieldNames
+      );
 
       subscriptions.add(
         selectedDataViewId$
@@ -106,11 +109,8 @@ export const getFieldListFactory = (
           )
           .subscribe((nextSelectedDataView) => {
             dataViews$.next([nextSelectedDataView]);
+            selectedFieldNames$.next([]);
           })
-      );
-
-      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
-        initialState.selectedFieldNames
       );
 
       const api = buildApi(
