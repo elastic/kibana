@@ -47,11 +47,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
             message: 'still testing',
           },
         })
-        .expect(200, {
-          connector_id: 'my-test-email',
+        .expect(403, {
+          error: 'Forbidden',
           message:
-            'Attempting to execute a disabled action type Error: Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
-          status: 'error',
+            'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
+          statusCode: 403,
         });
     });
   });
