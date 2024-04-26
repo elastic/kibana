@@ -7,6 +7,7 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
+import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
 import { stringify } from '../../../../utils/stringify';
@@ -41,7 +42,10 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
 } from '../../../../../../common/endpoint/types';
-import type { CommonResponseActionMethodOptions } from '../lib/types';
+import type {
+  CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
+} from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
@@ -341,5 +345,18 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
       throw err;
     }
+  }
+
+  async getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse> {
+    await this.ensureValidActionId(actionId);
+
+    const fleetFiles = await this.options.endpointService.getFleetFromHostFilesClient();
+    const file = await fleetFiles.get(fileId);
+
+    if (file.id !== fileId) {
+      throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
+    }
+
+    return fleetFiles.download(fileId);
   }
 }
