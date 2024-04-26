@@ -722,7 +722,7 @@ export class TaskRunner<
           .join(',');
         const errorMessage = `Executing Rule ${this.ruleType.id}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
         this.logger.error(errorMessage, {
-          tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed', `${errorSource}-error`],
         });
         return {
           taskRunError: createTaskRunError(new Error(errorMessage), errorSource),
@@ -738,12 +738,14 @@ export class TaskRunner<
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
+          const errorSource = `${getErrorSource(err)}-error`;
+
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             const message = `Executing Rule ${spaceId}:${
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', getErrorSource(err)],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
             });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
@@ -752,7 +754,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', getErrorSource(err)],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
               error: { stack_trace: stack },
             });
           }

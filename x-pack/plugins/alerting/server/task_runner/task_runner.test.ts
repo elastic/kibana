@@ -1954,7 +1954,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: GENERIC ERROR MESSAGE"`
     );
-    expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed', 'framework']);
+    expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed', 'framework-error']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
@@ -3338,7 +3338,7 @@ describe('Task Runner', () => {
     );
     expect(logger.error).toHaveBeenCalledWith(
       'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred',
-      { tags: ['test', '1', 'rule-run-failed', 'framework'] }
+      { tags: ['test', '1', 'rule-run-failed', 'framework-error'] }
     );
   });
 
