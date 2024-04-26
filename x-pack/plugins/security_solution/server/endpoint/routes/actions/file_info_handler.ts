@@ -6,10 +6,11 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { getActionAgentType } from '../../services/actions/utils/get_action_agent_type';
 import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { validateActionId } from '../../services';
+import type { ResponseActionsClient } from '../../services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
 import type {
@@ -31,22 +32,24 @@ export const getActionFileInfoRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileInfo');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const { action_id: requestActionId, file_id: fileId } = req.params;
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
-      await validateActionId(esClient, requestActionId);
-      const { actionId, mimeType, status, size, name, id, agents, created } = await fleetFiles.get(
-        fileId
-      );
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const { agentType } = await getActionAgentType(esClient, requestActionId);
+      const user = endpointContext.service.security?.authc.getCurrentUser(req);
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const connectorActions = (await context.actions).getActionsClient();
+      const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
+      });
 
-      if (id !== fileId) {
-        throw new CustomHttpRequestError(
-          `Invalid file id [${fileId}] for action [${requestActionId}]`,
-          400
-        );
-      }
+      const { actionId, mimeType, status, size, name, id, agents, created } =
+        await responseActionsClient.getFileInfo(requestActionId, fileId);
 
       const response: ActionFileInfoApiResponse = {
         data: {

@@ -45,6 +45,7 @@ import type {
 import type {
   CommonResponseActionMethodOptions,
   GetFileDownloadMethodResponse,
+  GetFileInfoResponse,
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
@@ -358,5 +359,17 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     }
 
     return fleetFiles.download(fileId);
+  }
+
+  async getFileInfo(actionId: string, fileId: string): Promise<GetFileInfoResponse> {
+    await this.ensureValidActionId(actionId);
+
+    const fleetFiles = await this.options.endpointService.getFleetFromHostFilesClient();
+    const file = await fleetFiles.get(fileId);
+
+    return {
+      ...file,
+      agentType: this.agentType,
+    };
   }
 }
