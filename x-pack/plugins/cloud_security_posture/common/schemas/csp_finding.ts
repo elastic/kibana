@@ -43,14 +43,14 @@ type CspFindingKSPM = CspFindingBase & {
 
 export type CspFinding = CspFindingCSPM | CspFindingKSPM;
 
-interface CspFindingOrchestrator {
+export interface CspFindingOrchestrator {
   cluster?: {
     id?: string;
     name?: string;
   };
 }
 
-interface CspFindingCloud {
+export interface CspFindingCloud {
   provider: 'aws';
   account: {
     name: string;
