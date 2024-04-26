@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: importedRule } = await securitySolutionApi
           .readRule({
-            query: { rule_id: 'rule-1' },
+            query: { rule_id: 'rule-to-import' },
           })
           .expect(200);
 
