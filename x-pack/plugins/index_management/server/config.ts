@@ -53,7 +53,7 @@ const schemaLatest = schema.object(
       serverless: schema.boolean({ defaultValue: true }),
     }),
     enableMappingsSourceField: offeringBasedSchema({
-      // The _source field in Mappings advanced options is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // The _source field in the Mappings editor's advanced options form is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
