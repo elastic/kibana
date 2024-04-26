@@ -168,7 +168,7 @@ function formatDuration(
       // calculate the fractional part of the value based on conversion to seconds
       // So when 1 year is given as unit value and the raw value in seconds is more than that
       // the overflow in seconds is used to calculate fractional part of the returned value
-      const finalValue = unit.seconds
+      const finalValue = unit.seconds >= 1
         ? calculatePrecision(rawValue, unitValue, unit.seconds)
         : unitValue;
       return finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
