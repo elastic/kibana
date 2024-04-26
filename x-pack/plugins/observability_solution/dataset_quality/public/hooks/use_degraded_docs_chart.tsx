@@ -62,7 +62,6 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     () => getDataViewField(dataView, breakdownField),
     [breakdownField, dataView]
   );
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
 
   const handleChartLoading = (isLoading: boolean) => {
     setIsChartLoading(isLoading);
@@ -79,16 +78,22 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   );
 
   useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes({
-        color: euiTheme.colors.danger,
-        dataView,
-        query: filterQuery,
-        breakdownFieldName: breakdownDataViewField?.name,
-      });
-      setAttributes(lensAttributes);
-    }
-  }, [breakdownDataViewField?.name, dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
+    const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+
+    const lensAttributes = getLensAttributes({
+      color: euiTheme.colors.danger,
+      dataStream: dataStreamName,
+      datasetTitle: dataStreamStat?.title ?? dataStreamName,
+      breakdownFieldName: breakdownDataViewField?.name,
+    });
+    setAttributes(lensAttributes);
+  }, [
+    breakdownDataViewField?.name,
+    euiTheme.colors.danger,
+    setAttributes,
+    dataStream,
+    dataStreamStat?.title,
+  ]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
