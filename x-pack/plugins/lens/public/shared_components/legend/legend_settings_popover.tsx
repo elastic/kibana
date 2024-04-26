@@ -19,6 +19,7 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
@@ -108,15 +109,15 @@ export interface LegendSettingsPopoverProps {
   /**
    * value in legend status
    */
-  valueInLegend?: boolean;
+  legendStats?: LegendStats[];
   /**
    * Callback on value in legend status change
    */
-  onValueInLegendChange?: (event: EuiSwitchEvent) => void;
+  onLegendStatsChange?: (legendStats?: LegendStats[]) => void;
   /**
    * If true, value in legend switch is rendered
    */
-  renderValueInLegendSwitch?: boolean;
+  allowLegendStats?: boolean;
   /**
    * Button group position
    */
@@ -197,9 +198,9 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   renderNestedLegendSwitch,
   nestedLegend,
   onNestedLegendChange = noop,
-  valueInLegend,
-  onValueInLegendChange = noop,
-  renderValueInLegendSwitch,
+  legendStats,
+  onLegendStatsChange = noop,
+  allowLegendStats,
   groupPosition = 'right',
   maxLines,
   onMaxLinesChange = noop,
@@ -317,7 +318,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
               />
             </EuiFormRow>
           )}
-          {renderValueInLegendSwitch && (
+          {allowLegendStats && (
             <EuiFormRow
               display="columnCompressedSwitch"
               label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
@@ -332,8 +333,14 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-show-value"
                 showLabel={false}
-                checked={!!valueInLegend}
-                onChange={onValueInLegendChange}
+                checked={legendStats?.[0] === LegendStats.values}
+                onChange={(ev) => {
+                  if (ev.target.checked) {
+                    onLegendStatsChange([LegendStats.values]);
+                  } else {
+                    onLegendStatsChange([]);
+                  }
+                }}
               />
             </EuiFormRow>
           )}
