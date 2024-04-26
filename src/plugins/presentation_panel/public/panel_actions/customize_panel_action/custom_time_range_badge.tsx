@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, PrettyDuration } from '@elastic/eui';
+import { PrettyDuration } from '@elastic/eui';
 import {
   Action,
   FrequentCompatibilityChangeAction,
