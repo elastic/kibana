@@ -9,6 +9,9 @@ export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
   nodejs: 'nodejs',
   'opentelemetry/nodejs': 'opentelemetry_nodejs',
   java: 'java',
+  'opentelemetry/java': 'opentelemetry_java_1x',
+  'opentelemetry/java/opentelemetry-java-instrumentation': 'opentelemetry_java_2x',
+  'opentelemetry/java/elastic': 'opentelemetry_java_2x',
 };
 
 /**
@@ -33,6 +36,18 @@ export async function loadDashboardFile(filename: string): Promise<any> {
       return import(
         /* webpackChunkName: "lazyJavaDashboard" */
         './java.json'
+      );
+    }
+    case 'opentelemetry_java_1x': {
+      return import(
+        /* webpackChunkName: "lazyJavaDashboard" */
+        './opentelemetry_java_1x.json'
+      );
+    }
+    case 'opentelemetry_java_2x': {
+      return import(
+        /* webpackChunkName: "lazyJavaDashboard" */
+        './opentelemetry_java_2x.json'
       );
     }
     default: {
