@@ -13,7 +13,9 @@ import {
   FLEET_ENDPOINT_PACKAGE,
 } from '../constants';
 
-export function policyHasFleetServer(agentPolicy: AgentPolicy) {
+export function policyHasFleetServer(
+  agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>
+) {
   if (!agentPolicy.package_policies) {
     return false;
   }
