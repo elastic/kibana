@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -118,4 +119,14 @@ export interface ResponseActionsClient {
    * the time of this writing, is being controlled by the background task.
    */
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
+
+  /**
+   * Retrieve a file for download
+   * @param actionId
+   * @param fileId
+   */
+  getFileDownload(
+    actionId: string,
+    fileId: string
+  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }>;
 }

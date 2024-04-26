@@ -13,6 +13,7 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Readable } from 'stream';
 import { fetchActionResponses } from '../../fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
@@ -652,5 +653,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
     this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
+  }
+
+  public async getFileDownload(
+    actionId: string,
+    fileId: string
+  ): Promise<{ stream: Readable; fileName: string; mimeType?: string }> {
+    throw new ResponseActionsClientError(`Method not implemented`, 501);
   }
 }
