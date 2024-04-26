@@ -258,7 +258,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await browser.switchTab(0);
     });
 
-    it('goes to infra hosts for hosts when show all is clicked', async () => {
+    // Blocked by https://github.com/elastic/kibana/issues/181705
+    it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
       const apacheAccessDatasetHumanName = 'Apache access logs';
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 

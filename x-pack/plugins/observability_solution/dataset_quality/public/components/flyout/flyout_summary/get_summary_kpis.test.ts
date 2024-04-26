@@ -81,10 +81,7 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutHostsText,
         value: '3',
-        link: {
-          label: flyoutShowAllText,
-          href: hostsRedirectUrl,
-        },
+        link: undefined,
       },
       {
         title: flyoutDegradedDocsText,
@@ -138,10 +135,7 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutHostsText,
         value: '54+',
-        link: {
-          label: flyoutShowAllText,
-          href: hostsRedirectUrl,
-        },
+        link: undefined,
       },
       {
         title: flyoutDegradedDocsText,
