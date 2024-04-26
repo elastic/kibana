@@ -250,7 +250,9 @@ function handleResultForRollingAndTimeslices(
     .asDays();
 
   const { bucketsPerDay } = getFixedIntervalAndBucketsPerDay(rollingWindowDurationInDays);
-  const totalSlices = timeWindow.duration.asSeconds() / objective.timesliceWindow!.asSeconds();
+  const totalSlices = Math.ceil(
+    timeWindow.duration.asSeconds() / objective.timesliceWindow!.asSeconds()
+  );
 
   return buckets
     .slice(-bucketsPerDay * rollingWindowDurationInDays)
