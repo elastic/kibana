@@ -649,7 +649,11 @@ export const getFieldsFromState = (
 ): NormalizedField[] => {
   const getField = (fieldId: string) => {
     if (filteredDataTypes) {
-      if (filteredDataTypes.includes(normalizedFields.byId[fieldId].source.type)) {
+      if (
+        filteredDataTypes.includes(
+          TYPE_DEFINITION[normalizedFields.byId[fieldId].source.type].label
+        )
+      ) {
         return normalizedFields.byId[fieldId];
       }
     } else {

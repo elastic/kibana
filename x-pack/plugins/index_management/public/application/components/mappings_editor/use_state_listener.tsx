@@ -27,6 +27,7 @@ import {
   getFieldsFromState,
 } from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
+import { TYPE_DEFINITION } from './constants';
 
 interface Args {
   onChange?: OnUpdateHandler;
@@ -54,7 +55,7 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
     const allFieldsTypes = getAllFieldTypesFromState(deNormalize(normalize(mappedFields)));
     return allFieldsTypes.map((dataType) => ({
       checked: undefined,
-      label: dataType.toString(),
+      label: TYPE_DEFINITION[dataType].label,
       'data-test-subj': `indexDetailsMappingsSelectFilter-${dataType}`,
     }));
   }, [mappedFields]);
