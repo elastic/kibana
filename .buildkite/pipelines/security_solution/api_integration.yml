@@ -17,9 +17,9 @@ steps:
   - group: 'Execute Tests'
     key: test_execution
     steps:
-      - label: Running exception_workflows:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:qa:serverless
-        key: exception_workflows:qa:serverless
+      - label: Running exception_workflows:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless
+        key: exception_workflows:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -32,9 +32,9 @@ steps:
             - exit_status: '*'
               limit: 2
 
-      - label: Running exception_operators_date_numeric_types:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_numeric_types:qa:serverless
-        key: exception_operators_date_numeric_types:qa:serverless
+      - label: Running exception_operators_date_numeric_types:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_numeric_types:essentials:qa:serverless
+        key: exception_operators_date_numeric_types:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
@@ -77,9 +77,9 @@ steps:
             - exit_status: '*'
               limit: 2
 
-      - label: Running exception_operators_long:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:qa:serverless
-        key: exception_operators_long:qa:serverless
+      - label: Running exception_operators_long:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:essentials:qa:serverless
+        key: exception_operators_long:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
