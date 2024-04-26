@@ -193,4 +193,4 @@ export type RouteValidator<P, Q, B> =
  * @return A @kbn/config-schema schema
  * @public
  */
-export type LazyValidator = () => ObjectType | Type<unknown>;
+export type LazyValidator = () => Type<unknown>;
