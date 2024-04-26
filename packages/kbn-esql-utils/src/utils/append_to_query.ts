@@ -22,7 +22,7 @@ export function appendWhereClauseToESQLQuery(
 ): string {
   let operator = operation === '+' ? '==' : '!=';
   let filterValue = typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
-  let fieldName = field;
+  let fieldName = `\`${field}\``;
 
   // casting
   if (fieldType !== 'string' && fieldType !== 'number') {
@@ -58,9 +58,9 @@ export function appendWhereClauseToESQLQuery(
         }
       }
     }
-    const whereClause = `and \`${fieldName}\`${operator}${filterValue}`;
+    const whereClause = `and ${fieldName}${operator}${filterValue}`;
     return appendToESQLQuery(baseESQLQuery, whereClause);
   }
-  const whereClause = `| where \`${fieldName}\`${operator}${filterValue}`;
+  const whereClause = `| where ${fieldName}${operator}${filterValue}`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }
