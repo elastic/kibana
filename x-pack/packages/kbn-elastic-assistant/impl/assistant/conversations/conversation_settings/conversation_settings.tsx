@@ -425,6 +425,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
+            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 
