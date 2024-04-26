@@ -8,6 +8,7 @@
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { Plugin } from '@kbn/core/public';
 
+import type { CoreSetup } from '@kbn/core/public';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
@@ -15,13 +16,20 @@ import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 import type { ConfigSchema } from '../common/app';
 import type {
-  DataVisualizerCoreSetup,
-  DataVisualizerPluginSetup,
-  DataVisualizerPluginStart,
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
+
 import { registerReactEmbeddablesAndActions } from './application/index_data_visualizer/embeddables';
+
+export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
+export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
+
+export type DataVisualizerCoreSetup = CoreSetup<
+  DataVisualizerStartDependencies,
+  DataVisualizerPluginStart
+>;
+
 export class DataVisualizerPlugin
   implements
     Plugin<
@@ -49,8 +57,8 @@ export class DataVisualizerPlugin
       registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
     }
-
     registerReactEmbeddablesAndActions(core, plugins);
+
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 

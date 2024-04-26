@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AnalyticsServiceStart, CoreSetup } from '@kbn/core/public';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -21,13 +21,14 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   discover: DiscoverSetup;
+  uiActions?: UiActionsSetup;
 }
 export interface DataVisualizerStartDependencies {
   analytics: AnalyticsServiceStart;
@@ -47,11 +48,3 @@ export interface DataVisualizerStartDependencies {
   cloud?: CloudStart;
   savedSearch: SavedSearchPublicPluginStart;
 }
-
-export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
-export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
-
-export type DataVisualizerCoreSetup = CoreSetup<
-  DataVisualizerStartDependencies,
-  DataVisualizerPluginStart
->;

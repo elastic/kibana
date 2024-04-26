@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
-import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import useObservable from 'react-use/lib/useObservable';
@@ -39,16 +38,19 @@ import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
-import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import type {
+  OverallStatsSearchStrategyParams,
+  SamplingOption,
+} from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
-import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
 import {
   DATA_VISUALIZER_INDEX_VIEWER_ID,
   getDefaultPageState,
 } from '../constants/index_data_visualizer_viewer';
 import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
+import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -63,7 +65,7 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
 };
 export const useDataVisualizerGridData = (
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<DataVisualizerGridInput, 'dataView'>,
+  input: Required<FieldStatisticsTableEmbeddableState, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void

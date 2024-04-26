@@ -5,56 +5,37 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense } from 'react';
 import { initializeTitles } from '@kbn/presentation-publishing';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { BehaviorSubject } from 'rxjs';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import type { DataVisualizerCoreSetup } from '../../../../plugin';
 import { FIELD_STATS_EMBED_ID } from './constants';
-import type { FieldListApi, FieldListSerializedStateState } from './types';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
-
+import type {
+  FieldStatisticsTableEmbeddableApi,
+  FieldStatisticsTableEmbeddableParentApi,
+  FieldStatisticsTableEmbeddableState,
+} from './types';
 const LazyFieldStatsEmbeddableWrapper = React.lazy(
   () => import('./field_stats_embeddable_wrapper')
 );
-const useReactEmbeddableExecutionContext = (
-  executionContextStart: ExecutionContextStart,
-  parentExecutionContext: KibanaExecutionContext,
-  embeddableType: string,
-  id: string
-) => {
-  const embeddableExecutionContext = useMemo(() => {
-    const child: KibanaExecutionContext = {
-      type: 'visualization',
-      name: embeddableType,
-      id,
-    };
 
-    return {
-      ...parentExecutionContext,
-      child,
-    };
-  }, [embeddableType, id, parentExecutionContext]);
-
-  useExecutionContext(executionContextStart, embeddableExecutionContext);
-};
-
-export const getFieldStatsTableFactory = (core: CoreStart) => {
+export const getFieldStatsTableFactory = (core: DataVisualizerCoreSetup) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
-    FieldListSerializedStateState,
-    FieldListApi
+    FieldStatisticsTableEmbeddableState,
+    FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBED_ID,
     deserializeState: (state) => {
-      return state.rawState;
+      return state.rawState ?? {};
     },
-    buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
-      const id = uuid.toString();
+    buildEmbeddable: async (initialState, buildApi, uuid, unknownParentApi) => {
+      const parentApi = unknownParentApi as FieldStatisticsTableEmbeddableParentApi;
 
       // @todo: Remove usage of deprecated React rendering utilities
       // see https://github.com/elastic/kibana/pull/181094
@@ -69,20 +50,20 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       const dataViews = services.data.dataViews;
 
       const showDistributions$ =
-        // @ts-ignore
-        (initialState.showPreviewByDefault !== undefined
+        initialState.showPreviewByDefault !== undefined
           ? new BehaviorSubject(initialState.showPreviewByDefault)
-          : parentApi?.showDistributions$) ?? new BehaviorSubject(undefined);
+          : new BehaviorSubject(true);
 
       // set up data views
       const defaultDataViewId = await dataViews.getDefaultId();
-      const initialDataViewId = initialState.dataViewId ?? defaultDataViewId;
-      const dataView = await dataViews.get(initialDataViewId);
+      const dataView =
+        initialState.dataView ??
+        (defaultDataViewId ? await dataViews.get(defaultDataViewId) : undefined);
       const queryBarState = services.data.query.getState();
 
       const embeddableState$ = parentApi.embeddableState$
         ? parentApi.embeddableState$
-        : new BehaviorSubject<FieldStatisticsTableEmbeddableState | undefined>({
+        : new BehaviorSubject<FieldStatisticsTableEmbeddableState>({
             id: 'dashboard_field_stats_embeddable',
             dataView,
             query: queryBarState.query,
@@ -111,13 +92,6 @@ export const getFieldStatsTableFactory = (core: CoreStart) => {
       return {
         api,
         Component: () => {
-          useReactEmbeddableExecutionContext(
-            services.executionContext,
-            parentApi?.executionContext?.value ?? { name: 'dashboard' },
-            FIELD_STATS_EMBED_ID,
-            uuid
-          );
-
           return (
             <I18nContext>
               <KibanaThemeProvider theme$={services.theme.theme$}>

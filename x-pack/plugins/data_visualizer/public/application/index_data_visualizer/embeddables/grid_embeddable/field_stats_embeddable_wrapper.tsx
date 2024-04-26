@@ -11,6 +11,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
 import type {
@@ -27,7 +28,10 @@ function isESQLFieldStatisticTableEmbeddableState(
 function isFieldStatisticTableEmbeddableState(
   input: unknown
 ): input is Required<FieldStatisticsTableEmbeddableState, 'dataView'> {
-  return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
+  return (
+    isPopulatedObject(input, ['dataView']) &&
+    (!isPopulatedObject(input, ['esql']) || input.esql === false)
+  );
 }
 
 const FieldStatisticsWrapper = (props: {

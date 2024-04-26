@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldStatisticsTableEmbeddableState } from './types';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';

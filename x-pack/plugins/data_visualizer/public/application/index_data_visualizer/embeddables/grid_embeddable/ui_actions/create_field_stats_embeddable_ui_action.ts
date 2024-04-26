@@ -8,9 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { DataVisualizerCoreSetup } from '../../../../common/types/data_visualizer_plugin';
 import { FIELD_STATS_EMBED_ID, CREATE_FIELD_STATS_ACTION_ID } from '../constants';
 
 const PLUGIN_ID = 'ml';
@@ -27,9 +26,12 @@ const parentApiIsCompatible = async (
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
-function createFieldStatsGridAction(
-  getStartServices: DataVisualizerCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateFieldStatsPanelActionContext> {
+interface FieldStatsAction {
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
+}
+function createFieldStatsGridAction(): UiActionsActionDefinition<FieldStatsAction> {
   return {
     id: CREATE_FIELD_STATS_ACTION_ID,
     grouping: [
@@ -54,7 +56,6 @@ function createFieldStatsGridAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      const startServices = await getStartServices();
       try {
         const initialState = { panelTitle: 'Field statistics' };
         presentationContainerParent.addNewPanel({
@@ -72,11 +73,8 @@ function createFieldStatsGridAction(
   };
 }
 
-export function registerFieldStatsUIActions(
-  core: DataVisualizerCoreSetup['getStartServices'],
-  uiActions: UiActionsPublicStart
-): UiActionsActionDefinition<CreateFieldStatsPanelActionContext> {
-  const createFieldStatsAction = createFieldStatsGridAction(core.getStartServices);
+export function registerFieldStatsUIActions(uiActions: UiActionsSetup) {
+  const createFieldStatsAction = createFieldStatsGridAction();
   uiActions.registerAction(createFieldStatsAction);
   uiActions.attachAction('ADD_PANEL_TRIGGER', CREATE_FIELD_STATS_ACTION_ID);
 }

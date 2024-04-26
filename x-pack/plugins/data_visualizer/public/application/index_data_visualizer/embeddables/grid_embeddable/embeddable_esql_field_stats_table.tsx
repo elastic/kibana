@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
@@ -26,7 +25,7 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
   input,
   onApiUpdate,
 }: {
-  input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableState;
+  input: ESQLDataVisualizerGridEmbeddableState;
   onApiUpdate?: (ouput: any) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =

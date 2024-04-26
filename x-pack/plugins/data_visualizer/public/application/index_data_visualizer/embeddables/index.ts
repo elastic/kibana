@@ -6,10 +6,8 @@
  */
 
 import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type {
-  DataVisualizerCoreSetup,
-  DataVisualizerSetupDependencies,
-} from '../../common/types/data_visualizer_plugin';
+import type { DataVisualizerCoreSetup } from '../../../plugin';
+import type { DataVisualizerSetupDependencies } from '../../common/types/data_visualizer_plugin';
 import { FIELD_STATS_EMBED_ID } from './grid_embeddable/constants';
 import { registerFieldStatsUIActions } from './grid_embeddable/ui_actions/create_field_stats_embeddable_ui_action';
 export function registerReactEmbeddablesAndActions(
@@ -18,7 +16,7 @@ export function registerReactEmbeddablesAndActions(
 ) {
   // Embeddable factory for field stats table
   if (plugins.uiActions) {
-    registerFieldStatsUIActions(core, plugins.uiActions);
+    registerFieldStatsUIActions(plugins.uiActions);
   }
   registerReactEmbeddableFactory(FIELD_STATS_EMBED_ID, async () => {
     const { getFieldStatsTableFactory } = await import(

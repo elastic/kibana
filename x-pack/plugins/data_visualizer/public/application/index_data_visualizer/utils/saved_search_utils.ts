@@ -9,7 +9,7 @@
 // `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { Query, Filter } from '@kbn/es-query';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -20,6 +20,7 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SavedSearchSavedObject } from '../../../../common/types';
 import { isSavedSearchSavedObject } from '../../../../common/types';
 
@@ -63,6 +64,10 @@ function getSavedSearchSource(savedSearch?: SavedSearch | null) {
     : undefined;
 }
 
+function isQuery(query?: Query | AggregateQuery): query is Query {
+  return isPopulatedObject(query, ['query', 'language']);
+}
+
 /**
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
@@ -78,11 +83,13 @@ export function getEsQueryFromSavedSearch({
   dataView: DataView;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearch | null | undefined;
-  query?: Query;
+  query?: Query | AggregateQuery;
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
   if (!dataView && !savedSearch) return;
+  // Cannot support AggregateQuery here
+  if (!isQuery(query)) return;
 
   const userQuery = query;
   const userFilters = filters;

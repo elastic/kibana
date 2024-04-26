@@ -39,7 +39,7 @@ import { type AggregatableField } from '../../types/esql_data_visualizer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../../embeddables/grid_embeddable/constants';
 import type {
-  ESQLDataVisualizerGridEmbeddableInput,
+  ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
@@ -78,10 +78,11 @@ export const getDefaultESQLDataVisualizerListState = (
   showEmptyFields: false,
   probability: null,
   rndSamplerPref: 'off',
+  query: { esql: '' },
   ...overrides,
 });
 export const useESQLDataVisualizerData = (
-  input: ESQLDataVisualizerGridEmbeddableInput,
+  input: ESQLDataVisualizerGridEmbeddableState,
   dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState,
   setQuery?: React.Dispatch<React.SetStateAction<ESQLQuery>>
 ) => {
