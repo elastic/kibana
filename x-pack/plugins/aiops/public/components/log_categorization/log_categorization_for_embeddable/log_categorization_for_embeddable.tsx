@@ -177,7 +177,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
 
   const openInDiscover = useOpenInDiscover(
     dataView.id!,
-    selectedField?.displayName ?? undefined,
+    selectedField ?? undefined,
     selectedCategories,
     stateFromUrl,
     timefilter,
