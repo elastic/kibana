@@ -123,7 +123,7 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
           historicalSummary.push({
             sloId,
             instanceId,
-            data: handleResultForRolling(objective, timeWindow, buckets),
+            data: handleResultForRollingAndOccurrences(objective, timeWindow, buckets),
           });
           continue;
         }
@@ -208,7 +208,7 @@ function handleResultForCalendarAlignedAndTimeslices(
   });
 }
 
-function handleResultForRolling(
+function handleResultForRollingAndOccurrences(
   objective: Objective,
   timeWindow: TimeWindow,
   buckets: DailyAggBucket[]

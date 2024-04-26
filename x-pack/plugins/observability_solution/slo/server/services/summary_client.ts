@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  AggregationsSumAggregate,
+  AggregationsTopHitsAggregate,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
@@ -51,25 +55,15 @@ export class DefaultSummaryClient implements SummaryClient {
     const instanceIdFilter = shouldIncludeInstanceIdFilter
       ? [{ term: { 'slo.instanceId': instanceId } }]
       : [];
-    const extraGroupingsAgg = {
-      last_doc: {
-        top_hits: {
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-          _source: {
-            includes: ['slo.groupings', 'monitor', 'observer', 'config_id'],
-          },
-          size: 1,
-        },
-      },
-    };
 
-    const result = await this.esClient.search({
+    const result = await this.esClient.search<
+      any,
+      {
+        good: AggregationsSumAggregate;
+        total: AggregationsSumAggregate;
+        last_doc: AggregationsTopHitsAggregate;
+      }
+    >({
       index: remoteName
         ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
         : SLO_DESTINATION_INDEX_PATTERN,
@@ -88,9 +82,24 @@ export class DefaultSummaryClient implements SummaryClient {
           ],
         },
       },
-      // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
       aggs: {
-        ...(shouldIncludeInstanceIdFilter && extraGroupingsAgg),
+        ...(shouldIncludeInstanceIdFilter && {
+          last_doc: {
+            top_hits: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: {
+                includes: ['slo.groupings', 'monitor', 'observer', 'config_id'],
+              },
+              size: 1,
+            },
+          },
+        }),
         ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
           good: {
             sum: { field: 'slo.isGoodSlice' },
@@ -106,11 +115,8 @@ export class DefaultSummaryClient implements SummaryClient {
       },
     });
 
-    // @ts-ignore value is not type correctly
     const good = result.aggregations?.good?.value ?? 0;
-    // @ts-ignore value is not type correctly
     const total = result.aggregations?.total?.value ?? 0;
-    // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
     const source = result.aggregations?.last_doc?.hits?.hits?.[0]?._source;
     const groupings = source?.slo?.groupings;
 
