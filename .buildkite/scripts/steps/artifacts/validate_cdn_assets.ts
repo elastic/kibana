@@ -24,7 +24,7 @@ async function main() {
 
   while (assetsProcessed < totalAssetCount) {
     const batch = allAssets.slice(assetsProcessed, assetsProcessed + batchSize);
-    const results = await Promise.all(batch.map(headAssetUrl));
+    const results = await Promise.all(batch.map((url) => headAssetUrlWithRetry(url)));
     assetsProcessed += results.length;
     results.forEach((result) => {
       if (result.status === 200) {
@@ -46,12 +46,38 @@ async function main() {
 
 async function headAssetUrl(assetPath: string) {
   const testUrl = `${CDN_URL_PREFIX}/${assetPath}`;
-  const response = await axios.head(testUrl);
+  const response = await axios.head(testUrl, {
+    timeout: 1000,
+  });
   return {
     status: response.status,
     testUrl,
     assetPath,
   };
+}
+
+async function headAssetUrlWithRetry(
+  assetPath: string,
+  retries = 5
+): Promise<{
+  status: number;
+  testUrl: string;
+  assetPath: string;
+}> {
+  const result = await headAssetUrl(assetPath);
+  if (result.status === 200) {
+    return result;
+  } else if (retries > 0) {
+    console.log(`Retrying ${assetPath}...(retries left: ${retries})`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return headAssetUrlWithRetry(assetPath, retries - 1);
+  } else {
+    return {
+      status: result.status || 0,
+      testUrl: result.testUrl,
+      assetPath,
+    };
+  }
 }
 
 main()
