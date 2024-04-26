@@ -8,7 +8,7 @@
 import { ConnectorClientSideDefinition } from './types';
 import { docLinks } from './doc_links';
 
-export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
+export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinition> => ({
   azure_blob_storage: {
     docsUrl: docLinks.connectorsAzureBlobStorage,
     externalAuthDocsUrl: 'https://learn.microsoft.com/azure/storage/common/authorize-data-access',
@@ -177,4 +177,4 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     platinumOnly: true,
   },
-};
+});
