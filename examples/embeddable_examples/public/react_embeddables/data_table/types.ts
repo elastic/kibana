@@ -9,14 +9,10 @@
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   PublishesDataLoading,
-  PublishesDataViews,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { PublishesSelectedFields } from '../field_list/publishes_selected_fields';
 
 export type DataTableSerializedState = SerializedTitles & SerializedTimeRange;
 
 export type DataTableApi = DefaultEmbeddableApi<DataTableSerializedState> & PublishesDataLoading;
-
-export type DataTableProvider = PublishesDataViews & PublishesSelectedFields;
