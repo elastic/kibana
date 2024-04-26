@@ -282,6 +282,56 @@ describe('Duration Format', () => {
   });
 
   testCase({
+    inputFormat: 'milliseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: -123,
+        output: '-123.00 ms',
+      },
+      {
+        input: 1,
+        output: '1.00 ms',
+      },
+      {
+        input: 600,
+        output: '600.00 ms',
+      },
+      {
+        input: 30,
+        output: '30.00 ms',
+      },
+      {
+        input: 3000,
+        output: '3.00 s',
+      },
+      {
+        input: 300000,
+        output: '5.00 min',
+      },
+      {
+        input: 30000000,
+        output: '8.33 h',
+      },
+      {
+        input: 90000000,
+        output: '1.04 d',
+      },
+      {
+        input: 9000000000,
+        output: '3.47 mon',
+      },
+      {
+        input: 99999999999,
+        output: '3.17 y',
+      },
+    ],
+  });
+
+  testCase({
     inputFormat: 'seconds',
     outputFormat: 'humanizePrecise',
     outputPrecision: 2,
@@ -325,6 +375,36 @@ describe('Duration Format', () => {
       {
         input: 339,
         output: '2 w',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'hours',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: 12,
+        output: '12.00 h',
+      },
+      {
+        input: 24,
+        output: '1.00 d',
+      },
+      {
+        input: 339,
+        output: '2.02 w',
+      },
+      {
+        input: 500,
+        output: '2.98 w',
+      },
+      {
+        input: 1000,
+        output: '1.39 mon',
       },
     ],
   });

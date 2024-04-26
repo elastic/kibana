@@ -135,14 +135,18 @@ const calculatePrecision = (rawValue: number, unitValue: number, seconds: number
 // Array of units is to find the first unit duration value that is not 0
 const units = [
   { getValue: (dur: moment.Duration) => dur.years(), seconds: 31536000, method: 'asYears' },
-  // Note: 31 days is used as a month in the duration format
-  { getValue: (dur: moment.Duration) => dur.months(), seconds: 2678400, method: 'asMonths' },
+  // Note: 30 days is used as a month in the duration format
+  { getValue: (dur: moment.Duration) => dur.months(), seconds: 2592000, method: 'asMonths' },
   { getValue: (dur: moment.Duration) => dur.weeks(), seconds: 604800, method: 'asWeeks' },
   { getValue: (dur: moment.Duration) => dur.days(), seconds: 86400, method: 'asDays' },
   { getValue: (dur: moment.Duration) => dur.hours(), seconds: 3600, method: 'asHours' },
   { getValue: (dur: moment.Duration) => dur.minutes(), seconds: 60, method: 'asMinutes' },
   { getValue: (dur: moment.Duration) => dur.seconds(), seconds: 1, method: 'asSeconds' },
-  { getValue: (dur: moment.Duration) => dur.milliseconds(), seconds: 0.001, method: 'asMilliseconds' },
+  {
+    getValue: (dur: moment.Duration) => dur.milliseconds(),
+    seconds: 0.001,
+    method: 'asMilliseconds',
+  },
 ];
 
 function formatDuration(
@@ -168,9 +172,8 @@ function formatDuration(
       // calculate the fractional part of the value based on conversion to seconds
       // So when 1 year is given as unit value and the raw value in seconds is more than that
       // the overflow in seconds is used to calculate fractional part of the returned value
-      const finalValue = unit.seconds >= 1
-        ? calculatePrecision(rawValue, unitValue, unit.seconds)
-        : unitValue;
+      const finalValue =
+        unit.seconds >= 1 ? calculatePrecision(rawValue, unitValue, unit.seconds) : unitValue;
       return finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }
   }
