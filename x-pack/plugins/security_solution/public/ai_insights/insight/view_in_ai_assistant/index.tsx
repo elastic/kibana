@@ -5,46 +5,34 @@
  * 2.0.
  */
 
-import { AssistantAvatar, useAssistantContext } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
-import { ALERT_SUMMARY_CONVERSATION_ID } from '../../../common/components/event_details/translations';
 import * as i18n from './translations';
+import type { AlertsInsight } from '../../types';
+import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 
 interface Props {
+  insight: AlertsInsight;
   compact?: boolean;
-  promptContextId: string | undefined;
   replacements?: Replacements;
 }
 
 const ViewInAiAssistantComponent: React.FC<Props> = ({
   compact = false,
-  promptContextId,
+  insight,
   replacements,
 }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
-  const { showAssistantOverlay } = useAssistantContext();
-
-  // proxy show / hide calls to assistant context, using our internal prompt context id:
-  const showOverlay = useCallback(() => {
-    showAssistantOverlay({
-      conversationTitle: ALERT_SUMMARY_CONVERSATION_ID, // a known conversation ID is required to auto-select the insight as context
-      promptContextId,
-      showOverlay: true,
-    });
-  }, [promptContextId, showAssistantOverlay]);
-
-  const disabled = !hasAssistantPrivilege || promptContextId == null;
+  const { showAssistantOverlay, disabled } = useViewInAiAssistant({ insight, replacements });
 
   return compact ? (
     <EuiButtonEmpty
       data-test-subj="viewInAiAssistantCompact"
       disabled={disabled}
       iconType="expand"
-      onClick={showOverlay}
+      onClick={showAssistantOverlay}
       size="xs"
     >
       {i18n.VIEW_IN_AI_ASSISTANT}
@@ -53,7 +41,7 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
     <EuiButton
       data-test-subj="viewInAiAssistant"
       disabled={disabled}
-      onClick={showOverlay}
+      onClick={showAssistantOverlay}
       size="s"
     >
       <EuiFlexGroup alignItems="center" gutterSize="xs">
