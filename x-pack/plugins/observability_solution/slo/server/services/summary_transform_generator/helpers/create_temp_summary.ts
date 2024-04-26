@@ -58,6 +58,7 @@ export function createTempSummaryDocument(
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
 
   const doc = {
+    // apm specific fields
     service: {
       environment: apmParams?.environment ?? null,
       name: apmParams?.service ?? null,
@@ -65,6 +66,17 @@ export function createTempSummaryDocument(
     transaction: {
       name: apmParams?.transactionName ?? null,
       type: apmParams?.transactionType ?? null,
+    },
+    // synthetics specific fields
+    monitor: {
+      name: null,
+      config_id: null,
+    },
+    observer: {
+      name: null,
+      geo: {
+        name: null,
+      },
     },
     slo: {
       // 8.14 adds indicator.params through transform summary pipeline, i.e. indicator.params might be undefined
