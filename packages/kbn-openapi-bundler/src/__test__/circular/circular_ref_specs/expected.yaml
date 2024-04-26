@@ -21,10 +21,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  field1:
-                    type: integer
+                $ref: '#/components/schemas/CircularTestSchema'
     post:
       operationId: TestEndpointPost
       responses:
@@ -33,24 +30,23 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
-    put:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
+                $ref: '#/components/schemas/CircularTestSchema'
 components:
   securitySchemes:
     BasicAuth:
       scheme: basic
       type: http
+  schemas:
+    CircularTestSchema:
+      type: string
+      data:
+        items:
+          $ref: '#/components/schemas/AnotherCircularTestSchema'
+
+    AnotherCircularTestSchema:
+      anyof:
+        - $ref: '#/components/schemas/CircularTestSchema'
+        - type: string
+          enum:
+            - value1
+            - value2

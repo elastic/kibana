@@ -25,30 +25,6 @@ paths:
                 properties:
                   field1:
                     type: integer
-    post:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
-    put:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
 components:
   securitySchemes:
     BasicAuth:

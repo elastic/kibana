@@ -22,33 +22,15 @@ paths:
             application/json:
               schema:
                 anyOf:
+                  - $ref: '#/components/schemas/TestSchema1'
                   - type: object
-                    properties:
-                      field1:
-                        type: string
-                        enum: [value1]
-                      field2:
-                        type: integer
-                        minimum: 1
-                  - $ref: '#/components/schemas/TestSchema2'
-                  - $ref: '#/components/schemas/TestSchema3'
 components:
   securitySchemes:
     BasicAuth:
       scheme: basic
       type: http
   schemas:
-    TestSchema2:
-      type: object
-      properties:
-        field1:
-          type: string
-          enum: [value1]
-        field2:
-          type: integer
-          minimum: 1
-
-    TestSchema3:
+    TestSchema1:
       type: object
       properties:
         field1:

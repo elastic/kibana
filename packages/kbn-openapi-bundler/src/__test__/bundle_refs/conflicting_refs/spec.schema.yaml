@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint
+  version: '2023-10-31'
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fieldA:
+                    $ref: './common_a.schema.yaml#/components/schemas/ConflictTestSchema'
+                  fieldB:
+                    $ref: './common_b.schema.yaml#/components/schemas/ConflictTestSchema'

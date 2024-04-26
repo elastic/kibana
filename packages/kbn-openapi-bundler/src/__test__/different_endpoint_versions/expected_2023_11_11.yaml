@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Bundled OpenAPI specs
-  version: '2023-10-31'
+  version: '2023-11-11'
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -25,28 +25,6 @@ paths:
                 properties:
                   field1:
                     type: integer
-    post:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
-    put:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
                   field2:
                     type: string
 components:

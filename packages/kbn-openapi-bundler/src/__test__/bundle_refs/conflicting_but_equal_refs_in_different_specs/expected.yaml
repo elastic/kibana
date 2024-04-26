@@ -21,36 +21,23 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  field1:
-                    type: integer
-    post:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
+                $ref: '#/components/schemas/ConflictTestSchema'
+  /api/another_api:
     put:
-      operationId: TestEndpointPost
+      operationId: AnotherTestEndpointPut
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
+                $ref: '#/components/schemas/ConflictTestSchema'
 components:
   securitySchemes:
     BasicAuth:
       scheme: basic
       type: http
+  schemas:
+    ConflictTestSchema:
+      type: integer
+      minimum: 1

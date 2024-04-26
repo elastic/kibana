@@ -1,42 +1,44 @@
-spec1.schema.yaml:
-  openapi: 3.0.3
-  info:
-    title: Test endpoint GET
-    version: '2023-10-31'
-  paths:
-    /api/some_api:
-      get:
-        operationId: TestEndpointGet
-        responses:
-          '200':
-            description: Successful response
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    field1:
-                      type: integer
-
-spec2.schema.yaml:
-  openapi: 3.0.3
-  info:
-    title: Test endpoint POST
-    version: '2023-10-31'
-  paths:
-    /api/some_api:
-      post:
-        operationId: TestEndpointPost
-        responses:
-          '200':
-            description: Successful response
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    field2:
-                      type: string
-
-shared_components.schema.yaml:
-  components: {}
+openapi: 3.0.3
+info:
+  title: Bundled OpenAPI specs
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: 'localhost'
+      port:
+        default: '5601'
+security:
+  - BasicAuth: []
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  field1:
+                    type: integer
+    post:
+      operationId: TestEndpointPost
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  field2:
+                    type: string
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http

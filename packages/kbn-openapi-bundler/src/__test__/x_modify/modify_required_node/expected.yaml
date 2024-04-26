@@ -24,31 +24,14 @@ paths:
                 type: object
                 properties:
                   field1:
+                    type: string
+                    enum: [value1]
+                  field2:
                     type: integer
-    post:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
-    put:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
+                    minimum: 1
+                required:
+                  - field1
+                  - field2
 components:
   securitySchemes:
     BasicAuth:

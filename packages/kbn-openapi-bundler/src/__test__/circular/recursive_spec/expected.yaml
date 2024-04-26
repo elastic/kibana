@@ -20,23 +20,16 @@ paths:
           description: Successful response
           content:
             application/json:
-              schema:
+              schema: &ref0
                 type: object
                 properties:
-                  field1:
-                    type: integer
-    post:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
+                  - name: field1
+                    required: false
+                    schema: *ref0
+                  - field2:
+                    required: false
+                    schema:
+                      type: string
 components:
   securitySchemes:
     BasicAuth:

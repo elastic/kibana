@@ -21,10 +21,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  field1:
-                    type: integer
+                $ref: '#/components/schemas/TestSchema'
     post:
       operationId: TestEndpointPost
       responses:
@@ -33,24 +30,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
-    put:
-      operationId: TestEndpointPost
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  field2:
-                    type: string
+                $ref: '#/components/schemas/TestSchema'
 components:
   securitySchemes:
     BasicAuth:
       scheme: basic
       type: http
+  schemas:
+    TestSchema:
+      type: string
+      enum:
+        - value1
+        - value2
