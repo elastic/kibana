@@ -8,6 +8,7 @@
 // @ts-expect-error
 import registerDataSession from 'cypress-data-session/src/plugin';
 import { merge } from 'lodash';
+import { samlAuthentication } from './support/saml_authentication';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -81,6 +82,7 @@ export const getCypressBaseConfig = (
           registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
+          samlAuthentication(on, config);
 
           dataLoaders(on, config);
 
