@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('@serverless @ess Timeline - Saved Objects', () => {
+  describe('Timeline - Saved Objects', () => {
     beforeEach(() => kibanaServer.savedObjects.cleanStandardList());
     afterEach(() => kibanaServer.savedObjects.cleanStandardList());
 

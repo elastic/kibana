@@ -5,6 +5,9 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services as commonServices } from '../../../../../test/common/services';
+import { BsearchSecureService } from '../../../common/services/bsearch_secure';
+
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
@@ -13,6 +16,7 @@ export interface CreateTestConfigOptions {
 }
 import { services } from '../../../../test_serverless/api_integration/services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { SpacesServiceProvider } from '../../../common/services/spaces';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -23,6 +27,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       ...svlSharedConfig.getAll(),
       services: {
         ...services,
+        spaces: SpacesServiceProvider,
+        bsearch: commonServices.bsearch,
+        secureBsearch: BsearchSecureService,
       },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),

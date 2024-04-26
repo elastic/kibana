@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('@serverless @ess Pinned Events - Saved Objects', () => {
+  describe('Pinned Events - Saved Objects', () => {
     before(() => kibanaServer.savedObjects.cleanStandardList());
     after(() => kibanaServer.savedObjects.cleanStandardList());
 
