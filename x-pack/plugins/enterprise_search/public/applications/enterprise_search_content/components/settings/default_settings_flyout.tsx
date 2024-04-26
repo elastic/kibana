@@ -76,7 +76,12 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
               defaultMessage="These settings apply to all new Elasticsearch indices created by Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}"
               values={{
                 link: (
-                  <EuiLink href={docLinks.ingestPipelines} target="_blank">
+                  <EuiLink
+                    data-test-subj="entSearchContent-defaultSettingsFlyout-ingestPipelinesLink"
+                    data-telemetry-id="entSearchContent-defaultSettingsFlyout-ingestPipelinesLink"
+                    href={docLinks.ingestPipelines}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.defaultSettingsFlyout.body.description.ingestPipelinesLink.link',
                       {
@@ -154,7 +159,12 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
             defaultMessage: 'ML Inference',
           })}
           link={
-            <EuiLink href={docLinks.mlDocumentEnrichment} target="_blank">
+            <EuiLink
+              data-test-subj="entSearchContent-defaultSettingsFlyout-mlInferenceLink"
+              data-telemetry-id="entSearchContent-defaultSettingsFlyout-mlInferenceLink"
+              href={docLinks.mlDocumentEnrichment}
+              target="_blank"
+            >
               {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
                 defaultMessage: 'Learn more about document enrichment with ML',
               })}

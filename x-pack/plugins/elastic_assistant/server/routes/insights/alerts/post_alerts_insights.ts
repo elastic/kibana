@@ -6,7 +6,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AlertsInsightsPostRequestBody,
