@@ -63,7 +63,7 @@ describe('License API guard', () => {
       {} as KibanaRequest,
       responseMock
     );
-    if ('catch' in maybePromise) {
+    if (maybePromise instanceof Promise) {
       maybePromise.catch(() => {});
     }
 
