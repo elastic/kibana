@@ -22,7 +22,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
   mlApiServices: MlApiServices,
   input?: SingleMetricViewerEmbeddableInput
 ): Promise<Partial<SingleMetricViewerEmbeddableInput>> {
-  const { overlays, theme, i18n } = coreStart;
+  const { overlays, ...startServices } = coreStart;
   const timefilter = pluginStart.data.query.timefilter.timefilter;
 
   return new Promise(async (resolve, reject) => {
@@ -62,7 +62,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
               }}
             />
           </KibanaContextProvider>,
-          { theme, i18n }
+          startServices
         )
       );
     } catch (error) {

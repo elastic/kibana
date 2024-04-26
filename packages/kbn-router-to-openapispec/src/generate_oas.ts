@@ -68,15 +68,21 @@ export const generateOpenApiDocument = (
       },
     ],
     paths,
-    components: converter.getSchemaComponents(),
-    security: [
-      {
-        basicAuth: [],
+    components: {
+      ...converter.getSchemaComponents(),
+      securitySchemes: {
+        basicAuth: {
+          type: 'http',
+          scheme: 'basic',
+        },
+        apiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'Authorization',
+        },
       },
-      {
-        apiKeyAuth: [],
-      },
-    ],
+    },
+    security: [{ basicAuth: [] }],
     tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };

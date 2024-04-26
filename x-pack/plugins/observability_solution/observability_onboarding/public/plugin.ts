@@ -27,6 +27,7 @@ import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_
 import { ObservabilityOnboardingPluginLocators } from './locators';
 import { ConfigSchema } from '.';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
+import { EXPERIMENTAL_ONBOARDING_APP_ROUTE } from './common';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -115,7 +116,7 @@ export class ObservabilityOnboardingPlugin
         core.application.register({
           id: `${PLUGIN_ID}_EXPERIMENTAL`,
           title: 'Observability Onboarding (Beta)',
-          appRoute: '/app/experimental-onboarding',
+          appRoute: EXPERIMENTAL_ONBOARDING_APP_ROUTE,
           order: 8500,
           euiIconType: 'logoObservability',
           category: DEFAULT_APP_CATEGORIES.observability,

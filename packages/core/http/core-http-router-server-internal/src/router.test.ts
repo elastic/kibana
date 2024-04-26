@@ -135,6 +135,12 @@ describe('Router', () => {
     expect(lazyValidation).toHaveBeenCalledTimes(1);
   });
 
+  it('registers pluginId if provided', () => {
+    const pluginId = Symbol('test');
+    const router = new Router('', logger, enhanceWithContext, { pluginId });
+    expect(router.pluginId).toBe(pluginId);
+  });
+
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);

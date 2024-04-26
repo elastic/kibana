@@ -23,7 +23,7 @@ export const IMPORT_RULE = i18n.translate(
 export const IMPORT_VALUE_LISTS = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Import value lists',
+    defaultMessage: 'Manage value lists',
   }
 );
 

@@ -24,8 +24,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { BetaBadge } from '../../../../../shared/beta/beta_badge';
-
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
@@ -80,9 +78,6 @@ export const ConnectorSyncRules: React.FC = () => {
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <BetaBadge />
-                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
               <EuiText size="s">
@@ -97,7 +92,7 @@ export const ConnectorSyncRules: React.FC = () => {
                   })}
                 </p>
                 <p>
-                  <EuiLink href={docLinks.syncRules} external>
+                  <EuiLink href={docLinks.syncRules} external target="_blank">
                     {i18n.translate(
                       'xpack.enterpriseSearch.index.connector.syncRules.syncRulesLabel',
                       {
@@ -191,7 +186,7 @@ export const ConnectorSyncRules: React.FC = () => {
                       )}
                     </p>
                     <p>
-                      <EuiLink external href={docLinks.syncRulesAdvanced}>
+                      <EuiLink external href={docLinks.syncRulesAdvanced} target="_blank">
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
                           {

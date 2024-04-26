@@ -73,6 +73,10 @@ paths:
                   type: string
                 actionTypeId:
                   type: string
+                langSmithProject:
+                  type: string
+                langSmithApiKey:
+                  type: string
                 model:
                   type: string
                 replacements:

@@ -125,6 +125,9 @@ export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
 
+  /** Plugin for which this router was registered */
+  pluginId?: symbol;
+
   versionedRouterOptions?: {
     /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
     defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
@@ -163,6 +166,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   implements IRouter<Context>
 {
   public routes: Array<Readonly<InternalRouterRoute>> = [];
+  public pluginId?: symbol;
   public get: InternalRegistrar<'get', Context>;
   public post: InternalRegistrar<'post', Context>;
   public delete: InternalRegistrar<'delete', Context>;
@@ -175,6 +179,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
     private readonly options: RouterOptions
   ) {
+    this.pluginId = options.pluginId;
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(

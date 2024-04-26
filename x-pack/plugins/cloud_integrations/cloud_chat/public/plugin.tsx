@@ -57,7 +57,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     );
   }
 
-  public start(core: CoreStart, { cloud }: CloudChatStartDeps) {
+  public start(core: CoreStart) {
     const CloudChatContextProvider: FC = ({ children }) => {
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
@@ -67,7 +67,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     function ConnectedChat(props: { chatVariant: ChatVariant }) {
       return (
         <CloudChatContextProvider>
-          <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+          <KibanaRenderContextProvider {...core}>
             <ChatExperimentSwitcher
               location$={core.application.currentLocation$}
               variant={props.chatVariant}

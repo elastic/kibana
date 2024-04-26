@@ -52,6 +52,7 @@ import { jobsApiProvider } from './jobs';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
+import { inferenceModelsApiProvider } from './inference_models';
 
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
@@ -814,6 +815,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    inferenceModels: inferenceModelsApiProvider(httpService),
     notifications: notificationsProvider(httpService),
     jsonSchema: jsonSchemaProvider(httpService),
   };

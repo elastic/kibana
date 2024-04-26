@@ -57,6 +57,7 @@ export class SavedObjectsPublicPlugin
           chrome: core.chrome,
           overlays: core.overlays,
         },
+        core,
         this.decoratorRegistry
       ),
     };

@@ -123,7 +123,7 @@ const navTree: NavigationTreeDefinition = {
           }),
           children: [
             {
-              link: 'enterpriseSearchContent:playground',
+              link: 'enterpriseSearchApplications:playground',
             },
             {
               title: i18n.translate('navigation.searchNav.build.searchApplications', {

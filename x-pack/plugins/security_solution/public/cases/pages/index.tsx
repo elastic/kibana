@@ -83,7 +83,7 @@ const CaseContainerComponent: React.FC = () => {
           },
         });
         telemetry.reportDetailsFlyoutOpened({
-          tableId: TimelineId.casePage,
+          location: TimelineId.casePage,
           panel: 'right',
         });
       }
