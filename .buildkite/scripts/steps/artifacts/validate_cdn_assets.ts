@@ -45,7 +45,9 @@ async function main() {
 }
 
 async function headAssetUrl(assetPath: string) {
-  const response = await axios.head(`${GCS_SA_CDN_URL}/${assetPath}`);
+  const testURL = `${GCS_SA_CDN_URL}/${assetPath}`;
+  console.log(`Testing ${assetPath} @ ${testURL}`);
+  const response = await axios.head(testURL);
   return {
     status: response.status,
     assetPath,
