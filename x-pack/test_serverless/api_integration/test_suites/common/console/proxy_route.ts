@@ -16,13 +16,13 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
 
   describe('POST /api/console/proxy', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
     describe('system indices behavior', () => {
-      before(async () => {
-        roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
-      });
-      after(async () => {
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-      });
       it('returns warning header when making requests to .kibana index', async () => {
         return await supertest
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
