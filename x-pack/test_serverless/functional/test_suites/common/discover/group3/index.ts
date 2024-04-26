@@ -20,8 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_request_counts'));
-    loadTestFile(require.resolve('./_unsaved_changes_badge'));
   });
 }

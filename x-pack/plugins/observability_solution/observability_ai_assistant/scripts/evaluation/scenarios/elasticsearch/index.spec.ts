@@ -61,8 +61,8 @@ describe('elasticsearch functions', () => {
         const conversation = await chatClient.complete('How many documents are in the index kb?');
 
         const result = await chatClient.evaluate(conversation, [
-          'Calls the Elasticsearch function',
-          'Finds how many documents are in that index',
+          'Calls the `elasticsearch` function OR the `query` function',
+          'Finds how many documents are in that index (one document)',
         ]);
 
         expect(result.passed).to.be(true);
