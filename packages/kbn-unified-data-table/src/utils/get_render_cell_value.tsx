@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useContext, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -90,7 +90,7 @@ export const getRenderCellValueFn = ({
         !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );
 
-    const popoverContent = useMemo(
+    const getPopoverContent = useCallback(
       () =>
         renderPopoverContent({
           row,
@@ -129,7 +129,7 @@ export const getRenderCellValueFn = ({
     }
 
     if (isDetails) {
-      return popoverContent;
+      return getPopoverContent();
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {

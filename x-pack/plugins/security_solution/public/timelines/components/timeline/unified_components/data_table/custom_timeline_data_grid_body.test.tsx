@@ -88,6 +88,23 @@ describe('CustomTimelineDataGridBody', () => {
     expect(container).toMatchSnapshot();
   });
 
+  it('should render lazy rows placeholder when rows are not intersecting', () => {
+    const mockLocalIntersectionObserver = jest.fn((cb) => {
+      cb([{ isIntersecting: false, intersectionRatio: 0 }]);
+      return mockIntersectionObserverReturnValue;
+    });
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    window.IntersectionObserver = mockLocalIntersectionObserver as unknown as any;
+
+    const { container, queryByText } = renderTestComponents();
+
+    expect(queryByText('Cell-0-0')).toBeFalsy();
+    expect(queryByText('Cell-1-0')).toBeFalsy();
+
+    expect(container.querySelectorAll('.customlazyGridRowPlaceholder')).toHaveLength(2);
+  });
+
   it('should render the additional Row when row Renderer is available', () => {
     (useStatefulRowRenderer as jest.Mock).mockImplementation(({ data }: { data: TimelineItem }) => {
       if (data._id === '1') {
