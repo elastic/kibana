@@ -13,6 +13,7 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { BrowserField } from '../../../../../common/containers/source';
 import {
   ALERT_HOST_CRITICALITY,
@@ -104,6 +105,8 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
 }) => {
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -287,7 +290,13 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
-    return (
+    return agentStatusClientEnabled ? (
+      <AgentStatus
+        agentId={String(value ?? '')}
+        agentType="endpoint"
+        data-test-subj="endpointHostAgentStatus"
+      />
+    ) : (
       <EndpointAgentStatusById
         endpointAgentId={String(value ?? '')}
         data-test-subj="endpointHostAgentStatus"
