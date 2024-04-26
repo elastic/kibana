@@ -613,7 +613,7 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
-    max_signals: maxSignals,
+    max_signals: maxSignals ? maxSignals : undefined,
     ...rest,
   };
   return resp;
