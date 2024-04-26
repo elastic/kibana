@@ -232,6 +232,52 @@ describe('Duration Format', () => {
   });
 
   testCase({
+    inputFormat: 'seconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: false,
+    fixtures: [
+      {
+        input: -123,
+        output: '0.00 milliseconds',
+      },
+      {
+        input: 1,
+        output: '1.00 seconds',
+      },
+      {
+        input: 12,
+        output: '12.00 seconds',
+      },
+      {
+        input: 123,
+        output: '2.05 minutes',
+      },
+      {
+        input: 658,
+        output: '10.97 minutes',
+      },
+      {
+        input: 1988,
+        output: '33.13 minutes',
+      },
+      {
+        input: 3857,
+        output: '1.07 hours',
+      },
+      {
+        input: 123292,
+        output: '1.43 days',
+      },
+      {
+        input: 923528271,
+        output: '29.28 years',
+      },
+    ],
+  });
+
+  testCase({
     inputFormat: 'milliseconds',
     outputFormat: 'humanizePrecise',
     outputPrecision: 0,
