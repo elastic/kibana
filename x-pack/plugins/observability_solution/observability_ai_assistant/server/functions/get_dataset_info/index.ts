@@ -16,7 +16,6 @@ export function registerGetDatasetInfoFunction({
   functions.registerFunction(
     {
       name: 'get_dataset_info',
-      contexts: ['core'],
       visibility: FunctionVisibility.AssistantOnly,
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 

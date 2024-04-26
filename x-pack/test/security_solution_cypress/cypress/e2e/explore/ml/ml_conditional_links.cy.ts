@@ -27,7 +27,7 @@ import {
 } from '../../../urls/ml_conditional_links';
 
 // FLAKY: https://github.com/elastic/kibana/issues/180748
-describe.skip('ml conditional links', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe.skip('ml conditional links', { tags: ['@ess', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
   });
