@@ -115,7 +115,6 @@ export const PresentationPanelInternal = <
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
       {...contentAttrs}
-      {...extraPanelProps}
     >
       {!hideHeader && api && (
         <PresentationPanelHeader

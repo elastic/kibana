@@ -186,7 +186,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   );
 
   return (
-    <EuiFlexItem css={statsTableCss}>
+    <EuiFlexItem css={statsTableCss} data-test-subj="dscFieldStatsEmbeddedContent">
       <ReactEmbeddableRenderer<
         FieldStatisticsTableEmbeddableState,
         FieldStatisticsTableEmbeddableApi
