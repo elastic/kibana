@@ -39,6 +39,7 @@ import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
+import { isAdvancedSyncRuleSnippetEmpty } from '../../utils/sync_rules_helpers';
 import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 
@@ -64,6 +65,7 @@ export const ConnectorConfiguration: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { errorConnectingMessage, http } = useValues(HttpLogic);
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
+  const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
 
   const { connectorTypes } = useValues(KibanaLogic);
   const BETA_CONNECTORS = useMemo(
@@ -264,36 +266,38 @@ export const ConnectorConfiguration: React.FC = () => {
                             />
                           )}
                           <EuiSpacer size="s" />
-                          {connector.status && hasAdvancedFilteringFeature && !!advancedSnippet && (
-                            <EuiCallOut
-                              title={i18n.translate(
-                                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
-                                { defaultMessage: 'Configuration warning' }
-                              )}
-                              iconType="iInCircle"
-                              color="warning"
-                            >
-                              <FormattedMessage
-                                id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
-                                defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
-                                values={{
-                                  advancedSyncRulesDocs: (
-                                    <EuiLink
-                                      data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
-                                      data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
-                                      href={docLinks.syncRules}
-                                      target="_blank"
-                                    >
-                                      {i18n.translate(
-                                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
-                                        { defaultMessage: 'Advanced Sync Rules' }
-                                      )}
-                                    </EuiLink>
-                                  ),
-                                }}
-                              />
-                            </EuiCallOut>
-                          )}
+                          {connector.status &&
+                            hasAdvancedFilteringFeature &&
+                            !isAdvancedSnippetEmpty && (
+                              <EuiCallOut
+                                title={i18n.translate(
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+                                  { defaultMessage: 'Configuration warning' }
+                                )}
+                                iconType="iInCircle"
+                                color="warning"
+                              >
+                                <FormattedMessage
+                                  id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+                                  defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
+                                  values={{
+                                    advancedSyncRulesDocs: (
+                                      <EuiLink
+                                        data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+                                        data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+                                        href={docLinks.syncRules}
+                                        target="_blank"
+                                      >
+                                        {i18n.translate(
+                                          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                                          { defaultMessage: 'Advanced Sync Rules' }
+                                        )}
+                                      </EuiLink>
+                                    ),
+                                  }}
+                                />
+                              </EuiCallOut>
+                            )}
                         </ConnectorConfigurationComponent>
                       ),
                       status:
