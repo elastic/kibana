@@ -79,7 +79,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
                 fetchContext.filters ?? [],
                 fetchContext.query,
                 // timeRange and timeslice provided seperatly so consumers can decide
-                // whether to refetch data for just mask current data.
+                // whether to refetch data or just mask current data.
                 // In this example, we must refetch because we need a count within the time range.
                 fetchContext.timeslice
                   ? {

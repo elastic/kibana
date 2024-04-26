@@ -7,8 +7,6 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   PublishesDataLoading,
   PublishesDataViews,
@@ -16,13 +14,6 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { PublishesSelectedFields } from '../field_list/publishes_selected_fields';
-
-export interface DataTableQueryState {
-  dataView?: DataView;
-  timeRange?: TimeRange;
-  filters?: Filter[];
-  query?: Query | AggregateQuery;
-}
 
 export type DataTableSerializedState = SerializedTitles & SerializedTimeRange;
 

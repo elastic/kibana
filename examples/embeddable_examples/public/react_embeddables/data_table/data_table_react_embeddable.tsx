@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  apiPublishesDataViews,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -25,14 +24,9 @@ import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from '@kbn/
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { StartDeps } from '../../plugin';
-import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
 import { DATA_TABLE_ID } from './constants';
 import { initializeDataTableQueries } from './data_table_queries';
-import { DataTableApi, DataTableProvider, DataTableSerializedState } from './types';
-
-export const isDataTableProvider = (api: unknown): api is DataTableProvider => {
-  return apiPublishesDataViews(api) && apiPublishesSelectedFields(api);
-};
+import { DataTableApi, DataTableSerializedState } from './types';
 
 export const getDataTableFactory = (
   core: CoreStart,

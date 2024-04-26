@@ -14,10 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { listenForCompatibleApi } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, fetch$ } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
-import { v4 } from 'uuid';
 import { StartDeps } from '../../plugin';
 import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
-import { DataTableApi, DataTableQueryState } from './types';
+import { DataTableApi } from './types';
 
 export const initializeDataTableQueries = async (
   services: StartDeps,
@@ -34,7 +33,7 @@ export const initializeDataTableQueries = async (
   if (!defaultDataView) {
     throw new Error(
       i18n.translate('embeddableExamples.dataTable.noDataViewError', {
-        defaultMessage: 'The parent of this data table must provide unified search state.',
+        defaultMessage: 'At least one data view is required to use the data table example..',
       })
     );
   }
@@ -82,42 +81,48 @@ export const initializeDataTableQueries = async (
     }
   );
 
-  // run query whenever the unified search state changes
-  const runQuery = async (unifiedSearchState: DataTableQueryState) => {
-    const { filters, query, timeRange, dataView } = unifiedSearchState;
-    if (!dataView) return;
-    queryLoading$.next(true);
-    const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(
-      dataView,
-      timeRange
-    ) as Filter;
-    searchSource.setField('filter', [...(filters ?? []), timeRangeFilter]);
-    searchSource.setField('query', query);
-    searchSource.setField('index', dataView);
-
-    abortController?.abort();
-    abortController = new AbortController();
-    const { rawResponse: resp } = await lastValueFrom(
-      searchSource.fetch$({
-        abortSignal: abortController.signal,
-        sessionId: v4(), // todo, search sessions
-        disableWarningToasts: true,
-      })
-    );
-    queryLoading$.next(false);
-    return resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView));
-  };
-
+  // run query whenever the embeddable's fetch state or the data view changes
   dataSubscription.add(
     combineLatest([fetch$(api), dataView$])
       .pipe(
-        map(([{ filters, timeRange, query }, dataView]) => ({
+        map(([{ filters, timeRange, query, timeslice, searchSessionId }, dataView]) => ({
           filters,
           timeRange,
           query,
           dataView,
+          timeslice,
+          searchSessionId,
         })),
-        switchMap((unifiedSearchState) => runQuery(unifiedSearchState))
+        switchMap(async ({ filters, query, timeRange, dataView, timeslice, searchSessionId }) => {
+          if (!dataView) return;
+          queryLoading$.next(true);
+          const appliedTimeRange = timeslice
+            ? {
+                from: new Date(timeslice[0]).toISOString(),
+                to: new Date(timeslice[1]).toISOString(),
+                mode: 'absolute' as 'absolute',
+              }
+            : timeRange;
+          const timeRangeFilter = services.data.query.timefilter.timefilter.createFilter(
+            dataView,
+            appliedTimeRange
+          ) as Filter;
+          searchSource.setField('filter', [...(filters ?? []), timeRangeFilter]);
+          searchSource.setField('query', query);
+          searchSource.setField('index', dataView);
+
+          abortController?.abort();
+          abortController = new AbortController();
+          const { rawResponse: resp } = await lastValueFrom(
+            searchSource.fetch$({
+              abortSignal: abortController.signal,
+              sessionId: searchSessionId,
+              disableWarningToasts: true,
+            })
+          );
+          queryLoading$.next(false);
+          return resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView));
+        })
       )
       .subscribe((rows) => rows$.next(rows))
   );
