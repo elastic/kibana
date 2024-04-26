@@ -24,7 +24,7 @@ import type {
   NormalizedExternalConnectorClientExecuteOptions,
   NormalizedExternalConnectorClient,
 } from '../lib/normalized_external_connector_client';
-import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
+import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
@@ -473,7 +473,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       };
 
       const searchRequestOptions: SearchRequest = {
-        index: SENTINEL_ONE_ACTIVITY_INDEX,
+        index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
         query,
         // There may be many documents for each host/agent, so we collapse it and only get back the
         // first one that came in after the isolate request was sent
@@ -493,7 +493,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       };
 
       this.log.debug(
-        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX}] index with:\n${stringify(
+        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
           searchRequestOptions,
           15
         )}`
