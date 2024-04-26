@@ -177,7 +177,14 @@ async function executor(
     });
   });
 
-  const backgroundInstruction = await getBackgroundProcessInstruction(
+  const backgroundInstruction = dedent(
+    `You are called as a background process because alerts have changed state.
+    As a background process you are not interacting with a user. Because of that DO NOT ask for user
+    input if tasked to execute actions. You can generate multiple responses in a row.
+    If available, include the link of the conversation at the end of your answer.`
+  );
+
+  const alertsContext = await getAlertsContext(
     execOptions.params.rule,
     execOptions.params.alerts,
     async (alert: Record<string, any>) => {
@@ -227,6 +234,26 @@ async function executor(
           message: {
             role: MessageRole.User,
             content: execOptions.params.message,
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: '',
+            function_call: {
+              name: 'get_alerts_context',
+              arguments: JSON.stringify({}),
+              trigger: MessageRole.Assistant as const,
+            },
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            name: 'get_alerts_context',
+            content: JSON.stringify({ context: alertsContext }),
           },
         },
         {
@@ -291,11 +318,11 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   };
 };
 
-async function getBackgroundProcessInstruction(
+async function getAlertsContext(
   rule: RuleType,
   alerts: AlertSummary,
   getAlertContext: (alert: Record<string, any>) => Promise<string>
-) {
+): Promise<string> {
   const getAlertGroupDetails = async (alertGroup: Array<Record<string, any>>) => {
     const formattedDetails = await Promise.all(
       alertGroup.map(async (alert) => {
@@ -308,24 +335,21 @@ async function getBackgroundProcessInstruction(
     return formattedDetails;
   };
 
-  let instruction = `You are called as a background process because the following alerts have changed state for the rule ${JSON.stringify(
-    rule
+  let details = `The following alerts have changed state for the rule ${JSON.stringify(
+    rule,
+    null,
+    2
   )}:\n`;
   if (alerts.new.length > 0) {
-    instruction += `- ${alerts.new.length} alerts have fired:\n${await getAlertGroupDetails(
+    details += `- ${alerts.new.length} alerts have fired:\n${await getAlertGroupDetails(
       alerts.new
     )}\n`;
   }
   if (alerts.recovered.length > 0) {
-    instruction += `- ${
-      alerts.recovered.length
-    } alerts have recovered\n: ${await getAlertGroupDetails(alerts.recovered)}\n`;
+    details += `- ${alerts.recovered.length} alerts have recovered\n: ${await getAlertGroupDetails(
+      alerts.recovered
+    )}\n`;
   }
-  instruction += dedent(
-    `As a background process you are not interacting with a user. Because of that DO NOT ask for user
-    input if tasked to execute actions. You can generate multiple responses in a row.
-    If available, include the link of the conversation at the end of your answer.`
-  );
 
-  return instruction;
+  return details;
 }
