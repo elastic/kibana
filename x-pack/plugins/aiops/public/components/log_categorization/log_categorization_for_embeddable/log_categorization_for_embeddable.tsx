@@ -169,9 +169,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         filter.meta.alias = alias;
       }
       filter.query = values.query;
-      if (onAddFilter !== undefined) {
-        input.onAddFilter();
-      }
+      input.onAddFilter();
       filterManager.addFilters([filter]);
     },
     [dataView.id, filterManager, input]
