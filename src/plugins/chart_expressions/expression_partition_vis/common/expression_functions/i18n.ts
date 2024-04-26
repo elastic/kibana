@@ -61,6 +61,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.truncateLegendHelpText', {
       defaultMessage: 'Defines if the legend items will be truncated or not',
     }),
+  getLegendStatsArgHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.args.legendStatsArgHelp', {
+      defaultMessage: 'Defines the legend stats',
+    }),
   getMaxLegendLinesArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.maxLegendLinesHelpText', {
       defaultMessage: 'Defines the number of lines per legend item',
@@ -96,10 +100,6 @@ export const strings = {
   getLabelsArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.labelsHelpText', {
       defaultMessage: 'Pie labels config',
-    }),
-  getShowValuesInLegendArgHelp: () =>
-    i18n.translate('expressionPartitionVis.waffle.function.args.showValuesInLegendHelpText', {
-      defaultMessage: 'Show values in legend',
     }),
   getAriaLabelHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.functions.args.ariaLabelHelpText', {

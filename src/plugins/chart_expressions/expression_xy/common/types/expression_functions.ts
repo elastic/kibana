@@ -14,7 +14,7 @@ import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
@@ -214,6 +214,10 @@ export interface LegendConfig {
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
   legendSize?: LegendSize;
+  /**
+   * metrics to display in the legend
+   */
+  legendStats?: LegendStats[];
 }
 
 // Arguments to XY chart expression, with computed properties
@@ -226,7 +230,6 @@ export interface XYArgs extends DataLayerArgs {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
@@ -277,7 +280,6 @@ export interface LayeredXYArgs {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
@@ -302,7 +304,6 @@ export interface XYProps {
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
-  valuesInLegend?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;

@@ -51,3 +51,7 @@ export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(METRIC_TYPES),
   ...Object.values(BUCKET_TYPES),
 ] as const;
+
+export enum LegendStats {
+  values = 'values',
+}
