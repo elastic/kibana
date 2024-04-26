@@ -160,9 +160,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     return {
       embeddableState$,
       // Overriding with data service from Discover because
-      // in serverless, Discover's data might be a proxy
+      // Discover's data service might be a proxy
       // in which case the proxied version might be different
-      overrideServices: { data: { ...services.data, applicationContext: 'discover' } },
+      overrideServices: { data: services.data },
       onAddFilter,
     };
   }, [embeddableState$, services.data, onAddFilter]);
