@@ -31,6 +31,7 @@ import type {
 export class PluginServices {
   private readonly telemetry: TelemetryService = new TelemetryService();
   private readonly queryService: QueryService = new QueryService();
+  private readonly timelineQueryService: QueryService = new QueryService();
   private readonly storage = new Storage(localStorage);
   private readonly sessionStorage = new Storage(sessionStorage);
 
@@ -69,7 +70,13 @@ export class PluginServices {
       { prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion }
     );
 
-    this.queryService?.setup({
+    this.queryService.setup({
+      uiSettings: coreSetup.uiSettings,
+      storage: this.storage,
+      nowProvider: new NowProvider(),
+    });
+
+    this.timelineQueryService.setup({
       uiSettings: coreSetup.uiSettings,
       storage: this.storage,
       nowProvider: new NowProvider(),
@@ -92,6 +99,7 @@ export class PluginServices {
 
   public stop() {
     this.queryService.stop();
+    this.timelineQueryService.stop();
     licenseService.stop();
   }
 
@@ -115,7 +123,7 @@ export class PluginServices {
     );
 
     const timelineDataService = this.startTimelineDataService(
-      this.queryService.start({
+      this.timelineQueryService.start({
         uiSettings: coreStart.uiSettings,
         storage: this.storage,
         http: coreStart.http,
