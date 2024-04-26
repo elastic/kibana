@@ -8,9 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EndpointError } from '../../../../../common/endpoint/errors';
 import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
@@ -25,31 +27,44 @@ interface FetchActionResponsesOptions {
 }
 
 interface FetchActionResponsesResult {
-  data: Array<estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
+  data: Array<EndpointActionResponse | LogsEndpointActionResponse>;
 }
 
+/** @private */
+const buildSearchQuery = (
+  actionIds?: string[],
+  agentIds?: string[]
+): estypes.QueryDslQueryContainer => {
+  if ((!actionIds || actionIds.length === 0) && (!agentIds || agentIds.length === 0)) {
+    throw new EndpointError(
+      `Unable to build query to retrieve Action responses. 'actionIds' and 'agentIds' are both empty`
+    );
+  }
+
+  const filter: estypes.QueryDslQueryContainer[] = [];
+  const query: estypes.QueryDslQueryContainer = { bool: { filter } };
+
+  if (agentIds?.length) {
+    filter.push({ terms: { agent_id: agentIds } });
+  }
+  if (actionIds?.length) {
+    filter.push({ terms: { action_id: actionIds } });
+  }
+
+  return query;
+};
+
 /**
- * Fetch Response Action responses
+ * Fetch Response Action responses from both the Endpoint and the Fleet indexes
  */
 export const fetchActionResponses = async ({
   esClient,
   actionIds = [],
   agentIds = [],
 }: FetchActionResponsesOptions): Promise<FetchActionResponsesResult> => {
-  const filter = [];
+  const query = buildSearchQuery(actionIds, agentIds);
 
-  if (agentIds?.length) {
-    filter.push({ terms: { agent_id: agentIds } });
-  }
-  if (actionIds.length) {
-    filter.push({ terms: { action_id: actionIds } });
-  }
-
-  const query: estypes.QueryDslQueryContainer = {
-    bool: {
-      filter,
-    },
-  };
+  // TODO:PT refactor this method to use new `fetchFleetActionResponses()` and `fetchEndpointActionResponses()`
 
   // Get the Action Response(s) from both the Fleet action response index and the Endpoint
   // action response index.
@@ -86,4 +101,65 @@ export const fetchActionResponses = async ({
   return {
     data: [...(fleetResponses?.hits?.hits ?? []), ...(endpointResponses?.hits?.hits ?? [])],
   };
+};
+
+/**
+ * Fetch Response Action response documents from the Endpoint index
+ * @param esClient
+ * @param actionIds
+ * @param agentIds
+ */
+export const fetchEndpointActionResponses = async <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
+>({
+  esClient,
+  actionIds,
+  agentIds,
+}: FetchActionResponsesOptions): Promise<
+  Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
+> => {
+  const searchResponse = await esClient
+    .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
+      {
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
+        query: buildSearchQuery(actionIds, agentIds),
+      },
+      { ignore: [404] }
+    )
+    .catch(catchAndWrapError);
+
+  return searchResponse.hits.hits.map((esHit) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return esHit._source!;
+  });
+};
+
+/**
+ * Fetch Response Action response documents from the Fleet index
+ * @param esClient
+ * @param actionIds
+ * @param agentIds
+ */
+export const fetchFleetActionResponses = async ({
+  esClient,
+  actionIds,
+  agentIds,
+}: FetchActionResponsesOptions): Promise<EndpointActionResponse[]> => {
+  const searchResponse = await esClient
+    .search<EndpointActionResponse>(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
+        query: buildSearchQuery(actionIds, agentIds),
+      },
+      { ignore: [404] }
+    )
+    .catch(catchAndWrapError);
+
+  return searchResponse.hits.hits.map((esHit) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return esHit._source!;
+  });
 };
