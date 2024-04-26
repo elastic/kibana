@@ -171,7 +171,6 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
   request: RouteValidatorFullConfigRequest<P, Q, B>;
   /**
    * Response schemas for your route.
-   *
    */
   response?: RouteValidatorFullConfigResponse;
 }
@@ -187,8 +186,8 @@ export type RouteValidator<P, Q, B> =
 /**
  * A validation schema factory.
  *
- * @note Often used to lazily create schemas that are otherwise not needed
- * @note assume that these factory will only be called once
+ * @note Used to lazily create schemas that are otherwise not needed
+ * @note Assume this function will only be called once
  *
  * @return A @kbn/config-schema schema
  * @public
