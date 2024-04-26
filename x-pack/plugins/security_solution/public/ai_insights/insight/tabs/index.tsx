@@ -14,20 +14,14 @@ import type { AlertsInsight } from '../../types';
 
 interface Props {
   insight: AlertsInsight;
-  promptContextId: string | undefined;
   replacements?: Replacements;
   showAnonymized?: boolean;
 }
 
-const TabsComponent: React.FC<Props> = ({
-  insight,
-  promptContextId,
-  replacements,
-  showAnonymized = false,
-}) => {
+const TabsComponent: React.FC<Props> = ({ insight, replacements, showAnonymized = false }) => {
   const tabs = useMemo(
-    () => getTabs({ insight, promptContextId, replacements, showAnonymized }),
-    [insight, promptContextId, replacements, showAnonymized]
+    () => getTabs({ insight, replacements, showAnonymized }),
+    [insight, replacements, showAnonymized]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
