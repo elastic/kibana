@@ -564,10 +564,13 @@ describe('SentinelOneActionsClient class', () => {
       let s1ActivityHits: Array<
         SearchHit<SentinelOneActivityEsDoc<SentinelOneActivityDataForType80>>
       >;
+      let actionRequestsSearchResponse: SearchResponse<
+        LogsEndpointAction<ResponseActionGetFileParameters, ResponseActionGetFileOutputContent>
+      >;
 
       beforeEach(() => {
         const s1DataGenerator = new SentinelOneDataGenerator('seed');
-        const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+        actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
           s1DataGenerator.generateActionEsHit<
             ResponseActionGetFileParameters,
             ResponseActionGetFileOutputContent,
@@ -667,11 +670,58 @@ describe('SentinelOneActionsClient class', () => {
         });
       });
 
-      it.todo(
-        'should complete action as a failure if no S1 agentId/commandBatchUuid present in action request doc'
-      );
+      it('should complete action as a failure if no S1 agentId/commandBatchUuid present in action request doc', async () => {
+        actionRequestsSearchResponse.hits.hits[0]._source.meta = {
+          agentId: 's1-agent-a',
+          agentUUID: 'agent-uuid-1',
+          hostName: 's1-host-name',
+        };
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
-      it.todo('should generate an action response doc');
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              message:
+                'Unable to very if action completed. SentinelOne agent id or commandBatchUuid missing on action request document!',
+            },
+          })
+        );
+      });
+
+      it('should generate an action success response doc', async () => {
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            completed_at: expect.any(String),
+            data: {
+              command: 'get-file',
+              comment: 'Some description here',
+              output: {
+                content: {
+                  code: '',
+                  contents: [],
+                  zip_size: 0,
+                },
+                type: 'json',
+              },
+            },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+          },
+          agent: {
+            id: 'agent-uuid-1',
+          },
+          error: undefined,
+          meta: {
+            activityLogEntryId: 'activity-222',
+            downloadUrl: '/agents/5173897/uploads/40558796',
+            elasticDocId: '16ae44fc-4be7-446c-8e8f-a5c082dda918',
+          },
+        });
+      });
     });
   });
 
