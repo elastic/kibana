@@ -10,7 +10,7 @@ import { ASSET_TYPE, FIRST_SEEN, LAST_SEEN } from '../../../../common/es_fields/
 import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
-const SERVICES_ASSET_SAMPLE_SIZE = 500;
+export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export async function getServicesFromAssets({
   assetsESClient,
@@ -26,7 +26,7 @@ export async function getServicesFromAssets({
   return withApmSpan('get_services_from_assets', async () => {
     const response = await assetsESClient.search('get_services_from_assets', {
       body: {
-        size: SERVICES_ASSET_SAMPLE_SIZE,
+        size: MAX_NUMBER_OF_SERVICES,
         track_total_hits: false,
         query: {
           bool: {
