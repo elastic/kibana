@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { applyActionListEsSearchMock } from './mocks';
+import { applyActionListEsSearchMock } from '../mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchActionResponses } from './fetch_action_responses';
-import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
+import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 
 describe('fetchActionResponses()', () => {
   let esClientMock: ElasticsearchClientMock;

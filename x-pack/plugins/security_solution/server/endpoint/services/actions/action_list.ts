@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { fetchActionResponses } from './fetch_action_responses';
+import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';

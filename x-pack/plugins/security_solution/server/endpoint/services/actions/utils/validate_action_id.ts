@@ -7,10 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { NotFoundError } from '../../errors';
-import { catchAndWrapError } from '../../utils';
-import type { LogsEndpointAction } from '../../../../common/endpoint/types';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
+import { NotFoundError } from '../../../errors';
+import { catchAndWrapError } from '../../../utils';
+import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 
 /**
  * Validates that a given action ID is a valid Endpoint action
@@ -27,15 +27,12 @@ export const validateActionId = async (
       body: {
         query: {
           bool: {
-            filter: [
-              { term: { action_id: actionId } },
-              { term: { input_type: 'endpoint' } },
-              { term: { type: 'INPUT_ACTION' } },
-            ],
+            filter: [{ term: { action_id: actionId } }, { term: { type: 'INPUT_ACTION' } }],
           },
         },
       },
       _source: false,
+      size: 1,
     })
     .catch(catchAndWrapError);
 

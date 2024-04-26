@@ -11,10 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
-import { catchAndWrapError } from '../../utils';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
+} from '../../../../../common/endpoint/types';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
+import { catchAndWrapError } from '../../../utils';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 
 interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
