@@ -11,7 +11,7 @@ import { createBrowserHistory } from 'history';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
   fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -68,8 +68,7 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       return {
         api,
         Component: () => {
-          const sloId = useStateFromPublishingSubject(sloId$);
-          const sloInstanceId = useStateFromPublishingSubject(sloInstanceId$);
+          const [sloId, sloInstanceId] = useBatchedPublishingSubjects(sloId$, sloInstanceId$);
           const I18nContext = deps.i18n.Context;
           const queryClient = new QueryClient();
 
