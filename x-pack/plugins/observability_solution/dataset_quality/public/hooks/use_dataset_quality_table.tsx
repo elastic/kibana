@@ -61,10 +61,6 @@ export const useDatasetQualityTable = () => {
 
   const datasets = useSelector(service, (state) => state.context.datasets);
 
-  const isDatasetQualityPageIdle = useSelector(service, (state) =>
-    state.matches('datasets.loaded.idle')
-  );
-
   const toggleInactiveDatasets = useCallback(
     () => service.send({ type: 'TOGGLE_INACTIVE_DATASETS' }),
     [service]
@@ -86,7 +82,7 @@ export const useDatasetQualityTable = () => {
         return;
       }
 
-      if (isDatasetQualityPageIdle) {
+      if (!flyout?.insightsTimeRange) {
         service.send({
           type: 'OPEN_FLYOUT',
           dataset: selectedDataset,
@@ -99,7 +95,7 @@ export const useDatasetQualityTable = () => {
         dataset: selectedDataset,
       });
     },
-    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
+    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
   );
 
   const isActive = useCallback(

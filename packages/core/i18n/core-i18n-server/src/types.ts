@@ -19,4 +19,9 @@ export interface I18nServiceSetup {
    * Return the absolute paths to translation files currently in use.
    */
   getTranslationFiles(): string[];
+
+  /**
+   * Returns the hash generated from the current translations.
+   */
+  getTranslationHash(): string;
 }
