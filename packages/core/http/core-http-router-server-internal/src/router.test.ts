@@ -111,6 +111,36 @@ describe('Router', () => {
     }
   );
 
+  it('constructs lazily provided validations once (idempotency)', async () => {
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
+    const lazyValidation = jest.fn(() => fooValidation);
+    router.post(
+      {
+        path: '/',
+        validate: lazyValidation,
+      },
+      (context, req, res) => res.ok()
+    );
+    const [{ handler }] = router.getRoutes();
+    for (let i = 0; i < 10; i++) {
+      await handler(
+        createRequestMock({
+          params: { foo: 1 },
+          query: { foo: 1 },
+          payload: { foo: 1 },
+        }),
+        mockResponseToolkit
+      );
+    }
+    expect(lazyValidation).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers pluginId if provided', () => {
+    const pluginId = Symbol('test');
+    const router = new Router('', logger, enhanceWithContext, { pluginId });
+    expect(router.pluginId).toBe(pluginId);
+  });
+
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);

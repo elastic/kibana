@@ -55,7 +55,7 @@ export const Reason: FC = () => {
       },
     });
     telemetry.reportDetailsFlyoutOpened({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'preview',
     });
   }, [eventId, openPreviewPanel, indexName, scopeId, telemetry]);

@@ -134,21 +134,19 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       </p>
       <p>
         {isCrawler && (
-          <>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.deleteConnectorModal.crawler.warning"
-                defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
-                values={{
-                  connectorName: (
-                    <strong>
-                      <EuiTextColor color="danger">{connectorName}</EuiTextColor>
-                    </strong>
-                  ),
-                }}
-              />
-            </EuiText>
-          </>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.deleteConnectorModal.crawler.warning"
+              defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
+              values={{
+                connectorName: (
+                  <strong>
+                    <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
         )}
         {!isCrawler && (
           <EuiText>
@@ -199,13 +197,13 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
           }
         >
           <EuiFieldText
+            data-test-subj="entSearchContent-connectors-deleteModal-input"
+            data-telemetry-id="entSearchContent-connectors-deleteModal-input"
             onChange={(e) => setInputConnectorName(e.target.value)}
             value={inputConnectorName}
           />
         </EuiFormRow>
       </EuiForm>
     </EuiConfirmModal>
-  ) : (
-    <></>
-  );
+  ) : null;
 };

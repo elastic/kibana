@@ -12,10 +12,9 @@ import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_contex
 export function useDefaultTimeRange() {
   const { core } = useApmPluginContext();
 
-  const { from: rangeFrom, to: rangeTo } =
-    core.uiSettings.get<TimePickerTimeDefaults>(
-      UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-    );
+  const { from: rangeFrom, to: rangeTo } = core.uiSettings.get<TimePickerTimeDefaults>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
 
   return { rangeFrom, rangeTo };
 }

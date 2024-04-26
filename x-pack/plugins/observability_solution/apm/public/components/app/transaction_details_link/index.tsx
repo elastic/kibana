@@ -17,12 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function TransactionDetailsByNameLink() {
   const {
-    query: {
-      rangeFrom = 'now-15m',
-      rangeTo = 'now',
-      transactionName,
-      serviceName,
-    },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', transactionName, serviceName },
   } = useApmParams('/link-to/transaction');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -67,10 +62,9 @@ export function TransactionDetailsByNameLink() {
           iconType="apmTrace"
           title={
             <h2>
-              {i18n.translate(
-                'xpack.apm.transactionDetailsLink.h2.transactionNotFound',
-                { defaultMessage: 'No transaction found' }
-              )}
+              {i18n.translate('xpack.apm.transactionDetailsLink.h2.transactionNotFound', {
+                defaultMessage: 'No transaction found',
+              })}
             </h2>
           }
         />
@@ -89,10 +83,9 @@ export function TransactionDetailsByNameLink() {
         iconType="apmTrace"
         title={
           <h2>
-            {i18n.translate(
-              'xpack.apm.transactionDetailsLink.h2.fetchingTransactionLabel',
-              { defaultMessage: 'Fetching transaction...' }
-            )}
+            {i18n.translate('xpack.apm.transactionDetailsLink.h2.fetchingTransactionLabel', {
+              defaultMessage: 'Fetching transaction...',
+            })}
           </h2>
         }
       />

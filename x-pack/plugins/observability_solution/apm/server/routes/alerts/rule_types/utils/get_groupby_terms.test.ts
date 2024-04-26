@@ -10,12 +10,7 @@ import { getGroupByTerms } from './get_groupby_terms';
 describe('get terms fields for multi-terms aggregation', () => {
   it('returns terms array based on the group-by fields', () => {
     const ruleParams = {
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
     const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([

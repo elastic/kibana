@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  wildcardQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
@@ -84,72 +80,66 @@ export async function getServiceTransactionStats({
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(
-          documentType,
-          useDurationSummary
-        ),
+        field: getDurationFieldForTransactions(documentType, useDurationSummary),
       },
     },
     ...outcomes,
   };
 
-  const response = await apmEventClient.search(
-    'get_service_transaction_stats',
-    {
-      apm: {
-        sources: [
-          {
-            documentType,
-            rollupInterval,
-          },
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...serviceGroupWithOverflowQuery(serviceGroup),
-              ...wildcardQuery(SERVICE_NAME, searchQuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_service_transaction_stats', {
+    apm: {
+      sources: [
+        {
+          documentType,
+          rollupInterval,
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              overflowCount: {
-                sum: {
-                  field: SERVICE_OVERFLOW_COUNT,
-                },
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...serviceGroupWithOverflowQuery(serviceGroup),
+            ...wildcardQuery(SERVICE_NAME, searchQuery),
+          ],
+        },
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            overflowCount: {
+              sum: {
+                field: SERVICE_OVERFLOW_COUNT,
               },
-              services: {
-                terms: {
-                  field: SERVICE_NAME,
-                  size: maxNumServices,
-                },
-                aggs: {
-                  transactionType: {
-                    terms: {
-                      field: TRANSACTION_TYPE,
-                    },
-                    aggs: {
-                      ...metrics,
-                      environments: {
-                        terms: {
-                          field: SERVICE_ENVIRONMENT,
-                        },
+            },
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: maxNumServices,
+              },
+              aggs: {
+                transactionType: {
+                  terms: {
+                    field: TRANSACTION_TYPE,
+                  },
+                  aggs: {
+                    ...metrics,
+                    environments: {
+                      terms: {
+                        field: SERVICE_ENVIRONMENT,
                       },
-                      sample: {
-                        top_metrics: {
-                          metrics: [{ field: AGENT_NAME } as const],
-                          sort: {
-                            '@timestamp': 'desc' as const,
-                          },
+                    },
+                    sample: {
+                      top_metrics: {
+                        metrics: [{ field: AGENT_NAME } as const],
+                        sort: {
+                          '@timestamp': 'desc' as const,
                         },
                       },
                     },
@@ -160,8 +150,8 @@ export async function getServiceTransactionStats({
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return {
     serviceStats:
@@ -179,9 +169,9 @@ export async function getServiceTransactionStats({
             topTransactionTypeBucket?.environments.buckets.map(
               (environmentBucket) => environmentBucket.key as string
             ) ?? [],
-          agentName: topTransactionTypeBucket?.sample.top[0].metrics[
-            AGENT_NAME
-          ] as AgentName | undefined,
+          agentName: topTransactionTypeBucket?.sample.top[0].metrics[AGENT_NAME] as
+            | AgentName
+            | undefined,
           latency: topTransactionTypeBucket?.avg_duration.value,
           transactionErrorRate: topTransactionTypeBucket
             ? calculateFailedTransactionRate(topTransactionTypeBucket)
@@ -195,7 +185,6 @@ export async function getServiceTransactionStats({
             : undefined,
         };
       }) ?? [],
-    serviceOverflowCount:
-      response.aggregations?.sample?.overflowCount?.value || 0,
+    serviceOverflowCount: response.aggregations?.sample?.overflowCount?.value || 0,
   };
 }

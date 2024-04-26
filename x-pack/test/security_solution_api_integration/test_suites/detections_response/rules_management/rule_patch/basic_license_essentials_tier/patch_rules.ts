@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(expectedRule);
       });
 
-      it('@brokenInServerless should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
+      it('@skipInServerless should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's type to machine learning

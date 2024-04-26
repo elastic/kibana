@@ -51,7 +51,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
       rowRenderers,
       isDetails,
       isExpandable,
-      isDraggable,
+      isDraggable = false,
       isExpanded,
       colIndex,
       eventId,

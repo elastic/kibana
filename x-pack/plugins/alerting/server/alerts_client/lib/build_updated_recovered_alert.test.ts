@@ -25,6 +25,7 @@ import {
   VERSION,
   ALERT_TIME_RANGE,
   ALERT_END,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -76,6 +77,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [SPACE_IDS]: ['default'],
       [VERSION]: '8.8.1',
       [TAGS]: ['rule-', '-tags'],
+      [ALERT_CONSECUTIVE_MATCHES]: 0,
     });
   });
 
@@ -125,6 +127,7 @@ describe('buildUpdatedRecoveredAlert', () => {
             lte: '2023-03-30T12:27:28.159Z',
           },
           uuid: 'abcdefg',
+          consecutive_matches: 0,
         },
         version: '8.8.1',
       },

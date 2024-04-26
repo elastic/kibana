@@ -35,12 +35,9 @@ export function AlertingFlyout(props: Props) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
-  const environment =
-    'environment' in query ? query.environment! : ENVIRONMENT_ALL.value;
-  const transactionType =
-    'transactionType' in query ? query.transactionType : undefined;
-  const transactionName =
-    'transactionName' in query ? query.transactionName : undefined;
+  const environment = 'environment' in query ? query.environment! : ENVIRONMENT_ALL.value;
+  const transactionType = 'transactionType' in query ? query.transactionType : undefined;
+  const transactionName = 'transactionName' in query ? query.transactionName : undefined;
   const errorGroupingKey = 'groupId' in path ? path.groupId : undefined;
 
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -54,10 +51,7 @@ export function AlertingFlyout(props: Props) {
   const addAlertFlyout = useMemo(
     () =>
       ruleType &&
-      services.triggersActionsUi.getAddRuleFlyout<
-        RuleTypeParams,
-        AlertMetadata
-      >({
+      services.triggersActionsUi.getAddRuleFlyout<RuleTypeParams, AlertMetadata>({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
         ruleTypeId: ruleType,

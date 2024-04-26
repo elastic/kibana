@@ -92,7 +92,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   unisolate: {
     automated: {
-      endpoint: true,
+      endpoint: false,
       sentinel_one: false,
     },
     manual: {
@@ -102,7 +102,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   upload: {
     automated: {
-      endpoint: true,
+      endpoint: false,
       sentinel_one: false,
     },
     manual: {
@@ -112,12 +112,12 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   'get-file': {
     automated: {
-      endpoint: true,
+      endpoint: false,
       sentinel_one: false,
     },
     manual: {
       endpoint: true,
-      sentinel_one: false,
+      sentinel_one: true,
     },
   },
   'kill-process': {
@@ -132,7 +132,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   execute: {
     automated: {
-      endpoint: true,
+      endpoint: false,
       sentinel_one: false,
     },
     manual: {
@@ -152,7 +152,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   'running-processes': {
     automated: {
-      endpoint: true,
+      endpoint: false,
       sentinel_one: false,
     },
     manual: {

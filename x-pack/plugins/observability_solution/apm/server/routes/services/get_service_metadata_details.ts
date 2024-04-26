@@ -106,28 +106,13 @@ export async function getServiceMetadataDetails({
 
   const params = {
     apm: {
-      events: [
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
+      events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
     },
-    sort: [
-      { _score: { order: 'desc' as const } },
-      { '@timestamp': { order: 'desc' as const } },
-    ],
+    sort: [{ _score: { order: 'desc' as const } }, { '@timestamp': { order: 'desc' as const } }],
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [
-        SERVICE,
-        AGENT,
-        HOST,
-        CONTAINER,
-        KUBERNETES,
-        CLOUD,
-        LABEL_TELEMETRY_AUTO_VERSION,
-      ],
+      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -184,12 +169,10 @@ export async function getServiceMetadataDetails({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_metadata_details',
-    params
-  );
+  const response = await apmEventClient.search('get_service_metadata_details', params);
 
-  if (response.hits.total.value === 0) {
+  const hit = response.hits.hits[0]?._source as ServiceMetadataDetailsRaw | undefined;
+  if (!hit) {
     return {
       service: undefined,
       container: undefined,
@@ -197,13 +180,10 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } =
-    response.hits.hits[0]._source as ServiceMetadataDetailsRaw;
+  const { service, agent, host, kubernetes, container, cloud, labels } = hit;
 
   const serviceMetadataDetails = {
-    versions: response.aggregations?.serviceVersions.buckets.map(
-      (bucket) => bucket.key as string
-    ),
+    versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
     runtime: service.runtime,
     framework: service.framework?.name,
     agent,
@@ -220,8 +200,7 @@ export async function getServiceMetadataDetails({
         }
       : undefined;
 
-  const totalNumberInstances =
-    response.aggregations?.totalNumberInstances.value;
+  const totalNumberInstances = response.aggregations?.totalNumberInstances.value;
 
   const containerDetails =
     host || container || totalNumberInstances || kubernetes
@@ -229,9 +208,7 @@ export async function getServiceMetadataDetails({
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
           os: host?.os?.platform,
           totalNumberInstances,
-          ids: response.aggregations?.containerIds.buckets.map(
-            (bucket) => bucket.key as string
-          ),
+          ids: response.aggregations?.containerIds.buckets.map((bucket) => bucket.key as string),
         }
       : undefined;
 
@@ -257,9 +234,7 @@ export async function getServiceMetadataDetails({
         availabilityZones: response.aggregations?.availabilityZones.buckets.map(
           (bucket) => bucket.key as string
         ),
-        regions: response.aggregations?.regions.buckets.map(
-          (bucket) => bucket.key as string
-        ),
+        regions: response.aggregations?.regions.buckets.map((bucket) => bucket.key as string),
         machineTypes: response.aggregations?.machineTypes.buckets.map(
           (bucket) => bucket.key as string
         ),

@@ -24,7 +24,7 @@ export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOp
  * @throws UnsupportedResponseActionsAgentTypeError
  */
 export const getResponseActionsClient = (
-  agentType: string | ResponseActionAgentType,
+  agentType: ResponseActionAgentType,
   constructorOptions: GetResponseActionsClientConstructorOptions
 ): ResponseActionsClient => {
   switch (agentType) {
@@ -32,9 +32,9 @@ export const getResponseActionsClient = (
       return new EndpointActionsClient(constructorOptions);
     case 'sentinel_one':
       return new SentinelOneActionsClient(constructorOptions);
+    default:
+      throw new UnsupportedResponseActionsAgentTypeError(
+        `Agent type [${agentType}] does not support response actions`
+      );
   }
-
-  throw new UnsupportedResponseActionsAgentTypeError(
-    `Agent type [${agentType}] does not support response actions`
-  );
 };

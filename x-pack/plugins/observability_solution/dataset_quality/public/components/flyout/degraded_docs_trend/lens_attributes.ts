@@ -32,11 +32,19 @@ enum DatasetQualityLensColumn {
 
 const MAX_BREAKDOWN_SERIES = 5;
 
-export function getLensAttributes(
-  color: string,
-  dataView: DataView = defaultDataView,
-  breakdownFieldName?: string
-) {
+interface GetLensAttributesParams {
+  color: string;
+  dataView: DataView;
+  query: string;
+  breakdownFieldName?: string;
+}
+
+export function getLensAttributes({
+  color,
+  dataView = defaultDataView,
+  query = '',
+  breakdownFieldName,
+}: GetLensAttributesParams) {
   const columnOrder = [
     DatasetQualityLensColumn.Date,
     DatasetQualityLensColumn.CountIgnored,
@@ -81,7 +89,7 @@ export function getLensAttributes(
       filters: [],
       query: {
         language: 'kuery',
-        query: '',
+        query,
       },
       visualization: {
         axisTitlesVisibilitySettings: {
@@ -234,7 +242,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
               },
               orderDirection: 'desc',
               otherBucket: true,
-              missingBucket: false,
+              missingBucket: true,
               parentFormat: {
                 id: 'terms',
               },

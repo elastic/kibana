@@ -1144,8 +1144,29 @@
         "label": "useFetchDataViews",
         "description": [],
         "signature": [
-          "() => ",
-          "UseFetchDataViewsResponse"
+          "() => { isLoading: boolean; isError: boolean; isSuccess: boolean; data: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewListItem",
+            "text": "DataViewListItem"
+          },
+          "[] | undefined; refetch: <TPageData>(options?: (",
+          "RefetchOptions",
+          " & ",
+          "RefetchQueryFilters",
+          "<TPageData>) | undefined) => Promise<",
+          "QueryObserverResult",
+          "<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewListItem",
+            "text": "DataViewListItem"
+          },
+          "[], unknown>>; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/public/hooks/use_fetch_data_views.ts",
         "deprecated": false,

@@ -972,6 +972,21 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOSuggestionsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOSuggestionsResponse",
+        "description": [],
+        "signature": [
+          "{ tags: { label: string; value: string; count: number; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_suggestions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.GroupingsSchema",
         "type": "Type",
         "tags": [],
@@ -9497,6 +9512,32 @@
           "; }>; }>]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOSuggestionsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOSuggestionsResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ tags: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ label: ",
+          "StringC",
+          "; value: ",
+          "StringC",
+          "; count: ",
+          "NumberC",
+          "; }>>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_suggestions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

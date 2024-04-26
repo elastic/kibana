@@ -27,7 +27,13 @@ const SUGGESTED_BM25_FIELDS = [
 
 const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text', 'page_content_text'];
+const SUGGESTED_SOURCE_FIELDS = [
+  'body_content',
+  'content',
+  'text',
+  'page_content_text',
+  'text_field',
+];
 
 interface Matches {
   queryMatches: any[];
@@ -215,6 +221,14 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
   const indexFields = Object.keys(fieldDescriptors).reduce<IndexFields>(
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
+
+      // if there are no source fields, we don't need to suggest anything
+      if (indexFieldDescriptors.source_fields.length === 0) {
+        return {
+          ...acc,
+          [index]: [],
+        };
+      }
 
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)

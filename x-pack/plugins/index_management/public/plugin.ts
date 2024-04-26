@@ -15,16 +15,11 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import {
-  IndexManagementPluginSetup,
-  SetupDependencies,
-  StartDependencies,
-  IndexManagementPluginStart,
-} from '@kbn/index-management';
+import { IndexManagementPluginSetup, IndexManagementPluginStart } from '@kbn/index-management';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
-import { ClientConfigType } from './types';
+import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
@@ -108,8 +103,7 @@ export class IndexMgmtUIPlugin
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
-    const { fleet, usageCollection, cloud, share, console } = plugins;
-
+    const { fleet, usageCollection, cloud, share, console, ml } = plugins;
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
@@ -130,6 +124,7 @@ export class IndexMgmtUIPlugin
             share,
             cloud,
             console,
+            ml,
           },
           services: {
             extensionsService: this.extensionsService,

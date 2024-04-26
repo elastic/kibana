@@ -69,9 +69,7 @@ export const GenerateMap: Story<{}> = () => {
           <EuiButton
             data-test-subj="apmGenerateMapGenerateServiceMapButton"
             onClick={() => {
-              setElements(
-                generateServiceMapElements({ size, hasAnomalies: true })
-              );
+              setElements(generateServiceMapElements({ size, hasAnomalies: true }));
               setJson('');
             }}
           >
@@ -142,11 +140,7 @@ export const MapFromJSON: Story<{}> = () => {
 
   return (
     <div>
-      <Cytoscape
-        key={uniqueKeyCounter}
-        elements={elements}
-        height={getHeight()}
-      >
+      <Cytoscape key={uniqueKeyCounter} elements={elements} height={getHeight()}>
         <Centerer />
       </Cytoscape>
       <EuiForm isInvalid={error !== undefined} error={error}>
@@ -204,10 +198,7 @@ export const MapFromJSON: Story<{}> = () => {
 export const TodoApp: Story<{}> = () => {
   return (
     <div>
-      <Cytoscape
-        elements={exampleResponseTodo.elements}
-        height={window.innerHeight}
-      >
+      <Cytoscape elements={exampleResponseTodo.elements} height={window.innerHeight}>
         <Centerer />
       </Cytoscape>
     </div>
@@ -217,10 +208,7 @@ export const TodoApp: Story<{}> = () => {
 export const OpbeansAndBeats: Story<{}> = () => {
   return (
     <div>
-      <Cytoscape
-        elements={exampleResponseOpbeansBeats.elements}
-        height={window.innerHeight}
-      >
+      <Cytoscape elements={exampleResponseOpbeansBeats.elements} height={window.innerHeight}>
         <Centerer />
       </Cytoscape>
     </div>
@@ -230,10 +218,7 @@ export const OpbeansAndBeats: Story<{}> = () => {
 export const HipsterStore: Story<{}> = () => {
   return (
     <div>
-      <Cytoscape
-        elements={exampleResponseHipsterStore.elements}
-        height={window.innerHeight}
-      >
+      <Cytoscape elements={exampleResponseHipsterStore.elements} height={window.innerHeight}>
         <Centerer />
       </Cytoscape>
     </div>

@@ -76,9 +76,7 @@ async function init() {
   }
 
   if ((!esHost || !kbHost) && !cloudId) {
-    console.error(
-      'Please provide either: --esHost and --kbHost or --cloudId\n'
-    );
+    console.error('Please provide either: --esHost and --kbHost or --cloudId\n');
 
     console.log('Example 1:');
     console.log(
@@ -94,9 +92,7 @@ async function init() {
   }
 
   if ((!username || !password) && !apiKey) {
-    console.error(
-      'Please provide either: --username and --password or --apiKey \n'
-    );
+    console.error('Please provide either: --username and --password or --apiKey \n');
 
     console.log('Example 1:');
     console.log('--username elastic --password changeme\n');

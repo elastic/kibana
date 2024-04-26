@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.bedrock',
         'actions:.cases',
         'actions:.cases-webhook',
+        'actions:.crowdstrike',
         'actions:.d3security',
         'actions:.email',
         'actions:.gen-ai',

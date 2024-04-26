@@ -12,6 +12,7 @@ import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -52,6 +53,7 @@ const enabledActionTypes = [
   '.gen-ai',
   '.d3security',
   SENTINELONE_CONNECTOR_ID,
+  CROWDSTRIKE_CONNECTOR_ID,
   '.slack',
   '.slack_api',
   '.tines',

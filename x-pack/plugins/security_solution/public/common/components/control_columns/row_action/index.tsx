@@ -122,7 +122,7 @@ const RowActionComponent = ({
         },
       });
       telemetry.reportDetailsFlyoutOpened({
-        tableId,
+        location: tableId,
         panel: 'right',
       });
     }

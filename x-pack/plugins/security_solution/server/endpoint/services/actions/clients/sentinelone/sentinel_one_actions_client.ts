@@ -14,15 +14,18 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetActivitiesResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
-  NormalizedExternalConnectorClientExecuteOptions,
   NormalizedExternalConnectorClient,
+  NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
 import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
@@ -42,12 +45,18 @@ import type {
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityEsDoc,
+  SentinelOneGetFileRequestMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
 } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
@@ -69,6 +78,48 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(SENTINELONE_CONNECTOR_ID);
   }
 
+  private async handleResponseActionCreation<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      Partial<TMeta>
+    >
+  ): Promise<{
+    actionEsDoc: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+    actionDetails: ActionDetails<TOutputContent, TParameters>;
+  }> {
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: reqIndexOptions.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    return {
+      actionEsDoc: actionRequestDoc,
+      actionDetails: await this.fetchActionDetails<ActionDetails<TOutputContent, TParameters>>(
+        actionRequestDoc.EndpointActions.action_id
+      ),
+    };
+  }
+
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
@@ -77,7 +128,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
       TOutputContent,
-      TMeta
+      Partial<TMeta> // Partial<> because the common Meta properties are actually set in this method for all requests
     >
   ): Promise<
     LogsEndpointAction<TParameters, TOutputContent, TMeta & SentinelOneActionRequestCommonMeta>
@@ -110,10 +161,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
-  private async sendAction(
+  private async sendAction<T = unknown>(
     actionType: SUB_ACTION,
     actionParams: object
-  ): Promise<ActionTypeExecutorResult<unknown>> {
+  ): Promise<ActionTypeExecutorResult<T>> {
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       params: {
         subAction: actionType,
@@ -141,7 +192,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
 
-    return actionSendResponse;
+    return actionSendResponse as ActionTypeExecutorResult<T>;
   }
 
   /** Gets agent details directly from SentinelOne */
@@ -174,7 +225,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       s1ApiResponse = response.data;
     } catch (err) {
       throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]`,
+        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]: ${err.message}`,
         500,
         err
       );
@@ -236,21 +287,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
 
     if (
       !actionRequestDoc.error &&
@@ -263,9 +301,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           command: actionRequestDoc.EndpointActions.data.command,
         },
       });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     }
 
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return actionDetails;
   }
 
   async release(
@@ -300,21 +340,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
 
     if (
       !actionRequestDoc.error &&
@@ -327,9 +354,110 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           command: actionRequestDoc.EndpointActions.data.command,
         },
       });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     }
 
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return actionDetails;
+  }
+
+  async getFile(
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      ResponseActionGetFileParameters,
+      ResponseActionGetFileOutputContent,
+      Partial<SentinelOneGetFileRequestMeta>
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'get-file',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+      const timestamp = new Date().toISOString();
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.FETCH_AGENT_FILES, {
+            agentUUID: actionRequest.endpoint_ids[0],
+            files: [actionRequest.parameters.path],
+            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+          });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+
+      if (!error) {
+        const { id: agentId } = await this.getAgentDetails(actionRequest.endpoint_ids[0]);
+
+        const activitySearchCriteria: SentinelOneGetActivitiesParams = {
+          // Activity type for fetching a file from a host machine in SentinelOne:
+          // {
+          //   "id": 81
+          //   "action": "User Requested Fetch Files",
+          //   "descriptionTemplate": "The management user {{ username }} initiated a fetch file command to the agent {{ computer_name }} ({{ external_ip }}).",
+          // },
+          activityTypes: '81',
+          limit: 1,
+          sortBy: 'createdAt',
+          sortOrder: 'asc',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          createdAt__gte: timestamp,
+          agentIds: agentId,
+        };
+
+        // Fetch the Activity log entry for this get-file request and store needed data
+        const activityLogSearchResponse = await this.sendAction<
+          SentinelOneGetActivitiesResponse<{ commandBatchUuid: string }>
+        >(SUB_ACTION.GET_ACTIVITIES, activitySearchCriteria);
+
+        this.log.debug(
+          `Search of activity log with:\n${stringify(
+            activitySearchCriteria
+          )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
+        );
+
+        if (activityLogSearchResponse.data?.data.length) {
+          const activityLogItem = activityLogSearchResponse.data?.data[0];
+
+          reqIndexOptions.meta = {
+            commandBatchUuid: activityLogItem?.data.commandBatchUuid,
+            activityId: activityLogItem?.id,
+          };
+        } else {
+          this.log.warn(
+            `Unable to find a fetch file command entry in SentinelOne activity log. May be unable to complete response action`
+          );
+        }
+      }
+    }
+
+    return (
+      await this.handleResponseActionCreation<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >(reqIndexOptions)
+    ).actionDetails;
   }
 
   async processPendingActions({

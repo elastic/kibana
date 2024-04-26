@@ -10,12 +10,7 @@ import { nonEmptyStringRt, toNumberRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  probabilityRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getTransaction } from '../transactions/get_transaction';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import {
@@ -23,16 +18,10 @@ import {
   TopTracesPrimaryStatsResponse,
 } from './get_top_traces_primary_stats';
 import { getTraceItems, TraceItems } from './get_trace_items';
-import {
-  getTraceSamplesByQuery,
-  TraceSamplesResponse,
-} from './get_trace_samples_by_query';
+import { getTraceSamplesByQuery, TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import {
-  CriticalPathResponse,
-  getAggregatedCriticalPath,
-} from './get_aggregated_critical_path';
+import { CriticalPathResponse, getAggregatedCriticalPath } from './get_aggregated_critical_path';
 import { getSpan } from '../transactions/get_span';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { Span } from '../../../typings/es_schemas/ui/span';
@@ -231,10 +220,7 @@ const findTracesRoute = createApmServerRoute({
       environmentRt,
       t.type({
         query: t.string,
-        type: t.union([
-          t.literal(TraceSearchType.kql),
-          t.literal(TraceSearchType.eql),
-        ]),
+        type: t.union([t.literal(TraceSearchType.kql), t.literal(TraceSearchType.eql)]),
       }),
     ]),
   }),
@@ -278,9 +264,7 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ criticalPath: CriticalPathResponse | null }> => {
+  handler: async (resources): Promise<{ criticalPath: CriticalPathResponse | null }> => {
     const {
       params: {
         body: { traceIds, start, end, serviceName, transactionName },

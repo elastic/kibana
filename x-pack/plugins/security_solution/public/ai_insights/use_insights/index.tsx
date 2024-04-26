@@ -16,6 +16,7 @@ import {
   AlertsInsightsPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocalStorage, useSessionStorage } from 'react-use';
@@ -60,7 +61,7 @@ export const useInsights = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // get alerts index pattern and allow lists from the assistant context:
-  const { alertsIndexPattern, knowledgeBase } = useAssistantContext();
+  const { alertsIndexPattern, knowledgeBase, traceOptions } = useAssistantContext();
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
@@ -116,6 +117,12 @@ export const useInsights = ({
       alertsIndexPattern: alertsIndexPattern ?? '',
       anonymizationFields: anonymizationFields?.data ?? [],
       connectorId: connectorId ?? '',
+      langSmithProject: isEmpty(traceOptions?.langSmithProject)
+        ? undefined
+        : traceOptions?.langSmithProject,
+      langSmithApiKey: isEmpty(traceOptions?.langSmithApiKey)
+        ? undefined
+        : traceOptions?.langSmithApiKey,
       size: knowledgeBase.latestAlerts,
       replacements: {}, // no need to re-use replacements in the current implementation
       subAction: 'invokeAI', // non-streaming
@@ -227,6 +234,8 @@ export const useInsights = ({
     setLocalStorageGenerationIntervals,
     setSessionStorageCachedInsights,
     toasts,
+    traceOptions?.langSmithApiKey,
+    traceOptions?.langSmithProject,
   ]);
 
   return {

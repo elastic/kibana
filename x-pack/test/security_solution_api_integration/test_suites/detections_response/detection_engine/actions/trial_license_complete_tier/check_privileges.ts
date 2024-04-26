@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless @brokenInServerless check_privileges', () => {
+  describe('@ess @serverless @skipInServerless check_privileges', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');

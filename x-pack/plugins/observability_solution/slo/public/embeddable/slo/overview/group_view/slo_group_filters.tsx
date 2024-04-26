@@ -13,6 +13,8 @@ import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiText } 
 import { i18n } from '@kbn/i18n';
 
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
+import { useGetSettings } from '../../../../pages/slo_settings/use_get_settings';
+
 import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
@@ -23,27 +25,6 @@ interface Option {
   value: string;
   text: string;
 }
-
-export const groupByOptions: Option[] = [
-  {
-    text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.tags', {
-      defaultMessage: 'Tags',
-    }),
-    value: 'slo.tags',
-  },
-  {
-    text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.status', {
-      defaultMessage: 'Status',
-    }),
-    value: 'status',
-  },
-  {
-    text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.sliType', {
-      defaultMessage: 'SLI type',
-    }),
-    value: 'slo.indicator.type',
-  },
-];
 
 interface Props {
   onSelected: (prop: string, value: string | Array<string | undefined> | Filter[]) => void;
@@ -70,6 +51,41 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
       ui: { SearchBar },
     },
   } = useKibana().services;
+  const { data: settings } = useGetSettings();
+
+  const hasRemoteEnabled =
+    settings && (settings.useAllRemoteClusters || settings.selectedRemoteClusters.length > 0);
+
+  const groupByOptions: Option[] = [
+    {
+      text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.tags', {
+        defaultMessage: 'Tags',
+      }),
+      value: 'slo.tags',
+    },
+    {
+      text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.status', {
+        defaultMessage: 'Status',
+      }),
+      value: 'status',
+    },
+    {
+      text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.sliType', {
+        defaultMessage: 'SLI type',
+      }),
+      value: 'slo.indicator.type',
+    },
+    ...(hasRemoteEnabled
+      ? [
+          {
+            text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.remoteCluster', {
+              defaultMessage: 'Remote cluster',
+            }),
+            value: '_index',
+          },
+        ]
+      : []),
+  ];
   const { dataView } = useCreateDataView({
     indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   });
@@ -120,6 +136,12 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
       setSelectedGroupByLabel(
         i18n.translate('xpack.slo.sloGroupConfiguration.sliTypeLabel', {
           defaultMessage: 'SLI type',
+        })
+      );
+    } else if (selectedGroupBy === '_index') {
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.remoteClusterLabel', {
+          defaultMessage: 'Remote cluster',
         })
       );
     }
