@@ -10,8 +10,7 @@ import {
   SUB_ACTION,
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import type { ExpandedEventFieldsObject } from '../../../../../../common/types/response_actions';
-import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -125,9 +124,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }> {
     const search = {
       index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
-      fields: [{ field: 'crowdstrike.event.HostName' }],
       size: 1,
-      _source: false,
+      _source: ['crowdstrike.event.HostName'],
       body: {
         query: {
           bool: {
@@ -136,25 +134,20 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         },
       },
     };
-    const result = await this.options.esClient
-      .search(search, {
-        ignore: [404],
-      })
-      .then((eventDetails) => {
-        return expandDottedObject(
-          eventDetails.hits.hits?.[0]?.fields as ExpandedEventFieldsObject,
-          true
-        ) as { crowdstrike: { event: { HostName: string } } };
-      })
-      .catch((err) => {
-        throw new ResponseActionsClientError(
-          `Failed to fetch event document: ${err.message}`,
-          err.statusCode ?? 500,
-          err
-        );
-      });
+    const result: SearchResponse<{ crowdstrike: { event: { HostName: string } } }> =
+      await this.options.esClient
+        .search<{ crowdstrike: { event: { HostName: string } } }>(search, {
+          ignore: [404],
+        })
+        .catch((err) => {
+          throw new ResponseActionsClientError(
+            `Failed to fetch event document: ${err.message}`,
+            err.statusCode ?? 500,
+            err
+          );
+        });
 
-    return result;
+    return result.hits.hits?.[0]?._source as { crowdstrike: { event: { HostName: string } } };
   }
 
   // TODO TC: uncomment when working on agent status support

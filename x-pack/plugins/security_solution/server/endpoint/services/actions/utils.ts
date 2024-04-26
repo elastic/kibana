@@ -601,8 +601,8 @@ export const getActionRequestExpiration = (): string => {
 };
 
 export const ELASTIC_RESPONSE_ACTION_MESSAGE = (
-  username?: string,
-  responseActionId?: string
+  username: string = 'system',
+  responseActionId: string = 'response-action-id not found' // I believe actionId exists always and there is a mismatch in types, but this default is just a safety net
 ): string =>
   i18n.translate('xpack.securitySolution.responseActions.comment.message', {
     values: { username, responseActionId },
