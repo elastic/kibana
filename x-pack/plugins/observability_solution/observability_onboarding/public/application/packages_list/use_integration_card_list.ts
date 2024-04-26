@@ -79,12 +79,12 @@ function formatCustomCards(
 function useFilteredCards(
   rewriteUrl: (card: IntegrationCardItem) => IntegrationCardItem,
   integrationsList: IntegrationCardItem[],
-  selectedCategory: string,
+  selectedCategory: string[],
   customCards?: CustomCard[]
 ) {
   return useMemo(() => {
     const integrationCards = integrationsList
-      .filter((card) => card.categories.includes(selectedCategory))
+      .filter((card) => card.categories.some((category) => selectedCategory.includes(category)))
       .map(rewriteUrl)
       .map(toCustomCard);
 
@@ -112,7 +112,7 @@ function useFilteredCards(
  */
 export function useIntegrationCardList(
   integrationsList: IntegrationCardItem[],
-  selectedCategory = 'observability',
+  selectedCategory: string[],
   customCards?: CustomCard[],
   flowCategory?: string | null,
   flowSearch?: string,
