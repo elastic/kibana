@@ -3530,6 +3530,17 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.startedAtOverridden",
+            "type": "boolean",
+            "tags": [],
+            "label": "startedAtOverridden",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorOptions.state",
             "type": "Uncategorized",
             "tags": [],
@@ -3598,7 +3609,8 @@
             "label": "getTimeRange",
             "description": [],
             "signature": [
-              "(timeWindow?: string | undefined) => { dateStart: string; dateEnd: string; }"
+              "(timeWindow?: string | undefined) => ",
+              "GetTimeRangeResult"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -4861,6 +4873,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.API_KEY_PENDING_INVALIDATION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_KEY_PENDING_INVALIDATION_TYPE",
+        "description": [],
+        "signature": [
+          "\"api_key_pending_invalidation\""
+        ],
+        "path": "x-pack/plugins/alerting/server/saved_objects/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.BulkEditOperation",
         "type": "Type",
         "tags": [],
@@ -5361,7 +5388,7 @@
           },
           ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; featureIds?: string[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
-          ">>; getSpaceId: () => string | undefined; getAuthorization: () => ",
+          ">>; scheduleBackfill: (params: Readonly<{ end?: string | undefined; } & { start: string; ruleId: string; }>[]) => Promise<(Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"pending\" | \"timeout\" | \"complete\"; runAt: string; }>[]; createdAt: string; status: \"error\" | \"running\" | \"pending\" | \"timeout\" | \"complete\"; duration: string; }> | Readonly<{} & { error: Readonly<{} & { error: string; message: string; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"pending\" | \"timeout\" | \"complete\"; runAt: string; }>[]; createdAt: string; status: \"error\" | \"running\" | \"pending\" | \"timeout\" | \"complete\"; duration: string; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; ruleIds?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: Readonly<{ end?: string | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"pending\" | \"timeout\" | \"complete\"; runAt: string; }>[]; createdAt: string; status: \"error\" | \"running\" | \"pending\" | \"timeout\" | \"complete\"; duration: string; }>[]; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
             "pluginId": "alerting",
             "scope": "server",
