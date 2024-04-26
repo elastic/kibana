@@ -7,41 +7,28 @@
 
 import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const es = getService('es');
   const securitySolutionApi = getService('securitySolutionApi');
 
   describe('@ess @serverless export_rules', () => {
     describe('exporting rules', () => {
-      beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
-        await createRule(supertest, log, getCustomQueryRuleParams());
+        const ruleToExport = getCustomQueryRuleParams();
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
@@ -50,13 +37,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should export a single rule with a rule_id', async () => {
         const ruleToExport = getCustomQueryRuleParams();
 
-        await createRule(supertest, log, ruleToExport);
+        await securitySolutionApi.createRule({ body: ruleToExport });
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
 
@@ -84,13 +68,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should have export summary reflecting a number of rules', async () => {
-        await createRule(supertest, log, getCustomQueryRuleParams());
+        const ruleToExport = getCustomQueryRuleParams();
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
 
@@ -108,14 +91,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleToExport1 = getCustomQueryRuleParams({ rule_id: 'rule-1' });
         const ruleToExport2 = getCustomQueryRuleParams({ rule_id: 'rule-2' });
 
-        await createRule(supertest, log, ruleToExport1);
-        await createRule(supertest, log, ruleToExport2);
+        await securitySolutionApi.createRule({ body: ruleToExport1 });
+        await securitySolutionApi.createRule({ body: ruleToExport2 });
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send()
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
           .expect(200)
           .parse(binaryToString);
 
