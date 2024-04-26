@@ -19,5 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./es_query_rule/es_query_rule'));
     loadTestFile(require.resolve('./slos'));
     loadTestFile(require.resolve('./synthetics'));
+    loadTestFile(require.resolve('./dataset_quality_api_integration'));
   });
 }

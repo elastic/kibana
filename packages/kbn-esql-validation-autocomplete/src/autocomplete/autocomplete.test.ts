@@ -255,7 +255,7 @@ describe('autocomplete', () => {
           statement,
           offset,
           context,
-          async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
         const suggestionInertTextSorted = suggestions
@@ -1190,7 +1190,7 @@ describe('autocomplete', () => {
         statement,
         triggerOffset + 1,
         context,
-        async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({
@@ -1206,7 +1206,7 @@ describe('autocomplete', () => {
         statement,
         triggerOffset + 1,
         context,
-        async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
@@ -1222,7 +1222,7 @@ describe('autocomplete', () => {
         statement,
         triggerOffset + 1,
         context,
-        async (text) => (text ? await getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
+        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
     }

@@ -91,6 +91,22 @@ function createComparisonDefinition(
         ],
         returnType: 'boolean',
       },
+      ...['date', 'number'].flatMap((type) => [
+        {
+          params: [
+            { name: 'left', type },
+            { name: 'right', type: 'string', constantOnly: true },
+          ],
+          returnType: 'boolean',
+        },
+        {
+          params: [
+            { name: 'right', type: 'string', constantOnly: true },
+            { name: 'right', type },
+          ],
+          returnType: 'boolean',
+        },
+      ]),
       ...extraSignatures,
     ],
   };
@@ -99,14 +115,14 @@ function createComparisonDefinition(
 export const builtinFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', 'date', ['date', 'time_literal'], ['time_literal', 'date']],
+    ['number', ['date', 'time_literal'], ['time_literal', 'date']],
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
