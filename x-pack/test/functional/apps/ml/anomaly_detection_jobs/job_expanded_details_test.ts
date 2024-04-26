@@ -59,9 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.api.createAnomalyDetectionJob(multiMetricJobConfig);
 
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToSettings();
-
       await ml.api.createCalendar(calendarId, {
         description: 'calendar for job list test',
         job_ids: [jobId],
@@ -77,6 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.closeAnomalyDetectionJob(jobId);
       await ml.api.deleteAnomalyDetectionJobES(jobId);
+
+      await ml.api.deleteAnomalyDetectionJobES(jobsSummaryId);
+
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });

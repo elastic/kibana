@@ -53,6 +53,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
         timeout: 3_000,
       });
+      await jobTable.ensureDetailsClosed(jobId);
     },
 
     async editAnnotation(jobId: string, newAnnotationText: string): Promise<void> {
