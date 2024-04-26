@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { AppDependencies } from '../../../..';
-import { mountWithIntl, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { AppContextProvider } from '../../../../app_context';
-import { MappingsEditorProvider } from '../../mappings_editor_context';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { ConfigurationForm } from '../../components/configuration_form';
 import { WithAppDependencies } from './helpers/setup_environment';
 import { TestSubjects } from './helpers/mappings_editor.helpers';
