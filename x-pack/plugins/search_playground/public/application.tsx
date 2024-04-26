@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
@@ -27,7 +27,7 @@ export const renderApp = (
   const navigation = services.navigation;
 
   ReactDOM.render(
-    <KibanaThemeProvider theme={core.theme}>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <Router basename={appBasePath}>
@@ -57,7 +57,7 @@ export const renderApp = (
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
 

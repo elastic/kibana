@@ -613,6 +613,130 @@ describe('policy preconfiguration', () => {
       );
     });
 
+    it('should update keep_monitoring_enabled for existing managed policies', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        { name: 'test_package1' } as PackagePolicy,
+      ]);
+
+      mockConfiguredPolicies.set('test-id', {
+        name: 'Test policy',
+        description: 'Test policy description',
+        unenroll_timeout: 120,
+        namespace: 'default',
+        id: 'test-id',
+        is_managed: true,
+        package_policies: [
+          {
+            name: 'test_package1',
+          },
+        ],
+      } as PreconfiguredAgentPolicy);
+
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            is_managed: true,
+            keep_monitoring_alive: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'test_package1',
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+        expect.anything(), // soClient
+        expect.anything(), // esClient
+        'test-id',
+        expect.objectContaining({
+          download_source_id: 'ds-test-id',
+          is_managed: true,
+          keep_monitoring_alive: true,
+          name: 'Test policy',
+        }),
+        {
+          force: true,
+        }
+      );
+    });
+
+    it('should update keep_monitoring_enabled for existing managed policies (even is the SO is out-of-sync)', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        { name: 'test_package1' } as PackagePolicy,
+      ]);
+
+      mockConfiguredPolicies.set('test-id', {
+        name: 'Test policy',
+        description: 'Test policy description',
+        unenroll_timeout: 120,
+        namespace: 'default',
+        id: 'test-id',
+        is_managed: false, // SO out-of-sync and mark the policy as not managed
+        package_policies: [
+          {
+            name: 'test_package1',
+          },
+        ],
+      } as PreconfiguredAgentPolicy);
+
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            is_managed: true,
+            keep_monitoring_alive: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'test_package1',
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+        expect.anything(), // soClient
+        expect.anything(), // esClient
+        'test-id',
+        expect.objectContaining({
+          download_source_id: 'ds-test-id',
+          is_managed: true,
+          keep_monitoring_alive: true,
+          name: 'Test policy',
+        }),
+        {
+          force: true,
+        }
+      );
+    });
+
     it('should not try to recreate preconfigure package policy that has been renamed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

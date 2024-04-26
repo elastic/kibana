@@ -98,10 +98,13 @@ function FieldListItemComponent(
     isExpanded,
     path,
   } = field;
+
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
   const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
+
+  const isSemanticText = source.type === 'semantic_text';
 
   const indentCreateField =
     (treeDepth + 1) * CHILD_FIELD_INDENT_SIZE +
@@ -287,6 +290,12 @@ function FieldListItemComponent(
                   : getTypeLabelFromField(source)}
               </EuiBadge>
             </EuiFlexItem>
+
+            {isSemanticText && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{source.inference_id}</EuiBadge>
+              </EuiFlexItem>
+            )}
 
             {isShadowed && (
               <EuiFlexItem grow={false}>
