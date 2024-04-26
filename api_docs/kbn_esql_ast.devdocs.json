@@ -212,7 +212,7 @@
         "label": "getAstAndSyntaxErrors",
         "description": [],
         "signature": [
-          "(text: string | undefined) => Promise<{ errors: ",
+          "(text: string | undefined) => { errors: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -228,7 +228,7 @@
             "section": "def-common.ESQLAst",
             "text": "ESQLAst"
           },
-          "; }>"
+          "; }"
         ],
         "path": "packages/kbn-esql-ast/src/ast_parser.ts",
         "deprecated": false,
@@ -987,7 +987,23 @@
             "section": "def-common.EditorError",
             "text": "EditorError"
           },
-          "[]; }>"
+          "[]; }> | { ast: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAst",
+            "text": "ESQLAst"
+          },
+          "; errors: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.EditorError",
+            "text": "EditorError"
+          },
+          "[]; }"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,

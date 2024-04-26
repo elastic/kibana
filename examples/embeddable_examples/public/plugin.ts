@@ -20,34 +20,14 @@ import {
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { setupApp } from './app/setup_app';
-import {
-  FilterDebuggerEmbeddableFactory,
-  FilterDebuggerEmbeddableFactoryDefinition,
-  FILTER_DEBUGGER_EMBEDDABLE,
-} from './filter_debugger';
-import {
-  HelloWorldEmbeddableFactory,
-  HelloWorldEmbeddableFactoryDefinition,
-  HELLO_WORLD_EMBEDDABLE,
-} from './hello_world';
-import {
-  ListContainerFactory,
-  ListContainerFactoryDefinition,
-  LIST_CONTAINER,
-} from './list_container';
-import {
-  SimpleEmbeddableFactory,
-  SimpleEmbeddableFactoryDefinition,
-  SIMPLE_EMBEDDABLE,
-} from './migrations';
 import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
-import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
+import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -65,52 +45,12 @@ export interface StartDeps {
   fieldFormats: FieldFormatsStart;
 }
 
-interface ExampleEmbeddableFactories {
-  getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;
-  getListContainerEmbeddableFactory: () => ListContainerFactory;
-  getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
-  getFilterDebuggerEmbeddableFactory: () => FilterDebuggerEmbeddableFactory;
-}
-
-export interface StartApi {
-  createSampleData: () => Promise<void>;
-  factories: ExampleEmbeddableFactories;
-}
-
-export class EmbeddableExamplesPlugin implements Plugin<void, StartApi, SetupDeps, StartDeps> {
-  private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
-
+export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
     setupApp(core, developerExamples);
-
-    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        HELLO_WORLD_EMBEDDABLE,
-        new HelloWorldEmbeddableFactoryDefinition()
-      );
-
-    this.exampleEmbeddableFactories.getMigrationsEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        SIMPLE_EMBEDDABLE,
-        new SimpleEmbeddableFactoryDefinition()
-      );
-
-    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        LIST_CONTAINER,
-        new ListContainerFactoryDefinition(async () => ({
-          embeddableServices: (await core.getStartServices())[1].embeddable,
-        }))
-      );
-
-    this.exampleEmbeddableFactories.getFilterDebuggerEmbeddableFactory =
-      embeddable.registerEmbeddableFactory(
-        FILTER_DEBUGGER_EMBEDDABLE,
-        new FilterDebuggerEmbeddableFactoryDefinition()
-      );
   }
 
-  public start(core: CoreStart, deps: StartDeps): StartApi {
+  public start(core: CoreStart, deps: StartDeps) {
     registerCreateFieldListAction(deps.uiActions);
     registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
@@ -128,12 +68,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, StartApi, SetupDep
     });
 
     registerAddSearchPanelAction(deps.uiActions);
-    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_ID, async () => {
-      const { getSearchEmbeddableFactory } = await import(
-        './react_embeddables/search/search_react_embeddable'
-      );
-      return getSearchEmbeddableFactory(deps);
-    });
+    registerSearchEmbeddable(deps);
 
     registerCreateDataTableAction(deps.uiActions);
     registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
@@ -142,11 +77,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, StartApi, SetupDep
       );
       return getDataTableFactory(core, deps);
     });
-
-    return {
-      createSampleData: async () => {},
-      factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
-    };
   }
 
   public stop() {}
