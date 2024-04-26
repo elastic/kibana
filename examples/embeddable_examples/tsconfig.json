@@ -36,6 +36,7 @@
     "@kbn/cell-actions",
     "@kbn/kibana-react-plugin",
     "@kbn/react-kibana-context-render",
-    "@kbn/unified-data-table"
+    "@kbn/unified-data-table",
+    "@kbn/kibana-utils-plugin"
   ]
 }
