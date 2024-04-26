@@ -27,4 +27,4 @@ export const apiHasAppContext = (unknownApi: unknown): unknownApi is HasAppConte
 
 export type NavigateToEditorApi = HasUniqueId &
   HasEditorApp &
-  Partial<HasSerializableState & HasParentApi<unknown>>;
+  Partial<HasSerializableState & HasAppContext & HasParentApi<unknown>>;

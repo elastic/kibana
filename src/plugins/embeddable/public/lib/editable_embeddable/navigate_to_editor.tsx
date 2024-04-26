@@ -7,7 +7,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { apiPublishesSearchSession } from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiPublishesSearchSession } from '@kbn/presentation-publishing';
 import { firstValueFrom } from 'rxjs';
 import { EmbeddableStart } from '../..';
 import { apiHasAppContext, NavigateToEditorApi } from './types';
@@ -24,14 +24,18 @@ export const navigateToEditor = async (
   const appTarget = await api.getEditorAppTarget();
 
   if (appTarget.editApp && appTarget.editPath) {
-    const parentApiContext = apiHasAppContext(api.parentApi)
-      ? api.parentApi.getAppContext()
-      : undefined;
-    let currentAppId = parentApiContext?.currentAppId;
+    /** The editor has a dedicated app */
+    const apiContext = apiHasAppContext(api) ? api.getAppContext() : undefined;
+    const parentApiContext =
+      apiHasParentApi(api) && apiHasAppContext(api.parentApi)
+        ? api.parentApi.getAppContext()
+        : undefined;
+    let currentAppId = parentApiContext?.currentAppId ?? apiContext?.currentAppId;
     if (!currentAppId) {
+      /** If the API is not providing a current app ID, then get it from Core */
       currentAppId = await firstValueFrom(services.core.application.currentAppId$);
     }
-    const serializedState = api.serializeState?.();
+    const serializedState = api.serializeState?.().rawState;
 
     if (parentApiContext && currentAppId && serializedState) {
       /**
@@ -39,13 +43,12 @@ export const navigateToEditor = async (
        * current app can be returned to and (2) there is actually state to transfer
        */
       const stateTransfer = services.embeddable.getStateTransfer();
-
       await stateTransfer.navigateToEditor(appTarget.editApp, {
         path: appTarget.editPath,
         state: {
           embeddableId: api.uuid,
           originatingApp: currentAppId,
-          originatingPath: parentApiContext?.getCurrentPath?.(),
+          originatingPath: parentApiContext?.getCurrentPath?.() ?? apiContext?.getCurrentPath?.(),
           searchSessionId: apiPublishesSearchSession(api.parentApi)
             ? api.parentApi.searchSessionId$.getValue()
             : undefined,
@@ -62,6 +65,7 @@ export const navigateToEditor = async (
   }
 
   if (appTarget.editUrl) {
+    /** The editor does not have a dedicated app - added for legacy support */
     window.location.href = appTarget.editUrl;
   }
 };

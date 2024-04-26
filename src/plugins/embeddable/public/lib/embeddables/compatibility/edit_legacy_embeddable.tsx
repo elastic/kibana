@@ -6,36 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
 import { LegacyCompatibleEmbeddable } from '../../../embeddable_panel/types';
 import { core, embeddableStart } from '../../../kibana_services';
 import { Container } from '../../containers';
+import { navigateToEditor } from '../../editable_embeddable';
 import { EmbeddableFactoryNotFoundError } from '../../errors';
-import { EmbeddableEditorState } from '../../state_transfer';
 import { isExplicitInputWithAttributes } from '../embeddable_factory';
 import { EmbeddableInput } from '../i_embeddable';
 
 const getExplicitInput = (embeddable: LegacyCompatibleEmbeddable) =>
   (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
   embeddable.getInput();
-
-const getAppTarget = async (embeddable: LegacyCompatibleEmbeddable) => {
-  const app = embeddable ? embeddable.getOutput().editApp : undefined;
-  const path = embeddable ? embeddable.getOutput().editPath : undefined;
-  if (!app || !path) return;
-
-  const currentAppId = await firstValueFrom(core.application.currentAppId$);
-  if (!currentAppId) return { app, path };
-
-  const state: EmbeddableEditorState = {
-    originatingApp: currentAppId,
-    valueInput: getExplicitInput(embeddable),
-    embeddableId: embeddable.id,
-    searchSessionId: embeddable.getInput().searchSessionId,
-    originatingPath: embeddable.getAppContext()?.getCurrentPath?.(),
-  };
-  return { app, path, state };
-};
 
 export const editLegacyEmbeddable = async (embeddable: LegacyCompatibleEmbeddable) => {
   const { editableWithExplicitInput } = embeddable.getOutput();
@@ -64,25 +45,26 @@ export const editLegacyEmbeddable = async (embeddable: LegacyCompatibleEmbeddabl
     return;
   }
 
-  const appTarget = await getAppTarget(embeddable);
-  const stateTransfer = embeddableStart.getStateTransfer();
-  if (appTarget) {
-    if (stateTransfer && appTarget.state) {
-      await stateTransfer.navigateToEditor(appTarget.app, {
-        path: appTarget.path,
-        state: appTarget.state,
-      });
-    } else {
-      await core.application.navigateToApp(appTarget.app, { path: appTarget.path });
+  await navigateToEditor(
+    { core, embeddable: embeddableStart },
+    {
+      ...embeddable,
+      serializeState: () => ({
+        rawState: getExplicitInput(embeddable),
+      }),
+      getAppContext: () => {
+        return {
+          getCurrentPath: embeddable.getAppContext()?.getCurrentPath,
+        };
+      },
+      getEditorAppTarget: () =>
+        Promise.resolve({
+          editPath: embeddable.getOutput().editPath,
+          editApp: embeddable.getOutput().editApp,
+          editUrl: embeddable.getOutput().editUrl,
+        }),
     }
-    return;
-  }
-
-  const href = embeddable.getOutput().editUrl;
-  if (href) {
-    window.location.href = href;
-    return;
-  }
+  );
 };
 
 export const canEditEmbeddable = (embeddable: LegacyCompatibleEmbeddable) => {
