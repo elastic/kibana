@@ -17,8 +17,6 @@ export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
     id: ADD_SEARCH_ACTION_ID,
     grouping: [addPanelGrouping],
     getDisplayName: () => 'Search example',
-    getDisplayNameTooltip: () =>
-      'Demonstrates how to use global filters, global time range, panel time range, and global query state in an embeddable',
     getIconType: () => 'search',
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);
