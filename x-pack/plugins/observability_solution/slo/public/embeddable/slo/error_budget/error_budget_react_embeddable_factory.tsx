@@ -84,7 +84,6 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                 <KibanaContextProvider services={deps}>
                   <QueryClientProvider client={queryClient}>
                     <SloErrorBudget
-                      data-test-id="superTestEmbeddable"
                       sloId={sloId}
                       sloInstanceId={sloInstanceId}
                       reloadSubject={reload$}
