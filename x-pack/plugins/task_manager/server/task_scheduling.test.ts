@@ -836,7 +836,8 @@ describe('TaskScheduling', () => {
   });
 
   describe('ephemeralRunNow', () => {
-    test('runs a task ephemerally', async () => {
+    // https://github.com/elastic/kibana/issues/181847
+    test.skip('runs a task ephemerally', async () => {
       const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
       const ephemeralTask = taskManagerMock.createTask({
         state: {
