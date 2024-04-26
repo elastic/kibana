@@ -7,10 +7,53 @@
  */
 
 import { omit } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
-import { isPlainObjectType } from '../../utils/is_plain_object_type';
-import { DocumentNodeProcessor } from '../types';
+import { isPlainObjectType } from '../../../utils/is_plain_object_type';
+import { DocumentNodeProcessor } from '../../types';
 
+/**
+ * Creates a node processor to merge object schema definitions when there are no conflicts
+ * between them.
+ *
+ * After inlining references or any other transformations a schema may have `allOf`
+ * with multiple object schema items. Object schema has `properties` field describing object
+ * properties and optional `required` field to say which object properties are not optional.
+ *
+ * Conflicts between object schemas do now allow merge them. The following conflicts may appear
+ *
+ * - Two or more object schemas define the same named object field but definition is different
+ * - Some of object schemas have optional properties like `readOnly`
+ * - Two or more object schemas have conflicting optional properties values
+ *
+ * Example:
+ *
+ * The following `allOf` containing multiple object schemas
+ *
+ * ```yaml
+ * allOf:
+ *   - type: object
+ *     properties:
+ *       fieldA:
+ *         $ref: '#/components/schemas/FieldA'
+ *   - type: object
+ *     properties:
+ *       fieldB:
+ *         type: string
+ * ```
+ *
+ * will be transformed to
+ *
+ * ```yaml
+ * allOf:
+ *   - type: object
+ *     properties:
+ *       fieldA:
+ *         $ref: '#/components/schemas/FieldA'
+ *       fieldB:
+ *         type: string
+ * ```
+ */
 export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProcessor {
   return {
     leave(allOfNode) {
@@ -54,7 +97,7 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
 }
 
 function canMergeObjectSchemas(schemas: OpenAPIV3.SchemaObject[]): boolean {
-  const propNames = new Set<string>();
+  const props = new Map<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>();
   let objectSchemasCounter = 1;
 
   for (let i = 0; i < schemas.length; ++i) {
@@ -71,11 +114,13 @@ function canMergeObjectSchemas(schemas: OpenAPIV3.SchemaObject[]): boolean {
     const nodePropNames = Object.keys(node.properties);
 
     for (const nodePropName of nodePropNames) {
-      if (propNames.has(nodePropName)) {
+      const propSchema = props.get(nodePropName);
+
+      if (propSchema && !deepEqual(propSchema, node.properties[nodePropName])) {
         return false;
       }
 
-      propNames.add(nodePropName);
+      props.set(nodePropName, node.properties[nodePropName]);
     }
 
     objectSchemasCounter++;

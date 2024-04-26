@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor } from '../types';
-
-export function createUnfoldSingleAllOfItemProcessor(): DocumentNodeProcessor {
-  return {
-    leave(node) {
-      if (!('allOf' in node) || !Array.isArray(node.allOf) || node.allOf.length > 1) {
-        return;
-      }
-
-      Object.assign(node, node.allOf[0]);
-      delete node.allOf;
-    },
-  };
-}
+export * from './flatten_folded_all_of_items';
+export * from './merge_non_conflicting_all_of_items';
+export * from './unfold_single_all_of_item';

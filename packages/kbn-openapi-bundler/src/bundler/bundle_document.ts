@@ -19,9 +19,11 @@ import { createModifyRequiredProcessor } from './document_processors/modify_requ
 import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
 import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
-import { createFlattenFoldedAllOfItemsProcessor } from './document_processors/flatten_folded_all_of_items';
-import { createMergeNonConflictingAllOfItemsProcessor } from './document_processors/merge_non_conflicting_all_of_items';
-import { createUnfoldSingleAllOfItemProcessor } from './document_processors/unfold_single_all_of_item';
+import {
+  createFlattenFoldedAllOfItemsProcessor,
+  createMergeNonConflictingAllOfItemsProcessor,
+  createUnfoldSingleAllOfItemProcessor,
+} from './document_processors/reduce_all_of_items';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {

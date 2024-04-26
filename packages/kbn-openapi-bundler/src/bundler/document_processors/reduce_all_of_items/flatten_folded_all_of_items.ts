@@ -6,8 +6,45 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor } from '../types';
+import { DocumentNodeProcessor } from '../../types';
 
+/**
+ * Creates a node processor to flatten folded allOf items.
+ *
+ * Folded `allOf` schemas is usually a result of inlining references.
+ *
+ * Example:
+ *
+ * The following folded `allOf`s
+ *
+ * ```yaml
+ * allOf:
+ *   - allOf:
+ *     - type: object
+ *       properties:
+ *         fieldA:
+ *           $ref: '#/components/schemas/FieldA'
+ *     - type: object
+ *       properties:
+ *         fieldB:
+ *           type: string
+ * ```
+ *
+ * will be transformed to
+ *
+ * ```yaml
+ * allOf:
+ *   - type: object
+ *     properties:
+ *       fieldA:
+ *         $ref: '#/components/schemas/FieldA'
+ *   - type: object
+ *     properties:
+ *       fieldB:
+ *         type: string
+ * ```
+ *
+ */
 export function createFlattenFoldedAllOfItemsProcessor(): DocumentNodeProcessor {
   return {
     leave(node) {
