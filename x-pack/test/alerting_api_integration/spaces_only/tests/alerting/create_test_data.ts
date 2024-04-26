@@ -93,7 +93,7 @@ export async function createEsDocumentsWithGroups({
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
-async function createEsDocument(
+export async function createEsDocument(
   es: Client,
   epochMillis: number,
   testedValue: number,
