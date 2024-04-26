@@ -9,6 +9,7 @@ import { RecursivePartial } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
@@ -55,6 +56,7 @@ function LatencyChart({
   timeZone,
   customAlertEvaluationThreshold,
   kuery = '',
+  filters,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -72,6 +74,7 @@ function LatencyChart({
   timeZone: string;
   customAlertEvaluationThreshold?: number;
   kuery?: string;
+  filters?: BoolQuery;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -95,6 +98,7 @@ function LatencyChart({
             query: {
               environment,
               kuery,
+              filters: filters ? JSON.stringify(filters) : undefined,
               start,
               end,
               transactionType,
@@ -121,6 +125,7 @@ function LatencyChart({
       transactionName,
       preferred,
       kuery,
+      filters,
     ]
   );
   const alertEvalThreshold =

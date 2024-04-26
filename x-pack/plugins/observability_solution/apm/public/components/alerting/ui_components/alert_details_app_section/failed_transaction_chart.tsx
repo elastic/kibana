@@ -8,6 +8,7 @@
 
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { BoolQuery } from '@kbn/es-query';
 import React from 'react';
 import { RecursivePartial } from '@elastic/eui';
 import { Theme } from '@elastic/charts';
@@ -47,6 +48,7 @@ function FailedTransactionChart({
   comparisonChartTheme,
   timeZone,
   kuery = '',
+  filters,
 }: {
   transactionType: string;
   setTransactionType?: (transactionType: string) => void;
@@ -58,6 +60,7 @@ function FailedTransactionChart({
   comparisonChartTheme: RecursivePartial<Theme>;
   timeZone: string;
   kuery?: string;
+  filters?: BoolQuery;
 }) {
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
@@ -85,6 +88,7 @@ function FailedTransactionChart({
               query: {
                 environment,
                 kuery,
+                filters: filters ? JSON.stringify(filters) : undefined,
                 start,
                 end,
                 transactionType,
@@ -98,7 +102,17 @@ function FailedTransactionChart({
         );
       }
     },
-    [environment, serviceName, start, end, transactionType, transactionName, preferred, kuery]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+      kuery,
+      filters,
+    ]
   );
   const timeseriesErrorRate = [
     {

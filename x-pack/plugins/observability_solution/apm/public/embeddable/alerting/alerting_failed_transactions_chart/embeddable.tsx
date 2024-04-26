@@ -74,6 +74,7 @@ export class APMAlertingFailedTransactionsChartEmbeddable extends AbstractEmbedd
           timeZone={input.timeZone}
           rangeFrom={input.rangeFrom}
           rangeTo={input.rangeTo}
+          filters={input.filters}
         />
       </APMEmbeddableContext>,
       node

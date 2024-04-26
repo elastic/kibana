@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Theme } from '@elastic/charts';
+import { BoolQuery } from '@kbn/es-query';
 import {
   RecursivePartial,
   EuiFlexItem,
@@ -42,6 +43,7 @@ function ThroughputChart({
   offset,
   timeZone,
   kuery = '',
+  filters,
 }: {
   transactionType: string;
   setTransactionType?: (transactionType: string) => void;
@@ -55,9 +57,8 @@ function ThroughputChart({
   offset: string;
   timeZone: string;
   kuery?: string;
+  filters?: BoolQuery;
 }) {
-  /* Throughput Chart */
-
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -79,6 +80,7 @@ function ThroughputChart({
             query: {
               environment,
               kuery,
+              filters: filters ? JSON.stringify(filters) : undefined,
               start,
               end,
               transactionType,
@@ -91,7 +93,17 @@ function ThroughputChart({
         });
       }
     },
-    [environment, serviceName, start, end, transactionType, transactionName, preferred, kuery]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+      kuery,
+      filters,
+    ]
   );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
   const timeseriesThroughput = [

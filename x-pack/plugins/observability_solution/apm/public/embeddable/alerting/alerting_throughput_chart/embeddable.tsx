@@ -73,6 +73,7 @@ export class APMAlertingThroughputChartEmbeddable extends AbstractEmbeddable<
           rangeFrom={input.rangeFrom}
           rangeTo={input.rangeTo}
           transactionName={input.transactionName}
+          filters={input.filters}
         />
       </APMEmbeddableContext>,
       node

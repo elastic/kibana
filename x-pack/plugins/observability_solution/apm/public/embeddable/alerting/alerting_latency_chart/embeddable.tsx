@@ -73,6 +73,7 @@ export class APMAlertingLatencyChartEmbeddable extends AbstractEmbeddable<
           rangeTo={input.rangeTo}
           latencyThresholdInMicroseconds={input.latencyThresholdInMicroseconds}
           transactionName={input.transactionName}
+          filters={input.filters}
         />
       </APMEmbeddableContext>,
       node

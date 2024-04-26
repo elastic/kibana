@@ -17,6 +17,7 @@ export function APMAlertingFailedTransactionsChart({
   rangeFrom,
   rangeTo,
   transactionName,
+  filters,
 }: EmbeddableAPMAlertingVizProps) {
   const {
     environment,
@@ -49,6 +50,7 @@ export function APMAlertingFailedTransactionsChart({
       comparisonChartTheme={comparisonChartTheme}
       timeZone={timeZone}
       kuery={kuery}
+      filters={filters}
     />
   );
 }

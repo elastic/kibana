@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { TopAlert } from '@kbn/observability-plugin/public';
+import type { BoolQuery } from '@kbn/es-query';
 
 export interface EmbeddableAPMAlertingVizProps {
   rule: Rule;
@@ -17,6 +18,7 @@ export interface EmbeddableAPMAlertingVizProps {
   rangeTo?: string;
   timeZone: string;
   latencyThresholdInMicroseconds?: number;
+  filters?: BoolQuery;
 }
 
 export type APMAlertingVizEmbeddableInput = EmbeddableInput &
@@ -25,5 +27,4 @@ export type APMAlertingVizEmbeddableInput = EmbeddableInput &
     environment?: string;
     transactionType?: string;
     kuery?: string;
-    filters?: string;
   };

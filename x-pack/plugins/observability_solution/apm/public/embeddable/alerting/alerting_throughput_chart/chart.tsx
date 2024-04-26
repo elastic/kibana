@@ -17,6 +17,7 @@ export function APMAlertingThroughputChart({
   rangeFrom,
   rangeTo,
   transactionName,
+  filters,
 }: EmbeddableAPMAlertingVizProps) {
   const {
     kuery,
@@ -52,6 +53,7 @@ export function APMAlertingThroughputChart({
       comparisonEnabled={false}
       offset={''}
       kuery={kuery}
+      filters={filters}
     />
   );
 }
