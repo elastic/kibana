@@ -38,9 +38,14 @@ export async function getServicesFromAssets({
     });
 
     const services = response.hits.hits.map((hit) => ({
-      ...hit._source?.service,
-      signalTypes: hit._source?.asset?.signalTypes,
-      identifyingMetadata: hit._source?.asset?.identifying_metadata,
+      asset: {
+        signalTypes: hit._source?.asset?.signalTypes,
+        identifyingMetadata: hit._source?.asset?.identifying_metadata,
+      },
+      service: {
+        name: hit._source?.service?.name,
+        environment: hit._source?.service?.environment,
+      },
     }));
 
     return services;

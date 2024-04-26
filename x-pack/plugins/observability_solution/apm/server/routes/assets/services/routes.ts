@@ -11,22 +11,23 @@ import { createAssetsESClient } from '../../../lib/helpers/create_es_client/crea
 import { getServicesFromAssets } from './get_services_from_assets';
 import { kueryRt, rangeRt } from '../../default_api_types';
 
-interface SignalTypes {
+type SignalTypes = {
   'asset.trace'?: boolean;
   'asset.logs'?: boolean;
-}
+};
 
 type ServiceItem = {
   environment: string;
   name: string;
-  node: {
-    name: string;
-  };
-  signalTypes: SignalTypes[];
+};
+
+type AssetItem = {
+  signalTypes: SignalTypes;
   identifyingMetadata: string[];
 };
+
 export interface ServicesItemsResponse {
-  services: ServiceItem[];
+  services: Array<{ asset: AssetItem; service: ServiceItem }>;
 }
 
 const servicesAssetsRoute = createApmServerRoute({
