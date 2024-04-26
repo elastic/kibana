@@ -13,7 +13,7 @@ import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collectio
 import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
-import { EmbeddableConsoleProps } from './embeddable_console';
+import { EmbeddedConsoleView } from './embeddable_console';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -55,5 +55,11 @@ export interface ConsolePluginStart {
   /**
    * EmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana
    */
-  EmbeddableConsole?: FC<EmbeddableConsoleProps>;
+  EmbeddableConsole?: FC<{}>;
+  /**
+   * Register an alternate view for the Embedded Console
+   *
+   * When registering an alternate view ensure that the content component you register is lazy loaded.
+   */
+  registerEmbeddedConsoleAlternateView?: (view: EmbeddedConsoleView | null) => void;
 }

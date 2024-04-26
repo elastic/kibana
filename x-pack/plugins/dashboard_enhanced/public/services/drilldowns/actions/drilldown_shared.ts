@@ -53,8 +53,8 @@ export const createDrilldownTemplatesFromSiblings = (
   if (!apiIsPresentationContainer(parentApi)) return [];
 
   const templates: DrilldownTemplate[] = [];
-  for (const childId of parentApi.getChildIds()) {
-    const child = parentApi.getChild(childId) as Partial<HasUniqueId & PublishesPanelTitle>;
+  for (const childId of Object.keys(parentApi.children$.value)) {
+    const child = parentApi.children$.value[childId] as Partial<HasUniqueId & PublishesPanelTitle>;
     if (childId === embeddable.uuid) continue;
     if (!apiHasDynamicActions(child)) continue;
     const events = child.enhancements.dynamicActions.state.get().events;

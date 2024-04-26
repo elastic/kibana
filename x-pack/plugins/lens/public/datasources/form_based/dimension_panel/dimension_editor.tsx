@@ -800,7 +800,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     compressed={true}
                     rowHeader="firstName"
                     columns={columnsSidebar}
-                    responsive={false}
+                    responsiveBreakpoint={false}
                   />
                 </EuiPanel>
               </EuiPopover>

@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('navigation - functional tests', function () {
+    loadTestFile(require.resolve('./solution_nav_switcher'));
     loadTestFile(require.resolve('./user_optin_optout'));
   });
 }

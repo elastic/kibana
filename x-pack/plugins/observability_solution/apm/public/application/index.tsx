@@ -8,11 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import {
-  AppMountParameters,
-  CoreStart,
-  APP_WRAPPER_CLASS,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ConfigSchema } from '..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps, ApmServices } from '../plugin';

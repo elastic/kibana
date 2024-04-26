@@ -410,6 +410,7 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            toasts: toastNotifications,
           });
         }
       },

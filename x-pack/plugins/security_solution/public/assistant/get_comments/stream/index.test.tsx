@@ -19,14 +19,19 @@ jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connect
 jest.mock('./use_stream');
 
 const content = 'Test Content';
+const mockAbortStream = jest.fn();
 const testProps = {
-  refetchCurrentConversation: jest.fn(),
+  abortStream: mockAbortStream,
+  actionTypeId: '.gen-ai',
+  connectorId: 'test',
   content,
   index: 1,
   isControlsEnabled: true,
+  isEnabledLangChain: true,
+  refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
+  setIsStreaming: jest.fn(),
   transformMessage: jest.fn(),
-  connectorId: 'test',
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
@@ -76,12 +81,13 @@ describe('StreamComment', () => {
     expect(screen.getByTestId('regenerateResponseButton')).toBeInTheDocument();
   });
 
-  it('calls setComplete when StopGeneratingButton is clicked', () => {
+  it('calls setComplete and abortStream when StopGeneratingButton is clicked', () => {
     render(<StreamComment {...testProps} reader={mockReader} isFetching={true} />);
 
     fireEvent.click(screen.getByTestId('stopGeneratingButton'));
 
     expect(mockSetComplete).toHaveBeenCalled();
+    expect(mockAbortStream).toHaveBeenCalled();
   });
 
   it('displays an error message correctly', () => {
@@ -94,6 +100,6 @@ describe('StreamComment', () => {
     });
     render(<StreamComment {...testProps} />);
 
-    expect(screen.getByTestId('messsage-error')).toBeInTheDocument();
+    expect(screen.getByTestId('message-error')).toBeInTheDocument();
   });
 });

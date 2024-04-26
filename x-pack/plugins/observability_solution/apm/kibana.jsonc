@@ -57,8 +57,7 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "maps",
-      "observabilityAIAssistant"
+      "maps"
     ]
   }
 }

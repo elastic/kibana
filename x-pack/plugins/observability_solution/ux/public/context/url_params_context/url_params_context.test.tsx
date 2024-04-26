@@ -45,8 +45,7 @@ describe('UrlParamsContext', () => {
   it('should read values in from location', () => {
     const location = {
       pathname: '/test/pathname',
-      search:
-        '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc',
+      search: '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc',
     } as Location;
 
     const wrapper = mountParams(location);
@@ -61,8 +60,7 @@ describe('UrlParamsContext', () => {
   it('should update param values if location has changed', () => {
     const location = {
       pathname: '/test/updated',
-      search:
-        '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED',
+      search: '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED',
     } as Location;
 
     const wrapper = mountParams(location);
@@ -159,9 +157,7 @@ describe('UrlParamsContext', () => {
       listen: jest.fn(),
     } as unknown as History;
 
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
+    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
 
     const wrapper = mount(
       <Router history={history}>

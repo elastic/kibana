@@ -37,7 +37,7 @@ const RULE_2 = createRuleAssetSavedObject({
 // https://github.com/elastic/kibana/issues/179961
 describe(
   'Rules table: selection',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     beforeEach(() => {
       login();

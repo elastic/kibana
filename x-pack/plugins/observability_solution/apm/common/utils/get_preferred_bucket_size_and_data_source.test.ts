@@ -75,27 +75,16 @@ describe('getPreferredBucketSizeAndDataSource', () => {
 
   tests.forEach((test) => {
     it(`${test.in} => ${test.out}`, () => {
-      const { source, bucketSizeInSeconds } =
-        getPreferredBucketSizeAndDataSource({
-          sources: [
-            ...serviceTransactionMetricSources,
-            ...txMetricSources,
-            ...txEventSources,
-          ],
-          bucketSizeInSeconds: intervalToSeconds(test.in),
-        });
+      const { source, bucketSizeInSeconds } = getPreferredBucketSizeAndDataSource({
+        sources: [...serviceTransactionMetricSources, ...txMetricSources, ...txEventSources],
+        bucketSizeInSeconds: intervalToSeconds(test.in),
+      });
 
-      expect(source.documentType).toBe(
-        ApmDocumentType.ServiceTransactionMetric
-      );
+      expect(source.documentType).toBe(ApmDocumentType.ServiceTransactionMetric);
 
-      expect(intervalToSeconds(source.rollupInterval)).toBe(
-        intervalToSeconds(test.out)
-      );
+      expect(intervalToSeconds(source.rollupInterval)).toBe(intervalToSeconds(test.out));
 
-      expect(bucketSizeInSeconds).toBeGreaterThanOrEqual(
-        intervalToSeconds(test.out)
-      );
+      expect(bucketSizeInSeconds).toBeGreaterThanOrEqual(intervalToSeconds(test.out));
     });
   });
 });

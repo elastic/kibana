@@ -8,7 +8,6 @@
 
 import {
   getLastSavedStateSubjectForChild,
-  PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import {
@@ -30,7 +29,7 @@ const getDefaultDiffingApi = () => {
 
 export const startTrackingEmbeddableUnsavedChanges = <StateType extends object = object>(
   uuid: string,
-  parentApi: PresentationContainer | undefined,
+  parentApi: unknown,
   comparators: StateComparators<StateType>,
   deserializeState: (state: SerializedPanelState<object>) => StateType
 ) => {

@@ -7,6 +7,12 @@
 
 import { isAllowed, isAnonymized, isDenied, getIsDataAnonymizable } from '.';
 
+const anonymizationFields = [
+  { id: 'fieldName1', field: 'fieldName1', allowed: true, anonymized: false },
+  { id: 'fieldName2', field: 'fieldName2', allowed: false, anonymized: false },
+  { id: 'fieldName3', field: 'fieldName3', allowed: false, anonymized: false },
+];
+
 describe('helpers', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -30,68 +36,59 @@ describe('helpers', () => {
 
   describe('isAllowed', () => {
     it('returns true when the field is present in the allowSet', () => {
-      const allowSet = new Set(['fieldName1', 'fieldName2', 'fieldName3']);
-
-      expect(isAllowed({ allowSet, field: 'fieldName1' })).toBe(true);
+      expect(isAllowed({ anonymizationFields, field: 'fieldName1' })).toBe(true);
     });
 
     it('returns false when the field is NOT present in the allowSet', () => {
-      const allowSet = new Set(['fieldName1', 'fieldName2', 'fieldName3']);
-
-      expect(isAllowed({ allowSet, field: 'nonexistentField' })).toBe(false);
+      expect(isAllowed({ anonymizationFields, field: 'nonexistentField' })).toBe(false);
     });
   });
 
   describe('isDenied', () => {
     it('returns true when the field is NOT in the allowSet', () => {
-      const allowSet = new Set(['field1', 'field2']);
-      const field = 'field3';
-
-      expect(isDenied({ allowSet, field })).toBe(true);
+      expect(isDenied({ anonymizationFields, field: 'field3' })).toBe(true);
     });
 
     it('returns false when the field is in the allowSet', () => {
-      const allowSet = new Set(['field1', 'field2']);
-      const field = 'field1';
-
-      expect(isDenied({ allowSet, field })).toBe(false);
+      expect(isDenied({ anonymizationFields, field: 'fieldName1' })).toBe(false);
     });
 
     it('returns true for an empty allowSet', () => {
-      const allowSet = new Set<string>();
-      const field = 'field1';
-
-      expect(isDenied({ allowSet, field })).toBe(true);
+      expect(isDenied({ anonymizationFields: [], field: 'field1' })).toBe(true);
     });
 
     it('returns false when the field is an empty string and allowSet contains the empty string', () => {
-      const allowSet = new Set(['', 'field1']);
-      const field = '';
-
-      expect(isDenied({ allowSet, field })).toBe(false);
+      expect(
+        isDenied({
+          anonymizationFields: [
+            ...anonymizationFields,
+            { id: '', field: '', allowed: true, anonymized: false },
+          ],
+          field: '',
+        })
+      ).toBe(false);
     });
   });
 
   describe('isAnonymized', () => {
-    const allowReplacementSet = new Set(['user.name', 'host.name']);
-
     it('returns true when the field is in the allowReplacementSet', () => {
-      const field = 'user.name';
-
-      expect(isAnonymized({ allowReplacementSet, field })).toBe(true);
+      expect(
+        isAnonymized({
+          anonymizationFields: [
+            ...anonymizationFields,
+            { id: 'user.name', field: 'user.name', allowed: false, anonymized: true },
+          ],
+          field: 'user.name',
+        })
+      ).toBe(true);
     });
 
     it('returns false when the field is NOT in the allowReplacementSet', () => {
-      const field = 'foozle';
-
-      expect(isAnonymized({ allowReplacementSet, field })).toBe(false);
+      expect(isAnonymized({ anonymizationFields, field: 'foozle' })).toBe(false);
     });
 
     it('returns false when allowReplacementSet is empty', () => {
-      const emptySet = new Set<string>();
-      const field = 'user.name';
-
-      expect(isAnonymized({ allowReplacementSet: emptySet, field })).toBe(false);
+      expect(isAnonymized({ anonymizationFields: [], field: 'user.name' })).toBe(false);
     });
   });
 });

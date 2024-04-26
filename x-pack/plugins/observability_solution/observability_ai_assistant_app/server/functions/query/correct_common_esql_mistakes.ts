@@ -27,7 +27,10 @@ function split(value: string, splitToken: string) {
 
     if (
       !delimiterToken &&
-      trimmed.slice(index, index + splitToken.length).join('') === splitToken
+      trimmed
+        .slice(index, index + splitToken.length)
+        .join('')
+        .toLowerCase() === splitToken.toLowerCase()
     ) {
       index += splitToken.length - 1;
       statements.push(currentStatement.trim());
@@ -77,6 +80,16 @@ function replaceSingleQuotesWithDoubleQuotes(command: string) {
   return command.replace(regex, '"');
 }
 
+function removeColumnQuotesAndEscape(column: string) {
+  const plainColumnIdentifier = column.replaceAll(/^"(.*)"$/g, `$1`).replaceAll(/^'(.*)'$/g, `$1`);
+
+  if (isValidColumnName(plainColumnIdentifier)) {
+    return plainColumnIdentifier;
+  }
+
+  return '`' + plainColumnIdentifier + '`';
+}
+
 function replaceAsKeywordWithAssignments(command: string) {
   return command.replaceAll(/^STATS\s*(.*)/g, (__, statsOperations: string) => {
     return `STATS ${statsOperations.replaceAll(
@@ -87,7 +100,23 @@ function replaceAsKeywordWithAssignments(command: string) {
 }
 
 function isValidColumnName(column: string) {
-  return column.match(/^`.*`$/) || column.match(/^[@A-Za-z\._\-]+$/);
+  return Boolean(column.match(/^`.*`$/) || column.match(/^[@A-Za-z\._\-\d]+$/));
+}
+
+function escapeColumns(line: string) {
+  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/s) ?? ['', '', ''];
+
+  const escapedBody = split(body.trim(), ',')
+    .map((statement) => {
+      const [lhs, rhs] = split(statement, '=');
+      if (!rhs) {
+        return lhs;
+      }
+      return `${removeColumnQuotesAndEscape(lhs)} = ${rhs}`;
+    })
+    .join(', ');
+
+  return `${command} ${escapedBody}`;
 }
 
 function verifyKeepColumns(
@@ -146,9 +175,30 @@ function verifyKeepColumns(
   return `KEEP ${columnsInKeep.join(', ')}`;
 }
 
+function escapeExpressionsInSort(sortCommand: string) {
+  const columnsInSort = split(sortCommand.replace(/^SORT\s*/, ''), ',')
+    .map((statement) => split(statement, '=')?.[0].trim())
+    .map((columnAndSortOrder) => {
+      let [, column, sortOrder = ''] = columnAndSortOrder.match(/^(.*?)\s*(ASC|DESC)?$/i) || [];
+      if (!column) {
+        return columnAndSortOrder;
+      }
+
+      if (sortOrder) sortOrder = ` ${sortOrder}`;
+
+      if (!column.match(/^[a-zA-Z0-9_\.@]+$/)) {
+        column = `\`${column}\``;
+      }
+
+      return `${column}${sortOrder}`;
+    });
+
+  return `SORT ${columnsInSort.join(', ')}`;
+}
+
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
   return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
-    const commands = splitIntoCommands(query);
+    const commands = splitIntoCommands(query.trim());
 
     const formattedCommands: string[] = commands.map(({ name, command }, index) => {
       let formattedCommand = command;
@@ -161,16 +211,29 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
           break;
 
         case 'WHERE':
+          formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+          break;
+
         case 'EVAL':
           formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+          formattedCommand = escapeColumns(formattedCommand);
           break;
 
         case 'STATS':
           formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
+          const [before, after] = split(formattedCommand, ' BY ');
+          formattedCommand = escapeColumns(before);
+          if (after) {
+            formattedCommand += ` BY ${after}`;
+          }
           break;
 
         case 'KEEP':
           formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+          break;
+
+        case 'SORT':
+          formattedCommand = escapeExpressionsInSort(formattedCommand);
           break;
       }
       return formattedCommand;

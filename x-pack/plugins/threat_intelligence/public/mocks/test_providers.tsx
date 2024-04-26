@@ -113,6 +113,8 @@ const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionCo
 
 const casesServiceMock = casesPluginMock.createStartContract();
 
+export const EMPTY_PAGE_SECURITY_TEMPLATE = 'empty-page-security-template' as const;
+
 export const mockedServices = {
   ...coreServiceMock,
   data: dataServiceMock,
@@ -128,8 +130,9 @@ export const mockedServices = {
       () =>
       ({ children, isEmptyState, emptyPageBody }: any) => {
         if (isEmptyState && emptyPageBody) {
-          return <>{emptyPageBody}</>;
+          return <div data-test-subj={EMPTY_PAGE_SECURITY_TEMPLATE}>{emptyPageBody}</div>;
         }
+
         return <>{children}</>;
       },
   },

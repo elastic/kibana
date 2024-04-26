@@ -12,6 +12,7 @@ import {
   assetCriticalityRouteHelpersFactory,
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
+  enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -22,10 +23,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @skipInQA asset_criticality Asset Criticality APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI asset_criticality Asset Criticality APIs', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await cleanAssetCriticality({ log, es });
+      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     afterEach(async () => {

@@ -105,7 +105,13 @@ export type {
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
 } from './src/router';
-export { validBodyOutput, RouteValidationError, getRequestValidation } from './src/router';
+export {
+  validBodyOutput,
+  RouteValidationError,
+  getRequestValidation,
+  getResponseValidation,
+  isFullValidatorContainer,
+} from './src/router';
 
 export type { ICspConfig } from './src/csp';
 
@@ -140,7 +146,7 @@ export type {
   VersionedRouteRequestValidation,
   VersionedRouteResponseValidation,
   ApiVersion,
-  FullValidationConfig,
+  VersionedRouteValidation,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,

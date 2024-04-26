@@ -27,15 +27,12 @@ export function useServiceTransactionTypesFetcher({
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && documentType && rollupInterval) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transaction_types',
-          {
-            params: {
-              path: { serviceName },
-              query: { start, end, documentType, rollupInterval },
-            },
-          }
-        );
+        return callApmApi('GET /internal/apm/services/{serviceName}/transaction_types', {
+          params: {
+            path: { serviceName },
+            query: { start, end, documentType, rollupInterval },
+          },
+        });
       }
     },
     [serviceName, start, end, documentType, rollupInterval]

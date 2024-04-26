@@ -90,13 +90,9 @@ export function MobileServiceOverview() {
   const isSingleColumn = isLarge;
 
   const latencyChartHeight = 200;
-  const nonLatencyChartHeight = isSingleColumn
-    ? latencyChartHeight
-    : chartHeight;
+  const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
 
-  const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
-    ? 'column'
-    : 'row';
+  const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
   return (
     <AnnotationsContextProvider
@@ -108,11 +104,7 @@ export function MobileServiceOverview() {
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <MobileStats
-              start={start}
-              end={end}
-              kuery={kueryWithMobileFilters}
-            />
+            <MobileStats start={start} end={end} kuery={kueryWithMobileFilters} />
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -169,18 +161,11 @@ export function MobileServiceOverview() {
 
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart
-                height={latencyChartHeight}
-                kuery={kueryWithMobileFilters}
-              />
+              <LatencyChart height={latencyChartHeight} kuery={kueryWithMobileFilters} />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
                   height={nonLatencyChartHeight}
@@ -203,11 +188,7 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               <EuiFlexItem grow={3}>
                 <FailedTransactionRateChart
                   height={nonLatencyChartHeight}
@@ -226,10 +207,9 @@ export function MobileServiceOverview() {
                         data-test-subj="apmMobileServiceOverviewViewDependenciesLink"
                         href={dependenciesLink}
                       >
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                          { defaultMessage: 'View dependencies' }
-                        )}
+                        {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTabLink', {
+                          defaultMessage: 'View dependencies',
+                        })}
                       </EuiLink>
                     }
                   />

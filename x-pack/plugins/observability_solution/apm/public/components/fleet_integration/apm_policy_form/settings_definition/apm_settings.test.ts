@@ -49,18 +49,16 @@ describe('apm_settings', () => {
     });
 
     describe('validates duration fields', () => {
-      ['idle_timeout', 'read_timeout', 'shutdown_timeout', 'write_timeout'].map(
-        (key) => {
-          it(`return false when  ${key} lower then 1ms`, () => {
-            const settings = getApmSettings();
-            expect(
-              isSettingsFormValid(settings, {
-                [key]: { value: '0ms', type: 'text' },
-              })
-            ).toBeFalsy();
-          });
-        }
-      );
+      ['idle_timeout', 'read_timeout', 'shutdown_timeout', 'write_timeout'].map((key) => {
+        it(`return false when  ${key} lower then 1ms`, () => {
+          const settings = getApmSettings();
+          expect(
+            isSettingsFormValid(settings, {
+              [key]: { value: '0ms', type: 'text' },
+            })
+          ).toBeFalsy();
+        });
+      });
     });
   });
 });

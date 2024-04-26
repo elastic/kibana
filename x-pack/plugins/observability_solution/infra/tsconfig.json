@@ -94,6 +94,8 @@
     "@kbn/serverless",
     "@kbn/core-lifecycle-server",
     "@kbn/elastic-agent-utils",
+    "@kbn/dashboard-plugin",
+    "@kbn/shared-svg",
     "@kbn/aiops-log-rate-analysis"
   ],
   "exclude": [

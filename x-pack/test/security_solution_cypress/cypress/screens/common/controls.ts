@@ -25,3 +25,5 @@ export const SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE =
   '[data-test-subj="investigate-bulk-in-timeline"]';
 
 export const SELECT_ALL_EVENTS = '[data-test-subj="selectAllAlertsButton"]';
+
+export const EUI_INLINE_SAVE_BUTTON = '[data-test-subj="euiInlineEditModeSaveButton"]';

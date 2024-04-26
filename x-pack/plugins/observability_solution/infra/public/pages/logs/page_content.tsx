@@ -81,7 +81,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
-                  href={getUrlForApp('/integrations/browse')}
+                  href={getUrlForApp('/observabilityOnboarding')}
                   color="primary"
                   iconType="indexOpen"
                 >
@@ -104,7 +104,15 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
-        <Route render={() => <NotFoundPage title="Logs" />} />
+        <Route
+          render={() => (
+            <NotFoundPage
+              title={i18n.translate('xpack.infra.logs.index.logsLabel', {
+                defaultMessage: 'Logs',
+              })}
+            />
+          )}
+        />
       </Routes>
     </>
   );

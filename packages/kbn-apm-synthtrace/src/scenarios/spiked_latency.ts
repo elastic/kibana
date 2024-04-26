@@ -40,10 +40,9 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         instanceId: generateShortId(),
         cloudProvider: cluster.provider,
         cloudRegion: cluster.region,
+        containerId: `spiked-container-${generateShortId()}`,
+        hostName: `spiked-host-${generateShortId()}`,
       }));
-
-      const containerId = `spiked-${generateShortId()}`;
-      const hostName = `spiked-${generateShortId()}`;
 
       function buildLogs(serviceName: string) {
         return range
@@ -59,6 +58,8 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
               instanceId,
               cloudRegion,
               cloudProvider,
+              containerId,
+              hostName,
             } = clusters[clusterIndex];
 
             return log
@@ -101,6 +102,9 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
       const buildTransactions = (serviceInstance: Instance, transactionName: string) => {
         const interval = random(1, 100, false);
         const rangeWithInterval = range.interval(`${interval}s`);
+
+        const clusterIndex = Math.floor(Math.random() * clusters.length);
+        const { containerId, hostName } = clusters[clusterIndex];
 
         return rangeWithInterval.generator((timestamp, i) => {
           const duration = getDuration(transactionName);

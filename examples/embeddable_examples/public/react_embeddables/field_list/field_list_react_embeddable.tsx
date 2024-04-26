@@ -28,8 +28,8 @@ import {
   type UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
 import { FieldListApi, FieldListSerializedStateState } from './types';
 
@@ -81,20 +81,32 @@ export const getFieldListFactory = (
       const subscriptions = new Subscription();
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
-      const allDataViews = await dataViews.getIdsWithTitle();
-      const selectedDataViewId$ = new BehaviorSubject<string | undefined>(
-        initialState.dataViewId ?? (await dataViews.getDefaultDataView())?.id
-      );
+      // set up data views
+      const [allDataViews, defaultDataViewId] = await Promise.all([
+        dataViews.getIdsWithTitle(),
+        dataViews.getDefaultId(),
+      ]);
+      if (!defaultDataViewId || allDataViews.length === 0) {
+        throw new Error(
+          i18n.translate('embeddableExamples.unifiedFieldList.noDefaultDataViewErrorMessage', {
+            defaultMessage: 'The field list must be used with at least one Data View present',
+          })
+        );
+      }
+      const initialDataViewId = initialState.dataViewId ?? defaultDataViewId;
+      const initialDataView = await dataViews.get(initialDataViewId);
+      const selectedDataViewId$ = new BehaviorSubject<string | undefined>(initialDataViewId);
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([initialDataView]);
 
-      // transform data view ID into data views array.
-      const getDataViews = async (id?: string) => {
-        return id ? [await dataViews.get(id)] : undefined;
-      };
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
-        await getDataViews(initialState.dataViewId)
-      );
       subscriptions.add(
-        selectedDataViewId$.subscribe(async (id) => dataViews$.next(await getDataViews(id)))
+        selectedDataViewId$
+          .pipe(
+            skip(1),
+            switchMap((dataViewId) => dataViews.get(dataViewId ?? defaultDataViewId))
+          )
+          .subscribe((nextSelectedDataView) => {
+            dataViews$.next([nextSelectedDataView]);
+          })
       );
 
       const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
@@ -104,6 +116,7 @@ export const getFieldListFactory = (
       const api = buildApi(
         {
           ...titlesApi,
+          dataViews: dataViews$,
           serializeState: () => {
             const dataViewId = selectedDataViewId$.getValue();
             const references: Reference[] = dataViewId
@@ -141,25 +154,12 @@ export const getFieldListFactory = (
       return {
         api,
         Component: () => {
-          const [selectedDataViewId, selectedFieldNames] = useBatchedPublishingSubjects(
-            selectedDataViewId$,
+          const [renderDataViews, selectedFieldNames] = useBatchedPublishingSubjects(
+            dataViews$,
             selectedFieldNames$
           );
 
-          const [selectedDataView, setSelectedDataView] = useState<DataView | undefined>(undefined);
-
-          useEffect(() => {
-            if (!selectedDataViewId) return;
-            let mounted = true;
-            (async () => {
-              const dataView = await dataViews.get(selectedDataViewId);
-              if (!mounted) return;
-              setSelectedDataView(dataView);
-            })();
-            return () => {
-              mounted = false;
-            };
-          }, [selectedDataViewId]);
+          const selectedDataView = renderDataViews?.[0];
 
           // On destroy
           useEffect(() => {
@@ -178,7 +178,7 @@ export const getFieldListFactory = (
               >
                 <DataViewPicker
                   dataViews={allDataViews}
-                  selectedDataViewId={selectedDataViewId}
+                  selectedDataViewId={selectedDataView?.id}
                   onChangeDataViewId={(nextSelection) => {
                     selectedDataViewId$.next(nextSelection);
                   }}

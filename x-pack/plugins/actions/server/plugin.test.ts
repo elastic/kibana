@@ -263,7 +263,7 @@ describe('Actions Plugin', () => {
           {
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
-            name: 'System action: .cases',
+            name: 'Cases',
             config: {},
             secrets: {},
             isDeprecated: false,
@@ -769,7 +769,7 @@ describe('Actions Plugin', () => {
             {
               id: 'system-connector-.cases',
               actionTypeId: '.cases',
-              name: 'System action: .cases',
+              name: 'Cases',
               config: {},
               secrets: {},
               isDeprecated: false,

@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
@@ -27,10 +23,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import {
-  getTotalIndicesStats,
-  getEstimatedSizeForDocumentsInIndex,
-} from './indices_stats_helpers';
+import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -74,10 +67,7 @@ async function getMainServiceStatistics({
               ...kqlQuery(kuery),
               ...rangeQuery(start, end),
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(
-                    TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                  )
+                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
                 : []),
             ],
           },
@@ -141,33 +131,28 @@ async function getMainServiceStatistics({
     }),
   ]);
 
-  const serviceStats = response.aggregations?.sample.services.buckets.map(
-    (bucket) => {
-      const estimatedSize = allIndicesStats
-        ? bucket.indices.buckets.reduce((prev, curr) => {
-            return (
-              prev +
-              getEstimatedSizeForDocumentsInIndex({
-                allIndicesStats,
-                indexName: curr.key as string,
-                numberOfDocs: curr.number_of_metric_docs.value,
-              })
-            );
-          }, 0)
-        : 0;
+  const serviceStats = response.aggregations?.sample.services.buckets.map((bucket) => {
+    const estimatedSize = allIndicesStats
+      ? bucket.indices.buckets.reduce((prev, curr) => {
+          return (
+            prev +
+            getEstimatedSizeForDocumentsInIndex({
+              allIndicesStats,
+              indexName: curr.key as string,
+              numberOfDocs: curr.number_of_metric_docs.value,
+            })
+          );
+        }, 0)
+      : 0;
 
-      return {
-        serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          ({ key }) => key as string
-        ),
-        sampledTransactionDocs:
-          bucket.transactions.sampled_transactions.buckets[0]?.doc_count,
-        size: estimatedSize,
-        agentName: bucket.sample.top[0]?.metrics[AGENT_NAME] as AgentName,
-      };
-    }
-  );
+    return {
+      serviceName: bucket.key as string,
+      environments: bucket.environments.buckets.map(({ key }) => key as string),
+      sampledTransactionDocs: bucket.transactions.sampled_transactions.buckets[0]?.doc_count,
+      size: estimatedSize,
+      agentName: bucket.sample.top[0]?.metrics[AGENT_NAME] as AgentName,
+    };
+  });
 
   return serviceStats ?? [];
 }
@@ -201,38 +186,34 @@ export async function getServiceStatistics({
   kuery: string;
   searchAggregatedTransactions: boolean;
 }): Promise<StorageExplorerServiceStatisticsResponse> {
-  const [docCountPerProcessorEvent, totalTransactionsPerService] =
-    await Promise.all([
-      getMainServiceStatistics({
-        apmEventClient,
-        context,
-        indexLifecyclePhase,
-        randomSampler,
-        environment,
-        kuery,
-        start,
-        end,
-      }),
-      getTotalTransactionsPerService({
-        apmEventClient,
-        searchAggregatedTransactions,
-        indexLifecyclePhase,
-        randomSampler,
-        environment,
-        kuery,
-        start,
-        end,
-      }),
-    ]);
+  const [docCountPerProcessorEvent, totalTransactionsPerService] = await Promise.all([
+    getMainServiceStatistics({
+      apmEventClient,
+      context,
+      indexLifecyclePhase,
+      randomSampler,
+      environment,
+      kuery,
+      start,
+      end,
+    }),
+    getTotalTransactionsPerService({
+      apmEventClient,
+      searchAggregatedTransactions,
+      indexLifecyclePhase,
+      randomSampler,
+      environment,
+      kuery,
+      start,
+      end,
+    }),
+  ]);
 
   const serviceStatistics = docCountPerProcessorEvent.map(
     ({ serviceName, sampledTransactionDocs, ...rest }) => {
       const sampling =
         sampledTransactionDocs && totalTransactionsPerService[serviceName]
-          ? Math.min(
-              sampledTransactionDocs / totalTransactionsPerService[serviceName],
-              1
-            )
+          ? Math.min(sampledTransactionDocs / totalTransactionsPerService[serviceName], 1)
           : 0;
 
       return {

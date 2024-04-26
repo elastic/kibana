@@ -53,6 +53,20 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default false
    */
   enableQueryVersion?: boolean;
+
+  /**
+   * Human-friendly description of this route, should be usable for documentation
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  description: `Retrieve foo resources given an ID. To retrieve a list of IDs use the GET /api/foo API.`,
+   * })
+   * ```
+   */
+  description?: string;
 };
 
 /**
@@ -198,7 +212,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @public
  */
-export interface FullValidationConfig<P, Q, B> {
+export interface VersionedRouteValidation<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @public
@@ -226,9 +240,11 @@ export interface AddVersionOpts<P, Q, B> {
   version: ApiVersion;
   /**
    * Validation for this version of a route
+   * @note if providing a function to lazily load your validation schemas assume
+   *       that the function will only be called once.
    * @public
    */
-  validate: false | FullValidationConfig<P, Q, B>;
+  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**

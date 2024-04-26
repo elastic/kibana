@@ -12,16 +12,25 @@ import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SloDefinitionClient } from './slo_definition_client';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
+  let defintionClient: SloDefinitionClient;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockSummaryClient = createSummaryClientMock();
-    getSLO = new GetSLO(mockRepository, mockSummaryClient);
+    defintionClient = new SloDefinitionClient(
+      mockRepository,
+      elasticsearchServiceMock.createElasticsearchClient(),
+      loggerMock.create()
+    );
+    getSLO = new GetSLO(defintionClient, mockSummaryClient);
   });
 
   describe('happy path', () => {
@@ -43,7 +52,7 @@ describe('GetSLO', () => {
         },
       });
 
-      const result = await getSLO.execute(slo.id);
+      const result = await getSLO.execute(slo.id, 'default');
 
       expect(mockRepository.findById).toHaveBeenCalledWith(slo.id);
       expect(result).toEqual({

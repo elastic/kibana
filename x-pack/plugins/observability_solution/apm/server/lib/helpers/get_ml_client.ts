@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  MlAnomalyDetectors,
-  MlMlSystem,
-  MlModules,
-} from '@kbn/ml-plugin/server';
+import { MlAnomalyDetectors, MlMlSystem, MlModules } from '@kbn/ml-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export interface MlClient {
   mlSystem: MlMlSystem;
@@ -19,15 +15,8 @@ export interface MlClient {
   modules: MlModules;
 }
 
-export async function getMlClient({
-  plugins,
-  context,
-  request,
-}: APMRouteHandlerResources) {
-  const [coreContext, licensingContext] = await Promise.all([
-    context.core,
-    context.licensing,
-  ]);
+export async function getMlClient({ plugins, context, request }: MinimalAPMRouteHandlerResources) {
+  const [coreContext, licensingContext] = await Promise.all([context.core, context.licensing]);
 
   const mlplugin = plugins.ml;
 
@@ -35,17 +24,11 @@ export async function getMlClient({
     return;
   }
   return {
-    mlSystem: mlplugin.setup.mlSystemProvider(
-      request,
-      coreContext.savedObjects.client
-    ),
+    mlSystem: mlplugin.setup.mlSystemProvider(request, coreContext.savedObjects.client),
     anomalyDetectors: mlplugin.setup.anomalyDetectorsProvider(
       request,
       coreContext.savedObjects.client
     ),
-    modules: mlplugin.setup.modulesProvider(
-      request,
-      coreContext.savedObjects.client
-    ),
+    modules: mlplugin.setup.modulesProvider(request, coreContext.savedObjects.client),
   };
 }

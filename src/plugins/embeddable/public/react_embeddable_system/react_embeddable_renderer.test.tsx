@@ -166,22 +166,4 @@ describe('react embeddable renderer', () => {
       )
     );
   });
-
-  it('registers the API with the parent API', async () => {
-    const onApiAvailable = jest.fn();
-    const parentApi = getMockPresentationContainer();
-    render(
-      <ReactEmbeddableRenderer
-        type={'test'}
-        maybeId={'12345'}
-        parentApi={parentApi}
-        onApiAvailable={onApiAvailable}
-        state={{ rawState: { name: 'Kuni Garu' } }}
-      />
-    );
-    await waitFor(() => {
-      expect(onApiAvailable).toHaveBeenCalledWith(expect.objectContaining({ parentApi }));
-      expect(parentApi.registerPanelApi).toHaveBeenCalledWith('12345', expect.any(Object));
-    });
-  });
 });

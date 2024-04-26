@@ -58,7 +58,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   return {
     label: fn.name,
     text: hasArgs ? `${fn.name} $0` : fn.name,
-    ...(hasArgs ? { insertTextRules: 4 } : {}), // kbn-esql-validation-autocomplete.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    asSnippet: hasArgs,
     kind: 'Operator',
     detail: fn.description,
     documentation: {
@@ -163,6 +163,21 @@ export const buildConstantsDefinitions = (
         defaultMessage: `Constant`,
       }),
     sortText: 'A',
+  }));
+
+export const buildValueDefinitions = (
+  values: string[],
+  detail?: string
+): SuggestionRawDefinition[] =>
+  values.map((value) => ({
+    label: `"${value}"`,
+    text: `"${value}"`,
+    detail:
+      detail ??
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+        defaultMessage: 'Literal value',
+      }),
+    kind: 'Value',
   }));
 
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
@@ -279,9 +294,11 @@ function getUnitDuration(unit: number = 1) {
 
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('number') && commandName === 'limit') {
-    // suggest 10/50/100
-    suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+  if (types.includes('number')) {
+    if (commandName === 'limit') {
+      // suggest 10/100/1000 for limit
+      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+    }
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular

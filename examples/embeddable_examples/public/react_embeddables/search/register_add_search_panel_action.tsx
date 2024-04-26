@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { apiCanAddNewPanel, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
 

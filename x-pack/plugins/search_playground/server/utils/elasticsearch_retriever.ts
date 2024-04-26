@@ -8,7 +8,11 @@
 import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
 import { Document } from '@langchain/core/documents';
 import { Client } from '@elastic/elasticsearch';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsAggregate,
+  SearchHit,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
@@ -63,11 +67,16 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   async _getRelevantDocuments(query: string): Promise<Document[]> {
     try {
-      const results = await this.client.search({
-        index: this.index,
-        query: this.query_body_fn(query),
-        size: this.k,
-      });
+      const queryBody = this.query_body_fn(query);
+
+      const results = (await this.client.transport.request({
+        method: 'POST',
+        path: `/${this.index}/_search`,
+        body: {
+          ...queryBody,
+          size: this.k,
+        },
+      })) as SearchResponse<unknown, Record<string, AggregationsAggregate>>;
 
       const hits = results.hits.hits;
 
@@ -81,9 +90,9 @@ export class ElasticsearchRetriever extends BaseRetriever {
         return new Document({
           pageContent: hit._source[pageContentFieldKey],
           metadata: {
-            score: hit._score,
-            id: hit._id,
-            index: hit._index,
+            _score: hit._score,
+            _id: hit._id,
+            _index: hit._index,
           },
         });
       };

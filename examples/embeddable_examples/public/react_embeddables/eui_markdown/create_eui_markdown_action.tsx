@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableApiContext, apiCanAddNewPanel } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 

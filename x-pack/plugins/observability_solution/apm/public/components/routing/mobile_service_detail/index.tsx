@@ -208,29 +208,27 @@ export const mobileServiceDetailRoute = {
           }),
         }),
         children: {
-          '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}':
-            {
-              element: <ErrorGroupDetails />,
-              params: t.type({
-                path: t.type({
-                  groupId: t.string,
-                }),
-                query: t.partial({ errorId: t.string }),
+          '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}': {
+            element: <ErrorGroupDetails />,
+            params: t.type({
+              path: t.type({
+                groupId: t.string,
               }),
-            },
+              query: t.partial({ errorId: t.string }),
+            }),
+          },
           '/mobile-services/{serviceName}/errors-and-crashes/': {
             element: <MobileErrorCrashesOverview />,
           },
-          '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}':
-            {
-              element: <CrashGroupDetails />,
-              params: t.type({
-                path: t.type({
-                  groupId: t.string,
-                }),
-                query: t.partial({ errorId: t.string }),
+          '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}': {
+            element: <CrashGroupDetails />,
+            params: t.type({
+              path: t.type({
+                groupId: t.string,
               }),
-            },
+              query: t.partial({ errorId: t.string }),
+            }),
+          },
         },
       },
       '/mobile-services/{serviceName}/dependencies': page({

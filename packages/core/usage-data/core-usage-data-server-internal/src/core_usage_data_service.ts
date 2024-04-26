@@ -493,17 +493,16 @@ export class CoreUsageDataService
       typeRegistry.registerType(coreUsageStatsType);
     };
 
-    const getClient = () => {
-      const debugLogger = (message: string) => this.logger.debug(message);
-
-      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
-    };
-
-    this.coreUsageStatsClient = getClient();
+    this.coreUsageStatsClient = new CoreUsageStatsClient(
+      (message: string) => this.logger.debug(message),
+      http.basePath,
+      internalRepositoryPromise,
+      this.stop$
+    );
 
     const contract: InternalCoreUsageDataSetup = {
       registerType,
-      getClient,
+      getClient: () => this.coreUsageStatsClient!,
       registerUsageCounter: (usageCounter) => {
         this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
       },

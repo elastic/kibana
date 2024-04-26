@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION = '2023-10-31';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION = '1';
 
 export const ELASTIC_AI_ASSISTANT_URL = '/api/elastic_assistant';

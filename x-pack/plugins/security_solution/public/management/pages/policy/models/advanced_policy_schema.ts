@@ -1177,6 +1177,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.enable_caps',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.enable_caps',
+      {
+        defaultMessage:
+          'This setting ensures thread capability arrays are not pruned from Linux process events before being sent to Elasticsearch. At the expense of higher Endpoint data volumes, a true value will ensure capability matching detection rules running within the Elastic stack can match. Detection rules running within Elastic Defend are unaffected because capabilities are conditionally pruned after rule processing. Default is false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.callstacks.emit_in_events',
     first_supported_version: '8.8',
     documentation: i18n.translate(
@@ -1641,6 +1652,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.memory_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.memory_scan',
+      {
+        defaultMessage:
+          'On behavior alerts, this feature enables an additional scan of identified memory regions against well-known malware signatures. Default: true',
       }
     ),
   },

@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiIsPresentationContainer,
-  PresentationContainer,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
@@ -38,11 +34,12 @@ export const ReactEmbeddableRenderer = <
   onApiAvailable,
   panelProps,
   onAnyStateChange,
+  hidePanelChrome,
 }: {
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
-  parentApi?: PresentationContainer;
+  parentApi?: unknown;
   onApiAvailable?: (api: ApiType) => void;
   panelProps?: Pick<
     PresentationPanelProps<ApiType>,
@@ -53,6 +50,7 @@ export const ReactEmbeddableRenderer = <
     | 'hideHeader'
     | 'hideInspector'
   >;
+  hidePanelChrome?: boolean;
   /**
    * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
    * as it changes. This is **not** expected to change over the lifetime of the component.
@@ -100,9 +98,6 @@ export const ReactEmbeddableRenderer = <
             resetUnsavedChanges,
             type: factory.type,
           } as unknown as ApiType;
-          if (parentApi && apiIsPresentationContainer(parentApi)) {
-            parentApi.registerPanelApi(uuid, fullApi);
-          }
           cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;
@@ -136,5 +131,11 @@ export const ReactEmbeddableRenderer = <
     };
   }, []);
 
-  return <PresentationPanel {...panelProps} Component={componentPromise} />;
+  return (
+    <PresentationPanel<ApiType, {}>
+      hidePanelChrome={hidePanelChrome}
+      {...panelProps}
+      Component={componentPromise}
+    />
+  );
 };

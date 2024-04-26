@@ -22,7 +22,9 @@ export const isTimelineEventItemAnAlert = (
 
 export const CROWDSTRIKE_AGENT_ID_FIELD = 'crowdstrike.event.DeviceId';
 
-export const getCrowdstrikeAgentId = (data: TimelineEventsDetailsItem[] | null) => {
+export const getCrowdstrikeAgentId = (
+  data: TimelineEventsDetailsItem[] | null
+): string | undefined => {
   return (
     getFieldValue({ category: 'crowdstrike', field: CROWDSTRIKE_AGENT_ID_FIELD }, data) || undefined
   );
@@ -48,7 +50,7 @@ export const isAlertFromCrowdstrikeEvent = ({
 
 /**
  * Checks to see if the given alert was generated out of the Crowdstrike Alerts dataset, coming from
- * sentinel_one Fleet integration
+ * crowdstrike Fleet integration
  * @param ecsData
  */
 export const isAlertFromCrowdstrikeAlert = ({

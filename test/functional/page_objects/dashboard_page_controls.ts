@@ -65,7 +65,9 @@ export class DashboardPageControls extends FtrService {
   public async getAllControlIds() {
     const controlFrames = await this.testSubjects.findAll('control-frame');
     const ids = await Promise.all(
-      controlFrames.map(async (controlFrame) => await controlFrame.getAttribute('data-control-id'))
+      controlFrames.map(
+        async (controlFrame) => (await controlFrame.getAttribute('data-control-id')) ?? ''
+      )
     );
     this.log.debug('Got all control ids:', ids);
     return ids;
@@ -93,7 +95,7 @@ export class DashboardPageControls extends FtrService {
   public async clearAllControls() {
     const controlIds = await this.getAllControlIds();
     for (const controlId of controlIds) {
-      await this.removeExistingControl(controlId);
+      if (controlId) await this.removeExistingControl(controlId);
     }
   }
 
@@ -162,7 +164,8 @@ export class DashboardPageControls extends FtrService {
       false: 'NONE',
     };
 
-    const switchState = await this.testSubjects.getAttribute('control-group-chaining', 'checked');
+    const switchState =
+      (await this.testSubjects.getAttribute('control-group-chaining', 'checked')) ?? '';
     if (chainingSystem !== switchStateToChainingSystem[switchState]) {
       await this.testSubjects.click('control-group-chaining');
     }
@@ -432,7 +435,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`getting available options count from options list`);
     await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    return +(await availableOptions.getAttribute('data-option-count'));
+    return +((await availableOptions.getAttribute('data-option-count')) ?? '0');
   }
 
   public async optionsListPopoverGetAvailableOptions() {

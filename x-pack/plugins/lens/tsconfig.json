@@ -111,7 +111,8 @@
     "@kbn/presentation-publishing",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/unified-data-table",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]
 }

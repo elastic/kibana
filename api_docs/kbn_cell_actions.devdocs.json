@@ -21,6 +21,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/cell-actions",
+        "id": "def-common.addExistsFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "addExistsFilter",
+        "description": [],
+        "signature": [
+          "({ filterManager, key, negate, dataViewId, }: AddExistsFilterParams) => void"
+        ],
+        "path": "packages/kbn-cell-actions/src/actions/filter/add_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.addExistsFilter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filterManager,\n  key,\n  negate,\n  dataViewId,\n}",
+            "description": [],
+            "signature": [
+              "AddExistsFilterParams"
+            ],
+            "path": "packages/kbn-cell-actions/src/actions/filter/add_filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cell-actions",
         "id": "def-common.addFilterIn",
         "type": "Function",
         "tags": [],

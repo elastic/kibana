@@ -190,7 +190,7 @@ export const getHttpInput = ({
     schedule: { value: '"@every 5m"', type: 'text' },
     urls: { value: '"https://nextjs-test-synthetics.vercel.app/api/users"', type: 'text' },
     'service.name': { value: null, type: 'text' },
-    timeout: { value: '3ms', type: 'text' },
+    timeout: { value: '180s', type: 'text' },
     max_redirects: { value: '3', type: 'integer' },
     processors: {
       type: 'yaml',
@@ -267,7 +267,7 @@ export const getHttpInput = ({
     enabled: true,
     urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
     schedule: '@every 5m',
-    timeout: '3ms',
+    timeout: '180s',
     max_redirects: 3,
     max_attempts: 2,
     proxy_url: proxyUrl ?? 'http://proxy.com',

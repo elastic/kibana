@@ -69,6 +69,7 @@ describe('TopN data from Elasticsearch', () => {
           },
         }) as Promise<any>
     ),
+    topNFunctions: jest.fn(),
   };
   const logger = loggerMock.create();
 

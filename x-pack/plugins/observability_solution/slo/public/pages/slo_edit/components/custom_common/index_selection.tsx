@@ -19,7 +19,7 @@ export function IndexSelection() {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService } = useKibana().services;
 
-  const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
+  const { isLoading: isDataViewsLoading, data: dataViews = [], refetch } = useFetchDataViews();
 
   const { dataViewEditor } = useKibana().services;
 
@@ -100,7 +100,8 @@ export function IndexSelection() {
                     setAdHocDataViews([...adHocDataViews, dataView]);
                     field.onChange(dataView.getIndexPattern());
                   } else {
-                    field.onChange(getDataViewPatternById(dataView.id));
+                    refetch();
+                    field.onChange(dataView.getIndexPattern());
                   }
                   if (dataView.timeFieldName) {
                     setValue('indicator.params.timestampField', dataView.timeFieldName);

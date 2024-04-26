@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
@@ -114,7 +114,7 @@ export function NavControl({}: {}) {
         fullWidth={false}
         minWidth={0}
       >
-        <AssistantAvatar size="xs" />
+        {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
       </EuiButton>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>

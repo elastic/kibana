@@ -20,21 +20,18 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts and rules',
 });
-const transactionDurationLabel = i18n.translate(
-  'xpack.apm.home.alertsMenu.transactionDuration',
-  { defaultMessage: 'Latency' }
-);
-const transactionErrorRateLabel = i18n.translate(
-  'xpack.apm.home.alertsMenu.transactionErrorRate',
-  { defaultMessage: 'Failed transaction rate' }
-);
+const transactionDurationLabel = i18n.translate('xpack.apm.home.alertsMenu.transactionDuration', {
+  defaultMessage: 'Latency',
+});
+const transactionErrorRateLabel = i18n.translate('xpack.apm.home.alertsMenu.transactionErrorRate', {
+  defaultMessage: 'Failed transaction rate',
+});
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
   defaultMessage: ' Create error count rule',
 });
-const createThresholdAlertLabel = i18n.translate(
-  'xpack.apm.home.alertsMenu.createThresholdAlert',
-  { defaultMessage: 'Create threshold rule' }
-);
+const createThresholdAlertLabel = i18n.translate('xpack.apm.home.alertsMenu.createThresholdAlert', {
+  defaultMessage: 'Create threshold rule',
+});
 const createAnomalyAlertAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createAnomalyAlert',
   { defaultMessage: 'Create anomaly rule' }
@@ -48,11 +45,7 @@ interface Props {
   canReadMlJobs: boolean;
 }
 
-export function AlertingPopoverAndFlyout({
-  canSaveAlerts,
-  canReadAlerts,
-  canReadMlJobs,
-}: Props) {
+export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canReadMlJobs }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ruleType, setRuleType] = useState<ApmRuleType | null>(null);
   const {
@@ -107,10 +100,9 @@ export function AlertingPopoverAndFlyout({
         ...(canReadAlerts
           ? [
               {
-                name: i18n.translate(
-                  'xpack.apm.home.alertsMenu.viewActiveAlerts',
-                  { defaultMessage: 'Manage rules' }
-                ),
+                name: i18n.translate('xpack.apm.home.alertsMenu.viewActiveAlerts', {
+                  defaultMessage: 'Manage rules',
+                }),
                 href: observability.useRulesLink().href,
                 icon: 'tableOfContents',
                 'data-test-subj': 'apmAlertsMenuItemManageRules',

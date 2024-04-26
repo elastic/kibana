@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
@@ -65,7 +66,12 @@ export const useAssistantOverlay = (
   /**
    * The assistant will display this tooltip when the user hovers over the context pill
    */
-  tooltip: PromptContext['tooltip']
+  tooltip: PromptContext['tooltip'],
+
+  /**
+   * Optionally provide a map of replacements associated with the context, i.e. replacements for an insight that's provided as context
+   */
+  replacements?: Replacements | null
 ): UseAssistantOverlay => {
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
@@ -83,6 +89,7 @@ export const useAssistantOverlay = (
     [suggestedUserPrompt]
   );
   const _tooltip = useMemo(() => tooltip, [tooltip]);
+  const _replacements = useMemo(() => replacements, [replacements]);
 
   // the assistant context is used to show/hide the assistant overlay:
   const {
@@ -115,6 +122,7 @@ export const useAssistantOverlay = (
       id: promptContextId,
       suggestedUserPrompt: _suggestedUserPrompt,
       tooltip: _tooltip,
+      replacements: _replacements ?? undefined,
     };
 
     registerPromptContext(newContext);
@@ -124,6 +132,7 @@ export const useAssistantOverlay = (
     _category,
     _description,
     _getPromptContext,
+    _replacements,
     _suggestedUserPrompt,
     _tooltip,
     promptContextId,

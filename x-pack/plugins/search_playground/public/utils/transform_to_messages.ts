@@ -14,7 +14,7 @@ export const transformFromChatMessages = (messages: UseChatHelpers['messages']):
       id,
       content,
       createdAt,
-      role: role === MessageRole.assistant ? MessageRole.assistant : MessageRole.user,
+      role,
     };
 
     if (role === MessageRole.assistant) {

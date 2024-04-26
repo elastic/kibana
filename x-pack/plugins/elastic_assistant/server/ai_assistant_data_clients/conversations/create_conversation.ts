@@ -85,6 +85,7 @@ export const transformToCreateScheme = (
     category: category ?? ConversationCategoryEnum.assistant,
     api_config: apiConfig
       ? {
+          action_type_id: apiConfig.actionTypeId,
           connector_id: apiConfig.connectorId,
           default_system_prompt_id: apiConfig.defaultSystemPromptId,
           model: apiConfig.model,
@@ -99,10 +100,14 @@ export const transformToCreateScheme = (
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
-      trace_data: {
-        trace_id: message.traceData?.traceId,
-        transaction_id: message.traceData?.transactionId,
-      },
+      ...(message.traceData
+        ? {
+            trace_data: {
+              trace_id: message.traceData.traceId,
+              transaction_id: message.traceData.transactionId,
+            },
+          }
+        : {}),
     })),
     updated_at: createdAt,
     replacements: replacements

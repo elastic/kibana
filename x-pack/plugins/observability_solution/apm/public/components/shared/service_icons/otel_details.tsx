@@ -25,37 +25,26 @@ export function OTelDetails({ opentelemetry }: Props) {
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
   listItems.push({
-    title: i18n.translate(
-      'xpack.apm.serviceIcons.otelDetails.opentelemetry.language',
-      {
-        defaultMessage: 'Language',
-      }
-    ),
-    description: (
-      <>{!!opentelemetry.language ? opentelemetry.language : 'unknown'}</>
-    ),
+    title: i18n.translate('xpack.apm.serviceIcons.otelDetails.opentelemetry.language', {
+      defaultMessage: 'Language',
+    }),
+    description: <>{!!opentelemetry.language ? opentelemetry.language : 'unknown'}</>,
   });
 
   if (!!opentelemetry.sdkVersion) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.otelDetails.opentelemetry.sdkVersion',
-        {
-          defaultMessage: 'OTel SDK version',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.otelDetails.opentelemetry.sdkVersion', {
+        defaultMessage: 'OTel SDK version',
+      }),
       description: <>{opentelemetry.sdkVersion}</>,
     });
   }
 
   if (!!opentelemetry.autoVersion) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.otelDetails.opentelemetry.autoVersion',
-        {
-          defaultMessage: 'Auto instrumentation agent version',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.otelDetails.opentelemetry.autoVersion', {
+        defaultMessage: 'Auto instrumentation agent version',
+      }),
       description: <>{opentelemetry.autoVersion}</>,
     });
   }

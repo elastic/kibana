@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { type EmbeddableApiContext, apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
-  type UiActionsActionDefinition,
   IncompatibleActionError,
+  type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import type { MlEmbeddableBaseApi, SingleMetricViewerEmbeddableApi } from '../embeddables';
+import type { SingleMetricViewerEmbeddableApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 
 import type { MlCoreSetup } from '../plugin';
+import { getEmbeddableTimeRange } from './get_embeddable_time_range';
 
 export interface OpenInSingleMetricViewerActionContext extends EmbeddableApiContext {
   embeddable: SingleMetricViewerEmbeddableApi;
@@ -33,10 +33,6 @@ export function isSingleMetricViewerEmbeddableContext(
     apiIsOfType(arg.embeddable, ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE)
   );
 }
-
-const getTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
-  return embeddable.timeRange$?.getValue() ?? embeddable.parentApi?.timeRange$?.getValue();
-};
 
 export function createOpenInSingleMetricViewerAction(
   getStartServices: MlCoreSetup['getStartServices']
@@ -59,14 +55,14 @@ export function createOpenInSingleMetricViewerAction(
 
       if (isSingleMetricViewerEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, query$, selectedEntities } = embeddable;
+        const { jobIds, query$, selectedEntities, selectedDetectorIndex } = embeddable;
 
         return locator.getUrl(
           {
             page: ML_PAGES.SINGLE_METRIC_VIEWER,
             // @ts-ignore entities is not compatible with SerializableRecord
             pageState: {
-              timeRange: getTimeRange(embeddable),
+              timeRange: getEmbeddableTimeRange(embeddable),
               refreshInterval: {
                 display: 'Off',
                 pause: true,
@@ -75,6 +71,7 @@ export function createOpenInSingleMetricViewerAction(
               jobIds: jobIds.getValue(),
               query: query$?.getValue(),
               entities: selectedEntities?.getValue(),
+              detectorIndex: selectedDetectorIndex?.getValue(),
             },
           },
           { absolute: true }

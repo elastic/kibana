@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
@@ -49,13 +43,10 @@ export function TransactionBreakdownChart({
 
           <EuiFlexItem grow={false}>
             <EuiIconTip
-              content={i18n.translate(
-                'xpack.apm.transactionBreakdown.chartHelp',
-                {
-                  defaultMessage:
-                    'The average duration of each span type. "app" indicates something was happening within the service. This could mean that the time was spent in application code and not in database or external requests, or that APM agent auto-instrumentation doesn\'t cover the executed code.',
-                }
-              )}
+              content={i18n.translate('xpack.apm.transactionBreakdown.chartHelp', {
+                defaultMessage:
+                  'The average duration of each span type. "app" indicates something was happening within the service. This could mean that the time was spent in application code and not in database or external requests, or that APM agent auto-instrumentation doesn\'t cover the executed code.',
+              })}
               position="right"
             />
           </EuiFlexItem>

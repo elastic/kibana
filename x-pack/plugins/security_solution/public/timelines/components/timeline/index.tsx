@@ -26,7 +26,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
-import { TabsContent } from './tabs_content';
+import { TabsContent } from './tabs';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';

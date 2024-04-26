@@ -15,7 +15,7 @@ import {
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiButtonEmpty,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -74,12 +74,12 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
                 // eslint-disable-next-line @elastic/eui/href-or-on-click
-                <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
+                <EuiLink href={getHref('settings')} onClick={onClose}>
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"
                   />
-                </EuiButtonEmpty>
+                </EuiLink>
               ),
             }}
           />

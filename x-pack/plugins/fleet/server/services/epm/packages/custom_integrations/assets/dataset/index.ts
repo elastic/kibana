@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './fields';
 export * from './manifest';
 export * from './utils';
