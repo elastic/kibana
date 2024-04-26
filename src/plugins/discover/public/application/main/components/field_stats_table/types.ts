@@ -160,5 +160,8 @@ export interface FieldStatisticsTableProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  /**
+   * Search session id to save to or restore from
+   */
   searchSessionId?: string;
 }
