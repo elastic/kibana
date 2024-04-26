@@ -91,8 +91,8 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Check Types and Build API Docs'
+  - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
+    label: 'Build API Docs'
     agents:
       queue: n2-4-spot
     key: build_api_docs
