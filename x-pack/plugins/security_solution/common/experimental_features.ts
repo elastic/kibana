@@ -97,6 +97,12 @@ export const allowedExperimentalValues = Object.freeze({
   agentStatusClientEnabled: false,
 
   /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
