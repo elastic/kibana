@@ -7,6 +7,7 @@
 
 export { useCreateTransform } from './use_create_transform';
 export { useDocumentationLinks } from './use_documentation_links';
+export { useGetDataViewIdsWithTitle } from './use_get_data_view_ids_with_title';
 export { useGetDataViewTitles } from './use_get_data_view_titles';
 export { useGetEsIndices } from './use_get_es_indices';
 export { useGetEsIngestPipelines } from './use_get_es_ingest_pipelines';
