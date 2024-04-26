@@ -470,7 +470,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
-        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
+        <div
+          data-test-subj="dataVisualizerTableContainer"
+          ref={resizeRef}
+          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
+        >
           <EuiInMemoryTable<T>
             message={
               loading
