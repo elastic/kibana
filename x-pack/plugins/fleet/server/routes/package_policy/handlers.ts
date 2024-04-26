@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
+import deepMerge from 'deepmerge';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -35,7 +36,6 @@ import type {
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
   UpdatePackagePolicyRequestBodySchema,
-  PackagePolicyInput,
 } from '../../types';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -367,9 +367,9 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: restOfBody.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
 
-      // if inputs overrides are specified, remove disallowed properties `compiled_streams` and `compiled_input`
       if (overrides?.inputs) {
-        newData.inputs = removeFieldsFromInputSchema(overrides.inputs as PackagePolicyInput[]);
+        const targetId = Object.keys(overrides?.inputs)[0];
+        newData = deepMerge<NewPackagePolicy>(newData, overrides?.inputs[targetId]);
       }
     }
 
