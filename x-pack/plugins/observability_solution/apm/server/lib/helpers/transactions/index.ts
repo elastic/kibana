@@ -170,7 +170,6 @@ export function getDurationLegacyFilter(): QueryDslQueryContainer {
       must: [
         {
           bool: {
-            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
             must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
           },
         },

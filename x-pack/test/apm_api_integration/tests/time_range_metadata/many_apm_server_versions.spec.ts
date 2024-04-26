@@ -28,7 +28,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const baseTime = new Date('2023-10-01T00:00:00.000Z').getTime();
   const startLegacy = moment(baseTime).add(0, 'minutes');
   const start = moment(baseTime).add(5, 'minutes');
-  const end = moment(baseTime).add(10, 'minutes');
+  const endLegacy = moment(baseTime).add(10, 'minutes');
+  const end = moment(baseTime).add(15, 'minutes');
 
   registry.when(
     'Time range metadata when there are multiple APM Server versions',
@@ -39,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await generateTraceDataForService({
             serviceName: 'synth-java-legacy',
             start: startLegacy,
-            end,
+            end: endLegacy,
             isLegacy: true,
             synthtrace,
           });
@@ -73,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(10);
+          expect(res.hits.total.value).to.be(20);
         });
 
         it('ingests transaction metrics without transaction.duration.summary', async () => {
@@ -98,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
               query: {
-                start: start.toISOString(),
+                start: endLegacy.toISOString(),
                 end: end.toISOString(),
                 enableContinuousRollups: true,
                 enableServiceTransactionMetrics: true,
@@ -111,8 +112,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const allHasSummaryField = response.body.sources
             .filter(
               (source) =>
-                source.documentType === ApmDocumentType.TransactionMetric &&
-                source.rollupInterval !== RollupInterval.OneMinute
+                source.documentType !== ApmDocumentType.TransactionEvent &&
+                source.rollupInterval !== RollupInterval.SixtyMinutes // there is not enough data for 60 minutes
             )
             .every((source) => {
               return source.hasDurationSummaryField;
@@ -127,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             params: {
               query: {
                 start: startLegacy.toISOString(),
-                end: end.toISOString(),
+                end: endLegacy.toISOString(),
                 enableContinuousRollups: true,
                 enableServiceTransactionMetrics: true,
                 useSpanName: false,
@@ -143,11 +144,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(allHasSummaryField).to.eql(false);
         });
 
+        it('does not support transaction.duration.summary for transactionMetric 1m when not all documents within the range support it ', async () => {
+          const response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/time_range_metadata',
+            params: {
+              query: {
+                start: startLegacy.toISOString(),
+                end: end.toISOString(),
+                enableContinuousRollups: true,
+                enableServiceTransactionMetrics: true,
+                useSpanName: false,
+                kuery: '',
+              },
+            },
+          });
+
+          const hasDurationSummaryField = response.body.sources.find(
+            (source) =>
+              source.documentType === ApmDocumentType.TransactionMetric &&
+              source.rollupInterval === RollupInterval.OneMinute // there is not enough data for 60 minutes in the timerange defined for the tests
+          )?.hasDurationSummaryField;
+
+          expect(hasDurationSummaryField).to.eql(false);
+        });
+
         it('does not have latency data for synth-java-legacy', async () => {
           const res = await getLatencyChartForService({
             serviceName: 'synth-java-legacy',
             start,
-            end,
+            end: endLegacy,
             apmApiClient,
             useDurationSummary: true,
           });
@@ -166,18 +191,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const res = await getLatencyChartForService({
             serviceName: 'synth-java',
             start,
-            end,
+            end: endLegacy,
             apmApiClient,
             useDurationSummary: true,
           });
 
           expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            null,
+            1000000, 1000000, 1000000, 1000000, 1000000, 1000000,
           ]);
         });
       });
