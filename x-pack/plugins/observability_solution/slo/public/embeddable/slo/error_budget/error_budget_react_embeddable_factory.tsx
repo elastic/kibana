@@ -50,7 +50,6 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                 ...serializeTitles(),
                 sloId: sloId$.getValue(),
                 sloInstanceId: sloInstanceId$.getValue(),
-                defaultPanelTitle: defaultTitle$.getValue(),
               },
             };
           },
