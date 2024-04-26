@@ -1,3 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Task priority checks detects tasks with priority definitions 1`] = `Array []`;
+exports[`Task priority checks detects tasks with priority definitions 1`] = `
+Array [
+  Object {
+    "priority": 1,
+    "taskType": "ad_hoc_run-backfill",
+  },
+]
+`;
