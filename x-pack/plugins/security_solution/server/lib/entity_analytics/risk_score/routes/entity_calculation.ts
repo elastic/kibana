@@ -73,16 +73,14 @@ export const riskScoreEntityCalculationRoute = (
 
           if (entityAnalyticsConfig == null) {
             return siemResponse.error({
-              statusCode: 500,
-              body: { message: 'No Risk engine configuration found.' },
-              bypassErrorFormat: true,
+              statusCode: 405,
+              body: 'No Risk engine configuration found',
             });
           }
 
           const {
             dataViewId,
             enabled,
-            // filter, // TODO merge with filter for entity
             range: configuredRange,
             pageSize,
             alertSampleSizePerShard,
@@ -90,9 +88,8 @@ export const riskScoreEntityCalculationRoute = (
 
           if (!enabled) {
             return siemResponse.error({
-              statusCode: 412,
-              body: { message: 'Risk engine is disabled.' },
-              bypassErrorFormat: true,
+              statusCode: 405,
+              body: 'Risk engine is disabled',
             });
           }
 
@@ -102,14 +99,14 @@ export const riskScoreEntityCalculationRoute = (
             soClient,
           });
 
-          // TODO delete me
-          const testRange = {
-            start: 'Jan 26, 2024 @ 00:00:00.000',
-            end: 'Apr 25, 2024 @ 10:57:53.511',
-          };
-          // const range = convertRangeToISO(configuredRange);
+          const range = convertRangeToISO(configuredRange);
 
-          const range = convertRangeToISO(testRange);
+          // TODO: DELETE ME
+          // const testRange = {
+          //   start: 'Jan 26, 2024 @ 00:00:00.000',
+          //   end: 'Apr 25, 2024 @ 10:57:53.511',
+          // };
+          // const range = convertRangeToISO(testRange);
           const afterKeys: AfterKeys = {};
 
           const result: CalculateAndPersistScoresResponse =
@@ -117,6 +114,7 @@ export const riskScoreEntityCalculationRoute = (
               pageSize,
               identifierType,
               index,
+              // Question: Should we merge the configured filter with the identifier filter?
               filter: { term: { [getFieldForIdentifier(identifierType)]: identifier } },
               range,
               runtimeMappings,
@@ -130,7 +128,7 @@ export const riskScoreEntityCalculationRoute = (
             return siemResponse.error({
               statusCode: 500,
               body: {
-                message: 'Error calculating the risk score for an entity',
+                message: 'Error calculating the risk score for an entity.',
                 full_error: JSON.stringify(result.errors),
               },
               bypassErrorFormat: true,
