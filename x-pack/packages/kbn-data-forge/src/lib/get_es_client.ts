@@ -23,17 +23,18 @@ export const getEsClient = (config: Config) => {
       };
 
   const isHTTPS = new URL(config.elasticsearch.host).protocol === 'https:';
-  const tls = isHTTPS
-    ? {
-        ca: Fs.readFileSync(CA_CERT_PATH),
-        rejectUnauthorized: true,
-      }
-    : undefined;
+  // load the CA cert from disk if necessary
+  const caCert = isHTTPS ? Fs.readFileSync(CA_CERT_PATH) : null;
 
   esClient = new Client({
     node: config.elasticsearch.host,
     auth,
-    tls,
+    tls: caCert
+      ? {
+          ca: caCert,
+          rejectUnauthorized: true,
+        }
+      : undefined,
   });
 
   return esClient;
