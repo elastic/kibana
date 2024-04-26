@@ -17,7 +17,6 @@ set +e
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
-PROXY_URL="https://cloud-handler-test-r344edqiza-uc.a.run.app"
 # Check the healthcheck of the proxy service
 response=$(curl -s -o /dev/null -w "%{http_code}" "$PROXY_URL/healthcheck")
 echo "Proxy Healthcheck Response code: $response"
