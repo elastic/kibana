@@ -9,6 +9,7 @@ import type { VFC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AgentStatus } from '../../../../management/components/agent_status/agent_status';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
@@ -83,35 +84,50 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField,
-}) => (
-  <>
-    {values != null &&
-      values.map((value, i) => {
+}) => {
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+
+  const getAgentStatus = (value?: string) => {
+    if (field === AGENT_STATUS_FIELD_NAME) {
+      const isSentinelOneAgentIdField = originalField === SENTINEL_ONE_AGENT_ID_FIELD;
+      if (isSentinelOneAgentIdField || agentStatusClientEnabled) {
         return (
-          <EuiFlexItem
-            grow={false}
-            key={`${i}-${value}`}
-            data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
-          >
-            {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
-              <LinkFieldCell value={value} />
-            ) : field === AGENT_STATUS_FIELD_NAME &&
-              originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
-              <AgentStatus
-                agentId={String(value ?? '')}
-                agentType="sentinel_one"
-                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-              />
-            ) : field === AGENT_STATUS_FIELD_NAME ? (
-              <EndpointAgentStatusById
-                endpointAgentId={String(value ?? '')}
-                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-              />
-            ) : (
-              <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
-            )}
-          </EuiFlexItem>
+          <AgentStatus
+            agentId={String(value ?? '')}
+            agentType={isSentinelOneAgentIdField ? 'sentinel_one' : 'endpoint'}
+            data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+          />
         );
-      })}
-  </>
-);
+      } else {
+        return (
+          <EndpointAgentStatusById
+            endpointAgentId={String(value ?? '')}
+            data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+          />
+        );
+      }
+    }
+    return <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>;
+  };
+
+  return (
+    <>
+      {values != null &&
+        values.map((value, i) => {
+          return (
+            <EuiFlexItem
+              grow={false}
+              key={`${i}-${value}`}
+              data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
+            >
+              {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
+                <LinkFieldCell value={value} />
+              ) : (
+                getAgentStatus(value)
+              )}
+            </EuiFlexItem>
+          );
+        })}
+    </>
+  );
+};
