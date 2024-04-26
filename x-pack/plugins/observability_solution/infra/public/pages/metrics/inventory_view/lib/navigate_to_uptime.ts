@@ -15,12 +15,9 @@ export const navigateToUptime = ({
   nodeType,
   node,
 }: {
-  uptimeLocator?: LocatorPublic<SerializableRecord>;
+  uptimeLocator: LocatorPublic<SerializableRecord>;
   nodeType: InventoryItemType;
   node: InfraWaffleMapNode;
 }) => {
-  if (!uptimeLocator) {
-    return;
-  }
   return uptimeLocator.navigate({ [nodeType]: node.id, ip: node.ip });
 };

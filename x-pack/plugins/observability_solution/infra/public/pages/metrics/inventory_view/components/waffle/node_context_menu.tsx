@@ -147,7 +147,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} in Uptime',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      onClick: () => navigateToUptime({ uptimeLocator, nodeType, node }),
+      onClick: () => (showUptimeLink ? navigateToUptime({ uptimeLocator, nodeType, node }) : {}),
       isDisabled: !showUptimeLink,
     };
 
