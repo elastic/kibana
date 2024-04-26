@@ -35,6 +35,23 @@ jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   },
 }));
 
+function findSubjects(component: ReactWrapper) {
+  return {
+    mainMsg: findTestSubject(component!, 'discoverNoResults').exists(),
+    errorMsg: findTestSubject(component!, 'discoverNoResultsError').exists(),
+    adjustTimeRange: findTestSubject(component!, 'discoverNoResultsTimefilter').exists(),
+    adjustSearch: findTestSubject(component!, 'discoverNoResultsAdjustSearch').exists(),
+    adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
+    checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
+    disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
+    viewMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
+    searchAllMatchesGivesNoResults: findTestSubject(
+      component!,
+      'discoverSearchAllMatchesGivesNoResults'
+    ).exists(),
+  };
+}
+
 async function mountAndFindSubjects(
   props: Omit<
     DiscoverNoResultsProps,
@@ -64,16 +81,7 @@ async function mountAndFindSubjects(
     await component!.update();
   });
 
-  return {
-    mainMsg: findTestSubject(component!, 'discoverNoResults').exists(),
-    errorMsg: findTestSubject(component!, 'discoverNoResultsError').exists(),
-    adjustTimeRange: findTestSubject(component!, 'discoverNoResultsTimefilter').exists(),
-    adjustSearch: findTestSubject(component!, 'discoverNoResultsAdjustSearch').exists(),
-    adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
-    checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
-    disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
-    viewMatchesButton: findTestSubject(component!, 'discoverNoResultsViewAllMatches').exists(),
-  };
+  return findSubjects(component!);
 }
 
 describe('DiscoverNoResults', () => {
@@ -98,6 +106,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
             "viewMatchesButton": false,
           }
         `);
@@ -119,10 +128,11 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
+            "searchAllMatchesGivesNoResults": false,
             "viewMatchesButton": true,
           }
         `);
-        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -134,6 +144,7 @@ describe('DiscoverNoResults', () => {
           filters: undefined,
         });
         expect(result).toHaveProperty('adjustSearch', true);
+        expect(result).toHaveProperty('disableFiltersButton', false);
       });
 
       test('shows "adjust filters" message when having filters', async () => {

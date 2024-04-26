@@ -140,14 +140,14 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       }
       body={body}
       actions={
-        !isTextBasedQuery(query) ? (
+        !isTextBasedQuery(query) && isTimeBased ? (
           <div
             css={css`
               min-block-size: ${euiTheme.size.xxl};
             `}
           >
             {timeRangeExtendingStatus === TimeRangeExtendingStatus.notFound ? (
-              <EuiText color="subdued">
+              <EuiText color="subdued" data-test-subj="discoverSearchAllMatchesGivesNoResults">
                 <FormattedMessage
                   id="discover.noResults.suggestion.searchAllMatchesButtonGivesNoResultsText"
                   defaultMessage="Expanding the time range gives no results too."
