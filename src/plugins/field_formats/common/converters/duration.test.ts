@@ -459,12 +459,12 @@ describe('Duration Format', () => {
     inputFormat: 'minutes',
     outputFormat: 'humanizePrecise',
     outputPrecision: 2,
-    showSuffix: true,
-    useShortSuffix: true,
+    showSuffix: false,
+    useShortSuffix: false,
     fixtures: [
       {
         input: 10750,
-        output: '1.07 w',
+        output: '1.07 weeks',
       },
     ],
   });
