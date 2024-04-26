@@ -4,6 +4,15 @@
     "name"
   ],
   "action_task_params": [],
+  "ad_hoc_run_params": [
+    "apiKeyId",
+    "createdAt",
+    "end",
+    "rule",
+    "rule.alertTypeId",
+    "rule.consumer",
+    "start"
+  ],
   "alert": [
     "actions",
     "actions.actionRef",

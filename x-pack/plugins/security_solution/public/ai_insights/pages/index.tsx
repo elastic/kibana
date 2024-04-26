@@ -31,7 +31,6 @@ import {
   showSummary,
 } from './helpers';
 import { Insight } from '../insight';
-import { LoadingPlaceholder } from '../insight/loading_placeholder';
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
 import { Summary } from './summary';
@@ -191,15 +190,11 @@ const AiInsightsComponent: React.FC = () => {
             isLoading,
             loadingConnectorId,
           }) ? (
-            <>
-              <LoadingCallout
-                alertsCount={knowledgeBase.latestAlerts}
-                connectorIntervals={connectorIntervals}
-                approximateFutureTime={approximateFutureTime}
-              />
-              <EuiSpacer size="m" />
-              <LoadingPlaceholder />
-            </>
+            <LoadingCallout
+              alertsCount={knowledgeBase.latestAlerts}
+              approximateFutureTime={approximateFutureTime}
+              connectorIntervals={connectorIntervals}
+            />
           ) : (
             selectedConnectorInsights.map((insight, i) => (
               <React.Fragment key={insight.id}>

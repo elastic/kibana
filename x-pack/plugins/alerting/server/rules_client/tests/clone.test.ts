@@ -24,6 +24,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { getBeforeSetup } from './lib';
 import { RuleDomain } from '../../application/rule/types';
 import { ConstructorOptions, RulesClient } from '../rules_client';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 describe('clone', () => {
   const taskManager = taskManagerMock.createStart();
@@ -34,6 +35,7 @@ describe('clone', () => {
   const actionsAuthorization = actionsAuthorizationMock.create();
   const auditLogger = auditLoggerMock.create();
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+  const backfillClient = backfillClientMock.create();
 
   const kibanaVersion = 'v8.2.0';
   const createAPIKeyMock = jest.fn();
@@ -63,6 +65,7 @@ describe('clone', () => {
     getAuthenticationAPIKey: getAuthenticationApiKeyMock,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
+    backfillClient,
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),

@@ -28,7 +28,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 describe(
   'Unsaved Timeline query tab',
   {
-    tags: ['@ess', '@serverless', '@skipInServerless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -47,6 +47,7 @@ describe(
       createNewTimeline();
       executeTimelineSearch('*');
     });
+
     it('should be able to add/remove columns correctly', () => {
       cy.get(GET_UNIFIED_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
       addFieldToTable('agent.type');
@@ -55,8 +56,9 @@ describe(
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
     });
 
+    // these tests are skipped until we implement the expandable flyout in the unified table for timeline
     context('flyout', () => {
-      it('should be able to open/close details details/host/user flyout', () => {
+      it.skip('should be able to open/close details details/host/user flyout', () => {
         cy.log('Event Details Flyout');
         openEventDetailsFlyout(0);
         cy.get(TIMELINE_DETAILS_FLYOUT).should('be.visible');
