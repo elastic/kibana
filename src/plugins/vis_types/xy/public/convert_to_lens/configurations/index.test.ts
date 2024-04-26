@@ -149,7 +149,6 @@ describe('getConfiguration', () => {
       },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
-      valuesInLegend: false,
       xTitle: undefined,
       yLeftExtent: { enforce: true, lowerBound: undefined, mode: 'full', upperBound: undefined },
       yLeftScale: 'linear',
