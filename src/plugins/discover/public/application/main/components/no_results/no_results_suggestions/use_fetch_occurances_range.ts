@@ -122,6 +122,7 @@ async function fetchDocumentsTimeRange({
         params: {
           index: dataView.getIndexPattern(),
           size: 0,
+          track_total_hits: false,
           body: {
             query: dslQuery ?? { match_all: {} },
             aggs: {
