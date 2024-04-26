@@ -70,13 +70,8 @@ export function LogRateAnalysis({
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
   // If an alert would have a `5m` lookback, this would result in a factor of `5`.
   const lookbackDuration =
-    alert.fields['kibana.alert.rule.parameters'] &&
-    alert.fields['kibana.alert.rule.parameters'].timeSize &&
-    alert.fields['kibana.alert.rule.parameters'].timeUnit
-      ? moment.duration(
-          alert.fields['kibana.alert.rule.parameters'].timeSize as number,
-          alert.fields['kibana.alert.rule.parameters'].timeUnit as any
-        )
+    rule.params.criteria[0]?.timeSize && rule.params.criteria[0]?.timeUnit
+      ? moment.duration(rule.params.criteria[0].timeSize, rule.params.criteria[0].timeUnit)
       : moment.duration(1, 'm');
   const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
 
