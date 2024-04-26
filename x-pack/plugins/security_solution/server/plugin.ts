@@ -662,10 +662,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (plugins.taskManager) {
-      this.completeExternalResponseActionsTask.start({
-        taskManager: plugins.taskManager,
-        esClient: core.elasticsearch.client.asInternalUser,
-      });
+      this.completeExternalResponseActionsTask
+        .start({
+          taskManager: plugins.taskManager,
+          esClient: core.elasticsearch.client.asInternalUser,
+        })
+        .catch(() => {}); // it shouldn't refuse, but just in case
     }
 
     this.telemetryReceiver
@@ -692,8 +694,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     const endpointPkgInstallationPromise = this.endpointContext.service
       .getInternalFleetServices()
       .packages.getInstallation(FLEET_ENDPOINT_PACKAGE);
-    Promise.all([endpointPkgInstallationPromise, plugins.fleet?.fleetSetupCompleted()]).then(
-      ([endpointPkgInstallation]) => {
+    Promise.all([endpointPkgInstallationPromise, plugins.fleet?.fleetSetupCompleted()])
+      .then(async ([endpointPkgInstallation]) => {
         if (plugins.taskManager) {
           if (
             endpointPkgInstallation?.version &&
@@ -702,10 +704,10 @@ export class Plugin implements ISecuritySolutionPlugin {
             return;
           }
 
-          this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
+          await this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
         }
-      }
-    );
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
 
     if (registerIngestCallback) {
       registerIngestCallback(

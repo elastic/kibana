@@ -294,7 +294,9 @@ export const getPackagePolicyPostCreateCallback = (
         exceptionsClient,
         integrationConfig.value.eventFilters,
         packagePolicy
-      );
+      ).catch((error) => {
+        logger.error(`Failed to create event filters: ${error}`);
+      });
     }
     return packagePolicy;
   };
