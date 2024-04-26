@@ -7,23 +7,20 @@
 
 import expect from '@kbn/expect';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlADJobTable } from './job_table';
+import { MlJobAnnotations } from './job_annotations_table';
 
 export function MachineLearningJobExpandedDetailsProvider(
   { getService }: FtrProviderContext,
-  jobTable: MlADJobTable
+  jobTable: MlADJobTable,
+  jobAnnotationsTable: MlJobAnnotations
 ) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async clickEditAnnotationAction(jobId: string) {
-      const row: WebElementWrapper = await testSubjects.find(`*row-annotation_for_${jobId}`);
-      const collapsedMenuButton: WebElementWrapper = await row.findByTestSubject(
-        'euiCollapsedItemActionsButton'
-      );
-      await collapsedMenuButton.click();
+    async clickEditAnnotationAction(jobId: string, annotationId: string) {
+      await jobAnnotationsTable.ensureAnnotationsActionsMenuOpen(annotationId);
       await testSubjects.click('mlAnnotationsActionEdit');
       await testSubjects.existOrFail('mlAnnotationFlyout', {
         timeout: 3_000,
@@ -56,27 +53,42 @@ export function MachineLearningJobExpandedDetailsProvider(
       await jobTable.ensureDetailsClosed(jobId);
     },
 
-    async editAnnotation(jobId: string, newAnnotationText: string): Promise<void> {
-      await jobTable.withDetailsOpen(jobId, async () => {
-        await jobTable.openAnnotationsTab(jobId);
-        if (await testSubjects.exists('clearSearchButton')) {
-          await testSubjects.click('clearSearchButton');
-          await testSubjects.missingOrFail('clearSearchButton');
-        }
+    async clearSearchButton() {
+      if (await testSubjects.exists('clearSearchButton')) {
+        await testSubjects.click('clearSearchButton');
+        await testSubjects.missingOrFail('clearSearchButton');
+      }
+    },
 
-        await this.clickEditAnnotationAction(jobId);
+    async editAnnotation(
+      jobId: string,
+      newAnnotationText: string,
+      annotationsFromApi: any
+    ): Promise<void> {
+      const length = annotationsFromApi.length;
+      expect(length).to.eql(
+        1,
+        `Expect annotions from api to have length of 1, but got [${length}]`
+      );
 
-        await testSubjects.setValue('mlAnnotationsFlyoutTextInput', newAnnotationText, {
-          clearWithKeyboard: true,
-        });
-        await testSubjects.click('annotationFlyoutUpdateOrCreateButton');
-        await testSubjects.missingOrFail('mlAnnotationsFlyoutTextInput');
+      await jobTable.ensureDetailsOpen(jobId);
+      await jobTable.openAnnotationsTab(jobId);
+      await this.clearSearchButton();
+
+      const { _id: annotationId }: { _id: string } = annotationsFromApi[0];
+
+      await this.clickEditAnnotationAction(jobId, annotationId);
+
+      await testSubjects.setValue('mlAnnotationsFlyoutTextInput', newAnnotationText, {
+        clearWithKeyboard: true,
       });
+      await testSubjects.click('annotationFlyoutUpdateOrCreateButton');
+      await testSubjects.missingOrFail('mlAnnotationsFlyoutTextInput');
+      await jobTable.ensureDetailsClosed(jobId);
 
       await jobTable.withDetailsOpen(jobId, async () => {
         await jobTable.openAnnotationsTab(jobId);
-        if (await testSubjects.exists('clearSearchButton'))
-          await testSubjects.click('clearSearchButton');
+        await this.clearSearchButton();
         const visibleText = await testSubjects.getVisibleText(
           jobTable.detailsSelector(jobId, 'mlAnnotationsColumnAnnotation')
         );
@@ -87,8 +99,7 @@ export function MachineLearningJobExpandedDetailsProvider(
     async assertDataFeedFlyout(jobId: string): Promise<void> {
       await jobTable.withDetailsOpen(jobId, async () => {
         await jobTable.openAnnotationsTab(jobId);
-        if (await testSubjects.exists('clearSearchButton'))
-          await testSubjects.click('clearSearchButton');
+        await this.clearSearchButton();
         await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
         await testSubjects.click('mlAnnotationsActionViewDatafeed');
         await testSubjects.existOrFail('mlAnnotationsViewDatafeedFlyoutChart');

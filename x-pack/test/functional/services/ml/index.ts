@@ -123,7 +123,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context, commonUI, customUrls);
-  const jobExpandedDetails = MachineLearningJobExpandedDetailsProvider(context, jobTable);
+
+  const jobExpandedDetails = MachineLearningJobExpandedDetailsProvider(
+    context,
+    jobTable,
+    jobAnnotations
+  );
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(

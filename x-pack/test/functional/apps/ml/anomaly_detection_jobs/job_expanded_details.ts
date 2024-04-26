@@ -90,7 +90,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('expanded row with annotations can be edited', async () => {
-      await ml.jobExpandedDetails.editAnnotation(jobId, 'edited annotation');
+      const annotationsFromApi = await ml.api.getAnnotations(jobId);
+
+      await ml.jobExpandedDetails.editAnnotation(jobId, 'edited annotation', annotationsFromApi);
     });
 
     it('expanded row with data feed flyout should display correctly', async () => {
