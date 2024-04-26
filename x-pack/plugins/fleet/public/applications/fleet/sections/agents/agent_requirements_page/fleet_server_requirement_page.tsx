@@ -9,9 +9,12 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useStartServices, useCheckPermissions } from '../../../hooks';
+import { useStartServices, useCheckPermissions, useAuthz } from '../../../hooks';
 
-import { FleetServerMissingPrivileges } from '../components/fleet_server_callouts';
+import {
+  FleetServerMissingESPrivileges,
+  FleetServerMissingKbnPrivileges,
+} from '../components/fleet_server_callouts';
 
 import { Loading } from '../components';
 
@@ -41,6 +44,7 @@ export const FleetServerRequirementPage: React.FunctionComponent<
 > = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
+  const authz = useAuthz();
 
   const { permissionsError, isPermissionsLoading } = useCheckPermissions();
 
@@ -50,10 +54,12 @@ export const FleetServerRequirementPage: React.FunctionComponent<
         <FlexItemWithMinWidth grow={false}>
           {deploymentUrl ? (
             <CloudInstructions deploymentUrl={deploymentUrl} />
+          ) : !authz.fleet.addFleetServers ? (
+            <FleetServerMissingKbnPrivileges />
           ) : isPermissionsLoading ? (
             <Loading />
           ) : permissionsError ? (
-            <FleetServerMissingPrivileges />
+            <FleetServerMissingESPrivileges />
           ) : showEnrollmentRecommendation ? (
             <EnrollmentRecommendation showStandaloneTab={showStandaloneTab} />
           ) : (
