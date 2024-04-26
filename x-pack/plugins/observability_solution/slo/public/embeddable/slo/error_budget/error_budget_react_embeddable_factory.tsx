@@ -25,6 +25,7 @@ export const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
     defaultMessage: 'SLO Error Budget burn down',
   });
+const queryClient = new QueryClient();
 
 export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<SloErrorBudgetEmbeddableState, ErrorBudgetApi> = {
@@ -65,12 +66,12 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
         .subscribe((next) => {
           reload$.next(next.isReload);
         });
+
       return {
         api,
         Component: () => {
           const [sloId, sloInstanceId] = useBatchedPublishingSubjects(sloId$, sloInstanceId$);
           const I18nContext = deps.i18n.Context;
-          const queryClient = new QueryClient();
 
           useEffect(() => {
             return () => {
