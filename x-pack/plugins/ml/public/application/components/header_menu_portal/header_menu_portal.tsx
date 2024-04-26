@@ -19,7 +19,6 @@ export interface HeaderMenuPortalProps {
 
 export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
   const { services } = useMlKibana();
-  const { theme, i18n } = services;
 
   const { setHeaderActionMenu } = useContext(MlPageControlsContext);
 
@@ -35,7 +34,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
         <KibanaContextProvider services={services}>
           <OutPortal node={portalNode} />
         </KibanaContextProvider>,
-        { theme, i18n }
+        services
       );
       return mount(element);
     });
@@ -44,8 +43,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [portalNode, setHeaderActionMenu, services.theme.theme$]);
+  }, [portalNode, setHeaderActionMenu, services]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 };

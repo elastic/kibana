@@ -19,11 +19,13 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 jest.mock('./use_sentinelone_host_isolation');
 jest.mock('../../../common/hooks/use_experimental_features');
 
+type AgentType = 'endpoint' | 'sentinel_one' | 'crowdstrike';
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
+// TODO TC: change crowdstrike tests when the useAgentStatus is implemented for Crowdstrike - now it defaults to `sentinel_one`
 describe('useHostIsolationAction', () => {
   describe.each([
     ['useGetSentinelOneAgentStatus', useGetSentinelOneAgentStatusMock],
@@ -37,37 +39,55 @@ describe('useHostIsolationAction', () => {
       return wrapper;
     };
 
-    const render = (isSentinelAlert: boolean = true) =>
+    const render = (agentTypeAlert: AgentType) =>
       renderHook(
         () =>
           useHostIsolationAction({
             closePopover: jest.fn(),
-            detailsData: isSentinelAlert
-              ? [
-                  {
-                    category: 'event',
-                    field: 'event.module',
-                    values: ['sentinel_one'],
-                    originalValue: ['sentinel_one'],
-                    isObjectArray: false,
-                  },
-                  {
-                    category: 'observer',
-                    field: 'observer.serial_number',
-                    values: ['some-agent-id'],
-                    originalValue: ['some-agent-id'],
-                    isObjectArray: false,
-                  },
-                ]
-              : [
-                  {
-                    category: 'agent',
-                    field: 'agent.id',
-                    values: ['some-agent-id'],
-                    originalValue: ['some-agent-id'],
-                    isObjectArray: false,
-                  },
-                ],
+            detailsData:
+              agentTypeAlert === 'sentinel_one'
+                ? [
+                    {
+                      category: 'event',
+                      field: 'event.module',
+                      values: ['sentinel_one'],
+                      originalValue: ['sentinel_one'],
+                      isObjectArray: false,
+                    },
+                    {
+                      category: 'observer',
+                      field: 'observer.serial_number',
+                      values: ['some-agent-id'],
+                      originalValue: ['some-agent-id'],
+                      isObjectArray: false,
+                    },
+                  ]
+                : agentTypeAlert === 'crowdstrike'
+                ? [
+                    {
+                      category: 'event',
+                      field: 'event.module',
+                      values: ['crowdstrike'],
+                      originalValue: ['crowdstrike'],
+                      isObjectArray: false,
+                    },
+                    {
+                      category: 'crowdstrike',
+                      field: 'crowdstrike.event.DeviceId',
+                      values: ['expectedCrowdstrikeAgentId'],
+                      originalValue: ['expectedCrowdstrikeAgentId'],
+                      isObjectArray: false,
+                    },
+                  ]
+                : [
+                    {
+                      category: 'agent',
+                      field: 'agent.id',
+                      values: ['some-agent-id'],
+                      originalValue: ['some-agent-id'],
+                      isObjectArray: false,
+                    },
+                  ],
             isHostIsolationPanelOpen: false,
             onAddIsolationStatusClick: jest.fn(),
           }),
@@ -86,24 +106,40 @@ describe('useHostIsolationAction', () => {
     });
 
     it(`${name} is invoked as 'enabled' when SentinelOne alert and FF enabled`, () => {
-      render();
+      render('sentinel_one');
 
       expect(hook).toHaveBeenCalledWith(['some-agent-id'], 'sentinel_one', {
         enabled: true,
       });
     });
+    it(`${name} is invoked as 'enabled' when Crowdstrike alert and FF enabled`, () => {
+      render('crowdstrike');
+
+      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
+        enabled: false,
+      });
+    });
 
     it(`${name} is invoked as 'disabled' when SentinelOne alert and FF disabled`, () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-      render();
+      render('sentinel_one');
 
       expect(hook).toHaveBeenCalledWith(['some-agent-id'], 'sentinel_one', {
         enabled: false,
       });
     });
 
-    it(`${name} is invoked as 'disabled' when non-SentinelOne alert`, () => {
-      render(false);
+    it(`${name} is invoked as 'disabled' when Crowdstrike alert and FF disabled`, () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      render('crowdstrike');
+
+      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
+        enabled: false,
+      });
+    });
+
+    it(`${name} is invoked as 'disabled' when endpoint alert`, () => {
+      render('endpoint');
 
       expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
         enabled: false,
