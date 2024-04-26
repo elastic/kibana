@@ -96,9 +96,15 @@ export default ({ getService }: FtrProviderContext) => {
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
+
     after(async () => {
       await esArchiver.unload(auditPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
+    });
+
+    afterEach(async () => {
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
