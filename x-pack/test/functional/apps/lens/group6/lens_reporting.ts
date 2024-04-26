@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.lens.openReportingShare('PDF');
         await testSubjects.existOrFail('shareReportingCopyURL');
-        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Post URL');
+        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Copy Post URL');
       });
 
       it(`should produce a valid URL for reporting`, async () => {
@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.lens.openReportingShare('PNG');
         await testSubjects.existOrFail('shareReportingCopyURL');
-        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Post URL');
+        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Copy Post URL');
       });
 
       it(`should produce a valid URL for reporting`, async () => {

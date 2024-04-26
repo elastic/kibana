@@ -174,7 +174,7 @@ const ExportContentUi = ({
         fill
         color="primary"
         onClick={getReport}
-        data-test-subj="generateExportButton"
+        data-test-subj="generateReportButton"
         isLoading={isCreatingExport}
       >
         {generateExportButton}

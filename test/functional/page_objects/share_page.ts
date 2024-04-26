@@ -12,6 +12,7 @@ export class SharePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
+  private readonly retry = this.ctx.getService('retry');
 
   async closeShareModal() {
     if (await this.isShareModalOpen()) {
@@ -83,7 +84,12 @@ export class SharePageObject extends FtrService {
     return true;
   }
 
-  async getSharedUrl() {
-    return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url')) ?? '';
+  async getSharedUrl(): Promise<string> {
+    await this.retry.waitFor('wait for share url creation', async () => {
+      await this.testSubjects.click('copyShareUrlButton');
+      return Boolean(await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url'));
+    });
+
+    return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url'))!;
   }
 }

@@ -84,15 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    afterEach(async () => {
-      retry.waitFor('close share modal', async () => {
-        if (await testSubjects.exists('shareContextModal')) {
-          await PageObjects.share.closeShareModal(); // close modal
-        }
-        return await testSubjects.exists('shareTopNavButton');
-      });
-    });
-
     it('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 

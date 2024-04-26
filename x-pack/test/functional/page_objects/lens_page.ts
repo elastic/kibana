@@ -1833,7 +1833,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async closeShareModal() {
       if (await testSubjects.exists('shareContextModal')) {
-        await find.clickByCssSelector('[data-test-subj="shareContextModal"] .euiModal__closeIcon');
+        await find.clickByCssSelector(
+          '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
+        );
       }
     },
 

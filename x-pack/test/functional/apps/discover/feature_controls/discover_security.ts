@@ -122,7 +122,7 @@ export default function (ctx: FtrProviderContext) {
       it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.clickTab('Export');
-        await testSubjects.existOrFail('generateExportButton');
+        await testSubjects.existOrFail('generateReportButton');
         await PageObjects.share.closeShareModal();
       });
 
