@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { getMockLinksApi } from '../../embeddable/mocks';
+import { getMockLinksApi } from '../../mocks';
 import { ResolvedLink } from '../../embeddable/types';
 
 jest.mock('@kbn/dashboard-plugin/public', () => {

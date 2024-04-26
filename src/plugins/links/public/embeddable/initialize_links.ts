@@ -42,7 +42,7 @@ export async function initializeLinks(
 
   const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>([]);
 
-  const attributes$ = new BehaviorSubject(attributes);
+  const attributes$ = new BehaviorSubject<LinksAttributes | undefined>(attributes);
   const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
 
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(attributes?.title);
