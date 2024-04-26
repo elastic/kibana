@@ -18,6 +18,7 @@ import {
   DataStreamStatServiceResponse,
   IntegrationsResponse,
   DataStreamStat,
+  DataStreamStatType,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -66,7 +67,7 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
-  dataStreamStats: DataStreamStat[];
+  dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {

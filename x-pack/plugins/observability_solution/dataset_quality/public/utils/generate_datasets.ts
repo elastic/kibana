@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import { DataStreamStatType } from '../../common/data_streams_stats/types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
 
 export function generateDatasets(
-  dataStreamStats: DataStreamStat[] = [],
+  dataStreamStats: DataStreamStatType[] = [],
   degradedDocStats: DegradedDocsStat[] = [],
   integrations: Integration[]
-) {
+): DataStreamStat[] {
   if (!dataStreamStats.length && !integrations.length) {
     return [];
   }
 
-  const integrationMap: Record<string, { integration: Integration; title: string }> =
+  const datasetIntegrationMap: Record<string, { integration: Integration; title: string }> =
     integrations.reduce((integrationMapAcc, integration) => {
       return {
         ...integrationMapAcc,
@@ -37,9 +38,19 @@ export function generateDatasets(
 
   if (!dataStreamStats.length) {
     return degradedDocStats.map((degradedDocStat) =>
-      DataStreamStat.fromDegradedDocStat({ degradedDocStat, integrationMap })
+      DataStreamStat.fromDegradedDocStat({ degradedDocStat, datasetIntegrationMap })
     );
   }
+
+  const integrationsMap: Record<string, Integration> = integrations.reduce(
+    (integrationMapAcc, integration) => {
+      return {
+        ...integrationMapAcc,
+        [integration.name]: integration,
+      };
+    },
+    {}
+  );
 
   const degradedMap: Record<
     DegradedDocsStat['dataset'],
@@ -53,10 +64,16 @@ export function generateDatasets(
     {}
   );
 
-  return dataStreamStats?.map((dataStream) => ({
-    ...dataStream,
-    title: integrationMap[dataStream.name]?.title || dataStream.title,
-    integration: integrationMap[dataStream.name]?.integration,
-    degradedDocs: degradedMap[dataStream.rawName] || dataStream.degradedDocs,
-  }));
+  return dataStreamStats?.map((dataStream) => {
+    const dataset = DataStreamStat.create(dataStream);
+
+    return {
+      ...dataset,
+      title: datasetIntegrationMap[dataset.name]?.title || dataset.title,
+      integration:
+        datasetIntegrationMap[dataset.name]?.integration ??
+        integrationsMap[dataStream.integration ?? ''],
+      degradedDocs: degradedMap[dataset.rawName] || dataset.degradedDocs,
+    };
+  });
 }
