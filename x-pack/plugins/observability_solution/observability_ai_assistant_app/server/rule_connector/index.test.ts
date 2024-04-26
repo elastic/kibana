@@ -158,6 +158,26 @@ describe('observabilityAIAssistant rule_connector', () => {
                 role: MessageRole.Assistant,
                 content: '',
                 function_call: {
+                  name: 'get_alerts_context',
+                  arguments: JSON.stringify({}),
+                  trigger: MessageRole.Assistant as const,
+                },
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.User,
+                name: 'get_alerts_context',
+                content: expect.any(String),
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
                   name: 'get_connectors',
                   arguments: JSON.stringify({}),
                   trigger: MessageRole.Assistant as const,
