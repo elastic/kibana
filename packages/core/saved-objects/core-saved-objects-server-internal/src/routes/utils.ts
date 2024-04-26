@@ -171,7 +171,7 @@ export function isKibanaRequest({ headers }: KibanaRequest) {
 export interface LogWarnOnExternalRequest {
   method: string;
   path: string;
-  req: KibanaRequest;
+  request: KibanaRequest;
   logger: Logger;
 }
 
@@ -181,8 +181,8 @@ export interface LogWarnOnExternalRequest {
  *  @internal
  */
 export function logWarnOnExternalRequest(params: LogWarnOnExternalRequest) {
-  const { method, path, req, logger } = params;
-  if (!isKibanaRequest(req)) {
+  const { method, path, request, logger } = params;
+  if (!isKibanaRequest(request)) {
     logger.warn(`The ${method} saved object API ${path} is deprecated.`);
   }
 }
