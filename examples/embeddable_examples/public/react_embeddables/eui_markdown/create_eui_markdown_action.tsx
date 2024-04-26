@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -34,7 +35,10 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
         true
       );
     },
-    getDisplayName: () => 'EUI Markdown',
+    getDisplayName: () =>
+      i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
+        defaultMessage: 'EUI Markdown',
+      }),
   });
   uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
   if (uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
