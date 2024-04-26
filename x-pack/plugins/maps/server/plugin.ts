@@ -145,7 +145,7 @@ export class MapsPlugin implements Plugin {
     );
   }
 
-  setup(core: CoreSetup, plugins: SetupDeps) {
+  setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );
