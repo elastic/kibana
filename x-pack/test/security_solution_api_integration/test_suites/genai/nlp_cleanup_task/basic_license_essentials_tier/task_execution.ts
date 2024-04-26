@@ -56,7 +56,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await waitFor(
             async () => {
               const { body, status } = await esSupertest.get(`/_ml/trained_models`);
-              logger.info(`body:\n${JSON.stringify(body, null, 2)}`);
               m1 = body;
               return status === 200 && m1.count > 1;
             },
