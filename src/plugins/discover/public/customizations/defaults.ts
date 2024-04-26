@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { DiscoverCustomizationContext } from './types';
 
-export interface ControlsCoreService {
-  analytics: CoreStart['analytics'];
-  i18n: CoreStart['i18n'];
-  theme: CoreStart['theme'];
-  notifications: CoreStart['notifications'];
-}
+export const defaultCustomizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
+};
