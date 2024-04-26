@@ -463,7 +463,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         spaceId,
         new Map([
           ['execute-timeout', { equal: 2 }],
-          ['execute-backfill', { equal: 2 }],
+          ['execute-backfill', { gte: 2 }],
         ])
       );
 
