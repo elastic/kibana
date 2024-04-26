@@ -263,6 +263,10 @@ export const ConversationUpdateProps = z.object({
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;
 export const ConversationCreateProps = z.object({
   /**
+   * The conversation ID.
+   */
+  id: z.string().optional(),
+  /**
    * The conversation title.
    */
   title: z.string(),
