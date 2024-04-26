@@ -12,9 +12,10 @@ import { ComparatorDefinition } from './types';
 
 /**
  * Comparators are required for every runtime state key. Occasionally, a comparator may
- * actually be optional. In those cases, implementors can fall back to this blank definition.
+ * actually be optional. In those cases, implementors can fall back to this blank definition
+ * which will always return 'true'.
  */
-export const getFallbackComparator = <
+export const getUnchangingComparator = <
   State extends object,
   Key extends keyof State
 >(): ComparatorDefinition<State, Key> => {
