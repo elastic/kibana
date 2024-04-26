@@ -97,7 +97,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant attackDiscovery={attackDiscovery} />
+          <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
         </EuiFlexItem>
         <EuiFlexItem
           css={css`

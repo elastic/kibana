@@ -48,7 +48,11 @@ const ActionableSummaryComponent: React.FC<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant compact={true} attackDiscovery={attackDiscovery} />
+          <ViewInAiAssistant
+            compact={true}
+            attackDiscovery={attackDiscovery}
+            replacements={replacements}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
