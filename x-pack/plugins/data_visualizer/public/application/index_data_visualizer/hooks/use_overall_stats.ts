@@ -68,13 +68,38 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
-  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<
+  const [populatedFieldsInIndexWithoutRuntimeFields, setPopulatedFieldsInIndex] = useState<
     | Set<string>
     // request to fields caps has not been made yet
     | undefined
     // null is set when field caps api is too slow, and we should not retry anymore
     | null
   >();
+
+  const populatedFieldsInIndex: Set<string> | undefined | null = useMemo(
+    () => {
+      if (!populatedFieldsInIndexWithoutRuntimeFields) return undefined;
+      const runtimeFields = searchStrategyParams?.runtimeFieldMap
+        ? Object.keys(searchStrategyParams?.runtimeFieldMap)
+        : undefined;
+      return runtimeFields && runtimeFields?.length > 0
+        ? new Set(
+            ...[
+              ...populatedFieldsInIndexWithoutRuntimeFields,
+              // Field caps API don't know about runtime fields
+              // so by default we expect runtime fields to be populated
+              // so we can later check as needed
+              ...runtimeFields,
+            ]
+          )
+        : populatedFieldsInIndexWithoutRuntimeFields;
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      populatedFieldsInIndexWithoutRuntimeFields,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(searchStrategyParams?.runtimeFieldMap),
+    ]
+  );
 
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
@@ -94,8 +119,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       // so don't try again
       if (!searchStrategyParams || populatedFieldsInIndex === null) return;
 
-      const { index, searchQuery, timeFieldName, earliest, latest, runtimeFieldMap } =
-        searchStrategyParams;
+      const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
@@ -131,15 +155,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
         if (!unmounted) {
           if (Array.isArray(nonEmptyFields)) {
-            setPopulatedFieldsInIndex(
-              new Set([
-                ...nonEmptyFields.map((field) => field.name),
-                // Field caps API don't know about runtime fields
-                // so by default we expect runtime fields to be populated
-                // so we can later check as needed
-                ...Object.keys(runtimeFieldMap ?? {}),
-              ])
-            );
+            setPopulatedFieldsInIndex(new Set([...nonEmptyFields.map((field) => field.name)]));
           } else {
             setPopulatedFieldsInIndex(null);
           }
@@ -154,13 +170,11 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      data.dataViews,
       searchStrategyParams?.timeFieldName,
       searchStrategyParams?.earliest,
       searchStrategyParams?.latest,
       searchStrategyParams?.searchQuery,
       searchStrategyParams?.index,
-      searchStrategyParams?.runtimeFieldMap,
     ]
   );
   const startFetch = useCallback(async () => {
