@@ -286,7 +286,8 @@ describe('HostName', () => {
     });
   });
 
-  test('should open expandable flyout in timeline', async () => {
+  // TODO re-enable this when the cell actions bug in timeline is fixed (see https://github.com/elastic/kibana/issues/181863)
+  test.skip('should open expandable flyout in timeline', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
       if (feature === 'newHostDetailsFlyout') return true;
       if (feature === 'expandableTimelineFlyoutEnabled') return true;

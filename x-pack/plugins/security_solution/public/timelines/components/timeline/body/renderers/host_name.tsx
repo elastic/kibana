@@ -50,9 +50,9 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
+  // const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+  //   'expandableTimelineFlyoutEnabled'
+  // );
   const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
@@ -105,9 +105,12 @@ const HostNameComponent: React.FC<Props> = ({
       };
 
       if (
-        (isTimelineScope(timelineID) &&
-          isNewHostDetailsFlyoutEnabled &&
-          expandableTimelineFlyoutEnabled) ||
+        // TODO re-enable this when the cell actions bug in timeline is fixed (see https://github.com/elastic/kibana/issues/181863)
+        // (isTimelineScope(timelineID) &&
+        //   isNewHostDetailsFlyoutEnabled &&
+        //   expandableTimelineFlyoutEnabled) ||
+        // isNewHostDetailsFlyoutEnabled
+        !isTimelineScope(timelineID) &&
         isNewHostDetailsFlyoutEnabled
       ) {
         openNewFlyout();
@@ -119,7 +122,7 @@ const HostNameComponent: React.FC<Props> = ({
       contextId,
       dispatch,
       eventContext,
-      expandableTimelineFlyoutEnabled,
+      // expandableTimelineFlyoutEnabled,
       hostName,
       isDraggable,
       isInTimelineContext,

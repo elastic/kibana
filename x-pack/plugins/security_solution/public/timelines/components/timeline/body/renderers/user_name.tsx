@@ -52,9 +52,9 @@ const UserNameComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
+  // const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+  //   'expandableTimelineFlyoutEnabled'
+  // );
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutApi();
@@ -104,9 +104,12 @@ const UserNameComponent: React.FC<Props> = ({
       };
 
       if (
-        (isTimelineScope(timelineID) &&
-          isNewUserDetailsFlyoutEnable &&
-          expandableTimelineFlyoutEnabled) ||
+        // TODO re-enable this when the cell actions bug in timeline is fixed (see https://github.com/elastic/kibana/issues/181863)
+        // (isTimelineScope(timelineID) &&
+        //   isNewUserDetailsFlyoutEnable &&
+        //   expandableTimelineFlyoutEnabled) ||
+        // isNewUserDetailsFlyoutEnable
+        !isTimelineScope(timelineID) &&
         isNewUserDetailsFlyoutEnable
       ) {
         openNewFlyout();
@@ -118,7 +121,7 @@ const UserNameComponent: React.FC<Props> = ({
       contextId,
       dispatch,
       eventContext,
-      expandableTimelineFlyoutEnabled,
+      // expandableTimelineFlyoutEnabled,
       isDraggable,
       isInTimelineContext,
       isNewUserDetailsFlyoutEnable,
