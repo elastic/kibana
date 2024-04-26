@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import supertestLib from 'supertest';
-import url from 'url';
+import { expect } from 'expect';
 
 import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_SUPPRESSION_DOCS_COUNT, ALERT_SUPPRESSION_TERMS } from '@kbn/rule-data-utils';
@@ -24,11 +23,8 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
-  const retry = getService('retry');
 
-  const request = supertestLib(url.format(config.get('servers.kibana')));
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatArchivePath = dataPathBuilder.getPath('auditbeat/hosts');
