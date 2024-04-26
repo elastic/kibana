@@ -51,7 +51,7 @@ export interface CasePersistedAttributes {
   customFields?: CasePersistedCustomFields;
 }
 
-type CasePersistedCustomFields = Array<{
+export type CasePersistedCustomFields = Array<{
   key: string;
   type: string;
   value: null | unknown;

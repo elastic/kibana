@@ -15,7 +15,8 @@ import {
   ConfigurationBasicWithoutOwnerRt,
 } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
-import type { User } from './user';
+import type { User, UserProfile } from './user';
+import { CasePersistedCustomFields, CasePersistedSeverity } from './case';
 
 export interface ConfigurationPersistedAttributes {
   connector: ConnectorPersisted;
@@ -26,6 +27,7 @@ export interface ConfigurationPersistedAttributes {
   updated_at: string | null;
   updated_by: User | null;
   customFields?: PersistedCustomFieldsConfiguration;
+  templates?: PersistedTemplatesConfiguration;
 }
 
 type PersistedCustomFieldsConfiguration = Array<{
@@ -34,6 +36,22 @@ type PersistedCustomFieldsConfiguration = Array<{
   label: string;
   required: boolean;
   defaultValue?: string | boolean | null;
+}>;
+
+type PersistedTemplatesConfiguration = Array<{
+  id: string;
+  name: string;
+  description: string;
+  caseFields?: {
+    title?: string;
+    assignees?: UserProfile[];
+    connector?: ConnectorPersisted;
+    description?: string;
+    severity?: CasePersistedSeverity;
+    tags: string[];
+    category?: string;
+    customFields?: CasePersistedCustomFields;
+  };
 }>;
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
+import { CaseConnector, CaseSeverity, ConfigurationAttributes } from '../../../common/types/domain';
 import { CustomFieldTypes, ConnectorTypes } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -57,6 +57,40 @@ const basicConfigFields = {
       label: 'Text',
       required: true,
       defaultValue: 'foobar',
+    },
+  ],
+  templates: [
+    {
+      id: 'test_template_1',
+      name: 'First test template',
+      description: 'This is a first test template',
+      caseFields: null,
+    },
+    {
+      id: 'test_template_4',
+      name: 'Fourth test template',
+      description: 'This is a fourth test template',
+      caseFields: {
+        title: 'Case with sample template 4',
+        description: 'case desc',
+        severity: CaseSeverity.LOW,
+        category: null,
+        tags: ['sample-4'],
+        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+        customFields: [
+          {
+            key: 'first_custom_field_key',
+            type: CustomFieldTypes.TEXT,
+            value: 'this is a text field value',
+          },
+        ],
+        connector: {
+          id: 'none',
+          name: 'My Connector',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      },
     },
   ],
 };
@@ -204,6 +238,46 @@ describe('CaseConfigureService', () => {
               },
             ],
             "owner": "securitySolution",
+            "templates": Array [
+              Object {
+                "caseFields": null,
+                "description": "This is a first test template",
+                "id": "test_template_1",
+                "name": "First test template",
+              },
+              Object {
+                "caseFields": Object {
+                  "assignees": Array [
+                    Object {
+                      "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                    },
+                  ],
+                  "category": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "My Connector",
+                    "type": ".none",
+                  },
+                  "customFields": Array [
+                    Object {
+                      "key": "first_custom_field_key",
+                      "type": "text",
+                      "value": "this is a text field value",
+                    },
+                  ],
+                  "description": "case desc",
+                  "severity": "low",
+                  "tags": Array [
+                    "sample-4",
+                  ],
+                  "title": "Case with sample template 4",
+                },
+                "description": "This is a fourth test template",
+                "id": "test_template_4",
+                "name": "Fourth test template",
+              },
+            ],
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -490,6 +564,46 @@ describe('CaseConfigureService', () => {
               },
             ],
             "owner": "securitySolution",
+            "templates": Array [
+              Object {
+                "caseFields": null,
+                "description": "This is a first test template",
+                "id": "test_template_1",
+                "name": "First test template",
+              },
+              Object {
+                "caseFields": Object {
+                  "assignees": Array [
+                    Object {
+                      "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                    },
+                  ],
+                  "category": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "My Connector",
+                    "type": ".none",
+                  },
+                  "customFields": Array [
+                    Object {
+                      "key": "first_custom_field_key",
+                      "type": "text",
+                      "value": "this is a text field value",
+                    },
+                  ],
+                  "description": "case desc",
+                  "severity": "low",
+                  "tags": Array [
+                    "sample-4",
+                  ],
+                  "title": "Case with sample template 4",
+                },
+                "description": "This is a fourth test template",
+                "id": "test_template_4",
+                "name": "Fourth test template",
+              },
+            ],
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
