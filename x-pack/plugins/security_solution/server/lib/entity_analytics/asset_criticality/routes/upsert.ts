@@ -12,6 +12,8 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { CreateAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 export const assetCriticalityUpsertRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
@@ -48,6 +50,16 @@ export const assetCriticalityUpsertRoute = (
           };
 
           const result = await assetCriticalityClient.upsert(assetCriticalityRecord);
+
+          securitySolution.getAuditLogger()?.log({
+            message: 'User attempted to assign the asset criticality level for an entity',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_UPDATE,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CREATION,
+              outcome: AUDIT_OUTCOME.UNKNOWN,
+            },
+          });
 
           return response.ok({
             body: result,

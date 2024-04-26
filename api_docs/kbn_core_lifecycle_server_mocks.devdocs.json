@@ -192,6 +192,14 @@
                 "section": "def-common.SecurityServiceSetup",
                 "text": "SecurityServiceSetup"
               },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              },
               ">; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
@@ -283,6 +291,14 @@
                 "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-common.SecurityServiceStart",
                 "text": "SecurityServiceStart"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
+                "section": "def-common.InternalUserProfileServiceStart",
+                "text": "InternalUserProfileServiceStart"
               },
               ">; }"
             ],

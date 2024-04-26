@@ -240,7 +240,7 @@ describe('LensVisService attributes', () => {
                         "label": "Top 3 values of extension",
                         "operationType": "terms",
                         "params": Object {
-                          "missingBucket": false,
+                          "missingBucket": true,
                           "orderBy": Object {
                             "columnId": "count_column",
                             "type": "column",
