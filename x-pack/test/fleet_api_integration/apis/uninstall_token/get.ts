@@ -17,7 +17,11 @@ import {
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { addUninstallTokenToPolicy, generateAgentPolicy, generateNPolicies } from '../../helpers';
+import {
+  addUninstallTokenToPolicy,
+  generateAgentPolicy,
+  generateNAgentPolicies,
+} from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -39,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
         let generatedPolicies: Map<string, AgentPolicy>;
 
         before(async () => {
-          const generatedPoliciesArray = await generateNPolicies(supertest, 20);
+          const generatedPoliciesArray = await generateNAgentPolicies(supertest, 20);
 
           generatedPolicies = new Map();
           generatedPoliciesArray.forEach((policy) => generatedPolicies.set(policy.id, policy));
@@ -86,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return default perPage number of token metadata if total is above default perPage', async () => {
-          const additionalPolicy = (await generateNPolicies(supertest, 1))[0];
+          const additionalPolicy = (await generateNAgentPolicies(supertest, 1))[0];
           generatedPolicies.set(additionalPolicy.id, additionalPolicy);
 
           const response1 = await supertest
@@ -167,7 +171,7 @@ export default function (providerContext: FtrProviderContext) {
         let timestampBeforeAddingNewTokens: number;
 
         before(async () => {
-          generatedPolicies = await generateNPolicies(supertest, 20);
+          generatedPolicies = await generateNAgentPolicies(supertest, 20);
 
           timestampBeforeAddingNewTokens = Date.now();
 
@@ -204,8 +208,8 @@ export default function (providerContext: FtrProviderContext) {
         let managedPolicies: AgentPolicy[];
 
         before(async () => {
-          notManagedPolicies = await generateNPolicies(supertest, 3);
-          managedPolicies = await generateNPolicies(supertest, 4, { is_managed: true });
+          notManagedPolicies = await generateNAgentPolicies(supertest, 3);
+          managedPolicies = await generateNAgentPolicies(supertest, 4, { is_managed: true });
         });
 
         after(async () => {
@@ -236,7 +240,7 @@ export default function (providerContext: FtrProviderContext) {
         let generatedPolicyArray: AgentPolicy[];
 
         before(async () => {
-          generatedPolicyArray = await generateNPolicies(supertest, 5);
+          generatedPolicyArray = await generateNAgentPolicies(supertest, 5);
         });
 
         after(async () => {
@@ -322,7 +326,7 @@ export default function (providerContext: FtrProviderContext) {
 
           promises.push(
             // random policies
-            generateNPolicies(supertest, 8),
+            generateNAgentPolicies(supertest, 8),
             // policies with special characters in policy name
             ...specialCharactersForNameAndId.map((c) =>
               generateAgentPolicy(supertest, { name: `name ${c}${c}${c}` })
@@ -339,7 +343,9 @@ export default function (providerContext: FtrProviderContext) {
           const policies = (await Promise.all(promises)).flat();
           generatedPolicyArray.push(...policies);
 
-          generatedManagedPolicyArray = await generateNPolicies(supertest, 3, { is_managed: true });
+          generatedManagedPolicyArray = await generateNAgentPolicies(supertest, 3, {
+            is_managed: true,
+          });
         });
 
         after(async () => {
@@ -381,7 +387,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return token metadata for policyID even if policy is deleted', async () => {
-          const deletedPolicy = (await generateNPolicies(supertest, 1))[0];
+          const deletedPolicy = (await generateNAgentPolicies(supertest, 1))[0];
           await supertest
             .post(agentPolicyRouteService.getDeletePath())
             .set('kbn-xsrf', 'xxxx')

@@ -125,7 +125,7 @@ export function setPrereleaseSetting(supertest: SuperTest<Test>) {
   });
 }
 
-export const generateNPolicies = async (
+export const generateNAgentPolicies = async (
   supertest: SuperTest<Test>,
   number: number,
   overwrite?: Partial<CreateAgentPolicyRequest['body']>
