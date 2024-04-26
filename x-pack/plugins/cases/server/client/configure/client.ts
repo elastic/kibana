@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -315,12 +316,21 @@ export async function update(
           }`;
     }
 
+    const templatesWithIds =
+      request.templates?.map((template) => {
+        return {
+          ...template,
+          id: uuidv4(),
+        };
+      }) ?? [];
+
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
         ...(connector != null && { connector }),
+        templates: templatesWithIds,
         updated_at: updateDate,
         updated_by: user,
       },
@@ -436,11 +446,20 @@ export async function create(
         : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
 
+    const templatesWithIds =
+      validatedConfigurationRequest.templates?.map((template) => {
+        return {
+          ...template,
+          id: uuidv4(),
+        };
+      }) ?? [];
+
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
+        templates: templatesWithIds,
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

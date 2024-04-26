@@ -7,8 +7,13 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
-import { UserRt } from '../user/v1';
-import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
+import { CaseAssigneesRt, UserRt } from '../user/v1';
+import {
+  CaseCustomFieldsRt,
+  CustomFieldTextTypeRt,
+  CustomFieldToggleTypeRt,
+} from '../custom_field/v1';
+import { CaseSeverityRt } from '../case/v1';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),
@@ -57,6 +62,53 @@ export const CustomFieldConfigurationRt = rt.union([
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
+const caseFieldsRt = rt.exact(
+  rt.partial({
+    /**
+     * The description of the case
+     */
+    description: rt.string,
+    /**
+     * The identifying strings for filter a case
+     */
+    tags: rt.array(rt.string),
+    /**
+     * The title of a case
+     */
+    title: rt.string,
+    /**
+     * The external system that the case can be synced with
+     */
+    connector: CaseConnectorRt,
+    /**
+     * The severity of the case
+     */
+    severity: CaseSeverityRt,
+    /**
+     * The users assigned to this case
+     */
+    assignees: CaseAssigneesRt,
+    /**
+     * The category of the case.
+     */
+    category: rt.union([rt.string, rt.null]),
+    /**
+     * An array containing the possible,
+     * user-configured custom fields.
+     */
+    customFields: CaseCustomFieldsRt,
+  })
+);
+
+export const TemplateConfigurationRt = rt.strict({
+  id: rt.string,
+  name: rt.string,
+  description: rt.string,
+  caseFields: rt.union([rt.null, caseFieldsRt]),
+});
+
+export const TemplatesConfigurationRt = rt.array(TemplateConfigurationRt);
+
 export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   /**
    * The external connector
@@ -70,6 +122,10 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * The custom fields configured for the case
    */
   customFields: CustomFieldsConfigurationRt,
+  /**
+   * Templates configured for the case
+   */
+  templates: TemplatesConfigurationRt,
 });
 
 export const CasesConfigureBasicRt = rt.intersection([

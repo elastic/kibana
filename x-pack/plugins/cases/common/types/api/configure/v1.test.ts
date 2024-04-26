@@ -12,7 +12,10 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_TEMPLATES_LENGTH,
+  MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../constants';
+import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
@@ -23,6 +26,7 @@ import {
   CustomFieldConfigurationWithoutTypeRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
+  TemplateConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -88,6 +92,46 @@ describe('configure', () => {
       ).toContain(
         `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}`
       );
+    });
+
+    it('has expected attributes in request with templates', () => {
+      const request = {
+        ...defaultRequest,
+        templates: [
+          {
+            name: 'Template 1',
+            description: 'this is first template',
+            caseFields: {
+              title: 'case using sample template',
+            },
+          },
+          {
+            name: 'Template 2',
+            description: 'this is second template',
+            caseFields: null,
+          },
+        ],
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it(`limits templates to ${MAX_TEMPLATES_LENGTH}`, () => {
+      const templates = new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+        name: 'Template 1',
+        description: 'this is first template',
+        caseFields: {
+          title: 'case using sample template',
+        },
+      });
+
+      expect(
+        PathReporter.report(ConfigurationRequestRt.decode({ ...defaultRequest, templates }))[0]
+      ).toContain(`The length of the field templates is too long. Array must be of length <= 10.`);
     });
 
     it('removes foo:bar attributes from request', () => {
@@ -157,6 +201,46 @@ describe('configure', () => {
       ).toContain(
         `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}`
       );
+    });
+
+    it('has expected attributes in request with templates', () => {
+      const request = {
+        ...defaultRequest,
+        templates: [
+          {
+            name: 'Template 1',
+            description: 'this is first template',
+            caseFields: {
+              title: 'case using sample template',
+            },
+          },
+          {
+            name: 'Template 2',
+            description: 'this is second template',
+            caseFields: null,
+          },
+        ],
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it(`limits templates to ${MAX_TEMPLATES_LENGTH}`, () => {
+      const templates = new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+        name: 'Template 1',
+        description: 'this is first template',
+        caseFields: {
+          title: 'case using sample template',
+        },
+      });
+
+      expect(
+        PathReporter.report(ConfigurationPatchRequestRt.decode({ ...defaultRequest, templates }))[0]
+      ).toContain(`The length of the field templates is too long. Array must be of length <= 10.`);
     });
 
     it('removes foo:bar attributes from request', () => {
@@ -405,6 +489,112 @@ describe('configure', () => {
           })
         )[0]
       ).toContain('Invalid value "foobar" supplied');
+    });
+  });
+
+  describe('TemplateConfigurationRt', () => {
+    const defaultRequest = {
+      name: 'Template 1',
+      description: 'this is first template',
+      caseFields: {
+        title: 'case using sample template',
+      },
+    };
+
+    it('has expected attributes in request', () => {
+      const query = TemplateConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = TemplateConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('limits name to 50 characters', () => {
+      const longName = 'x'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
+
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, name: longName }))
+      ).toContain('The length of the name is too long. The maximum length is 50.');
+    });
+
+    it('removes foo:bar attributes from caseFields', () => {
+      const query = TemplateConfigurationRt.decode({
+        ...defaultRequest,
+        caseFields: { ...defaultRequest.caseFields, foo: 'bar' },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('accepts caseFields as null', () => {
+      const query = TemplateConfigurationRt.decode({
+        ...defaultRequest,
+        caseFields: null,
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, caseFields: null },
+      });
+    });
+
+    it('accepts caseFields as {}', () => {
+      const query = TemplateConfigurationRt.decode({
+        ...defaultRequest,
+        caseFields: {},
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, caseFields: {} },
+      });
+    });
+
+    it('accepts caseFields with all fields', () => {
+      const caseFieldsAll = {
+        title: 'Case with sample template 1',
+        description: 'case desc',
+        severity: CaseSeverity.LOW,
+        category: null,
+        tags: ['sample-1'],
+        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+        customFields: [
+          {
+            key: 'first_custom_field_key',
+            type: 'text',
+            value: 'this is a text field value',
+          },
+        ],
+        connector: {
+          id: 'none',
+          name: 'My Connector',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      };
+
+      const query = TemplateConfigurationRt.decode({
+        ...defaultRequest,
+        caseFields: caseFieldsAll,
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, caseFields: caseFieldsAll },
+      });
     });
   });
 });
