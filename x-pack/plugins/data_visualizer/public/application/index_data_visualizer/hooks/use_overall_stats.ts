@@ -83,15 +83,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         ? Object.keys(searchStrategyParams?.runtimeFieldMap)
         : undefined;
       return runtimeFields && runtimeFields?.length > 0
-        ? new Set(
-            ...[
-              ...populatedFieldsInIndexWithoutRuntimeFields,
-              // Field caps API don't know about runtime fields
-              // so by default we expect runtime fields to be populated
-              // so we can later check as needed
-              ...runtimeFields,
-            ]
-          )
+        ? new Set([...Array.from(populatedFieldsInIndexWithoutRuntimeFields), ...runtimeFields])
         : populatedFieldsInIndexWithoutRuntimeFields;
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
     [
