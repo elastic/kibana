@@ -21,7 +21,12 @@ export interface EmbeddableSloProps {
   onRenderComplete?: () => void;
 }
 
-export type SloErrorBudgetEmbeddableState = SerializedTitles & EmbeddableSloProps;
+interface ErrorBudgetCustomInput {
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
+}
+
+export type SloErrorBudgetEmbeddableState = SerializedTitles & ErrorBudgetCustomInput;
 export type ErrorBudgetApi = DefaultEmbeddableApi<SloErrorBudgetEmbeddableState>;
 
 export interface SloEmbeddableDeps {
