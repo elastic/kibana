@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { ListContainer, LIST_CONTAINER } from './list_container';
-export type { ListContainerFactory } from './list_container_factory';
-export { ListContainerFactoryDefinition } from './list_container_factory';
+import { DiscoverCustomizationContext } from './types';
+
+export const defaultCustomizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
+};
