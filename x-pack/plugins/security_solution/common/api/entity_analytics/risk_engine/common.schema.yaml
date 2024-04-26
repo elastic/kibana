@@ -33,7 +33,9 @@ components:
 
     Filter:
       description: An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
-      # $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer'
+      # TODO Fix the following line reference
+      # $ref: 'https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer' 
+
 
     PageSize:
       description: Specifies how many scores will be involved in a given calculation. Note that this value is per `identifier_type`, i.e. a value of 10 will calculate 10 host scores and 10 user scores, if available. To avoid missed data, keep this value consistent while paginating through scores.
@@ -42,6 +44,7 @@ components:
 
     KibanaDate:
       type: string
+      # TODO Fix the following oneOf declaration
       # oneOf:
       #   - format: date
       #   - format: date-time
