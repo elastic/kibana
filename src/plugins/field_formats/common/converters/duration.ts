@@ -141,8 +141,8 @@ const units = [
   { getValue: (dur: moment.Duration) => dur.days(), seconds: 86400, method: 'asDays' },
   { getValue: (dur: moment.Duration) => dur.hours(), seconds: 3600, method: 'asHours' },
   { getValue: (dur: moment.Duration) => dur.minutes(), seconds: 60, method: 'asMinutes' },
-  { getValue: (dur: moment.Duration) => dur.seconds(), method: 'asSeconds' },
-  { getValue: (dur: moment.Duration) => dur.milliseconds(), method: 'asMilliseconds' },
+  { getValue: (dur: moment.Duration) => dur.seconds(), seconds: 1, method: 'asSeconds' },
+  { getValue: (dur: moment.Duration) => dur.milliseconds(), seconds: 0.001, method: 'asMilliseconds' },
 ];
 
 function formatDuration(
