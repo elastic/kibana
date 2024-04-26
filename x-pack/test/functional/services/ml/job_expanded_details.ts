@@ -17,6 +17,7 @@ export function MachineLearningJobExpandedDetailsProvider(
   jobAnnotationsTable: MlJobAnnotations
 ) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async clickEditAnnotationAction(jobId: string, annotationId: string) {
@@ -45,10 +46,13 @@ export function MachineLearningJobExpandedDetailsProvider(
     },
 
     async assertForecastElements(jobId: string): Promise<void> {
-      await jobTable.ensureDetailsOpen(jobId);
-      await this.openForecastTab(jobId);
-      await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
-        timeout: 5_000,
+      await retry.tryForTime(15_000, async () => {
+        await jobTable.ensureDetailsClosed(jobId);
+        await jobTable.ensureDetailsOpen(jobId);
+        await this.openForecastTab(jobId);
+        await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
+          timeout: 5_000,
+        });
       });
       await jobTable.ensureDetailsClosed(jobId);
     },
