@@ -32,7 +32,7 @@ import type {
   ResponseActionGetFileParameters,
   SentinelOneGetFileRequestMeta,
 } from '../../../../../../common/endpoint/types';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
 import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
@@ -561,9 +561,6 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     describe('for Get File', () => {
-      let s1ActivityHits: Array<
-        SearchHit<SentinelOneActivityEsDoc<SentinelOneActivityDataForType80>>
-      >;
       let actionRequestsSearchResponse: SearchResponse<
         LogsEndpointAction<ResponseActionGetFileParameters, ResponseActionGetFileOutputContent>
       >;
@@ -608,8 +605,6 @@ describe('SentinelOneActionsClient class', () => {
             },
           }),
         ]);
-
-        s1ActivityHits = s1ActivitySearchResponse.hits.hits;
 
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
@@ -671,7 +666,7 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       it('should complete action as a failure if no S1 agentId/commandBatchUuid present in action request doc', async () => {
-        actionRequestsSearchResponse.hits.hits[0]._source.meta = {
+        actionRequestsSearchResponse.hits.hits[0]!._source!.meta = {
           agentId: 's1-agent-a',
           agentUUID: 'agent-uuid-1',
           hostName: 's1-host-name',
