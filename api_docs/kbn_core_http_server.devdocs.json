@@ -3446,6 +3446,10 @@
                 "path": "packages/core/status/core-status-server-internal/src/routes/status_preboot.ts"
               },
               {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.ts"
+              },
+              {
                 "plugin": "@kbn/core-rendering-server-internal",
                 "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.ts"
               },
@@ -3460,10 +3464,6 @@
               {
                 "plugin": "@kbn/core-deprecations-server-internal",
                 "path": "packages/core/deprecations/core-deprecations-server-internal/src/routes/get.ts"
-              },
-              {
-                "plugin": "@kbn/core-i18n-server-internal",
-                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.ts"
               },
               {
                 "plugin": "@kbn/core-apps-server-internal",
@@ -3776,6 +3776,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/get/get_query_delay_settings.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -5531,6 +5535,18 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/find/find_maintenance_windows_route.test.ts"
               },
               {
@@ -5704,6 +5720,10 @@
               {
                 "plugin": "@kbn/core-apps-server-internal",
                 "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundle_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-i18n-server-internal",
+                "path": "packages/core/i18n/core-i18n-server-internal/src/routes/translations.test.ts"
               },
               {
                 "plugin": "@kbn/core-i18n-server-internal",
@@ -6406,6 +6426,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -7750,6 +7778,30 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/update_objects_spaces.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/schedule/schedule_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9326,6 +9378,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability_solution/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -9648,6 +9704,18 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/delete.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
               },
               {
                 "plugin": "alerting",

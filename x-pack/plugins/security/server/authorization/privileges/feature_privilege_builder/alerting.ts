@@ -25,6 +25,8 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getActionErrorLog',
     'find',
     'getRuleExecutionKPI',
+    'getBackfill',
+    'findBackfill',
   ],
   alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
@@ -48,6 +50,8 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'bulkDisable',
     'unsnooze',
     'runSoon',
+    'scheduleBackfill',
+    'deleteBackfill',
   ],
   alert: ['update'],
 };
