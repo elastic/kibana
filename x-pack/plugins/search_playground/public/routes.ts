@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import React from 'react';
-
-export const EmbeddableSingleMetricViewerContainer = React.lazy(
-  () => import('./embeddable_single_metric_viewer_container')
-);
+export const ROOT_PATH = '/';
+export const SEARCH_PLAYGROUND_CHAT_PATH = `${ROOT_PATH}chat`;

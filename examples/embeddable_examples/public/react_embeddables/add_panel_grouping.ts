@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './migrations_embeddable';
-export * from './migrations_embeddable_factory';
+export const addPanelGrouping = {
+  id: 'embeddableExamples',
+  getDisplayName: () => 'Embeddable examples',
+};
