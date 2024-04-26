@@ -11,13 +11,13 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
-import { addPanelGrouping } from '../add_panel_grouping';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_FIELD_LIST_ACTION_ID,
-    grouping: [addPanelGrouping],
+    grouping: [embeddableExamplesGrouping],
     getIconType: () => 'indexOpen',
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);

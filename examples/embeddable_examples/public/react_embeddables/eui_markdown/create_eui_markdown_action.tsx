@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { addPanelGrouping } from '../add_panel_grouping';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 
 // -----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_EUI_MARKDOWN_ACTION_ID,
-    grouping: [addPanelGrouping],
+    grouping: [embeddableExamplesGrouping],
     getIconType: () => 'editorCodeBlock',
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);
