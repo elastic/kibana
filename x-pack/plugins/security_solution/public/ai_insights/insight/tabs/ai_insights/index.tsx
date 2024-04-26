@@ -21,14 +21,12 @@ import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 
 interface Props {
   insight: AlertsInsight;
-  promptContextId: string | undefined;
   replacements?: Replacements;
   showAnonymized?: boolean;
 }
 
 const AiInsightsComponent: React.FC<Props> = ({
   insight,
-  promptContextId,
   replacements,
   showAnonymized = false,
 }) => {
@@ -99,7 +97,7 @@ const AiInsightsComponent: React.FC<Props> = ({
 
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant promptContextId={promptContextId} />
+          <ViewInAiAssistant insight={insight} />
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
