@@ -22,7 +22,6 @@ export const navigateToEditor = async (
   api: NavigateToEditorApi
 ) => {
   const appTarget = await api.getEditorAppTarget();
-
   if (appTarget.editApp && appTarget.editPath) {
     /** The editor has a dedicated app */
     const apiContext = apiHasAppContext(api) ? api.getAppContext() : undefined;
@@ -37,7 +36,7 @@ export const navigateToEditor = async (
     }
     const serializedState = api.serializeState?.().rawState;
 
-    if (parentApiContext && currentAppId && serializedState) {
+    if ((parentApiContext || apiContext) && currentAppId && serializedState) {
       /**
        * The state transfer service should only be used when both (1) the parent API is providing context so that the
        * current app can be returned to and (2) there is actually state to transfer
