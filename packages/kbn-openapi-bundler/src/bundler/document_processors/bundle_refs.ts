@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Document, ResolvedRef, TraverseDocumentContext, RefNode, DocumentNode } from '../types';
+import deepEqual from 'fast-deep-equal';
+import chalk from 'chalk';
+import {
+  Document,
+  ResolvedRef,
+  TraverseDocumentContext,
+  RefNode,
+  DocumentNode,
+  TraverseRootDocumentContext,
+} from '../types';
 import { hasProp } from '../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
 import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
@@ -37,8 +46,12 @@ export class BundleRefProcessor {
   }
 
   ref(node: RefNode, resolvedRef: ResolvedRef, context: TraverseDocumentContext): void {
-    if (!resolvedRef.pointer.startsWith('/components/schemas')) {
-      throw new Error(`$ref pointer must start with "/components/schemas"`);
+    if (!resolvedRef.pointer.startsWith('/components')) {
+      throw new Error(
+        `$ref pointer ${chalk.yellow(
+          resolvedRef.pointer
+        )} must start with "/components" at ${chalk.bold(resolvedRef.absolutePath)}`
+      );
     }
 
     if (this.nodesToInline.has(node) || this.nodesToInline.has(resolvedRef.refNode)) {
@@ -50,16 +63,29 @@ export class BundleRefProcessor {
         rootDocument.components = {};
       }
 
+      const ref = this.refs.get(resolvedRef.pointer);
+
+      if (ref && !deepEqual(ref.refNode, resolvedRef.refNode)) {
+        const documentAbsolutePath =
+          this.extractParentContext(context).resolvedDocument.absolutePath;
+
+        throw new Error(
+          `❌  Unable to bundle ${chalk.bold(
+            documentAbsolutePath
+          )} due to conflicts in references. Schema ${chalk.yellow(
+            ref.pointer
+          )} is defined in ${chalk.blue(ref.absolutePath)} and in ${chalk.magenta(
+            resolvedRef.absolutePath
+          )} but has not matching definitions.`
+        );
+      }
+
       node.$ref = this.saveComponent(
         resolvedRef,
         rootDocument.components as Record<string, unknown>
       );
 
-      const refKey = `${resolvedRef.absolutePath}#${resolvedRef.pointer}`;
-
-      if (!this.refs.has(refKey)) {
-        this.refs.set(refKey, resolvedRef);
-      }
+      this.refs.set(resolvedRef.pointer, resolvedRef);
     }
   }
 
@@ -73,11 +99,17 @@ export class BundleRefProcessor {
     return `#${ref.pointer}`;
   }
 
-  private extractRootDocument(context: TraverseDocumentContext): Document {
+  private extractParentContext(context: TraverseDocumentContext): TraverseRootDocumentContext {
     while (isChildContext(context)) {
       context = context.parentContext;
     }
 
-    return context.resolvedDocument.document;
+    return context;
+  }
+
+  private extractRootDocument(context: TraverseDocumentContext): Document {
+    const parentContext = this.extractParentContext(context);
+
+    return parentContext.resolvedDocument.document;
   }
 }
