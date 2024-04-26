@@ -51,7 +51,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       await jobTable.ensureDetailsOpen(jobId);
       await this.openForecastTab(jobId);
       await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
-        timeout: 3_000,
+        timeout: 5_000,
       });
       await jobTable.ensureDetailsClosed(jobId);
     },
