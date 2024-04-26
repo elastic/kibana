@@ -8,12 +8,12 @@
 
 import { OpenAPIV3 } from 'openapi-types';
 
-export function createBlankOpenApiDocument(): OpenAPIV3.Document {
+export function createBlankOpenApiDocument(version: string): OpenAPIV3.Document {
   return {
     openapi: '3.0.3',
     info: {
       title: 'Bundled OpenAPI specs',
-      version: '2023-10-31',
+      version,
     },
     servers: [
       {

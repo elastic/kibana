@@ -14,14 +14,38 @@ import { mergeSharedComponents } from './merge_shared_components';
 
 export async function mergeDocuments(
   bundledDocuments: BundledDocument[]
-): Promise<OpenAPIV3.Document> {
-  const mergedDocument = createBlankOpenApiDocument();
+): Promise<Map<string, OpenAPIV3.Document>> {
+  const bundledDocumentsByVersion = splitByVersions(bundledDocuments);
+  const mergedByVersion = new Map<string, OpenAPIV3.Document>();
 
-  mergedDocument.paths = mergePaths(bundledDocuments);
-  mergedDocument.components = {
-    ...mergedDocument.components,
-    ...mergeSharedComponents(bundledDocuments),
-  };
+  for (const [version, singleVersionBundledDocuments] of bundledDocumentsByVersion.entries()) {
+    const mergedDocument = createBlankOpenApiDocument(version);
 
-  return mergedDocument;
+    mergedDocument.paths = mergePaths(singleVersionBundledDocuments);
+    mergedDocument.components = {
+      ...mergedDocument.components,
+      ...mergeSharedComponents(singleVersionBundledDocuments),
+    };
+
+    mergedByVersion.set(mergedDocument.info.version, mergedDocument);
+  }
+
+  return mergedByVersion;
+}
+
+function splitByVersions(bundledDocuments: BundledDocument[]): Map<string, BundledDocument[]> {
+  const splitBundledDocuments = new Map<string, BundledDocument[]>();
+
+  for (const bundledDocument of bundledDocuments) {
+    const version = (bundledDocument.document.info as OpenAPIV3.InfoObject).version;
+    const versionBundledDocuments = splitBundledDocuments.get(version);
+
+    if (!versionBundledDocuments) {
+      splitBundledDocuments.set(version, [bundledDocument]);
+    } else {
+      versionBundledDocuments.push(bundledDocument);
+    }
+  }
+
+  return splitBundledDocuments;
 }

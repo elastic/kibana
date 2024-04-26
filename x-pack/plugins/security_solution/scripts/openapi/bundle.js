@@ -7,12 +7,15 @@
 
 require('../../../../../src/setup_node_env');
 const { bundle } = require('@kbn/openapi-bundler');
-const { resolve } = require('path');
+const { join, resolve } = require('path');
 
 const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
 bundle({
   rootDir: SECURITY_SOLUTION_ROOT,
   sourceGlob: './common/api/**/*.schema.yaml',
-  outputFilePath: './target/openapi/security_solution.bundled.schema.yaml',
+  outputFilePath: join(
+    SECURITY_SOLUTION_ROOT,
+    'target/openapi/security_solution-{version}.bundled.schema.yaml'
+  ),
 });
