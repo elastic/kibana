@@ -13,20 +13,28 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerServices } from './services/register_services';
-import { LogsPluginStartDeps } from './types';
+import { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
 
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;
 
-export class LogsDataAccessPlugin implements Plugin {
+export class LogsDataAccessPlugin
+  implements
+    Plugin<
+      LogsDataAccessPluginSetup,
+      LogsDataAccessPluginStart,
+      LogsDataAccessPluginSetupDeps,
+      LogsDataAccessPluginStartDeps
+    >
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
-  public setup(core: CoreSetup) {}
+  public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {}
 
-  public start(core: CoreStart, plugins: LogsPluginStartDeps) {
+  public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
     const services = registerServices({
       logger: this.logger,
       deps: {},

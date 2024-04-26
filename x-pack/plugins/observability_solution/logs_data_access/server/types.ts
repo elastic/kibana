@@ -4,6 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '@kbn/data-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsPluginStartDeps {}
+export interface LogsDataAccessPluginSetupDeps {
+  data: DataPluginSetup;
+}
+
+export interface LogsDataAccessPluginStartDeps {
+  data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
+}
