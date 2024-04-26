@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import deepEqual from 'fast-deep-equal';
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -18,7 +19,14 @@ import {
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
@@ -376,33 +384,6 @@ export const initializeDashboard = async ({
   }
 
   // --------------------------------------------------------------------------------------
-  // Set up search sessions integration.
-  // --------------------------------------------------------------------------------------
-  let initialSearchSessionId;
-  if (searchSessionSettings) {
-    const { sessionIdToRestore } = searchSessionSettings;
-
-    // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      session.continue(incomingEmbeddable.searchSessionId);
-    }
-    if (sessionIdToRestore) {
-      session.restore(sessionIdToRestore);
-    }
-    const existingSession = session.getSessionId();
-
-    initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddable ? existingSession : session.start());
-
-    untilDashboardReady().then((container) => {
-      startDashboardSearchSessionIntegration.bind(container)(
-        creationOptions?.searchSessionSettings
-      );
-    });
-  }
-
-  // --------------------------------------------------------------------------------------
   // Start the control group integration.
   // --------------------------------------------------------------------------------------
   if (useControlGroupIntegration) {
@@ -487,7 +468,7 @@ export const initializeDashboard = async ({
       startWith(dashboardContainer.getInput()),
       map((input) => input.filters),
       distinctUntilChanged((previous, current) => {
-        return compareFilters(previous ?? [], current ?? []);
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
       })
     );
 
@@ -503,6 +484,51 @@ export const initializeDashboard = async ({
       })
     );
   });
+
+  // --------------------------------------------------------------------------------------
+  // Set up parentApi.query$
+  // Can not use legacyEmbeddableToApi since query$ setting is delayed
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      dashboardContainer.getInput().query
+    );
+    dashboardContainer.query$ = query$;
+    dashboardContainer.integrationSubscriptions.add(
+      dashboardContainer.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up search sessions integration.
+  // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
+  if (searchSessionSettings) {
+    const { sessionIdToRestore } = searchSessionSettings;
+
+    // if this incoming embeddable has a session, continue it.
+    if (incomingEmbeddable?.searchSessionId) {
+      session.continue(incomingEmbeddable.searchSessionId);
+    }
+    if (sessionIdToRestore) {
+      session.restore(sessionIdToRestore);
+    }
+    const existingSession = session.getSessionId();
+
+    initialSearchSessionId =
+      sessionIdToRestore ??
+      (existingSession && incomingEmbeddable ? existingSession : session.start());
+
+    untilDashboardReady().then((container) => {
+      startDashboardSearchSessionIntegration.bind(container)(
+        creationOptions?.searchSessionSettings
+      );
+    });
+  }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

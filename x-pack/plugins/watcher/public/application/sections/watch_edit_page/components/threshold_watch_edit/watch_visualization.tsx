@@ -89,9 +89,9 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { createTimeBuckets, theme, uiSettings } = useAppContext();
+  const { createTimeBuckets, chartsTheme, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartBaseTheme = theme.useChartsBaseTheme();
+  const chartBaseTheme = chartsTheme.useChartsBaseTheme();
   const {
     index,
     timeField,

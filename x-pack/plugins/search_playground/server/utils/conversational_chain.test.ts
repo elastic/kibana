@@ -44,7 +44,9 @@ describe('conversational chain', () => {
     });
 
     const mockElasticsearchClient = {
-      search: searchMock,
+      transport: {
+        request: searchMock,
+      },
     };
 
     const llm = new FakeListLLM({
@@ -118,17 +120,17 @@ describe('conversational chain', () => {
       [
         {
           documents: [
-            { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
-            { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       [
         {
-          index: 'index,website',
-          query: { query: { match: { field: 'what is the work from home policy?' } } },
-          size: 3,
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
       ]
     );
@@ -158,17 +160,17 @@ describe('conversational chain', () => {
       [
         {
           documents: [
-            { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
-            { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       [
         {
-          index: 'index,website',
-          query: { query: { match: { field: 'rewrite the question' } } },
-          size: 3,
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'rewrite the question' } }, size: 3 },
         },
       ]
     );
@@ -198,17 +200,17 @@ describe('conversational chain', () => {
       [
         {
           documents: [
-            { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
-            { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       [
         {
-          index: 'index,website',
-          query: { query: { match: { field: 'rewrite "the" question' } } },
-          size: 3,
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
         },
       ]
     );

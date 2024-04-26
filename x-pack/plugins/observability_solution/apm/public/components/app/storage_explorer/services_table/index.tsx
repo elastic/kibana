@@ -28,10 +28,7 @@ import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import {
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
+import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
@@ -66,13 +63,10 @@ interface Props {
   loadingSummaryStats: boolean;
 }
 
-export function ServicesTable({
-  summaryStatsData,
-  loadingSummaryStats,
-}: Props) {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReactNode>
-  >({});
+export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
 
   const { core } = useApmPluginContext();
 
@@ -110,9 +104,7 @@ export function ServicesTable({
   };
 
   const useOptimizedSorting =
-    useKibana().services.uiSettings?.get<boolean>(
-      apmServiceInventoryOptimizedSorting
-    ) || false;
+    useKibana().services.uiSettings?.get<boolean>(apmServiceInventoryOptimizedSorting) || false;
 
   const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
@@ -150,8 +142,7 @@ export function ServicesTable({
     [indexLifecyclePhase, start, end, environment, kuery]
   );
 
-  const serviceStatisticsItems =
-    serviceStatisticsFetch.data?.serviceStatistics ?? [];
+  const serviceStatisticsItems = serviceStatisticsFetch.data?.serviceStatistics ?? [];
   const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
 
   const initialSortField = useOptimizedSorting
@@ -165,9 +156,7 @@ export function ServicesTable({
 
   const items = joinByKey(
     [
-      ...(initialSortField === StorageExplorerFieldName.ServiceName
-        ? preloadedServices
-        : []),
+      ...(initialSortField === StorageExplorerFieldName.ServiceName ? preloadedServices : []),
       ...serviceStatisticsItems,
     ],
     'serviceName'
@@ -176,12 +165,9 @@ export function ServicesTable({
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
     {
       field: 'serviceName',
-      name: i18n.translate(
-        'xpack.apm.storageExplorer.table.serviceColumnName',
-        {
-          defaultMessage: 'Service',
-        }
-      ),
+      name: i18n.translate('xpack.apm.storageExplorer.table.serviceColumnName', {
+        defaultMessage: 'Service',
+      }),
       sortable: true,
       render: (_, { serviceName, agentName }) => {
         const serviceLinkQuery = {
@@ -210,15 +196,10 @@ export function ServicesTable({
     },
     {
       field: 'environment',
-      name: i18n.translate(
-        'xpack.apm.storageExplorer.table.environmentColumnName',
-        {
-          defaultMessage: 'Environment',
-        }
-      ),
-      render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments ?? []} />
-      ),
+      name: i18n.translate('xpack.apm.storageExplorer.table.environmentColumnName', {
+        defaultMessage: 'Environment',
+      }),
+      render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
       sortable: true,
     },
 
@@ -226,26 +207,15 @@ export function ServicesTable({
       field: 'sampling',
       name: (
         <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.storageExplorer.table.samplingColumnDescription',
-            {
-              defaultMessage: `The number of sampled transactions divided by total throughput. This value may differ from the configured transaction sample rate because it might be affected by the initial service's decision when using head-based sampling or by a set of policies when using tail-based sampling.`,
-            }
-          )}
+          content={i18n.translate('xpack.apm.storageExplorer.table.samplingColumnDescription', {
+            defaultMessage: `The number of sampled transactions divided by total throughput. This value may differ from the configured transaction sample rate because it might be affected by the initial service's decision when using head-based sampling or by a set of policies when using tail-based sampling.`,
+          })}
         >
           <>
-            {i18n.translate(
-              'xpack.apm.storageExplorer.table.samplingColumnName',
-              {
-                defaultMessage: 'Sampling rate',
-              }
-            )}{' '}
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-            />
+            {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
+              defaultMessage: 'Sampling rate',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -285,24 +255,17 @@ export function ServicesTable({
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={
-              itemIdToExpandedRowMap[serviceName] ? 'arrowUp' : 'arrowDown'
-            }
+            iconType={itemIdToExpandedRowMap[serviceName] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
     },
   ];
 
-  const isDownloadButtonDisable =
-    isEmpty(serviceStatisticsItems) || loadingSummaryStats;
+  const isDownloadButtonDisable = isEmpty(serviceStatisticsItems) || loadingSummaryStats;
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      paddingSize="none"
-      style={{ position: 'relative' }}
-    >
+    <EuiPanel hasShadow={false} paddingSize="none" style={{ position: 'relative' }}>
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
@@ -312,9 +275,7 @@ export function ServicesTable({
             isDisabled={isDownloadButtonDisable}
             onClick={() =>
               downloadJson({
-                fileName: `storage-explorefpr-${moment(Date.now()).format(
-                  'YYYYMMDDHHmmss'
-                )}.json`,
+                fileName: `storage-explorefpr-${moment(Date.now()).format('YYYYMMDDHHmmss')}.json`,
                 data: {
                   filters: {
                     rangeFrom,
@@ -325,29 +286,18 @@ export function ServicesTable({
                   },
                   summary: {
                     totalSize: asDynamicBytes(summaryStatsData?.totalSize),
-                    diskSpaceUsedPct: asPercent(
-                      summaryStatsData?.diskSpaceUsedPct,
-                      1
-                    ),
+                    diskSpaceUsedPct: asPercent(summaryStatsData?.diskSpaceUsedPct, 1),
                     estimatedIncrementalSize: asDynamicBytes(
                       summaryStatsData?.estimatedIncrementalSize
                     ),
-                    dailyDataGeneration: asDynamicBytes(
-                      summaryStatsData?.dailyDataGeneration
-                    ),
-                    tracesPerMinute: asTransactionRate(
-                      summaryStatsData?.tracesPerMinute
-                    ),
-                    numberOfServices: (
-                      summaryStatsData?.numberOfServices ?? 0
-                    ).toString(),
+                    dailyDataGeneration: asDynamicBytes(summaryStatsData?.dailyDataGeneration),
+                    tracesPerMinute: asTransactionRate(summaryStatsData?.tracesPerMinute),
+                    numberOfServices: (summaryStatsData?.numberOfServices ?? 0).toString(),
                   },
                   services: serviceStatisticsItems.map((item) => ({
                     ...item,
                     sampling: asPercent(item?.sampling, 1),
-                    size: item?.size
-                      ? asDynamicBytes(item?.size)
-                      : NOT_AVAILABLE_LABEL,
+                    size: item?.size ? asDynamicBytes(item?.size) : NOT_AVAILABLE_LABEL,
                   })),
                 },
               })
@@ -362,12 +312,9 @@ export function ServicesTable({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
-        tableCaption={i18n.translate(
-          'xpack.apm.storageExplorer.table.caption',
-          {
-            defaultMessage: 'Storage Explorer',
-          }
-        )}
+        tableCaption={i18n.translate('xpack.apm.storageExplorer.table.caption', {
+          defaultMessage: 'Storage Explorer',
+        })}
         items={items ?? []}
         columns={columns}
         pagination={true}

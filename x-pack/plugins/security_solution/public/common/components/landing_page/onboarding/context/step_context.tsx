@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { OnboardingHubStepLinkClickedParams } from '../../../../lib/telemetry/events/onboarding/types';
 import type {
   ToggleTaskCompleteStatus,
   CardId,
@@ -19,6 +20,7 @@ export interface StepContextType {
   finishedSteps: Record<CardId, Set<StepId>>;
   indicesExist: boolean;
   onStepClicked: OnStepClicked;
+  onStepLinkClicked: (params: OnboardingHubStepLinkClickedParams) => void;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 

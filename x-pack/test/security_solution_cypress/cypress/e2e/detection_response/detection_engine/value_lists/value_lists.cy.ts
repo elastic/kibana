@@ -29,15 +29,19 @@ import { refreshIndex } from '../../../../tasks/api_calls/elasticsearch';
 describe('value lists management modal', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
+
+    createListsIndex();
+    visit(RULES_MANAGEMENT_URL);
+    waitForListsIndex();
+    waitForValueListsModalToBeLoaded();
+  });
+
+  afterEach(() => {
     deleteValueLists([
       KNOWN_VALUE_LIST_FILES.TEXT,
       KNOWN_VALUE_LIST_FILES.IPs,
       KNOWN_VALUE_LIST_FILES.CIDRs,
     ]);
-    createListsIndex();
-    visit(RULES_MANAGEMENT_URL);
-    waitForListsIndex();
-    waitForValueListsModalToBeLoaded();
   });
 
   it('can open and close the modal', () => {

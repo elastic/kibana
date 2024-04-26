@@ -744,72 +744,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.ESQLLiteral",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESQLLiteral",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLLiteral",
-            "text": "ESQLLiteral"
-          },
-          " extends ESQLAstBaseItem"
-        ],
-        "path": "packages/kbn-esql-ast/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLLiteral.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"literal\""
-            ],
-            "path": "packages/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLLiteral.literalType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "literalType",
-            "description": [],
-            "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"null\""
-            ],
-            "path": "packages/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLLiteral.value",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "signature": [
-              "string | number"
-            ],
-            "path": "packages/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLLocation",
         "type": "Interface",
         "tags": [],
@@ -1123,6 +1057,27 @@
             "text": "ESQLAstItem"
           },
           "[]"
+        ],
+        "path": "packages/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLLiteral",
+        "type": "Type",
+        "tags": [],
+        "label": "ESQLLiteral",
+        "description": [],
+        "signature": [
+          "ESQLNumberLiteral",
+          " | ",
+          "ESQLBooleanLiteral",
+          " | ",
+          "ESQLNullLiteral",
+          " | ",
+          "ESQLStringLiteral"
         ],
         "path": "packages/kbn-esql-ast/src/types.ts",
         "deprecated": false,

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 
-export const getDefaultSecurityImplementation = (): CoreSecurityContract => {
+export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: () => null,

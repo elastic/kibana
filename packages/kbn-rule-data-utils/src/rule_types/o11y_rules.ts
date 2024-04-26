@@ -10,6 +10,7 @@ export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_
 export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
 
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
+export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const LOG_THRESHOLD_ALERT_TYPE_ID = 'logs.alert.document.count';
 
 export enum ApmRuleType {

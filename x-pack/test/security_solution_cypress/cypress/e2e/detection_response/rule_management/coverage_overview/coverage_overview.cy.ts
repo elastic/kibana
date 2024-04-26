@@ -190,7 +190,7 @@ const prebuiltRules = [
 ];
 
 // https://github.com/elastic/kibana/issues/179052
-describe('Coverage overview', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   describe('base cases', () => {
     beforeEach(() => {
       login();

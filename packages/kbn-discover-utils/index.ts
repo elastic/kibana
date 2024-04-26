@@ -37,5 +37,6 @@ export {
   getIgnoredReason,
   getShouldShowFieldHandler,
   isNestedFieldParent,
+  isLegacyTableEnabled,
   usePager,
 } from './src';

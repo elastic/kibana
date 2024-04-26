@@ -34,8 +34,9 @@ export enum ReadOperations {
   GetActionErrorLog = 'getActionErrorLog',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
-  RunSoon = 'runSoon',
   GetRuleExecutionKPI = 'getRuleExecutionKPI',
+  GetBackfill = 'getBackfill',
+  FindBackfill = 'findBackfill',
 }
 
 export enum WriteOperations {
@@ -55,6 +56,9 @@ export enum WriteOperations {
   BulkEnable = 'bulkEnable',
   BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
+  RunSoon = 'runSoon',
+  ScheduleBackfill = 'scheduleBackfill',
+  DeleteBackfill = 'deleteBackfill',
 }
 
 export interface EnsureAuthorizedOpts {
@@ -62,6 +66,7 @@ export interface EnsureAuthorizedOpts {
   consumer: string;
   operation: ReadOperations | WriteOperations;
   entity: AlertingAuthorizationEntity;
+  additionalPrivileges?: string[];
 }
 
 interface HasPrivileges {
@@ -172,6 +177,7 @@ export class AlertingAuthorization {
     consumer: legacyConsumer,
     operation,
     entity,
+    additionalPrivileges = [],
   }: EnsureAuthorizedOpts) {
     const { authorization } = this;
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
@@ -186,7 +192,10 @@ export class AlertingAuthorization {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
       const { hasAllRequested } = await checkPrivileges({
-        kibana: [authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)],
+        kibana: [
+          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
+          ...additionalPrivileges,
+        ],
       });
 
       if (!isAvailableConsumer) {

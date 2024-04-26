@@ -15,14 +15,14 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useDiscoverState } from '../../../timelines/components/timeline/esql_tab_content/use_discover_state';
+import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { savedSearchComparator } from '../../../timelines/components/timeline/esql_tab_content/utils';
+import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,

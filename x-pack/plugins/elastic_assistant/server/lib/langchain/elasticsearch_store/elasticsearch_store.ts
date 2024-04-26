@@ -6,7 +6,11 @@
  */
 
 import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MappingTypeMapping,
+  MlTrainedModelDeploymentNodesStats,
+  MlTrainedModelStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Callbacks } from '@langchain/core/callbacks/manager';
 import { Document } from 'langchain/document';
@@ -395,10 +399,21 @@ export class ElasticsearchStore extends VectorStore {
         model_id: modelId ?? this.model,
       });
 
+      this.logger.debug(`modelId: ${modelId}`);
+      this.logger.debug(`getResponse: ${JSON.stringify(getResponse, null, 2)}`);
+
+      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
+      const isReadyESS = (stats: MlTrainedModelStats) =>
+        stats.deployment_stats?.state === 'started' &&
+        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+
+      const isReadyServerless = (stats: MlTrainedModelStats) =>
+        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+          (node) => node.routing_state.routing_state === 'started'
+        );
+
       return getResponse.trained_model_stats.some(
-        (stats) =>
-          stats.deployment_stats?.state === 'started' &&
-          stats.deployment_stats?.allocation_status.state === 'fully_allocated'
+        (stats) => isReadyESS(stats) || isReadyServerless(stats)
       );
     } catch (e) {
       // Returns 404 if it doesn't exist

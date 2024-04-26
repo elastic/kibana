@@ -6,7 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
@@ -24,13 +24,13 @@ describe('Synthetics Availability Transform Generator', () => {
       _meta: {
         managed: true,
         managed_by: 'observability',
-        version: 3,
+        version: 3.2,
       },
       defer_validation: true,
       description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
       dest: {
-        index: '.slo-observability.sli-v3',
-        pipeline: '.slo-observability.sli.pipeline-v3',
+        index: '.slo-observability.sli-v3.2',
+        pipeline: '.slo-observability.sli.pipeline-v3.2',
       },
       frequency: '1m',
       pivot: {
@@ -57,14 +57,24 @@ describe('Synthetics Availability Transform Generator', () => {
               fixed_interval: '1m',
             },
           },
-          config_id: {
+          'monitor.config_id': {
             terms: {
               field: 'config_id',
+            },
+          },
+          'monitor.name': {
+            terms: {
+              field: 'monitor.name',
             },
           },
           'observer.name': {
             terms: {
               field: 'observer.name',
+            },
+          },
+          'observer.geo.name': {
+            terms: {
+              field: 'observer.geo.name',
             },
           },
           'slo.groupings.monitor.name': {
@@ -85,11 +95,6 @@ describe('Synthetics Availability Transform Generator', () => {
           'slo.id': {
             terms: {
               field: 'slo.id',
-            },
-          },
-          'slo.instanceId': {
-            terms: {
-              field: 'slo.instanceId',
             },
           },
           'slo.revision': {
@@ -135,12 +140,6 @@ describe('Synthetics Availability Transform Generator', () => {
             },
             type: 'keyword',
           },
-          'slo.instanceId': {
-            script: {
-              source: "emit('*')",
-            },
-            type: 'keyword',
-          },
           'slo.revision': {
             script: {
               source: 'emit(1)',
@@ -173,7 +172,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
     expect(transform.pivot?.group_by).toEqual(
       expect.objectContaining({
-        config_id: {
+        'monitor.config_id': {
           terms: {
             field: 'config_id',
           },
@@ -197,7 +196,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
     expect(transform.pivot?.group_by).not.toEqual(
       expect.objectContaining({
-        config_id: {
+        'monitor.config_id': {
           terms: {
             field: 'config_id',
           },
@@ -319,7 +318,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           tags,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -349,7 +348,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           monitorIds,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -379,7 +378,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           projects,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 

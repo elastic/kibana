@@ -94,13 +94,9 @@ export function Home() {
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" style={{ textAlign: 'center' }}>
             <p>
-              {i18n.translate(
-                'xpack.observability_onboarding.home.description',
-                {
-                  defaultMessage:
-                    'Select your method for collecting data into Observability.',
-                }
-              )}
+              {i18n.translate('xpack.observability_onboarding.home.description', {
+                defaultMessage: 'Select your method for collecting data into Observability.',
+              })}
             </p>
           </EuiText>
           <EuiSpacer />
@@ -118,10 +114,9 @@ export function Home() {
                     { defaultMessage: 'Quick start' }
                   ),
                 }}
-                title={i18n.translate(
-                  'xpack.observability_onboarding.card.systemLogs.title',
-                  { defaultMessage: 'Stream host system logs' }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.card.systemLogs.title', {
+                  defaultMessage: 'Stream host system logs',
+                })}
                 footer={
                   <EuiButton
                     onClick={handleClickSystemLogs}
@@ -146,13 +141,10 @@ export function Home() {
                 <EuiSpacer size="m" />
                 <EuiText color="subdued" size="s" textAlign="center">
                   <p>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.card.systemLogs.description1',
-                      {
-                        defaultMessage:
-                          'The quickest path to onboard log data from your own machine or server.',
-                      }
-                    )}
+                    {i18n.translate('xpack.observability_onboarding.card.systemLogs.description1', {
+                      defaultMessage:
+                        'The quickest path to onboard log data from your own machine or server.',
+                    })}
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
@@ -161,10 +153,9 @@ export function Home() {
             <EuiFlexItem>
               <EuiCard
                 icon={<EuiIcon type={loggingIcon} size="l" />}
-                title={i18n.translate(
-                  'xpack.observability_onboarding.card.customLogs.title',
-                  { defaultMessage: 'Stream log files' }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.card.customLogs.title', {
+                  defaultMessage: 'Stream log files',
+                })}
                 footer={
                   <EuiButton
                     onClick={handleClickCustomLogs}
@@ -209,22 +200,16 @@ export function Home() {
                     <EuiIcon type={opentelemetryIcon} size="l" />
                   </EuiFlexGroup>
                 }
-                title={i18n.translate(
-                  'xpack.observability_onboarding.card.apm.title',
-                  {
-                    defaultMessage: 'Collect application performance data',
-                  }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.card.apm.title', {
+                  defaultMessage: 'Collect application performance data',
+                })}
                 description={
                   <EuiText color="subdued" size="s" textAlign="center">
                     <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.card.apm.description',
-                        {
-                          defaultMessage:
-                            'Collect traces, logs, and metrics from OpenTelemetry or APM custom agent.',
-                        }
-                      )}
+                      {i18n.translate('xpack.observability_onboarding.card.apm.description', {
+                        defaultMessage:
+                          'Collect traces, logs, and metrics from OpenTelemetry or APM custom agent.',
+                      })}
                     </p>
                   </EuiText>
                 }
@@ -247,20 +232,16 @@ export function Home() {
             <EuiFlexItem>
               <EuiCard
                 icon={<EuiIcon type={kubernetesIcon} size="l" />}
-                title={i18n.translate(
-                  'xpack.observability_onboarding.card.k8s.title',
-                  { defaultMessage: 'Collect Kubernetes clusters data' }
-                )}
+                title={i18n.translate('xpack.observability_onboarding.card.k8s.title', {
+                  defaultMessage: 'Collect Kubernetes clusters data',
+                })}
                 description={
                   <EuiText color="subdued" size="s" textAlign="center">
                     <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.card.k8s.description',
-                        {
-                          defaultMessage:
-                            'Collect logs and metrics from Kubernetes clusters with Elastic Agent.',
-                        }
-                      )}
+                      {i18n.translate('xpack.observability_onboarding.card.k8s.description', {
+                        defaultMessage:
+                          'Collect logs and metrics from Kubernetes clusters with Elastic Agent.',
+                      })}
                     </p>
                   </EuiText>
                 }
@@ -294,13 +275,9 @@ export function Home() {
                 <EuiIcon type={azureIcon} size="l" />
               </EuiFlexGroup>
             }
-            title={i18n.translate(
-              'xpack.observability_onboarding.card.integrations.title',
-              {
-                defaultMessage:
-                  'Explore 300+ ways of ingesting data with our integrations',
-              }
-            )}
+            title={i18n.translate('xpack.observability_onboarding.card.integrations.title', {
+              defaultMessage: 'Explore 300+ ways of ingesting data with our integrations',
+            })}
             footer={
               <>
                 <EuiButton
@@ -308,24 +285,19 @@ export function Home() {
                   color="primary"
                   data-test-subj="obltOnboardingHomeExploreIntegrations"
                 >
-                  {i18n.translate(
-                    'xpack.observability_onboarding.card.integrations.start',
-                    { defaultMessage: 'Start exploring' }
-                  )}
+                  {i18n.translate('xpack.observability_onboarding.card.integrations.start', {
+                    defaultMessage: 'Start exploring',
+                  })}
                 </EuiButton>
                 <EuiHorizontalRule margin="m" />
                 <EuiFlexGroup justifyContent="center" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.card.integrations.quickLinks',
-                      { defaultMessage: 'Quick links:' }
-                    )}
+                    {i18n.translate('xpack.observability_onboarding.card.integrations.quickLinks', {
+                      defaultMessage: 'Quick links:',
+                    })}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup
-                      style={{ flexWrap: 'nowrap' }}
-                      alignItems="flexStart"
-                    >
+                    <EuiFlexGroup style={{ flexWrap: 'nowrap' }} alignItems="flexStart">
                       <EuiFlexItem grow={false}>
                         <EuiLink
                           onClick={handleClickSampleData}
@@ -385,12 +357,10 @@ export function Home() {
   );
 }
 
-const getStartedLabel = i18n.translate(
-  'xpack.observability_onboarding.card.getStarted',
-  { defaultMessage: 'Get started' }
-);
+const getStartedLabel = i18n.translate('xpack.observability_onboarding.card.getStarted', {
+  defaultMessage: 'Get started',
+});
 
-const elasticAgentLabel = i18n.translate(
-  'xpack.observability_onboarding.card.elasticAgent',
-  { defaultMessage: 'Elastic Agent' }
-);
+const elasticAgentLabel = i18n.translate('xpack.observability_onboarding.card.elasticAgent', {
+  defaultMessage: 'Elastic Agent',
+});

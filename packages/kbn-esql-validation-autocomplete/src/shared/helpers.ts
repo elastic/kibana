@@ -34,6 +34,7 @@ import {
 import type {
   CommandDefinition,
   CommandOptionsDefinition,
+  FunctionArgSignature,
   FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
@@ -179,6 +180,8 @@ export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
 }
 
+const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
+
 function buildCommandLookup() {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
@@ -230,7 +233,10 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
-export function extractSingleType(type: string) {
+/**
+ * Given an array type for example `string[]` it will return `string`
+ */
+export function extractSingularType(type: string) {
   return type.replace(ARRAY_REGEXP, '');
 }
 
@@ -337,8 +343,28 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
   return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
 }
 
+/**
+ * Checks if this argument is one of the possible options
+ * if they are defined on the arg definition.
+ *
+ * TODO - Consider merging with isEqualType to create a unified arg validation function
+ */
+export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignature) {
+  return (
+    arg.literalType === 'string' &&
+    argDef.literalOptions &&
+    !argDef.literalOptions
+      .map((option) => option.toLowerCase())
+      .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
+  );
+}
+
+/**
+ * Checks if an AST argument is of the correct type
+ * given the definition.
+ */
 export function isEqualType(
-  item: ESQLSingleAstItem,
+  arg: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,
   parentCommand?: string,
@@ -348,30 +374,33 @@ export function isEqualType(
   if (argType === 'any') {
     return true;
   }
-  if (item.type === 'literal') {
-    return compareLiteralType(argType, item);
+  if (arg.type === 'literal') {
+    return compareLiteralType(argType, arg);
   }
-  if (item.type === 'function') {
-    if (isSupportedFunction(item.name, parentCommand).supported) {
-      const fnDef = buildFunctionLookup().get(item.name)!;
-      return fnDef.signatures.some((signature) => argType === signature.returnType);
+  if (arg.type === 'function') {
+    if (isSupportedFunction(arg.name, parentCommand).supported) {
+      const fnDef = buildFunctionLookup().get(arg.name)!;
+      return fnDef.signatures.some(
+        (signature) => signature.returnType === 'any' || argType === signature.returnType
+      );
     }
   }
-  if (item.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(item);
+  if (arg.type === 'timeInterval') {
+    return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
-  if (item.type === 'column') {
+  if (arg.type === 'column') {
     if (argType === 'column') {
       // anything goes, so avoid any effort here
       return true;
     }
-    const hit = getColumnHit(nameHit ?? item.name, references);
+    const hit = getColumnHit(nameHit ?? arg.name, references);
     const validHit = hit;
     if (!validHit) {
       return false;
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    return wrappedTypes.some((ct) => argType === ct);
+    // if final type is of type any make it pass for now
+    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
   }
 }
 

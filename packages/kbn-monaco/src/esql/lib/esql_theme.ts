@@ -12,6 +12,15 @@ import { ESQL_TOKEN_POSTFIX } from './constants';
 import { monaco } from '../../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory(ESQL_TOKEN_POSTFIX);
+const COMMANDS_COLORS = {
+  dark: '#a68ac5',
+  light: '#765b96',
+};
+
+const FUNCTIONS_COLORS = {
+  dark: '#d97797',
+  light: '#a34a68',
+};
 
 export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
   base: darkMode ? 'vs-dark' : 'vs',
@@ -81,11 +90,11 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'on',
         'with',
       ],
-      euiThemeVars.euiColorPrimaryText
+      darkMode ? COMMANDS_COLORS.dark : COMMANDS_COLORS.light
     ),
 
     // functions
-    ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimaryText),
+    ...buildRuleGroup(['functions'], darkMode ? FUNCTIONS_COLORS.dark : FUNCTIONS_COLORS.light),
 
     // operators
     ...buildRuleGroup(
@@ -103,7 +112,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'src_line_comment',
         'src_multiline_comment',
       ],
-      euiThemeVars.euiColorMediumShade
+      darkMode ? euiThemeVars.euiColorDarkestShade : euiThemeVars.euiColorMediumShade
     ),
   ],
   colors: {},

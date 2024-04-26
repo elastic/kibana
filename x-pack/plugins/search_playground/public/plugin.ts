@@ -7,7 +7,7 @@
 
 import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { PlaygroundToolbar, PlaygroundProvider, Playground } from './embeddable';
+import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
 import {
   AppPluginStartDependencies,
   SearchPlaygroundPluginSetup,
@@ -35,7 +35,7 @@ export class SearchPlaygroundPlugin
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
     return {
-      PlaygroundProvider,
+      PlaygroundProvider: getPlaygroundProvider(core, deps),
       PlaygroundToolbar,
       Playground,
     };

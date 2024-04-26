@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
@@ -36,6 +36,7 @@ interface AutocompleteFieldListsProps {
   selectedValue: string | undefined;
   allowLargeValueLists?: boolean;
   'aria-label'?: string;
+  showValueListModal: ElementType;
 }
 
 export interface AutocompleteListsData {
@@ -55,6 +56,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   selectedValue,
   allowLargeValueLists = false,
   'aria-label': ariaLabel,
+  showValueListModal,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
@@ -118,29 +120,36 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   }, [selectedField, start, httpService]);
 
   const isLoadingState = useMemo((): boolean => isLoading || loading, [isLoading, loading]);
+  const ShowValueListModal = showValueListModal;
 
   const helpText = useMemo(() => {
     return (
-      !allowLargeValueLists && (
-        <EuiText size="xs">
-          {i18n.LISTS_TOOLTIP_INFO}{' '}
-          <EuiLink
-            external
-            target="_blank"
-            href={
-              getDocLinks({
-                kibanaBranch: 'main',
-                buildFlavor: 'traditional',
-              }).securitySolution.exceptions.value_lists
-            }
-          >
-            {i18n.SEE_DOCUMENTATION}
-          </EuiLink>
-        </EuiText>
-      )
+      <>
+        {selectedValue && (
+          <ShowValueListModal shouldShowContentIfModalNotAvailable={false} listId={selectedValue}>
+            {i18n.SHOW_VALUE_LIST_MODAL}
+          </ShowValueListModal>
+        )}
+        {!allowLargeValueLists && (
+          <EuiText size="xs">
+            {i18n.LISTS_TOOLTIP_INFO}{' '}
+            <EuiLink
+              external
+              target="_blank"
+              href={
+                getDocLinks({
+                  kibanaBranch: 'main',
+                  buildFlavor: 'traditional',
+                }).securitySolution.exceptions.value_lists
+              }
+            >
+              {i18n.SEE_DOCUMENTATION}
+            </EuiLink>
+          </EuiText>
+        )}
+      </>
     );
-  }, [allowLargeValueLists]);
-
+  }, [allowLargeValueLists, selectedValue, ShowValueListModal]);
   return (
     <EuiFormRow
       label={rowLabel}

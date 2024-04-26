@@ -6872,7 +6872,15 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; disabledActionIds: ",
+          "<string | undefined>; defaultPanelDescription: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined> | undefined; disabledActionIds: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -13032,7 +13040,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\" | undefined"
+              "RowHeightMode | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13046,7 +13054,7 @@
             "label": "headerRowHeight",
             "description": [],
             "signature": [
-              "\"custom\" | \"auto\" | \"single\" | undefined"
+              "RowHeightMode | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

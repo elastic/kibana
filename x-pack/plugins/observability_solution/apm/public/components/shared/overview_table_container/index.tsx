@@ -42,14 +42,14 @@ const OverviewTableContainerDiv = euiStyled.div<{
     flex-direction: column;
     flex-grow: 1;
 
-    > :first-child {
-      flex-grow: 1;
+    /* Align the pagination to the bottom of the card */
+    > :last-child {
+      margin-top: auto;
     }
   `}
 
   .euiTableRowCell {
-    visibility: ${({ isEmptyAndNotInitiated }) =>
-      isEmptyAndNotInitiated ? 'hidden' : 'visible'};
+    visibility: ${({ isEmptyAndNotInitiated }) => (isEmptyAndNotInitiated ? 'hidden' : 'visible')};
   }
 `;
 

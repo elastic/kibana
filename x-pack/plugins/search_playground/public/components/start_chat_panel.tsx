@@ -55,7 +55,7 @@ export const StartChatPanel: React.FC<StartChatPanelProps> = ({
 
     <EuiSpacer size="s" />
 
-    <EuiFlexGroup direction="column" gutterSize="xl">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiText size="s">
         <p>{description}</p>
       </EuiText>

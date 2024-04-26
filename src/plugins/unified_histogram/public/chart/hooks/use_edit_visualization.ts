@@ -26,7 +26,7 @@ export const useEditVisualization = ({
   services: UnifiedHistogramServices;
   dataView: DataView;
   relativeTimeRange?: TimeRange;
-  lensAttributes: TypedLensByValueInput['attributes'];
+  lensAttributes?: TypedLensByValueInput['attributes'];
   isPlainRecord?: boolean;
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
@@ -51,7 +51,7 @@ export const useEditVisualization = ({
   }, [dataView, isPlainRecord, services.uiActions]);
 
   const onEditVisualization = useMemo(() => {
-    if (!canVisualize) {
+    if (!canVisualize || !lensAttributes) {
       return undefined;
     }
 

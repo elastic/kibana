@@ -19,8 +19,7 @@ const LABELS = {
   inProgress: i18n.STATUS_IN_PROGRESS,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/177334
-describe.skip('StatusFilter', () => {
+describe('StatusFilter', () => {
   const onChange = jest.fn();
   const defaultProps = {
     selectedOptionKeys: [],
@@ -37,24 +36,24 @@ describe.skip('StatusFilter', () => {
   it('should render', async () => {
     render(<StatusFilter {...defaultProps} />);
 
-    expect(screen.getByTestId('options-filter-popover-button-status')).toBeInTheDocument();
-    expect(screen.getByTestId('options-filter-popover-button-status')).not.toBeDisabled();
+    expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
+    expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
 
-    userEvent.click(screen.getByRole('button', { name: 'Status' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByRole('option', { name: LABELS.open })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: LABELS.closed })).toBeInTheDocument();
-    expect(screen.getAllByRole('option').length).toBe(3);
+    expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: LABELS.closed })).toBeInTheDocument();
+    expect((await screen.findAllByRole('option')).length).toBe(3);
   });
 
   it('should call onStatusChanged when changing status to open', async () => {
     render(<StatusFilter {...defaultProps} />);
 
-    userEvent.click(screen.getByRole('button', { name: 'Status' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: LABELS.open }));
+    userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
@@ -67,11 +66,11 @@ describe.skip('StatusFilter', () => {
   it('should not render hidden statuses', async () => {
     render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
 
-    userEvent.click(screen.getByRole('button', { name: 'Status' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getAllByRole('option')).toHaveLength(2);
-    expect(screen.getByRole('option', { name: LABELS.open })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
   });
 });

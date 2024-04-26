@@ -14,13 +14,11 @@ export function DefaultFrameHeadingRenderer({
 }: FrameHeadingRendererProps) {
   const lineNumber = stackframe.line?.number ?? 0;
 
-  const name =
-    'filename' in stackframe ? stackframe.filename : stackframe.classname;
+  const name = 'filename' in stackframe ? stackframe.filename : stackframe.classname;
 
   return (
     <>
-      <FileDetail>{name}</FileDetail> in{' '}
-      <FileDetail>{stackframe.function}</FileDetail>
+      <FileDetail>{name}</FileDetail> in <FileDetail>{stackframe.function}</FileDetail>
       {lineNumber > 0 && (
         <>
           {' at '}

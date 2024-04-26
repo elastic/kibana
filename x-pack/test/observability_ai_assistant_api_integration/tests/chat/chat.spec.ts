@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('Chat', () => {
+  describe('/internal/observability_ai_assistant/chat', () => {
     let proxy: LlmProxy;
 
     let connectorId: string;

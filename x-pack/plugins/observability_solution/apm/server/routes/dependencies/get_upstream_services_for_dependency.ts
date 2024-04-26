@@ -77,9 +77,7 @@ export async function getUpstreamServicesForDependency(
   return {
     services: currentServices.map((service) => {
       const { stats, ...rest } = service;
-      const prev = previousServices.find(
-        (item) => item.location.id === service.location.id
-      );
+      const prev = previousServices.find((item) => item.location.id === service.location.id);
       return {
         ...rest,
         currentStats: stats,

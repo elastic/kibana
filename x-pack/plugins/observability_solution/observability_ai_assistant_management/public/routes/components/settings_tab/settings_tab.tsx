@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiDescribedFormGroup, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../hooks/use_app_context';
-import { PersistedSettings } from './persisted_settings';
+import { UISettings } from './ui_settings';
 
 export function SettingsTab() {
   const {
@@ -103,7 +103,7 @@ export function SettingsTab() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      <PersistedSettings />
+      <UISettings />
     </EuiPanel>
   );
 }

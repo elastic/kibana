@@ -52,18 +52,18 @@ import {
   RuleReferenceArray,
   MaxSignals,
   ThreatArray,
+  SetupGuide,
   RuleObjectId,
   RuleSignatureId,
   IsRuleImmutable,
   RelatedIntegrationArray,
   RequiredFieldArray,
-  SetupGuide,
   RuleQuery,
   IndexPatternArray,
   DataViewId,
   RuleFilterArray,
-  SavedQueryId,
   AlertSuppression,
+  SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
@@ -134,6 +134,7 @@ export const BaseDefaultableFields = z.object({
   references: RuleReferenceArray.optional(),
   max_signals: MaxSignals.optional(),
   threat: ThreatArray.optional(),
+  setup: SetupGuide.optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
@@ -162,7 +163,6 @@ export const ResponseFields = z.object({
   revision: z.number().int().min(0),
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
-  setup: SetupGuide,
   execution_summary: RuleExecutionSummary.optional(),
 });
 
@@ -219,6 +219,7 @@ export const EqlOptionalFields = z.object({
   event_category_override: EventCategoryOverride.optional(),
   tiebreaker_field: TiebreakerField.optional(),
   timestamp_field: TimestampField.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
@@ -504,6 +505,7 @@ export const NewTermsRuleOptionalFields = z.object({
   index: IndexPatternArray.optional(),
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type NewTermsRuleDefaultableFields = z.infer<typeof NewTermsRuleDefaultableFields>;

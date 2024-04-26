@@ -31,6 +31,7 @@ interface RuleTypeListProps {
   selectedProducer: string | null;
   ruleTypeCountsByProducer: RuleTypeCountsByProducer;
   onClearFilters: () => void;
+  showCategories: boolean;
 }
 
 const producerToDisplayName = (producer: string) => {
@@ -44,6 +45,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
   selectedProducer,
   ruleTypeCountsByProducer,
   onClearFilters,
+  showCategories = true,
 }) => {
   const ruleTypesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
   const { euiTheme } = useEuiTheme();
@@ -66,30 +68,36 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
     [ruleTypeCountsByProducer, onFilterByProducer, selectedProducer]
   );
 
+  const onClickAll = useCallback(() => onFilterByProducer(null), [onFilterByProducer]);
+
   return (
     <EuiFlexGroup
       style={{
         height: '100%',
       }}
     >
-      <EuiFlexItem
-        grow={1}
-        style={{
-          paddingTop: euiTheme.size.base /* Match drop shadow padding in the right column */,
-        }}
-      >
-        <EuiFacetGroup>
-          <EuiFacetButton
-            fullWidth
-            quantity={ruleTypeCountsByProducer.total}
-            onClick={useCallback(() => onFilterByProducer(null), [onFilterByProducer])}
-            isSelected={!selectedProducer}
-          >
-            All
-          </EuiFacetButton>
-          {facetList}
-        </EuiFacetGroup>
-      </EuiFlexItem>
+      {showCategories && (
+        <EuiFlexItem
+          grow={1}
+          style={{
+            paddingTop: euiTheme.size.base /* Match drop shadow padding in the right column */,
+          }}
+        >
+          <EuiFacetGroup>
+            <EuiFacetButton
+              fullWidth
+              quantity={ruleTypeCountsByProducer.total}
+              onClick={onClickAll}
+              isSelected={!selectedProducer}
+            >
+              {i18n.translate('alertsUIShared.components.ruleTypeModal.allRuleTypes', {
+                defaultMessage: 'All',
+              })}
+            </EuiFacetButton>
+            {facetList}
+          </EuiFacetGroup>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         grow={3}
         style={{

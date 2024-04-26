@@ -18,5 +18,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./risk_engine_privileges'));
     loadTestFile(require.resolve('./asset_criticality'));
     loadTestFile(require.resolve('./asset_criticality_privileges'));
+    loadTestFile(require.resolve('./asset_criticality_csv_upload'));
   });
 }

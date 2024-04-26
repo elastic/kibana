@@ -45,16 +45,21 @@ export const useDatasetQualityTable = () => {
 
   const flyout = useSelector(service, (state) => state.context.flyout);
 
-  const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const loading = useSelector(
+    service,
+    (state) =>
+      state.matches('datasets.fetching') ||
+      state.matches('integrations.fetching') ||
+      state.matches('degradedDocs.fetching')
+  );
+  const loadingDataStreamStats = useSelector(service, (state) =>
+    state.matches('datasets.fetching')
+  );
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('degradedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
-
-  const isDatasetQualityPageIdle = useSelector(service, (state) =>
-    state.matches('datasets.loaded.idle')
-  );
 
   const toggleInactiveDatasets = useCallback(
     () => service.send({ type: 'TOGGLE_INACTIVE_DATASETS' }),
@@ -77,7 +82,7 @@ export const useDatasetQualityTable = () => {
         return;
       }
 
-      if (isDatasetQualityPageIdle) {
+      if (!flyout?.insightsTimeRange) {
         service.send({
           type: 'OPEN_FLYOUT',
           dataset: selectedDataset,
@@ -90,7 +95,7 @@ export const useDatasetQualityTable = () => {
         dataset: selectedDataset,
       });
     },
-    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
+    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
   );
 
   const isActive = useCallback(
@@ -104,6 +109,7 @@ export const useDatasetQualityTable = () => {
         fieldFormats,
         selectedDataset: flyout?.dataset,
         openFlyout,
+        loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
         isActiveDataset: isActive,
@@ -112,6 +118,7 @@ export const useDatasetQualityTable = () => {
       fieldFormats,
       flyout?.dataset,
       openFlyout,
+      loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
       isActive,

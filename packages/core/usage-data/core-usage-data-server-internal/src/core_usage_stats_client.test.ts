@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
@@ -38,6 +39,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { CoreUsageStatsClient } from '.';
 
 describe('CoreUsageStatsClient', () => {
+  const stop$ = new Subject<void>();
   const setup = (namespace?: string) => {
     const debugLoggerMock = jest.fn();
     const basePathMock = httpServiceMock.createBasePath();
@@ -47,7 +49,8 @@ describe('CoreUsageStatsClient', () => {
     const usageStatsClient = new CoreUsageStatsClient(
       debugLoggerMock,
       basePathMock,
-      Promise.resolve(repositoryMock)
+      Promise.resolve(repositoryMock),
+      stop$
     );
     return { usageStatsClient, debugLoggerMock, basePathMock, repositoryMock };
   };
@@ -57,6 +60,115 @@ describe('CoreUsageStatsClient', () => {
     'x-elastic-internal-origin': 'c',
   }; // as long as these header fields are truthy, this will be treated like a first-party request
   const incrementOptions = { refresh: false };
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    stop$.next();
+  });
+
+  describe('Request-batching', () => {
+    it.each([
+      { triggerName: 'timer-based', triggerFn: async () => await jest.runOnlyPendingTimersAsync() },
+      {
+        triggerName: 'forced-flush',
+        triggerFn: (usageStatsClient: CoreUsageStatsClient) => {
+          // eslint-disable-next-line dot-notation
+          usageStatsClient['flush$'].next();
+        },
+      },
+    ])('batches multiple increments into one ($triggerName)', async ({ triggerFn }) => {
+      const { usageStatsClient, repositoryMock } = setup();
+
+      // First request
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementSavedObjectsBulkCreate({
+        request,
+      } as BaseIncrementOptions);
+
+      // Second request
+      const kibanaRequest = httpServerMock.createKibanaRequest({
+        headers: firstPartyRequestHeaders,
+      });
+      await usageStatsClient.incrementSavedObjectsBulkCreate({
+        request: kibanaRequest,
+      } as BaseIncrementOptions);
+
+      // Run trigger
+      await triggerFn(usageStatsClient);
+
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 2 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 2 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+        ],
+        incrementOptions
+      );
+    });
+
+    it('triggers when the queue is too large', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+
+      // Trigger enough requests to overflow the queue
+      const request = httpServerMock.createKibanaRequest();
+      await Promise.all(
+        [...new Array(10_001).keys()].map(() =>
+          usageStatsClient.incrementSavedObjectsBulkCreate({
+            request,
+          } as BaseIncrementOptions)
+        )
+      );
+
+      // It sends all elements in the max batch
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        1,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 10_000 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 10_000 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 10_000,
+          },
+        ],
+        incrementOptions
+      );
+
+      // After timer, it sends the remainder event
+      await jest.runOnlyPendingTimersAsync();
+
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        2,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+        ],
+        incrementOptions
+      );
+    });
+  });
 
   describe('#getUsageStats', () => {
     it('returns empty object when encountering a repository error', async () => {
@@ -93,6 +205,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -103,14 +216,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkCreate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_CREATE_STATS_PREFIX}.total`,
-          `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -123,14 +240,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkCreate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_CREATE_STATS_PREFIX}.total`,
-          `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -143,14 +264,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkCreate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_CREATE_STATS_PREFIX}.total`,
-          `${BULK_CREATE_STATS_PREFIX}.namespace.custom.total`,
-          `${BULK_CREATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -168,6 +293,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -178,14 +304,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkGet({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_GET_STATS_PREFIX}.total`,
-          `${BULK_GET_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_GET_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${BULK_GET_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_GET_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_GET_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -198,14 +328,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkGet({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_GET_STATS_PREFIX}.total`,
-          `${BULK_GET_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_GET_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${BULK_GET_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_GET_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_GET_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -218,14 +352,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkGet({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_GET_STATS_PREFIX}.total`,
-          `${BULK_GET_STATS_PREFIX}.namespace.custom.total`,
-          `${BULK_GET_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${BULK_GET_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_GET_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_GET_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -243,6 +381,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -253,14 +392,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkResolve({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_RESOLVE_STATS_PREFIX}.total`,
-          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${BULK_RESOLVE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -273,14 +416,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkResolve({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_RESOLVE_STATS_PREFIX}.total`,
-          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${BULK_RESOLVE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -293,14 +440,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkResolve({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_RESOLVE_STATS_PREFIX}.total`,
-          `${BULK_RESOLVE_STATS_PREFIX}.namespace.custom.total`,
-          `${BULK_RESOLVE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${BULK_RESOLVE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_RESOLVE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_RESOLVE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -318,6 +469,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -328,14 +480,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkUpdate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_UPDATE_STATS_PREFIX}.total`,
-          `${BULK_UPDATE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${BULK_UPDATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_UPDATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -348,14 +504,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkUpdate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_UPDATE_STATS_PREFIX}.total`,
-          `${BULK_UPDATE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${BULK_UPDATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_UPDATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -368,14 +528,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkUpdate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_UPDATE_STATS_PREFIX}.total`,
-          `${BULK_UPDATE_STATS_PREFIX}.namespace.custom.total`,
-          `${BULK_UPDATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${BULK_UPDATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_UPDATE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_UPDATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -393,6 +557,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -403,14 +568,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsCreate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${CREATE_STATS_PREFIX}.total`,
-          `${CREATE_STATS_PREFIX}.namespace.default.total`,
-          `${CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -423,14 +592,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsCreate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${CREATE_STATS_PREFIX}.total`,
-          `${CREATE_STATS_PREFIX}.namespace.default.total`,
-          `${CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -443,14 +616,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsCreate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${CREATE_STATS_PREFIX}.total`,
-          `${CREATE_STATS_PREFIX}.namespace.custom.total`,
-          `${CREATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${CREATE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${CREATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -468,6 +642,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -478,14 +653,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkDelete({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_DELETE_STATS_PREFIX}.total`,
-          `${BULK_DELETE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${BULK_DELETE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_DELETE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -498,14 +677,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkDelete({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_DELETE_STATS_PREFIX}.total`,
-          `${BULK_DELETE_STATS_PREFIX}.namespace.default.total`,
-          `${BULK_DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${BULK_DELETE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_DELETE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -518,14 +701,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsBulkDelete({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${BULK_DELETE_STATS_PREFIX}.total`,
-          `${BULK_DELETE_STATS_PREFIX}.namespace.custom.total`,
-          `${BULK_DELETE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${BULK_DELETE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_DELETE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_DELETE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -543,6 +730,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -553,14 +741,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsDelete({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${DELETE_STATS_PREFIX}.total`,
-          `${DELETE_STATS_PREFIX}.namespace.default.total`,
-          `${DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${DELETE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${DELETE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -573,14 +765,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsDelete({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${DELETE_STATS_PREFIX}.total`,
-          `${DELETE_STATS_PREFIX}.namespace.default.total`,
-          `${DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${DELETE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${DELETE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${DELETE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -593,14 +789,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsDelete({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${DELETE_STATS_PREFIX}.total`,
-          `${DELETE_STATS_PREFIX}.namespace.custom.total`,
-          `${DELETE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${DELETE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${DELETE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${DELETE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -618,6 +815,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -628,14 +826,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsFind({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${FIND_STATS_PREFIX}.total`,
-          `${FIND_STATS_PREFIX}.namespace.default.total`,
-          `${FIND_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${FIND_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${FIND_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          { fieldName: `${FIND_STATS_PREFIX}.namespace.default.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -648,14 +847,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsFind({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${FIND_STATS_PREFIX}.total`,
-          `${FIND_STATS_PREFIX}.namespace.default.total`,
-          `${FIND_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${FIND_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${FIND_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          { fieldName: `${FIND_STATS_PREFIX}.namespace.default.kibanaRequest.yes`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -668,14 +868,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsFind({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${FIND_STATS_PREFIX}.total`,
-          `${FIND_STATS_PREFIX}.namespace.custom.total`,
-          `${FIND_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${FIND_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${FIND_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${FIND_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -693,6 +894,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -703,14 +905,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsGet({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${GET_STATS_PREFIX}.total`,
-          `${GET_STATS_PREFIX}.namespace.default.total`,
-          `${GET_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${GET_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${GET_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          { fieldName: `${GET_STATS_PREFIX}.namespace.default.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -723,14 +926,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsGet({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${GET_STATS_PREFIX}.total`,
-          `${GET_STATS_PREFIX}.namespace.default.total`,
-          `${GET_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${GET_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${GET_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          { fieldName: `${GET_STATS_PREFIX}.namespace.default.kibanaRequest.yes`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -743,14 +947,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsGet({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${GET_STATS_PREFIX}.total`,
-          `${GET_STATS_PREFIX}.namespace.custom.total`,
-          `${GET_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${GET_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${GET_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${GET_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -768,6 +973,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -778,14 +984,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolve({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_STATS_PREFIX}.total`,
-          `${RESOLVE_STATS_PREFIX}.namespace.default.total`,
-          `${RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${RESOLVE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -798,14 +1008,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolve({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_STATS_PREFIX}.total`,
-          `${RESOLVE_STATS_PREFIX}.namespace.default.total`,
-          `${RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${RESOLVE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -818,14 +1032,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolve({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_STATS_PREFIX}.total`,
-          `${RESOLVE_STATS_PREFIX}.namespace.custom.total`,
-          `${RESOLVE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${RESOLVE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -843,6 +1061,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as BaseIncrementOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -853,14 +1072,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsUpdate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${UPDATE_STATS_PREFIX}.total`,
-          `${UPDATE_STATS_PREFIX}.namespace.default.total`,
-          `${UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          { fieldName: `${UPDATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${UPDATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -873,14 +1096,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsUpdate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${UPDATE_STATS_PREFIX}.total`,
-          `${UPDATE_STATS_PREFIX}.namespace.default.total`,
-          `${UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${UPDATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${UPDATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${UPDATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -893,14 +1120,15 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsUpdate({
         request,
       } as BaseIncrementOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${UPDATE_STATS_PREFIX}.total`,
-          `${UPDATE_STATS_PREFIX}.namespace.custom.total`,
-          `${UPDATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${UPDATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${UPDATE_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${UPDATE_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -918,6 +1146,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsImportOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
     });
 
@@ -928,17 +1157,21 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsImport({
         request,
       } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${IMPORT_STATS_PREFIX}.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
-          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-          `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
-          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
+          { fieldName: `${IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+          { fieldName: `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -954,22 +1187,27 @@ describe('CoreUsageStatsClient', () => {
         overwrite: true,
         compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
       await usageStatsClient.incrementSavedObjectsImport({
         request,
         createNewCopies: false,
         overwrite: true,
         compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
         1,
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${IMPORT_STATS_PREFIX}.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          { fieldName: `${IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+          { fieldName: `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`, incrementBy: 1 },
           // excludes 'overwriteEnabled.yes', 'overwriteEnabled.no', 'compatibilityModeEnabled.yes`, and
           // `compatibilityModeEnabled.no` when createNewCopies is true
         ],
@@ -980,12 +1218,15 @@ describe('CoreUsageStatsClient', () => {
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${IMPORT_STATS_PREFIX}.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-          `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
-          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
+          { fieldName: `${IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+          { fieldName: `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -998,17 +1239,18 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsImport({
         request,
       } as IncrementSavedObjectsImportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${IMPORT_STATS_PREFIX}.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.custom.total`,
-          `${IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
-          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-          `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
-          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
+          { fieldName: `${IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`, incrementBy: 1 },
+          { fieldName: `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -1026,6 +1268,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsResolveImportErrorsOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1036,16 +1279,23 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -1060,21 +1310,29 @@ describe('CoreUsageStatsClient', () => {
         createNewCopies: true,
         compatibilityMode: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
+      await jest.runOnlyPendingTimersAsync();
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
         createNewCopies: false,
         compatibilityMode: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
         1,
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+            incrementBy: 1,
+          },
           // excludes 'compatibilityModeEnabled.yes` and `compatibilityModeEnabled.no` when createNewCopies is true
         ],
         incrementOptions
@@ -1084,11 +1342,17 @@ describe('CoreUsageStatsClient', () => {
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -1101,16 +1365,23 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.total`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
-          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+          { fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`, incrementBy: 1 },
+          {
+            fieldName: `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -1128,6 +1399,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsExportOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1140,15 +1412,19 @@ describe('CoreUsageStatsClient', () => {
         types: undefined,
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${EXPORT_STATS_PREFIX}.total`,
-          `${EXPORT_STATS_PREFIX}.namespace.default.total`,
-          `${EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
-          `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+          { fieldName: `${EXPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${EXPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+          { fieldName: `${EXPORT_STATS_PREFIX}.allTypesSelected.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -1163,15 +1439,19 @@ describe('CoreUsageStatsClient', () => {
         types: ['foo', 'bar'],
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${EXPORT_STATS_PREFIX}.total`,
-          `${EXPORT_STATS_PREFIX}.namespace.default.total`,
-          `${EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-          `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
+          { fieldName: `${EXPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${EXPORT_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+          { fieldName: `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -1184,15 +1464,16 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsExport({
         request,
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${EXPORT_STATS_PREFIX}.total`,
-          `${EXPORT_STATS_PREFIX}.namespace.custom.total`,
-          `${EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
-          `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+          { fieldName: `${EXPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${EXPORT_STATS_PREFIX}.namespace.custom.total`, incrementBy: 1 },
+          { fieldName: `${EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`, incrementBy: 1 },
+          { fieldName: `${EXPORT_STATS_PREFIX}.allTypesSelected.no`, incrementBy: 1 },
         ],
         incrementOptions
       );
@@ -1210,6 +1491,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsExportOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1220,14 +1502,21 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsImport({
         request,
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.total`,
-          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.default.total`,
-          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.default.total`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -1240,14 +1529,21 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsImport({
         request,
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.total`,
-          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.custom.total`,
-          `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.custom.total`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -1265,6 +1561,7 @@ describe('CoreUsageStatsClient', () => {
           request,
         } as IncrementSavedObjectsExportOptions)
       ).resolves.toBeUndefined();
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
@@ -1275,14 +1572,21 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsExport({
         request,
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.total`,
-          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.default.total`,
-          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          { fieldName: `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.default.total`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );
@@ -1295,14 +1599,21 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementLegacyDashboardsExport({
         request,
       } as IncrementSavedObjectsExportOptions);
+      await jest.runOnlyPendingTimersAsync();
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
-          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.total`,
-          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.custom.total`,
-          `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          { fieldName: `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.total`, incrementBy: 1 },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.custom.total`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+            incrementBy: 1,
+          },
         ],
         incrementOptions
       );

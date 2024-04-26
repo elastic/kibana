@@ -31,9 +31,9 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '74.49 lbs / 33.79 kg' },
-        { id: 'annualizedCost', value: '$318.32' },
-        { id: 'totalNumberOfSamples', value: '513' },
+        { id: 'annualizedCo2', value: '79.81 lbs / 36.2 kg' },
+        { id: 'annualizedCost', value: '$341.05' },
+        { id: 'totalNumberOfSamples', value: '17,186' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         cy.get(`[data-test-subj="${item.id}_comparison_value"]`).should('not.exist');
@@ -50,9 +50,9 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '74.49 lbs / 33.79 kg' },
-        { id: 'annualizedCost', value: '$0', comparisonValue: '$318.32' },
-        { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '79.81 lbs / 36.2 kg' },
+        { id: 'annualizedCost', value: '$0', comparisonValue: '$341.05' },
+        { id: 'totalNumberOfSamples', value: '0', comparisonValue: '515,580' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         if (item.comparisonValue) {
@@ -73,23 +73,23 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
+        { id: 'overallPerformance', value: '78.01%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '74.49 lbs / 33.79 kg',
-          comparisonValue: '25.41 lbs / 11.53 kg (65.89%)',
+          value: '9.81 lbs / 36.2 kg',
+          comparisonValue: '28.23 lbs / 12.81 kg (64.62%)',
           icon: 'comparison_sortUp_success',
         },
         {
           id: 'annualizedCost',
-          value: '$318.32',
-          comparisonValue: '$108.59 (65.89%)',
+          value: '$341.05',
+          comparisonValue: '$120.65 (64.62%)',
           icon: 'comparison_sortUp_success',
         },
         {
           id: 'totalNumberOfSamples',
-          value: '513',
-          comparisonValue: '175 (65.89%)',
+          value: '17,186',
+          comparisonValue: '3,780 (78.01%)',
           icon: 'comparison_sortUp_success',
         },
       ].forEach((item) => {
@@ -113,23 +113,23 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
+        { id: 'overallPerformance', value: '354.66%', icon: 'sortDown_danger' },
         {
           id: 'annualizedCo2',
-          value: '25.41 lbs / 11.53 kg',
-          comparisonValue: '74.49 lbs / 33.79 kg (193.14%)',
+          value: '28.23 lbs / 12.81 kg',
+          comparisonValue: '79.81 lbs / 36.2 kg (182.67%)',
           icon: 'comparison_sortDown_danger',
         },
         {
           id: 'annualizedCost',
-          value: '$108.59',
-          comparisonValue: '$318.32 (193.14%)',
+          value: '$120.65',
+          comparisonValue: '$341.05 (182.67%)',
           icon: 'comparison_sortDown_danger',
         },
         {
           id: 'totalNumberOfSamples',
-          value: '175',
-          comparisonValue: '513 (193.14%)',
+          value: '3,780',
+          comparisonValue: '17,186 (354.66%)',
           icon: 'comparison_sortDown_danger',
         },
       ].forEach((item) => {

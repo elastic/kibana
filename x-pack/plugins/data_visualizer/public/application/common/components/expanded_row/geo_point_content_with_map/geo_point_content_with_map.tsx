@@ -23,7 +23,8 @@ export const GeoPointContentWithMap: FC<{
   dataView: DataView | undefined;
   combinedQuery?: CombinedQuery;
   esql?: string;
-}> = ({ config, dataView, combinedQuery, esql }) => {
+  timeFieldName?: string;
+}> = ({ config, dataView, combinedQuery, esql, timeFieldName }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
@@ -72,7 +73,7 @@ export const GeoPointContentWithMap: FC<{
                 },
               ],
               dataViewId: dataView.id,
-              dateField: dataView.timeFieldName,
+              dateField: dataView.timeFieldName ?? timeFieldName,
               geoField: config.fieldName,
               esql,
               narrowByGlobalSearch: true,

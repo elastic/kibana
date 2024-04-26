@@ -14,7 +14,6 @@ type PaginationProps = RuleRegistrySearchRequestPagination & {
 };
 
 export type UsePagination = (props: PaginationProps) => {
-  pagination: RuleRegistrySearchRequestPagination;
   onChangePageSize: (pageSize: number) => void;
   onChangePageIndex: (pageIndex: number) => void;
   onPaginateFlyoutNext: () => void;

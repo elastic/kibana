@@ -15,11 +15,13 @@ import { useQueryIndices } from '../../hooks/use_query_indices';
 interface AddIndicesFieldProps {
   selectedIndices: IndexName[];
   onIndexSelect: (index: IndexName) => void;
+  loading: boolean;
 }
 
 export const AddIndicesField: React.FC<AddIndicesFieldProps> = ({
   selectedIndices,
   onIndexSelect,
+  loading,
 }) => {
   const [query, setQuery] = useState<string>('');
   const { indices, isLoading } = useQueryIndices(query);
@@ -50,6 +52,7 @@ export const AddIndicesField: React.FC<AddIndicesFieldProps> = ({
         onChange={handleChange}
         onSearchChange={handleSearchChange}
         fullWidth
+        isDisabled={loading}
         options={indices.map((index) => ({
           label: index,
           disabled: selectedIndices.includes(index),

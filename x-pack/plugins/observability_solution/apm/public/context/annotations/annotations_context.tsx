@@ -31,21 +31,18 @@ export function AnnotationsContextProvider({
   const { data = INITIAL_STATE } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
-        return callApmApi(
-          'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                start,
-                end,
-              },
+        return callApmApi('GET /api/apm/services/{serviceName}/annotation/search 2023-10-31', {
+          params: {
+            path: {
+              serviceName,
             },
-          }
-        );
+            query: {
+              environment,
+              start,
+              end,
+            },
+          },
+        });
       }
     },
     [environment, start, end, serviceName]

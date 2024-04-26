@@ -41,6 +41,8 @@ export const ExecuteConnectorRequestBody = z.object({
   isEnabledRAGAlerts: z.boolean().optional(),
   replacements: Replacements,
   size: z.number().optional(),
+  langSmithProject: z.string().optional(),
+  langSmithApiKey: z.string().optional(),
 });
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
 

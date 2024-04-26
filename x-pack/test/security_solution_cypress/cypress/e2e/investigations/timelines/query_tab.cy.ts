@@ -64,7 +64,7 @@ describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
       .and('match', /Unpin the event in row 2/);
   });
 
-  it('should have an unlock icon', { tags: '@brokenInServerless' }, () => {
+  it('should have an unlock icon', { tags: '@skipInServerless' }, () => {
     cy.get(UNLOCKED_ICON).should('be.visible');
   });
 });

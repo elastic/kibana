@@ -18,14 +18,10 @@ export const recordVideo = (page: Page, postfix = '') => {
   after(async () => {
     try {
       const videoFilePath = await page.video()?.path();
-      const pathToVideo = videoFilePath
-        ?.replace('.journeys/videos/', '')
-        .replace('.webm', '');
+      const pathToVideo = videoFilePath?.replace('.journeys/videos/', '').replace('.webm', '');
       const newVideoPath = videoFilePath?.replace(
         pathToVideo!,
-        postfix
-          ? runner.currentJourney!.name + `-${postfix}`
-          : runner.currentJourney!.name
+        postfix ? runner.currentJourney!.name + `-${postfix}` : runner.currentJourney!.name
       );
       fs.renameSync(videoFilePath!, newVideoPath!);
     } catch (e) {

@@ -15,6 +15,6 @@ describe('createRetriever', () => {
     const retriever = createRetriever(esQuery);
     const result = retriever(question);
 
-    expect(result).toEqual({ match: { text: 'How can I "do something" with quotes?' } });
+    expect(result).toEqual({ query: { match: { text: 'How can I "do something" with quotes?' } } });
   });
 });

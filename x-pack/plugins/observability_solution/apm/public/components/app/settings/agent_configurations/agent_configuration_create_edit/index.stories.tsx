@@ -17,10 +17,7 @@ import {
   ApmPluginContextValue,
 } from '../../../../../context/apm_plugin/apm_plugin_context';
 
-storiesOf(
-  'app/settings/AgentConfigurations/agent_configuration_create_edit',
-  module
-)
+storiesOf('app/settings/AgentConfigurations/agent_configuration_create_edit', module)
   .addDecorator((storyFn) => {
     const coreMock = {} as unknown as CoreStart;
 
@@ -36,9 +33,7 @@ storiesOf(
     };
 
     return (
-      <ApmPluginContext.Provider
-        value={contextMock as unknown as ApmPluginContextValue}
-      >
+      <ApmPluginContext.Provider value={contextMock as unknown as ApmPluginContextValue}>
         {storyFn()}
       </ApmPluginContext.Provider>
     );
@@ -61,10 +56,7 @@ storiesOf(
     },
     {
       info: {
-        propTablesExclude: [
-          AgentConfigurationCreateEdit,
-          ApmPluginContext.Provider,
-        ],
+        propTablesExclude: [AgentConfigurationCreateEdit, ApmPluginContext.Provider],
         source: false,
       },
     }

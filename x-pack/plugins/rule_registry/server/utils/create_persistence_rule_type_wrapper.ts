@@ -24,6 +24,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import type { IRuleDataClient } from '..';
@@ -65,6 +66,7 @@ const augmentAlerts = <T>({
     return {
       ...alert,
       _source: {
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: new Date(),
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
@@ -247,7 +249,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
+            alertWithPersistence: async (
+              alerts,
+              refresh,
+              maxAlerts = undefined,
+              enrichAlerts,
+              currentTimeOverride
+            ) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
@@ -299,7 +307,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
-                  currentTimeOverride: undefined,
+                  currentTimeOverride,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -361,7 +369,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               suppressionWindow,
               enrichAlerts,
               currentTimeOverride,
-              isRuleExecutionOnly
+              isRuleExecutionOnly,
+              maxAlerts
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -375,6 +384,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
               const writeAlerts =
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+
+              let alertsWereTruncated = false;
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -392,7 +403,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (filteredDuplicates.length === 0) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
                 }
 
                 const suppressionAlertSearchRequest = {
@@ -473,7 +489,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (nonSuppressedAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
                 }
 
                 const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
@@ -535,6 +556,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   }
                 }
 
+                if (maxAlerts && enrichedAlerts.length > maxAlerts) {
+                  enrichedAlerts.length = maxAlerts;
+                  alertsWereTruncated = true;
+                }
+
                 const augmentedAlerts = augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
@@ -548,7 +574,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (bulkResponse == null) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated: false,
+                  };
                 }
 
                 const createdAlerts = augmentedAlerts
@@ -594,10 +625,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   createdAlerts,
                   suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
                   errors: errorAggregator(bulkResponse.body, [409]),
+                  alertsWereTruncated,
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                return {
+                  createdAlerts: [],
+                  errors: {},
+                  suppressedAlerts: [],
+                  alertsWereTruncated: false,
+                };
               }
             },
           },
