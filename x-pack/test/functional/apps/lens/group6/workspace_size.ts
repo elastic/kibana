@@ -43,6 +43,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (width !== DEFAULT_WINDOW_SIZE[0] || height !== DEFAULT_WINDOW_SIZE[1]) {
         const { width: containerWidth, height: containerHeight } =
           await PageObjects.lens.getWorkspaceVisContainerDimensions();
+        log.debug(
+          `Detected Chrome bug, adjusting aspect ratio from ${UNCONSTRAINED} to ${
+            pxToN(containerWidth) / pxToN(containerHeight)
+          }`
+        );
         UNCONSTRAINED = pxToN(containerWidth) / pxToN(containerHeight);
       }
 
