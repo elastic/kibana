@@ -14,6 +14,7 @@ import {
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
 } from '@kbn/observability-logs-explorer-plugin/common';
+import { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -70,6 +71,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
+    datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
     datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
@@ -199,6 +202,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityNamespacesSelectableButton,
         testSubjectSelectors.datasetQualityNamespacesSelectable,
         namespaces
+      );
+    },
+
+    async filterForQualities(qualities: QualityIndicators[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityQualitiesSelectableButton,
+        testSubjectSelectors.datasetQualityQualitiesSelectable,
+        qualities
       );
     },
 
