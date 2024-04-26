@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { I18nConfigType, InternalI18nServicePreboot } from './src';
-export { config, I18nService } from './src';
-export { getKibanaTranslationFiles } from './src/get_kibana_translation_files';
-export { supportedLocale } from './src/constants';
+/**
+ * List of all locales that are officially supported.
+ */
+export const supportedLocale = ['en', 'fr-FR', 'ja-JP', 'zh-CN'];
