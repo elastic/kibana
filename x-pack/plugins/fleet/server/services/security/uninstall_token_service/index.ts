@@ -188,15 +188,28 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       : null;
   }
 
-  private prepareSearchString(str: string | undefined, wildcard: string): string | undefined {
+  private prepareSearchString(
+    str: string | undefined,
+    charactersToEscape: RegExp,
+    wildcard: string
+  ): string | undefined {
     const strWithoutSpecialCharacters = str
-      ?.split(/[^-\da-z]+/gi)
+      ?.replace(new RegExp(charactersToEscape, 'g'), '\\$&')
+      .split(/ +/gi)
       .filter((x) => x)
       .join(wildcard);
 
     return strWithoutSpecialCharacters
       ? wildcard + strWithoutSpecialCharacters + wildcard
       : undefined;
+  }
+
+  private prepareRegexpQuery(str: string | undefined): string | undefined {
+    return this.prepareSearchString(str, /[@#&*+()[\]{}|.?~"<]/, '.*');
+  }
+
+  private prepareQueryStringQuery(str: string | undefined): string | undefined {
+    return this.prepareSearchString(str, /[":*(){}\\<>]/, '*');
   }
 
   private async searchPoliciesByName(policyNameSearchString: string): Promise<string[]> {
@@ -217,10 +230,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     perPage = 20,
     excludedPolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse> {
-    const policyIdFilter = this.prepareSearchString(policyIdSearchTerm, '.*');
+    const policyIdFilter = this.prepareRegexpQuery(policyIdSearchTerm);
 
     let policyIdsFoundByName: string[] | undefined;
-    const policyNameSearchString = this.prepareSearchString(policyNameSearchTerm, '*');
+    const policyNameSearchString = this.prepareQueryStringQuery(policyNameSearchTerm);
     if (policyNameSearchString) {
       policyIdsFoundByName = await this.searchPoliciesByName(policyNameSearchString);
     }
