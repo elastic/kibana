@@ -12,12 +12,6 @@ import type { UiActionsActionDefinition, UiActionsSetup } from '@kbn/ui-actions-
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { FIELD_STATS_EMBED_ID, CREATE_FIELD_STATS_ACTION_ID } from '../constants';
 
-const PLUGIN_ID = 'ml';
-const PLUGIN_ICON = 'machineLearningApp';
-const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
-  defaultMessage: 'Machine Learning',
-});
-
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
@@ -34,13 +28,6 @@ interface FieldStatsAction {
 function createFieldStatsGridAction(): UiActionsActionDefinition<FieldStatsAction> {
   return {
     id: CREATE_FIELD_STATS_ACTION_ID,
-    grouping: [
-      {
-        id: PLUGIN_ID,
-        getDisplayName: () => ML_APP_NAME,
-        getIconType: () => PLUGIN_ICON,
-      },
-    ],
     getDisplayName: () =>
       i18n.translate('xpack.dataVisualizer.fieldStatsTable.displayName', {
         defaultMessage: 'Field statistics',
