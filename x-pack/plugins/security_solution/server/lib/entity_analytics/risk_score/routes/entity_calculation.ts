@@ -20,9 +20,11 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { convertRangeToISO } from '../tasks/helpers';
 import { buildRiskScoreServiceForRequest } from './helpers';
 import { getFieldForIdentifier } from '../helpers';
+import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
 
 export const riskScoreEntityCalculationRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
   logger: Logger
 ) => {
   router.versioned
@@ -40,7 +42,7 @@ export const riskScoreEntityCalculationRoute = (
           request: { body: buildRouteValidation(riskScoreEntityCalculationRequestSchema) },
         },
       },
-      async (context, request, response) => {
+      withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
         const securityContext = await context.securitySolution;
 
         securityContext.getAuditLogger()?.log({
@@ -101,12 +103,6 @@ export const riskScoreEntityCalculationRoute = (
 
           const range = convertRangeToISO(configuredRange);
 
-          // TODO: DELETE ME
-          // const testRange = {
-          //   start: 'Jan 26, 2024 @ 00:00:00.000',
-          //   end: 'Apr 25, 2024 @ 10:57:53.511',
-          // };
-          // const range = convertRangeToISO(testRange);
           const afterKeys: AfterKeys = {};
 
           const result: CalculateAndPersistScoresResponse =
@@ -114,7 +110,6 @@ export const riskScoreEntityCalculationRoute = (
               pageSize,
               identifierType,
               index,
-              // Question: Should we merge the configured filter with the identifier filter?
               filter: { term: { [getFieldForIdentifier(identifierType)]: identifier } },
               range,
               runtimeMappings,
@@ -153,16 +148,6 @@ export const riskScoreEntityCalculationRoute = (
             bypassErrorFormat: true,
           });
         }
-      }
+      })
     );
 };
-
-// KIBANA_URL="http://localhost:5601/mtj"
-
-// curl "$KIBANA_URL/api/risk_scores/calculation/entity" \
-//   -H 'kbn-xsrf:hello' \
-//   --user elastic:changeme \
-//   -X 'POST' \
-//   -H 'elastic-api-version: 1' \
-//   -H "Content-Type: application/json" \
-//   -d '{"identifier_type": "host", "identifier": "Host-spotless-tamale.name"}'

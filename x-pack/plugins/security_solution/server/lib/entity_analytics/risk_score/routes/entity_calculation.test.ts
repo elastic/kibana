@@ -18,6 +18,7 @@ import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
 import { riskScoreEntityCalculationRoute } from './entity_calculation';
+import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
 
 jest.mock('../get_risk_inputs_index');
 jest.mock('../risk_score_service');
@@ -32,9 +33,17 @@ describe('entity risk score calculation route', () => {
     enabled: true,
     range: { start: 'now-30d', end: 'now' },
   } as unknown as RiskEngineConfigurationWithDefaults;
+  let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
     jest.resetAllMocks();
+
+    getStartServicesMock = jest.fn().mockResolvedValue([
+      {},
+      {
+        security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+      },
+    ]);
 
     server = serverMock.create();
     logger = loggerMock.create();
@@ -52,7 +61,7 @@ describe('entity risk score calculation route', () => {
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
-    riskScoreEntityCalculationRoute(server.router, logger);
+    riskScoreEntityCalculationRoute(server.router, getStartServicesMock, logger);
   });
 
   const buildRequest = (overrides: object = {}) => {
