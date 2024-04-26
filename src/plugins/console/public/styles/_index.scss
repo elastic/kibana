@@ -11,15 +11,11 @@
 .ace_editor.ace_autocomplete {
   resize: horizontal;
 
+  // These negative z-index's ensure to expose the resizer on Safari.
   .ace_scroller {
-    right: 6px !important;
-
-    .ace_rightAlignedText {
-      right: 10px;
-    }
+    z-index: -1;
   }
-
   .ace_scrollbar.ace_scrollbar-v {
-    bottom: $euiSize !important;
+    z-index: -1;
   }
 }
