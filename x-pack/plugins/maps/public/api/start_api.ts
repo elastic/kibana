@@ -8,6 +8,7 @@
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 import type { SampleValuesConfig, EMSTermJoinConfig } from '../ems_autosuggest';
+import type { Props as PassiveMapProps } from '../lens/passive_map';
 
 export interface MapsStartApi {
   createLayerDescriptors: {
@@ -20,5 +21,6 @@ export interface MapsStartApi {
       params: CreateLayerDescriptorParams
     ) => Promise<LayerDescriptor>;
   };
+  PassiveMap: React.FC<PassiveMapProps>;
   suggestEMSTermJoinConfig(config: SampleValuesConfig): Promise<EMSTermJoinConfig | null>;
 }

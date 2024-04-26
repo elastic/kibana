@@ -498,7 +498,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertExamplesList(fieldName, expectedExamplesCount);
 
       await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerEmbeddedMapContent')
+        this.detailsSelector(fieldName, 'mapContainer')
       );
 
       await this.ensureDetailsClosed(fieldName);

@@ -21,7 +21,6 @@ import {
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
-import { EmbeddedMapComponent } from '../../../embedded_map';
 import type { FieldVisStats } from '../../../../../../../common/types';
 import { ExpandedRowPanel } from './expanded_row_panel';
 
@@ -103,13 +102,16 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   const {
     services: {
       data: { fieldFormats },
+      maps: mapsService,
     },
   } = useDataVisualizerKibana();
 
+  if (!mapsService) return null;
+
   const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
 
-  const layerList: VectorLayerDescriptor[] = useMemo(
-    () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
+  const choroplethLayer: VectorLayerDescriptor = useMemo(
+    () => getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion),
     [suggestion, fieldName, topValues]
   );
 
@@ -160,7 +162,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       grow={true}
     >
       <div className={'dvMap__wrapper'}>
-        <EmbeddedMapComponent layerList={layerList} />
+        <mapsService.PassiveMap passiveLayer={choroplethLayer} />
       </div>
 
       {countsElement}
