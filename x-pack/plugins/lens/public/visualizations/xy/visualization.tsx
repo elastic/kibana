@@ -60,15 +60,11 @@ import {
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
-  type PersistedState,
   visualizationTypes,
 } from './types';
 import {
-  getPersistableState,
   getAnnotationLayerErrors,
-  injectReferences,
   isHorizontalChart,
-  isPersistedState,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
 } from './state_helpers';
@@ -122,6 +118,7 @@ import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
 
 const XY_ID = 'lnsXY';
 
@@ -151,7 +148,7 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, PersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -245,7 +242,7 @@ export const getXyVisualization = ({
   },
 
   getPersistableState(state) {
-    return getPersistableState(state);
+    return convertToPersistable(state);
   },
 
   getDescription,
@@ -273,31 +270,28 @@ export const getXyVisualization = ({
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
-    const finalState =
-      state && isPersistedState(state)
-        ? injectReferences(state, annotationGroups!, references)
-        : state;
-    return (
-      finalState || {
-        title: 'Empty XY chart',
-        legend: { isVisible: true, position: Position.Right },
-        valueLabels: 'hide',
-        preferredSeriesType: defaultSeriesType,
-        layers: [
-          {
-            layerId: addNewLayer(),
-            accessors: [],
-            position: Position.Top,
-            seriesType: defaultSeriesType,
-            showGridlines: false,
-            layerType: LayerTypes.DATA,
-            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-            colorMapping:
-              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
-          },
-        ],
-      }
-    );
+    if (state) {
+      return convertToRuntime(state, annotationGroups!, references);
+    }
+    return {
+      title: 'Empty XY chart',
+      legend: { isVisible: true, position: Position.Right },
+      valueLabels: 'hide',
+      preferredSeriesType: defaultSeriesType,
+      layers: [
+        {
+          layerId: addNewLayer(),
+          accessors: [],
+          position: Position.Top,
+          seriesType: defaultSeriesType,
+          showGridlines: false,
+          layerType: LayerTypes.DATA,
+          palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+          colorMapping:
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
+        },
+      ],
+    };
   },
 
   getLayerType(layerId, state) {
@@ -984,8 +978,8 @@ export const getXyVisualization = ({
   },
 
   isEqual(state1, references1, state2, references2, annotationGroups) {
-    const injected1 = injectReferences(state1, annotationGroups, references1);
-    const injected2 = injectReferences(state2, annotationGroups, references2);
+    const injected1 = convertToRuntime(state1, annotationGroups, references1);
+    const injected2 = convertToRuntime(state2, annotationGroups, references2);
     return isEqual(injected1, injected2);
   },
 

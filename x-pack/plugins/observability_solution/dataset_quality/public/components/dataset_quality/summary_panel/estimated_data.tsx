@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { formatNumber } from '@elastic/eui';
 
-import { formatBytes } from '@kbn/formatters';
 import { useSummaryPanelContext } from '../../../hooks';
+import { BYTE_NUMBER_FORMAT } from '../../../../common/constants';
 import {
   summaryPanelEstimatedDataText,
   summaryPanelEstimatedDataTooltipText,
@@ -22,7 +23,7 @@ export function EstimatedData() {
     <LastDayDataPlaceholder
       title={summaryPanelEstimatedDataText}
       tooltip={summaryPanelEstimatedDataTooltipText}
-      value={formatBytes(estimatedData.estimatedDataInBytes)}
+      value={formatNumber(estimatedData.estimatedDataInBytes, BYTE_NUMBER_FORMAT)}
       isLoading={isEstimatedDataLoading}
     />
   );

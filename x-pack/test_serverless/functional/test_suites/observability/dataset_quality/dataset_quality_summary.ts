@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         datasetHealthDegraded: '0',
         datasetHealthGood: '3',
         activeDatasets: '0 of 3',
-        // estimatedData: '0 Bytes', https://github.com/elastic/kibana/issues/178954
+        // estimatedData: '0.0 B', https://github.com/elastic/kibana/issues/178954
       });
     });
 
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(updatedActiveDatasets).to.eql('3 of 3');
 
-        // TODO: Investigate. This fails on Serverless.
+        // TODO: `_stats` not available on Serverless. // https://github.com/elastic/kibana/issues/178954
         // expect(_updatedEstimatedData).to.not.eql(_existingEstimatedData);
       });
     });

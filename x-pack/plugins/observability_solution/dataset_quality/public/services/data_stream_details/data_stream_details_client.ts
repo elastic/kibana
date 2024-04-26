@@ -8,26 +8,50 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
+  getDataStreamsSettingsResponseRt,
   getDataStreamsDetailsResponseRt,
   integrationDashboardsRT,
 } from '../../../common/api_types';
 import {
   GetDataStreamsStatsError,
+  GetDataStreamSettingsParams,
+  GetDataStreamSettingsResponse,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
   GetIntegrationDashboardsParams,
   GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
-import { DataStreamDetails } from '../../../common/data_streams_stats';
+import { DataStreamDetails, DataStreamSettings } from '../../../common/data_streams_stats';
 import { IDataStreamDetailsClient } from './types';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   constructor(private readonly http: HttpStart) {}
 
-  public async getDataStreamDetails({ dataStream }: GetDataStreamDetailsParams) {
+  public async getDataStreamSettings({ dataStream }: GetDataStreamSettingsParams) {
+    const response = await this.http
+      .get<GetDataStreamSettingsResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/settings`
+      )
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(`Failed to fetch data stream settings": ${error}`);
+      });
+
+    const dataStreamSettings = decodeOrThrow(
+      getDataStreamsSettingsResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(`Failed to decode data stream settings response: ${message}"`)
+    )(response);
+
+    return dataStreamSettings as DataStreamSettings;
+  }
+
+  public async getDataStreamDetails({ dataStream, start, end }: GetDataStreamDetailsParams) {
     const response = await this.http
       .get<GetDataStreamDetailsResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/details`
+        `/internal/dataset_quality/data_streams/${dataStream}/details`,
+        {
+          query: { start, end },
+        }
       )
       .catch((error) => {
         throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`);

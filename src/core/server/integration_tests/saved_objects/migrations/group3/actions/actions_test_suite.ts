@@ -1358,7 +1358,7 @@ export const runActionTestSuite = ({
         query: { match_all: {} },
         batchSize: 1, // small batch size so we don't exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 1000, // set a small size to force the error
+        maxResponseSizeBytes: 5000, // make sure long ids don't cause es_response_too_large
       });
       const rightResponse = await readWithPitTask();
 
