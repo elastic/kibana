@@ -640,7 +640,7 @@ export const reducer = (state: State, action: Action): State => {
           selectedOptions: action.value.selectedOptions,
           selectedDataTypes,
         },
-      }
+      };
     }
     case 'inferenceToModelIdMap.update': {
       return {
