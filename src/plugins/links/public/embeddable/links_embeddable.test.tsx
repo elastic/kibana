@@ -152,7 +152,7 @@ jest.mock('./utils', () => {
   };
 });
 
-jest.mock('../content_management/load_from_library', () => {
+jest.mock('../content_management', () => {
   return {
     loadFromLibrary: jest.fn((savedObjectId) => {
       return Promise.resolve({
@@ -200,11 +200,7 @@ describe('getLinksEmbeddableFactory', () => {
         rawState,
         references,
       });
-      expect(deserializedState).toEqual({
-        savedObjectId: '123',
-        title: 'my links',
-        description: 'just a few links',
-      });
+      expect(deserializedState).toEqual(rawState);
     });
 
     test('component renders', async () => {

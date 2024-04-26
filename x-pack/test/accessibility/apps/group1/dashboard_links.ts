@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Empty links editor flyout', async () => {
       await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
       await a11y.testAppSnapshot();
     });
 
