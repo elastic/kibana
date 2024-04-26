@@ -25,7 +25,7 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
       defaultMessage: 'Visualize in Maps',
     }),
   isCompatible: async (context) => {
-    return Boolean(!!getVisualizeCapabilities().show && context.dataViewSpec && context.fieldName)
+    return Boolean(!!getVisualizeCapabilities().show && context.dataViewSpec && context.fieldName);
   },
   getHref: async (context) => {
     const { getMapsLink } = await import('./get_maps_link');
