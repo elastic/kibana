@@ -22,12 +22,10 @@ interface TabInfo {
 
 export const getTabs = ({
   insight,
-  promptContextId,
   replacements,
   showAnonymized = false,
 }: {
   insight: AlertsInsight;
-  promptContextId: string | undefined;
   replacements?: Replacements;
   showAnonymized?: boolean;
 }): TabInfo[] => [
@@ -37,12 +35,7 @@ export const getTabs = ({
     content: (
       <>
         <EuiSpacer />
-        <AiInsights
-          insight={insight}
-          promptContextId={promptContextId}
-          replacements={replacements}
-          showAnonymized={showAnonymized}
-        />
+        <AiInsights insight={insight} replacements={replacements} showAnonymized={showAnonymized} />
       </>
     ),
   },
