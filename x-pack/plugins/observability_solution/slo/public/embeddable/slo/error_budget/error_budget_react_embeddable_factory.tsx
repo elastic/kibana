@@ -35,8 +35,7 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const defaultTitle = getErrorBudgetPanelTitle();
-      titlesApi.setPanelTitle(state.title ?? defaultTitle);
+      const defaultTitle$ = new BehaviorSubject(getErrorBudgetPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
       const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
       const reload$ = new Subject<boolean>();
@@ -70,9 +69,19 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       return {
         api,
         Component: () => {
-          const [sloId, sloInstanceId] = useBatchedPublishingSubjects(sloId$, sloInstanceId$);
+          const [sloId, sloInstanceId, panelTitle, defaultTitle] = useBatchedPublishingSubjects(
+            sloId$,
+            sloInstanceId$,
+            titlesApi.panelTitle,
+            defaultTitle$
+          );
           const I18nContext = deps.i18n.Context;
 
+          useEffect(() => {
+            if (panelTitle === undefined) {
+              api.setPanelTitle(defaultTitle);
+            }
+          }, [defaultTitle, panelTitle]);
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();

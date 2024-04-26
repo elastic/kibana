@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { SerializedTitles, PublishesWritablePanelTitle } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
 import {
@@ -27,7 +27,8 @@ interface ErrorBudgetCustomInput {
 }
 
 export type SloErrorBudgetEmbeddableState = SerializedTitles & ErrorBudgetCustomInput;
-export type ErrorBudgetApi = DefaultEmbeddableApi<SloErrorBudgetEmbeddableState>;
+export type ErrorBudgetApi = DefaultEmbeddableApi<SloErrorBudgetEmbeddableState> &
+  PublishesWritablePanelTitle;
 
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;
