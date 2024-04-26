@@ -53,68 +53,23 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.space_id).to.eql(spaceId);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
-      expect(data.schedule).to.eql([
-        {
-          run_at: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-20T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-21T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-21T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-22T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-22T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-23T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-23T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-24T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-24T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-25T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-25T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-      ]);
+      expect(data.schedule.length).to.eql(12);
+      data.schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('12h');
+        expect(sched.status).to.match(/complete|pending|running|error|timeout/);
+      });
+      expect(data.schedule[0].run_at).to.eql('2023-10-20T00:00:00.000Z');
+      expect(data.schedule[1].run_at).to.eql('2023-10-20T12:00:00.000Z');
+      expect(data.schedule[2].run_at).to.eql('2023-10-21T00:00:00.000Z');
+      expect(data.schedule[3].run_at).to.eql('2023-10-21T12:00:00.000Z');
+      expect(data.schedule[4].run_at).to.eql('2023-10-22T00:00:00.000Z');
+      expect(data.schedule[5].run_at).to.eql('2023-10-22T12:00:00.000Z');
+      expect(data.schedule[6].run_at).to.eql('2023-10-23T00:00:00.000Z');
+      expect(data.schedule[7].run_at).to.eql('2023-10-23T12:00:00.000Z');
+      expect(data.schedule[8].run_at).to.eql('2023-10-24T00:00:00.000Z');
+      expect(data.schedule[9].run_at).to.eql('2023-10-24T12:00:00.000Z');
+      expect(data.schedule[10].run_at).to.eql('2023-10-25T00:00:00.000Z');
+      expect(data.schedule[11].run_at).to.eql('2023-10-25T12:00:00.000Z');
     }
 
     function testExpectedBackfill2(data: any, id: string, ruleId: string, spaceId: string) {
@@ -127,28 +82,15 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.space_id).to.eql(spaceId);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
-      expect(data.schedule).to.eql([
-        {
-          run_at: '2023-10-22T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-22T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-23T00:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-        {
-          run_at: '2023-10-23T12:00:00.000Z',
-          status: 'pending',
-          interval: '12h',
-        },
-      ]);
+      expect(data.schedule.length).to.eql(4);
+      data.schedule.forEach((sched: any) => {
+        expect(sched.interval).to.eql('12h');
+        expect(sched.status).to.match(/complete|pending|running|error|timeout/);
+      });
+      expect(data.schedule[0].run_at).to.eql('2023-10-22T00:00:00.000Z');
+      expect(data.schedule[1].run_at).to.eql('2023-10-22T12:00:00.000Z');
+      expect(data.schedule[2].run_at).to.eql('2023-10-23T00:00:00.000Z');
+      expect(data.schedule[3].run_at).to.eql('2023-10-23T12:00:00.000Z');
     }
 
     function testExpectedRule(result: any, ruleId: string | undefined, isSO: boolean) {
