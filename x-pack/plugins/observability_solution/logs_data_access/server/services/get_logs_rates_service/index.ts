@@ -7,6 +7,6 @@
 
 import { RegisterServicesParams } from '../register_services';
 
-export function createGetLogsRateService(params: RegisterServicesParams) {
+export function createGetLogsRatesService(params: RegisterServicesParams) {
   return () => {};
 }

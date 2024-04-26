@@ -6,8 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { registerGetLogsIndices } from './get_logs_indices';
-import { createGetLogsRateService } from './get_logs_rate_service';
+import { createGetLogsRatesService } from './get_logs_rates_service';
 
 export interface RegisterServicesParams {
   logger: Logger;
@@ -16,7 +15,6 @@ export interface RegisterServicesParams {
 
 export function registerServices(params: RegisterServicesParams) {
   return {
-    getLogsIndices: registerGetLogsIndices(params),
-    getLogsRateService: createGetLogsRateService(params),
+    getLogsRatesService: createGetLogsRatesService(params),
   };
 }
