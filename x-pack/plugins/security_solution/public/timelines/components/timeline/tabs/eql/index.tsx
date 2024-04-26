@@ -162,7 +162,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   );
 
   return (
-    <> 
+    <>
       <InPortal node={eqlEventsCountPortalNode}>
         {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
       </InPortal>
@@ -214,52 +214,52 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           <TabHeaderContainer data-test-subj="timelineHeader">
             <EqlQueryBarTimeline timelineId={timelineId} />
           </TabHeaderContainer>
-            <EventDetailsWidthProvider>
-              <StyledEuiFlyoutBody
-                data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
-                className="timeline-flyout-body"
-              >
-                <StatefulBody
-                  activePage={pageInfo.activePage}
-                  browserFields={browserFields}
-                  data={isBlankTimeline ? EMPTY_EVENTS : events}
-                  id={timelineId}
-                  refetch={refetch}
-                  renderCellValue={renderCellValue}
-                  rowRenderers={rowRenderers}
-                  sort={NO_SORTING}
-                  tabType={TimelineTabs.eql}
-                  totalPages={calculateTotalPages({
-                    itemsCount: totalCount,
-                    itemsPerPage,
-                  })}
-                  leadingControlColumns={leadingControlColumns}
-                  trailingControlColumns={trailingControlColumns}
-                />
-              </StyledEuiFlyoutBody>
+          <EventDetailsWidthProvider>
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
+              <StatefulBody
+                activePage={pageInfo.activePage}
+                browserFields={browserFields}
+                data={isBlankTimeline ? EMPTY_EVENTS : events}
+                id={timelineId}
+                refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
+                sort={NO_SORTING}
+                tabType={TimelineTabs.eql}
+                totalPages={calculateTotalPages({
+                  itemsCount: totalCount,
+                  itemsPerPage,
+                })}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
+              />
+            </StyledEuiFlyoutBody>
 
-              <StyledEuiFlyoutFooter
-                data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
-                className="timeline-flyout-footer"
-              >
-                {!isBlankTimeline && (
-                  <Footer
-                    activePage={pageInfo?.activePage ?? 0}
-                    data-test-subj="timeline-footer"
-                    updatedAt={refreshedAt}
-                    height={footerHeight}
-                    id={timelineId}
-                    isLive={isLive}
-                    isLoading={isQueryLoading || loadingSourcerer}
-                    itemsCount={isBlankTimeline ? 0 : events.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangePage={loadPage}
-                    totalCount={isBlankTimeline ? 0 : totalCount}
-                  />
-                )}
-              </StyledEuiFlyoutFooter>
-            </EventDetailsWidthProvider>
+            <StyledEuiFlyoutFooter
+              data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
+              className="timeline-flyout-footer"
+            >
+              {!isBlankTimeline && (
+                <Footer
+                  activePage={pageInfo?.activePage ?? 0}
+                  data-test-subj="timeline-footer"
+                  updatedAt={refreshedAt}
+                  height={footerHeight}
+                  id={timelineId}
+                  isLive={isLive}
+                  isLoading={isQueryLoading || loadingSourcerer}
+                  itemsCount={isBlankTimeline ? 0 : events.length}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  onChangePage={loadPage}
+                  totalCount={isBlankTimeline ? 0 : totalCount}
+                />
+              )}
+            </StyledEuiFlyoutFooter>
+          </EventDetailsWidthProvider>
         </ScrollableFlexItem>
         {showExpandedDetails && (
           <>
