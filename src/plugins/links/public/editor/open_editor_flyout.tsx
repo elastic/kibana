@@ -18,11 +18,11 @@ import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { LinksLayoutType } from '../../common/content_management';
-import { runQuickSave, runSaveToLibrary } from '../content_management/save_to_library';
+import { runQuickSave, runSaveToLibrary } from '../content_management';
 import { coreServices } from '../services/kibana_services';
 import { LinksSerializedState, ResolvedLink } from '../embeddable/types';
 import { resolveLinks } from '../embeddable/utils';
-import { loadFromLibrary } from '../content_management/load_from_library';
+import { loadFromLibrary } from '../content_management';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
@@ -96,7 +96,7 @@ export async function openEditorFlyout({
         layout: newLayout,
       };
       const newState = initialState?.savedObjectId
-        ? await runQuickSave(newAttributes, initialState?.savedObjectId)
+        ? await runQuickSave(newAttributes, initialState.savedObjectId)
         : await runSaveToLibrary(newAttributes);
       resolve(newState);
       closeEditorFlyout(editorFlyout);

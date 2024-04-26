@@ -15,7 +15,7 @@ import { LinksAttributes } from '../../common/content_management';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
-import { loadFromLibrary } from '../content_management/load_from_library';
+import { loadFromLibrary } from '../content_management';
 import { CONTENT_ID } from '../../common';
 
 const isParentApiCompatible = (parentApi: unknown): parentApi is PresentationContainer =>
