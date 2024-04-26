@@ -78,7 +78,9 @@
     "@kbn/visualization-utils",
     "@kbn/ml-time-buckets",
     "@kbn/aiops-log-rate-analysis",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*",

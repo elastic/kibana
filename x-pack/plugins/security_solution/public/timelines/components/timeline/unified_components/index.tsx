@@ -97,6 +97,7 @@ export const HIDE_FOR_SIZES = ['xs', 's'];
 
 interface Props {
   columns: ColumnHeaderOptions[];
+  isSortEnabled?: boolean;
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
@@ -118,6 +119,7 @@ interface Props {
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
+  isSortEnabled,
   activeTab,
   timelineId,
   itemsPerPage,
@@ -387,6 +389,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
+                      isSortEnabled={isSortEnabled}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
                       sort={sortingColumns}

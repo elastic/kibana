@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
 
 const IS_ROW_RENDERER_LAZY_LOADING_ENABLED = true;
 
@@ -79,7 +80,9 @@ const CustomGridRow = styled.div.attrs<{
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
 `;
 
-const CustomLazyRowPlaceholder = styled.div`
+const CustomLazyRowPlaceholder = styled.div.attrs({
+  className: 'customlazyGridRowPlaceholder',
+})`
   height: 80px;
 `;
 
@@ -87,7 +90,11 @@ const CustomLazyRowPlaceholder = styled.div`
  *
  * A Simple Wrapper component for displaying a custom data grid `cell`
  */
-const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper' })`
+const CustomGridRowCellWrapper = styled.div.attrs<{
+  className?: string;
+}>((props) => ({
+  className: `rowCellWrapper ${props.className ?? ''}`,
+}))`
   display: flex;
 `;
 
@@ -151,6 +158,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         : {},
     [canShowRowRenderer]
   );
+  const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
 
   const isRowIntersecting =
     intersectionEntry.isIntersecting && intersectionEntry.intersectionRatio > 0;
@@ -167,7 +175,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         <CustomLazyRowPlaceholder />
       ) : (
         <>
-          <CustomGridRowCellWrapper>
+          <CustomGridRowCellWrapper className={eventTypeRowClassName}>
             {visibleColumns.map((column, colIndex) => {
               return (
                 <React.Fragment key={`${rowIndex}-${colIndex}`}>

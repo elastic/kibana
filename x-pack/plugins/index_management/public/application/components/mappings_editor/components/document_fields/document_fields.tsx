@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { GlobalFlyout } from '../../shared_imports';
-import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { deNormalize } from '../../lib';
-import { EditFieldContainer, EditFieldContainerProps, defaultFlyoutProps } from './fields';
+import { useDispatch, useMappingsState } from '../../mappings_state_context';
+import { GlobalFlyout } from '../../shared_imports';
+import {
+  defaultFlyoutProps,
+  EditFieldContainer,
+  EditFieldContainerProps,
+  SemanticTextInfo,
+} from './fields';
 import { DocumentFieldsJsonEditor } from './fields_json_editor';
 import { DocumentFieldsTreeEditor } from './fields_tree_editor';
 
 const { useGlobalFlyout } = GlobalFlyout;
+
 interface Props {
   searchComponent?: React.ReactElement;
   searchResultComponent?: React.ReactElement;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
-  isSemanticTextEnabled?: boolean;
-  indexName?: string;
+  semanticTextInfo?: SemanticTextInfo;
 }
 export const DocumentFields = React.memo(
   ({
@@ -29,8 +34,7 @@ export const DocumentFields = React.memo(
     searchResultComponent,
     onCancelAddingNewFields,
     isAddingFields,
-    isSemanticTextEnabled,
-    indexName,
+    semanticTextInfo,
   }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
@@ -53,8 +57,7 @@ export const DocumentFields = React.memo(
         <DocumentFieldsTreeEditor
           onCancelAddingNewFields={onCancelAddingNewFields}
           isAddingFields={isAddingFields}
-          isSemanticTextEnabled={isSemanticTextEnabled}
-          indexName={indexName}
+          semanticTextInfo={semanticTextInfo}
         />
       );
 

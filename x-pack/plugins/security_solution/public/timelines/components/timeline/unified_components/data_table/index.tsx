@@ -26,8 +26,9 @@ import type {
   OnChangePage,
   RowRenderer,
   ToggleDetailPanel,
+  TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../../common/store';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
@@ -69,7 +70,7 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort' | 'onFilter'>;
+} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort' | 'onFilter' | 'isSortEnabled'>;
 
 interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
@@ -87,6 +88,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     rowRenderers,
     sort,
     events,
+    isSortEnabled = true,
     onFieldEdited,
     refetch,
     dataLoadingState,
@@ -153,27 +155,27 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         dispatch(
           timelineActions.toggleDetailPanel({
             ...updatedExpandedDetail,
-            tabType: TimelineTabs.query,
+            tabType: activeTab,
             id: timelineId,
           })
         );
 
         activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
       },
-      [dispatch, refetch, timelineId]
+      [activeTab, dispatch, refetch, timelineId]
     );
 
     const handleOnPanelClosed = useCallback(() => {
       if (
-        expandedDetail[TimelineTabs.query]?.panelView &&
+        expandedDetail[activeTab]?.panelView &&
         timelineId === TimelineId.active &&
         showExpandedDetails
       ) {
         activeTimeline.toggleExpandedDetail({});
       }
       setExpandedDoc(undefined);
-      onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
-    }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+      onEventClosed({ tabType: activeTab, id: timelineId });
+    }, [expandedDetail, activeTab, timelineId, showExpandedDetails, onEventClosed]);
 
     const onSetExpandedDoc = useCallback(
       (newDoc?: DataTableRecord) => {
@@ -369,7 +371,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onUpdateSampleSize={onUpdateSampleSize}
             setExpandedDoc={onSetExpandedDoc}
             showTimeCol={showTimeCol}
-            isSortEnabled={true}
+            isSortEnabled={isSortEnabled}
             sort={sort}
             rowHeightState={rowHeight}
             isPlainRecord={isTextBasedQuery}
