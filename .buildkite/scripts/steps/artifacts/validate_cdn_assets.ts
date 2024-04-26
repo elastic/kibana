@@ -9,7 +9,7 @@
 import * as glob from 'glob';
 import axios from 'axios';
 
-const GCS_SA_CDN_URL = process.argv[2];
+const CDN_URL_PREFIX = process.argv[2];
 const CDN_ASSETS_FOLDER = process.argv[3];
 
 async function main() {
@@ -31,7 +31,7 @@ async function main() {
         console.log(`Testing ${result.assetPath}...${result.status}`);
         assetsFound++;
       } else {
-        console.error(`Testing ${result.assetPath}...${result.status}`);
+        console.error(`Testing ${result.assetPath}...${result.status} (${result.testUrl})`);
       }
     });
   }
@@ -45,11 +45,11 @@ async function main() {
 }
 
 async function headAssetUrl(assetPath: string) {
-  const testURL = `${GCS_SA_CDN_URL}/${assetPath}`;
-  console.log(`Testing ${assetPath} @ ${testURL}`);
-  const response = await axios.head(testURL);
+  const testUrl = `${CDN_URL_PREFIX}/${assetPath}`;
+  const response = await axios.head(testUrl);
   return {
     status: response.status,
+    testUrl,
     assetPath,
   };
 }
