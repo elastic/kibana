@@ -178,7 +178,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
-  const abortSignal = useRef<((reason?: string | undefined) => void) | undefined>(undefined);
+  const abortCtrl = useRef(new AbortController());
 
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const dispatch = useAppDispatch();
@@ -230,9 +230,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
 
   function cancelHandler() {
-    if (abortSignal.current) {
-      abortSignal.current();
-    }
+    abortCtrl.current.abort();
     dispatch(cancelStream());
   }
 
@@ -309,6 +307,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     http,
     endpoint: '/internal/aiops/log_rate_analysis',
     apiVersion: '2',
+    abortCtrl,
     body: {
       start: earliest,
       end: latest,
@@ -336,8 +335,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (shouldStart) {
-      const promise = dispatch(startStream(startParams));
-      abortSignal.current = promise.abort;
+      dispatch(startStream(startParams));
       setShouldStart(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -346,8 +344,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   useEffect(() => {
     setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
-    const promise = dispatch(startStream(startParams));
-    abortSignal.current = promise.abort;
+    dispatch(startStream(startParams));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
