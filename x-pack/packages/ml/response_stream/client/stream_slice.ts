@@ -19,12 +19,13 @@ export const startStream = createAsyncThunk(
       http: HttpSetup;
       endpoint: string;
       apiVersion?: string;
+      abortCtrl: React.MutableRefObject<AbortController>;
       body?: any;
       headers?: HttpFetchOptions['headers'];
     },
-    { dispatch, getState, signal }
+    { dispatch, getState }
   ) => {
-    const { http, endpoint, apiVersion, body, headers } = options;
+    const { http, endpoint, apiVersion, abortCtrl, body, headers } = options;
     const state = getState() as StreamState;
 
     if (state.isRunning) {
@@ -42,7 +43,7 @@ export const startStream = createAsyncThunk(
       http,
       endpoint,
       apiVersion,
-      { current: { signal } },
+      abortCtrl,
       body,
       true,
       headers
