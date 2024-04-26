@@ -38,8 +38,6 @@ export const getFieldStatsTableFactory = (core: DataVisualizerCoreSetup) => {
     buildEmbeddable: async (initialState, buildApi, uuid, unknownParentApi) => {
       const parentApi = unknownParentApi as FieldStatisticsTableEmbeddableParentApi;
 
-      // @todo: Remove usage of deprecated React rendering utilities
-      // see https://github.com/elastic/kibana/pull/181094
       const startServices = await core.getStartServices();
       const servicesToOverride = parentApi.overrideServices ?? {};
       const services = { ...startServices[0], ...startServices[1], ...servicesToOverride };

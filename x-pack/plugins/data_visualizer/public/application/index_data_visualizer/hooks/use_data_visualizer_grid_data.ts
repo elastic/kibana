@@ -129,7 +129,6 @@ export const useDataVisualizerGridData = (
     return getFieldsWithSubFields({
       input,
       currentDataView,
-      // @todo: test if this is good
       shouldGetSubfields:
         input.shouldGetSubfields !== undefined
           ? input.shouldGetSubfields
