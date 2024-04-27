@@ -96,10 +96,10 @@ export const getChoroplethTopValuesLayer = (
 
 interface Props {
   stats: FieldVisStats;
-  joinConfig: EMSTermJoinConfig;
+  suggestion: EMSTermJoinConfig;
 }
 
-export const ChoroplethMap: FC<Props> = ({ stats, joinConfig }) => {
+export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
   const {
     services: {
       data: { fieldFormats },
@@ -109,11 +109,9 @@ export const ChoroplethMap: FC<Props> = ({ stats, joinConfig }) => {
   const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats;
 
   const layerList: VectorLayerDescriptor[] = useMemo(
-    () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], joinConfig)],
-    [joinConfig, fieldName, topValues]
+    () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
+    [suggestion, fieldName, topValues]
   );
-
-  if (!stats) return null;
 
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
 

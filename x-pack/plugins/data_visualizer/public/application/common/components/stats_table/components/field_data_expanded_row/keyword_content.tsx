@@ -17,7 +17,7 @@ import { ChoroplethMap } from './choropleth_map';
 import { ErrorMessageContent } from './error_message';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
-  const [joinConfig, setJoinConfig] = useState<EMSTermJoinConfig | null>(null);
+  const [suggestion, setSuggestion] = useState<EMSTermJoinConfig | null>(null);
   const { stats, fieldName } = config;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const {
@@ -27,7 +27,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
   useEffect(() => {
     if (!mapsPlugin) return;
     if (!stats?.topValues) {
-      setJoinConfig(null);
+      setSuggestion(null);
       return;
     }
 
@@ -37,14 +37,14 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
         sampleValues: stats.topValues.map((value) => value.key),
         sampleValuesColumnName: fieldName || '',
       })
-      .then((nextJoinConfig) => {
+      .then((nextSuggestion) => {
         if (!ignore) {
-          setJoinConfig(nextJoinConfig);
+          setSuggestion(nextSuggestion);
         }
       })
       .catch(() => {
         if (!ignore) {
-          setJoinConfig(null);
+          setSuggestion(null);
         }
       });
 
@@ -75,7 +75,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
         />
       ) : null}
 
-      {joinConfig && stats && <ChoroplethMap stats={stats} joinConfig={joinConfig} />}
+      {suggestion && stats && <ChoroplethMap stats={stats} suggestion={suggestion} />}
     </ExpandedRowContent>
   );
 };
