@@ -31,12 +31,11 @@ import {
   BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicator } from '../../quality_indicator';
+import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { IntegrationIcon } from '../../common';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
-import { DatasetQualityIndicator } from './dataset_quality_indicator';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',

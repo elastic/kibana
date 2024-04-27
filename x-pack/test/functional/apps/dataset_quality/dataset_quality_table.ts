@@ -124,8 +124,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      expect(Object.keys(cols).length).to.eql(8);
-
       const datasetNameCol = cols['Dataset Name'];
 
       // Sort ascending

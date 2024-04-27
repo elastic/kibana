@@ -41,19 +41,23 @@ export const useDatasetQualityFilters = () => {
   }
 
   const datasets = useSelector(service, (state) => state.context.datasets);
-  const { namespaces, qualities, integrations } = datasets.reduce(
-    (acc: Filters, dataset) => {
-      acc.namespaces.push(dataset.namespace);
-      acc.qualities.push(dataset.degradedDocs.quality);
-      if (dataset.integration) {
-        acc.integrations.push(dataset.integration);
-      } else if (!acc.hasNoneIntegration) {
-        acc.integrations.push(Integration.create({ name: 'none', title: 'None' }));
-        acc.hasNoneIntegration = true;
-      }
-      return acc;
-    },
-    { namespaces: [], qualities: [], integrations: [], hasNoneIntegration: false }
+  const { namespaces, qualities, integrations } = useMemo(
+    () =>
+      datasets.reduce(
+        (acc: Filters, dataset) => {
+          acc.namespaces.push(dataset.namespace);
+          acc.qualities.push(dataset.degradedDocs.quality);
+          if (dataset.integration) {
+            acc.integrations.push(dataset.integration);
+          } else if (!acc.hasNoneIntegration) {
+            acc.integrations.push(Integration.create({ name: 'none', title: 'None' }));
+            acc.hasNoneIntegration = true;
+          }
+          return acc;
+        },
+        { namespaces: [], qualities: [], integrations: [], hasNoneIntegration: false }
+      ),
+    [datasets]
   );
 
   const onTimeChange = useCallback(

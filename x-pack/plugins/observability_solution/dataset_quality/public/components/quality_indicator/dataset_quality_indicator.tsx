@@ -9,8 +9,8 @@ import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { QualityIndicator } from '../../quality_indicator';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import { QualityIndicator } from '.';
+import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 
 export const DatasetQualityIndicator = ({
   isLoading,
