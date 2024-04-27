@@ -10,7 +10,8 @@
 
 The index threshold rule type runs an {es} query. It aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
 
-In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*, fill in the name and optional tags, then select *Index threshold*.
+In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*.
+Select the *Index threshold* rule type then fill in the name and optional tags.
 
 [float]
 === Define the conditions
