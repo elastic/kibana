@@ -95,22 +95,22 @@ export const getChoroplethTopValuesLayer = (
 };
 
 interface Props {
-  stats: FieldVisStats | undefined;
-  suggestion: EMSTermJoinConfig;
+  stats: FieldVisStats;
+  joinConfig: EMSTermJoinConfig;
 }
 
-export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
+export const ChoroplethMap: FC<Props> = ({ stats, joinConfig }) => {
   const {
     services: {
       data: { fieldFormats },
     },
   } = useDataVisualizerKibana();
 
-  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
+  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats;
 
   const layerList: VectorLayerDescriptor[] = useMemo(
-    () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
-    [suggestion, fieldName, topValues]
+    () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], joinConfig)],
+    [joinConfig, fieldName, topValues]
   );
 
   if (!stats) return null;
