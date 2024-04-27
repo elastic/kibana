@@ -1502,6 +1502,38 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Container.untilReactEmbeddableLoaded",
+            "type": "Function",
+            "tags": [],
+            "label": "untilReactEmbeddableLoaded",
+            "description": [],
+            "signature": [
+              "<ApiType>(id: string) => Promise<ApiType | undefined>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.untilReactEmbeddableLoaded.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Container.getExplicitInputIsEqual",
             "type": "Function",
             "tags": [],
