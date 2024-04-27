@@ -572,7 +572,7 @@ describe('utils', () => {
       expect(tuples.length).toEqual(1);
       expect(wroteWarningStatus).toEqual(true);
       expect(warningStatusMessage).toEqual(
-        "The rule's max_signals value (20) is greater than the Kibana alerting limit (10). The rule will only write a maximum of 10 per rule run."
+        "The rule's max alerts per run setting (20) is greater than the Kibana alerting limit (10). The rule will only write a maximum of 10 alerts per rule run."
       );
     });
   });
