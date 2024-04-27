@@ -39,7 +39,7 @@ export const PerformanceContext = createContext<PerformanceApi | undefined>(unde
 
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
   const [isBrowserReady, setIsBrowserReady] = useState<Boolean>(false);
-  const location = useLocation();
+  // const location = useLocation();
   const interaction = measureInteraction();
 
   React.useEffect(() => {

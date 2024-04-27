@@ -8,3 +8,4 @@
 
 export { PerformanceContextProvider } from './context/performance_context';
 export { usePerformanceContext } from './context/use_performance_context';
+export { ttfmpPerfomanceMarkers } from './performance_markers';
