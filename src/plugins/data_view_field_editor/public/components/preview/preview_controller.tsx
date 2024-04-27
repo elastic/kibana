@@ -28,6 +28,7 @@ import type { FieldFormatsStart, RuntimeType } from '../../shared_imports';
 import { valueTypeToSelectedType } from './field_preview_context';
 import { Field } from '../../types';
 import { pluginName } from '../../constants';
+import { InternalFieldType } from '../../types';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
@@ -43,7 +44,7 @@ interface PreviewControllerDependencies {
   dataViews: DataViewsPublicPluginStart;
   onSave: (field: DataViewField[]) => void;
   fieldToEdit?: Field;
-  fieldTypeToProcess?: 'runtime' | 'concrete';
+  fieldTypeToProcess: InternalFieldType;
 }
 
 const previewStateDefault: PreviewState = {
@@ -117,7 +118,7 @@ export class PreviewController {
   private dataViews: DataViewsPublicPluginStart;
   private onSave: (field: DataViewField[]) => void;
   private fieldToEdit?: Field;
-  private fieldTypeToProcess?: 'runtime' | 'concrete';
+  private fieldTypeToProcess: InternalFieldType;
 
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
@@ -279,6 +280,8 @@ export class PreviewController {
       this.setIsSaving(false);
     }
   };
+
+  public getInternalFieldType = () => this.fieldTypeToProcess;
 
   togglePinnedField = (fieldName: string) => {
     const currentState = this.state$.getValue();

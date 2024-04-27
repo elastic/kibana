@@ -84,7 +84,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
         .map((field) => {
           const { name, displayName } = field;
           const formatter = dataView.getFormatterForField(field);
-          const value = get(currentDocument?._source, name);
+          const value = get(currentDocument?.fields, name);
           const formattedValue = formatter.convert(value, 'html');
 
           return {
@@ -95,7 +95,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           };
         })
         .filter(({ value }) => value !== undefined),
-    [dataView, currentDocument?._source]
+    [dataView, currentDocument?.fields]
   );
 
   const fieldListWithPinnedFields: DocumentField[] = useMemo(() => {
