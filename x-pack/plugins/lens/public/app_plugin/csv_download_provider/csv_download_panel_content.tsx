@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiForm, EuiModalFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -33,21 +33,20 @@ export function DownloadPanelContent({
           ))}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFormRow fullWidth={true}>
-          <EuiButton
-            disabled={isDisabled}
-            onClick={onClick}
-            data-test-subj="lnsApp_downloadCSVButton"
-            fill
-            fullWidth
-          >
-            <FormattedMessage
-              id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
-              defaultMessage="Generate CSV"
-            />
-          </EuiButton>
-        </EuiFormRow>
       </EuiForm>
+      <EuiModalFooter>
+        <EuiButton
+          disabled={isDisabled}
+          fill
+          onClick={onClick}
+          data-test-subj="lnsApp_downloadCSVButton"
+        >
+          <FormattedMessage
+            id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
+            defaultMessage="Generate CSV"
+          />
+        </EuiButton>
+      </EuiModalFooter>
     </>
   );
 }
