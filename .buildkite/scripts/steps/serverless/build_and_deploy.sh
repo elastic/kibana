@@ -137,8 +137,41 @@ EOF
   buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
 }
 
+# This is the integration with the observability-test-environments
+create_github_issue_oblt_test_environments() {
+
+echo "--- Create GitHub issue for deploying in the oblt test env"
+
+GITHUB_ISSUE=$(mktemp --suffix ".md") 
+cat <<EOF > "$GITHUB_ISSUE"
+### Kibana image
+
+$KIBANA_IMAGE
+
+### Kibana pull request
+
+$BUILDKITE_PULL_REQUEST
+
+### Further details
+
+Caused by @$GITHUB_PR_TRIGGER_USER using the github label in https://github.com/elastic/kibana/pull/$BUILDKITE_PULL_REQUEST
+EOF
+
+  GH_TOKEN="$GITHUB_TOKEN" \
+  gh issue create \
+    --title "[Deploy Serverless Kibana] for user $GITHUB_PR_TRIGGER_USER with PR kibana@pr-$BUILDKITE_PULL_REQUEST" \
+    --body-file "${GITHUB_ISSUE}" \
+    --label 'deploy-custom-kibana-serverless' \
+    --repo 'elastic/observability-test-environments' \
+    --assignee "$GITHUB_PR_OWNER"
+}
+
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
-is_pr_with_label "ci:project-deploy-observability" && deploy "observability"
+if is_pr_with_label "ci:project-deploy-observability" ; then
+  create_github_issue_oblt_test_environments
+  echo "--- Deploy observability with Kibana CI"
+  deploy "observability"
+fi
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 
 exit 0;
