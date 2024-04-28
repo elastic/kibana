@@ -15,8 +15,8 @@ import type { MapEmbeddableType } from './types';
 import { MapEmbeddable } from './map_embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
-interface Props {
-  title: string;
+export interface Props {
+  title?: string;
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -42,7 +42,7 @@ export class MapComponent extends Component<Props> {
       {
         id: uuidv4(),
         attributes: {
-          title: this.props.title,
+          title: this.props.title ?? '',
           layerListJSON: JSON.stringify([
             createBasemapLayerDescriptor(),
             ...this.props.getLayerDescriptors(),

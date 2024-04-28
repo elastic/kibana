@@ -94,6 +94,7 @@ import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
 import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
 import { MapByValueInput } from './embeddable';
+import { MapComponentLazy } from './embeddable/map_component_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -275,6 +276,7 @@ export class MapsPlugin
     return {
       createLayerDescriptors,
       suggestEMSTermJoinConfig,
+      Map: MapComponentLazy,
       PassiveMap: PassiveMapLazy,
     };
   }
