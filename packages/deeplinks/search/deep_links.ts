@@ -15,6 +15,7 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
+  SERVERLESS_ES_SEARCH_PLAYGROUND_ID,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -25,10 +26,11 @@ export type EnterpriseSearchAppsearchApp = typeof ENTERPRISE_SEARCH_APPSEARCH_AP
 export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID;
 export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
+export type SearchPlaygroundId = typeof SERVERLESS_ES_SEARCH_PLAYGROUND_ID;
 
-export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers' | 'playground';
+export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
 
-export type ApplicationsLinkId = 'searchApplications';
+export type ApplicationsLinkId = 'searchApplications' | 'playground';
 
 export type AppsearchLinkId = 'engines';
 
@@ -41,6 +43,7 @@ export type DeepLinkId =
   | EnterpriseSearchWorkplaceSearchApp
   | ServerlessSearchApp
   | ConnectorsId
+  | SearchPlaygroundId
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`;

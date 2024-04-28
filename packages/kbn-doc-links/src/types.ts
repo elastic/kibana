@@ -647,6 +647,9 @@ export interface DocLinks {
   readonly telemetry: {
     readonly settings: string;
   };
+  readonly playground: {
+    readonly chatPlayground: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';

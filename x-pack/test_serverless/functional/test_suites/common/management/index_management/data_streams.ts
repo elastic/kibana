@@ -19,7 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const TEST_DS_NAME = 'test-ds-1';
 
-  describe('Data Streams', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/181242
+  describe.skip('Data Streams', function () {
     // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
     this.tags(['failsOnMKI']);
     before(async () => {
