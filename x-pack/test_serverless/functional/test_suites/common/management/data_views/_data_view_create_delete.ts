@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await testSubjects.click('closeFlyoutButton');
-        await testSubjects.find('createDataViewButton');
+        await PageObjects.settings.clickAddNewIndexPatternButton();
       });
     });
 
