@@ -19,7 +19,7 @@ import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/publ
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { noop } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
@@ -67,8 +67,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
     let isOptionsOpen = false;
     const optionsContainer = document.createElement('div');
+    const root = createRoot(optionsContainer);
+
     const closeOptionsPopover = () => {
-      ReactDOM.unmountComponentAtNode(optionsContainer);
+      root.unmount();
       document.body.removeChild(optionsContainer);
       isOptionsOpen = false;
     };
@@ -139,8 +141,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       />
                     </EuiWrappingPopover>
                   );
-
-                  ReactDOM.render(element, optionsContainer);
+                  root.render(element);
                 },
               },
               order: 100,

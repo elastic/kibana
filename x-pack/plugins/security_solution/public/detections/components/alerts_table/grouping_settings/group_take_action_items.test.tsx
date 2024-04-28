@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { useGroupTakeActionsItems } from '.';
@@ -21,7 +21,7 @@ describe('useGroupTakeActionsItems', () => {
   };
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             showAlertStatusActions: true,
@@ -30,14 +30,14 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current(getActionItemsParams).length).toEqual(3);
     });
   });
 
   it('returns all take actions items if currentStatus is []', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             currentStatus: [],
@@ -47,14 +47,14 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current(getActionItemsParams).length).toEqual(3);
     });
   });
 
   it('returns all take actions items if currentStatus.length > 1', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['open', 'closed'],
@@ -64,14 +64,14 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current(getActionItemsParams).length).toEqual(3);
     });
   });
 
   it('returns acknowledged & closed take actions items if currentStatus === ["open"]', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['open'],
@@ -81,7 +81,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       const currentParams = result.current(getActionItemsParams);
       expect(currentParams.length).toEqual(2);
       expect(currentParams[0].key).toEqual('acknowledge');
@@ -91,7 +91,7 @@ describe('useGroupTakeActionsItems', () => {
 
   it('returns open & acknowledged take actions items if currentStatus === ["closed"]', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['closed'],
@@ -101,7 +101,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       const currentParams = result.current(getActionItemsParams);
       expect(currentParams.length).toEqual(2);
       expect(currentParams[0].key).toEqual('open');
@@ -111,7 +111,7 @@ describe('useGroupTakeActionsItems', () => {
 
   it('returns open & closed take actions items if currentStatus === ["acknowledged"]', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['acknowledged'],
@@ -121,7 +121,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       const currentParams = result.current(getActionItemsParams);
       expect(currentParams.length).toEqual(2);
       expect(currentParams[0].key).toEqual('open');
@@ -131,7 +131,7 @@ describe('useGroupTakeActionsItems', () => {
 
   it('returns empty take actions items if showAlertStatusActions is false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             showAlertStatusActions: false,
@@ -140,13 +140,13 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current(getActionItemsParams).length).toEqual(0);
     });
   });
   it('returns array take actions items if showAlertStatusActions is true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useGroupTakeActionsItems({
             showAlertStatusActions: true,
@@ -155,7 +155,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current(getActionItemsParams).length).toEqual(3);
     });
   });

@@ -27,7 +27,9 @@ export const LinkListSwitch = memo(
       [linkedList, list.id]
     );
     const onLinkOrUnlinkList = useCallback(
-      ({ target: { checked } }) => {
+      ({
+        target: { checked }
+      }: any) => {
         const newLinkedLists = !checked
           ? linkedList?.filter((item) => item.id !== list.id)
           : [...linkedList, list];

@@ -190,7 +190,7 @@ function DiscoverDocumentsComponent({
   });
 
   const onResizeDataGrid = useCallback(
-    (colSettings) => onResize(colSettings, stateContainer),
+    (colSettings: any) => onResize(colSettings, stateContainer),
     [stateContainer]
   );
 

@@ -32,7 +32,7 @@ const RuleNameComponents = ({ name, id, appId }: RuleNameProps) => {
     [getUrlForApp, id, appId]
   );
   const goToRuleDetails = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       navigateToApp(appId, {
         deepLinkId: 'rules',

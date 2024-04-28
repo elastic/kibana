@@ -11,6 +11,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { OpenTimelineResult } from '../../open_timeline/types';
+import type { SelectableTimelineProps } from '../selectable_timeline';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
@@ -90,7 +91,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(true);
   }, []);
 
-  const handleKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+  const handleKeyboardOpen: NonNullable<EuiFieldTextProps['onKeyDown']> = useCallback((event) => {
     if (event.key === keys.ENTER) {
       setIsPopoverOpen(true);
     }
@@ -123,7 +124,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     ]
   );
 
-  const handleGetSelectableOptions = useCallback(
+  const handleGetSelectableOptions: SelectableTimelineProps['getSelectableOptions'] = useCallback(
     ({ timelines, onlyFavorites, searchTimelineValue }) => [
       ...(!onlyFavorites && searchTimelineValue === ''
         ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)

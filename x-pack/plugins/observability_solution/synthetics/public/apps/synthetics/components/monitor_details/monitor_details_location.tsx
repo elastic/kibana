@@ -32,13 +32,13 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
   const params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
 
   return (
-    <MonitorLocationSelect
+    (<MonitorLocationSelect
       isDisabled={isDisabled}
       monitorLocations={monitor?.locations}
       configId={monitorId}
       selectedLocation={selectedLocation}
       onChange={useCallback(
-        (id, label) => {
+        (id: any, label: any) => {
           if (isErrorsTab) {
             services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
               path: `/monitor/${monitorId}/errors?locationId=${id}${params}`,
@@ -55,6 +55,6 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
         },
         [isErrorsTab, isHistoryTab, monitorId, params, services.application]
       )}
-    />
+    />)
   );
 };

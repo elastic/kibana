@@ -9,7 +9,7 @@ import { calculatePopoverPosition, EuiPortal, withEuiTheme, WithEuiThemeProps } 
 // @ts-expect-error style types not defined
 import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
 import { css } from '@emotion/react';
-import * as React from 'react';
+import React from 'react';
 
 import { AutoSizer } from '../../auto_sizer';
 

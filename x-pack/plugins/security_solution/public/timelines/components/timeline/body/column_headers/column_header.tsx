@@ -216,7 +216,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
 
   const DraggableContent = useCallback(
-    (dragProvided) => (
+    (dragProvided: any) => (
       <EventsTh
         data-test-subj="draggable-header"
         {...dragProvided.draggableProps}

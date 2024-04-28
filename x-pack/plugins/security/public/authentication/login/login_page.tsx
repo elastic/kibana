@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -372,14 +372,14 @@ export function renderLoginPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...services}>
       <LoginPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }
 
 function isWindowEmbedded() {

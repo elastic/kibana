@@ -22,7 +22,7 @@ export const ResponseActionFormField = React.memo(({ field }: { field: FieldHook
   );
 
   const handleError = useCallback(
-    (newErrors) => {
+    (newErrors: any) => {
       if (isEmpty(newErrors)) {
         clearErrors();
       } else {

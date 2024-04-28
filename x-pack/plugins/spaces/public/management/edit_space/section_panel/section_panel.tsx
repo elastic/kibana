@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
 interface Props {
+  children: ReactNode;
   iconType?: IconType;
   title: string | ReactNode;
 }

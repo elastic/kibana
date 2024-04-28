@@ -459,7 +459,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   };
 
   const goToDetailsRule = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useFlyout } from './use_flyout';
 import { IWaterfallContext } from '../context/waterfall_chart';
 

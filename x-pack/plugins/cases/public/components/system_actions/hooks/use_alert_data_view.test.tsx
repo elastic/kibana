@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
@@ -42,7 +42,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}> {children} </QueryClientProvider>
 );
 

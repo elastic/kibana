@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
 import { Action, ActionDefinition, ActionMenuItemProps } from './action';
 

@@ -305,7 +305,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, [sourcererDataView, fieldFormats]);
 
     const onTimeRangeChange = useCallback(
-      ({ query, dateRange }) => {
+      ({
+        query,
+        dateRange
+      }: any) => {
         const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
         updateSearch({
           end: dateRange.to,

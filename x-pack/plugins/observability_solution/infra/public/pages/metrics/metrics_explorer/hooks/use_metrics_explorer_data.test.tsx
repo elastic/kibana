@@ -9,7 +9,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
@@ -86,12 +86,12 @@ describe('useMetricsExplorerData Hook', () => {
 
   it('should just work', async () => {
     mockedFetch.mockResolvedValue(resp);
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    const { result } = renderUseMetricsExplorerDataHook();
 
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
@@ -102,10 +102,10 @@ describe('useMetricsExplorerData Hook', () => {
 
   it('should paginate', async () => {
     mockedFetch.mockResolvedValue(resp);
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    const { result } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
@@ -116,7 +116,7 @@ describe('useMetricsExplorerData Hook', () => {
       series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
     } as any);
     result.current.fetchNextPage();
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.isLoading).toBe(false);
     const { series: nextSeries } = result.current.data!.pages[1];
     expect(nextSeries).toBeDefined();
@@ -126,17 +126,17 @@ describe('useMetricsExplorerData Hook', () => {
   it('should reset error upon recovery', async () => {
     const error = new Error('Network Error');
     mockedFetch.mockRejectedValue(error);
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    const { result } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(null);
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(error);
     expect(result.current.isLoading).toBe(false);
     mockedFetch.mockResolvedValue(resp as any);
     result.current.refetch();
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
@@ -144,10 +144,10 @@ describe('useMetricsExplorerData Hook', () => {
 
   it('should not paginate on option change', async () => {
     mockedFetch.mockResolvedValue(resp as any);
-    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    const { result, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
@@ -165,17 +165,17 @@ describe('useMetricsExplorerData Hook', () => {
       timestamps,
     });
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
   });
 
   it('should not paginate on time change', async () => {
     mockedFetch.mockResolvedValue(resp as any);
-    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    const { result, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
@@ -189,7 +189,7 @@ describe('useMetricsExplorerData Hook', () => {
       timestamps: { fromTimestamp: 1678378092225, toTimestamp: 1678381693477, interval: '>=10s' },
     });
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.data!.pages[0]).toEqual(resp);
     expect(result.current.isLoading).toBe(false);
   });

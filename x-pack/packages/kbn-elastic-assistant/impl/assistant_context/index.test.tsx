@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useAssistantContext } from '.';
 import { useLocalStorage } from 'react-use';
@@ -22,6 +22,7 @@ describe('AssistantContext', () => {
   test('it throws an error when useAssistantContext hook is used without a SecurityAssistantContext', () => {
     const { result } = renderHook(useAssistantContext);
 
+    // @ts-expect-error
     expect(result.error).toEqual(
       new Error('useAssistantContext must be used within a AssistantProvider')
     );

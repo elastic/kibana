@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -799,7 +799,8 @@ export const LensTopNavMenu = ({
   ]);
 
   const onQuerySubmitWrapped = useCallback(
-    (payload) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (payload: any) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
       if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
@@ -842,14 +843,14 @@ export const LensTopNavMenu = ({
   );
 
   const onSavedWrapped = useCallback(
-    (newSavedQuery) => {
+    (newSavedQuery: SavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
   const onSavedQueryUpdatedWrapped = useCallback(
-    (newSavedQuery) => {
+    (newSavedQuery: SavedQuery) => {
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
       // by Redux Toolkit. `filterManager.setFilters` will then try to modify

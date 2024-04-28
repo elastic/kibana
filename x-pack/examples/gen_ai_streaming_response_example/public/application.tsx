@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { GenAiStreamingResponseExampleApp } from './gen_ai_streaming_response_example';
@@ -18,12 +18,13 @@ export const renderApp = (
   { element }: AppMountParameters
 ) => {
   const { http } = core;
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <GenAiStreamingResponseExampleApp http={http} triggersActionsUi={deps.triggersActionsUi} />
-    </KibanaContextProvider>,
-    element
+    </KibanaContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

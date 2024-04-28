@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
 import { createSourcererDataView } from './create_sourcerer_data_view';
@@ -42,10 +42,10 @@ describe('useSignalHelpers', () => {
 
   test('Default state, does not need init and does not need poll', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
+      const { result } = renderHook(() => useSignalHelpers(), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
       expect(result.current.pollForSignalIndex).toEqual(undefined);
     });
@@ -71,10 +71,10 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
+      const { result } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current.signalIndexNeedsInit).toEqual(true);
       expect(result.current.pollForSignalIndex).toEqual(undefined);
     });
@@ -100,10 +100,10 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
+      const { result } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
       expect(result.current.pollForSignalIndex).not.toEqual(undefined);
     });
@@ -131,10 +131,10 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
+      const { result } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
       expect(result.current.pollForSignalIndex).not.toEqual(undefined);
       expect(mockAddError).not.toHaveBeenCalled();
@@ -165,10 +165,10 @@ describe('useSignalHelpers', () => {
     };
     const store = createMockStore(state);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
+      const { result } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
       expect(result.current.pollForSignalIndex).not.toEqual(undefined);
       result.current.pollForSignalIndex?.();

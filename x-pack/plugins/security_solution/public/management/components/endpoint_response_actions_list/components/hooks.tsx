@@ -55,7 +55,10 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   });
 
   const updateActionListDateRanges = useCallback(
-    ({ start, end }) => {
+    ({
+      start,
+      end
+    }: any) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         startDate: start,
@@ -66,7 +69,7 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   );
 
   const updateActionListRecentlyUsedDateRanges = useCallback(
-    (recentlyUsedDateRanges) => {
+    (recentlyUsedDateRanges: any) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         recentlyUsedDateRanges,

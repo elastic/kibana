@@ -85,7 +85,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     fields: merge({}, defaultClusterValues),
   };
 
-  static contextType = AppContext;
+  declare context: React.ContextType<typeof AppContext>;
   private readonly generateId: (idSuffix?: string) => string;
 
   constructor(props: Props, context: Context) {

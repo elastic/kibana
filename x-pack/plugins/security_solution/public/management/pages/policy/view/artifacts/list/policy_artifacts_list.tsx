@@ -89,7 +89,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     );
 
     const handleOnSearch = useCallback(
-      (filter) => {
+      (filter: any) => {
         navigateCallback({ filter });
       },
       [navigateCallback]
@@ -121,7 +121,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
 
     const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
     const provideCardProps = useCallback(
-      (artifact) => {
+      (artifact: any) => {
         const viewUrlPath = getArtifactPath({
           filter: (artifact as ExceptionListItemSchema).item_id,
         });

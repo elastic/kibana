@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -105,7 +105,9 @@ export const renderApp = ({
     ],
   });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <PresentationContextProvider>
       <EuiErrorBoundary>
         <ApplicationUsageTrackingProvider>
@@ -150,8 +152,7 @@ export const renderApp = ({
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
       </EuiErrorBoundary>
-    </PresentationContextProvider>,
-    element
+    </PresentationContextProvider>
   );
 
   return () => {
@@ -161,6 +162,6 @@ export const renderApp = ({
     // these sessions.
     plugins.data.search.session.clear();
     unregisterPrompts?.();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

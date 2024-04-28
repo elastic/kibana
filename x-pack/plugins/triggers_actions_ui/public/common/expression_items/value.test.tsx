@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ValueExpression } from './value';

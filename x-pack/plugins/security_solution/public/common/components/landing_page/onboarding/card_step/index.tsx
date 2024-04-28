@@ -75,7 +75,7 @@ const CardStepComponent: React.FC<{
   const isDone = finishedSteps.has(stepId);
 
   const toggleStep = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
       const newStatus = !isExpandedStep;
 

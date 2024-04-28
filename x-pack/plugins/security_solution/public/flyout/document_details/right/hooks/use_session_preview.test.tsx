@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseSessionPreviewParams } from './use_session_preview';
 import { useSessionPreview } from './use_session_preview';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 
 describe('useSessionPreview', () => {
-  let hookResult: RenderHookResult<UseSessionPreviewParams, SessionViewConfig | null>;
+  let hookResult: RenderHookResult<SessionViewConfig | null, UseSessionPreviewParams>;
 
   it(`should return a session view config object`, () => {
     const getFieldsData: GetFieldsData = (field: string) => field;

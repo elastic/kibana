@@ -7,4 +7,4 @@
 
 import React from 'react';
 
-export const ContentWrapper = ({ children }: { children: React.ReactElement }) => <>{children}</>;
+export const ContentWrapper = ({ children }: React.PropsWithChildren) => <>{children}</>;

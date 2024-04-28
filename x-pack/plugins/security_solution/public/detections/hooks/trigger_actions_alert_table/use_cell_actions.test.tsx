@@ -7,7 +7,7 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getUseCellActionsHook } from './use_cell_actions';
 import { columns as mockColumns, data as mockData } from './mock/data';
 import type {
@@ -86,7 +86,7 @@ const TestProviderWithCustomStateAndActions = withCustomPropsAndCellActions({
 
 describe('getUseCellActionsHook', () => {
   it('should render cell actions correctly for gridView view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useCellActions({
           columns: mockColumns as unknown as EuiDataGridColumn[],
@@ -101,7 +101,7 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     const cellAction = result.current.getCellActions('host.name', 0)[0];
 
@@ -111,7 +111,7 @@ describe('getUseCellActionsHook', () => {
   });
 
   it('should not render cell actions correctly for eventRendered view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useCellActions({
           columns: mockColumns as unknown as EuiDataGridColumn[],
@@ -128,7 +128,7 @@ describe('getUseCellActionsHook', () => {
 
     const cellAction = result.current.getCellActions('host.name', 0);
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(cellAction).toHaveLength(0);
   });

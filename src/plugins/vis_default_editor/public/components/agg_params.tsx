@@ -11,7 +11,7 @@ import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import { IAggConfig, AggGroupNames, IAggType } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { Schema } from '@kbn/visualizations-plugin/public';
@@ -124,7 +124,7 @@ function DefaultEditorAggParams({
     !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
-    (value) => {
+    (value: IAggType) => {
       if (agg.type !== value) {
         onAggTypeChange(agg.id, value);
         // reset touched and valid of params

@@ -103,7 +103,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   );
 
   return (
-    <EuiForm
+    (<EuiForm
       data-test-subj={'mlJobsHealthAlertingRuleForm'}
       invalidCallout={'none'}
       error={formErrors}
@@ -124,13 +124,11 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           />
         }
       />
-
       <EuiSpacer size="m" />
-
       <JobSelectorControl
         jobsAndGroupIds={excludeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        onChange={useCallback((update) => {
+        onChange={useCallback((update: any) => {
           const callback = onAlertParamChange('excludeJobs');
           if (isPopulatedObject(update)) {
             callback(update);
@@ -149,16 +147,14 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         }
         options={excludeJobsOptions}
       />
-
       <EuiSpacer size="m" />
-
       <TestsSelectionControl
         config={ruleParams.testsConfig}
         // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('testsConfig'), [])}
         errors={Array.isArray(errors.testsConfig) ? errors.testsConfig : []}
       />
-    </EuiForm>
+    </EuiForm>)
   );
 };
 

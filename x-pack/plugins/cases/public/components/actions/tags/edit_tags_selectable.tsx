@@ -117,7 +117,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     [options, searchValue, state.items]
   );
 
-  const onSearchChange = useCallback((value) => {
+  const onSearchChange = useCallback((value: string) => {
     setSearchValue(value);
   }, []);
 

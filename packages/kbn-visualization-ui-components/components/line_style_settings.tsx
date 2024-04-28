@@ -31,73 +31,71 @@ export const LineStyleSettings = ({
   setConfig: (config: LineStyleConfig) => void;
   idPrefix: string;
 }) => {
-  return (
-    <>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('visualizationUiComponents.xyChart.lineStyle.label', {
-          defaultMessage: 'Line',
-        })}
-      >
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem>
-            <LineThicknessSlider
-              value={currentConfig?.lineWidth || 1}
-              // Without this memoization, EuiFieldNumber rerenders too often
-              // which somehow causes the annotation query to fall out of sync
-              onChange={useCallback((value) => {
-                setConfig({ lineWidth: value });
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-              }, [])}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={i18n.translate('visualizationUiComponents.xyChart.lineStyle.label', {
-                defaultMessage: 'Line',
-              })}
-              data-test-subj="lnsXY_line_style"
-              name="lineStyle"
-              buttonSize="compressed"
-              options={[
-                {
-                  id: `${idPrefix}solid`,
-                  label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.solid', {
-                    defaultMessage: 'Solid',
-                  }),
-                  'data-test-subj': 'lnsXY_line_style_solid',
-                  iconType: 'lineSolid',
-                },
-                {
-                  id: `${idPrefix}dashed`,
-                  label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.dashed', {
-                    defaultMessage: 'Dashed',
-                  }),
-                  'data-test-subj': 'lnsXY_line_style_dashed',
-                  iconType: 'lineDashed',
-                },
-                {
-                  id: `${idPrefix}dotted`,
-                  label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.dotted', {
-                    defaultMessage: 'Dotted',
-                  }),
-                  'data-test-subj': 'lnsXY_line_style_dotted',
-                  iconType: 'lineDotted',
-                },
-              ]}
-              idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
-              onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as Exclude<LineStyle, 'dot-dashed'>;
-                setConfig({ lineStyle: newMode });
-              }}
-              isIconOnly
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    </>
-  );
+  return (<>
+    <EuiFormRow
+      display="columnCompressed"
+      fullWidth
+      label={i18n.translate('visualizationUiComponents.xyChart.lineStyle.label', {
+        defaultMessage: 'Line',
+      })}
+    >
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem>
+          <LineThicknessSlider
+            value={currentConfig?.lineWidth || 1}
+            // Without this memoization, EuiFieldNumber rerenders too often
+            // which somehow causes the annotation query to fall out of sync
+            onChange={useCallback((value: any) => {
+              setConfig({ lineWidth: value });
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+            }, [])}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend={i18n.translate('visualizationUiComponents.xyChart.lineStyle.label', {
+              defaultMessage: 'Line',
+            })}
+            data-test-subj="lnsXY_line_style"
+            name="lineStyle"
+            buttonSize="compressed"
+            options={[
+              {
+                id: `${idPrefix}solid`,
+                label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.solid', {
+                  defaultMessage: 'Solid',
+                }),
+                'data-test-subj': 'lnsXY_line_style_solid',
+                iconType: 'lineSolid',
+              },
+              {
+                id: `${idPrefix}dashed`,
+                label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.dashed', {
+                  defaultMessage: 'Dashed',
+                }),
+                'data-test-subj': 'lnsXY_line_style_dashed',
+                iconType: 'lineDashed',
+              },
+              {
+                id: `${idPrefix}dotted`,
+                label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.dotted', {
+                  defaultMessage: 'Dotted',
+                }),
+                'data-test-subj': 'lnsXY_line_style_dotted',
+                iconType: 'lineDotted',
+              },
+            ]}
+            idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
+            onChange={(id) => {
+              const newMode = id.replace(idPrefix, '') as Exclude<LineStyle, 'dot-dashed'>;
+              setConfig({ lineStyle: newMode });
+            }}
+            isIconOnly
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  </>);
 };
 
 const minRange = 1;

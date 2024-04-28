@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
 import { useDarkMode } from './use_dark_mode';
 import { createKibanaReactContext } from '../context';
@@ -45,12 +45,12 @@ describe('useDarkMode', () => {
   test('returns the value from the theme', () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumer />
-      </Provider>,
-      container
+      </Provider>
     );
 
     const div = container!.querySelector('div');
@@ -60,12 +60,12 @@ describe('useDarkMode', () => {
   test('value changes if the theme changes', () => {
     const [core, subject] = mock();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumer />
-      </Provider>,
-      container
+      </Provider>
     );
 
     let div = container!.querySelector('div');

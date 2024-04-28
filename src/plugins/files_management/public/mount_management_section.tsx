@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -33,8 +33,8 @@ export const mountManagementSection = (
   const {
     files: { filesClientFactory, getAllFindKindDefinitions, getFileKindDefinition },
   } = startDeps;
-
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme$={coreStart.theme.theme$}>
         <QueryClientProvider client={queryClient}>
@@ -57,11 +57,10 @@ export const mountManagementSection = (
           </TableListViewKibanaProvider>
         </QueryClientProvider>
       </KibanaThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

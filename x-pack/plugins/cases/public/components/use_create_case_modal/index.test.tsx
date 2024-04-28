@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { render, act as reactAct } from '@testing-library/react';
+import { render, act, renderHook } from '@testing-library/react';
 
 import { useKibana } from '../../common/lib/kibana';
-import type { UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
+import type { UseCreateCaseModalReturnedValues, UseCreateCaseModalProps } from '.';
 import { useCreateCaseModal } from '.';
 import { TestProviders } from '../../common/mock';
 
@@ -29,7 +28,7 @@ describe.skip('useCreateCaseModal', () => {
   });
 
   it('init', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
+    const { result } = renderHook<UseCreateCaseModalReturnedValues, UseCreateCaseModalProps>(
       () => useCreateCaseModal({ onCaseCreated }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -40,7 +39,7 @@ describe.skip('useCreateCaseModal', () => {
   });
 
   it('opens the modal', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
+    const { result } = renderHook<UseCreateCaseModalReturnedValues, UseCreateCaseModalProps>(
       () => useCreateCaseModal({ onCaseCreated }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -55,7 +54,7 @@ describe.skip('useCreateCaseModal', () => {
   });
 
   it('closes the modal', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
+    const { result } = renderHook<UseCreateCaseModalReturnedValues, UseCreateCaseModalProps>(
       () => useCreateCaseModal({ onCaseCreated }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -72,8 +71,8 @@ describe.skip('useCreateCaseModal', () => {
 
   it('returns a memoized value', async () => {
     const { result, rerender } = renderHook<
-      UseCreateCaseModalProps,
-      UseCreateCaseModalReturnedValues
+      UseCreateCaseModalReturnedValues,
+      UseCreateCaseModalProps
     >(() => useCreateCaseModal({ onCaseCreated }), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
@@ -86,7 +85,7 @@ describe.skip('useCreateCaseModal', () => {
   });
 
   it('closes the modal when creating a case', async () => {
-    const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
+    const { result } = renderHook<UseCreateCaseModalReturnedValues, UseCreateCaseModalProps>(
       () => useCreateCaseModal({ onCaseCreated }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -97,7 +96,7 @@ describe.skip('useCreateCaseModal', () => {
       result.current.openModal();
     });
 
-    await reactAct(async () => {
+    await act(async () => {
       const modal = result.current.modal;
       render(<TestProviders>{modal}</TestProviders>);
     });

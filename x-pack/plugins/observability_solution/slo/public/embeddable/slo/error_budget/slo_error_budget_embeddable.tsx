@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
 import {
@@ -41,6 +41,7 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
 > {
   public readonly type = SLO_ERROR_BUDGET_EMBEDDABLE;
   private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot>;
   private reloadSubject: Subject<boolean>;
 
   constructor(
@@ -70,6 +71,7 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
   public render(node: HTMLElement) {
     super.render(node);
     this.node = node;
+    this.root = createRoot(node);
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
@@ -77,7 +79,7 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <Router history={createBrowserHistory()}>
           <KibanaContextProvider services={this.deps}>
@@ -86,8 +88,7 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
             </QueryClientProvider>
           </KibanaContextProvider>
         </Router>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
@@ -97,8 +98,8 @@ export class SLOErrorBudgetEmbeddable extends AbstractEmbeddable<
 
   public destroy() {
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

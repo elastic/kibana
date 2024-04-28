@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { fireEvent } from '@testing-library/react';
-import * as React from 'react';
+import React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../../../common';

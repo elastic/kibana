@@ -191,7 +191,7 @@ export const TagCloudChart = ({
   );
 
   const handleWordClick = useCallback(
-    (elements) => {
+    (elements: any) => {
       if (!bucket) {
         return;
       }

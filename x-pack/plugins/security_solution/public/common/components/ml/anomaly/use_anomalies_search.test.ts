@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 
@@ -71,14 +71,14 @@ describe('useAggregatedAnomaliesByJob', () => {
 
   it('refetch calls useSecurityJobs().refetch', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
 
       result.current.refetch();
     });
@@ -92,14 +92,14 @@ describe('useAggregatedAnomaliesByJob', () => {
       mockAnomaliesSearch.mockResolvedValue({
         aggregations: { number_of_anomalies: { buckets: [jobCount] } },
       });
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
 
       expect(result.current.data).toEqual(
         expect.arrayContaining([
@@ -150,14 +150,14 @@ describe('useAggregatedAnomaliesByJob', () => {
         refetch: useSecurityJobsRefetch,
       });
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
 
       const names = result.current.data.map(({ name }) => name);
 
@@ -169,14 +169,14 @@ describe('useAggregatedAnomaliesByJob', () => {
   it('does not throw error when aggregations is undefined', async () => {
     await act(async () => {
       mockAnomaliesSearch.mockResolvedValue({});
-      const { waitForNextUpdate } = renderHook(
+      renderHook(
         () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
 
       expect(mockAddToastError).not.toBeCalled();
     });

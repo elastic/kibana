@@ -195,7 +195,7 @@ export const EsQueryExpression: React.FC<
   ]);
 
   return (
-    <Fragment>
+    (<Fragment>
       <EuiFormRow
         fullWidth
         label={
@@ -285,9 +285,7 @@ export const EsQueryExpression: React.FC<
           }}
         />
       </EuiFormRow>
-
       <EuiSpacer size="s" />
-
       <RuleCommonExpressions
         threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
@@ -309,11 +307,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSelectedGroupBy={useCallback(
-          (selectedGroupBy) => setParam('groupBy', selectedGroupBy),
+          (selectedGroupBy: any) => setParam('groupBy', selectedGroupBy),
           [setParam]
         )}
         onChangeSelectedTermField={useCallback(
-          (selectedTermField) => setParam('termField', selectedTermField),
+          (selectedTermField: any) => setParam('termField', selectedTermField),
           [setParam]
         )}
         onChangeSelectedTermSize={useCallback(
@@ -321,11 +319,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeThreshold={useCallback(
-          (selectedThresholds) => setParam('threshold', selectedThresholds),
+          (selectedThresholds: any) => setParam('threshold', selectedThresholds),
           [setParam]
         )}
         onChangeThresholdComparator={useCallback(
-          (selectedThresholdComparator) =>
+          (selectedThresholdComparator: any) =>
             setParam('thresholdComparator', selectedThresholdComparator),
           [setParam]
         )}
@@ -339,7 +337,7 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSizeValue={useCallback(
-          (updatedValue) => setParam('size', updatedValue),
+          (updatedValue: any) => setParam('size', updatedValue),
           [setParam]
         )}
         errors={errors}
@@ -347,18 +345,17 @@ export const EsQueryExpression: React.FC<
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={useCallback(
-          (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
+          (exclude: any) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
         onChangeSourceFields={useCallback(
-          (selectedSourceFields) => setParam('sourceFields', selectedSourceFields),
+          (selectedSourceFields: any) => setParam('sourceFields', selectedSourceFields),
           [setParam]
         )}
         sourceFields={sourceFields}
       />
-
       <EuiSpacer />
-    </Fragment>
+    </Fragment>)
   );
 };

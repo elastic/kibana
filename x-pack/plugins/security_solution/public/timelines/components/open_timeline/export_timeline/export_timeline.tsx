@@ -23,7 +23,7 @@ const ExportTimeline: React.FC<{
   const { addSuccess } = useAppToasts();
 
   const onExportSuccess = useCallback(
-    (exportCount) => {
+    (exportCount: any) => {
       if (onComplete != null) {
         onComplete();
       }

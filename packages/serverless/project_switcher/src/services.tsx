@@ -7,7 +7,7 @@
  */
 
 import React, { FC, PropsWithChildren, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Loader } from './loader';
 
 import type { Services, KibanaDependencies } from './types';
@@ -37,7 +37,8 @@ export const ProjectSwitcherKibanaProvider: FC<PropsWithChildren<KibanaDependenc
       coreStart.http
         .post(projectChangeAPIUrl, { body: JSON.stringify({ id: projectType }) })
         .then(() => {
-          ReactDOM.render(<Loader project={projectType} />, document.body);
+          const root = createRoot(document.body);
+          root.render(<Loader project={projectType} />);
 
           // Give the watcher a couple of seconds to see the file change.
           setTimeout(() => {

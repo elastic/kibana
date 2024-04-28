@@ -21,7 +21,7 @@ export const useSetUrlParams = (): ((
   const { toUrlParams, urlParams: currentUrlParams } = useUrlParams();
 
   return useCallback(
-    (params, replace = false) => {
+    (params: any, replace = false) => {
       history.push({
         ...location,
         search: toUrlParams(

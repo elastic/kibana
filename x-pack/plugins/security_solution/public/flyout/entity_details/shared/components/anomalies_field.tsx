@@ -19,7 +19,7 @@ export const AnomaliesField = ({ anomalies }: { anomalies: EntityAnomalies }) =>
   const dispatch = useDispatch();
 
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: any, interval: any) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

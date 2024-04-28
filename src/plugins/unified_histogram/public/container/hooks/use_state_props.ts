@@ -15,7 +15,11 @@ import {
 } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
-import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
+import {
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramSuggestionContext,
+} from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   breakdownFieldSelector,
@@ -159,7 +163,7 @@ export const useStateProps = ({
   );
 
   const onSuggestionContextChange = useCallback(
-    (suggestionContext) => {
+    (suggestionContext?: UnifiedHistogramSuggestionContext) => {
       stateService?.setCurrentSuggestionContext(suggestionContext);
     },
     [stateService]

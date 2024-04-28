@@ -99,7 +99,7 @@ export const Assignees: FC<AssigneesProps> = memo(
     }, []);
 
     const handleApplyAssignees = useCallback(
-      async (assignees) => {
+      async (assignees: any) => {
         setIsPopoverOpen(false);
         if (setAlertAssignees) {
           await setAlertAssignees(assignees, [eventId], onSuccess, noop);

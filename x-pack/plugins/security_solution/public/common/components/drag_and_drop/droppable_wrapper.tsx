@@ -100,7 +100,7 @@ export const DroppableWrapper = React.memo<Props>(
     renderClone,
   }) => {
     const DroppableContent = useCallback(
-      (provided, snapshot) => (
+      (provided: any, snapshot: any) => (
         <ReactDndDropTarget
           height={height}
           ref={provided.innerRef}

@@ -240,7 +240,7 @@ export interface TimelineTab {
   href: string;
   id: TimelineTypeLiteral;
   name: string;
-  onClick: (ev: { preventDefault: () => void }) => void;
+  onClick: (ev: React.SyntheticEvent) => void;
 }
 
 export interface TemplateTimelineFilter {

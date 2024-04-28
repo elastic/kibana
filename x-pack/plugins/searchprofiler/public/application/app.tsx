@@ -18,6 +18,7 @@ import {
   ProfileLoadingPlaceholder,
   EmptyTreePlaceHolder,
   ProfileQueryEditor,
+  OnHighlightChangeArgs,
 } from './components';
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
@@ -46,7 +47,7 @@ export const App = () => {
   );
 
   const onHighlight = useCallback(
-    (value) => dispatch({ type: 'setHighlightDetails', value }),
+    (value: OnHighlightChangeArgs) => dispatch({ type: 'setHighlightDetails', value }),
     [dispatch]
   );
 

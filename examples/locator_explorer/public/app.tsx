@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPage,
   EuiButton,
@@ -190,7 +190,7 @@ const ActionsExplorer = ({ share }: Props) => {
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ActionsExplorer {...props} />, element);
-
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<ActionsExplorer {...props} />);
+  return () => root.unmount();
 };

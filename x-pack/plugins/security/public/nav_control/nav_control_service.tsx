@@ -8,7 +8,7 @@
 import { sortBy } from 'lodash';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
@@ -113,7 +113,8 @@ export class SecurityNavControlService {
     core.chrome.navControls.registerRight({
       order: 4000,
       mount: (element: HTMLElement) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
             <SecurityNavControl
               editProfileUrl={core.http.basePath.prepend('/security/account')}
@@ -121,11 +122,10 @@ export class SecurityNavControlService {
               userMenuLinks$={this.userMenuLinks$}
               buildFlavour={this.buildFlavor}
             />
-          </Providers>,
-          element
+          </Providers>
         );
 
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

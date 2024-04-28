@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
@@ -68,14 +68,14 @@ export const renderApp = (
   { appId, basePath, targetAppId, application }: AppOptions,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <FooApp
       appId={appId}
       targetAppId={targetAppId}
       basePath={basePath}
       application={application}
-    />,
-    element
+    />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

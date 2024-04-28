@@ -127,7 +127,7 @@ export function ColorRangeItem({
   );
 
   const onValueChange = useCallback(
-    ({ target: { value: targetValue } }) => {
+    ({ target: { value: targetValue } }: any) => {
       setLocalValue(targetValue);
       dispatch({
         type: 'updateValue',
@@ -138,7 +138,7 @@ export function ColorRangeItem({
   );
 
   const onUpdateColor = useCallback(
-    (color) => {
+    (color: string) => {
       dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes } });
     },
     [dispatch, index, dataBounds, palettes]

@@ -100,7 +100,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
     pageSizeOptions: [5, 10, 25],
   };
 
-  const onQueryChange = useCallback((params) => {
+  const onQueryChange = useCallback((params: any) => {
     setFilter(params.queryText);
   }, []);
 

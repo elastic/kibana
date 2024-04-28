@@ -18,7 +18,10 @@ export const DocumentFieldsJsonEditor = ({ defaultValue }: Props) => {
   const dispatch = useDispatch();
   const defaultValueRef = useRef(defaultValue);
   const onUpdate = useCallback(
-    ({ data, isValid }) =>
+    ({
+      data,
+      isValid
+    }: any) =>
       dispatch({
         type: 'fieldsJsonEditor.update',
         value: { json: data.format(), isValid },

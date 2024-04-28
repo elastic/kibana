@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Observable, Subscription } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -254,11 +254,11 @@ export const renderSpaceSelectorApp = (
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...services}>
       <SpaceSelector {...props} />
     </KibanaRenderContextProvider>,
-    element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

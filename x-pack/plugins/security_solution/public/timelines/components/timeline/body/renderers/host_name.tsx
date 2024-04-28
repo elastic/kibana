@@ -62,7 +62,7 @@ const HostNameComponent: React.FC<Props> = ({
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
 
   const openHostDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
 
       if (onClick) {

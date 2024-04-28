@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { ChangeEvent, SyntheticEvent } from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useEditModal } from './use_edit_modal';
 
 const listDetails = { name: 'test-name', description: 'test-description' };

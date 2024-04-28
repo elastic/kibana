@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode, useEffect, useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 export interface Props {
@@ -22,7 +22,8 @@ export function SearchBarPortal({ children }: Props) {
       if (!mainContent) return;
       const element = document.createElement('div');
       element.setAttribute('id', 'searchBarContainer');
-      ReactDOM.render(<OutPortal node={portalNode} />, element);
+      const root = createRoot(element);
+      root.render(<OutPortal node={portalNode} />);
       if (mainContent.childNodes?.[0]) {
         mainContent.insertBefore(element, mainContent.childNodes?.[0]);
       }

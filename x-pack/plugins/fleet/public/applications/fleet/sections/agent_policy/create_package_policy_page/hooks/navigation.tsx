@@ -35,7 +35,7 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
   const { getHref } = useLink();
 
   const cancelClickHandler = useCallback(
-    (ev) => {
+    (ev: any) => {
       if (routeState?.onCancelNavigateTo) {
         ev.preventDefault();
         navigateToApp(...routeState.onCancelNavigateTo);

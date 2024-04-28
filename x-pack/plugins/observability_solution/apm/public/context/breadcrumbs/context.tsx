@@ -23,7 +23,7 @@ interface BreadcrumbApi {
 
 export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undefined);
 
-export function BreadcrumbsContextProvider({ children }: { children: React.ReactElement }) {
+export function BreadcrumbsContextProvider({ children }: React.PropsWithChildren) {
   const [, forceUpdate] = useState({});
 
   const breadcrumbs = useMemo(() => {

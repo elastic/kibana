@@ -59,7 +59,9 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
   ) => {
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse = useCallback(
-      (err, { messages }) => {
+      (err: any, {
+        messages
+      }: any) => {
         setMarkdownErrorMessages(err ? [err] : messages);
         setIsMarkdownInvalid(err ? true : false);
       },

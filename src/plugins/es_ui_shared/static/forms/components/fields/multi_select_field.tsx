@@ -24,6 +24,7 @@ export const MultiSelectField = ({ field, euiFieldProps = {}, idAria, ...rest }:
   return (
     <EuiFormRow
       label={field.label}
+      // @ts-expect-error
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

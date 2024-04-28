@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import React, { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
 import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -75,7 +75,7 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () => {
         return useLoadRuleAggregations(params);
       },
@@ -83,7 +83,7 @@ describe('useLoadRuleAggregations', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
       expect.objectContaining({
@@ -115,7 +115,7 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () => useLoadRuleAggregations(params),
       {
         wrapper,
@@ -123,7 +123,7 @@ describe('useLoadRuleAggregations', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
       expect.objectContaining({

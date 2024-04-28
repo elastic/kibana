@@ -68,7 +68,7 @@ export const SeverityFilterGroup: React.FC<{
   }, [severityCount, selectedSeverities]);
 
   const updateSeverityFilter = useCallback(
-    (newSelection: SeverityItems[], _, changedSeverity: SeverityItems) => {
+    (newSelection: SeverityItems[], _: any, changedSeverity: SeverityItems) => {
       if (changedSeverity.checked === 'on') {
         telemetry.reportEntityRiskFiltered({
           entity: riskEntity,

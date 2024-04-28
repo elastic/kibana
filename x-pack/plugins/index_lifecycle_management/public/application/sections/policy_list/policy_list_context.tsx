@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, ReactChild, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { PolicyFromES } from '../../../../common/types';
 
 interface ListAction {
@@ -23,7 +23,7 @@ const PolicyListContext = createContext<PolicyListContextValue>({
   setListAction: () => {},
 });
 
-export const PolicyListContextProvider = ({ children }: { children: ReactChild }) => {
+export const PolicyListContextProvider = ({ children }: React.PropsWithChildren) => {
   const [listAction, setListAction] = useState<ListAction | null>(null);
 
   return (

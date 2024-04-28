@@ -44,7 +44,7 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
@@ -156,6 +156,7 @@ export class DashboardContainer
   private dashboardCreationStartTime?: number;
 
   private domNode?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null = null;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
   private hadContentfulRender = false;
@@ -344,13 +345,14 @@ export class DashboardContainer
   }
 
   public render(dom: HTMLElement) {
-    if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) {
+      this.root.unmount();
     }
     this.domNode = dom;
     this.domNode.className = 'dashboardContainer';
+    this.root = createRoot(this.domNode);
 
-    ReactDOM.render(
+    this.root.render(
       <I18nProvider>
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
@@ -361,8 +363,7 @@ export class DashboardContainer
             </DashboardContainerContext.Provider>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
-      </I18nProvider>,
-      dom
+      </I18nProvider>
     );
   }
 
@@ -430,7 +431,7 @@ export class DashboardContainer
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) this.root.unmount();
   }
 
   // ------------------------------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -66,7 +66,7 @@ describe('useFetcher', () => {
 
     it('should show success after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      await hook.waitForNextUpdate();
+      // await hook.waitFor();
 
       expect(hook.result.current).toEqual({
         data: 'response from hook',
@@ -116,7 +116,7 @@ describe('useFetcher', () => {
 
     it('should show error after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      await hook.waitForNextUpdate();
+      // await hook.waitFor();
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -149,7 +149,7 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      await hook.waitForNextUpdate();
+      // await hook.waitFor();
 
       // assert: first response has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -179,7 +179,7 @@ describe('useFetcher', () => {
       });
 
       jest.advanceTimersByTime(500);
-      await hook.waitForNextUpdate();
+      // await hook.waitFor();
 
       // assert: "second response" has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -202,7 +202,7 @@ describe('useFetcher', () => {
           wrapper,
         }
       );
-      await hook.waitForNextUpdate();
+      // await hook.waitFor();
       const firstResult = hook.result.current;
       hook.rerender();
       const secondResult = hook.result.current;
@@ -216,7 +216,7 @@ describe('useFetcher', () => {
         },
         args: ['b'],
       });
-      await hook.waitForNextUpdate();
+      // await hook.waitFor();
       const thirdResult = hook.result.current;
 
       // assert: rerender with different data returns a new object

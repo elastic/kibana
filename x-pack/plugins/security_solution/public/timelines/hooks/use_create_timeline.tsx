@@ -62,7 +62,11 @@ export const useCreateTimeline = ({
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
 
   const createTimeline = useCallback(
-    ({ id, show, timeRange: timeRangeParam }) => {
+    ({
+      id,
+      show,
+      timeRange: timeRangeParam
+    }: any) => {
       const timerange = timeRangeParam ?? globalTimeRange;
 
       if (id === TimelineId.active && timelineFullScreen) {

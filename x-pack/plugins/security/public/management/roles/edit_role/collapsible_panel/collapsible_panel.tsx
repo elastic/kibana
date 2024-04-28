@@ -23,6 +23,7 @@ import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
+  children: ReactNode;
   iconType?: IconType;
   title: string | ReactNode;
   initiallyCollapsed?: boolean;

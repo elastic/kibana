@@ -32,8 +32,8 @@ export const sortOptions: EuiSelectOption[] = [
 export const SortActivity = React.memo<FilterActivityProps>(
   ({ sortOrder, onOrderChange, isLoading = false }) => {
     const onChange: EuiSelectProps['onChange'] = useCallback(
-      (e) => {
-        onOrderChange(e.target.value);
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        onOrderChange(e.target.value as UserActivitySortOrder);
       },
       [onOrderChange]
     );

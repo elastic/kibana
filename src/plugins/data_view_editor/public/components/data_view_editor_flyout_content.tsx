@@ -196,7 +196,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   const onTypeChange = useCallback(
-    (newType) => {
+    (newType: INDEX_PATTERN_TYPE) => {
       form.setFieldValue('title', '');
       form.setFieldValue('name', '');
       form.setFieldValue('timestampField', '');

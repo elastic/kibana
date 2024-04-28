@@ -31,7 +31,7 @@ const AddPrebuiltRulesTableFiltersComponent = () => {
   const { tags: selectedTags } = filterOptions;
 
   const handleOnSearch = useCallback(
-    (filterString) => {
+    (filterString: any) => {
       setFilterOptions((filters) => ({
         ...filters,
         filter: filterString.trim(),

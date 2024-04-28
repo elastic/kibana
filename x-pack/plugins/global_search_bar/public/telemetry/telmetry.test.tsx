@@ -108,6 +108,7 @@ describe('SearchBar', () => {
         .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -130,6 +131,7 @@ describe('SearchBar', () => {
 
     it('keyboard shortcut', async () => {
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -157,6 +159,7 @@ describe('SearchBar', () => {
       );
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -194,6 +197,7 @@ describe('SearchBar', () => {
       );
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -230,6 +234,7 @@ describe('SearchBar', () => {
       searchService.find.mockReturnValueOnce(throwError(() => new Error('service unavailable :(')));
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -259,6 +264,8 @@ describe('SearchBar', () => {
 
       it('keyboard shortcut expsoses the component and focuses the text input', async () => {
         render(
+          // @ts-expect-error
+
           <IntlProvider locale="en">
             <SearchBar
               globalSearch={searchService}
@@ -288,6 +295,8 @@ describe('SearchBar', () => {
 
       it('show/hide', async () => {
         render(
+          // @ts-expect-error
+
           <IntlProvider locale="en">
             <SearchBar
               globalSearch={searchService}

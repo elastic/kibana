@@ -68,7 +68,7 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   );
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: any) =>
       dispatch(
         usersActions.updateTableLimit({
           usersType: type,
@@ -80,7 +80,7 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: any) =>
       dispatch(
         usersActions.updateTableActivePage({
           activePage: newPage,

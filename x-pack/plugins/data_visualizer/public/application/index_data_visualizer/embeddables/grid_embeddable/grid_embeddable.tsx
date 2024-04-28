@@ -9,7 +9,7 @@ import { pick } from 'lodash';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React, { Suspense } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -91,7 +91,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableInput,
   DataVisualizerGridEmbeddableOutput
 > {
-  private node?: HTMLElement;
+  private root: ReturnType<typeof createRoot> | null = null;
   private reload$ = new Subject<void>();
   public readonly type: string = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
@@ -105,7 +105,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
   public render(node: HTMLElement) {
     super.render(node);
-    this.node = node;
+    this.root = createRoot(node);
 
     const I18nContext = this.services[0].i18n.Context;
 
@@ -115,7 +115,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
       uiSettingsKeys: UI_SETTINGS,
     };
 
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
           <KibanaContextProvider services={services}>
@@ -131,15 +131,14 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
             </DatePickerContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
   public destroy() {
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 

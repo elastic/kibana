@@ -66,7 +66,7 @@ function MaxBarsParamEditor({
   }, [isValid, setValidity]);
 
   const onChange: EuiFieldNumberProps['onChange'] = useCallback(
-    (ev) => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value)),
+    (ev: any) => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value)),
     [setValue]
   );
 

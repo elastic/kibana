@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -64,6 +64,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   public readonly type = SLO_ALERTS_EMBEDDABLE;
   private reloadSubject: Subject<SloAlertsEmbeddableInput | undefined>;
   private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot>;
   kibanaVersion: string;
   private subscription: Subscription;
 
@@ -108,6 +109,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   public render(node: HTMLElement) {
     super.render(node);
     this.node = node;
+    this.root = createRoot(node);
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
@@ -122,7 +124,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
 
     const deps = this.deps;
     const kibanaVersion = this.kibanaVersion;
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <KibanaContextProvider
           services={{
@@ -146,8 +148,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
             </QueryClientProvider>
           </Router>
         </KibanaContextProvider>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
@@ -158,8 +159,8 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

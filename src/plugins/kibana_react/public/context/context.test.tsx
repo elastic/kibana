@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
@@ -26,11 +26,12 @@ afterEach(() => {
 
 test('can mount <Provider> without crashing', () => {
   const services = coreMock.createStart();
-  ReactDOM.render(
+  const root = createRoot(container!);
+
+  root.render(
     <context.Provider value={{ services } as any}>
       <div>Hello world</div>
-    </context.Provider>,
-    container
+    </context.Provider>
   );
 });
 
@@ -42,11 +43,12 @@ const TestConsumer = () => {
 test('useKibana() hook retrieves Kibana context', () => {
   const core = coreMock.createStart();
   (core as any).foo = 'bar';
-  ReactDOM.render(
+  const root = createRoot(container!);
+
+  root.render(
     <context.Provider value={{ services: core } as any}>
       <TestConsumer />
-    </context.Provider>,
-    container
+    </context.Provider>
   );
 
   const div = container!.querySelector('div');
@@ -58,12 +60,12 @@ test('createContext() creates context that can be consumed by useKibana() hook',
     foo: 'baz',
   } as Partial<CoreStart>;
   const { Provider } = createKibanaReactContext(services);
+  const root = createRoot(container!);
 
-  ReactDOM.render(
+  root.render(
     <Provider>
       <TestConsumer />
-    </Provider>,
-    container
+    </Provider>
   );
 
   const div = container!.querySelector('div');
@@ -81,12 +83,12 @@ test('services, notifications and overlays objects are always available', () => 
     });
     return null;
   };
+  const root = createRoot(container!);
 
-  ReactDOM.render(
+  root.render(
     <Provider>
       <Test />
-    </Provider>,
-    container
+    </Provider>
   );
 });
 
@@ -100,12 +102,12 @@ test('<KibanaContextProvider> provider provides default kibana-react context', (
     });
     return null;
   };
+  const root = createRoot(container!);
 
-  ReactDOM.render(
+  root.render(
     <KibanaContextProvider>
       <Test />
-    </KibanaContextProvider>,
-    container
+    </KibanaContextProvider>
   );
 });
 
@@ -115,12 +117,12 @@ test('<KibanaContextProvider> can set custom services in context', () => {
     expect(services.test).toBe('quux');
     return null;
   };
+  const root = createRoot(container!);
 
-  ReactDOM.render(
+  root.render(
     <KibanaContextProvider services={{ test: 'quux' }}>
       <Test />
-    </KibanaContextProvider>,
-    container
+    </KibanaContextProvider>
   );
 });
 
@@ -132,16 +134,16 @@ test('nested <KibanaContextProvider> override and merge services', () => {
     expect(services.baz).toBe('baz3');
     return null;
   };
+  const root = createRoot(container!);
 
-  ReactDOM.render(
+  root.render(
     <KibanaContextProvider services={{ foo: 'foo', bar: 'bar', baz: 'baz' }}>
       <KibanaContextProvider services={{ foo: 'foo2' }}>
         <KibanaContextProvider services={{ baz: 'baz3' }}>
           <Test />
         </KibanaContextProvider>
       </KibanaContextProvider>
-    </KibanaContextProvider>,
-    container
+    </KibanaContextProvider>
   );
 });
 
@@ -161,13 +163,14 @@ test('overlays wrapper uses the closest overlays service', () => {
     overlays: overlayServiceMock.createStartContract(),
   } as Partial<CoreStart>;
 
-  ReactDOM.render(
+  const root = createRoot(container!);
+
+  root.render(
     <KibanaContextProvider services={core1}>
       <KibanaContextProvider services={core2}>
         <Test />
       </KibanaContextProvider>
-    </KibanaContextProvider>,
-    container
+    </KibanaContextProvider>
   );
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);
@@ -199,13 +202,14 @@ test('notifications wrapper uses the closest notifications service', () => {
     } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
-  ReactDOM.render(
+  const root = createRoot(container!);
+
+  root.render(
     <KibanaContextProvider services={core1}>
       <KibanaContextProvider services={core2}>
         <Test />
       </KibanaContextProvider>
-    </KibanaContextProvider>,
-    container
+    </KibanaContextProvider>
   );
 
   expect(core1.notifications!.toasts.add).toHaveBeenCalledTimes(0);
@@ -237,14 +241,14 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
   } as Partial<CoreStart>;
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);
+  const root = createRoot(container!);
 
-  ReactDOM.render(
+  root.render(
     <KibanaContextProvider services={core1}>
       <KibanaContextProvider services={core2}>
         <Test />
       </KibanaContextProvider>
-    </KibanaContextProvider>,
-    container
+    </KibanaContextProvider>
   );
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(1);

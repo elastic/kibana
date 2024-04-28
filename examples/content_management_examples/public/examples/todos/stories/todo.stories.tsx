@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { ContentClientProvider, ContentClient } from '@kbn/content-management-plugin/public';
 import { ContentTypeRegistry } from '@kbn/content-management-plugin/public/registry';
 

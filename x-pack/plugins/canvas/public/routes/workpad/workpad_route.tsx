@@ -22,7 +22,7 @@ import { useRestoreHistory } from './hooks/use_restore_history';
 import { useWorkpadHistory } from './hooks/use_workpad_history';
 import { usePageSync } from './hooks/use_page_sync';
 import { useWorkpadPersist } from './hooks/use_workpad_persist';
-import { WorkpadRouteProps, WorkpadPageRouteParams } from '.';
+import { WorkpadRouteProps, WorkpadPageRouteParams, WorkpadRouteParams } from '.';
 import { WorkpadRoutingContextComponent } from './workpad_routing_context';
 import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 
@@ -30,17 +30,17 @@ const { workpadRoutes: strings } = ErrorStrings;
 
 export const WorkpadRoute = () => {
   return (
-    <Route
+    <Route<WorkpadRouteParams>
       path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
       exact={false}
-      children={(route: WorkpadRouteProps) => {
-        return <WorkpadRouteComponent route={route} />;
+      children={(route) => {
+        return <WorkpadRouteComponent route={route as WorkpadRouteProps} />;
       }}
     />
   );
 };
 
-const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
+const WorkpadRouteComponent = ({ route }: { route: WorkpadRouteProps }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) =>
       `/workpad/${workpadId}${
@@ -80,10 +80,10 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
 
 export const ExportWorkpadRoute = () => {
   return (
-    <Route
+    <Route<WorkpadRouteParams>
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      children={(route: WorkpadRouteProps) => {
-        return <ExportWorkpadRouteComponent route={route} />;
+      children={(route) => {
+        return <ExportWorkpadRouteComponent route={route as WorkpadRouteProps} />;
       }}
     />
   );

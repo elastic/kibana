@@ -49,7 +49,7 @@ export const ModelSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new model
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      (searchValue: any, flattenedOptions:EuiComboBoxOptionOption[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }

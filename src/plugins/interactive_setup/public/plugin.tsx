@@ -8,7 +8,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -32,14 +32,13 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
           window.location.replace(url.href);
         };
         const [services] = await core.getStartServices();
-
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <Providers defaultCode={defaultCode} services={services}>
             <App onSuccess={onSuccess} />
-          </Providers>,
-          element
+          </Providers>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   }

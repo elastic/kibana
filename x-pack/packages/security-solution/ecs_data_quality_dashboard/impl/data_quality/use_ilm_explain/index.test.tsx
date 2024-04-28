@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import { renderHook } from '@testing-library/react';
+import React, { PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
@@ -22,14 +22,13 @@ const mockTelemetryEvents = {
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
 const { toasts } = notificationServiceMock.createSetupContract();
-const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: boolean }> = ({
+const ContextWrapper: React.FC<PropsWithChildren> = ({
   children,
-  isILMAvailable = true,
 }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
-    isILMAvailable={isILMAvailable}
+    isILMAvailable={true}
     toasts={toasts}
   >
     {children}
@@ -49,10 +48,10 @@ describe('useIlmExplain', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockIlmExplain);
 
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      const { result } = renderHook<UseIlmExplain, void>(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       ilmExplainResult = await result.current;
     });
 
@@ -73,7 +72,7 @@ describe('useIlmExplain', () => {
     let ilmExplainResult: UseIlmExplain | undefined;
 
     beforeEach(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      const { result } = renderHook(() => useIlmExplain(pattern), {
         wrapper: ({ children }) => (
           <DataQualityProvider
             httpFetch={mockHttpFetch}
@@ -85,7 +84,7 @@ describe('useIlmExplain', () => {
           </DataQualityProvider>
         ),
       });
-      await waitForNextUpdate();
+      // await waitFor();
       ilmExplainResult = await result.current;
     });
 
@@ -105,10 +104,10 @@ describe('useIlmExplain', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      const { result } = renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       ilmExplainResult = await result.current;
     });
 

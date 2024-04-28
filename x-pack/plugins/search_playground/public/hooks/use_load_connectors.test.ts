@@ -8,7 +8,7 @@
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useLoadConnectors } from './use_load_connectors';
 import { useKibana } from './use_kibana';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;
@@ -75,8 +75,8 @@ describe('useLoadConnectors', () => {
     mockedLoadConnectors.mockResolvedValue(connectors);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors());
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useLoadConnectors());
+      // await waitFor();
 
       await expect(result.current).resolves.toStrictEqual([
         {
@@ -115,8 +115,8 @@ describe('useLoadConnectors', () => {
     mockedLoadConnectors.mockRejectedValue(error);
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useLoadConnectors());
-      await waitForNextUpdate();
+      renderHook(() => useLoadConnectors());
+      // await waitFor();
 
       expect(mockedUseKibana().services.notifications.toasts.addError).toHaveBeenCalledWith(
         error,

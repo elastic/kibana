@@ -106,7 +106,7 @@ export const useFetchIndex = (
   const { addError } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
-    (iNames) => {
+    (iNames: any) => {
       const asyncSearch = async () => {
         try {
           setState({ ...state, loading: true });

@@ -7,7 +7,7 @@
 
 import React, { type FC, useMemo } from 'react';
 import './_index.scss';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -173,8 +173,9 @@ export const renderApp = (
   });
 
   appMountParams.onAppLeave((actions) => actions.default());
+  const root = createRoot(appMountParams.element);
 
-  ReactDOM.render(
+  root.render(
     <App
       coreStart={coreStart}
       deps={deps}
@@ -182,13 +183,12 @@ export const renderApp = (
       isServerless={isServerless}
       mlFeatures={mlFeatures}
       experimentalFeatures={experimentalFeatures}
-    />,
-    appMountParams.element
+    />
   );
 
   return () => {
     clearCache();
-    ReactDOM.unmountComponentAtNode(appMountParams.element);
+    root.unmount();
     deps.data.search.session.clear();
   };
 };

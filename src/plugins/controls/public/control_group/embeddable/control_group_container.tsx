@@ -9,7 +9,7 @@
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
@@ -93,7 +93,7 @@ export class ControlGroupContainer extends Container<
   private storageService: ControlsStorageService;
 
   private subscriptions: Subscription = new Subscription();
-  private domNode?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null;
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
@@ -558,19 +558,18 @@ export class ControlGroupContainer extends Container<
   };
 
   public render(dom: HTMLElement) {
-    if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.domNode = dom;
-    ReactDOM.render(
+    this.root = createRoot(dom);
+    this.root.render(
       <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <Provider store={this.store}>
           <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />
           </ControlGroupContainerContext.Provider>
         </Provider>
-      </KibanaThemeProvider>,
-      dom
+      </KibanaThemeProvider>
     );
   }
 
@@ -579,6 +578,6 @@ export class ControlGroupContainer extends Container<
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
     this.cleanupStateTools();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) this.root.unmount();
   }
 }

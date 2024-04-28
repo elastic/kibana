@@ -168,7 +168,8 @@ export function EmptyDimensionButton({
   );
 
   const handleOnDrop = React.useCallback(
-    (source, selectedDropType) => onDrop(source, value, selectedDropType),
+    (source: DragDropIdentifier, selectedDropType?: DropType) =>
+      onDrop(source, value, selectedDropType),
     [value, onDrop]
   );
 

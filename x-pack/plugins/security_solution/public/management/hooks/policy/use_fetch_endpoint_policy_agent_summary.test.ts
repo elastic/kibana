@@ -27,8 +27,8 @@ jest.mock('@tanstack/react-query', () => {
 
 describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
   type HookRenderer = ReactQueryHookRenderer<
-    Parameters<typeof useFetchAgentByAgentPolicySummary>,
-    ReturnType<typeof useFetchAgentByAgentPolicySummary>
+    ReturnType<typeof useFetchAgentByAgentPolicySummary>,
+    Parameters<typeof useFetchAgentByAgentPolicySummary>
   >;
 
   let policy: PolicyData;

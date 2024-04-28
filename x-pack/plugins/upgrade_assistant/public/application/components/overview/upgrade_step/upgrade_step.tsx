@@ -72,7 +72,9 @@ const UpgradeStep = () => {
           data-test-subj="upgradeStatusErrorCallout"
         >
           <p>
-            {error.statusCode} - {error.message}
+            <>
+              {error.statusCode} - {error.message}
+            </>
           </p>
           <EuiButton
             color="danger"
@@ -137,9 +139,11 @@ const UpgradeStep = () => {
     <>
       <EuiText>
         <p>
-          {isCloudEnabled
-            ? i18nTexts.upgradeStepDescriptionForCloud
-            : i18nTexts.upgradeStepDescription}
+          <>
+            {isCloudEnabled
+              ? i18nTexts.upgradeStepDescriptionForCloud
+              : i18nTexts.upgradeStepDescription}
+          </>
         </p>
       </EuiText>
 

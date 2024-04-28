@@ -103,7 +103,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     }, [setExceptionItemToDelete]);
 
     const handleOnDeleteActionCallback = useCallback(
-      (item) => {
+      (item: any) => {
         setExceptionItemToDelete(item);
       },
       [setExceptionItemToDelete]

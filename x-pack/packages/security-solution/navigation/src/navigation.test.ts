@@ -6,7 +6,7 @@
  */
 import { useGetAppUrl, useNavigateTo } from './navigation';
 import { mockGetUrlForApp, mockNavigateToApp, mockNavigateToUrl } from '../mocks/context';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 
 jest.mock('./context');

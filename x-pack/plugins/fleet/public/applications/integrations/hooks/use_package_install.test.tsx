@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, type WrapperComponent } from '@testing-library/react-hooks';
+import React, { FC, PropsWithChildren } from 'react';
+import { act } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';
 
@@ -41,7 +41,7 @@ describe('usePackageInstall', () => {
       }) as any);
 
       const notifications = renderer.startServices.notifications;
-      const wrapper: WrapperComponent<any> = ({ children }) => (
+      const wrapper: FC<PropsWithChildren> = ({ children }) => (
         <PackageInstallProvider
           notifications={notifications}
           theme$={renderer.startServices.theme.theme$}

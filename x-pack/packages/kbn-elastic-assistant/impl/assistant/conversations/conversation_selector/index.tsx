@@ -83,7 +83,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
-      async (searchValue, flattenedOptions = []) => {
+      async (searchValue: any, flattenedOptions = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }

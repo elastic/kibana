@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render as rTLRender, waitFor, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';

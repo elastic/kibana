@@ -17,6 +17,7 @@ import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engin
 
 const Wrapper: FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
+    // @ts-expect-error
     <IntlProvider locale="en">
       <>{children}</>
     </IntlProvider>

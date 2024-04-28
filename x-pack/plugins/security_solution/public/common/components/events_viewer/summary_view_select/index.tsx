@@ -116,7 +116,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     [viewSelected]
   );
 
-  const renderOption = useCallback((option) => {
+  const renderOption = useCallback((option: any) => {
     return (
       <>
         <EuiTitle size="xxs">

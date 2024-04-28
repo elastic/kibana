@@ -7,7 +7,7 @@
  */
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 const txtDismiss = i18n.translate(

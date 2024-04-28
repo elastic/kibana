@@ -26,7 +26,7 @@ export const DiagnosticsContext = React.createContext<{
   refetch: () => undefined,
 });
 
-export function DiagnosticsContextProvider({ children }: { children: React.ReactChild }) {
+export function DiagnosticsContextProvider({ children }: React.PropsWithChildren) {
   const {
     query: { kuery, rangeFrom, rangeTo },
   } = useApmParams('/diagnostics/*');

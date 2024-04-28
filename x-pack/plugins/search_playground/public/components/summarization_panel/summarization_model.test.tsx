@@ -12,6 +12,7 @@ import { useManagementLink } from '../../hooks/use_management_link';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const render = (children: React.ReactNode) =>
+  // @ts-expect-error
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
 const MockIcon = () => <span />;
 

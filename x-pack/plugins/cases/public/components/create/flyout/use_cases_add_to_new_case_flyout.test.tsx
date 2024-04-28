@@ -6,7 +6,7 @@
  */
 
 import { alertComment } from '../../../containers/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
@@ -49,7 +49,8 @@ describe('use cases add to new case flyout hook', () => {
     const { result } = renderHook(() => {
       useCasesAddToNewCaseFlyout();
     });
-    expect(result.error?.message).toContain(
+    // @ts-expect-error
+    expect(result.current.error?.message).toContain(
       'useCasesContext must be used within a CasesProvider and have a defined value'
     );
   });

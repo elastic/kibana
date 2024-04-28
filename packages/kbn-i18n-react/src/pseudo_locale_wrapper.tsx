@@ -7,7 +7,7 @@
  */
 
 import * as PropTypes from 'prop-types';
-import * as React from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -40,7 +40,7 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
  * be inefficient in some cases, and can cause React hooks to lose
  * their state.
  */
-export class PseudoLocaleWrapper extends React.PureComponent {
+export class PseudoLocaleWrapper extends React.PureComponent<{ children: React.ReactNode }> {
   public static propTypes = { children: PropTypes.element.isRequired };
 
   public static contextTypes = {

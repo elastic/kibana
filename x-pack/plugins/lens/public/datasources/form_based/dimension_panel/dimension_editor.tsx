@@ -26,7 +26,7 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
 } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
@@ -144,7 +144,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const { euiTheme } = useEuiTheme();
 
   const updateLayer = useCallback(
-    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    (newLayer: Partial<FormBasedLayer>) =>
+      setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
   );
 
@@ -372,12 +373,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
       .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
 
-  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
+  const helpPopoverContainer = useRef<ReturnType<typeof createRoot> | null>(null);
   useEffect(() => {
     return () => {
       if (helpPopoverContainer.current) {
-        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-        document.body.removeChild(helpPopoverContainer.current);
+        helpPopoverContainer.current.unmount();
+        // document.body.removeChild(helpPopoverContainer.current);
       }
     };
   }, []);
@@ -544,7 +545,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               onClick: (e) => {
                 if (!helpPopoverContainer.current) {
                   const container = document.createElement('div');
-                  helpPopoverContainer.current = container;
+                  helpPopoverContainer.current = createRoot(container);
                   document.body.appendChild(container);
                   const HelpComponent = operationDefinitionMap[operationType].helpComponent!;
                   const element = (
@@ -554,8 +555,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       title={operationDefinitionMap[operationType].helpComponentTitle}
                       closePopover={() => {
                         if (helpPopoverContainer.current) {
-                          ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-                          document.body.removeChild(helpPopoverContainer.current);
+                          helpPopoverContainer.current.unmount();
+                          // document.body.removeChild(helpPopoverContainer.current);
                           helpPopoverContainer.current = null;
                         }
                       }}
@@ -564,10 +565,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       <HelpComponent />
                     </WrappingHelpPopover>
                   );
-                  ReactDOM.render(element, helpPopoverContainer.current);
+                  helpPopoverContainer.current.render(element);
                 } else {
-                  ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-                  document.body.removeChild(helpPopoverContainer.current);
+                  helpPopoverContainer.current.unmount();
+                  // document.body.removeChild(helpPopoverContainer.current);
                   helpPopoverContainer.current = null;
                 }
               },
@@ -994,7 +995,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const ButtonGroupContent = showQuickFunctions ? quickFunctions : customParamEditor;
 
   const onFormatChange = useCallback(
-    (newFormat) => {
+    (newFormat: unknown) => {
       updateLayer(
         updateColumnParam({
           layer: state.layers[layerId],
@@ -1099,7 +1100,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
    * so before updating the layer the full insertOrReplaceColumn needs to be performed
    */
   const updateAdvancedOption = useCallback(
-    (newLayer) => {
+    (newLayer: FormBasedLayer) => {
       if (selectedColumn) {
         setStateWrapper(
           // formula need to regenerate from scratch

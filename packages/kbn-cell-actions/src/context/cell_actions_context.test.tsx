@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { CellActionsProvider, useCellActionsContext } from './cell_actions_context';
@@ -29,6 +29,7 @@ describe('CellActionContext', () => {
 
   it('should throw error when context not found', () => {
     const { result } = renderHook(useCellActionsContext);
+    // @ts-expect-error
     expect(result.error).toEqual(
       new Error('No CellActionsContext found. Please wrap the application with CellActionsProvider')
     );

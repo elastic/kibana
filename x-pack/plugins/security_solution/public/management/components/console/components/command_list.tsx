@@ -125,7 +125,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   }, []);
 
   const updateInputText = useCallback(
-    (text) => () => {
+    (text: any) => () => {
       dispatch({
         type: 'updateInputTextEnteredState',
         payload: () => {
@@ -218,7 +218,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const getTableColumns = useCallback(
-    (commandsByGroup) => {
+    (commandsByGroup: any) => {
       const groupLabel = commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel;
       const groupTestIdSuffix = convertToTestId(groupLabel);
 
@@ -294,7 +294,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const getFilteredCommands = useCallback(
-    (commandsByGroup): CommandDefinition[] =>
+    (commandsByGroup: any): CommandDefinition[] =>
       commandsByGroup.filter(
         (current: CommandDefinition) => current.name !== 'help' && current.name !== 'clear'
       ),

@@ -50,8 +50,8 @@ export const getUseActionColumnHook =
         refresh: alertsTableRefresh,
         clearSelection,
         ecsAlert: alert,
-        nonEcsData,
-      }) => {
+        nonEcsData
+      }: any) => {
         const timelineItem: TimelineItem = {
           _id: (alert as Ecs)._id,
           _index: (alert as Ecs)._index,

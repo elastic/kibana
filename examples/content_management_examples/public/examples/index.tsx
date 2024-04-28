@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -23,7 +23,8 @@ export const renderApp = (
   { contentManagement, savedObjectsTaggingOss }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <Router history={history}>
       <RedirectAppLinks coreStart={core}>
         <EuiPageTemplate offset={0}>
@@ -82,9 +83,8 @@ export const renderApp = (
           </EuiPageTemplate.Section>
         </EuiPageTemplate>
       </RedirectAppLinks>
-    </Router>,
-    element
+    </Router>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

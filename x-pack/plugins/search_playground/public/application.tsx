@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -25,8 +25,8 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const navigation = services.navigation;
-
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
@@ -38,6 +38,7 @@ export const renderApp = (
               }}
             >
               <KibanaPageTemplate
+                // @ts-expect-error
                 pageChrome={[
                   i18n.translate('xpack.searchPlayground.breadcrumb', {
                     defaultMessage: 'Playground',
@@ -57,9 +58,8 @@ export const renderApp = (
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
-    element
+    </KibanaThemeProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

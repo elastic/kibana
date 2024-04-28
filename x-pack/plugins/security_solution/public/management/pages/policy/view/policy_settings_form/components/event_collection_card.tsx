@@ -254,7 +254,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
     const isChecked: boolean = get(policy, keyPath);
 
     const checkboxOnChangeHandler = useCallback(
-      (ev) => {
+      (ev: any) => {
         const updatedPolicy = cloneDeep(policy);
         set(updatedPolicy, keyPath, ev.target.checked);
 

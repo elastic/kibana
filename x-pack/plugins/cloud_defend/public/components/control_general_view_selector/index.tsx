@@ -70,7 +70,7 @@ const BooleanCondition = ({
 }: BooleanConditionProps) => {
   const value = selector[prop as keyof Selector] as boolean;
   const onChange = useCallback(
-    (e) => {
+    (e: any) => {
       onChangeBooleanCondition(prop, e.target.checked);
     },
     [onChangeBooleanCondition, prop]

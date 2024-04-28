@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../services/discover_state';
@@ -123,8 +123,8 @@ describe('useDiscoverHistogram', () => {
       isPlainRecord,
     };
 
-    const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
-      <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
+    const Wrapper: React.FC<PropsWithChildren> = ({ children }) => (
+      <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
     );
 
     const hook = renderHook(

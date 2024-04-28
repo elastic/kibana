@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { debounceTime, first, map } from 'rxjs';
 
@@ -63,7 +63,7 @@ export class TimeSliderControlEmbeddable
   public deferEmbeddedLoad = true;
 
   private inputSubscription: Subscription;
-  private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null;
 
   // state management
   public select: TimeSliderReduxEmbeddableTools['select'];
@@ -382,11 +382,11 @@ export class TimeSliderControlEmbeddable
   }
 
   public render = (node: HTMLElement) => {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.node = node;
-    ReactDOM.render(
+    this.root = createRoot(node);
+    this.root.render(
       <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <TimeSliderControlContext.Provider value={this}>
           <TimeSlider
@@ -398,8 +398,7 @@ export class TimeSliderControlEmbeddable
             }}
           />
         </TimeSliderControlContext.Provider>
-      </KibanaThemeProvider>,
-      node
+      </KibanaThemeProvider>
     );
   };
 

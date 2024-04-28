@@ -25,8 +25,8 @@ jest.mock('@tanstack/react-query', () => {
 
 describe('useGetEndpointPendingActionsSummary hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
-    Parameters<typeof useGetEndpointPendingActionsSummary>,
-    ReturnType<typeof useGetEndpointPendingActionsSummary>
+    ReturnType<typeof useGetEndpointPendingActionsSummary>,
+    Parameters<typeof useGetEndpointPendingActionsSummary>
   >;
   let http: AppContextTestRender['coreStart']['http'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;

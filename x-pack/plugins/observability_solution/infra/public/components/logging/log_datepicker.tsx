@@ -27,7 +27,11 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
   onStopStreaming,
 }) => {
   const handleTimeChange = useCallback(
-    ({ start, end, isInvalid }) => {
+    ({
+      start,
+      end,
+      isInvalid
+    }: any) => {
       if (onUpdateDateRange && !isInvalid) {
         onUpdateDateRange({ startDateExpression: start, endDateExpression: end });
       }

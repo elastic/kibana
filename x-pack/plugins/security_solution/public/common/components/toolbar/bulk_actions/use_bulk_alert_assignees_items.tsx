@@ -43,7 +43,7 @@ export const useBulkAlertAssigneesItems = ({
   const setAlertAssignees = useSetAlertAssignees();
 
   const handleOnAlertAssigneesSubmit = useCallback(
-    async (assignees, ids, onSuccess, setIsLoading) => {
+    async (assignees: any, ids: any, onSuccess: any, setIsLoading: any) => {
       if (setAlertAssignees) {
         await setAlertAssignees(assignees, ids, onSuccess, setIsLoading);
       }

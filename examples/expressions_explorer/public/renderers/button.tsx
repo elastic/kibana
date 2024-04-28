@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -42,8 +42,13 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
       </div>
     );
 
-    ReactDOM.render(renderDebug(), domNode, () => handlers.done());
+    const root = createRoot(domNode);
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    root.render(renderDebug(),
+
+      // () => handlers.done()
+    );
+
+    handlers.onDestroy(() => root.unmount());
   },
 };

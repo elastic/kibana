@@ -48,7 +48,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
   ];
 
   const onNumberChange = useCallback(
-    (e) => {
+    (e: any) => {
       const floatVal = parseFloat(e.target.value);
       const varValue = isNaN(floatVal) ? '' : floatVal;
       onChange(varValue);

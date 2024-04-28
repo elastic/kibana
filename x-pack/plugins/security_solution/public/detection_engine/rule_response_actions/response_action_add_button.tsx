@@ -46,7 +46,7 @@ export const ResponseActionAddButton = ({
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   const handleAddActionType = useCallback(
-    (item) => {
+    (item: any) => {
       setAddResponseActionButtonShown(false);
       addActionType();
 

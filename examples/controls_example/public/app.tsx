@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AppMountParameters } from '@kbn/core/public';
@@ -38,12 +38,12 @@ export const renderApp = async (
       <div>{'Install web logs sample data to run controls examples.'}</div>
     );
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
       <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
-    </KibanaPageTemplate>,
-    element
+    </KibanaPageTemplate>
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

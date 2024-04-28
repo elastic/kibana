@@ -50,7 +50,7 @@ export function ChartConfigPanel({
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
 
   const updatePanelState = useCallback(
-    (datasourceState, visualizationState, visualizationId) => {
+    (datasourceState: any, visualizationState: any, visualizationId?: string) => {
       const updatedSuggestion: Suggestion = {
         ...currentSuggestionContext?.suggestion,
         visualizationId: visualizationId ?? currentSuggestionContext?.suggestion?.visualizationId,
@@ -66,7 +66,7 @@ export function ChartConfigPanel({
   );
 
   const updateSuggestion = useCallback(
-    (attributes) => {
+    (attributes: UnifiedHistogramVisContext['attributes']) => {
       const updatedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext: {
           ...visContext,

@@ -36,8 +36,8 @@ const CaseCallOutComponent = ({
 }: CaseCallOutProps) => {
   const { navigateToConfigureCases } = useConfigureCasesNavigation();
   const handleCallOut = useCallback(
-    (e) => {
-      e.preventDefault();
+    (ev: React.MouseEvent) => {
+      ev.preventDefault();
       // if theres connectors open dropdown editor
       // if no connectors, redirect to create case page
       if (hasConnectors) {

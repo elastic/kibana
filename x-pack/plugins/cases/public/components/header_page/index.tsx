@@ -56,7 +56,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const navigateToAllCasesClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       if (e) {
         e.preventDefault();
       }

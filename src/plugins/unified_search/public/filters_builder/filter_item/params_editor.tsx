@@ -38,14 +38,14 @@ export function ParamsEditor({
 }: ParamsEditorProps) {
   const { disabled, suggestionsAbstraction } = useContext(FiltersBuilderContextType);
   const onParamsChange = useCallback(
-    (selectedParams) => {
+    (selectedParams: any) => {
       onHandleParamsChange(selectedParams);
     },
     [onHandleParamsChange]
   );
 
   const onParamsUpdate = useCallback(
-    (value) => {
+    (value: any) => {
       onHandleParamsUpdate(value);
     },
     [onHandleParamsUpdate]

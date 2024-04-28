@@ -102,7 +102,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     [toasts]
   );
 
-  const initializeListRules = useCallback(async (result) => {
+  const initializeListRules = useCallback(async (result: any) => {
     const listRules = await getListRules(result.list_id);
     setLinkedRules(listRules);
   }, []);
@@ -329,7 +329,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     return linkedRules.filter((rule) => !newLinkedRules.includes(rule));
   }, [linkedRules, newLinkedRules]);
 
-  const onRuleSelectionChange = useCallback((value) => {
+  const onRuleSelectionChange = useCallback((value: any) => {
     setNewLinkedRules(value);
     setDisableManageButton(false);
   }, []);

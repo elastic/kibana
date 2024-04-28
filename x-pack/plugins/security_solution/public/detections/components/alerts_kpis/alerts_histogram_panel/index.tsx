@@ -160,7 +160,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     });
 
     const goToDetectionEngine = useCallback(
-      (ev) => {
+      (ev: any) => {
         ev.preventDefault();
         navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,

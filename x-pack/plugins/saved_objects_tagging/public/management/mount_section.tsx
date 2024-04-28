@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -49,8 +49,9 @@ export const mountSection = async ({
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
   const assignableTypes = await assignmentService.getAssignableTypes();
   coreStart.chrome.docTitle.change(title);
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <RedirectToHomeIfUnauthorized applications={coreStart.application}>
         <TagManagementPage
@@ -63,12 +64,11 @@ export const mountSection = async ({
           assignableTypes={assignableTypes}
         />
       </RedirectToHomeIfUnauthorized>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

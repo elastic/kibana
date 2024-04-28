@@ -28,6 +28,7 @@ describe('Page Title', () => {
 
   const renderComp = (props: PageTitleProps) => {
     return render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <PageTitle {...props} />
       </IntlProvider>

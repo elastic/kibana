@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useSocTrends } from './use_soc_trends';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import * as i18n from '../translations';
@@ -43,13 +43,13 @@ describe('useSocTrends', () => {
   });
   it('loads initial state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useSocTrends({ skip: false, signalIndexName: '.alerts-default' }),
         {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stats: [
           {

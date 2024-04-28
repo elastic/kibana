@@ -39,7 +39,7 @@ import { useIsMainApplication } from '../../../../common/hooks';
 const DEFAULT_TIMERANGE = {
   from: 'now-7d',
   to: 'now',
-  mode: 'relative',
+  mode: 'relative' as const,
 };
 
 type LensIncomingEmbeddablePackage = Omit<EmbeddablePackageState, 'input'> & {
@@ -86,7 +86,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes, timerange) => {
+    (
+      attributes: TypedLensByValueInput['attributes'],
+      timerange: TypedLensByValueInput['timeRange']
+    ) => {
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: timerange,
@@ -103,7 +106,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleUpdate = useCallback(
-    (attributes, timerange, position) => {
+    (
+      attributes: TypedLensByValueInput['attributes'],
+      timerange: TypedLensByValueInput['timeRange'],
+      position: EuiMarkdownAstNodePosition
+    ) => {
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -151,28 +158,31 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   ]);
 
   const handleEditInLensClick = useCallback(
-    (lensAttributes?, timeRange = DEFAULT_TIMERANGE) => {
-      storage.set(DRAFT_COMMENT_STORAGE_ID, {
-        commentId: commentEditorContext?.editorId,
-        comment: commentEditorContext?.value,
-        position: node?.position,
-        caseTitle: commentEditorContext?.caseTitle,
-        caseTags: commentEditorContext?.caseTags,
-      });
+    (
+      lensAttributes?: TypedLensByValueInput['attributes'] | undefined,
+      timeRange: TypedLensByValueInput['timeRange'] = DEFAULT_TIMERANGE
+    ) => {
+      if (node?.attributes || lensAttributes) {
+        storage.set(DRAFT_COMMENT_STORAGE_ID, {
+          commentId: commentEditorContext?.editorId,
+          comment: commentEditorContext?.value,
+          position: node?.position,
+          caseTitle: commentEditorContext?.caseTitle,
+          caseTags: commentEditorContext?.caseTags,
+        });
 
-      lens?.navigateToPrefilledEditor(
-        lensAttributes || node?.attributes
-          ? {
-              id: '',
-              timeRange,
-              attributes: lensAttributes || node?.attributes,
-            }
-          : undefined,
-        {
-          originatingApp: currentAppId,
-          originatingPath,
-        }
-      );
+        lens?.navigateToPrefilledEditor(
+          {
+            id: '',
+            timeRange,
+            attributes: (lensAttributes || node?.attributes) as TypedLensByValueInput['attributes'],
+          },
+          {
+            originatingApp: currentAppId,
+            originatingPath,
+          }
+        );
+      }
     },
     [
       storage,
@@ -189,6 +199,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleChooseLensSO = useCallback(
+    // @ts-expect-error
     (savedObjectId, savedObjectType, fullName, savedObject) => {
       handleEditInLensClick({
         ...savedObject.attributes,

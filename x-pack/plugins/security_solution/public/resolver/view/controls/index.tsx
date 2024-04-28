@@ -57,7 +57,7 @@ export const GraphControls = React.memo(
     const colorMap = useColors();
 
     const setActivePopover = useCallback(
-      (value) => {
+      (value: any) => {
         if (value === activePopover) {
           setPopover(null);
         } else {
@@ -69,7 +69,7 @@ export const GraphControls = React.memo(
 
     const closePopover = useCallback(() => setPopover(null), []);
 
-    const handleZoomAmountChange: EuiRangeProps['onChange'] = useCallback(
+    const handleZoomAmountChange: NonNullable<EuiRangeProps['onChange']> = useCallback(
       (event) => {
         const valueAsNumber = parseFloat(
           (event as React.ChangeEvent<HTMLInputElement>).target.value

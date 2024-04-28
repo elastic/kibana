@@ -142,7 +142,8 @@ export const useAddBulkToTimelineAction = ({
   });
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: { id: string; isLoading: boolean }) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 
@@ -190,8 +191,10 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
+  const onActionClick:
+    | NonNullable<BulkActionsConfig['onClick']>
+    | NonNullable<CustomBulkAction['onClick']> = useCallback(
+    (items, isAllSelected, setLoading, clearSelection) => {
       if (!items) return;
       /*
        * Trigger actions table passed isAllSelected param

@@ -139,7 +139,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
-  const onUpdateFilters = useCallback((newFilters) => {
+  const onUpdateFilters = useCallback((newFilters: any) => {
     dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
   }, []);
 

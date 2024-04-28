@@ -50,7 +50,7 @@ export const useInvestigateInTimeline = ({
   const { startTransaction } = useStartTransaction();
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: any) => dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 

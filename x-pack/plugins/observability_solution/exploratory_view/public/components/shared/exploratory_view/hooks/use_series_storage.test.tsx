@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
@@ -135,7 +135,7 @@ describe('userSeriesStorage', function () {
   });
 
   it('ensures that only one series has a breakdown', () => {
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -166,7 +166,7 @@ describe('userSeriesStorage', function () {
 
   it('sets reportType when calling applyChanges', () => {
     const setStorage = jest.fn();
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -197,7 +197,7 @@ describe('userSeriesStorage', function () {
 
   it('returns reportType in state, not url storage, from hook', () => {
     const setStorage = jest.fn();
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -225,7 +225,7 @@ describe('userSeriesStorage', function () {
   it('ensures that telemetry is called', () => {
     const trackEvent = jest.fn();
     jest.spyOn(useTrackMetric, 'useUiTracker').mockReturnValue(trackEvent);
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{

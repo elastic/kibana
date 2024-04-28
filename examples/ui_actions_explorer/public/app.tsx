@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import {
   EuiPage,
@@ -59,7 +59,8 @@ const ActionsExplorer = ({ uiActionsStartService, core }: Props) => {
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ActionsExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<ActionsExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

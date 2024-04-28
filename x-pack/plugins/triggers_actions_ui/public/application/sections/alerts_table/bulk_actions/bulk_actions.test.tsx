@@ -13,6 +13,7 @@ import { AlertsTable } from '../alerts_table';
 import {
   Alerts,
   AlertsField,
+  AlertsTableConfigurationRegistry,
   AlertsTableProps,
   BulkActionsConfig,
   BulkActionsState,
@@ -213,10 +214,10 @@ describe('AlertsTable.BulkActions', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
+    getRenderCellValue: (() =>
       jest.fn().mockImplementation((props) => {
         return `${props.colIndex}:${props.rowIndex}`;
-      }),
+      })) as unknown as AlertsTableConfigurationRegistry['getRenderCellValue'],
   };
 
   const casesMap = getCasesMockMap();

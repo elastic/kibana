@@ -49,7 +49,7 @@ export const ReputationService = React.memo(
       policy.windows.behavior_protection.reputation_service && protectionTurnedOn;
 
     const handleChange = useCallback(
-      (event) => {
+      (event: any) => {
         const newPayload = cloneDeep(policy);
         newPayload.windows.behavior_protection.reputation_service = event.target.checked;
         newPayload.mac.behavior_protection.reputation_service = event.target.checked;

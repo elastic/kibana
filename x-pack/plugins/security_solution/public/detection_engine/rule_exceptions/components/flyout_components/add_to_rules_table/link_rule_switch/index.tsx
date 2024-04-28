@@ -23,7 +23,9 @@ export const LinkRuleSwitch = memo(
       [linkedRules, rule.id]
     );
     const onLinkOrUnlinkRule = useCallback(
-      ({ target: { checked } }) => {
+      ({
+        target: { checked }
+      }: any) => {
         const newLinkedRules = !checked
           ? linkedRules?.filter((item) => item.id !== rule.id)
           : [...linkedRules, rule];

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
@@ -39,6 +39,8 @@ export async function openLinkEditorFlyout({
   mainFlyoutId, // used to manage the focus of this flyout after inidividual link editor flyout is closed
   parentDashboard,
 }: LinksEditorProps): Promise<UnorderedLink | undefined> {
+  const root = createRoot(ref.current!);
+
   const unmountFlyout = async () => {
     if (ref.current) {
       ref.current.children[1].className = 'linkEditor out';
@@ -46,7 +48,7 @@ export async function openLinkEditorFlyout({
     await new Promise(() => {
       // wait for close animation before unmounting
       setTimeout(() => {
-        if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+        if (root) root.unmount();
         focusMainFlyout(mainFlyoutId);
       }, 180);
     });
@@ -63,7 +65,8 @@ export async function openLinkEditorFlyout({
       await unmountFlyout();
     };
 
-    ReactDOM.render(
+
+    root.render(
       <KibanaThemeProvider theme={coreServices.theme}>
         <LinkEditor
           link={link}
@@ -71,8 +74,7 @@ export async function openLinkEditorFlyout({
           onClose={onCancel}
           parentDashboard={parentDashboard}
         />
-      </KibanaThemeProvider>,
-      ref.current
+      </KibanaThemeProvider>
     );
   }).catch(() => {
     // on reject (i.e. on cancel), just return the original list of links

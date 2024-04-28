@@ -117,7 +117,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   );
 
   const onChange = useCallback(
-    (selectedSystemPromptId) => {
+    (selectedSystemPromptId: any) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
         setIsSettingsModalVisible(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);

@@ -48,7 +48,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
   }, [clearSelection, refresh]);
 
   const handleApplyAssignees = useCallback(
-    async (assignees) => {
+    async (assignees: any) => {
       closePopoverMenu();
       if (onSubmit) {
         closePopoverMenu();

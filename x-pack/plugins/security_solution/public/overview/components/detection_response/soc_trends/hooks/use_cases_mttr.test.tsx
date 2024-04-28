@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseCasesMttr } from './use_cases_mttr';
 import { useCasesMttr } from './use_cases_mttr';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
 import * as i18n from '../translations';
@@ -55,10 +55,10 @@ describe('useCasesMttr', () => {
   });
   it('loads initial state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
+      const { result } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: true,
@@ -76,11 +76,11 @@ describe('useCasesMttr', () => {
       .mockReturnValueOnce({ mttr: 10000 })
       .mockReturnValue({ mttr: 5000 });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
+      const { result } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -103,11 +103,11 @@ describe('useCasesMttr', () => {
       .mockReturnValueOnce({ mttr: 5000 })
       .mockReturnValue({ mttr: 10000 });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
+      const { result } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '1h',
         isLoading: false,
@@ -130,11 +130,11 @@ describe('useCasesMttr', () => {
       mttr: 10000,
     });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
+      const { result } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -152,11 +152,11 @@ describe('useCasesMttr', () => {
       .mockReturnValueOnce({ mttr: null })
       .mockReturnValue({ mttr: 10000 });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
+      const { result } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -174,11 +174,11 @@ describe('useCasesMttr', () => {
       .mockReturnValueOnce({ mttr: 10000 })
       .mockReturnValue({ mttr: null });
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCasesMttr(props), {
+      const { result } = renderHook(() => useCasesMttr(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -200,11 +200,11 @@ describe('useCasesMttr', () => {
       });
     await act(async () => {
       let ourProps = props;
-      const { result, rerender, waitForNextUpdate } = renderHook(() => useCasesMttr(ourProps), {
+      const { result, rerender } = renderHook(() => useCasesMttr(ourProps), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -221,7 +221,7 @@ describe('useCasesMttr', () => {
         to: '2020-07-09T08:20:18.966Z',
       };
       rerender();
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -243,11 +243,11 @@ describe('useCasesMttr', () => {
       });
     await act(async () => {
       let ourProps = props;
-      const { result, rerender, waitForNextUpdate } = renderHook(() => useCasesMttr(ourProps), {
+      const { result, rerender } = renderHook(() => useCasesMttr(ourProps), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '2h',
         isLoading: false,
@@ -265,7 +265,7 @@ describe('useCasesMttr', () => {
       };
       rerender();
       rerender();
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,

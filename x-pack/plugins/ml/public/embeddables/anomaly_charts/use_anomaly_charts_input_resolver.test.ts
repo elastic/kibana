@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';

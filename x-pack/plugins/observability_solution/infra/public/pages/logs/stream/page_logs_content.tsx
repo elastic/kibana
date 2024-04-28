@@ -172,7 +172,7 @@ export const StreamPageLogsContent = React.memo<{
   const [, { setContextEntry }] = useViewLogInProviderContext();
 
   const handleDateRangeExtension = useCallback(
-    (newDateRange) => {
+    (newDateRange: any) => {
       updateDateRange(newDateRange);
 
       if (
@@ -195,7 +195,7 @@ export const StreamPageLogsContent = React.memo<{
   );
 
   const handlePagination = useCallback(
-    (params) => {
+    (params: any) => {
       reportVisiblePositions(params);
       if (!params.fromScroll) {
         return;

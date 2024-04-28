@@ -5,21 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { Component } from 'react';
+import React, { Component, PropsWithChildren } from 'react';
 import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface FilterBadgeErrorBoundaryProps {}
 
 interface FilterBadgeErrorBoundaryState {
   hasError: boolean;
 }
 
 export class FilterBadgeErrorBoundary extends Component<
-  FilterBadgeErrorBoundaryProps,
+  PropsWithChildren,
   FilterBadgeErrorBoundaryState
 > {
-  constructor(props: FilterBadgeErrorBoundaryProps) {
+  constructor(props: PropsWithChildren) {
     super(props);
     this.state = { hasError: false };
   }

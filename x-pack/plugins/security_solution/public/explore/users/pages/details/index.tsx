@@ -157,7 +157,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: any, interval: any) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

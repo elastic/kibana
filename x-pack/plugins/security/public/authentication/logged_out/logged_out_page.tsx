@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
@@ -47,12 +47,12 @@ export function renderLoggedOutPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...services}>
       <LoggedOutPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { mockQuery, mockAlertCountByRuleResult, parsedAlertCountByRuleResult } from './mock_data';
 import type {
@@ -53,7 +53,7 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_ind
 const renderUseAlertCountByRuleByStatus = (
   overrides: Partial<UseAlertCountByRuleByStatusProps> = {}
 ) =>
-  renderHook<UseAlertCountByRuleByStatusProps, ReturnType<UseAlertCountByRuleByStatus>>(() =>
+  renderHook<ReturnType<UseAlertCountByRuleByStatus>, UseAlertCountByRuleByStatusProps>(() =>
     useAlertCountByRuleByStatus({
       skip: false,
       field: 'test_field',

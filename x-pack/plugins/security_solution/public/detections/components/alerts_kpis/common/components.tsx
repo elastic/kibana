@@ -85,7 +85,7 @@ export const StackByComboBox = React.forwardRef(
     ref
   ) => {
     const onChange = useCallback(
-      (options) => {
+      (options: any) => {
         if (options && options.length > 0) {
           onSelect(options[0].value);
         } else {

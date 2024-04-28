@@ -234,22 +234,22 @@ jest.mock('../../../../../../hooks/use_request', () => ({
 describe('usePackagePolicy', () => {
   it('should load the package policy if this is a not an upgrade', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, waitForNextUpdate } = renderer.renderHook(() =>
+    const { result, } = renderer.renderHook(() =>
       usePackagePolicyWithRelatedData('package-policy-1', {})
     );
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.packagePolicy).toEqual(omit(mockPackagePolicy, 'id'));
   });
 
   it('should load the package policy if this is an upgrade', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, waitForNextUpdate } = renderer.renderHook(() =>
+    const { result, } = renderer.renderHook(() =>
       usePackagePolicyWithRelatedData('package-policy-1', {
         forceUpgrade: true,
       })
     );
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.packagePolicy).toMatchInlineSnapshot(`
       Object {
         "description": "Nginx description",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import * as React from 'react';
+import React from 'react';
 import { RuleActionsPopover } from './rule_actions_popover';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Rule } from '../../../..';
@@ -48,6 +48,7 @@ describe('rule_actions_popover', () => {
   it('renders all the buttons', () => {
     const rule = mockRule();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}
@@ -72,6 +73,7 @@ describe('rule_actions_popover', () => {
   it('calls onDelete', async () => {
     const rule = mockRule();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}
@@ -101,6 +103,7 @@ describe('rule_actions_popover', () => {
   it('disables the rule', async () => {
     const rule = mockRule();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}
@@ -129,6 +132,7 @@ describe('rule_actions_popover', () => {
   it('enables the rule', async () => {
     const rule = mockRule({ enabled: false });
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}
@@ -158,6 +162,7 @@ describe('rule_actions_popover', () => {
   it('calls onApiKeyUpdate', async () => {
     const rule = mockRule();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}
@@ -187,6 +192,7 @@ describe('rule_actions_popover', () => {
   it('calls onRunRule', async () => {
     const rule = mockRule();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}
@@ -216,6 +222,7 @@ describe('rule_actions_popover', () => {
   it('disables buttons when the user does not have enough permission', async () => {
     const rule = mockRule();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleActionsPopover
           rule={rule}

@@ -110,7 +110,7 @@ export const TableVisBasic = memo(
       });
 
     const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
-      ({ columnId, width }) => {
+      ({ columnId, width }: any) => {
         const colIndex = columns.findIndex((c) => c.id === columnId);
         setColumnsWidth({
           colIndex,

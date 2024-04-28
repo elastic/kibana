@@ -88,7 +88,10 @@ export function MobileLocationStats({
   const previousPeriod = locationStatsData?.previousPeriod;
 
   const getComparisonValueFormatter = useCallback(
-    ({ currentPeriodValue, previousPeriodValue }) => {
+    ({
+      currentPeriodValue,
+      previousPeriodValue
+    }: any) => {
       const comparisonDiffValue = calculateDiffPercentageAndFormat(
         currentPeriodValue,
         previousPeriodValue

@@ -212,7 +212,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Callbacks
   const onTableChangeCallback = useCallback(
-    ({ page = {}, sort = {} }) => {
+    ({
+      page = {},
+      sort = {}
+    }: any) => {
       const { index, size } = page;
       const { field, direction } = sort;
 

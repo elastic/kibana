@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
@@ -31,12 +31,12 @@ describe('useGetCaseUserActionsStats', () => {
   });
 
   it('returns proper state on getCaseUserActionsStats', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useGetCaseUserActionsStats(basicCase.id),
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -61,11 +61,11 @@ describe('useGetCaseUserActionsStats', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+    renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
     expect(addError).toHaveBeenCalled();
@@ -74,11 +74,11 @@ describe('useGetCaseUserActionsStats', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCaseUserActionsStats');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+    renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
   });

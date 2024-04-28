@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -29,7 +29,8 @@ export const renderApp = (
   storage: Storage,
   kibanaVersion: string
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -52,9 +53,8 @@ export const renderApp = (
           </Router>
         </EuiErrorBoundary>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
-    element
+    </KibanaThemeProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

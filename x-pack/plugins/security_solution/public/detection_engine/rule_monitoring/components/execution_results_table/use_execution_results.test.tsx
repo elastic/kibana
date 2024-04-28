@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react';
 
 import { useExecutionResults } from './use_execution_results';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -60,9 +60,9 @@ describe('useExecutionResults', () => {
   it('calls the API via fetchRuleExecutionResults', async () => {
     const fetchRuleExecutionResults = jest.spyOn(api, 'fetchRuleExecutionResults');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(fetchRuleExecutionResults).toHaveBeenCalledTimes(1);
     expect(fetchRuleExecutionResults).toHaveBeenLastCalledWith(
@@ -71,7 +71,7 @@ describe('useExecutionResults', () => {
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result, } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -79,7 +79,7 @@ describe('useExecutionResults', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
+    // await waitFor();
 
     // It switches to a success state
     expect(result.current.isLoading).toEqual(false);
@@ -119,7 +119,7 @@ describe('useExecutionResults', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchRuleExecutionResults').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result, } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -127,7 +127,7 @@ describe('useExecutionResults', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    // await waitFor();
 
     // It switches to an error state
     expect(result.current.isLoading).toEqual(false);

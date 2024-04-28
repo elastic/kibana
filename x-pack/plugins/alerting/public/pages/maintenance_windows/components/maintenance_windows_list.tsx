@@ -116,13 +116,13 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const { euiTheme } = useEuiTheme();
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback(
-      (id) => navigateToEditMaintenanceWindows(id),
+      (id: string ) => navigateToEditMaintenanceWindows(id),
       [navigateToEditMaintenanceWindows]
     );
     const { mutate: finishMaintenanceWindow, isLoading: isLoadingFinish } =
       useFinishMaintenanceWindow();
     const onCancel = useCallback(
-      (id) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
+      (id: string) => finishMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishMaintenanceWindow, refreshData]
     );
     const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =

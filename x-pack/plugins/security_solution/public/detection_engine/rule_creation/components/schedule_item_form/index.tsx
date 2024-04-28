@@ -107,7 +107,7 @@ export const ScheduleItem = ({
   const { value, setValue } = field;
 
   const onChangeTimeType = useCallback(
-    (e) => {
+    (e: any) => {
       setTimeType(e.target.value);
       setValue(`${timeVal}${e.target.value}`);
     },
@@ -115,7 +115,7 @@ export const ScheduleItem = ({
   );
 
   const onChangeTimeVal = useCallback(
-    (e) => {
+    (e: any) => {
       const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
       setTimeVal(sanitizedValue);
       setValue(`${sanitizedValue}${timeType}`);

@@ -101,7 +101,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const debouncedSetSearchTimelineValue = useMemo(() => debounce(500, setSearchTimelineValue), []);
 
   const onSearchTimeline = useCallback(
-    (val) => {
+    (val: any) => {
       debouncedSetSearchTimelineValue(val);
     },
     [debouncedSetSearchTimelineValue]
@@ -134,7 +134,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [heightTrigger, pageSize]
   );
 
-  const renderTimelineOption = useCallback((option, searchValue) => {
+  const renderTimelineOption = useCallback((option: any, searchValue: any) => {
     const title: string = isUntitled({ ...option, title: option.timelineTitle })
       ? i18nTimeline.UNTITLED_TIMELINE
       : option.timelineTitle;
@@ -181,7 +181,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   }, []);
 
   const handleTimelineChange = useCallback(
-    (options) => {
+    (options: any) => {
       const selectedTimeline = options.filter(
         (option: { checked: string }) => option.checked === 'on'
       );
@@ -200,7 +200,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   );
 
   const EuiSelectableContent = useCallback(
-    (list, search) => (
+    (list: any, search: any) => (
       <>
         {search}
         {list}

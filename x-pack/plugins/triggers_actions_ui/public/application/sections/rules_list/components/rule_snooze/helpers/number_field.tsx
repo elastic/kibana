@@ -18,9 +18,9 @@ export const NumberField: React.FC<
   const max = typeof props.max !== 'undefined' ? props.max : Infinity;
 
   const onChange = useCallback(
-    (e) => {
+    (e: { target: { value: string } }) => {
       const { value } = e.target;
-      const isValid = !isNaN(Number(value)) && value >= min && value <= max;
+      const isValid = !isNaN(Number(value)) && Number(value) >= min && Number(value) <= max;
       if (isValid || value === '') {
         setDisplayValue(value);
       }
@@ -31,7 +31,7 @@ export const NumberField: React.FC<
     [props, setDisplayValue, max, min]
   );
 
-  const onBlur = useCallback(
+  const onBlur: NonNullable<EuiFieldNumberProps['onBlur']> = useCallback(
     (e) => {
       if (isNaN(Number(displayValue)) || displayValue === '') {
         setDisplayValue(props.value);

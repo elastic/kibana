@@ -29,7 +29,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
     );
 
     const onKeyDown = useCallback(
-      (event) => {
+      (event: any) => {
         if (event.key === 'Enter' && !event.shiftKey && value.trim().length > 0) {
           event.preventDefault();
           onPromptSubmit(event.target.value?.trim());

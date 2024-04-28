@@ -14,6 +14,7 @@ const PARTIAL_TOUR_TEXT = 'Some agents have become inactive and have been hidden
 
 const renderComponent = (props: React.ComponentProps<typeof AgentStatusFilter>) => {
   return render(
+    // @ts-expect-error
     <IntlProvider timeZone="UTC" locale="en">
       <AgentStatusFilter {...props} />
     </IntlProvider>

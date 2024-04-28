@@ -32,7 +32,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
       });
     },
   });
-  const onChange = useCallback((e) => {
+  const onChange = useCallback((e: any) => {
     setValue(e.target.value);
   }, []);
   const onCancel = useCallback(() => {
@@ -40,7 +40,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
   }, [listItem]);
 
   const onSave = useCallback(
-    async (newValue) => {
+    async (newValue: any) => {
       await patchListItemMutation.mutateAsync({
         id: listItem.id,
         value: newValue,

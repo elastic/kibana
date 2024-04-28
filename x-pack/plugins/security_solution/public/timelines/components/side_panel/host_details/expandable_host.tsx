@@ -78,7 +78,7 @@ export const ExpandableHostDetails = ({
     startDate: from,
   });
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: any, interval: any) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

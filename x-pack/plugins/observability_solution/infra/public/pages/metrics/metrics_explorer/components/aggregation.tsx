@@ -57,7 +57,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
   };
 
   const handleChange = useCallback(
-    (e) => {
+    (e: any) => {
       const aggregation =
         (metricsExplorerAggregationRT.is(e.target.value) && e.target.value) || 'avg';
       onChange(aggregation);
@@ -77,6 +77,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     <EuiSelect
       data-test-subj="infraMetricsExplorerAggregationPickerSelect"
       aria-label={placeholder}
+      // @ts-expect-error
       placeholder={placeholder}
       fullWidth
       value={options.aggregation}

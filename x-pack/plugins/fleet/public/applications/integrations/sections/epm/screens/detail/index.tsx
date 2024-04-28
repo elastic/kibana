@@ -370,7 +370,7 @@ export function Detail() {
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)

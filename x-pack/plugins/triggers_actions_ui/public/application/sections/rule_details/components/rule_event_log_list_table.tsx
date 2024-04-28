@@ -197,7 +197,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, []);
 
   const onError = useCallback(
-    (e) => {
+    (e: any) => {
       if (e.body.statusCode === 413) {
         return;
       }
@@ -309,7 +309,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, []);
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -319,7 +319,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }

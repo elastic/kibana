@@ -6,7 +6,7 @@
  */
 import { BehaviorSubject } from 'rxjs';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLicense } from './use_license';
 import { useKibana } from '../../common/lib/kibana';
 

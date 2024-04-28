@@ -226,7 +226,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     );
 
     const handleNewConversationDefaultChange = useCallback(
-      (e) => {
+      (e: any) => {
         const isChecked = e.target.checked;
 
         if (selectedSystemPrompt != null) {

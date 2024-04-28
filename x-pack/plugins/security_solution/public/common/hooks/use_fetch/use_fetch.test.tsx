@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { RequestName } from './request_names';
 import type { OptionsParam, RequestFnParam, Result } from './use_fetch';
 import { useFetch } from './use_fetch';
@@ -33,7 +33,7 @@ type UseFetchParams = [RequestName, RequestFnParam<Parameters, string>, OptionsP
 const abortController = new AbortController();
 
 const renderUseFetch = (options?: OptionsParam<Parameters>) =>
-  renderHook<UseFetchParams, Result<Parameters, string, unknown>>(() =>
+  renderHook<Result<Parameters, string, unknown>, UseFetchParams>(() =>
     useFetch(requestName, mockFetchFn, options)
   );
 
@@ -55,7 +55,7 @@ describe('useFetch', () => {
   });
 
   it('should call fetch', async () => {
-    const { result, waitForNextUpdate } = renderUseFetch();
+    const { result, } = renderUseFetch();
 
     expect(result.current.data).toEqual(undefined);
     expect(result.current.isLoading).toEqual(false);
@@ -63,7 +63,7 @@ describe('useFetch', () => {
 
     await act(async () => {
       result.current.fetch(parameters);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current.data).toEqual(response);
@@ -73,7 +73,7 @@ describe('useFetch', () => {
   });
 
   it('should call fetch if initialParameters option defined', async () => {
-    const { result, waitForNextUpdate } = renderUseFetch({ initialParameters: parameters });
+    const { result, } = renderUseFetch({ initialParameters: parameters });
 
     expect(result.current.data).toEqual(undefined);
     expect(result.current.isLoading).toEqual(true);
@@ -82,7 +82,7 @@ describe('useFetch', () => {
     expect(mockFetchFn).toHaveBeenCalledWith(parameters, abortController.signal);
 
     await act(async () => {
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current.data).toEqual(response);
@@ -91,14 +91,14 @@ describe('useFetch', () => {
   });
 
   it('should refetch with same parameters', async () => {
-    const { result, waitForNextUpdate } = renderUseFetch({ initialParameters: parameters });
+    const { result, } = renderUseFetch({ initialParameters: parameters });
 
     expect(mockFetchFn).toHaveBeenCalledTimes(1);
     expect(mockFetchFn).toHaveBeenCalledWith(parameters, abortController.signal);
 
     await act(async () => {
       result.current.refetch();
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(mockFetchFn).toHaveBeenCalledTimes(1);
@@ -106,7 +106,7 @@ describe('useFetch', () => {
   });
 
   it('should not call fetch if disabled option defined', async () => {
-    const { result, waitForNextUpdate } = renderUseFetch({
+    const { result, } = renderUseFetch({
       initialParameters: parameters,
       disabled: true,
     });
@@ -119,7 +119,7 @@ describe('useFetch', () => {
 
     await act(async () => {
       result.current.fetch(parameters);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current.data).toEqual(undefined);
@@ -134,13 +134,13 @@ describe('useFetch', () => {
       return response;
     });
 
-    const { result, waitForNextUpdate, unmount } = renderUseFetch();
+    const { result, unmount } = renderUseFetch();
 
     expect(result.current.data).toEqual(undefined);
 
     await act(async () => {
       result.current.fetch(parameters);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current.data).toEqual(undefined);
@@ -152,13 +152,13 @@ describe('useFetch', () => {
       throw new Error();
     });
 
-    const { result, waitForNextUpdate, unmount } = renderUseFetch();
+    const { result, unmount } = renderUseFetch();
 
     expect(result.current.error).toEqual(undefined);
 
     await act(async () => {
       result.current.fetch(parameters);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current.error).toEqual(undefined);
@@ -168,7 +168,7 @@ describe('useFetch', () => {
     const firstAbortCtrl = new AbortController();
     const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
-    const { result, waitForNextUpdate } = renderUseFetch({ initialParameters: parameters });
+    const { result, } = renderUseFetch({ initialParameters: parameters });
 
     mockFetchFn.mockImplementationOnce(async () => {
       result.current.fetch(parameters);
@@ -176,7 +176,7 @@ describe('useFetch', () => {
     });
 
     await act(async () => {
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(firstAbortCtrl.signal.aborted).toEqual(true);
@@ -188,7 +188,7 @@ describe('useFetch', () => {
     const firstAbortCtrl = new AbortController();
     const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
-    const { result, waitForNextUpdate } = renderUseFetch();
+    const { result, } = renderUseFetch();
 
     mockFetchFn.mockImplementationOnce(async () => {
       result.current.fetch(parameters);
@@ -197,7 +197,7 @@ describe('useFetch', () => {
 
     await act(async () => {
       result.current.fetch(parameters);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(firstAbortCtrl.signal.aborted).toEqual(true);
@@ -207,11 +207,11 @@ describe('useFetch', () => {
 
   describe('APM tracking', () => {
     it('should track with request name', async () => {
-      const { result, waitForNextUpdate } = renderUseFetch();
+      const { result, } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
-        await waitForNextUpdate();
+        // await waitFor();
       });
 
       expect(mockStartTracking).toHaveBeenCalledTimes(1);
@@ -219,12 +219,12 @@ describe('useFetch', () => {
     });
 
     it('should track each request', async () => {
-      const { result, waitForNextUpdate } = renderUseFetch({
+      const { result, } = renderUseFetch({
         initialParameters: parameters,
       });
 
       await act(async () => {
-        await waitForNextUpdate();
+        // await waitFor();
       });
 
       expect(mockFetchFn).toHaveBeenCalledTimes(1);
@@ -234,7 +234,7 @@ describe('useFetch', () => {
 
       await act(async () => {
         result.current.fetch(parameters);
-        await waitForNextUpdate();
+        // await waitFor();
       });
 
       expect(mockFetchFn).toHaveBeenCalledTimes(2);
@@ -243,11 +243,11 @@ describe('useFetch', () => {
     });
 
     it('should end success', async () => {
-      const { result, waitForNextUpdate } = renderUseFetch();
+      const { result, } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
-        await waitForNextUpdate();
+        // await waitFor();
       });
 
       expect(mockEndTracking).toHaveBeenCalledTimes(1);
@@ -263,11 +263,11 @@ describe('useFetch', () => {
         throw Error('request aborted');
       });
 
-      const { result, waitForNextUpdate } = renderUseFetch();
+      const { result, } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
-        await waitForNextUpdate();
+        // await waitFor();
       });
 
       expect(mockEndTracking).toHaveBeenCalledTimes(1);
@@ -281,11 +281,11 @@ describe('useFetch', () => {
         throw Error('request error');
       });
 
-      const { result, waitForNextUpdate } = renderUseFetch();
+      const { result, } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
-        await waitForNextUpdate();
+        // await waitFor();
       });
 
       expect(mockEndTracking).toHaveBeenCalledTimes(1);

@@ -109,7 +109,7 @@ export const CreateSharedListFlyout = memo(
     ]);
 
     const handleCreateSuccess = useCallback(
-      (response) => {
+      (response: any) => {
         addSuccess({
           text: getSuccessText(newListDetails.name),
           title: SUCCESS_TITLE,
@@ -122,7 +122,7 @@ export const CreateSharedListFlyout = memo(
     );
 
     const handleCreateError = useCallback(
-      (error) => {
+      (error: any) => {
         if (!error.message.includes('AbortError') && !error?.body?.message.includes('AbortError')) {
           addError(error, {
             title: translate.translate(

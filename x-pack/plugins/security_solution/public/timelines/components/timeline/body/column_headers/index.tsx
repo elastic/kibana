@@ -163,7 +163,7 @@ export const ColumnHeadersComponent = ({
   );
 
   const DroppableContent = useCallback(
-    (dropProvided, snapshot) => (
+    (dropProvided: any, snapshot: any) => (
       <>
         <EventsThGroupData
           data-test-subj="headers-group"

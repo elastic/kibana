@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Component, CSSProperties, Ref, SVGProps } from 'react';
+import { Component, CSSProperties, Ref, SVGProps, PropsWithChildren } from 'react';
 import { ViewBoxParams } from '../../../common/types';
 import type { ShapeType } from './shape_factory';
 
-export type ShapeProps = {
-  shapeAttributes?: ShapeAttributes;
-  shapeContentAttributes?: ShapeContentAttributes &
-    SpecificShapeContentAttributes & { ref?: React.RefObject<any> };
-  textAttributes?: SvgTextAttributes;
-} & Component['props'] & { ref?: React.RefObject<any> };
+export type ShapeProps = PropsWithChildren<
+  {
+    shapeAttributes?: ShapeAttributes;
+    shapeContentAttributes?: ShapeContentAttributes &
+      SpecificShapeContentAttributes & { ref?: React.RefObject<any> };
+    textAttributes?: SvgTextAttributes;
+  } & Component['props'] & { ref?: React.RefObject<any> }
+>;
 
 export enum SvgElementTypes {
   polygon,

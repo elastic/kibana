@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { act, renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import * as rulesApi from '../../rule_management/api/api';
@@ -40,8 +40,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<
-    UseFetchOrCreateRuleExceptionListProps,
-    ReturnUseFetchOrCreateRuleExceptionList
+  ReturnUseFetchOrCreateRuleExceptionList,
+    UseFetchOrCreateRuleExceptionListProps
   >;
   const onError = jest.fn();
   const onSuccess = jest.fn();
@@ -94,7 +94,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       .mockResolvedValue(detectionExceptionList);
 
     render = (listType = detectionListType) =>
-      renderHook<UseFetchOrCreateRuleExceptionListProps, ReturnUseFetchOrCreateRuleExceptionList>(
+      renderHook<ReturnUseFetchOrCreateRuleExceptionList, UseFetchOrCreateRuleExceptionListProps>(
         () =>
           useFetchOrCreateRuleExceptionList({
             http: mockKibanaHttpService,
@@ -111,20 +111,20 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   });
 
   it('initializes hook', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result, } = render();
 
     // Should set isLoading to true while fetching
     expect(result.current).toEqual([true, null]);
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current).toEqual([false, detectionExceptionList]);
   });
 
   it('fetches the rule with the given ruleId', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = render();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      render();
+      // await waitFor();
+      // await waitFor();
       expect(fetchRuleById).toHaveBeenCalledTimes(1);
       expect(fetchRuleById).toHaveBeenCalledWith({
         id: ruleId,
@@ -142,34 +142,34 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('does not fetch the exceptions lists', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
         expect(fetchExceptionListById).not.toHaveBeenCalled();
       });
     });
     it('should create a new exception list', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
+        // await waitFor();
         expect(addExceptionList).toHaveBeenCalledTimes(1);
       });
     });
     it('should update the rule', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
+        // await waitFor();
+        // await waitFor();
         expect(patchRule).toHaveBeenCalledTimes(1);
       });
     });
     it('invokes onSuccess', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
+        // await waitFor();
+        // await waitFor();
         expect(onSuccess).toHaveBeenCalledWith(false);
       });
     });
@@ -178,39 +178,39 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   describe("when the rule has exception list references and 'detection' is passed in", () => {
     it('fetches the exceptions lists', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
+        // await waitFor();
         expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
       });
     });
     it('does not create a new exception list', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
         expect(addExceptionList).not.toHaveBeenCalled();
       });
     });
     it('does not update the rule', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
         expect(patchRule).not.toHaveBeenCalled();
       });
     });
     it('should set the exception list to be the fetched list', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        const { result, } = render();
+        // await waitFor();
+        // await waitFor();
         expect(result.current[1]).toEqual(detectionExceptionList);
       });
     });
     it('invokes onSuccess indicating', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
+        // await waitFor();
         expect(onSuccess).toHaveBeenCalledWith(false);
       });
     });
@@ -224,27 +224,27 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
       it('should create a new exception list', async () => {
         await act(async () => {
-          const { waitForNextUpdate } = render();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
+          render();
+          // await waitFor();
+          // await waitFor();
           expect(addExceptionList).toHaveBeenCalledTimes(1);
         });
       });
       it('should update the rule', async () => {
         await act(async () => {
-          const { waitForNextUpdate } = render();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
+          render();
+          // await waitFor();
+          // await waitFor();
+          // await waitFor();
           expect(patchRule).toHaveBeenCalledTimes(1);
         });
       });
       it('should set the exception list to be the newly created list', async () => {
         await act(async () => {
-          const { result, waitForNextUpdate } = render();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
+          const { result, } = render();
+          // await waitFor();
+          // await waitFor();
+          // await waitFor();
           expect(result.current[1]).toEqual(newDetectionExceptionList);
         });
       });
@@ -264,31 +264,31 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('fetches the exceptions lists', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render(endpointListType);
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        const { } = render(endpointListType);
+        // await waitFor();
+        // await waitFor();
         expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
       });
     });
     it('does not create a new exception list', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render(endpointListType);
-        await waitForNextUpdate();
+        const { } = render(endpointListType);
+        // await waitFor();
         expect(addExceptionList).not.toHaveBeenCalled();
       });
     });
     it('does not update the rule', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render(endpointListType);
-        await waitForNextUpdate();
+        const { } = render(endpointListType);
+        // await waitFor();
         expect(patchRule).not.toHaveBeenCalled();
       });
     });
     it('should set the exception list to be the fetched list', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = render(endpointListType);
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        const { result, } = render(endpointListType);
+        // await waitFor();
+        // await waitFor();
         expect(result.current[1]).toEqual(endpointExceptionList);
       });
     });
@@ -302,27 +302,27 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
       it('should create a new exception list', async () => {
         await act(async () => {
-          const { waitForNextUpdate } = render(endpointListType);
-          await waitForNextUpdate();
-          await waitForNextUpdate();
+          const { } = render(endpointListType);
+          // await waitFor();
+          // await waitFor();
           expect(addEndpointExceptionList).toHaveBeenCalledTimes(1);
         });
       });
       it('should update the rule', async () => {
         await act(async () => {
-          const { waitForNextUpdate } = render(endpointListType);
-          await waitForNextUpdate();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
+          const { } = render(endpointListType);
+          // await waitFor();
+          // await waitFor();
+          // await waitFor();
           expect(patchRule).toHaveBeenCalledTimes(1);
         });
       });
       it('should set the exception list to be the newly created list', async () => {
         await act(async () => {
-          const { result, waitForNextUpdate } = render(endpointListType);
-          await waitForNextUpdate();
-          await waitForNextUpdate();
-          await waitForNextUpdate();
+          const { result, } = render(endpointListType);
+          // await waitFor();
+          // await waitFor();
+          // await waitFor();
           expect(result.current[1]).toEqual(newEndpointExceptionList);
         });
       });
@@ -336,25 +336,25 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('exception list should be null', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = render();
-        await waitForNextUpdate();
+        const { result, } = render();
+        // await waitFor();
         expect(result.current[1]).toBeNull();
       });
     });
 
     it('isLoading should be false', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = render();
-        await waitForNextUpdate();
+        const { result, } = render();
+        // await waitFor();
         expect(result.current[0]).toEqual(false);
       });
     });
 
     it('should call error callback', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
+        // await waitFor();
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError).toHaveBeenCalledWith(error, null, null);
       });
@@ -362,8 +362,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('does not call onSuccess', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = render();
-        await waitForNextUpdate();
+        render();
+        // await waitFor();
         expect(onSuccess).not.toHaveBeenCalled();
       });
     });

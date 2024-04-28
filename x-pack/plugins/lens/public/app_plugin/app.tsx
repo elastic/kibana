@@ -14,7 +14,7 @@ import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public'
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
-import { LensAppProps, LensAppServices } from './types';
+import { LensAppProps, LensAppServices, LensTopNavMenuProps } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
 import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
@@ -473,13 +473,16 @@ export function App({
     [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
-  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
-    setIsSaveModalVisible(true);
-    setShouldCloseAndSaveTextBasedQuery(true);
-    saveAndExit.current = () => {
-      onSave();
-    };
-  }, []);
+  const onTextBasedSavedAndExit: LensTopNavMenuProps['onTextBasedSavedAndExit'] = useCallback(
+    async ({ onSave }) => {
+      setIsSaveModalVisible(true);
+      setShouldCloseAndSaveTextBasedQuery(true);
+      saveAndExit.current = () => {
+        onSave();
+      };
+    },
+    []
+  );
 
   // remember latest URL based on the configuration
   // url_panel_content has a similar logic

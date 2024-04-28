@@ -65,7 +65,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
       : networkModel.NetworkDetailsTableType.tls;
 
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: any) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,
@@ -77,7 +77,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: any) =>
       dispatch(
         networkActions.updateNetworkTable({
           networkType: type,

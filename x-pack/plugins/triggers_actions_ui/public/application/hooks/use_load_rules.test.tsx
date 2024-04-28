@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import React, { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
 import {
   RuleExecutionStatusErrorReasons,
@@ -36,7 +36,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -282,7 +282,7 @@ describe('useLoadRules', () => {
       sort: { field: 'name', direction: 'asc' },
     };
 
-    const { result, waitForNextUpdate, rerender } = renderHook(() => useLoadRules(params), {
+    const { result, rerender } = renderHook(() => useLoadRules(params), {
       wrapper,
     });
 
@@ -291,7 +291,7 @@ describe('useLoadRules', () => {
     expect(result.current.rulesState.isLoading).toBeTruthy();
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.rulesState.initialLoad).toBeFalsy();
     expect(result.current.hasData).toBeTruthy();
@@ -339,12 +339,12 @@ describe('useLoadRules', () => {
       sort: { field: 'name', direction: 'asc' },
     };
 
-    const { waitForNextUpdate, rerender } = renderHook(() => useLoadRules(params), {
+    const { rerender } = renderHook(() => useLoadRules(params), {
       wrapper,
     });
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(loadRulesWithKueryFilter).toBeCalledWith(
       expect.objectContaining({
@@ -391,7 +391,7 @@ describe('useLoadRules', () => {
       sort: { field: 'name', direction: 'asc' },
     };
 
-    const { rerender, waitForNextUpdate } = renderHook(
+    const { rerender } = renderHook(
       () => {
         return useLoadRules(params);
       },
@@ -399,7 +399,7 @@ describe('useLoadRules', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(onPage).toHaveBeenCalledWith({
       index: 0,
@@ -459,14 +459,14 @@ describe('useLoadRules', () => {
         sort: { field: 'name', direction: 'asc' },
       };
 
-      const { rerender, result, waitForNextUpdate } = renderHook(() => useLoadRules(params), {
+      const { rerender, result } = renderHook(() => useLoadRules(params), {
         wrapper,
       });
 
       expect(result.current.hasData).toBeFalsy();
 
       rerender();
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(result.current.hasData).toBeFalsy();
     });
@@ -494,14 +494,14 @@ describe('useLoadRules', () => {
         hasDefaultRuleTypesFiltersOn: true,
       };
 
-      const { rerender, result, waitForNextUpdate } = renderHook(() => useLoadRules(params), {
+      const { rerender, result } = renderHook(() => useLoadRules(params), {
         wrapper,
       });
 
       expect(result.current.hasData).toBeFalsy();
 
       rerender();
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(result.current.hasData).toBeFalsy();
     });

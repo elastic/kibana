@@ -71,7 +71,7 @@ export const AssistantHeader: React.FC<Props> = ({
     [currentConversation?.replacements, showAnonymizedValues]
   );
   const onConversationChange = useCallback(
-    (updatedConversation) => {
+    (updatedConversation: any) => {
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,

@@ -84,7 +84,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: any, interval: any) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

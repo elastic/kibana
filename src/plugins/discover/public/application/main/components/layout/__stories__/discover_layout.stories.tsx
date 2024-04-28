@@ -41,6 +41,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
   withDiscoverServices(() => {
     const props = getDocumentsLayoutProps(getDataViewMock(true));
     return (
+      // @ts-expect-error
       <IntlProvider locale="en">
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverLayoutStory {...props} />
@@ -55,6 +56,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
   withDiscoverServices(() => {
     const props = getDocumentsLayoutProps(getDataViewMock(false));
     return (
+      // @ts-expect-error
       <IntlProvider locale="en">
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverLayoutStory {...props} />
@@ -69,6 +71,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
   withDiscoverServices(() => {
     const props = getPlainRecordLayoutProps(getDataViewMock(false));
     return (
+      // @ts-expect-error
       <IntlProvider locale="en">
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverLayoutStory {...props} />

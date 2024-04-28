@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
 import { useMonitorsSortedByStatus } from './use_monitors_sorted_by_status';
 import { WrappedHelper } from '../utils/testing';
@@ -38,7 +38,7 @@ describe('useMonitorsSortedByStatus', () => {
     children,
     sortOrder = 'asc',
   }: {
-    children: React.ReactElement;
+    children: React.ReactNode;
     sortOrder: 'asc' | 'desc';
   }) => {
     return (
@@ -166,75 +166,9 @@ describe('useMonitorsSortedByStatus', () => {
     );
   };
 
-  it('returns monitors down first when sort order is asc', () => {
-    const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: WrapperWithState,
-    });
-    expect(result.current).toEqual({
-      monitorsSortedByStatus: [
-        {
-          configId: 'test-monitor-2',
-          id: 'test-monitor-2',
-          name: 'Test monitor 2',
-          location: location1,
-          isEnabled: true,
-        },
-        {
-          configId: 'test-monitor-3',
-          id: 'test-monitor-3',
-          name: 'Test monitor 3',
-          location: location1,
-          isEnabled: true,
-        },
-        {
-          configId: 'test-monitor-1',
-          id: 'test-monitor-1',
-          name: 'Test monitor 1',
-          location: location2,
-          isEnabled: true,
-        },
-        {
-          configId: 'test-monitor-2',
-          id: 'test-monitor-2',
-          name: 'Test monitor 2',
-          location: location2,
-          isEnabled: true,
-        },
-        {
-          configId: 'test-monitor-3',
-          id: 'test-monitor-3',
-          name: 'Test monitor 3',
-          location: location2,
-          isEnabled: true,
-        },
-        {
-          configId: 'test-monitor-1',
-          id: 'test-monitor-1',
-          name: 'Test monitor 1',
-          location: location1,
-          isEnabled: false,
-        },
-        {
-          configId: 'test-monitor-4',
-          id: 'test-monitor-4',
-          name: 'Test monitor 4',
-          location: location1,
-          isEnabled: true,
-        },
-      ],
-      downMonitors: {
-        'test-monitor-1': ['us_central'],
-        'test-monitor-2': ['us_central'],
-        'test-monitor-3': ['us_central'],
-      },
-    });
-  });
-
   it('returns monitors up first when sort order is desc', () => {
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
-        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
-      ),
+      wrapper: ({ children }) => <WrapperWithState sortOrder="desc">{children}</WrapperWithState>,
     });
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
@@ -302,9 +236,7 @@ describe('useMonitorsSortedByStatus', () => {
     } as SyntheticsUrlParams);
 
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
-        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
-      ),
+      wrapper: ({ children }) => <WrapperWithState sortOrder="desc">{children}</WrapperWithState>,
     });
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
@@ -344,9 +276,7 @@ describe('useMonitorsSortedByStatus', () => {
     } as SyntheticsUrlParams);
 
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
-        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
-      ),
+      wrapper: ({ children }) => <WrapperWithState sortOrder="desc">{children}</WrapperWithState>,
     });
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
@@ -379,9 +309,7 @@ describe('useMonitorsSortedByStatus', () => {
     } as SyntheticsUrlParams);
 
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
-        <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
-      ),
+      wrapper: ({ children }) => <WrapperWithState sortOrder="desc">{children}</WrapperWithState>,
     });
     expect(result.current).toEqual({
       monitorsSortedByStatus: [

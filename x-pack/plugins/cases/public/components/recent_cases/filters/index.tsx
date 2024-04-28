@@ -51,7 +51,7 @@ export const RecentCasesFilters = React.memo<{
   });
 
   const onChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
       setFilterBy(e.target.value as FilterMode);
     },
     [setFilterBy]

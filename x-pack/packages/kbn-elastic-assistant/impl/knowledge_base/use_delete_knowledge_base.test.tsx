@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useDeleteKnowledgeBase, UseDeleteKnowledgeBaseParams } from './use_delete_knowledge_base';
 import { deleteKnowledgeBase as _deleteKnowledgeBase } from '../assistant/api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
@@ -51,8 +51,8 @@ describe('useDeleteKnowledgeBase', () => {
   });
   it('should call api to delete knowledge base', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useDeleteKnowledgeBase(defaultProps));
+      // await waitFor();
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
@@ -75,8 +75,8 @@ describe('useDeleteKnowledgeBase', () => {
       }
     });
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useDeleteKnowledgeBase(defaultProps));
+      // await waitFor();
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
@@ -91,8 +91,8 @@ describe('useDeleteKnowledgeBase', () => {
 
   it('should return delete response', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
+      // await waitFor();
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
     });
@@ -101,8 +101,8 @@ describe('useDeleteKnowledgeBase', () => {
   it('should display error toast when api throws error', async () => {
     deleteKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useDeleteKnowledgeBase(defaultProps));
+      // await waitFor();
 
       expect(toasts.addError).toHaveBeenCalled();
     });

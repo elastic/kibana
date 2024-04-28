@@ -88,7 +88,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      (searchValue: string, flattenedOptions: SystemPromptSelectorOption[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -96,12 +96,11 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         const normalizedSearchValue = searchValue.trim().toLowerCase();
         const optionExists =
           flattenedOptions.findIndex(
-            (option: SystemPromptSelectorOption) =>
-              option.label.trim().toLowerCase() === normalizedSearchValue
+            (option) => option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
-        const newOption = {
-          value: searchValue,
+        const newOption: SystemPromptSelectorOption = {
+          value: searchValue as unknown as SystemPromptSelectorOption['value'],
           label: searchValue,
         };
 

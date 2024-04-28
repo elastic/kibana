@@ -41,6 +41,7 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 
 const renderRelatedCases = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RelatedCases eventId={eventId} />
     </IntlProvider>

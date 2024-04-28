@@ -8,7 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
@@ -179,7 +179,9 @@ export function renderApp(
 
   setBadge(application, chrome);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
         <Router>
@@ -210,8 +212,7 @@ export function renderApp(
           </Routes>
         </Router>
       </KibanaThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   // dispatch synthetic hash change event to update hash history objects
@@ -222,7 +223,7 @@ export function renderApp(
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
   };
 }

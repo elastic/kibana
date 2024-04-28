@@ -39,7 +39,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
   abortController?: AbortController;
 }
 
-interface ExpressionRendererState {
+export interface ExpressionRendererState {
   isEmpty: boolean;
   isLoading: boolean;
   error: null | ExpressionRenderError;

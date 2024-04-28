@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { SetupTechnology } from '../../../../../../../../common/types';
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -70,7 +70,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should fetch agentless policy if agentless is enabled', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -79,7 +79,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.agentlessPolicy).toEqual({ id: 'agentless-policy-id' });
   });
@@ -106,7 +106,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -115,7 +115,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
@@ -126,7 +126,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -135,7 +135,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
@@ -179,7 +179,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
@@ -188,7 +188,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 

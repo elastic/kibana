@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { Direction } from '../../../../common/search_strategy';
 import type { FirstLastSeenProps } from '../../components/first_last_seen/first_last_seen';
@@ -22,7 +22,7 @@ const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
 const renderUseFirstLastSeen = (overrides?: Partial<UseFirstLastSeen>) =>
-  renderHook<FirstLastSeenProps, ReturnType<typeof useFirstLastSeen>>(() =>
+  renderHook<ReturnType<typeof useFirstLastSeen>, FirstLastSeenProps>(() =>
     useFirstLastSeen({
       order: Direction.asc,
       field: 'host.name',

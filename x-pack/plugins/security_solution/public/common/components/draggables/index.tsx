@@ -132,7 +132,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     );
 
     const renderCallback = useCallback(
-      (dataProvider, _, snapshot) =>
+      (dataProvider: any, _: any, snapshot: any) =>
         snapshot.isDragging ? (
           <DragEffects>
             <Provider dataProvider={dataProvider} />

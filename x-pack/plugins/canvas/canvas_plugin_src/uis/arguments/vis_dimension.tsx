@@ -38,7 +38,7 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   }, [argValue]);
 
   const onChange = useCallback(
-    (ev) => {
+    (ev: any) => {
       const onChangeFn = confirm ? setValue : onValueChange;
       const astObj: ExpressionAstExpression = {
         type: 'expression',

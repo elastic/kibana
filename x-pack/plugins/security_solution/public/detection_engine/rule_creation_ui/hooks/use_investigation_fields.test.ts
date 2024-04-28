@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { useInvestigationFields } from './use_investigation_fields';
@@ -65,7 +65,7 @@ describe('useInvestigationFields', () => {
   });
 
   it('should return only index pattern fields when ES|QL query is empty', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useInvestigationFields({
           esqlQuery: '',
@@ -74,7 +74,7 @@ describe('useInvestigationFields', () => {
       { wrapper }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.investigationFields).toEqual(mockIndexPatternFields);
   });

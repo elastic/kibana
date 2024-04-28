@@ -83,7 +83,7 @@ export function TextBasedDataPanel({
     [layerFields]
   );
 
-  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+  const onOverrideFieldGroupDetails = useCallback((groupName: FieldsGroupNames) => {
     if (groupName === FieldsGroupNames.AvailableFields) {
       return {
         helpText: i18n.translate('xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp', {

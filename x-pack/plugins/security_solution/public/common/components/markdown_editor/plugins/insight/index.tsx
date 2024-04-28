@@ -379,7 +379,7 @@ const InsightEditorComponent = ({
     setProviders(filtersToInsightProviders(filters));
   }, []);
   const selectOnChange = useCallback(
-    (event) => {
+    (event: any) => {
       relativeTimerangeController.field.onChange(event.target.value);
     },
     [relativeTimerangeController.field]

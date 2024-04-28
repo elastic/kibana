@@ -56,7 +56,7 @@ export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTo
   );
 
   // EUI bug, will remove once bug resolve. will link issue here as soon as i have it
-  const onKeyDown = useCallback((e) => {
+  const onKeyDown = useCallback((e: any) => {
     if (e.key === 'Enter') {
       e.stopPropagation();
     }

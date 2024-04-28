@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -187,7 +187,7 @@ export const percentileRanksOperation: OperationDefinition<
         defaultMessage: 'Percentile ranks value',
       });
     const onChange = useCallback(
-      (value) => {
+      (value: string | undefined) => {
         if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }
@@ -221,8 +221,8 @@ export const percentileRanksOperation: OperationDefinition<
     );
     const inputValueIsValid = isValidNumber(inputValue, isInline);
 
-    const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
-      (e) => {
+    const handleInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         handleInputChangeWithoutValidation(e.currentTarget.value);
       },
       [handleInputChangeWithoutValidation]

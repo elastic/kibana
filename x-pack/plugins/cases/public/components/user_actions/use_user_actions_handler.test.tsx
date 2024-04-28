@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { basicCase } from '../../containers/mock';
 
 import { useUpdateComment } from '../../containers/use_update_comment';

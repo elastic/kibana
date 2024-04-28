@@ -93,11 +93,10 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
       return (
         // filter out all the agents counted by selected policies and platforms
-        selectedAgents.filter(checkAgent).length +
+        (selectedAgents.filter(checkAgent).length +
         // add the number of agents added via policy and platform groups
-        getNumAgentsInGrouping(selectedGroups) -
-        // subtract the number of agents double counted by policy/platform selections
-        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
+        getNumAgentsInGrouping(selectedGroups) - // subtract the number of agents double counted by policy/platform selections
+        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {}))
       );
     }
   }, [agentList?.groups?.overlap, agentList?.total, selectedOptions]);
@@ -174,7 +173,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     }
   }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
-  const renderOption = useCallback((option, searchVal, contentClassName) => {
+  const renderOption = useCallback((option: any, searchVal: any, contentClassName: any) => {
     const { label, value } = option;
 
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (

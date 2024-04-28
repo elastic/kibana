@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from '@kbn/shared-ux-router';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -22,11 +22,11 @@ import { CasesApp } from './components/app';
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
   const { element } = mountParams;
-
-  ReactDOM.render(<App deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<App deps={deps} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

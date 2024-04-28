@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { Link } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -25,7 +25,8 @@ export class ManagementTestPlugin
       title: 'Management Test',
       mount(params: any) {
         params.setBreadcrumbs([{ text: 'Management Test' }]);
-        ReactDOM.render(
+        const root = createRoot(params.element);
+        root.render(
           <Router history={params.history}>
             <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
             <Routes>
@@ -40,12 +41,11 @@ export class ManagementTestPlugin
                 </Link>
               </Route>
             </Routes>
-          </Router>,
-          params.element
+          </Router>
         );
 
         return () => {
-          ReactDOM.unmountComponentAtNode(params.element);
+          root.unmount()
         };
       },
     });
@@ -56,10 +56,11 @@ export class ManagementTestPlugin
         title: 'Management Test Disabled',
         mount(params) {
           params.setBreadcrumbs([{ text: 'Management Test Disabled' }]);
-          ReactDOM.render(<div>This is a secret that should never be seen!</div>, params.element);
+          const root = createRoot(params.element);
+          root.render(<div>This is a secret that should never be seen!</div>);
 
           return () => {
-            ReactDOM.unmountComponentAtNode(params.element);
+            root.unmount();
           };
         },
       })

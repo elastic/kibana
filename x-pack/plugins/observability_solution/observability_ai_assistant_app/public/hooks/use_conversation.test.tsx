@@ -5,14 +5,9 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import {
-  act,
-  renderHook,
-  type RenderHookResult,
-  type WrapperComponent,
-} from '@testing-library/react-hooks';
+import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { merge } from 'lodash';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,
@@ -33,7 +28,7 @@ import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hoo
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
+let hookResult: RenderHookResult<UseConversationResult, UseConversationProps>;
 
 type MockedService = DeeplyMockedKeys<Omit<ObservabilityAIAssistantAppService, 'conversations'>> & {
   conversations: DeeplyMockedKeys<
@@ -81,11 +76,11 @@ const useKibanaMockServices = {
 };
 
 describe('useConversation', () => {
-  let wrapper: WrapperComponent<UseConversationProps>;
+  let wrapper: FC<PropsWithChildren>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }: { children?: React.ReactNode }) => (
+    wrapper = ({ children }) => (
       <KibanaContextProvider services={useKibanaMockServices}>
         <ObservabilityAIAssistantAppServiceProvider value={mockService}>
           {children}
@@ -112,6 +107,7 @@ describe('useConversation', () => {
       });
     });
     it('throws an error', () => {
+      // @ts-expect-error
       expect(hookResult.result.error).toBeTruthy();
     });
   });

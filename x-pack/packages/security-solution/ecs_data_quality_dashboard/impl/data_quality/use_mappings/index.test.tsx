@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
@@ -47,10 +47,10 @@ describe('useMappings', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockMappingsResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
+      const { result } = renderHook(() => useMappings(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       mappingsResult = await result.current;
     });
 
@@ -74,10 +74,10 @@ describe('useMappings', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
+      const { result } = renderHook(() => useMappings(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       mappingsResult = await result.current;
     });
 

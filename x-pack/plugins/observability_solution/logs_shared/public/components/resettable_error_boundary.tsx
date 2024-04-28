@@ -6,7 +6,7 @@
  */
 
 import equal from 'fast-deep-equal';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 export interface RenderErrorFuncArgs {
   latestError: any;
@@ -25,7 +25,7 @@ interface ResettableErrorBoundaryState {
 }
 
 export class ResettableErrorBoundary<ResetOnChange> extends React.Component<
-  ResettableErrorBoundaryProps<ResetOnChange>,
+  PropsWithChildren<ResettableErrorBoundaryProps<ResetOnChange>>,
   ResettableErrorBoundaryState
 > {
   state: ResettableErrorBoundaryState = {

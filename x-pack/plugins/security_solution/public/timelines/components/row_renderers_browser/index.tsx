@@ -79,7 +79,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const [show, setShow] = useState(false);
 
   const setExcludedRowRendererIds = useCallback(
-    (payload) =>
+    (payload: any) =>
       dispatch(
         dispatchSetExcludedRowRendererIds({
           id: timelineId,

@@ -15,6 +15,7 @@ const emptyMessages = {};
 
 export const I18nProviderMock: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
+    // @ts-expect-error
     <IntlProvider
       locale={i18n.getLocale()}
       messages={emptyMessages}

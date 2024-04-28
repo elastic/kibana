@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
@@ -61,7 +61,7 @@ describe('useStorage', () => {
   });
 
   test('updates the storage value', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
         wrapper: Provider,
@@ -74,7 +74,7 @@ describe('useStorage', () => {
 
     await act(async () => {
       setValue(false);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current[0]).toBe(false);
@@ -82,7 +82,7 @@ describe('useStorage', () => {
   });
 
   test('removes the storage value', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
         wrapper: Provider,
@@ -95,7 +95,7 @@ describe('useStorage', () => {
 
     await act(async () => {
       setValue(undefined);
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current[0]).toBe(undefined);
@@ -103,7 +103,7 @@ describe('useStorage', () => {
   });
 
   test('updates the value on storage event', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
         wrapper: Provider,
@@ -130,7 +130,7 @@ describe('useStorage', () => {
           newValue: null,
         })
       );
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current[0]).toBe(undefined);
@@ -142,7 +142,7 @@ describe('useStorage', () => {
           newValue: 'false',
         })
       );
-      await waitForNextUpdate();
+      // await waitFor();
     });
 
     expect(result.current[0]).toBe(false);

@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled, keyframes } from '@kbn/kibana-react-plugin/common';
 import { LogEntriesSummaryHighlightsBucket, LogEntryTime } from '@kbn/logs-shared-plugin/common';
-import * as React from 'react';
+import React from 'react';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
 
 interface SearchMarkerProps {

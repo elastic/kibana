@@ -23,7 +23,7 @@ jest.mock('../../hooks/use_indices_fields', () => ({
   }),
 }));
 
-const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
+const MockFormProvider = ({ children }: React.PropsWithChildren) => {
   const methods = useForm({
     values: {
       indices: ['index1'],
@@ -37,6 +37,7 @@ describe('ViewQueryFlyout component tests', () => {
 
   beforeEach(() => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <MockFormProvider>
           <ViewQueryFlyout onClose={onCloseMock} />

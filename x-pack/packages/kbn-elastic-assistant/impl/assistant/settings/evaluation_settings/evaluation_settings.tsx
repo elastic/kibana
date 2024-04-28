@@ -72,7 +72,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   // Project Name
   const [projectName, setProjectName] = useState();
   const onProjectNameChange = useCallback(
-    (e) => {
+    (e: any) => {
       setProjectName(e.target.value);
     },
     [setProjectName]
@@ -80,7 +80,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   // Run Name
   const [runName, setRunName] = useState();
   const onRunNameChange = useCallback(
-    (e) => {
+    (e: any) => {
       setRunName(e.target.value);
     },
     [setRunName]
@@ -88,7 +88,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   // Local Output Index
   const [outputIndex, setOutputIndex] = useState(DEFAULT_OUTPUT_INDEX);
   const onOutputIndexChange = useCallback(
-    (e) => {
+    (e: any) => {
       setOutputIndex(e.target.value);
     },
     [setOutputIndex]
@@ -96,19 +96,19 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
   const onApmUrlChange = useCallback(
-    (e) => {
+    (e: any) => {
       setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithProjectChange = useCallback(
-    (e) => {
+    (e: any) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithApiKeyChange = useCallback(
-    (e) => {
+    (e: any) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
     [setTraceOptions, traceOptions]
@@ -144,7 +144,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   }, [useLangSmithDataset]);
   const [datasetName, setDatasetName] = useState<string>();
   const onDatasetNameChange = useCallback(
-    (e) => {
+    (e: any) => {
       setDatasetName(e.target.value);
     },
     [setDatasetName]
@@ -160,7 +160,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   ];
   const [datasetText, setDatasetText] = useState<string>(JSON.stringify(sampleDataset, null, 2));
   const onDatasetTextChange = useCallback(
-    (e) => {
+    (e: any) => {
       setDatasetText(e.target.value);
     },
     [setDatasetText]
@@ -262,7 +262,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   const sampleEvalPrompt: string = `For the below input: \n\n{{input}} \n\na prediction: \n\n{{prediction}} \n\nwas made. How's it stack up against this reference: \n\n{{reference}} \n\nReturn output in a succinct sentence ranking on a simple grading rubric focused on correctness.`;
   const [evalPrompt, setEvalPrompt] = useState<string>(sampleEvalPrompt);
   const onEvalPromptChange = useCallback(
-    (e) => {
+    (e: any) => {
       setEvalPrompt(e.target.value);
     },
     [setEvalPrompt]

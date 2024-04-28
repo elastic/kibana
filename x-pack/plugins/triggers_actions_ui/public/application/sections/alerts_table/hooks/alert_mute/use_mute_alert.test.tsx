@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
 import * as api from '../../../../lib/rule_api/mute_alert';
 import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import {
   CoreSetup,
@@ -86,7 +86,8 @@ export class GuidedOnboardingPlugin
     notifications: NotificationsStart;
   }) {
     const { theme } = startServices;
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaRenderContextProvider {...startServices}>
         <GuidePanel
           api={api}
@@ -94,9 +95,8 @@ export class GuidedOnboardingPlugin
           notifications={notifications}
           theme$={theme.theme$}
         />
-      </KibanaRenderContextProvider>,
-      targetDomElement
+      </KibanaRenderContextProvider>
     );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

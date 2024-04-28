@@ -20,11 +20,8 @@ jest.mock('../../hooks/use_query_indices', () => ({
 }));
 
 const Wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  return (
-    <>
-      <IntlProvider locale="en">{children}</IntlProvider>
-    </>
-  );
+  // @ts-expect-error
+  return <IntlProvider locale="en">{children}</IntlProvider>;
 };
 
 describe('SourcesPanelSidebar component', () => {

@@ -85,7 +85,11 @@ export const Processes = () => {
   }, []);
 
   const searchBarOnChange = useCallback(
-    ({ query, queryText, error: queryError }) => {
+    ({
+      query,
+      queryText,
+      error: queryError
+    }: any) => {
       if (queryError) {
         setSearchQueryError(queryError);
       } else {

@@ -29,8 +29,8 @@ export const DashboardLink: React.FC<Props> = ({
     },
   } = useKibana();
   const onClick = useCallback(
-    (e) => {
-      e.preventDefault();
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
+      ev.preventDefault();
       if (dashboardUrl) {
         navigateToUrl(dashboardUrl);
       }

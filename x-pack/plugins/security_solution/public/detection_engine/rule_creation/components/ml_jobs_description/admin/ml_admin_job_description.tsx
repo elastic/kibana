@@ -32,7 +32,7 @@ const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
   } = useEnableDataFeed();
 
   const handleJobStateChange = useCallback(
-    async (_, latestTimestampMs: number, enable: boolean) => {
+    async (_: any, latestTimestampMs: number, enable: boolean) => {
       if (enable) {
         await enableDatafeed(job, latestTimestampMs);
       } else {

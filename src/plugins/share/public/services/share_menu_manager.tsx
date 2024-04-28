@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { EuiWrappingPopover } from '@elastic/eui';
@@ -24,6 +24,7 @@ export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
+  private root: ReturnType<typeof createRoot> | null = null;
 
   start(
     core: CoreStart,
@@ -64,7 +65,7 @@ export class ShareMenuManager {
   }
 
   private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
+    this.root?.unmount();
     this.isOpen = false;
   };
 
@@ -149,7 +150,8 @@ export class ShareMenuManager {
           </KibanaThemeProvider>
         </I18nProvider>
       );
-      ReactDOM.render(element, this.container);
+      this.root = createRoot(this.container);
+      this.root.render(element);
     } else if (newVersionEnabled) {
       const openModal = () => {
         const session = overlays.openModal(

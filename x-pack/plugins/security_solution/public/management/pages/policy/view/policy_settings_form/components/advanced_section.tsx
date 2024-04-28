@@ -121,7 +121,7 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     }, []);
 
     const handleAdvancedSettingUpdate = useCallback(
-      (event) => {
+      (event: any) => {
         const updatedPolicy = cloneDeep(policy);
 
         setValue(

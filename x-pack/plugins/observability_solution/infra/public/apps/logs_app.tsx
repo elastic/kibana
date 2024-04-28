@@ -8,7 +8,7 @@
 import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -28,8 +28,9 @@ export const renderApp = (
   const storage = new Storage(window.localStorage);
 
   prepareMountElement(element, 'infraLogsPage');
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <LogsApp
       core={core}
       storage={storage}
@@ -38,12 +39,11 @@ export const renderApp = (
       pluginStart={pluginStart}
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
-    />,
-    element
+    />
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

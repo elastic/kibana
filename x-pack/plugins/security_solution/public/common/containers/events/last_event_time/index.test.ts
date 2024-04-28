@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 import type { UseTimelineLastEventTimeArgs } from '.';
 import { useTimelineLastEventTime } from '.';
@@ -60,9 +60,9 @@ describe('useTimelineLastEventTime', () => {
 
   it('should init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        string,
-        [boolean, UseTimelineLastEventTimeArgs]
+      const { result } = renderHook<
+      [boolean, UseTimelineLastEventTimeArgs],
+        string
       >(() =>
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
@@ -70,7 +70,7 @@ describe('useTimelineLastEventTime', () => {
           indexNames: [],
         })
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual([
         false,
         { errorMessage: undefined, lastSeen: null, refetch: noop },
@@ -80,7 +80,7 @@ describe('useTimelineLastEventTime', () => {
 
   it('should call search strategy', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(
+      renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(
         () =>
           useTimelineLastEventTime({
             indexKey: LastEventIndexKey.hostDetails,
@@ -88,8 +88,8 @@ describe('useTimelineLastEventTime', () => {
             indexNames: [],
           })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
         defaultIndex: [],
         details: {},
@@ -101,9 +101,9 @@ describe('useTimelineLastEventTime', () => {
 
   it('should set response', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        string,
-        [boolean, UseTimelineLastEventTimeArgs]
+      const { result } = renderHook<
+      [boolean, UseTimelineLastEventTimeArgs],
+        string
       >(() =>
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
@@ -111,8 +111,8 @@ describe('useTimelineLastEventTime', () => {
           indexNames: [],
         })
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current[1].lastSeen).toEqual('1 minute ago');
     });
   });

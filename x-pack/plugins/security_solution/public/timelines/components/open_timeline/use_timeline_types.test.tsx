@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 
@@ -47,11 +47,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 describe('useTimelineTypes', () => {
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseTimelineTypesArgs,
-        UseTimelineTypesResult
+      const { result } = renderHook<
+        UseTimelineTypesResult,
+        UseTimelineTypesArgs
       >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         timelineType: 'default',
         timelineTabs: result.current.timelineTabs,
@@ -63,11 +63,11 @@ describe('useTimelineTypes', () => {
   describe('timelineTabs', () => {
     it('render timelineTabs', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
+        const { result } = renderHook<
+          UseTimelineTypesResult,
+          UseTimelineTypesArgs
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        // await waitFor();
 
         const { container } = render(result.current.timelineTabs);
         expect(
@@ -81,11 +81,11 @@ describe('useTimelineTypes', () => {
 
     it('set timelineTypes correctly', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
+        const { result } = renderHook<
+          UseTimelineTypesResult,
+          UseTimelineTypesArgs
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        // await waitFor();
 
         const { container } = render(result.current.timelineTabs);
 
@@ -107,11 +107,11 @@ describe('useTimelineTypes', () => {
 
     it('stays in the same tab if clicking again on current tab', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
+        const { result } = renderHook<
+          UseTimelineTypesResult,
+          UseTimelineTypesArgs
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        // await waitFor();
 
         const { container } = render(result.current.timelineTabs);
 
@@ -135,11 +135,11 @@ describe('useTimelineTypes', () => {
   describe('timelineFilters', () => {
     it('render timelineFilters', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
+        const { result } = renderHook<
+          UseTimelineTypesResult,
+          UseTimelineTypesArgs
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        // await waitFor();
 
         const { container } = render(<>{result.current.timelineFilters}</>);
         expect(
@@ -153,11 +153,11 @@ describe('useTimelineTypes', () => {
 
     it('set timelineTypes correctly', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
+        const { result } = renderHook<
+          UseTimelineTypesResult,
+          UseTimelineTypesArgs
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        // await waitFor();
 
         const { container } = render(<>{result.current.timelineFilters}</>);
 
@@ -179,11 +179,11 @@ describe('useTimelineTypes', () => {
 
     it('stays in the same tab if clicking again on current tab', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          UseTimelineTypesArgs,
-          UseTimelineTypesResult
+        const { result } = renderHook<
+          UseTimelineTypesResult,
+          UseTimelineTypesArgs
         >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }));
-        await waitForNextUpdate();
+        // await waitFor();
 
         const { container } = render(<>{result.current.timelineFilters}</>);
 

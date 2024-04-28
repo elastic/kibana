@@ -117,7 +117,7 @@ export function SaveQueryForm({
     shouldIncludeTimefilter,
   ]);
 
-  const onInputChange = useCallback((event) => {
+  const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     setFormErrors([]);
     setTitle(event.target.value);
   }, []);

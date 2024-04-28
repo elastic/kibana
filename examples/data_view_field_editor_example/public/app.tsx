@@ -25,7 +25,7 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 interface Props {
   dataView?: DataView;
@@ -154,10 +154,10 @@ export const renderApp = async (
   { element }: AppMountParameters
 ) => {
   const dataView = (await data.dataViews.getDefault()) || undefined;
-  ReactDOM.render(
-    <DataViewFieldEditorExample dataView={dataView} dataViewFieldEditor={dataViewFieldEditor} />,
-    element
+  const root = createRoot(element);
+  root.render(
+    <DataViewFieldEditorExample dataView={dataView} dataViewFieldEditor={dataViewFieldEditor} />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { EuiCheckbox, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { xor } from 'lodash/fp';
@@ -19,7 +21,6 @@ interface RowRenderersBrowserProps {
   setExcludedRowRendererIds: (excludedRowRendererIds: RowRendererId[]) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTable {
     tr > *:last-child {
@@ -92,7 +93,7 @@ const RowRenderersBrowserComponent = ({
   );
 
   const nameColumnRenderCallback = useCallback(
-    (value, item) => (
+    (value: any, item: any) => (
       <StyledNameButton className="kbn-resetFocusState" onClick={handleNameClick(item)}>
         {value}
       </StyledNameButton>
@@ -101,7 +102,7 @@ const RowRenderersBrowserComponent = ({
   );
 
   const idColumnRenderCallback = useCallback(
-    (_, item) => (
+    (_: any, item: any) => (
       <EuiCheckbox
         id={item.id}
         onChange={handleNameClick(item)}

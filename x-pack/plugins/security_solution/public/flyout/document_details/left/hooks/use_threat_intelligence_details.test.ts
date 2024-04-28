@@ -6,7 +6,7 @@
  */
 
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';

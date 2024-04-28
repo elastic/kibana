@@ -11,7 +11,7 @@ import type { UseFieldTableColumnsProps, UseFieldTableColumns } from '.';
 import { useFieldTableColumns } from '.';
 
 import { TestProviders } from '../../../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 
@@ -21,7 +21,7 @@ const mockOpenDeleteFieldModal = jest.fn();
 
 // helper function to render the hook
 const renderUseFieldTableColumns = (props: Partial<UseFieldTableColumnsProps> = {}) =>
-  renderHook<UseFieldTableColumnsProps, ReturnType<UseFieldTableColumns>>(
+  renderHook<ReturnType<UseFieldTableColumns>, UseFieldTableColumnsProps>(
     () =>
       useFieldTableColumns({
         hasFieldEditPermission: true,

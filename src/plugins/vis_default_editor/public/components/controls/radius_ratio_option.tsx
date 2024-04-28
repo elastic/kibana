@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMount from 'react-use/lib/useMount';
 
+import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
 import { AggControlProps } from './agg_control_props';
 
 const DEFAULT_VALUE = 50;
@@ -41,7 +42,8 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
   });
 
   const onChange: EuiRangeProps['onChange'] = useCallback(
-    (e) => setStateParamValue(PARAM_NAME, parseFloat(e.currentTarget.value)),
+    (e: _SingleRangeChangeEvent) =>
+      setStateParamValue(PARAM_NAME, parseFloat(e.currentTarget.value)),
     [setStateParamValue]
   );
 

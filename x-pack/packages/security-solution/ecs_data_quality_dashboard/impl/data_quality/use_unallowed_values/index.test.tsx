@@ -6,7 +6,7 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 
 import { getUnallowedValueRequestItems } from '../data_quality_panel/allowed_values/helpers';
@@ -74,13 +74,13 @@ describe('useUnallowedValues', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockUnallowedValuesResponse);
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useUnallowedValues({ indexName, requestItems }),
         {
           wrapper: ContextWrapper,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       unallowedValuesResult = await result.current;
     });
 
@@ -112,13 +112,13 @@ describe('useUnallowedValues', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () => useUnallowedValues({ indexName, requestItems }),
         {
           wrapper: ContextWrapper,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       unallowedValuesResult = await result.current;
     });
 

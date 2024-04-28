@@ -64,7 +64,9 @@ const DashboardRendererComponent = ({
   const isCreateDashboard = !savedObjectId;
 
   const getSecuritySolutionDashboardUrl = useCallback(
-    ({ dashboardId }) => {
+    ({
+      dashboardId
+    }: any) => {
       return getSecuritySolutionUrl({
         deepLinkId: SecurityPageName.dashboards,
         path: dashboardId,
@@ -85,7 +87,7 @@ const DashboardRendererComponent = ({
      * locators in that refactor, as well - not only would this clean up some tech debt, it would also make it so that
      * control selections could also be translated to filter pills on navigation.
      */
-    async (params) => {
+    async (params: any) => {
       navigateTo({
         url: getSecuritySolutionDashboardUrl(params),
       });

@@ -71,7 +71,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
       ),
       render: (value: unknown) => (
         <EuiCodeBlock paddingSize="none" transparentBackground fontSize="m">
-          {value}
+          <>{value}</>
         </EuiCodeBlock>
       ),
     },

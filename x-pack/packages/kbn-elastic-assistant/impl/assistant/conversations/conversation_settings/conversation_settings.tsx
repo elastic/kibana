@@ -244,7 +244,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const handleOnConnectorSelectionChange = useCallback(
-      (connector) => {
+      (connector: any) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
           const updatedConversation = {

@@ -107,7 +107,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
   );
 
   return (
-    <WaterfallProvider
+    (<WaterfallProvider
       activeStep={activeStep}
       markerItems={markerItems}
       totalNetworkRequests={total}
@@ -127,14 +127,16 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
       setShowCustomMarks={setShowCustomMarks}
       query={query}
       setQuery={setQuery}
-      renderTooltipItem={useCallback((tooltipProps) => {
+      renderTooltipItem={useCallback((tooltipProps: any) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }, [])}
     >
       <WaterfallChart
         tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
         domain={domain}
-        barStyleAccessor={useCallback(({ datum }) => {
+        barStyleAccessor={useCallback(({
+          datum
+        }: any) => {
           if (!datum.config?.isHighlighted) {
             return {
               rect: {
@@ -149,6 +151,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
         renderLegendItem={renderLegendItem}
         renderFlyout={renderFlyout}
       />
-    </WaterfallProvider>
+    </WaterfallProvider>)
   );
 };

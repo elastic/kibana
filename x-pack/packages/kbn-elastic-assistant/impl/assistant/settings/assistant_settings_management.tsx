@@ -220,7 +220,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
 
     const handleChange = useCallback(
-      (callback) => (value: unknown) => {
+      (callback: any) => (value: unknown) => {
         setHasPendingChanges(true);
         callback(value);
       },

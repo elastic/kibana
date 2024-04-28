@@ -13,7 +13,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Router } from '@kbn/shared-ux-router';
@@ -27,7 +27,8 @@ export async function renderApp(
 ) {
   const { ConnectorsRouter } = await import('./components/connectors_router');
 
-  ReactDOM.render(
+  const root= createRoot(element);
+  root.render(
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
@@ -40,7 +41,6 @@ export async function renderApp(
         </QueryClientProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>,
-    element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

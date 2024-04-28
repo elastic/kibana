@@ -82,7 +82,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
     getHostRiskScoreSelector(state, hostsModel.HostsType.page)
   );
   const updateLimitPagination = useCallback(
-    (newLimit) =>
+    (newLimit: any) =>
       dispatch(
         hostsActions.updateTableLimit({
           hostsType: type,
@@ -94,7 +94,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) =>
+    (newPage: any) =>
       dispatch(
         hostsActions.updateTableActivePage({
           activePage: newPage,

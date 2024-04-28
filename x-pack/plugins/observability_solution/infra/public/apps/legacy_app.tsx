@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { createBrowserHistory, History } from 'history';
 import { AppMountParameters } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { RouteProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -17,11 +17,12 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 // It will be removed in 8.0.0.
 export async function renderApp({ element }: AppMountParameters) {
   const history = createBrowserHistory();
+  const root = createRoot(element);
 
-  ReactDOM.render(<LegacyApp history={history} />, element);
+  root.render(<LegacyApp history={history} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 

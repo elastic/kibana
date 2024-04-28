@@ -203,7 +203,7 @@ export default function Expressions(props: Props) {
   );
 
   const updateParams = useCallback(
-    (id, e: MetricExpression) => {
+    (id: any, e: MetricExpression) => {
       const ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       ruleCriteria[id] = e;
       setRuleParams('criteria', ruleCriteria);
@@ -470,6 +470,7 @@ export default function Expressions(props: Props) {
                 key={idx} // idx's don't usually make good key's but here the index has semantic meaning
                 expressionId={idx}
                 setRuleParams={updateParams}
+                // @ts-expect-error
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
@@ -493,6 +494,7 @@ export default function Expressions(props: Props) {
                   dataView={dataView}
                   searchConfiguration={ruleParams.searchConfiguration}
                   groupBy={ruleParams.groupBy}
+                  // @ts-expect-error
                   error={(errors[idx] as IErrorObject) || emptyError}
                   timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
                 />

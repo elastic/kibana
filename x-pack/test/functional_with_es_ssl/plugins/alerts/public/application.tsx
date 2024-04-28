@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
@@ -42,7 +42,8 @@ export const renderApp = (
   deps: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<AlertingExampleApp basename={appBasePath} {...deps} />, element);
+  const root = createRoot(element);
+  root.render(<AlertingExampleApp basename={appBasePath} {...deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

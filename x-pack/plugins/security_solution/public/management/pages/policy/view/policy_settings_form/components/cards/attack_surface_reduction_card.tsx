@@ -51,7 +51,7 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     const isEditMode = mode === 'edit';
 
     const handleSwitchChange = useCallback(
-      (event) => {
+      (event: any) => {
         const updatedPolicy = cloneDeep(policy);
 
         updatedPolicy.windows.attack_surface_reduction.credential_hardening.enabled =

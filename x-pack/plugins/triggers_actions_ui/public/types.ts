@@ -430,7 +430,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
 }
 
 export interface IErrorObject {
-  [key: string]: string | string[] | IErrorObject;
+  [key: string]: string | string[];
 }
 
 export enum EditConnectorTabs {

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -30,6 +30,8 @@ export const renderApp = (
     { text: i18n.translate('kibanaOverview.breadcrumbs.title', { defaultMessage: 'Analytics' }) },
   ]);
 
+  const root = createRoot(element);
+
   core.chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = home.featureCatalogue
       .getSolutions()
@@ -39,19 +41,19 @@ export const renderApp = (
           ({ category, visibleIn }) => visibleIn.includes('kibanaOverview') && category?.id === id
         )
       );
-
-    ReactDOM.render(
+    root.render(
       <KibanaRenderContextProvider {...core}>
         <KibanaContextProvider services={{ ...core, ...deps }}>
           <KibanaOverviewApp
             basename={appBasePath}
+
+
             {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
           />
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>,
-      element
+      </KibanaRenderContextProvider>
     );
   });
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

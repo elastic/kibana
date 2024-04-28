@@ -51,7 +51,7 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
   }, [inferenceEndpointError]);
 
   const onChangingInferenceEndpoint = useCallback(
-    (value) => {
+    (value: string) => {
       setInferenceEndpointId(value);
       onInferenceEndpointChange(value);
     },

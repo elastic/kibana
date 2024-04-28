@@ -52,7 +52,7 @@ function DefaultEditor({
 
   /**
    * The empty callback is in place to prevent resetting the dragging state of the resize button.
-   * The mouseLeave is triggered since a visualization is rendered through another call of "ReactDOM.render()"" in expressions,
+   * The mouseLeave is triggered since a visualization is rendered through another call of "root.render()"" in expressions,
    * using the "visRef" node reference.
    * Here is the existing React issue: https://github.com/facebook/react/issues/17064
    */

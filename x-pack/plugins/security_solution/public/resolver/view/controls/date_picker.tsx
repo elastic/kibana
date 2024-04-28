@@ -62,7 +62,11 @@ export const DateSelectionButton = memo(
     });
 
     const onTimeChange = useCallback(
-      ({ start, end, isInvalid }) => {
+      ({
+        start,
+        end,
+        isInvalid
+      }: any) => {
         if (!isInvalid) {
           const isQuickSelection = start.includes('now') || end.includes('now');
           const fromDate = formatDate(start);

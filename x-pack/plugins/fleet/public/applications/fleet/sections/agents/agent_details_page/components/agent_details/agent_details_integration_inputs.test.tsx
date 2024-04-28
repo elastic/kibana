@@ -41,6 +41,7 @@ describe('AgentDetailsIntegrationInputs', () => {
 
   const renderComponent = () => {
     return render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' } })}>
           <AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />

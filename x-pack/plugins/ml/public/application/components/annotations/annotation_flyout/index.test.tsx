@@ -30,7 +30,11 @@ const MlAnnotationUpdatesContextProvider = ({
 }) => {
   return (
     <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-      <IntlProvider>{children}</IntlProvider>
+
+      {
+        // @ts-expect-error
+        <IntlProvider>{children}</IntlProvider>
+      }
     </MlAnnotationUpdatesContext.Provider>
   );
 };

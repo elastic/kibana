@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React, { PropsWithChildren } from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createFindAlerts } from '../services/find_alerts';
@@ -30,7 +30,7 @@ describe('useFetchAlerts', () => {
 
   it('fetches alerts and handles loading state', async () => {
     const queryClient = new QueryClient();
-    const wrapper = ({ children }: { children: React.ReactChild }) => (
+    const wrapper = ({ children }: PropsWithChildren) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
@@ -47,7 +47,7 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), { wrapper });
+    const { result } = renderHook(() => useFetchAlerts(params), { wrapper });
 
     expect(result.current.loading).toBe(true);
 
@@ -61,7 +61,7 @@ describe('useFetchAlerts', () => {
 
   it('handles error state', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: React.ReactChild }) => (
+    const wrapper = ({ children }: PropsWithChildren) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
@@ -79,7 +79,7 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), { wrapper });
+    const { result } = renderHook(() => useFetchAlerts(params), { wrapper });
 
     expect(result.current.loading).toBe(true);
 

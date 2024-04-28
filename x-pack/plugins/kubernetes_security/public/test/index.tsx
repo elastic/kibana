@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useMemo } from 'react';
+import React, { memo, ReactNode, PropsWithChildren, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -113,7 +113,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<PropsWithChildren> = ({ children }) => (
     <AppRootProvider history={history} coreStart={coreStart}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </AppRootProvider>

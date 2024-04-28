@@ -200,14 +200,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const onResizeDataGrid = useCallback(
-      (colSettings) => {
+      (colSettings: any) => {
         onColumnResize({ columnId: colSettings.columnId, width: Math.round(colSettings.width) });
       },
       [onColumnResize]
     );
 
     const onChangeItemsPerPage = useCallback(
-      (itemsChangedPerPage) => {
+      (itemsChangedPerPage: any) => {
         dispatch(
           timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
         );

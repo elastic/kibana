@@ -125,12 +125,13 @@ export function DraggableDimensionButton({
   );
 
   const registerNewButtonRefMemoized = useCallback(
-    (el) => registerNewButtonRef(target.columnId, el),
+    (el: HTMLDivElement) => registerNewButtonRef(target.columnId, el),
     [registerNewButtonRef, target.columnId]
   );
 
   const handleOnDrop = useCallback(
-    (source, selectedDropType) => onDrop(source, value, selectedDropType),
+    (source: DragDropIdentifier, selectedDropType: DropType | undefined) =>
+      onDrop(source, value, selectedDropType),
     [value, onDrop]
   );
   return (

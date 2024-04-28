@@ -9,6 +9,7 @@ import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { MarkdownEditorRef } from '../../editor';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
 
@@ -51,9 +52,11 @@ export const useLensDraftComment = () => {
     fetchDraftComment();
   }, [currentAppId$, embeddable, storage]);
 
-  const openLensModal = useCallback(({ editorRef }) => {
+  const openLensModal = useCallback(({ editorRef }: { editorRef: MarkdownEditorRef }) => {
     if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector(`[aria-label="${VISUALIZATION}"]`);
+      const lensPluginButton = editorRef.toolbar?.querySelector<HTMLElement>(
+        `[aria-label="${VISUALIZATION}"]`
+      );
       if (lensPluginButton) {
         lensPluginButton.click();
       }

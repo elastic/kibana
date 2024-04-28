@@ -44,7 +44,7 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
 }) => {
   const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
   const navigateToCaseViewClick = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       navigateToCaseView({ detailName });
     },
@@ -83,8 +83,8 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
   const { getConfigureCasesUrl, navigateToConfigureCases } = useConfigureCasesNavigation();
 
   const navigateToConfigureCasesClick = useCallback(
-    (e) => {
-      e.preventDefault();
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
+      ev.preventDefault();
       navigateToConfigureCases();
     },
     [navigateToConfigureCases]

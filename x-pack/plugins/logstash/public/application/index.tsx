@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
@@ -39,8 +39,9 @@ export const renderApp = async (
   const monitoringService = new MonitoringService(core.http, isMonitoringEnabled, clusterService);
   const pipelinesService = new PipelinesService(core.http, monitoringService);
   const pipelineService = new PipelineService(core.http, pipelinesService);
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <Router history={history}>
         <Routes>
@@ -100,11 +101,10 @@ export const renderApp = async (
           />
         </Routes>
       </Router>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

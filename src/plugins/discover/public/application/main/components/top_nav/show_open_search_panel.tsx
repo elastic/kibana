@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
@@ -28,8 +28,9 @@ export function showOpenSearchPanel({
 
   isOpen = true;
   const container = document.createElement('div');
+  const root = createRoot(container);
   const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     isOpen = false;
   };
@@ -42,5 +43,5 @@ export function showOpenSearchPanel({
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

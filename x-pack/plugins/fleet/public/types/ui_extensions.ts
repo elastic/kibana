@@ -6,7 +6,7 @@
  */
 
 import type { EuiStepProps } from '@elastic/eui';
-import type { ComponentType, LazyExoticComponent } from 'react';
+import type { ComponentType, LazyExoticComponent, PropsWithChildren } from 'react';
 
 import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
 
@@ -116,7 +116,7 @@ export interface PackagePolicyResponseExtension {
 export interface EndpointAgentTamperProtectionExtension {
   package: string;
   view: 'endpoint-agent-tamper-protection';
-  Component: LazyExoticComponent<ComponentType>;
+  Component: LazyExoticComponent<ComponentType<PropsWithChildren>>;
 }
 
 export interface PackageGenericErrorsListExtension {

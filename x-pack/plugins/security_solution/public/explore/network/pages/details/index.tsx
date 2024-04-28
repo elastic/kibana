@@ -83,7 +83,7 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
-    (score, interval) => {
+    (score: any, interval: any) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({

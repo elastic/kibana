@@ -14,7 +14,7 @@ export const TimeRangeIdContext = createContext<{
   timeRangeId: 0,
 });
 
-export function TimeRangeIdContextProvider({ children }: { children: React.ReactChild }) {
+export function TimeRangeIdContextProvider({ children }: React.PropsWithChildren) {
   const [timeRangeId, setTimeRangeId] = useState(0);
 
   const api = useMemo(() => {

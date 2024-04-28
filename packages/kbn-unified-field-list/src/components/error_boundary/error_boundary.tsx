@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 /**
  * Renders nothing instead of a component which triggered an exception.
  */
-export class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
+export class ErrorBoundary extends React.Component<PropsWithChildren, { hasError: boolean }> {
   constructor(props: {}) {
     super(props);
     this.state = { hasError: false };

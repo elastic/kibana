@@ -47,7 +47,7 @@ const RulesTableFiltersComponent = () => {
   } = filterOptions;
 
   const handleOnSearch = useCallback(
-    (filterString) => {
+    (filterString: any) => {
       startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
       setFilterOptions({ filter: filterString.trim() });
     },

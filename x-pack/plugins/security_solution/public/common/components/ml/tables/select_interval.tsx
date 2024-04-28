@@ -32,7 +32,7 @@ export const SelectInterval: React.FC<{
   onChange: (interval: string) => void;
 }> = ({ interval, onChange }) => {
   const onChangeCb = useCallback(
-    (e) => {
+    (e: any) => {
       onChange(e.target.value);
     },
     [onChange]

@@ -39,7 +39,7 @@ export interface ContextValue {
 
 interface ContextProps {
   value: ContextValue;
-  children: JSX.Element;
+  children: React.ReactNode;
 }
 
 const ServicesContext = createContext<ContextValue | null>(null);

@@ -30,7 +30,7 @@ const defaultContext: ContextType = {
 
 export const CsmSharedContext = createContext(defaultContext);
 
-export function CsmSharedContextProvider({ children }: { children: JSX.Element }) {
+export function CsmSharedContextProvider({ children }: React.PropsWithChildren) {
   const [newData, setNewData] = useState<SharedData>({ totalPageViews: 0 });
   const [dataView, setDataView] = useState<DataView>();
 

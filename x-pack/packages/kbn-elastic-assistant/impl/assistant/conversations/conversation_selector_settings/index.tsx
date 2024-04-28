@@ -107,7 +107,10 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new conversation
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      (
+        searchValue: string,
+        flattenedOptions: Array<EuiComboBoxOptionOption<{ isDefault: boolean }>> = []
+      ) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -115,12 +118,11 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
         const normalizedSearchValue = searchValue.trim().toLowerCase();
         const optionExists =
           flattenedOptions.findIndex(
-            (option: SystemPromptSelectorOption) =>
-              option.label.trim().toLowerCase() === normalizedSearchValue
+            (option) => option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
         const newOption = {
-          value: searchValue,
+          value: searchValue as unknown as SystemPromptSelectorOption['value'],
           label: searchValue,
           id: '',
         };

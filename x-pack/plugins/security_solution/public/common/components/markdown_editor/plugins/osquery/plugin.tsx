@@ -56,7 +56,7 @@ const OsqueryEditorComponent = ({
   });
 
   const onSubmit = useCallback(
-    (data) => {
+    (data: any) => {
       onSave(
         `!{osquery${JSON.stringify(
           pickBy(

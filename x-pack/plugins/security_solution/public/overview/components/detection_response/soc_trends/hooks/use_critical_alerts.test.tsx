@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseCriticalAlerts } from './use_critical_alerts';
 import { useCriticalAlerts } from './use_critical_alerts';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import * as i18n from '../translations';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
@@ -67,10 +67,10 @@ describe('useCriticalAlerts', () => {
   });
   it('loads initial state', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCriticalAlerts(props), {
+      const { result } = renderHook(() => useCriticalAlerts(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: true,
@@ -96,11 +96,11 @@ describe('useCriticalAlerts', () => {
           }
     );
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCriticalAlerts(props), {
+      const { result } = renderHook(() => useCriticalAlerts(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '100',
         isLoading: false,
@@ -131,11 +131,11 @@ describe('useCriticalAlerts', () => {
           }
     );
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCriticalAlerts(props), {
+      const { result } = renderHook(() => useCriticalAlerts(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '50',
         isLoading: false,
@@ -159,11 +159,11 @@ describe('useCriticalAlerts', () => {
       ...basicReturn,
     }));
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCriticalAlerts(props), {
+      const { result } = renderHook(() => useCriticalAlerts(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '100',
         isLoading: false,
@@ -189,11 +189,11 @@ describe('useCriticalAlerts', () => {
           }
     );
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCriticalAlerts(props), {
+      const { result } = renderHook(() => useCriticalAlerts(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -219,11 +219,11 @@ describe('useCriticalAlerts', () => {
           }
     );
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useCriticalAlerts(props), {
+      const { result } = renderHook(() => useCriticalAlerts(props), {
         wrapper: wrapperContainer,
       });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '100',
         isLoading: false,
@@ -251,14 +251,14 @@ describe('useCriticalAlerts', () => {
     );
     await act(async () => {
       let ourProps = props;
-      const { result, rerender, waitForNextUpdate } = renderHook(
+      const { result, rerender } = renderHook(
         () => useCriticalAlerts(ourProps),
         {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '100',
         isLoading: false,
@@ -277,7 +277,7 @@ describe('useCriticalAlerts', () => {
         toCompare: '2020-09-08T08:20:18.966Z',
       };
       rerender();
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,
@@ -305,14 +305,14 @@ describe('useCriticalAlerts', () => {
     );
     await act(async () => {
       let ourProps = props;
-      const { result, rerender, waitForNextUpdate } = renderHook(
+      const { result, rerender } = renderHook(
         () => useCriticalAlerts(ourProps),
         {
           wrapper: wrapperContainer,
         }
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '100',
         isLoading: false,
@@ -331,7 +331,7 @@ describe('useCriticalAlerts', () => {
         toCompare: '2020-09-08T08:20:18.966Z',
       };
       rerender();
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         stat: '-',
         isLoading: false,

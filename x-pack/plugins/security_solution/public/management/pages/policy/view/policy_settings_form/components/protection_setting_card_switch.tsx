@@ -52,7 +52,7 @@ export const ProtectionSettingCardSwitch = React.memo(
     const isEditMode = mode === 'edit';
 
     const handleSwitchChange = useCallback(
-      (event) => {
+      (event: any) => {
         const newPayload = cloneDeep(policy);
 
         if (event.target.checked === false) {

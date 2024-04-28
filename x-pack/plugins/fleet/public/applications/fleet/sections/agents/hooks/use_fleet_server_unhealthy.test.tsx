@@ -103,20 +103,20 @@ describe('useFleetServerUnhealthy', () => {
   it('should return isUnHealthy:false with an online fleet slerver', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockApiCallsWithHealthyFleetServer(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() => useFleetServerUnhealthy());
+    const { result, } = testRenderer.renderHook(() => useFleetServerUnhealthy());
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isUnhealthy).toBeFalsy();
   });
   it('should return isUnHealthy:true with only one offline fleet slerver', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockApiCallsWithoutHealthyFleetServer(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() => useFleetServerUnhealthy());
+    const { result, } = testRenderer.renderHook(() => useFleetServerUnhealthy());
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isUnhealthy).toBeTruthy();
   });
@@ -124,10 +124,10 @@ describe('useFleetServerUnhealthy', () => {
   it('should call notifications service if an error happen while fetching status', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockApiCallsWithError(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() => useFleetServerUnhealthy());
+    const { result, } = testRenderer.renderHook(() => useFleetServerUnhealthy());
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isUnhealthy).toBeFalsy();
     expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();

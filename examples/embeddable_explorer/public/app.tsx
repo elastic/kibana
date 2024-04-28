@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
@@ -117,7 +117,8 @@ const EmbeddableExplorerApp = ({
 };
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<EmbeddableExplorerApp {...props} />, element);
+  const root = createRoot(element);
+  root.render(<EmbeddableExplorerApp {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -152,7 +152,7 @@ export function ContextAppContent({
   );
 
   const onResize = useCallback(
-    (colSettings) => {
+    (colSettings: any) => {
       setGridSettings((currentGridSettings) =>
         onResizeGridColumn(colSettings, currentGridSettings)
       );

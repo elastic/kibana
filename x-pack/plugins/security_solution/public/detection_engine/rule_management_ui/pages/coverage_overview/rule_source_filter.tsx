@@ -51,7 +51,7 @@ const RuleSourceFilterComponent = ({
   const options = populateSelected(ruleSourceFilterDefaultOptions, selected);
 
   const handleSelectableOnChange = useCallback(
-    (newOptions) => {
+    (newOptions: any) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleSource>(newOptions);
       onChange(formattedOptions);
     },

@@ -282,7 +282,7 @@ export const SavedQueryManagementList = ({
     }
   }, [onLoad, selectedSavedQuery, onClose]);
 
-  const handleSelect = useCallback((savedQueryToSelect) => {
+  const handleSelect = useCallback((savedQueryToSelect: SavedQuery | undefined) => {
     setSelectedSavedQuery(savedQueryToSelect);
   }, []);
 

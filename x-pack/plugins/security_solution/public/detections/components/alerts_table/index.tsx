@@ -227,7 +227,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [alertColumns, isEventRenderedView]
   );
 
-  const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
+  const onAlertTableUpdate: NonNullable<AlertsTableStateProps['onUpdate']> = useCallback(
     ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
       dispatch(
         updateIsLoading({

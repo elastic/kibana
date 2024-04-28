@@ -7,7 +7,7 @@
  */
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { createHashHistory } from 'history';
 import { TodoAppPage } from './todo';
@@ -34,12 +34,12 @@ export const renderApp = (
   { navigateToApp, exampleLinks }: Deps
 ) => {
   const history = historyType === History.Browser ? platformHistory : createHashHistory();
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
       <TodoAppPage history={history} appTitle={appTitle} appBasePath={appBasePath} />
-    </StateContainersExamplesPage>,
-    element
+    </StateContainersExamplesPage>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

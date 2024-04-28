@@ -109,7 +109,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
-        let description: string | ReactNode = '';
+        let description: string | ((esDocUrl: string) => ReactNode) = '';
 
         if (typeField.value?.length) {
           const type = typeField.value;

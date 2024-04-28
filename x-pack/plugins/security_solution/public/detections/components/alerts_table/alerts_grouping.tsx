@@ -90,7 +90,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   );
 
   const onOptionsChange = useCallback(
-    (options) => {
+    (options: any) => {
       dispatch(
         updateGroups({
           tableId: props.tableId,

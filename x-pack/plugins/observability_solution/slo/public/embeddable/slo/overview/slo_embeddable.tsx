@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiFlexItem, EuiLink, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -55,6 +55,7 @@ export interface SloEmbeddableDeps {
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
   public readonly type = SLO_EMBEDDABLE;
   private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot>;
   private reloadSubject: Subject<boolean>;
   private reloadGroupSubject: Subject<SloEmbeddableInput | undefined>;
   private subscription: Subscription;
@@ -90,6 +91,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
   public render(node: HTMLElement) {
     super.render(node);
     this.node = node;
+    this.root = createRoot(node);
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
     const {
@@ -160,7 +162,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
         );
       }
     };
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <Router history={createBrowserHistory()}>
           <EuiThemeProvider darkMode={true}>
@@ -179,8 +181,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
             </KibanaThemeProvider>
           </EuiThemeProvider>
         </Router>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
@@ -200,8 +201,8 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

@@ -8,7 +8,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { AlertsFlyout } from './alerts_flyout';
-import { Alert, AlertsField } from '../../../../types';
+import { Alert, AlertsField, AlertsTableConfigurationRegistry } from '../../../../types';
 
 const onClose = jest.fn();
 const onPaginate = jest.fn();
@@ -39,10 +39,10 @@ const props = {
       header: null,
       footer: () => null,
     }),
-    getRenderCellValue: () =>
+    getRenderCellValue: (() =>
       jest.fn().mockImplementation((rcvProps) => {
         return `${rcvProps.colIndex}:${rcvProps.rowIndex}`;
-      }),
+      })) as unknown as AlertsTableConfigurationRegistry['getRenderCellValue'],
   },
   flyoutIndex: 0,
   alertsCount: 4,

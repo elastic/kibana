@@ -109,7 +109,7 @@ export function DataViewsList({
   );
 
   const onChangeSortDirection = useCallback(
-    (value) => {
+    (value: any) => {
       sortingService.setDirection(value);
       setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
     },

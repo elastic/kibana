@@ -54,7 +54,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   );
 
   const goToTimelines = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.timelines,

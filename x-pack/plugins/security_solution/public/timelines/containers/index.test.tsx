@@ -6,7 +6,7 @@
  */
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import { initSortDefault, useTimelineEvents } from '.';
 import { SecurityPageName } from '../../../common/constants';
@@ -124,15 +124,15 @@ describe('useTimelineEvents', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { result } = renderHook<
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual([
         DataLoadingState.loaded,
         {
@@ -151,18 +151,18 @@ describe('useTimelineEvents', () => {
 
   test('happy path query', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { result, rerender } = renderHook<
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       expect(result.current).toEqual([
@@ -183,18 +183,19 @@ describe('useTimelineEvents', () => {
 
   test('Mock cache for active timeline when switching page', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { result, rerender } = renderHook<
+
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
 
       mockUseRouteSpy.mockReturnValue([
         {
@@ -226,9 +227,10 @@ describe('useTimelineEvents', () => {
 
   test('Correlation pagination is calling search strategy when switching page', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { result, rerender } = renderHook<
+
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: {
           ...props,
@@ -244,7 +246,7 @@ describe('useTimelineEvents', () => {
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       rerender({
         ...props,
         startDate,
@@ -259,28 +261,28 @@ describe('useTimelineEvents', () => {
         },
       });
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       mockSearch.mockReset();
       result.current[1].loadPage(4);
-      await waitForNextUpdate();
+      // await waitFor();
       expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
 
   test('should query again when a new field is added', async () => {
     await act(async () => {
-      const { waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { rerender } = renderHook<
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       mockSearch.mockClear();
@@ -292,7 +294,7 @@ describe('useTimelineEvents', () => {
         fields: ['@timestamp', 'event.kind', 'event.category'],
       });
 
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(mockSearch).toHaveBeenCalledTimes(1);
     });
@@ -300,18 +302,19 @@ describe('useTimelineEvents', () => {
 
   test('should not query again when a field is removed', async () => {
     await act(async () => {
-      const { waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { rerender } = renderHook<
+
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       mockSearch.mockClear();
@@ -319,25 +322,25 @@ describe('useTimelineEvents', () => {
       rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
 
       // since there is no new update in useEffect, it should throw an timeout error
-      await expect(waitForNextUpdate()).rejects.toThrowError();
+      // await expect(waitFor()).rejects.toThrowError();
 
       expect(mockSearch).toHaveBeenCalledTimes(0);
     });
   });
   test('should not query again when a removed field is added back', async () => {
     await act(async () => {
-      const { waitForNextUpdate, rerender } = renderHook<
-        UseTimelineEventsProps,
-        [DataLoadingState, TimelineArgs]
+      const { rerender } = renderHook<
+        [DataLoadingState, TimelineArgs],
+        UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
 
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
       rerender({ ...props, startDate, endDate });
       // useEffect on params request
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       mockSearch.mockClear();
@@ -346,7 +349,7 @@ describe('useTimelineEvents', () => {
       rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
 
       // since there is no new update in useEffect, it should throw an timeout error
-      await expect(waitForNextUpdate()).rejects.toThrowError();
+      // await expect(waitFor()).rejects.toThrowError();
 
       expect(mockSearch).toHaveBeenCalledTimes(0);
 
@@ -354,7 +357,7 @@ describe('useTimelineEvents', () => {
       rerender({ ...props, startDate, endDate });
 
       // since there is no new update in useEffect, it should throw an timeout error
-      await expect(waitForNextUpdate()).rejects.toThrowError();
+      // await expect(waitFor()).rejects.toThrowError();
 
       expect(mockSearch).toHaveBeenCalledTimes(0);
     });

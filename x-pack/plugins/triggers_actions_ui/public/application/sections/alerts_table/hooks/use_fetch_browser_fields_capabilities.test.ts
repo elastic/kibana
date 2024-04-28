@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFetchBrowserFieldCapabilities } from './use_fetch_browser_fields_capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
@@ -60,11 +60,11 @@ describe('useFetchBrowserFieldCapabilities', () => {
   });
 
   it('should call the api only once', async () => {
-    const { result, waitForNextUpdate, rerender } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useFetchBrowserFieldCapabilities({ featureIds: ['apm'] })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(httpMock).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual([
@@ -123,13 +123,13 @@ describe('useFetchBrowserFieldCapabilities', () => {
   });
 
   it('should filter out the non valid feature id', async () => {
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useFetchBrowserFieldCapabilities({
         featureIds: ['alerts', 'apm', 'logs'] as unknown as AlertConsumers[],
       })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(httpMock).toHaveBeenCalledTimes(1);
     expect(httpMock).toHaveBeenCalledWith('/internal/rac/alerts/browser_fields', {

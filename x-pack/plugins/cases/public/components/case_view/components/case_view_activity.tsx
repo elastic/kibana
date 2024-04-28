@@ -22,7 +22,7 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
+import type { CaseConnector, CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
@@ -115,12 +115,13 @@ export const CaseViewActivity = ({
   );
 
   const onSubmitTags = useCallback(
-    (newTags) => onUpdateField({ key: 'tags', value: newTags }),
+    (newTags: string[]) => onUpdateField({ key: 'tags', value: newTags }),
     [onUpdateField]
   );
 
   const onSubmitCategory = useCallback(
-    (newCategory) => onUpdateField({ key: 'category', value: newCategory }),
+    (newCategory?: string | null) =>
+      newCategory && onUpdateField({ key: 'category', value: newCategory }),
     [onUpdateField]
   );
 
@@ -143,7 +144,7 @@ export const CaseViewActivity = ({
     useGetSupportedActionConnectors();
 
   const onSubmitConnector = useCallback(
-    (connector) => {
+    (connector: CaseConnector) => {
       onUpdateField({
         key: 'connector',
         value: connector,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import {
   fireEvent,
   render,
@@ -159,6 +159,7 @@ const queryClient = new QueryClient({
 });
 
 const AllTheProviders = ({ children }: { children: any }) => (
+  // @ts-expect-error
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </IntlProvider>

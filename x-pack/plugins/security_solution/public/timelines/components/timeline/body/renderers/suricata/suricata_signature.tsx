@@ -81,7 +81,7 @@ export const DraggableSignatureId = React.memo<{
   );
 
   const render = useCallback(
-    (dataProvider, _, snapshot) =>
+    (dataProvider: any, _: any, snapshot: any) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />

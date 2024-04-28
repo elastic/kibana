@@ -87,6 +87,7 @@ const modalProps: RulesSettingsModalProps = {
 const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsModalProps> = (
   props
 ) => (
+  // @ts-expect-error
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <RulesSettingsModal {...props} />

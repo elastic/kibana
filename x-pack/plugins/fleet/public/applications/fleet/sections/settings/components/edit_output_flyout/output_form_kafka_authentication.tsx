@@ -379,6 +379,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             data-test-subj="settingsOutputsFlyout.kafkaVerificationModeInput"
             {...inputs.kafkaVerificationModeInput.props}
             options={kafkaVerificationModeOptions}
+            // @ts-expect-error
             placeholder={i18n.translate(
               'xpack.fleet.settings.editOutputFlyout.kafkaVerificationModeInputPlaceholder',
               {

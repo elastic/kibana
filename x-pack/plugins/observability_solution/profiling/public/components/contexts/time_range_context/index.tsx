@@ -12,7 +12,7 @@ export const TimeRangeContext = React.createContext<
   { timeRangeId: string; refresh: () => void } | undefined
 >(undefined);
 
-export function TimeRangeContextProvider({ children }: { children: React.ReactElement }) {
+export function TimeRangeContextProvider({ children }: React.PropsWithChildren) {
   const [timeRangeId, setTimeRangeId] = useState(uniqueId());
 
   const timeRangeContextValue = useMemo(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';

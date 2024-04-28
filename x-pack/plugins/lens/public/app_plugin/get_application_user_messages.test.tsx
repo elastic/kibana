@@ -160,6 +160,7 @@ describe('application-level user messages', () => {
       expect(
         mountWithIntl(
           <div>
+            <>
             {
               getApplicationUserMessages({
                 visualizationType: '123',
@@ -175,6 +176,7 @@ describe('application-level user messages', () => {
                 ...irrelevantProps,
               })[0].longMessage
             }
+            </>
           </div>
         ).exists(RedirectAppLinks)
       ).toBeFalsy();
@@ -182,6 +184,7 @@ describe('application-level user messages', () => {
       expect(
         shallow(
           <div>
+            <>
             {
               getApplicationUserMessages({
                 visualizationType: '123',
@@ -197,6 +200,7 @@ describe('application-level user messages', () => {
                 ...irrelevantProps,
               })[0].longMessage
             }
+            </>
           </div>
         ).exists(RedirectAppLinks)
       ).toBeFalsy();

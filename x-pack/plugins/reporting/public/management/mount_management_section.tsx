@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';

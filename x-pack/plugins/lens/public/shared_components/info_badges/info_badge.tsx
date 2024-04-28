@@ -59,7 +59,9 @@ export function InfoBadge({
             {title}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <>{children}</>
+        </EuiFlexItem>
       </EuiFlexGroup>
       {hasMultipleColors ? (
         <div

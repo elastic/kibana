@@ -10,22 +10,24 @@ import React from 'react';
 import { EuiResizableButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+export interface ResizableButtonProps {
+  onMouseDownResizeHandler: (
+    mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
+  onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
+  editorIsInline?: boolean;
+}
 export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
   editorIsInline,
-}: {
-  onMouseDownResizeHandler: (
-    mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent
-  ) => void;
-  onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
-  editorIsInline?: boolean;
-}) {
+}: ResizableButtonProps) {
   return (
     <EuiResizableButton
       data-test-subj="TextBasedLangEditor-resize"
       onMouseDown={onMouseDownResizeHandler}
       onKeyDown={onKeyDownResizeHandler}
+      // @ts-expect-error
       onTouchStart={onMouseDownResizeHandler}
       indicator="border"
       css={css`

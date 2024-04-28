@@ -13,7 +13,7 @@ export const getUseTriggersActionsFieldBrowserOptions = (scopeId: SourcererScope
   const useTriggersActionsFieldBrowserOptions: AlertsTableConfigurationRegistry['useFieldBrowserOptions'] =
     ({ onToggleColumn }) => {
       const upsertColumn = useCallback(
-        (column) => {
+        (column: any) => {
           onToggleColumn(column.id);
         },
         [onToggleColumn]

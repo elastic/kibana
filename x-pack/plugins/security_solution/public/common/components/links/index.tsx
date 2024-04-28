@@ -72,7 +72,7 @@ const UserDetailsLinkComponent: React.FC<{
     telemetry,
   } = useKibana().services;
   const goToUsersDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
@@ -141,7 +141,7 @@ const HostDetailsLinkComponent: React.FC<{
   const encodedHostName = encodeURIComponent(hostName);
 
   const goToHostDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
@@ -310,7 +310,7 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
   );
 
   const goToCaseDetails = useCallback(
-    async (ev?) => {
+    async (ev?: SyntheticEvent) => {
       if (ev) ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
@@ -350,7 +350,7 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCreateCase = useCallback(
-    async (ev) => {
+    async (ev: SyntheticEvent) => {
       ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
@@ -509,7 +509,7 @@ const ReputationLinkComponent: React.FC<{
   );
 
   const renderCallback = useCallback(
-    (rowItem) =>
+    (rowItem: ReputationLinkSetting) =>
       isReputationLink(rowItem) && (
         <ExternalLink
           url={rowItem.url_template}

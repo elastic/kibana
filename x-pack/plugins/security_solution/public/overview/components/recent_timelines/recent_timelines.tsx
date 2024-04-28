@@ -54,7 +54,7 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
     );
 
     const render = useCallback(
-      (showHoverContent) => (
+      (showHoverContent: any) => (
         <EuiFlexGroup
           gutterSize="none"
           justifyContent="spaceBetween"

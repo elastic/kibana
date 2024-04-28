@@ -81,7 +81,10 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new quick prompt
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      (
+        searchValue: string,
+        flattenedOptions: Array<EuiComboBoxOptionOption<{ isDefault: boolean }>> = []
+      ) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -89,12 +92,11 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         const normalizedSearchValue = searchValue.trim().toLowerCase();
         const optionExists =
           flattenedOptions.findIndex(
-            (option: QuickPromptSelectorOption) =>
-              option.label.trim().toLowerCase() === normalizedSearchValue
+            (option) => option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
-        const newOption = {
-          value: searchValue,
+        const newOption: QuickPromptSelectorOption = {
+          value: searchValue as unknown as QuickPromptSelectorOption['value'],
           label: searchValue,
         };
 

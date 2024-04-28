@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -66,7 +66,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   );
 
   const onChange = useCallback(
-    ({ target }) => onChangeDuration(Number(target.value)),
+    ({ target }: ChangeEvent<HTMLSelectElement>) => onChangeDuration(Number(target.value)),
     [onChangeDuration]
   );
 

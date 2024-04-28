@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactNode, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -54,7 +54,7 @@ export interface KibanaProviderOptions<ExtraCore> {
 }
 
 interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
-  children: ReactElement | ReactNode;
+  children: ReactNode;
 }
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
@@ -254,7 +254,7 @@ export function WrappedHelper<ExtraCore>({
   useRealStore,
   path,
   history = createMemoryHistory(),
-}: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
+}: RenderRouterOptions<ExtraCore> & PropsWithChildren<{ useRealStore?: boolean }>) {
   const testState: AppState = mergeWith({}, mockState, state, (objValue, srcValue) => {
     if (Array.isArray(objValue)) {
       return srcValue;
@@ -276,7 +276,7 @@ export function WrappedHelper<ExtraCore>({
 
 /* Custom react testing library render */
 export function render<ExtraCore>(
-  ui: ReactElement,
+  ui: ReactNode,
   {
     history = createMemoryHistory(),
     core,

@@ -250,7 +250,7 @@ export const FooterComponent = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) =>
+    (itemsChangedPerPage: any) =>
       dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
     [dispatch, id]
   );

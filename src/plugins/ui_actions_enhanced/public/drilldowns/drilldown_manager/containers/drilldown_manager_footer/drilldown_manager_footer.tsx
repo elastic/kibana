@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useDrilldownManager } from '../context';
 
 export const DrilldownManagerFooter: React.FC<{ children?: React.ReactNode }> = ({ children }) => {

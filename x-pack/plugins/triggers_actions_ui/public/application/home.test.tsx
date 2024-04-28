@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
@@ -67,6 +67,7 @@ describe('home', () => {
     };
 
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <Router history={props.history}>
           <QueryClientProvider client={queryClient}>

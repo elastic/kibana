@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';

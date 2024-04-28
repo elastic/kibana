@@ -189,12 +189,12 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useOutputOptions({} as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -317,12 +317,12 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => false,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useOutputOptions({} as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -445,12 +445,12 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithLogstashOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useOutputOptions({} as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -497,7 +497,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithLogstashOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useOutputOptions({
         package_policies: [
           {
@@ -510,7 +510,7 @@ describe('useOutputOptions', () => {
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -601,12 +601,12 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithRemoteESOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useOutputOptions({} as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.dataOutputOptions.length).toEqual(2);
     expect(result.current.dataOutputOptions[1].value).toEqual('remote1');
     expect(result.current.monitoringOutputOptions.length).toEqual(2);
@@ -619,12 +619,12 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithInternalOutputs(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useOutputOptions({} as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -670,12 +670,12 @@ describe('useFleetServerHostsOptions', () => {
   it('should not enable internal fleet server hosts', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockApiCallsWithInternalFleetServerHost(testRenderer.startServices.http);
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+    const { result, } = testRenderer.renderHook(() =>
       useFleetServerHostsOptions({} as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(result.current.fleetServerHostsOptions).toMatchInlineSnapshot(`
       Array [
         Object {

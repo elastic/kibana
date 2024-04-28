@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
@@ -20,12 +20,12 @@ describe('Transform: Transform List Actions', () => {
     const wrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useActions({ forceDisable: false, transformNodes: 1 }),
       { wrapper }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     const actions = result.current.actions;
 

@@ -77,7 +77,7 @@ export const NotifyUserOption = React.memo(
     const userNotificationMessage = policy.windows.popup[protection].message;
 
     const handleUserNotificationCheckbox = useCallback(
-      (event) => {
+      (event: any) => {
         const newPayload = cloneDeep(policy);
 
         for (const os of osList) {
@@ -97,7 +97,7 @@ export const NotifyUserOption = React.memo(
     );
 
     const handleCustomUserNotification = useCallback(
-      (event) => {
+      (event: any) => {
         const newPayload = cloneDeep(policy);
         for (const os of osList) {
           if (os === 'windows') {

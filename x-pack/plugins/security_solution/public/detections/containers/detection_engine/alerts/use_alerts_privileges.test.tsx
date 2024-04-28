@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import produce from 'immer';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -91,10 +91,10 @@ describe('useAlertsPrivileges', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
         useAlertsPrivileges()
       );
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: null,
         hasIndexManage: null,
@@ -116,11 +116,11 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
         useAlertsPrivileges()
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: false,
         hasIndexManage: false,
@@ -146,11 +146,11 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
         useAlertsPrivileges()
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: false,
@@ -173,11 +173,11 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
         useAlertsPrivileges()
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,
@@ -201,11 +201,11 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
         useAlertsPrivileges()
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,
@@ -229,11 +229,11 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
         useAlertsPrivileges()
       );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: true,
         hasIndexManage: true,

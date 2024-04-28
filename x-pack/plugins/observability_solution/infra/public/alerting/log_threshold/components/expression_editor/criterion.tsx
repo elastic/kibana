@@ -23,6 +23,7 @@ import { isFinite, isNumber } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   Comparator,
   ComparatorToi18nMap,
@@ -132,7 +133,7 @@ export const Criterion: React.FC<Props> = ({
   }, [fieldInfo]);
 
   const handleFieldChange = useCallback(
-    ([selectedOption]) => {
+    ([selectedOption]: Array<EuiComboBoxOptionOption<unknown>>) => {
       if (!selectedOption) {
         updateCriterion(idx, { field: '' });
         return;

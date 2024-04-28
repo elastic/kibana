@@ -9,7 +9,8 @@
 import { useCallback } from 'react';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { IAggConfig, AggParamType } from '@kbn/data-plugin/public';
+import { IAggConfig, AggParamType, IAggType } from '@kbn/data-plugin/public';
+import { DefaultEditorCommonProps } from '../../agg_common_props';
 
 type SetValue = (value?: IAggConfig) => void;
 
@@ -19,7 +20,7 @@ function useSubAggParamsHandlers(
   subAgg: IAggConfig,
   setValue: SetValue
 ) {
-  const setAggParamValue = useCallback(
+  const setAggParamValue: DefaultEditorCommonProps['setAggParamValue'] = useCallback(
     (aggId, paramName, val) => {
       const parsedParams = subAgg.serialize();
       const params = {
@@ -36,7 +37,7 @@ function useSubAggParamsHandlers(
   );
 
   const onAggTypeChange = useCallback(
-    (aggId, aggType) => {
+    (aggId: string, aggType: IAggType) => {
       const parsedAgg = subAgg.serialize();
       const parsedAggParams = parsedAgg.params as SerializableRecord;
 
@@ -49,7 +50,7 @@ function useSubAggParamsHandlers(
           customLabel: parsedAggParams.customLabel,
           timeShift: parsedAggParams.timeShift,
         },
-        type: aggType,
+        type: aggType as unknown as string,
       };
 
       setValue(aggParam.makeAgg(agg, params));

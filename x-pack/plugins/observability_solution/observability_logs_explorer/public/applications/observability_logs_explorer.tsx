@@ -10,7 +10,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { DatasetQualityRoute, ObservabilityLogsExplorerMainRoute } from '../routes/main';
 import { NotFoundPage } from '../routes/not_found';
 import {
@@ -27,14 +27,15 @@ export const renderObservabilityLogsExplorer = (
   ownPluginStart: ObservabilityLogsExplorerPluginStart,
   appParams: ObservabilityLogsExplorerAppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(appParams.element);
+
+  root.render(
     <ObservabilityLogsExplorerApp
       appParams={appParams}
       core={core}
       plugins={pluginsStart}
       pluginStart={ownPluginStart}
-    />,
-    appParams.element
+    />
   );
 
   return () => {
@@ -42,7 +43,7 @@ export const renderObservabilityLogsExplorer = (
     // observable in the search session service
     pluginsStart.data.search.session.clear();
 
-    ReactDOM.unmountComponentAtNode(appParams.element);
+    root.unmount();
   };
 };
 

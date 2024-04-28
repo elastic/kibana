@@ -30,7 +30,10 @@ const DashboardToolBarComponent = ({
 
   const { navigateTo, getAppUrl } = useNavigation();
   const redirectTo = useCallback(
-    ({ destination, id }) => {
+    ({
+      destination,
+      id
+    }: any) => {
       if (destination === 'listing') {
         navigateTo({ deepLinkId: SecurityPageName.dashboards });
       }

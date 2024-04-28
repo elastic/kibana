@@ -7,10 +7,14 @@
  */
 
 import type { RefObject } from 'react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
-import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
+import {
+  ExpressionRendererParams,
+  ExpressionRendererState,
+  useExpressionRenderer,
+} from './use_expression_renderer';
 import * as loader from '../loader';
 
 describe('useExpressionRenderer', () => {
@@ -22,7 +26,7 @@ describe('useExpressionRenderer', () => {
     loading$: Subject<void>;
     render$: Subject<number>;
   };
-  let hook: RenderHookResult<ExpressionRendererParams, ReturnType<typeof useExpressionRenderer>>;
+  let hook: RenderHookResult<ExpressionRendererState, ExpressionRendererParams>;
 
   beforeEach(() => {
     nodeRef = { current: document.createElement('div') };

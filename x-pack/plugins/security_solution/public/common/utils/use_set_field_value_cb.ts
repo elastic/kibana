@@ -30,7 +30,7 @@ export const useSetFieldValueWithCallback = ({
   }, [value, callback]);
 
   return useCallback(
-    (v, cb) => {
+    (v: any, cb: any) => {
       setFieldValue(field, v);
 
       setCallback(() => cb);

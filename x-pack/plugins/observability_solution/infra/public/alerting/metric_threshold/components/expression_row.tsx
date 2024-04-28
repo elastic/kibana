@@ -140,13 +140,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: any) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -156,7 +156,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateWarningThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
@@ -187,7 +187,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   ]);
 
   const handleCustomMetricChange = useCallback(
-    (exp) => {
+    (exp: any) => {
       setRuleParams(expressionId, exp);
     },
     [expressionId, setRuleParams]
@@ -199,6 +199,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       threshold={threshold}
       updateComparator={updateComparator}
       updateThreshold={updateThreshold}
+      // @ts-expect-error
       errors={(errors.critical as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
     />
@@ -210,6 +211,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       threshold={warningThreshold}
       updateComparator={updateWarningComparator}
       updateThreshold={updateWarningThreshold}
+      // @ts-expect-error
       errors={(errors.warning as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
     />

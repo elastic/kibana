@@ -139,7 +139,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   });
 
   const handleMlLinkClick = useCallback(
-    (e) => {
+    (e: any) => {
       if (!viewAnomalyInMachineLearningLink || !shouldHandleLinkEvent(e)) return;
       application.navigateToUrl(viewAnomalyInMachineLearningLink);
     },

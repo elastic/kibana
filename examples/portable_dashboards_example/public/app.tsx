@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React, { useMemo } from 'react';
 import { useAsync } from 'react-use/lib';
 import { Redirect } from 'react-router-dom';
@@ -30,11 +30,11 @@ export const renderApp = async (
   { data, dashboard }: PortableDashboardsExampleStartDeps,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
-    <PortableDashboardsDemos data={data} history={history} dashboard={dashboard} />,
-    element
+  const root = createRoot(element);
+  root.render(
+    <PortableDashboardsDemos data={data} history={history} dashboard={dashboard} />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 const PortableDashboardsDemos = ({

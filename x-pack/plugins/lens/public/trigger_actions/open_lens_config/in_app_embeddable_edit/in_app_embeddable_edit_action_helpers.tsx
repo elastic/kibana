@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -125,7 +125,9 @@ export async function executeEditEmbeddableAction({
   // in case an element is given render the component in the container,
   // otherwise a flyout will open
   if (container) {
-    ReactDOM.render(ConfigPanel, container);
+    const root = createRoot(container);
+
+    root.render(ConfigPanel);
   } else {
     const handle = core.overlays.openFlyout(
       toMountPoint(

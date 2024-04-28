@@ -107,7 +107,9 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
         data-test-subj="errorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          <>
+            {error.statusCode} - {error.message}
+          </>
         </p>
         <EuiButton color="danger" onClick={resendRequest} data-test-subj="retryButton">
           {i18nTexts.retryButton}
@@ -123,7 +125,9 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       iconType={calloutIcon}
       data-test-subj={calloutTestId}
     >
-      <p>{i18nTexts.calloutBody}</p>
+      <p>
+        <>{i18nTexts.calloutBody}</>
+      </p>
       <EuiButton
         color={calloutTint}
         onClick={onResetClick}

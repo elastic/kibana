@@ -38,7 +38,7 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   );
 
   const handleClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
 
@@ -52,9 +52,9 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
+    (<EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
       {data?.name ?? policyId}
-    </EuiLink>
+    </EuiLink>)
   );
 };
 

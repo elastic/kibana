@@ -25,6 +25,7 @@ export const TextField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props)
     <EuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
+      // @ts-expect-error
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

@@ -41,7 +41,7 @@ export function WorkspaceErrors(props: Props) {
       }
       body={
         <div data-test-subj="workspace-error-message">
-          {typeof activeError === 'string' ? activeError : activeError.longMessage}
+          <>{typeof activeError === 'string' ? activeError : activeError.longMessage}</>
         </div>
       }
       title={<h2>{props.title}</h2>}

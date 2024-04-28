@@ -6,7 +6,7 @@
  */
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana, KibanaServices } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
@@ -35,7 +35,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   });
 
   it('should call fleet setup first via `isInitialized()` and then send upgrade request', async () => {
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -57,7 +57,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaBranch.mockReturnValue('main');
     mockBuildFlavor.mockReturnValue('serverless');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -77,7 +77,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaBranch.mockReturnValue('main');
     mockBuildFlavor.mockReturnValue('serverless');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -97,7 +97,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaBranch.mockReturnValue('release');
     mockBuildFlavor.mockReturnValue('traditional');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -117,7 +117,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaBranch.mockReturnValue('main');
     mockBuildFlavor.mockReturnValue('traditional');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -137,7 +137,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaBranch.mockReturnValue('release');
     mockBuildFlavor.mockReturnValue('traditional');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -157,7 +157,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     mockGetKibanaBranch.mockReturnValue('main');
     mockBuildFlavor.mockReturnValue('traditional');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 
@@ -175,7 +175,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   it('should send separate upgrade requests if prebuiltRulesPackageVersion is provided', async () => {
     mockGetPrebuiltRulesPackageVersion.mockReturnValue('8.2.1');
 
-    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+    renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
     });
 

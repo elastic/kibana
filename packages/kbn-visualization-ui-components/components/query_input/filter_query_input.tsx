@@ -118,13 +118,15 @@ export function FilterQueryInput({
                         }
                       )}
                     >
-                      {inputFilter?.query ||
-                        i18n.translate(
-                          'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
-                          {
-                            defaultMessage: '(empty)',
-                          }
-                        )}
+                      <>
+                        {inputFilter?.query ||
+                          i18n.translate(
+                            'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
+                            {
+                              defaultMessage: '(empty)',
+                            }
+                          )}
+                      </>
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -6,7 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -15,7 +15,7 @@ import { TransactionOverviewLink, useTransactionsOverviewHref } from './transact
 
 const history = createMemoryHistory();
 
-function Wrapper({ children }: { children: React.ReactElement }) {
+function Wrapper({ children }: React.PropsWithChildren) {
   return (
     <MockApmPluginContextWrapper history={history}>
       <MockUrlParamsContextProvider>{children}</MockUrlParamsContextProvider>

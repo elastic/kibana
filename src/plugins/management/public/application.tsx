@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { ManagementApp, ManagementAppDependencies } from './components/management_app';
@@ -16,6 +16,7 @@ export const renderApp = async (
   { history, appBasePath, element, theme$ }: AppMountParameters,
   dependencies: ManagementAppDependencies
 ) => {
-  ReactDOM.render(<ManagementApp {...{ history, appBasePath, theme$, dependencies }} />, element);
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<ManagementApp {...{ history, appBasePath, theme$, dependencies }} />);
+  return () => root.unmount();
 };

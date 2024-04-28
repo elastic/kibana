@@ -15,6 +15,7 @@ import type { ExpandedDetailType } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions } from '../../../helpers';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { Props as DraggableWrapperProps } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import {
   DragEffects,
   DraggableWrapper,
@@ -116,7 +117,7 @@ const NonDecoratedIpComponent: React.FC<{
     [value]
   );
 
-  const render = useCallback(
+  const render: DraggableWrapperProps['render'] = useCallback(
     (dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
@@ -183,7 +184,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (onClick) {
         onClick();
@@ -249,7 +250,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     ]
   );
 
-  const render = useCallback(
+  const render: DraggableWrapperProps['render'] = useCallback(
     (_props, _provided, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>

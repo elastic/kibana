@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { PropsWithChildren, ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
@@ -78,7 +78,7 @@ export const renderWithReduxStore = (
   const { store } = makeLensStore({ preloadedState, storeDeps });
   const { wrapper, ...options } = renderOptions || {};
 
-  const CustomWrapper = wrapper as React.ComponentType;
+  const CustomWrapper = wrapper as React.ComponentType<PropsWithChildren>;
 
   const Wrapper: React.FC<{
     children: React.ReactNode;

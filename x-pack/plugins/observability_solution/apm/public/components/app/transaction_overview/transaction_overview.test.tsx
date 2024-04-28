@@ -65,6 +65,7 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper history={history}>

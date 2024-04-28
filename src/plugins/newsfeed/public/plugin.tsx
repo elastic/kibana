@@ -8,7 +8,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -86,12 +86,12 @@ export class NewsfeedPublicPlugin
 
   private mount(api: NewsfeedApi, targetDomElement: HTMLElement, core: CoreStart) {
     const hasCustomBranding$ = core.customBranding.hasCustomBranding$;
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaRenderContextProvider {...core}>
         <NewsfeedNavButton newsfeedApi={api} hasCustomBranding$={hasCustomBranding$} />
-      </KibanaRenderContextProvider>,
-      targetDomElement
+      </KibanaRenderContextProvider>
     );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

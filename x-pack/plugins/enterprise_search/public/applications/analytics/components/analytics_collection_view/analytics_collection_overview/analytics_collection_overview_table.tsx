@@ -171,6 +171,7 @@ const tableSettings: {
   },
   [ExploreTables.Clicked]: {
     columns: [
+      // @ts-expect-error
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -206,6 +207,7 @@ const tableSettings: {
   },
   [ExploreTables.Referrers]: {
     columns: [
+      // @ts-expect-error
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -241,6 +243,7 @@ const tableSettings: {
   },
   [ExploreTables.Locations]: {
     columns: [
+      // @ts-expect-error
       {
         field: ExploreTableColumns.location,
         name: i18n.translate(

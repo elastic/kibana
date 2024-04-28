@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import type {
   ShowRelatedAlertsBySameSourceEventParams,
@@ -16,8 +16,8 @@ import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts
 
 describe('useShowRelatedAlertsBySameSourceEvent', () => {
   let hookResult: RenderHookResult<
-    ShowRelatedAlertsBySameSourceEventParams,
-    ShowRelatedAlertsBySameSourceEventResult
+    ShowRelatedAlertsBySameSourceEventResult,
+    ShowRelatedAlertsBySameSourceEventParams
   >;
 
   it('should return false if getFieldsData returns null', () => {

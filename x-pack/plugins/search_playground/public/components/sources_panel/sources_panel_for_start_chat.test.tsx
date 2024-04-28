@@ -1,4 +1,5 @@
 /*
+
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -29,11 +30,8 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 const Wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  return (
-    <>
-      <IntlProvider locale="en">{children}</IntlProvider>
-    </>
-  );
+  // @ts-expect-error
+  return <IntlProvider locale="en">{children}</IntlProvider>;
 };
 
 describe('SourcesPanelForStartChat component', () => {

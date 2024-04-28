@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useInspector } from './use_inspector';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';

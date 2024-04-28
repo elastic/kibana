@@ -6,7 +6,7 @@
  */
 
 import React, { type FC } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -81,9 +81,10 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
       core.chrome.navControls.registerExtension({
         order: 50,
         mount: (e) => {
-          ReactDOM.render(<ConnectedChat chatVariant={config.chatVariant} />, e);
+          const root = createRoot(e);
+          root.render(<ConnectedChat chatVariant={config.chatVariant} />);
           return () => {
-            ReactDOM.unmountComponentAtNode(e);
+            root.unmount();
           };
         },
       });

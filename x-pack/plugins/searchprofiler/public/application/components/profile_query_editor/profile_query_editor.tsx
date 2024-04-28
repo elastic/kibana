@@ -23,7 +23,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
-import { Editor, EditorInstance } from './editor';
+import { Editor, EditorInstance, Props as EditorProps } from './editor';
 
 const DEFAULT_INDEX_VALUE = '_all';
 
@@ -77,7 +77,10 @@ export const ProfileQueryEditor = memo(() => {
     }
   };
 
-  const onEditorReady = useCallback((editorInstance) => (editorRef.current = editorInstance), []);
+  const onEditorReady = useCallback<EditorProps['onEditorReady']>(
+    (editorInstance) => (editorRef.current = editorInstance),
+    []
+  );
   const licenseEnabled = getLicenseStatus().valid;
 
   return (

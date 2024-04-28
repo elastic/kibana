@@ -45,6 +45,8 @@ describe('EmailParamsFields renders', () => {
     };
 
     render(
+      // @ts-expect-error
+
       <IntlProvider locale="en">
         <EmailParamsFields
           actionParams={actionParams}
@@ -122,6 +124,8 @@ describe('EmailParamsFields renders', () => {
 
     const editAction = jest.fn();
     const { rerender } = render(
+      // @ts-expect-error
+
       <IntlProvider locale="en">
         <EmailParamsFields
           actionParams={actionParams}
@@ -144,6 +148,8 @@ describe('EmailParamsFields renders', () => {
     expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
 
     rerender(
+      // @ts-expect-error
+
       <IntlProvider locale="en">
         <EmailParamsFields
           actionParams={{
@@ -159,6 +165,8 @@ describe('EmailParamsFields renders', () => {
     );
 
     rerender(
+      // @ts-expect-error
+
       <IntlProvider locale="en">
         <EmailParamsFields
           actionParams={{

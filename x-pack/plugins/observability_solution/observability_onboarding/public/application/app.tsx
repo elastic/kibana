@@ -19,7 +19,7 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { ConfigSchema } from '..';
 import { customLogsRoutes } from '../components/app/custom_logs';
@@ -198,10 +198,11 @@ interface RenderAppProps {
 
 export const renderApp = (props: RenderAppProps) => {
   const { element } = props.appMountParameters;
+  const root = createRoot(element);
 
-  ReactDOM.render(<ObservabilityOnboardingAppRoot {...props} />, element);
+  root.render(<ObservabilityOnboardingAppRoot {...props} />);
   return () => {
     props.corePlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

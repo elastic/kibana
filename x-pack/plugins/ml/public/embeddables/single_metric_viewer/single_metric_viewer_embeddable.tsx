@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { pick } from 'lodash';
 
 import { Embeddable, embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
@@ -43,6 +43,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   AnomalyChartsEmbeddableOutput
 > {
   private node?: HTMLElement;
+  private root: ReturnType<typeof createRoot> | null = null;
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE;
 
@@ -122,8 +123,9 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
       uiSettingsKeys: UI_SETTINGS,
       showFrozenDataTierChoice: false,
     };
+    this.root = createRoot(node);
 
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider
@@ -153,16 +155,15 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
             </DatePickerContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </I18nContext>,
-      node
+      </I18nContext>
     );
   }
 
   public destroy() {
     this.apiSubscriptions.unsubscribe();
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 

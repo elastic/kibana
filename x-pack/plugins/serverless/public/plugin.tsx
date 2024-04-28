@@ -14,7 +14,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
 import {
@@ -142,15 +142,15 @@ export class ServerlessPlugin
     coreStart: CoreStart,
     currentProjectType: ProjectType
   ) {
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
         <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
           <ProjectSwitcher {...{ currentProjectType }} />
         </ProjectSwitcherKibanaProvider>
       </KibanaRenderContextProvider>,
-      targetDomElement
     );
 
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

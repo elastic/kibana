@@ -37,19 +37,19 @@ export const useExplorationDataGrid = (
     [pageUrlState.pageSize, pageUrlState.pageIndex]
   );
   dataGrid.setPagination = useCallback(
-    (u) => {
+    (u: any) => {
       setPageUrlState({ ...u });
     },
     [setPageUrlState]
   );
   dataGrid.onChangePage = useCallback(
-    (pageIndex) => {
+    (pageIndex: any) => {
       setPageUrlState({ pageIndex });
     },
     [setPageUrlState]
   );
   dataGrid.onChangeItemsPerPage = useCallback(
-    (pageSize) => {
+    (pageSize: any) => {
       setPageUrlState({ pageSize });
     },
     [setPageUrlState]

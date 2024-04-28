@@ -8,7 +8,7 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Histogram } from './histogram';
 import React from 'react';
-import { of, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
@@ -19,6 +19,7 @@ import * as buildBucketInterval from './utils/build_bucket_interval';
 import * as useTimeRange from './hooks/use_time_range';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { getLensProps } from './hooks/use_lens_props';
+import { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 
 const mockBucketInterval = { description: '1 minute', scale: undefined, scaled: false };
 jest.spyOn(buildBucketInterval, 'buildBucketInterval').mockReturnValue(mockBucketInterval);
@@ -99,7 +100,7 @@ describe('Histogram', () => {
       searchSessionId: props.request.searchSessionId,
       getTimeRange: props.getTimeRange,
       attributes: (await getMockLensAttributes())!.attributes,
-      onLoad: lensProps.onLoad,
+      onLoad: lensProps.onLoad!,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
@@ -170,8 +171,10 @@ describe('Histogram', () => {
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    const embeddableOutput$ = jest.fn().mockReturnValue(of('output$'));
-    onLoad(true, undefined, embeddableOutput$);
+    const embeddableOutput$ = jest
+      .fn()
+      .mockReturnValue(of('output$')) as unknown as Observable<LensEmbeddableOutput>;
+    onLoad?.(true, undefined, embeddableOutput$);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.loading,
       undefined
@@ -182,7 +185,7 @@ describe('Histogram', () => {
       expect.objectContaining({ bucketInterval: undefined })
     );
     act(() => {
-      onLoad(false, adapters, embeddableOutput$);
+      onLoad?.(false, adapters, embeddableOutput$);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
@@ -203,7 +206,7 @@ describe('Histogram', () => {
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ status: RequestStatus.ERROR } as any]);
-    onLoad(false, adapters);
+    onLoad?.(false, adapters);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.error,
       undefined
@@ -235,7 +238,7 @@ describe('Histogram', () => {
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
     act(() => {
-      onLoad(false, adapters);
+      onLoad?.(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
@@ -271,7 +274,7 @@ describe('Histogram', () => {
       ],
     } as any;
     act(() => {
-      onLoad(false, adapters);
+      onLoad?.(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
@@ -307,7 +310,7 @@ describe('Histogram', () => {
       ],
     } as any;
     act(() => {
-      onLoad(false, adapters);
+      onLoad?.(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,

@@ -10,7 +10,7 @@ import { DataViewFieldBase } from '@kbn/es-query';
 import { ReactElement } from 'react';
 import { act } from '@testing-library/react';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import TestRenderer from 'react-test-renderer';
 const { act: actTestRenderer } = TestRenderer;
 

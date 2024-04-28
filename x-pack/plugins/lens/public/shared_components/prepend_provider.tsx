@@ -34,7 +34,7 @@ export const PrependWidthProvider = ({ children }: { children: ReactChild | Reac
     <PrependWidthContext.Provider
       value={{ minWidth: minPrependWidth, onResize: prependResizeObserver }}
     >
-      {children}
+      <>{children}</>
     </PrependWidthContext.Provider>
   );
 };
@@ -48,7 +48,11 @@ export const Prepend = ({ children }: { children: ReactChild | ReactChildren }) 
   return (
     <EuiFormLabel css={{ minWidth: Math.round(minWidth) + paddingAffordance }}>
       <EuiResizeObserver onResize={onResize}>
-        {(resizeRef) => <span ref={resizeRef}>{children}</span>}
+        {(resizeRef) => (
+          <span ref={resizeRef}>
+            <>{children}</>
+          </span>
+        )}
       </EuiResizeObserver>
     </EuiFormLabel>
   );

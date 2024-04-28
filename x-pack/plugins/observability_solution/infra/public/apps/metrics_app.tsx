@@ -8,7 +8,7 @@
 import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -35,8 +35,9 @@ export const renderApp = (
   const storage = new Storage(window.localStorage);
 
   prepareMountElement(element, METRICS_APP_DATA_TEST_SUBJ);
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <MetricsApp
       core={core}
       history={history}
@@ -47,14 +48,13 @@ export const renderApp = (
       storage={storage}
       theme$={theme$}
       kibanaEnvironment={kibanaEnvironment}
-    />,
-    element
+    />
   );
 
   return () => {
     plugins.data.search.session.clear();
     core.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

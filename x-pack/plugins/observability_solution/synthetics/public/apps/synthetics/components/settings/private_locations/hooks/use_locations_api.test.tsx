@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
@@ -42,7 +42,7 @@ describe('usePrivateLocationsAPI', () => {
     } as any,
   ]);
   it('returns expected results after data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -53,7 +53,7 @@ describe('usePrivateLocationsAPI', () => {
       })
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -64,11 +64,11 @@ describe('usePrivateLocationsAPI', () => {
   });
 
   it('adds location on submit', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     act(() => {
       result.current.onSubmit({
@@ -81,7 +81,7 @@ describe('usePrivateLocationsAPI', () => {
       });
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(addAPI).toHaveBeenCalledWith({
       geo: {
@@ -96,17 +96,17 @@ describe('usePrivateLocationsAPI', () => {
   });
 
   it('deletes location on delete', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     act(() => {
       result.current.onDelete('Test');
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(deletedAPI).toHaveBeenLastCalledWith('Test');
     expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));

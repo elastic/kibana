@@ -159,7 +159,7 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     return null;
   }
   return (
-    <EuiFormRow fullWidth label={SELECT_LABEL} isInvalid={isInvalid} error={errors?.consumer ?? ''}>
+    <EuiFormRow fullWidth label={SELECT_LABEL} isInvalid={isInvalid} error={<>{errors?.consumer ?? ''}</>}>
       <EuiComboBox
         data-test-subj="ruleFormConsumerSelect"
         aria-label={i18n.translate(

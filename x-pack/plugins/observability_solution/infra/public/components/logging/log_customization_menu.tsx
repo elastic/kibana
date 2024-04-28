@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
@@ -15,7 +15,7 @@ interface LogCustomizationMenuState {
   isShown: boolean;
 }
 
-export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMenuState> {
+export class LogCustomizationMenu extends React.Component<PropsWithChildren, LogCustomizationMenuState> {
   public readonly state = {
     isShown: false,
   };

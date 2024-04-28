@@ -149,7 +149,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleFieldUpdate = useCallback(
-      (newField) => {
+      (newField: any) => {
         onChange({ ...entry, field: newField }, entry);
 
         if (entry.value) {
@@ -160,7 +160,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleOperatorUpdate = useCallback(
-      (newOperator) => onChange({ ...entry, type: newOperator }, entry),
+      (newOperator: any) => onChange({ ...entry, type: newOperator }, entry),
       [entry, onChange]
     );
 

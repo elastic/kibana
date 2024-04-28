@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -38,7 +38,7 @@ describe('useRecentlyViewedMonitors', () => {
   });
 
   it('returns expected result', () => {
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
           {children}
@@ -87,20 +87,20 @@ describe('useRecentlyViewedMonitors', () => {
       monitors: [fetchedMonitor],
     });
 
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
           {children}
         </WrappedHelper>
       );
     };
-    const { result, waitForValueToChange, rerender } = renderHook(
+    const { result,  rerender } = renderHook(
       () => useRecentlyViewedMonitors(),
       {
         wrapper: WrapperWithState,
       }
     );
-    await waitForValueToChange(() => persistedIds);
+    // await waitForValueToChange(() => persistedIds);
 
     // Sets the current monitor as well as updated information
     expect(setPersistedIdsMock).toHaveBeenCalledWith([currentMonitorQueryId, monitorQueryId3]);

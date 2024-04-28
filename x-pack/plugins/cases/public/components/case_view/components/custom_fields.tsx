@@ -33,7 +33,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
   );
 
   const onSubmitCustomField = useCallback(
-    (customFieldToAdd) => {
+    (customFieldToAdd: any) => {
       onSubmit(customFieldToAdd);
     },
     [onSubmit]

@@ -62,7 +62,7 @@ import {
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
-import { ResizableButton } from './resizable_button';
+import { ResizableButton, ResizableButtonProps } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
@@ -297,7 +297,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback(
+  const onMouseDownResizeHandler: ResizableButtonProps['onMouseDownResizeHandler'] = useCallback(
     (mouseDownEvent) => {
       const startSize = editorHeight;
       const startPosition = mouseDownEvent.pageY;
@@ -317,7 +317,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const onKeyDownResizeHandler = useCallback(
+  const onKeyDownResizeHandler: ResizableButtonProps['onKeyDownResizeHandler'] = useCallback(
     (keyDownEvent) => {
       let height = editorHeight;
       if (

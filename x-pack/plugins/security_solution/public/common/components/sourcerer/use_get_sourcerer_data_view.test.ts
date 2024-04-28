@@ -6,7 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { mockSourcererScope } from '../../containers/sourcerer/mocks';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -14,7 +14,7 @@ import type { UseGetScopedSourcererDataViewArgs } from './use_get_sourcerer_data
 import { useGetScopedSourcererDataView } from './use_get_sourcerer_data_view';
 
 const renderHookCustom = (args: UseGetScopedSourcererDataViewArgs) => {
-  return renderHook<UseGetScopedSourcererDataViewArgs, DataView | undefined>(
+  return renderHook<DataView | undefined, UseGetScopedSourcererDataViewArgs>(
     ({ sourcererScope }) => useGetScopedSourcererDataView({ sourcererScope }),
     {
       initialProps: {

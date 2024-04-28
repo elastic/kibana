@@ -211,7 +211,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   });
 
   const handleSetRuleFromTimeline = useCallback(
-    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
+    ({
+      index: timelineIndex,
+      queryBar: timelineQueryBar,
+      eqlOptions
+    }: any) => {
       const setQuery = () => {
         setFieldValue('index', timelineIndex);
         setFieldValue('queryBar', timelineQueryBar);
@@ -413,7 +417,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   const ThresholdInputChildren = useCallback(
-    ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
+    ({
+      thresholdField,
+      thresholdValue,
+      thresholdCardinalityField,
+      thresholdCardinalityValue
+    }: any) => (
       <ThresholdInput
         browserFields={aggFields}
         thresholdField={thresholdField}
@@ -426,7 +435,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const ThreatMatchInputChildren = useCallback(
-    ({ threatMapping }) => (
+    ({
+      threatMapping
+    }: any) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}
@@ -510,7 +521,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     !groupByFields.length;
 
   const GroupByChildren = useCallback(
-    ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
+    ({
+      groupByRadioSelection,
+      groupByDurationUnit,
+      groupByDurationValue
+    }: any) => (
       <EuiRadioGroup
         disabled={isGroupByChildrenDisabled}
         idSelected={groupByRadioSelection.value}
@@ -565,7 +580,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const AlertSuppressionMissingFields = useCallback(
-    ({ suppressionMissingFields }) => (
+    ({
+      suppressionMissingFields
+    }: any) => (
       <EuiRadioGroup
         disabled={isMissingFieldsDisabled}
         idSelected={suppressionMissingFields.value}

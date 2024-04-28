@@ -51,7 +51,7 @@ const RuleActivityFilterComponent = ({
   const options = populateSelected(ruleActivityFilterDefaultOptions, selected);
 
   const handleSelectableOnChange = useCallback(
-    (newOptions) => {
+    (newOptions: any) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleActivity>(newOptions);
       onChange(formattedOptions);
     },

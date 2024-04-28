@@ -157,7 +157,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ComponentType<{ children: React.ReactNode }>,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();

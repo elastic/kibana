@@ -169,6 +169,7 @@ export async function getRuleActionErrors(
 
 export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
   !!Object.values(errors).find((errorList) => {
+    // @ts-expect-error
     if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });

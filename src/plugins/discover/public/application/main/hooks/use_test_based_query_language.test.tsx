@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React, { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -76,7 +76,7 @@ const getDataViewsService = () => {
 };
 
 const getHookContext = (stateContainer: DiscoverStateContainer) => {
-  return ({ children }: { children: JSX.Element }) => (
+  return ({ children }: PropsWithChildren) => (
     <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
   );
 };

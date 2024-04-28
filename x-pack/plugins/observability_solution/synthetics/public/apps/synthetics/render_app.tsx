@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { SyntheticsAppProps } from './contexts';
@@ -75,10 +75,12 @@ export function renderApp(
     setBreadcrumbs: startPlugins.serverless?.setBreadcrumbs ?? core.chrome.setBreadcrumbs,
   };
 
-  ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);
+  const root = createRoot(appMountParameters.element);
+
+  root.render(<SyntheticsApp {...props} />);
 
   return () => {
     startPlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(appMountParameters.element);
+    root.unmount();
   };
 }

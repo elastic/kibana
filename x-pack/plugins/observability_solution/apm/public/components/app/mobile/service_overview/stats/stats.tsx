@@ -49,7 +49,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
   );
 
   const getComparisonValueFormatter = useCallback(
-    (value) => {
+    (value: any) => {
       return (
         <span>
           {value && comparisonEnabled

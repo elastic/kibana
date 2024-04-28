@@ -32,7 +32,7 @@ export interface DatePickerContextValue {
  */
 export const DatePickerContext = createContext({} as DatePickerContextValue);
 
-export function DatePickerContextProvider({ children }: { children: React.ReactElement }) {
+export function DatePickerContextProvider({ children }: React.PropsWithChildren) {
   const location = useLocation();
   const history = useHistory();
 
@@ -108,7 +108,10 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   );
 
   const updateRefreshInterval = useCallback(
-    ({ interval, isPaused }) => {
+    ({
+      interval,
+      isPaused
+    }: any) => {
       updateUrl({ refreshInterval: interval, refreshPaused: isPaused });
       data.query.timefilter.timefilter.setRefreshInterval({ value: interval, pause: isPaused });
       setLastUpdated(Date.now());

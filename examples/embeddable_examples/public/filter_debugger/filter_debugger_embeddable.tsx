@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 
 import {
@@ -19,24 +19,24 @@ import { FilterDebuggerEmbeddableComponent } from './filter_debugger_embeddable_
 export class FilterDebuggerEmbeddable extends Embeddable<FilterDebuggerEmbeddableInput> {
   public readonly type = FILTER_DEBUGGER_EMBEDDABLE;
 
-  private domNode?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null;
 
   constructor(initialInput: FilterDebuggerEmbeddableInput, parent?: IContainer) {
     super(initialInput, {}, parent);
   }
 
   public render(node: HTMLElement) {
-    if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.domNode = node;
-    ReactDOM.render(<FilterDebuggerEmbeddableComponent embeddable={this} />, node);
+    this.root = createRoot(node);
+    this.root.render(<FilterDebuggerEmbeddableComponent embeddable={this} />);
   }
 
   public reload() {}
 
   public destroy() {
     super.destroy();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) this.root.unmount();
   }
 }

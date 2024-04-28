@@ -35,7 +35,7 @@ export default function TextBasedLanguagesTransitionModal({
   textBasedLanguage,
 }: TextBasedLanguagesTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
-  const onTransitionModalDismiss = useCallback((e) => {
+  const onTransitionModalDismiss: React.ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
     setDismissModalChecked(e.target.checked);
   }, []);
 

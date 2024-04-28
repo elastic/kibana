@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,9 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     })
   );
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     wrapWithTheme(
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
         <I18nProvider>
@@ -54,12 +56,11 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
       theme$
-    ),
-    element
+    )
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

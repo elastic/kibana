@@ -81,7 +81,7 @@ export const DashboardViewportComponent = () => {
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
+        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid -
             otherwise, there is a race condition where the panels can end up being squashed */}
         {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>
@@ -92,7 +92,7 @@ export const DashboardViewportComponent = () => {
 // This fullscreen button HOC separates fullscreen button and dashboard content to reduce rerenders
 // because ExitFullScreenButton sets isFullscreenMode to false on unmount while rerendering.
 // This specifically fixed maximizing/minimizing panels without exiting fullscreen mode.
-const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
+const WithFullScreenButton = ({ children }: React.PropsWithChildren) => {
   const dashboard = useDashboardContainer();
 
   const isFullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);

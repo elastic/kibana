@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
@@ -43,12 +43,12 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('returns proper state on findCaseUserActions', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useFindCaseUserActions(basicCase.id, params, isEnabled),
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -69,7 +69,7 @@ describe('UseFindCaseUserActions', () => {
   it('calls the API with correct parameters', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useFindCaseUserActions(
           basicCase.id,
@@ -84,7 +84,7 @@ describe('UseFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
@@ -120,14 +120,14 @@ describe('UseFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () => useFindCaseUserActions(basicCase.id, params, isEnabled),
       {
         wrapper: appMockRender.AppWrapper,
       }
     );
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,

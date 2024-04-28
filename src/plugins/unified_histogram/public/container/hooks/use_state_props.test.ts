@@ -8,9 +8,9 @@
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Suggestion } from '@kbn/lens-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { act } from 'react-test-renderer';
-import { UnifiedHistogramFetchStatus } from '../../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
@@ -451,7 +451,10 @@ describe('useStateProps', () => {
     expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
 
     act(() => {
-      onSuggestionContextChange({ title: 'Stacked Bar' } as Suggestion);
+      onSuggestionContextChange({
+        suggestion: { title: 'Stacked Bar' } as Suggestion,
+        type: UnifiedHistogramSuggestionType.lensSuggestion,
+      });
     });
     expect(stateService.setCurrentSuggestionContext).toHaveBeenLastCalledWith({
       title: 'Stacked Bar',

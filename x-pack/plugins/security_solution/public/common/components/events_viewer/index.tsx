@@ -249,11 +249,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sourcererScope,
     editorActionsRef,
     upsertColumn: useCallback(
-      (column, index) => dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+      (column: any, index: any) => dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
       [dispatch, tableId]
     ),
     removeColumn: useCallback(
-      (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+      (columnId: any) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
       [dispatch, tableId]
     ),
   });
@@ -328,7 +328,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, [dispatch, tableId, loading]);
 
   const deleteQuery = useCallback(
-    ({ id }) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
+    ({
+      id
+    }: any) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
 
@@ -375,7 +377,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, [nonDeletedEvents, dispatch, tableId]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => {
+    (itemsChangedPerPage: any) => {
       dispatch(
         dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
       );
@@ -384,7 +386,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   const onChangePage = useCallback(
-    (page) => {
+    (page: any) => {
       loadPage(page);
     },
     [loadPage]

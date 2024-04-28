@@ -6,10 +6,11 @@
  */
 
 import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
+
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
+import { createRoot } from 'react-dom/client';
 import { Store } from 'redux';
 
 import { of } from 'rxjs';
@@ -156,8 +157,8 @@ export const renderApp = (
     readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
-
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
@@ -180,11 +181,10 @@ export const renderApp = (
           </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>
-    </I18nProvider>,
-    params.element
+    </I18nProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
     unmountKibanaLogic();
     unmountLicensingLogic();
     unmountHttpLogic();
@@ -206,15 +206,15 @@ export const renderHeaderActions = (
   params: AppMountParameters,
   kibanaHeaderEl: HTMLElement
 ) => {
-  ReactDOM.render(
+  const root = createRoot(kibanaHeaderEl);
+  root.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
         <Provider store={store}>
           <HeaderActions />
         </Provider>
       </KibanaThemeProvider>
-    </I18nProvider>,
-    kibanaHeaderEl
+    </I18nProvider>
   );
-  return () => ReactDOM.render(<></>, kibanaHeaderEl);
+  return () => root.unmount();
 };

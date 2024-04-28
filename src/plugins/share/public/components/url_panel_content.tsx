@@ -581,7 +581,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     );
   };
 
-  private renderUrlParamExtensions = (): ReactElement | void => {
+  private renderUrlParamExtensions = (): ReactElement | undefined => {
     if (!this.props.urlParamExtensions) {
       return;
     }

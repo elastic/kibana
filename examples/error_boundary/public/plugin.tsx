@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -74,7 +74,8 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
       id: 'errorBoundaryExample',
       title: 'Error Boundary Example',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <KibanaErrorBoundaryProvider analytics={core.analytics}>
             <KibanaErrorBoundary>
               <KibanaPageTemplate>
@@ -90,10 +91,9 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
                 </KibanaPageTemplate.Section>
               </KibanaPageTemplate>
             </KibanaErrorBoundary>
-          </KibanaErrorBoundaryProvider>,
-          element
+          </KibanaErrorBoundaryProvider>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

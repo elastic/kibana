@@ -78,7 +78,7 @@ export function DegradedDocs({
   }, []);
 
   const handleTimeChange = useCallback(
-    (durationRange) => {
+    (durationRange: any) => {
       service.send({
         type: 'UPDATE_INSIGHTS_TIME_RANGE',
         timeRange: {

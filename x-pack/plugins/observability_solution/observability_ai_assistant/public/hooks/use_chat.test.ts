@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { act, renderHook, type RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import {
   MessageRole,
@@ -48,7 +48,7 @@ jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   },
 } as any);
 
-let hookResult: RenderHookResult<UseChatProps, UseChatResult>;
+let hookResult: RenderHookResult<UseChatResult, UseChatProps>;
 
 describe('useChat', () => {
   beforeEach(() => {

@@ -141,7 +141,7 @@ describe('health check', () => {
       // wait for useEffect to run
     });
 
-    const description = queryByRole(/banner/i);
+    const description = queryByRole('banner');
     expect(description!.textContent).toMatchInlineSnapshot(
       `"You must configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
     );

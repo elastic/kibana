@@ -37,7 +37,7 @@ export const TTYSearchBar = ({
   const [currentMatch, setCurrentMatch] = useState<SearchResult | null>(null);
 
   const jumpToMatch = useCallback(
-    (match) => {
+    (match: SearchResult) => {
       if (match) {
         setIsPlaying(false);
         const goToLine = lines.indexOf(match.line);
@@ -103,7 +103,7 @@ export const TTYSearchBar = ({
   }, [searchQuery, lines, jumpToMatch, xTermSearchFn]);
 
   const onSearch = useCallback(
-    (query) => {
+    (query: string) => {
       setIsPlaying(false);
       setSearchQuery(query);
       setCurrentMatch(null);
@@ -112,7 +112,7 @@ export const TTYSearchBar = ({
   );
 
   const onSetCurrentMatch = useCallback(
-    (index) => {
+    (index: number) => {
       const match = searchResults[index];
 
       if (match && currentMatch !== match) {

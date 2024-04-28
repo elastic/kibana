@@ -50,7 +50,7 @@ export const InfrastructurePage = () => {
   const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-  const isHostsViewEnabled = useUiSetting(enableInfrastructureHostsView);
+  const isHostsViewEnabled = useUiSetting<boolean>(enableInfrastructureHostsView);
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',

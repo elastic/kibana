@@ -20,7 +20,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  ActionConnectorTableItem,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
@@ -107,39 +111,41 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated = useCallback(
-    async (updatedConnector) => {
-      setEditedConnectorItem(updatedConnector);
-      refetchConnectors();
-      refetchActionTypes();
-      refetchCaseConfigure();
-    },
-    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
-  );
+  const onConnectorUpdated: NonNullable<EditConnectorFlyoutProps['onConnectorUpdated']> =
+    useCallback(
+      async (updatedConnector) => {
+        setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
+        refetchConnectors();
+        refetchActionTypes();
+        refetchCaseConfigure();
+      },
+      [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
+    );
 
-  const onConnectorCreated = useCallback(
-    async (createdConnector) => {
-      const caseConnector = normalizeActionConnector(createdConnector);
+  const onConnectorCreated: NonNullable<CreateConnectorFlyoutProps['onConnectorCreated']> =
+    useCallback(
+      async (createdConnector) => {
+        const caseConnector = normalizeActionConnector(createdConnector);
 
-      await persistCaseConfigureAsync({
-        connector: caseConnector,
+        await persistCaseConfigureAsync({
+          connector: caseConnector,
+          closureType,
+          customFields,
+          id: configurationId,
+          version: configurationVersion,
+        });
+
+        onConnectorUpdated(createdConnector);
+      },
+      [
+        persistCaseConfigureAsync,
         closureType,
         customFields,
-        id: configurationId,
-        version: configurationVersion,
-      });
-
-      onConnectorUpdated(createdConnector);
-    },
-    [
-      persistCaseConfigureAsync,
-      closureType,
-      customFields,
-      configurationId,
-      configurationVersion,
-      onConnectorUpdated,
-    ]
-  );
+        configurationId,
+        configurationVersion,
+        onConnectorUpdated,
+      ]
+    );
 
   const isLoadingAny =
     isLoadingConnectors ||

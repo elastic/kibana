@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';

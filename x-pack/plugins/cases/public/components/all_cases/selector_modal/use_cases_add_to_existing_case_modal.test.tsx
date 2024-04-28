@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
@@ -98,7 +97,8 @@ describe('use cases add to existing case modal hook', () => {
     const { result } = renderHook(() => {
       useCasesAddToExistingCaseModal(defaultParams());
     });
-    expect(result.error?.message).toContain(
+    // @ts-expect-error
+    expect(result.current.error?.message).toContain(
       'useCasesContext must be used within a CasesProvider and have a defined value'
     );
   });

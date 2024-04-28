@@ -12,7 +12,7 @@ import { getRequestsAndResponses } from './utils';
 
 export const useEmbeddableInspect = (onEmbeddableLoad?: OnEmbeddableLoaded) => {
   const setInspectData = useCallback(
-    (isLoading, adapters) => {
+    (isLoading: any, adapters: any) => {
       if (!adapters) {
         return;
       }

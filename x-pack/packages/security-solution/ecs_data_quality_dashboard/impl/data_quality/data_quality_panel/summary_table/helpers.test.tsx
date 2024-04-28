@@ -218,7 +218,7 @@ describe('helpers', () => {
 
       test('it renders a Collapse button when the row is expanded', () => {
         const itemIdToExpandedRowMap: Record<string, React.ReactNode> = {
-          [indexName]: () => null,
+          [indexName]: null,
         };
 
         const columns = getSummaryTableColumns({

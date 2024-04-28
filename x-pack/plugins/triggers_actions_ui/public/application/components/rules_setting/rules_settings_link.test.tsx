@@ -63,6 +63,7 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
 };
 
 const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
+  // @ts-expect-error
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <RulesSettingsLink />

@@ -346,7 +346,7 @@ export const percentileOperation: OperationDefinition<
     const step = isInline ? 1 : 0.0001;
     const upperBound = isInline ? 99 : 99.9999;
     const onChange = useCallback(
-      (value) => {
+      (value?: string) => {
         if (
           !isValidNumber(value, isInline, upperBound, step, ALLOWED_DECIMAL_DIGITS) ||
           Number(value) === currentColumn.params.percentile
@@ -387,7 +387,8 @@ export const percentileOperation: OperationDefinition<
     );
 
     const handleInputChange = useCallback(
-      (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (e: any) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
       [handleInputChangeWithoutValidation]
     );
 

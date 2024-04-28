@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';

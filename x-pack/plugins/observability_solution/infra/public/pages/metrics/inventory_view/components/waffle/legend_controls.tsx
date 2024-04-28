@@ -149,7 +149,7 @@ export const LegendControls = ({
   }, [autoBounds, boundsOverride, options]);
 
   const handleStepsChange = useCallback(
-    (e) => {
+    (e: any) => {
       const steps = parseInt(e.target.value, 10);
       setLegendOptions((previous) => ({ ...previous, steps }));
     },
@@ -157,7 +157,7 @@ export const LegendControls = ({
   );
 
   const handlePaletteChange = useCallback(
-    (e) => {
+    (e: any) => {
       const palette = e.target.value;
       setLegendOptions((previous) => ({ ...previous, palette }));
     },

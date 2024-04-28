@@ -24,6 +24,7 @@ export const TextAreaField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
   return (
     <EuiFormRow
       label={field.label}
+      // @ts-expect-error
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

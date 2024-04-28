@@ -73,7 +73,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
   const goToRuleDetails = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useStream } from './use_stream';
 
 const refetchCurrentConversation = jest.fn();
@@ -51,7 +51,7 @@ describe.skip('useStream', () => {
   });
 
   it('Should stream response. isLoading/isStreaming are true while streaming, isLoading/isStreaming are false when streaming completes', async () => {
-    const { result, waitFor } = renderHook(() => useStream(defaultProps));
+    const { result } = renderHook(() => useStream(defaultProps));
     expect(reader).toHaveBeenCalledTimes(1);
     await waitFor(() => {
       expect(result.current).toEqual({
@@ -109,7 +109,7 @@ describe.skip('useStream', () => {
       releaseLock: jest.fn(),
       closed: jest.fn().mockResolvedValue(true),
     } as unknown as ReadableStreamDefaultReader<Uint8Array>;
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useStream({
         ...defaultProps,
         reader: errorReader,
@@ -117,7 +117,7 @@ describe.skip('useStream', () => {
     );
     expect(result.current.error).toBeUndefined();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.error).toBe(errorMessage);
     expect(result.current.isLoading).toBe(false);

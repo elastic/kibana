@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from '@kbn/core/public';

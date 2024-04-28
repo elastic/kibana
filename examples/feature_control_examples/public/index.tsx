@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -32,15 +32,15 @@ export class FeatureControlsPluginExample implements Plugin<void, void, SetupDep
       title: 'FeatureControlExamples',
       async mount({ element }: AppMountParameters) {
         const [coreStart] = await coreSetup.getStartServices();
-        ReactDOM.render(
+        const root = createRoot(element)
+        root.render(
           <KibanaPageTemplate>
             <KibanaContextProvider services={{ ...coreStart, ...deps }}>
               <MyPluginComponent />
             </KibanaContextProvider>
-          </KibanaPageTemplate>,
-          element
+          </KibanaPageTemplate>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
     deps.developerExamples.register({

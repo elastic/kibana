@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import {
   useInitializeUrlParam,
   useGlobalQueryString,
@@ -56,7 +56,7 @@ describe('global query string', () => {
     });
 
   const makeWrapper = (globalUrlParam?: GlobalUrlParam) => {
-    const wrapper = ({ children }: { children: React.ReactElement }) => (
+    const wrapper = ({ children }: React.PropsWithChildren) => (
       <TestProviders store={makeStore(globalUrlParam ?? {})}>{children}</TestProviders>
     );
     return wrapper;
@@ -196,7 +196,7 @@ describe('global query string', () => {
           testEmptyString: '',
         },
       });
-      const wrapper = ({ children }: { children: React.ReactElement }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders store={store}>{children}</TestProviders>
       );
 
@@ -306,8 +306,8 @@ describe('global query string', () => {
       };
       const store = makeStore(globalUrlParam);
 
-      const { waitForNextUpdate } = renderHook(() => useSyncGlobalQueryString(), {
-        wrapper: ({ children }: { children: React.ReactElement }) => (
+      renderHook(() => useSyncGlobalQueryString(), {
+        wrapper: ({ children }: React.PropsWithChildren) => (
           <TestProviders store={store}>{children}</TestProviders>
         ),
       });
@@ -318,7 +318,7 @@ describe('global query string', () => {
         store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
       });
 
-      waitForNextUpdate();
+      // waitFor();
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: ``,

@@ -28,7 +28,7 @@ export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
   const controlEnabled = !!controlInput?.enabled;
   const onToggleEnabled = useCallback(
-    (e) => {
+    (e: any) => {
       if (controlInput) {
         controlInput.enabled = e.target.checked;
 

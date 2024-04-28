@@ -97,7 +97,7 @@ export const DashboardLinkDestinationPicker = ({
   );
 
   const renderOption = useCallback(
-    (option, searchValue, contentClassName) => {
+    (option: DashboardComboBoxOption, searchValue: string, contentClassName: string) => {
       const { label, key: dashboardId } = option;
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>

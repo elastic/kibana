@@ -159,7 +159,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   });
 
   const updateDateRange = useCallback(
-    ({ range }) => {
+    ({
+      range
+    }: any) => {
       const [min, max] = range;
       dispatch(
         setAbsoluteRangeDatePicker({
@@ -173,7 +175,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   );
 
   const onFilterCallback = useCallback(
-    (event) => {
+    (event: any) => {
       if (disableOnClickFilter) {
         event.preventDefault();
         return;

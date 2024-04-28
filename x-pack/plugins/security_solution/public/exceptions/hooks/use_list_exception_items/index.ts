@@ -73,7 +73,7 @@ export const useListExceptionItems = ({
     }
   }, [handleErrorStatus, list, setExceptionListReferences]);
 
-  const updateViewer = useCallback((paginationResult, dataLength, viewStatus) => {
+  const updateViewer = useCallback((paginationResult: any, dataLength: any, viewStatus: any) => {
     setPagination(paginationResult);
     setLastUpdated(Date.now());
     setTimeout(() => {
@@ -85,7 +85,7 @@ export const useListExceptionItems = ({
   }, []);
 
   const fetchItems = useCallback(
-    async (options?, viewStatus?) => {
+    async (options?: any, viewStatus?: any) => {
       try {
         setViewerStatus(ViewerStatus.LOADING);
         const { data, pagination: paginationResult } = await fetchListExceptionItems({
@@ -104,7 +104,11 @@ export const useListExceptionItems = ({
   );
 
   const onDeleteException = useCallback(
-    async ({ id, name, namespaceType }) => {
+    async ({
+      id,
+      name,
+      namespaceType
+    }: any) => {
       try {
         setViewerStatus(ViewerStatus.LOADING);
         await deleteException({ id, http, namespaceType });
@@ -123,7 +127,7 @@ export const useListExceptionItems = ({
     if (typeof onEditListExceptionItem === 'function') onEditListExceptionItem(exception);
   };
   const onPaginationChange = useCallback(
-    async (options) => {
+    async (options: any) => {
       fetchItems(options);
     },
     [fetchItems]

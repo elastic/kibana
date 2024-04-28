@@ -123,7 +123,7 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const updateParams = useCallback(
-    (id, e: InventoryMetricConditions) => {
+    (id: any, e: InventoryMetricConditions) => {
       const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
       setRuleParams('criteria', exp);
@@ -304,6 +304,7 @@ export const Expressions: React.FC<Props> = (props) => {
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
               expressionId={idx}
               setRuleParams={updateParams}
+              // @ts-expect-error
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
               fields={derivedIndexPattern.fields}
@@ -491,7 +492,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateThreshold = useCallback(
-    (t) => {
+    (t: any) => {
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
       }
@@ -500,7 +501,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateWarningThreshold = useCallback(
-    (t) => {
+    (t: any) => {
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
       }
@@ -535,6 +536,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       threshold={threshold}
       updateComparator={updateComparator}
       updateThreshold={updateThreshold}
+      // @ts-expect-error
       errors={(errors.critical as IErrorObject) ?? {}}
       metric={metric}
     />
@@ -546,6 +548,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       threshold={warningThreshold}
       updateComparator={updateWarningComparator}
       updateThreshold={updateWarningThreshold}
+      // @ts-expect-error
       errors={(errors.warning as IErrorObject) ?? {}}
       metric={metric}
     />

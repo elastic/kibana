@@ -9,7 +9,7 @@ import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
 
 const mockDispatch = jest.fn();
@@ -84,13 +84,13 @@ describe('source/index.tsx', () => {
     });
     it('sets field data for data view', async () => {
       await act(async () => {
-        const { waitForNextUpdate, result } = renderHook<
-          string,
-          { indexFieldsSearch: IndexFieldSearch }
+        const { result } = renderHook<
+        { indexFieldsSearch: IndexFieldSearch },
+          string
         >(() => useDataView(), {
           wrapper: TestProviders,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         await result.current.indexFieldsSearch({ dataViewId: 'neato' });
       });
       expect(mockDispatch.mock.calls[0][0]).toEqual({
@@ -106,13 +106,13 @@ describe('source/index.tsx', () => {
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
-        const { waitForNextUpdate, result } = renderHook<
-          string,
-          { indexFieldsSearch: IndexFieldSearch }
+        const { result } = renderHook<
+        { indexFieldsSearch: IndexFieldSearch },
+          string
         >(() => useDataView(), {
           wrapper: TestProviders,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         indexFieldsSearch = result.current.indexFieldsSearch;
       });
 
@@ -135,13 +135,13 @@ describe('source/index.tsx', () => {
     it('should not reuse the result for dataView info when cleanCache passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
-        const { waitForNextUpdate, result } = renderHook<
-          string,
-          { indexFieldsSearch: IndexFieldSearch }
+        const { result } = renderHook<
+        { indexFieldsSearch: IndexFieldSearch },
+          string
         >(() => useDataView(), {
           wrapper: TestProviders,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         indexFieldsSearch = result.current.indexFieldsSearch;
       });
 

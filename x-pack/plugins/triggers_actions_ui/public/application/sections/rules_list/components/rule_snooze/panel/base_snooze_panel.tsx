@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, ChangeEvent } from 'react';
 import { parseInterval } from '../../../../../../../common';
 
 import { SnoozeSchedule } from '../../../../../../types';
@@ -78,11 +78,11 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const onChangeValue = useCallback(
-    ({ target }) => setIntervalValue(target.value),
+    ({ target }: ChangeEvent<HTMLInputElement>) => setIntervalValue(parseInt(target.value, 10)),
     [setIntervalValue]
   );
   const onChangeUnit = useCallback(
-    ({ target }) => setIntervalUnit(target.value),
+    ({ target }: ChangeEvent<HTMLSelectElement>) => setIntervalUnit(target.value),
     [setIntervalUnit]
   );
 

@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useEmailConfig } from './use_email_config';
 
 const http = httpServiceMock.createStartContract();
@@ -75,11 +75,11 @@ describe('useEmailConfig', () => {
       throw new Error('no!');
     });
 
-    const { result, waitForNextUpdate } = renderUseEmailConfigHook();
+    const { result, } = renderUseEmailConfigHook();
 
     await act(async () => {
       result.current.getEmailServiceConfig('foo');
-      await waitForNextUpdate();
+      // await waitFor();
       expect(toasts.addDanger).toHaveBeenCalled();
     });
   });

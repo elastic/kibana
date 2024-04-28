@@ -176,7 +176,7 @@ function DetailedFlyoutHeader({
   const selectedLocation = allLocations.find((ll) => ll.label === currentLocation);
 
   return (
-    <EuiFlexGroup wrap={true} responsive={false}>
+    (<EuiFlexGroup wrap={true} responsive={false}>
       <EuiFlexItem grow={false}>
         <MonitorStatus status={status} monitor={monitor} />
       </EuiFlexItem>
@@ -187,7 +187,7 @@ function DetailedFlyoutHeader({
           configId={configId}
           selectedLocation={selectedLocation}
           onChange={useCallback(
-            (id, label) => {
+            (id: any, label: any) => {
               if (currentLocation !== label) setCurrentLocation(label, id);
             },
             [currentLocation, setCurrentLocation]
@@ -202,7 +202,7 @@ function DetailedFlyoutHeader({
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGroup>)
   );
 }
 

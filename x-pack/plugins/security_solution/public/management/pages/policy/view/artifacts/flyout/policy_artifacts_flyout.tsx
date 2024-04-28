@@ -85,7 +85,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       searchableFields
     );
 
-    const handleOnSearch = useCallback((query) => {
+    const handleOnSearch = useCallback((query: any) => {
       setSelectedArtifactIds([]);
       setCurrentFilter(query);
     }, []);

@@ -88,7 +88,7 @@ export const CustomMetricForm = withTheme(
     }, [metric, aggregation, field, onChange, label]);
 
     const handleLabelChange = useCallback(
-      (e) => {
+      (e: any) => {
         setLabel(e.target.value);
       },
       [setLabel]
@@ -102,7 +102,7 @@ export const CustomMetricForm = withTheme(
     );
 
     const handleAggregationChange = useCallback(
-      (e) => {
+      (e: any) => {
         const value = e.target.value;
         const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
           ? value

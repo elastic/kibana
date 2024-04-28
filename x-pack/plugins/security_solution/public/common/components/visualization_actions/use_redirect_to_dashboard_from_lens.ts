@@ -39,7 +39,7 @@ export const useRedirectToDashboardFromLens = ({
   );
 
   const redirectTo = useCallback(
-    (props) => {
+    (props: any) => {
       if (props.destination === 'listing') {
         navigateTo({ url: dashboardListingUrl });
       }

@@ -222,7 +222,14 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     }, [dataProvider.id, dataProvider.type, dispatch, group, index, timelineId]);
 
     const handleDataProviderEdited = useCallback(
-      ({ andProviderId, excluded, field, operator, providerId, value }) =>
+      ({
+        andProviderId,
+        excluded,
+        field,
+        operator,
+        providerId,
+        value
+      }: any) =>
         dispatch(
           timelineActions.dataProviderEdited({
             andProviderId,
@@ -267,7 +274,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     );
 
     const DraggableContent = useCallback(
-      (provided, snapshot) => (
+      (provided: any, snapshot: any) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
@@ -397,7 +404,7 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
     );
 
     const DroppableContent = useCallback(
-      (droppableProvided) => (
+      (droppableProvided: any) => (
         <DroppableContainer
           className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}
           ref={droppableProvided.innerRef}

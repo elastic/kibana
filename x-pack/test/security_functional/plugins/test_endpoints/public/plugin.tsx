@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { debounce, filter, first } from 'rxjs';
 import { timer } from 'rxjs';
@@ -25,7 +25,8 @@ export class TestEndpointsPlugin implements Plugin<void, void, object, PluginSta
       title: 'Expired Session Test',
       async mount({ element }) {
         (window as any).kibanaFetch = core.http.fetch;
-        return () => ReactDOM.unmountComponentAtNode(element);
+        const root = createRoot(element);
+        return () => root.unmount();
       },
     });
 
@@ -46,13 +47,11 @@ export class TestEndpointsPlugin implements Plugin<void, void, object, PluginSta
       async mount({ element }) {
         // Promise is resolved as soon there are no requests has been made in the last 3 seconds. We need this to make
         // sure none of the unrelated requests interferes with the test logic.
+        const root = createRoot(element);
         networkIdle$.toPromise().then(() => {
-          ReactDOM.render(
-            <div data-test-subj="testEndpointsAuthenticationApp">Authenticated!</div>,
-            element
-          );
+          root.render(<div data-test-subj="testEndpointsAuthenticationApp">Authenticated!</div>);
         });
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 
@@ -70,7 +69,8 @@ export class TestEndpointsPlugin implements Plugin<void, void, object, PluginSta
           }),
         ]);
 
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <div>
             <div data-test-subj="testEndpointsUserProfilesAppCurrentUserProfile">
               {currentUserProfile?.user.username}:{JSON.stringify(currentUserProfile?.data)}
@@ -82,10 +82,9 @@ export class TestEndpointsPlugin implements Plugin<void, void, object, PluginSta
                 {userProfile.user.username}:{JSON.stringify(userProfile.data)}
               </div>
             ))}
-          </div>,
-          element
+          </div>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   }

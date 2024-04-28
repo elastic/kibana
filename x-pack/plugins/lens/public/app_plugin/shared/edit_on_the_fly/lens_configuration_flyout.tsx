@@ -282,7 +282,7 @@ export function LensEditConfigurationFlyout({
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
   const runQuery = useCallback(
-    async (q, abortController) => {
+    async (q: AggregateQuery, abortController?: AbortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,

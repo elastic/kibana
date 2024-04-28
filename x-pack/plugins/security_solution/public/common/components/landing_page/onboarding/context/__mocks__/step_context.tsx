@@ -11,7 +11,7 @@ import { CreateProjectSteps, QuickStartSectionCardsId } from '../../types';
 
 export const mockOnStepClicked = jest.fn();
 export const mockToggleTaskCompleteStatus = jest.fn();
-export const StepContextProvider = ({ children }: { children: React.ReactElement }) => (
+export const StepContextProvider = ({ children }: React.PropsWithChildren) => (
   <>{children}</>
 );
 

@@ -125,7 +125,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
     [onOptionsChange]
   );
   const handleSizeField = useCallback(
-    (evt) => {
+    (evt: any) => {
       if (onOptionsChange) {
         setLocalSize(evt?.target?.value);
         if (debounceSize.current?.cancel) {

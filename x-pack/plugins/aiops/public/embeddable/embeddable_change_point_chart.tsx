@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { EmbeddableInput, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
 import { Embeddable as AbstractEmbeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -58,6 +58,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
   }
 
   private node?: HTMLElement;
+  private root: ReturnType<typeof createRoot> | null = null;
 
   // Need to defer embeddable load in order to resolve data views
   deferEmbeddableLoad = true;
@@ -110,6 +111,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     super.render(el);
 
     this.node = el;
+    this.root = createRoot(el);
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
@@ -131,7 +133,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
       ...this.deps,
     } as unknown as AiopsAppDependencies;
 
-    ReactDOM.render(
+    this.root.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
           <AiopsAppContext.Provider value={aiopsAppContextValue}>
@@ -150,15 +152,14 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
             </DatePickerContextProvider>
           </AiopsAppContext.Provider>
         </KibanaThemeProvider>
-      </I18nContext>,
-      el
+      </I18nContext>
     );
   }
 
   public destroy() {
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

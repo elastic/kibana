@@ -28,7 +28,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
   const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertTags = useSetAlertTags();
   const handleOnAlertTagsSubmit = useCallback(
-    async (tags, ids, onSuccess, setIsLoading) => {
+    async (tags: any, ids: any, onSuccess: any, setIsLoading: any) => {
       if (setAlertTags) {
         await setAlertTags(tags, ids, onSuccess, setIsLoading);
       }

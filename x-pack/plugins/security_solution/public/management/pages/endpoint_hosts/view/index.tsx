@@ -479,7 +479,7 @@ export const EndpointList = () => {
   }, [dispatch]);
 
   const onRefreshChange = useCallback(
-    (evt) => {
+    (evt: any) => {
       dispatch({
         type: 'userUpdatedEndpointListRefreshOptions',
         payload: {

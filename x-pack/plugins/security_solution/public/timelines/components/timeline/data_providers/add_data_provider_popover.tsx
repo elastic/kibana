@@ -60,7 +60,16 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   );
 
   const handleDataProviderEdited = useCallback(
-    ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
+    ({
+      andProviderId,
+      excluded,
+      field,
+      id,
+      operator,
+      providerId,
+      value,
+      type
+    }: any) => {
       addContentToTimeline({
         dataProviders,
         destination: {

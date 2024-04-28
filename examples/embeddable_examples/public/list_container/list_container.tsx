@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Container, ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ListContainerComponent } from './list_container_component';
 
@@ -15,7 +15,7 @@ export const LIST_CONTAINER = 'LIST_CONTAINER';
 
 export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
-  private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot>;
 
   constructor(input: ContainerInput, embeddableServices: EmbeddableStart) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
@@ -28,17 +28,17 @@ export class ListContainer extends Container<{}, ContainerInput> {
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.node = node;
-    ReactDOM.render(<ListContainerComponent embeddable={this} />, node);
+    this.root = createRoot(node);
+    this.root.render(<ListContainerComponent embeddable={this} />);
   }
 
   public destroy() {
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

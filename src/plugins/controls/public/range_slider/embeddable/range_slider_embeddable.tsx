@@ -9,7 +9,7 @@
 import deepEqual from 'fast-deep-equal';
 import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { batch } from 'react-redux';
 import { lastValueFrom, Subscription, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
@@ -86,7 +86,7 @@ export class RangeSliderEmbeddable
   public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
-  private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null = null;
 
   // Controls services
   private dataService: ControlsDataService;
@@ -438,20 +438,19 @@ export class RangeSliderEmbeddable
   };
 
   public render = (node: HTMLElement) => {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.node = node;
+    this.root = createRoot(node);
     const ControlsServicesProvider = pluginServices.getContextProvider();
-    ReactDOM.render(
+    this.root.render(
       <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <ControlsServicesProvider>
           <RangeSliderControlContext.Provider value={this}>
             <RangeSliderControl />
           </RangeSliderControlContext.Provider>
         </ControlsServicesProvider>
-      </KibanaThemeProvider>,
-      node
+      </KibanaThemeProvider>
     );
   };
 

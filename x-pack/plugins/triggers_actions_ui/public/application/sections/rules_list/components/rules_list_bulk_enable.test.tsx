@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as React from 'react';
+import React from 'react';
 import {
   act,
   render,
@@ -129,6 +129,7 @@ const queryClient = new QueryClient({
 });
 
 const AllTheProviders = ({ children }: { children: any }) => (
+  // @ts-expect-error
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </IntlProvider>

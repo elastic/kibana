@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from '../kibana_services';
@@ -35,8 +35,9 @@ export function showSaveModal(
   Wrapper?: React.FC<{ children: React.ReactNode }>
 ) {
   const container = document.createElement('div');
+  const root = createRoot(container);
   const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     saveModal.props.onClose?.();
   };
@@ -58,10 +59,9 @@ export function showSaveModal(
   });
 
   const I18nContext = getI18n().Context;
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <I18nContext>{Wrapper ? <Wrapper>{element}</Wrapper> : element}</I18nContext>
-    </KibanaRenderContextProvider>,
-    container
+    </KibanaRenderContextProvider>
   );
 }

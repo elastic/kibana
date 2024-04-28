@@ -6,7 +6,7 @@
  */
 
 import React, { CSSProperties } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -28,8 +28,8 @@ export const getMarkdownRenderer =
     reuseDomNode: true,
     render(domNode, config, handlers) {
       const fontStyle = config.font ? config.font.spec : {};
-
-      ReactDOM.render(
+      const root = createRoot(domNode);
+      root.render(
         <KibanaThemeProvider theme={{ theme$ }}>
           <Markdown
             className="canvasMarkdown"
@@ -38,11 +38,10 @@ export const getMarkdownRenderer =
             openLinksInNewTab={config.openLinksInNewTab}
           />
         </KibanaThemeProvider>,
-        domNode,
-        () => handlers.done()
+        // () => handlers.done()
       );
 
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      handlers.onDestroy(() => root.unmount());
     },
   });
 

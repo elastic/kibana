@@ -88,7 +88,7 @@ export const diagnosticsRoute = {
   },
 };
 
-function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
+function DiagnosticsTemplate({ children }: React.PropsWithChildren) {
   const routePath = useApmRoutePath();
   const router = useApmRouter();
   const { diagnosticsBundle, status } = useDiagnosticsContext();

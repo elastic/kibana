@@ -83,7 +83,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     getUserRiskScoreSelector(state)
   );
   const updateLimitPagination = useCallback(
-    (newLimit) => {
+    (newLimit: any) => {
       dispatch(
         usersActions.updateTableLimit({
           usersType: type,
@@ -96,7 +96,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    (newPage) => {
+    (newPage: any) => {
       dispatch(
         usersActions.updateTableActivePage({
           activePage: newPage,

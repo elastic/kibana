@@ -6,7 +6,7 @@
  */
 
 import { useBenchmarkDynamicValues } from './use_benchmark_dynamic_values';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
 import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
 import { BenchmarksCisId } from '../../../common/types/benchmarks/v2';
 

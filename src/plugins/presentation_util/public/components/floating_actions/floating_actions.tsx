@@ -65,6 +65,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
             {actions.map((action) =>
               React.createElement(action.MenuItem, {
                 key: action.id,
+                // @ts-expect-error
                 context,
               })
             )}

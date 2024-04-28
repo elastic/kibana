@@ -57,7 +57,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       if (goToCreateCase != null) {
         goToCreateCase();
