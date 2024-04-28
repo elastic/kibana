@@ -9,7 +9,7 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { Props } from './map_component';
 
-const MapComponent = dynamic(async () => {
+const Component = dynamic(async () => {
   const { MapComponent } = await import('./map_component');
   return {
     default: MapComponent,
@@ -17,5 +17,5 @@ const MapComponent = dynamic(async () => {
 });
 
 export function MapComponentLazy(props: Props) {
-  return <MapComponent {...props} />;
+  return <Component {...props} />;
 }

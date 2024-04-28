@@ -44,10 +44,7 @@ export class MapComponent extends Component<Props> {
         id: uuidv4(),
         attributes: {
           title: this.props.title ?? '',
-          layerListJSON: JSON.stringify([
-            createBasemapLayerDescriptor(),
-            ...this.props.layerList,
-          ]),
+          layerListJSON: JSON.stringify([createBasemapLayerDescriptor(), ...this.props.layerList]),
         },
         mapCenter: this.props.mapCenter,
       }

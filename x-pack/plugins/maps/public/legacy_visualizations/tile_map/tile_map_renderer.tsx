@@ -8,11 +8,11 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { TileMapVisRenderValue } from './tile_map_fn';
 import { TILE_MAP_RENDER } from './types';
-import { dynamic } from '@kbn/shared-ux-utility';
 
-const TileMapVisualization = dynamic(async () => {
+const Component = dynamic(async () => {
   const { TileMapVisualization } = await import('./tile_map_visualization');
   return {
     default: TileMapVisualization,
@@ -37,6 +37,6 @@ export const tileMapRenderer = {
       visConfig,
     };
 
-    render(<TileMapVisualization {...props} />, domNode);
+    render(<Component {...props} />, domNode);
   },
 } as ExpressionRenderDefinition<TileMapVisRenderValue>;

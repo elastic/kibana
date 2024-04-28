@@ -9,7 +9,7 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { Props } from './passive_map';
 
-const PassiveMap = dynamic(async () => {
+const Component = dynamic(async () => {
   const { PassiveMap } = await import('./passive_map');
   return {
     default: PassiveMap,
@@ -17,5 +17,5 @@ const PassiveMap = dynamic(async () => {
 });
 
 export function PassiveMapLazy(props: Props) {
-  return <PassiveMap {...props} />;
+  return <Component {...props} />;
 }

@@ -92,7 +92,7 @@ export class PassiveMap extends Component<Props, State> {
 
     if (this.props.onRenderComplete) {
       this._onRenderSubscription = mapEmbeddable.getOnRenderComplete$().subscribe(() => {
-        if (this._isMounted &&  this.props.onRenderComplete) {
+        if (this._isMounted && this.props.onRenderComplete) {
           this.props.onRenderComplete();
         }
       });

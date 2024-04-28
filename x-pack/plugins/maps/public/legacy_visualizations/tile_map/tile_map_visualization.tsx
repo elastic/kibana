@@ -26,16 +26,16 @@ export function TileMapVisualization(props: Props) {
       lat: props.visConfig.mapCenter[0],
       lon: props.visConfig.mapCenter[1],
       zoom: props.visConfig.mapZoom,
-    }
-  // props.visConfig reference changes each render but values are the same
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+    };
+    // props.visConfig reference changes each render but values are the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const initialLayerList = useMemo(() => {
     const layerDescriptor = createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
-  // props.visConfig reference changes each render but values are the same
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+    // props.visConfig reference changes each render but values are the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <MapComponent
       title={props.visConfig.layerDescriptorParams.label}
