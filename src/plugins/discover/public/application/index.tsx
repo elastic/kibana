@@ -48,10 +48,7 @@ export const renderApp = ({
       experimentalFeatures={experimentalFeatures}
       history={history}
     />,
-    {
-      theme: core.theme,
-      i18n: core.i18n,
-    }
+    core
   )(element);
 
   return () => {
