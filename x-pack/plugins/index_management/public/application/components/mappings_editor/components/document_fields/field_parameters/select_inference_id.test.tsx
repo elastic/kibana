@@ -62,5 +62,6 @@ describe('SelectInferenceId', () => {
   it('should display the inference endpoints in the combo', () => {
     find('inferenceIdButton').simulate('click');
     expect(find('data-inference-endpoint-list').contains('e5')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('elser_model_2')).toBe(true);
   });
 });
