@@ -239,8 +239,12 @@ describe('Duration Format', () => {
     useShortSuffix: false,
     fixtures: [
       {
+        input: -12,
+        output: '-12.00 seconds',
+      },
+      {
         input: -123,
-        output: '0.00 milliseconds',
+        output: '-2.05 minutes',
       },
       {
         input: 1,
@@ -287,6 +291,10 @@ describe('Duration Format', () => {
       {
         input: -123,
         output: '-123 ms',
+      },
+      {
+        input: -1230,
+        output: '-1 s',
       },
       {
         input: 1,

@@ -28,34 +28,13 @@ const HUMAN_FRIENDLY = 'humanize';
 const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
 
-function parseInputAsDuration(val: number, inputFormat: string) {
+function parseInputAsDuration(val: number, inputFormat: string, humanPrecise: boolean) {
   const ratio = ratioToSeconds[inputFormat] || 1;
   const kind = (
     inputFormat in ratioToSeconds ? 'seconds' : inputFormat
   ) as unitOfTime.DurationConstructor;
-  return moment.duration(val * ratio, kind);
-}
-
-function formatInputHumanPrecise(
-  val: number,
-  inputFormat: string,
-  outputPrecision: number,
-  useShortSuffix: boolean,
-  includeSpace: string
-) {
-  const ratio = ratioToSeconds[inputFormat] || 1;
-  const kind = (
-    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
-  ) as unitOfTime.DurationConstructor;
-  const valueInDuration = moment.duration(val * ratio, kind);
-
-  return formatDuration(
-    valueInDuration.as('seconds'),
-    valueInDuration,
-    outputPrecision,
-    useShortSuffix,
-    includeSpace
-  );
+  const value = humanPrecise && val < 0 ? Math.abs(val * ratio) : val * ratio;
+  return moment.duration(value, kind);
 }
 
 export class DurationFormat extends FieldFormat {
@@ -111,12 +90,12 @@ export class DurationFormat extends FieldFormat {
           }) + ' '
         : '';
 
-    const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
+    const duration = parseInputAsDuration(val, inputFormat, humanPrecise);
     const formatted = humanPrecise
-      ? formatInputHumanPrecise(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
-      : duration[outputFormat]();
+      ? formatDuration(duration, outputPrecision, useShortSuffix, includeSpace, val < 0)
+      : (duration[outputFormat] as Function)();
 
-    const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
+    const precise = human || humanPrecise ? formatted : Number(formatted).toFixed(outputPrecision);
     const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
@@ -150,14 +129,15 @@ const units = [
 ];
 
 function formatDuration(
-  valueInSeconds: number,
   duration: moment.Duration,
   outputPrecision: number,
   useShortSuffix: boolean,
-  includeSpace: string
+  includeSpace: string,
+  negativeValue: boolean
 ) {
   // return nothing when the duration is falsy or not correctly parsed (P0D)
   if (!duration || !duration.isValid()) return;
+  const valueInSeconds = duration.as('seconds');
 
   const getUnitText = (method: string) => {
     const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
@@ -174,7 +154,8 @@ function formatDuration(
       // the overflow in seconds is used to calculate fractional part of the returned value
       const finalValue =
         unit.seconds >= 1 ? calculatePrecision(valueInSeconds, unitValue, unit.seconds) : unitValue;
-      return finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
+      const prefix = negativeValue ? '-' : '';
+      return prefix + finalValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }
   }
 }
