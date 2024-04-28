@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import type { RegionMapVisRenderValue } from './region_map_fn';
-import { LazyWrapper } from '../../lazy_wrapper';
 import { REGION_MAP_RENDER } from './types';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-const getLazyComponent = () => {
-  return lazy(() => import('./region_map_visualization'));
-};
+const RegionMapVisualization = dynamic(async () => {
+  const { RegionMapVisualization } = await import('./region_map_visualization');
+  return {
+    default: RegionMapVisualization,
+  };
+});
 
 export const regionMapRenderer = {
   name: REGION_MAP_RENDER,
@@ -34,6 +37,6 @@ export const regionMapRenderer = {
       visConfig,
     };
 
-    render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />, domNode);
+    render(<RegionMapVisualization {...props} />, domNode);
   },
 } as ExpressionRenderDefinition<RegionMapVisRenderValue>;

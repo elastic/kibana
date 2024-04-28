@@ -11,7 +11,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
-import type { MapEmbeddableType } from './types';
 import { MapEmbeddable } from './map_embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
@@ -20,7 +19,7 @@ export interface Props {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
-  getLayerDescriptors: () => LayerDescriptor[];
+  layerList: LayerDescriptor[];
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   /*
@@ -30,11 +29,13 @@ export interface Props {
 }
 
 export class MapComponent extends Component<Props> {
-  private _mapEmbeddable: MapEmbeddableType;
+  private _prevLayerList: LayerDescriptor[];
+  private _mapEmbeddable: MapEmbeddable;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
 
   constructor(props: Props) {
     super(props);
+    this._prevLayerList = this.props.layerList;
     this._mapEmbeddable = new MapEmbeddable(
       {
         editable: false,
@@ -45,7 +46,7 @@ export class MapComponent extends Component<Props> {
           title: this.props.title ?? '',
           layerListJSON: JSON.stringify([
             createBasemapLayerDescriptor(),
-            ...this.props.getLayerDescriptors(),
+            ...this.props.layerList,
           ]),
         },
         mapCenter: this.props.mapCenter,
@@ -84,6 +85,11 @@ export class MapComponent extends Component<Props> {
       query: this.props.query,
       timeRange: this.props.timeRange,
     });
+
+    if (this._prevLayerList !== this.props.layerList) {
+      this._mapEmbeddable.setLayerList(this.props.layerList);
+      this._prevLayerList = this.props.layerList;
+    }
   }
 
   render() {

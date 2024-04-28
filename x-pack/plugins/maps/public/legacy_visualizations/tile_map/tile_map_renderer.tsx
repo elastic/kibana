@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import type { TileMapVisRenderValue } from './tile_map_fn';
-import { LazyWrapper } from '../../lazy_wrapper';
 import { TILE_MAP_RENDER } from './types';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-const getLazyComponent = () => {
-  return lazy(() => import('./tile_map_visualization'));
-};
+const TileMapVisualization = dynamic(async () => {
+  const { TileMapVisualization } = await import('./tile_map_visualization');
+  return {
+    default: TileMapVisualization,
+  };
+});
 
 export const tileMapRenderer = {
   name: TILE_MAP_RENDER,
@@ -34,6 +37,6 @@ export const tileMapRenderer = {
       visConfig,
     };
 
-    render(<LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />, domNode);
+    render(<TileMapVisualization {...props} />, domNode);
   },
 } as ExpressionRenderDefinition<TileMapVisRenderValue>;
