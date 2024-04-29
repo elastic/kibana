@@ -55,6 +55,10 @@ type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
     ? UnwrapObservable<ReturnType<Function>>
     : Awaited<ReturnType<Function>>;
 
+export interface FunctionCacheItem {
+  value: unknown;
+  time: number;
+}
 /**
  * The result returned after an expression function execution.
  */
@@ -185,8 +189,6 @@ export interface ExecutionParams {
   params: ExpressionExecutionParams;
 }
 
-const functionCache: Map<string, any> = new Map();
-
 export class Execution<
   Input = unknown,
   Output = unknown,
@@ -253,10 +255,16 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
+  constructor(
+    public readonly execution: ExecutionParams,
+    private readonly logger?: Logger,
+    private readonly functionCache?: Map<string, FunctionCacheItem>
+  ) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
+
+    if (!this.functionCache) this.functionCache = new Map();
 
     if (!execution.ast && !execution.expression) {
       throw new TypeError('Execution params should contain at least .ast or .expression key.');
@@ -476,9 +484,9 @@ export class Execution<
         return normalizedInput;
       }),
       switchMap((normalizedInput) => {
-        if (hash && functionCache.has(hash)) {
-          const cached = functionCache.get(hash);
-          if (Date.now() - cached.time < this.cacheTimeout) {
+        if (hash && this.functionCache!.has(hash)) {
+          const cached = this.functionCache!.get(hash);
+          if (cached && Date.now() - cached.time < this.cacheTimeout) {
             return of(cached.value);
           }
         }
@@ -515,10 +523,10 @@ export class Execution<
         }
 
         if (hash) {
-          while (functionCache.size >= maxCacheSize) {
-            functionCache.delete(functionCache.keys().next().value);
+          while (this.functionCache!.size >= maxCacheSize) {
+            this.functionCache!.delete(this.functionCache!.keys().next().value);
           }
-          functionCache.set(hash, { value: output, time: Date.now() });
+          this.functionCache!.set(hash, { value: output, time: Date.now() });
         }
         return output;
       })

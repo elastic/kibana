@@ -22,7 +22,12 @@ import {
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
+import {
+  Execution,
+  ExecutionParams,
+  ExecutionResult,
+  FunctionCacheItem,
+} from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
@@ -109,12 +114,12 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  private functionCache: Map<string, any>;
+  private functionCache: Map<string, FunctionCacheItem>;
 
   constructor(
     private readonly logger?: Logger,
     state?: ExecutorState<Context>,
-    functionCache: Map<string, any> = new Map()
+    functionCache: Map<string, FunctionCacheItem> = new Map()
   ) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
@@ -202,7 +207,11 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
 
-    const execution = new Execution<Input, Output>(executionParams, this.logger);
+    const execution = new Execution<Input, Output>(
+      executionParams,
+      this.logger,
+      this.functionCache
+    );
 
     return execution;
   }
