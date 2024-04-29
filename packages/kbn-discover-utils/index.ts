@@ -31,12 +31,17 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  fieldConstants,
   formatFieldValue,
   formatHit,
   getDocId,
+  getLogDocumentOverview,
   getIgnoredReason,
+  getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   isLegacyTableEnabled,
   usePager,
 } from './src';
+
+export * from './src/types';

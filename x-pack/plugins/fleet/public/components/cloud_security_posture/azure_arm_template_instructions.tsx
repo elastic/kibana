@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy } from '../../../common';
 
-import { useCreateAzureArmTemplateUrl } from './hooks';
-
 import type { CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
+
+import { useCreateAzureArmTemplateUrl } from './hooks';
 
 import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 
