@@ -92,7 +92,7 @@ export class DurationFormat extends FieldFormat {
 
     const duration = parseInputAsDuration(val, inputFormat, humanPrecise);
     const formatted = humanPrecise
-      ? formatDuration(duration, outputPrecision, useShortSuffix, includeSpace, val < 0)
+      ? formatDurationHumanPrecise(duration, outputPrecision, useShortSuffix, includeSpace, val < 0)
       : (duration[outputFormat] as Function)();
 
     const precise = human || humanPrecise ? formatted : Number(formatted).toFixed(outputPrecision);
@@ -128,7 +128,7 @@ const units = [
   },
 ];
 
-function formatDuration(
+function formatDurationHumanPrecise(
   duration: moment.Duration,
   outputPrecision: number,
   useShortSuffix: boolean,
