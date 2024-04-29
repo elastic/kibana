@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { take } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -399,7 +398,7 @@ export class LensPlugin {
           atLeastGold: () => {
             let isGold = false;
             startServices()
-              .plugins.licensing?.license$.pipe(take(1))
+              .plugins.licensing?.license$.pipe()
               .subscribe((license) => {
                 isGold = license.hasAtLeast('gold');
               });
