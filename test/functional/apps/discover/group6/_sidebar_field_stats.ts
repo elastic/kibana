@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('text based columns', function () {
-      before(async () => {
+      beforeEach(async () => {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
