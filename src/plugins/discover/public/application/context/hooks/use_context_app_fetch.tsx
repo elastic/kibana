@@ -105,10 +105,7 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
-          theme: services.core.theme,
-          i18n: services.core.i18n,
-        }),
+        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
       });
     }
   }, [
@@ -160,10 +157,7 @@ export function useContextAppFetch({
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: errorTitle,
-          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
-            theme: services.core.theme,
-            i18n: services.core.i18n,
-          }),
+          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
         });
       }
     },
