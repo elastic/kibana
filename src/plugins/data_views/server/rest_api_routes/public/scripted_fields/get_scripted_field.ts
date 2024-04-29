@@ -48,9 +48,10 @@ export const registerGetScriptedFieldRoute = (
           },
           response: {
             200: {
-              body: schema.object({
-                field: schema.object(fieldSpecSchemaFields),
-              }),
+              body: () =>
+                schema.object({
+                  field: schema.object(fieldSpecSchemaFields),
+                }),
             },
           },
         },
