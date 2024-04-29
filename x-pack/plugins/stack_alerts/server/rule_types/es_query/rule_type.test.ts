@@ -905,6 +905,7 @@ async function invokeExecutor({
   return await ruleType.executor({
     executionId: uuidv4(),
     startedAt: new Date(),
+    startedAtOverridden: false,
     previousStartedAt: new Date(),
     services: ruleServices as unknown as RuleExecutorServices<
       EsQueryRuleState,
