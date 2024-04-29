@@ -14,12 +14,18 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiPopover,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+
+const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
+  defaultMessage: 'Integration actions',
+});
+
 const seeIntegrationText = i18n.translate('xpack.datasetQuality.flyoutSeeIntegrationActionText', {
   defaultMessage: 'See integration',
 });
@@ -32,7 +38,13 @@ const viewDashboardsText = i18n.translate('xpack.datasetQuality.flyoutViewDashbo
   defaultMessage: 'View dashboards',
 });
 
-export function IntegrationActionsMenu({ integration }: { integration: Integration }) {
+export function IntegrationActionsMenu({
+  integration,
+  dashboardsLoading,
+}: {
+  integration: Integration;
+  dashboardsLoading: boolean;
+}) {
   const { type, name } = useDatasetQualityFlyout().dataStreamStat!;
   const { dashboards = [], version, name: integrationName } = integration;
   const {
@@ -46,6 +58,8 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
 
   const actionButton = (
     <EuiButtonIcon
+      title={integrationActionsText}
+      aria-label={integrationActionsText}
       iconType="boxesHorizontal"
       onClick={handleToggleMenu}
       data-test-subj="datasetQualityFlyoutIntegrationActionsButton"
@@ -115,6 +129,13 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
         name: viewDashboardsText,
         'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
       });
+    } else if (dashboardsLoading) {
+      firstLevelItems.push({
+        icon: 'dashboardApp',
+        name: <EuiSkeletonRectangle width={120} title={viewDashboardsText} />,
+        'data-test-subj': 'datasetQualityFlyoutIntegrationActionDashboardsLoading',
+        disabled: true,
+      });
     }
 
     const panel: EuiContextMenuPanelDescriptor[] = [
@@ -150,6 +171,7 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
     name,
     type,
     version,
+    dashboardsLoading,
   ]);
 
   return (

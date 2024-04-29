@@ -91,33 +91,31 @@ describe('apm', () => {
     );
   });
 
-  it('service summary, troughput, dependencies and errors', async () => {
-    let conversation = await chatClient.complete(
-      'What is the status of the service ai-assistant-service in the test environment?'
-    );
-
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
-        content:
-          'What is the average throughput for the ai-assistant-service service over the past 4 hours?',
-        role: MessageRole.User,
-      })
-    );
-
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
-        content: 'What are the downstream dependencies of the ai-assistant-service-front service?',
-        role: MessageRole.User,
-      })
+  it('service throughput', async () => {
+    const conversation = await chatClient.complete(
+      'What is the average throughput per minute for the ai-assistant-service service over the past 4 hours?'
     );
 
     const result = await chatClient.evaluate(conversation, [
-      'Uses get_apm_service_summary to obtain the status of the ai-assistant-service service',
-      'Executes get_apm_timeseries to obtain the throughput of the services ai-assistant-service for the last 4 hours',
-      'Gives a summary of the throughput stats for ai-assistant-service',
-      'Provides the downstream dependencies of ai-assistant-service-front',
+      'Uses the get_apm_dataset_info function to get information about the APM data streams',
+      'Uses the query function to generate an ES|QL query',
+      'Generates a valid ES|QL query that returns the throughput over the past 4 hours.',
+      'Uses the execute_query function to get the results for the generated query',
+      'Summarizes the results for the user',
+      'Calculates a throughput of 30 transactions per minute',
+    ]);
+
+    expect(result.passed).to.be(true);
+  });
+
+  it('service dependencies', async () => {
+    const conversation = await chatClient.complete(
+      'What are the downstream dependencies of the ai-assistant-service-front service?'
+    );
+
+    const result = await chatClient.evaluate(conversation, [
+      'Uses the get_apm_downstream_dependencies function with the `service.name` parameter being "ai-assistant-service-front"',
+      'Returns the results to the user ("ai-assistant-service-back" is the only dependency)',
     ]);
 
     expect(result.passed).to.be(true);

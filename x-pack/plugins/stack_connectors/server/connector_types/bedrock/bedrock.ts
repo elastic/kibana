@@ -28,7 +28,11 @@ import {
   InvokeAIActionResponse,
   RunApiLatestResponse,
 } from '../../../common/bedrock/types';
-import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
+import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
+} from '../../../common/bedrock/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -207,6 +211,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     body,
     model: reqModel,
     signal,
+    timeout,
   }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
@@ -219,7 +224,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       data: body,
       signal,
       // give up to 2 minutes for response
-      timeout: 120000,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
     };
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
     if (usesDeprecatedArguments(body)) {
@@ -240,6 +245,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     body,
     model: reqModel,
     signal,
+    timeout,
   }: RunActionParams): Promise<StreamingResponse> {
     // set model on per request basis
     const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
@@ -253,6 +259,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       data: body,
       responseType: 'stream',
       signal,
+      timeout,
     });
 
     return response.data.pipe(new PassThrough());
@@ -273,11 +280,13 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     system,
     temperature,
     signal,
+    timeout,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
       signal,
+      timeout,
     })) as unknown as IncomingMessage;
     return res;
   }
@@ -297,11 +306,13 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     system,
     temperature,
     signal,
+    timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
       signal,
+      timeout,
     });
     return { message: res.completion.trim() };
   }
@@ -328,7 +339,6 @@ const formatBedrockBody = ({
 
 /**
  * Ensures that the messages are in the correct format for the Bedrock API
- * Bedrock only accepts assistant and user roles.
  * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
  * We combine the messages into a single message to avoid this error
  * @param messages
