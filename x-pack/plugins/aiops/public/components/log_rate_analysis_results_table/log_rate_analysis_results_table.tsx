@@ -168,12 +168,13 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
               </EuiToolTip>
             )}
 
-            <span title={fieldName}>{fieldName}</span>
+            <span title={fieldName} className="eui-textTruncate">
+              {fieldName}
+            </span>
           </>
         );
       },
       sortable: true,
-      truncateText: true,
       valign: 'middle',
     },
     {

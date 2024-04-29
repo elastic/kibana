@@ -36,7 +36,7 @@ interface SecurityRoutePageWrapperProps {
  * </PluginTemplateWrapper>
  * ```
  */
-export const SecurityRoutePageWrapper: React.FC<SecurityRoutePageWrapperProps> = ({
+export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWrapperProps>> = ({
   children,
   pageName,
   redirectOnMissing,
