@@ -20,7 +20,7 @@ import {
   DataTotalHitsMsg,
   RecordRawType,
   SavedSearchData,
-} from '../services/discover_data_state_container';
+} from '../state_management/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTextBased } from './fetch_text_based';
 import { buildDataTableRecord } from '@kbn/discover-utils';

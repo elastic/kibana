@@ -22,12 +22,12 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../../services/discover_data_state_container';
+} from '../../../state_management/discover_data_state_container';
 import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
   getDiscoverStateContainer,
-} from '../../../services/discover_state';
+} from '../../../state_management/discover_state';
 import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { mockCustomizationContext } from '../../../../../customizations/__mocks__/customization_context';
 

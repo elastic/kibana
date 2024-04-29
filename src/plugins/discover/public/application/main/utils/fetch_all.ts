@@ -10,7 +10,7 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
-import type { DiscoverAppState } from '../services/discover_app_state_container';
+import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
 import {
@@ -25,10 +25,14 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
+import {
+  DataMsg,
+  RecordRawType,
+  SavedSearchData,
+} from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchTextBased } from './fetch_text_based';
-import { InternalState } from '../services/discover_internal_state_container';
+import { InternalState } from '../state_management/discover_internal_state_container';
 
 export interface FetchDeps {
   abortController: AbortController;

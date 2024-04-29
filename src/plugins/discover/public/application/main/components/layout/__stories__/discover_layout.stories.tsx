@@ -9,8 +9,8 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { DiscoverMainProvider } from '../../../services/discover_state_provider';
-import { DiscoverAppState } from '../../../services/discover_app_state_container';
+import { DiscoverMainProvider } from '../../../state_management/discover_state_provider';
+import { DiscoverAppState } from '../../../state_management/discover_app_state_container';
 import { getDataViewMock } from '../../../../../__mocks__/__storybook_mocks__/get_data_view_mock';
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
