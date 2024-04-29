@@ -23,7 +23,7 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
   dataViews: DataViewsContract,
   input?: AnomalyChartsEmbeddableInput
 ): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-  const { http, overlays, theme, i18n } = coreStart;
+  const { http, overlays, ...startServices } = coreStart;
 
   const { getJobs } = mlApiServicesProvider(new HttpService(http));
 
@@ -52,7 +52,7 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
               reject();
             }}
           />,
-          { theme, i18n }
+          startServices
         )
       );
     } catch (error) {

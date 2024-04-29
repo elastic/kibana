@@ -50,7 +50,6 @@ jobs:
 
               Just comment with:
               - \`/oblt-deploy\` : Deploy a Kibana instance using the Observability test environments.
-              - \`/oblt-deploy-serverless\` : Deploy a serverless Kibana instance using the Observability test environments.
               - \`run\` \`elasticsearch-ci/docs\` : Re-trigger the docs validation. (use unformatted text in the comment!)
 
               </p>
