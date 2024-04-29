@@ -14,7 +14,7 @@ import { MlPageControlsContext } from '../ml_page/ml_page';
 /**
  * Component for setting the page header content.
  */
-export const MlPageHeader: FC<PropsWithChildren> = ({ children }) => {
+export const MlPageHeader: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {
