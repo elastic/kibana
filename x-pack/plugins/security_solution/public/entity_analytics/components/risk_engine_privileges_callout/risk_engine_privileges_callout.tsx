@@ -30,6 +30,5 @@ export const RiskEnginePrivilegesCallOut: React.FC<{
       <CallOut message={message} showDismissButton={false} />
       <EuiSpacer size="l" />
     </>
-    // message && <CallOutSwitcher namespace="entity_analytics" condition={true} message={message} />
   );
 };
