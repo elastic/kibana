@@ -172,6 +172,43 @@ describe('OpenAPI Bundler', () => {
       );
     });
   });
+
+  describe('reduce allOf items', () => {
+    it('flatten folded allOfs', async () => {
+      const folder = join('reduce_all_of', 'flatten_folded_all_of_items');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('unfolds single allOf item', async () => {
+      const folder = join('reduce_all_of', 'unfold_single_all_of_item');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('merges non conflicting allOf object schema items', async () => {
+      const folder = join('reduce_all_of', 'merge_non_conflicting_all_of_items');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('DOES NOT merge conflicting incompatible allOf object schema items', async () => {
+      const folder = join('reduce_all_of', 'do_not_merge_conflicting_all_of_items');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('merges allOf object schema items with inlined references', async () => {
+      const folder = join('reduce_all_of', 'merge_all_of_items_with_inlined_refs');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+  });
 });
 
 async function bundleFolder(folderName: string): Promise<void> {

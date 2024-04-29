@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint GET
+  version: '2023-10-31'
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: string
+                    enum: [value1]
+                  - type: object
+                    properties:
+                      fieldA:
+                        type: string
+                  - type: number
+                  - type: object
+                    properties:
+                      fieldB:
+                        type: string
+                    required:
+                      - fieldB
+                  - $ref: '#/components/schemas/SchemaAToInline'
+                  - type: boolean
+                  - type: object
+                    properties:
+                      stringField:
+                        type: string
+                    required:
+                      - stringField
+
+components:
+  schemas:
+    SchemaAToInline:
+      x-inline: true
+      allOf:
+        - type: string
+          enum: [SchemaAToInline-value1]
+        - type: object
+          properties:
+            enumField:
+              type: string
+              enum: [SchemaAToInline-value2]
+            integerField:
+              type: integer
+              minimum: 1
+        - $ref: './common.schema.yaml#/components/schemas/SchemaBToInline'
