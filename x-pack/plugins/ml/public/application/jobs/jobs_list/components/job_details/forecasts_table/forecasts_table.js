@@ -334,6 +334,7 @@ export class ForecastsTable extends Component {
 
     return (
       <EuiInMemoryTable
+        data-test-subj="mlJobListForecastTable"
         compressed={true}
         items={forecasts}
         columns={columns}
