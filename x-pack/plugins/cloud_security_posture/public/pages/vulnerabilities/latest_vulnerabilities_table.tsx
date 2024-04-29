@@ -18,11 +18,13 @@ import { getDefaultQuery, defaultColumns } from './constants';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
+import { CloudSecurityPostureStartServices } from '../../types';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
   height?: number;
   nonPersistedFilters?: Filter[];
+  startServices: CloudSecurityPostureStartServices;
 }
 /**
  * Type Guard for checking if the given source is a CspVulnerabilityFinding
@@ -50,11 +52,19 @@ const CspVulnerabilityFindingRenderer = ({
   return children({ finding });
 };
 
-const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+const flyoutComponent = (
+  row: DataTableRecord,
+  onCloseFlyout: () => void,
+  startServices: CloudSecurityPostureStartServices
+): JSX.Element => {
   return (
     <CspVulnerabilityFindingRenderer row={row}>
       {({ finding }) => (
-        <VulnerabilityFindingFlyout vulnerabilityRecord={finding} closeFlyout={onCloseFlyout} />
+        <VulnerabilityFindingFlyout
+          vulnerabilityRecord={finding}
+          closeFlyout={onCloseFlyout}
+          startServices={startServices}
+        />
       )}
     </CspVulnerabilityFindingRenderer>
   );
@@ -86,6 +96,7 @@ export const LatestVulnerabilitiesTable = ({
   groupSelectorComponent,
   height,
   nonPersistedFilters,
+  startServices,
 }: LatestVulnerabilitiesTableProps) => {
   const { cloudPostureDataTable, rows, total, error, isFetching, fetchNextPage } =
     useLatestVulnerabilitiesTable({
@@ -116,6 +127,7 @@ export const LatestVulnerabilitiesTable = ({
           customCellRenderer={customCellRenderer}
           groupSelectorComponent={groupSelectorComponent}
           height={height ?? `calc(100vh - ${filters?.length > 0 ? 404 : 364}px)`}
+          startServices={startServices}
         />
       )}
     </>
