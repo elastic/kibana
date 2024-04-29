@@ -1,0 +1,55 @@
+openapi: 3.0.3
+info:
+  title: Bundled OpenAPI specs
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: 'localhost'
+      port:
+        default: '5601'
+security:
+  - BasicAuth: []
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responseSchemaFieldA:
+                    type: object
+                    properties:
+                      SchemaToInlineField1:
+                        type: string
+                      SchemaToInlineField2:
+                        type: number
+                    required:
+                      - field2
+                  responseSchemaFieldB:
+                    $ref: '#/components/schemas/MySchema'
+components:
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+  schemas:
+    MySchema:
+      type: object
+      properties:
+        type: object
+        properties:
+          SchemaToInlineField1:
+            type: string
+          SchemaToInlineField2:
+            type: number
+          mySchemaSubfield:
+            type: boolean
+        required:
+          - field2

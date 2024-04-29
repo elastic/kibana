@@ -217,6 +217,16 @@ describe('OpenAPI Bundler', () => {
       await bundleFolder(folder);
       await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
     });
+
+    it('merges allOf object schema items inlined in different document branches with extra field', async () => {
+      const folder = join(
+        'reduce_all_of',
+        'merge_all_of_items_with_inlined_refs_in_different_document_branches'
+      );
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
   });
 });
 
