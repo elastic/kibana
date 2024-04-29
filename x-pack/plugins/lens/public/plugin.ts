@@ -636,11 +636,7 @@ export class LensPlugin {
       visualizeAggBasedVisAction(core.application)
     );
 
-    const editInLensAction = new ConfigureInLensPanelAction(
-      startDependencies,
-      core.overlays,
-      core.theme
-    );
+    const editInLensAction = new ConfigureInLensPanelAction(startDependencies, core);
     // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
 
