@@ -22,6 +22,7 @@ export interface Props {
   layerList: LayerDescriptor[];
   mapSettings?: Partial<MapSettings>;
   hideFilterActions?: boolean;
+  isLayerTOCOpen?: boolean;
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   /*
@@ -50,7 +51,8 @@ export class MapComponent extends Component<Props> {
         },
         hidePanelTitles: !Boolean(this.props.title),
         viewMode: ViewMode.VIEW,
-        isLayerTOCOpen: false,
+        isLayerTOCOpen:
+          typeof this.props.isLayerTOCOpen === 'boolean' ? this.props.isLayerTOCOpen : false,
         hideFilterActions:
           typeof this.props.hideFilterActions === 'boolean' ? this.props.hideFilterActions : false,
         mapCenter: this.props.mapCenter,

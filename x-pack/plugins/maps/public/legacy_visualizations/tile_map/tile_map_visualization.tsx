@@ -43,6 +43,7 @@ export function TileMapVisualization(props: Props) {
       query={props.query}
       timeRange={props.timeRange}
       mapCenter={initialMapCenter}
+      isLayerTOCOpen={true}
       layerList={initialLayerList}
       onInitialRenderComplete={props.onInitialRenderComplete}
       isSharable={false}
