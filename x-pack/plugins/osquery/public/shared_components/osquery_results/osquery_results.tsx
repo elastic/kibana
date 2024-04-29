@@ -14,7 +14,7 @@ import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { queryClient } from '../../query_client';
-import { KibanaThemeProvider } from '../../shared_imports';
+import { KibanaRenderContextProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
@@ -61,7 +61,7 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
   services,
   ...restProps
 }) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
@@ -69,7 +69,7 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
-  </KibanaThemeProvider>
+  </KibanaRenderContextProvider>
 );
 
 const OsqueryActionResultsWrapper = React.memo(OsqueryActionResultsWrapperComponent);

@@ -10,7 +10,8 @@ import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
@@ -72,7 +73,7 @@ const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperP
   services,
   ...restProps
 }) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
@@ -80,7 +81,7 @@ const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperP
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
-  </KibanaThemeProvider>
+  </KibanaRenderContextProvider>
 );
 
 const OsqueryActionResultWrapper = React.memo(OsqueryActionResultWrapperComponent);
