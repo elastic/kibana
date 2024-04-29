@@ -113,8 +113,6 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
     [suggestion, fieldName, topValues]
   );
 
-  if (!mapsService) return null;
-
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
 
   const countsElement = totalDocuments ? (
@@ -159,9 +157,11 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       className={'dvPanel__wrapper'}
       grow={true}
     >
-      <div className={'dvMap__wrapper'}>
-        <mapsService.PassiveMap passiveLayer={choroplethLayer} />
-      </div>
+      {mapsService && (
+        <div className={'dvMap__wrapper'}>
+          <mapsService.PassiveMap passiveLayer={choroplethLayer} />
+        </div>
+      )}
 
       {countsElement}
     </ExpandedRowPanel>
