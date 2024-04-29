@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotCustomAggregation,
@@ -32,7 +33,6 @@ import {
   SnapshotCustomMetricInputRT,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
 
 interface Props {
   metric?: { value: string; text: string };
@@ -41,7 +41,6 @@ interface Props {
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
   customMetric?: SnapshotCustomMetricInput;
-  fields: DerivedIndexPattern['fields'];
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -80,7 +79,6 @@ export const MetricExpression = ({
   metric,
   metrics,
   customMetric,
-  fields,
   errors,
   onChange,
   onChangeCustom,
@@ -90,6 +88,7 @@ export const MetricExpression = ({
   const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
   const [selectedOption, setSelectedOption] = useState(metric?.value);
   const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
+  const { metricsView } = useMetricsDataViewContext();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const firstFieldOption = {
@@ -101,10 +100,10 @@ export const MetricExpression = ({
 
   const fieldOptions = useMemo(
     () =>
-      fields
+      (metricsView?.fields ?? [])
         .filter((f) => f.aggregatable && f.type === 'number' && !(customMetric?.field === f.name))
         .map((f) => ({ label: f.name })),
-    [fields, customMetric?.field]
+    [metricsView?.fields, customMetric?.field]
   );
 
   const expressionDisplayValue = useMemo(() => {

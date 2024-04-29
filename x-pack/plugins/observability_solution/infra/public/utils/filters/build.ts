@@ -12,7 +12,7 @@ import {
   type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
@@ -36,8 +36,8 @@ export const buildCombinedHostsFilter = ({
       meta: {},
     };
   }
-  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
 
+  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
   return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
 };
 

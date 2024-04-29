@@ -6,26 +6,23 @@
  */
 
 import { createTSVBLink, createFilterFromOptions } from './create_tsvb_link';
-import {
-  source,
-  options,
-  timeRange,
-  chartOptions,
-} from '../../../../../utils/fixtures/metrics_explorer';
+import { options, timeRange, chartOptions } from '../../../../../utils/fixtures/metrics_explorer';
 import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
 } from '../../hooks/use_metrics_explorer_options';
 import { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
+
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('test-id'),
 }));
 
+const indexPattern = 'metricbeat-*';
 const series = { id: 'example-01', rows: [], columns: [] };
 
 describe('createTSVBLink()', () => {
   it('should just work', () => {
-    const link = createTSVBLink(source, options, series, timeRange, chartOptions);
+    const link = createTSVBLink(indexPattern, options, series, timeRange, chartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -42,7 +39,7 @@ describe('createTSVBLink()', () => {
       ...options,
       metrics: [{ aggregation: 'rate', field: 'host.network.egress.bytes' }],
     };
-    const link = createTSVBLink(source, customOptions, series, timeRange, chartOptions);
+    const link = createTSVBLink(indexPattern, customOptions, series, timeRange, chartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -55,7 +52,7 @@ describe('createTSVBLink()', () => {
   });
   it('should work with time range', () => {
     const customTimeRange = { ...timeRange, from: 'now-10m', to: 'now' };
-    const link = createTSVBLink(source, options, series, customTimeRange, chartOptions);
+    const link = createTSVBLink(indexPattern, options, series, customTimeRange, chartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -66,31 +63,10 @@ describe('createTSVBLink()', () => {
       },
     });
   });
-  it('should work with source', () => {
-    const customSource = {
-      ...source,
-      metricAlias: 'my-beats-*',
-      fields: { ...source.fields, timestamp: 'time' },
-    };
-    const link = createTSVBLink(customSource, options, series, timeRange, chartOptions);
-    expect(link).toStrictEqual({
-      app: 'visualize',
-      hash: '/create',
-      search: {
-        _a: "(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_min:0,axis_position:left,axis_scale:normal,default_index_pattern:'my-beats-*',filter:(language:kuery,query:'host.name : \"example-01\"'),id:test-id,index_pattern:'my-beats-*',interval:auto,series:!((axis_position:right,chart_type:line,color:#6092C0,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))",
-        _g: '(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))',
-        type: 'metrics',
-      },
-    });
-  });
+
   it('should work with filterQuery', () => {
-    const customSource = {
-      ...source,
-      metricAlias: 'my-beats-*',
-      fields: { ...source.fields, timestamp: 'time' },
-    };
     const customOptions = { ...options, filterQuery: 'system.network.name:lo*' };
-    const link = createTSVBLink(customSource, customOptions, series, timeRange, chartOptions);
+    const link = createTSVBLink('my-beats-*', customOptions, series, timeRange, chartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -104,7 +80,7 @@ describe('createTSVBLink()', () => {
 
   it('should remove axis_min from link', () => {
     const customChartOptions = { ...chartOptions, yAxisMode: MetricsExplorerYAxisMode.auto };
-    const link = createTSVBLink(source, options, series, timeRange, customChartOptions);
+    const link = createTSVBLink(indexPattern, options, series, timeRange, customChartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -118,7 +94,7 @@ describe('createTSVBLink()', () => {
 
   it('should change series to area', () => {
     const customChartOptions = { ...chartOptions, type: MetricsExplorerChartType.area };
-    const link = createTSVBLink(source, options, series, timeRange, customChartOptions);
+    const link = createTSVBLink(indexPattern, options, series, timeRange, customChartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -136,7 +112,7 @@ describe('createTSVBLink()', () => {
       type: MetricsExplorerChartType.area,
       stack: true,
     };
-    const link = createTSVBLink(source, options, series, timeRange, customChartOptions);
+    const link = createTSVBLink(indexPattern, options, series, timeRange, customChartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',
@@ -149,12 +125,7 @@ describe('createTSVBLink()', () => {
   });
 
   it('should use the workaround index pattern when there are multiple listed in the source', () => {
-    const customSource = {
-      ...source,
-      metricAlias: 'my-beats-*,metrics-*',
-      fields: { ...source.fields, timestamp: 'time' },
-    };
-    const link = createTSVBLink(customSource, options, series, timeRange, chartOptions);
+    const link = createTSVBLink('my-beats-*,metrics-*', options, series, timeRange, chartOptions);
     expect(link).toStrictEqual({
       app: 'visualize',
       hash: '/create',

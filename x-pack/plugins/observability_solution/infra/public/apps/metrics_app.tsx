@@ -18,7 +18,7 @@ import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
-import { SourceProvider } from '../containers/metrics_source';
+import { SourceProvider, MetricsDataViewProvider } from '../containers/metrics_source';
 import { PluginConfigProvider } from '../containers/plugin_config_context';
 import type { KibanaEnvContext } from '../hooks/use_kibana';
 
@@ -97,16 +97,18 @@ const MetricsApp: React.FC<{
         triggersActionsUI={plugins.triggersActionsUi}
       >
         <SourceProvider sourceId="default">
-          <PluginConfigProvider value={pluginConfig}>
-            <Router history={history}>
-              <Routes>
-                <Route path="/link-to" component={LinkToMetricsPage} />
-                {uiCapabilities?.infrastructure?.show && (
-                  <Route path="/" component={InfrastructurePage} />
-                )}
-              </Routes>
-            </Router>
-          </PluginConfigProvider>
+          <MetricsDataViewProvider>
+            <PluginConfigProvider value={pluginConfig}>
+              <Router history={history}>
+                <Routes>
+                  <Route path="/link-to" component={LinkToMetricsPage} />
+                  {uiCapabilities?.infrastructure?.show && (
+                    <Route path="/" component={InfrastructurePage} />
+                  )}
+                </Routes>
+              </Router>
+            </PluginConfigProvider>
+          </MetricsDataViewProvider>
         </SourceProvider>
       </CommonInfraProviders>
     </CoreProviders>

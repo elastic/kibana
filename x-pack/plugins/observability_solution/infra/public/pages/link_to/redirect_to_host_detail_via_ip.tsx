@@ -14,7 +14,7 @@ import { useHostIpToName } from './use_host_ip_to_name';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 import { LoadingPage } from '../../components/loading_page';
 import { Error } from '../error';
-import { useSourceContext } from '../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../containers/metrics_source';
 
 type RedirectToHostDetailType = RouteComponentProps<{
   hostIp: string;
@@ -26,12 +26,9 @@ export const RedirectToHostDetailViaIP = ({
   },
   location,
 }: RedirectToHostDetailType) => {
-  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
 
-  const { error, name } = useHostIpToName(
-    hostIp,
-    (source && source.configuration && source.configuration.metricAlias) || null
-  );
+  const { error, name } = useHostIpToName(hostIp, (metricsView && metricsView.indices) || null);
 
   if (error) {
     return (

@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 
 export interface SortBy {
   name: string;
@@ -28,8 +28,7 @@ export function useProcessList(
   searchFilter: object,
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>
 ) {
-  const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern().title;
+  const { metricsView } = useMetricsDataViewContext();
 
   const decodeResponse = (response: any) => {
     return pipe(
@@ -51,7 +50,7 @@ export function useProcessList(
     'POST',
     JSON.stringify({
       hostTerm,
-      indexPattern,
+      indexPattern: metricsView?.indices,
       to,
       sortBy: parsedSortBy,
       searchFilter,
@@ -80,9 +79,8 @@ export function useProcessList(
 
 function useProcessListParams(props: { hostTerm: Record<string, string>; to: number }) {
   const { hostTerm, to } = props;
-  const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern().title;
-  return { hostTerm, indexPattern, to };
+  const { metricsView } = useMetricsDataViewContext();
+  return { hostTerm, indexPattern: metricsView?.indices, to };
 }
 const ProcessListContext = createContainter(useProcessListParams);
 export const [ProcessListContextProvider, useProcessListContext] = ProcessListContext;

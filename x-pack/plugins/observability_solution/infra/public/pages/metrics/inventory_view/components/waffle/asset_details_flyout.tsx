@@ -11,7 +11,7 @@ import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { ContentTabIds } from '../../../../../components/asset_details/types';
 import { AssetDetails } from '../../../../../components/asset_details';
-import { useSourceContext } from '../../../../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
@@ -45,7 +45,7 @@ export const AssetDetailsFlyout = ({
   refreshInterval,
   isAutoReloading = false,
 }: Props) => {
-  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
 
   const dateRange = useMemo(() => {
     // forces relative dates when auto-refresh is active
@@ -60,7 +60,7 @@ export const AssetDetailsFlyout = ({
         };
   }, [currentTime, isAutoReloading]);
 
-  return source ? (
+  return metricsView ? (
     <AssetDetails
       assetId={assetName}
       assetName={assetName}
@@ -79,7 +79,7 @@ export const AssetDetailsFlyout = ({
         mode: 'flyout',
         closeFlyout,
       }}
-      metricAlias={source.configuration.metricAlias}
+      metricsIndexPattern={metricsView.indices}
       dateRange={dateRange}
       autoRefresh={{
         isPaused: !isAutoReloading,

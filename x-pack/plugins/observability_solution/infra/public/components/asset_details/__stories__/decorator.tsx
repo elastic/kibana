@@ -214,7 +214,7 @@ export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
         to: '2023-04-09T11:23:49Z',
       }}
     >
-      <DataViewsProvider metricAlias="metrics-*">{story()}</DataViewsProvider>
+      <DataViewsProvider metricsIndexPattern="metrics-*">{story()}</DataViewsProvider>
     </ContextProviders>
   );
 };

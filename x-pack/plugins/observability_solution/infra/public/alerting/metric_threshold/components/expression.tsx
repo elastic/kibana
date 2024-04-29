@@ -28,7 +28,11 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
+import {
+  useMetricsDataViewContext,
+  useSourceContext,
+  withSourceProvider,
+} from '../../../containers/metrics_source';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -42,7 +46,13 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
+  | 'defaultActionGroupId'
+  | 'actionGroups'
+  | 'charts'
+  | 'data'
+  | 'unifiedSearch'
+  | 'onChangeMetaData'
+  | 'dataViews'
 >;
 
 const defaultExpression = {
@@ -57,14 +67,11 @@ export { defaultExpression };
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { docLinks } = useKibanaContextForPlugin().services;
-  const { source, createDerivedIndexPattern } = useSourceContext();
+  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -113,13 +120,13 @@ export const Expressions: React.FC<Props> = (props) => {
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
       }
     },
-    [setRuleParams, derivedIndexPattern]
+    [setRuleParams, metricsView?.dataViewReference]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -193,7 +200,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', md.currentOptions.filterQuery);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(
+          md.currentOptions.filterQuery,
+          metricsView?.dataViewReference
+        ) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
@@ -203,10 +213,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', filter);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference) || ''
       );
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, metricsView?.dataViewReference, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -299,7 +309,6 @@ export const Expressions: React.FC<Props> = (props) => {
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields}
               remove={removeExpression}
               addExpression={addExpression}
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
@@ -307,12 +316,9 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
-              dataView={derivedIndexPattern}
             >
               <ExpressionChart
                 expression={e}
-                derivedIndexPattern={derivedIndexPattern}
-                source={source}
                 filterQuery={ruleParams.filterQueryText}
                 groupBy={ruleParams.groupBy}
               />
@@ -395,7 +401,6 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         {(metadata && (
           <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={ruleParams.filterQueryText}
@@ -424,7 +429,6 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields}
           options={{
             ...options,
             groupBy: ruleParams.groupBy || undefined,

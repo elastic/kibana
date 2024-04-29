@@ -66,5 +66,5 @@ export const assetDetailsProps: AssetDetailsProps = {
   },
   tabs,
   links,
-  metricAlias: 'metrics-*',
+  metricsIndexPattern: 'metrics-*',
 };

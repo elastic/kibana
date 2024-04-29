@@ -7,18 +7,16 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import React, { useCallback, useState } from 'react';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: DerivedIndexPattern['fields'];
 }
 
 interface SelectedOption {
@@ -26,7 +24,8 @@ interface SelectedOption {
   label: string;
 }
 
-export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = false }: Props) => {
+export const MetricsExplorerMetrics = ({ options, onChange, autoFocus = false }: Props) => {
+  const { metricsView } = useMetricsDataViewContext();
   const colors = Object.keys(Color) as Array<keyof typeof Color>;
   const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
@@ -54,7 +53,10 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     [onChange, options.aggregation, colors]
   );
 
-  const comboOptions = fields.map((field) => ({ label: field.name, value: field.name }));
+  const comboOptions = (metricsView?.fields ?? []).map((field) => ({
+    label: field.name,
+    value: field.name,
+  }));
   const selectedOptions = options.metrics
     .filter((m) => m.aggregation !== 'count')
     .map((metric) => ({

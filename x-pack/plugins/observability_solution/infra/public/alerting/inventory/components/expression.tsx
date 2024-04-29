@@ -64,7 +64,7 @@ import {
 } from '../../../../common/http_api/snapshot_api';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
-  DerivedIndexPattern,
+  useMetricsDataViewContext,
   useSourceContext,
   withSourceProvider,
 } from '../../../containers/metrics_source';
@@ -120,15 +120,12 @@ export const defaultExpression = {
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceContext();
+  const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
+  const { metricsView } = useMetricsDataViewContext();
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
@@ -166,13 +163,13 @@ export const Expressions: React.FC<Props> = (props) => {
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
       }
     },
-    [derivedIndexPattern, setRuleParams]
+    [metricsView?.dataViewReference, setRuleParams]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -247,10 +244,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', md.filter);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(md.filter, metricsView?.dataViewReference) || ''
       );
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, metricsView?.dataViewReference, setRuleParams]);
 
   useEffect(() => {
     const md = metadata;
@@ -276,7 +273,7 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!ruleParams.sourceId) {
       setRuleParams('sourceId', source?.id || 'default');
     }
-  }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -314,7 +311,6 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
-              fields={derivedIndexPattern.fields}
             >
               <ExpressionChart
                 expression={e}
@@ -391,7 +387,6 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         {metadata ? (
           <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}
             value={ruleParams.filterQueryText}
@@ -426,7 +421,6 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  fields: DerivedIndexPattern['fields'];
 }
 
 const NonCollapsibleExpressionCss = css`
@@ -450,8 +444,7 @@ const StyledHealthCss = css`
 export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, toggle] = useToggle(true);
 
-  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, fields } =
-    props;
+  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete } = props;
   const {
     metric,
     comparator = Comparator.GT,
@@ -619,7 +612,6 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                 onChangeCustom={updateCustomMetric}
                 errors={errors}
                 customMetric={customMetric}
-                fields={fields}
               />
             </div>
             {!displayWarningThreshold && criticalThresholdExpression}

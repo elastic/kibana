@@ -16,7 +16,7 @@ import { MetricRowBaseProps } from './types';
 interface MetricRowWithCountProps extends MetricRowBaseProps {
   agg?: Aggregators;
   filter?: string;
-  dataView: DataViewBase;
+  dataView?: DataViewBase;
 }
 
 export const MetricRowWithCount = ({
@@ -95,7 +95,7 @@ export const MetricRowWithCount = ({
             <MetricsExplorerKueryBar
               placeholder={' '}
               compressed
-              derivedIndexPattern={dataView}
+              dataView={dataView}
               onChange={handleFilterChange}
               onSubmit={handleFilterChange}
               value={filter}

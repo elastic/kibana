@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSourceContext } from '../../../../../containers/metrics_source';
+import { useMetricsDataView } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { AssetDetails } from '../../../../../components/asset_details';
@@ -18,10 +18,10 @@ export interface Props {
 }
 
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
-  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataView();
   const { parsedDateRange } = useUnifiedSearchContext();
 
-  return source ? (
+  return metricsView ? (
     <AssetDetails
       assetId={name}
       assetName={name}
@@ -38,7 +38,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
         mode: 'flyout',
         closeFlyout,
       }}
-      metricAlias={source.configuration.metricAlias}
+      metricsIndexPattern={metricsView.indices}
     />
   ) : null;
 };

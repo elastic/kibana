@@ -18,7 +18,7 @@ import {
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 
 const validateKuery = (expression: string) => {
@@ -36,8 +36,7 @@ export const DEFAULT_WAFFLE_FILTERS_STATE: InventoryFiltersState = {
 };
 
 export const useWaffleFilters = () => {
-  const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern();
+  const { metricsView } = useMetricsDataViewContext();
 
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
@@ -53,8 +52,8 @@ export const useWaffleFilters = () => {
   const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
 
   const filterQueryAsJson = useMemo(
-    () => convertKueryToElasticSearchQuery(urlState.expression, indexPattern),
-    [indexPattern, urlState.expression]
+    () => convertKueryToElasticSearchQuery(urlState.expression, metricsView?.dataViewReference),
+    [metricsView?.dataViewReference, urlState.expression]
   );
 
   const applyFilterQueryFromKueryExpression = useCallback(

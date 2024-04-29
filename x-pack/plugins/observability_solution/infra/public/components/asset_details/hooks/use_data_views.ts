@@ -9,15 +9,35 @@ import useAsync from 'react-use/lib/useAsync';
 import createContainer from 'constate';
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import {
+  DEFAULT_METRICS_VIEW,
+  DEFAULT_METRICS_VIEW_ATTRIBUTES,
+} from '../../../../common/constants';
+import { resolveAdHocDataView } from '../../../utils/data_view';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewReference } from '../../../hooks/use_log_view_reference';
-import { useDataView } from '../../../hooks/use_data_view';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 
-const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
+const useDataViews = ({ metricsIndexPattern }: { metricsIndexPattern: string }) => {
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { dataView: metricsDataView, loading: metricsDataViewLoading } = useDataView({
-    index: metricAlias,
-  });
+  const {
+    services: { dataViews },
+  } = useKibanaContextForPlugin();
+
+  const { value: metricsView, loading: metricsDataViewLoading } = useAsync(
+    () =>
+      resolveAdHocDataView({
+        dataViewsService: dataViews,
+        dataViewId: DEFAULT_METRICS_VIEW.metricsViewId,
+        attributes: {
+          indexPattern: metricsIndexPattern,
+          name: DEFAULT_METRICS_VIEW_ATTRIBUTES.name,
+          timeFieldName: DEFAULT_METRICS_VIEW_ATTRIBUTES.timeFieldName,
+        },
+      }),
+    [dataViews, metricsIndexPattern]
+  );
+
   const {
     logViewReference,
     getLogsDataView,
@@ -39,7 +59,7 @@ const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
   );
 
   return {
-    metrics: { dataView: metricsDataView, loading: metricsDataViewLoading },
+    metrics: { dataView: metricsView?.dataViewReference, loading: metricsDataViewLoading },
     logs: {
       dataView: logsDataView,
       reference: logViewReference,

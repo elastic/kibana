@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -27,7 +27,7 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../../common/components/threshold';
-import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
+import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -61,13 +61,9 @@ export function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
-  const { source, createDerivedIndexPattern } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
   const { euiTheme } = useEuiTheme();
 
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
@@ -149,12 +145,10 @@ export function AlertDetailsAppSection({
                 <ExpressionChart
                   annotations={annotations}
                   chartType={MetricsExplorerChartType.line}
-                  derivedIndexPattern={derivedIndexPattern}
                   expression={criterion}
                   filterQuery={rule.params.filterQueryText}
                   groupBy={rule.params.groupBy}
                   hideTitle
-                  source={source}
                   timeRange={timeRange}
                 />
               </EuiFlexItem>

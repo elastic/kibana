@@ -13,6 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { omit, range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +41,7 @@ export interface CustomEquationEditorProps {
   fields: NormalizedFields;
   aggregationTypes: AggregationTypes;
   errors: IErrorObject;
-  dataView: DataViewBase;
+  dataView?: DataViewBase;
 }
 
 const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
@@ -183,7 +184,9 @@ export const CustomEquationEditor = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            label="Equation"
+            label={i18n.translate('xpack.infra.customEquationEditor.euiFormRow.equationLabel', {
+              defaultMessage: 'Equation',
+            })}
             fullWidth
             helpText={EQUATION_HELP_MESSAGE}
             isInvalid={errors.equation != null}
