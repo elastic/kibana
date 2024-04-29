@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicTool } from '@langchain/core/tools';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
@@ -30,7 +30,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     const { chain } = params as EsqlKnowledgeBaseToolParams;
     if (chain == null) return null;
 
-    return new DynamicTool({
+    return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
       func: async (input, _, cbManager) => {

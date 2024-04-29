@@ -14,7 +14,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
 import {
   ActionsClientChatOpenAI,
-  ActionsClientLlm,
+  ActionsClientSimpleChatModel,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
@@ -26,7 +26,7 @@ import { AssistantToolParams } from '../../../types';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
- * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientSimpleChatModel,
  * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
  *
  */
@@ -55,7 +55,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 }) => {
   // TODO implement llmClass for bedrock streaming
   // tracked here: https://github.com/elastic/security-team/issues/7363
-  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
+  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
     actions,
@@ -130,7 +130,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         verbose: false,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
-        agentType: 'chat-conversational-react-description',
+        agentType: 'structured-chat-zero-shot-react-description',
         memory,
         verbose: false,
       });
