@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectProps } from '@elastic/eui';
@@ -72,7 +72,6 @@ const getDefaultFieldConfig = (
 };
 
 interface SeriesControlsProps {
-  children?: React.ReactNode;
   appStateHandler: Function;
   bounds: any;
   functionDescription?: string;
@@ -86,7 +85,7 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
+export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   appStateHandler,
   bounds,
   children,

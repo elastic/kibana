@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,14 +19,13 @@ import {
 } from '@elastic/eui';
 
 interface StepsNavProps {
-  children?: React.ReactNode;
   previousActive?: boolean;
   nextActive?: boolean;
   previous?(): void;
   next?(): void;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
+export const WizardNav: FC<PropsWithChildren<StepsNavProps>> = ({
   previous,
   previousActive = true,
   next,

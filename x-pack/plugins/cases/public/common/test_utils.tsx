@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import type { MatcherFunction } from '@testing-library/react';
@@ -52,7 +52,7 @@ interface FormTestComponentProps {
 }
 
 // eslint-disable-next-line react/display-name
-export const FormTestComponent: React.FC<FormTestComponentProps> = ({
+export const FormTestComponent: FC<PropsWithChildren<FormTestComponentProps>> = ({
   children,
   onSubmit,
   formDefaultValue,

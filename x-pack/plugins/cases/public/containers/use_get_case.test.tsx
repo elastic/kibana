@@ -9,14 +9,14 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useGetCase } from './use_get_case';
 import * as api from './api';
 import { waitFor } from '@testing-library/react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const wrapper: FC<PropsWithChildren> = ({ children }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

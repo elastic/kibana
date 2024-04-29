@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
@@ -102,11 +102,10 @@ export const LogColumnHeaders: React.FunctionComponent<{
   );
 };
 
-export const LogColumnHeader: React.FunctionComponent<{
-  children: React.ReactNode;
+export const LogColumnHeader: FC<PropsWithChildren<{
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
-}> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
+}>> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
   <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
     <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
   </LogColumnHeaderWrapper>

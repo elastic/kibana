@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NavigationLink } from '../types';
@@ -20,7 +20,6 @@ export interface LandingLinkIconProps {
   item: NavigationLink;
   urlState?: string;
   onLinkClick?: (id: string) => void;
-  children?: React.ReactNode;
 }
 
 const useLinkIconStyles = () => {
@@ -37,7 +36,7 @@ const useLinkIconStyles = () => {
   };
 };
 
-export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(function LandingLinkIcon({
+export const LandingLinkIcon: FC<PropsWithChildren<LandingLinkIconProps>> = React.memo(function LandingLinkIcon({
   item,
   urlState,
   onLinkClick,

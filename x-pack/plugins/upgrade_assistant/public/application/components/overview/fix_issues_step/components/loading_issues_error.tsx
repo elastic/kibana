@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 
-export const LoadingIssuesError: FunctionComponent<{ children?: React.ReactNode }> = ({
+export const LoadingIssuesError: FC<PropsWithChildren> = ({
   children,
 }) => (
   <EuiText color="subdued" data-test-subj="loadingIssuesError">

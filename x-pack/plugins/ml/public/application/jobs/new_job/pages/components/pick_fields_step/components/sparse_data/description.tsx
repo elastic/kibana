@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-export const Description = memo(({ children }: { children?: React.ReactNode }) => {
+export const Description = memo<PropsWithChildren>(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.sparseData.title', {
     defaultMessage: 'Sparse data',
   });

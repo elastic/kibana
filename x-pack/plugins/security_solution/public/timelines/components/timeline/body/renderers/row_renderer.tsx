@@ -13,7 +13,7 @@ interface RowRendererContainerProps {
 }
 
 export const RowRendererContainer = React.memo<RowRendererContainerProps>(
-  ({ children }: { children?: React.ReactNode }) => (
+  ({ children }) => (
     <EventsTrSupplement className="siemEventsTable__trSupplement--summary">
       {children}
     </EventsTrSupplement>

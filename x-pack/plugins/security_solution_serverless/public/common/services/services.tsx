@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren, FC } from 'react';
 import React from 'react';
 import {
   KibanaContextProvider,
@@ -13,10 +14,11 @@ import {
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { Services } from './types';
 
-export const ServicesProvider: React.FC<{
-  children: React.ReactNode;
-  services: Services;
-}> = ({ services, children }) => {
+export const ServicesProvider: FC<
+  PropsWithChildren<{
+    services: Services;
+  }>
+> = ({ services, children }) => {
   return (
     <KibanaContextProvider services={services}>
       <NavigationProvider core={services}>{children}</NavigationProvider>

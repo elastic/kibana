@@ -6,7 +6,7 @@
  */
 
 import stringify from 'json-stable-stringify';
-import React, { useMemo } from 'react';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import {
   LogHighlightsStateProvider,
   LogPositionStateProvider,
@@ -24,7 +24,7 @@ import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
-const ViewLogInContext: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const ViewLogInContext: FC<PropsWithChildren> = ({ children }) => {
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewReference } = useLogViewContext();
 
@@ -43,10 +43,11 @@ const ViewLogInContext: React.FC<{ children?: React.ReactNode }> = ({ children }
   );
 };
 
-const LogEntriesStateProvider: React.FC<{
-  children: React.ReactNode;
-  logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+const LogEntriesStateProvider: FC<
+  PropsWithChildren<{
+    logStreamPageState: InitializedLogStreamPageState;
+  }>
+> = ({ children, logStreamPageState }) => {
   const { logViewReference } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const {
@@ -71,10 +72,11 @@ const LogEntriesStateProvider: React.FC<{
   );
 };
 
-const LogHighlightsState: React.FC<{
-  children: React.ReactNode;
-  logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+const LogHighlightsState: FC<
+  PropsWithChildren<{
+    logStreamPageState: InitializedLogStreamPageState;
+  }>
+> = ({ children, logStreamPageState }) => {
   const { logViewReference, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const serializedParsedQuery = useMemo(
@@ -94,11 +96,12 @@ const LogHighlightsState: React.FC<{
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogStreamPageContentProviders: React.FC<{
-  children: React.ReactNode;
-  logStreamPageState: InitializedLogStreamPageState;
-  logStreamPageCallbacks: LogStreamPageCallbacks;
-}> = ({ children, logStreamPageState, logStreamPageCallbacks }) => {
+export const LogStreamPageContentProviders: FC<
+  PropsWithChildren<{
+    logStreamPageState: InitializedLogStreamPageState;
+    logStreamPageCallbacks: LogStreamPageCallbacks;
+  }>
+> = ({ children, logStreamPageState, logStreamPageCallbacks }) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>

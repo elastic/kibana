@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, FC, PropsWithChildren  } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -29,11 +29,10 @@ import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
 interface SchedulePanelProps {
-  children: React.ReactNode;
   description: string;
   title: string;
 }
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({ title, description, children }) => {
   return (
     <>
       <EuiSplitPanel.Outer>

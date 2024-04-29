@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, type PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -624,7 +624,6 @@ const FieldPanel: FC<FieldPanelProps> = ({
 };
 
 interface FieldsControlsProps {
-  children: React.ReactNode;
   fieldConfig: FieldConfig;
   onChange: (update: FieldConfig) => void;
 }
@@ -632,7 +631,7 @@ interface FieldsControlsProps {
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
+export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({ fieldConfig, onChange, children }) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();

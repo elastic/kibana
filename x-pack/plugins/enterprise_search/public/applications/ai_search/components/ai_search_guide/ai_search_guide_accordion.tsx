@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   EuiAccordion,
@@ -26,10 +26,9 @@ export interface AISearchGuideAccordionProps {
   initialIsOpen?: boolean;
   onToggle: (id: string | undefined) => void;
   currentExpandedId: string | undefined;
-  children: React.ReactNode;
 }
 
-export const AISearchGuideAccordion: React.FC<AISearchGuideAccordionProps> = ({
+export const AISearchGuideAccordion: FC<PropsWithChildren<AISearchGuideAccordionProps>> = ({
   id,
   icon,
   title,

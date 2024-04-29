@@ -11,10 +11,9 @@ import { EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 export interface IndexOverviewPanelProps {
   title: React.ReactNode;
   footer?: React.ReactNode | React.ReactNode[];
-  children: React.ReactNode;
 }
 
-export const IndexOverviewPanel: React.FC<IndexOverviewPanelProps> = ({
+export const IndexOverviewPanel: FC<PropsWithChildren<IndexOverviewPanelProps>> = ({
   title,
   footer,
   children,
@@ -35,7 +34,7 @@ export const IndexOverviewPanel: React.FC<IndexOverviewPanelProps> = ({
   </EuiSplitPanel.Outer>
 );
 
-export const IndexOverviewPanelStat: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+export const IndexOverviewPanelStat: FC<PropsWithChildren> = ({ children }) => (
   <EuiTitle size="l">
     <p>{children}</p>
   </EuiTitle>

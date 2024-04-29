@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import {
@@ -27,10 +27,9 @@ export interface SavedSearchEmbeddableBaseProps {
   append?: React.ReactElement;
   dataTestSubj?: string;
   interceptedWarnings?: SearchResponseWarning[];
-  children: React.ReactNode;
 }
 
-export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps> = ({
+export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddableBaseProps>> = ({
   isLoading,
   totalHitCount,
   prepend,

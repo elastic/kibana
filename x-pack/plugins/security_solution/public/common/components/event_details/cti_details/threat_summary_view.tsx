@@ -6,7 +6,7 @@
  */
 
 import styled from 'styled-components';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { HostRisk, UserRisk } from '../../../../entity_analytics/api/types';
 import * as i18n from './translations';
@@ -27,7 +27,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+const ThreatSummaryPanelTitle: FC<PropsWithChildren> = ({ children }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>

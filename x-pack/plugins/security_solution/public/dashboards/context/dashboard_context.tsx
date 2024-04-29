@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 import { useFetchSecurityTags } from '../containers/use_fetch_security_tags';
 
@@ -18,7 +18,7 @@ export interface DashboardContextType {
 
 const DashboardContext = React.createContext<DashboardContextType | null>({ securityTags: null });
 
-export const DashboardContextProvider: React.FC<{ children?: React.ReactNode }> = ({
+export const DashboardContextProvider: FC<PropsWithChildren> = ({
   children,
 }) => {
   const { tags, isLoading } = useFetchSecurityTags();

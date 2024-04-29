@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -141,10 +141,9 @@ export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   services: CoreStart;
   securityApiClients: SecurityApiClients;
-  children: React.ReactNode;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   authc,
   services,
   securityApiClients,

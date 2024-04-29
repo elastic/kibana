@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface StartChatPanelProps {
@@ -24,7 +24,7 @@ interface StartChatPanelProps {
   isValid?: boolean;
 }
 
-export const StartChatPanel: React.FC<StartChatPanelProps> = ({
+export const StartChatPanel: FC<PropsWithChildren<StartChatPanelProps>> = ({
   title,
   description,
   children,

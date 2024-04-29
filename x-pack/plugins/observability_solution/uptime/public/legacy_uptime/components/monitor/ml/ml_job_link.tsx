@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import url from 'url';
 import { EuiButtonEmpty } from '@elastic/eui';
 import rison from '@kbn/rison';
@@ -18,10 +18,9 @@ interface Props {
     to: string;
     from: string;
   };
-  children: React.ReactNode;
 }
 
-export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Omit<Props, 'children'>) => {
+export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
   const query = {
     ml: { jobIds: [getMLJobId(monitorId)] },
     refreshInterval: { pause: true, value: 0 },
@@ -47,7 +46,7 @@ export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Omit<Props,
   });
 };
 
-export const MLJobLink: React.FC<Props> = ({ basePath, monitorId, dateRange, children }) => {
+export const MLJobLink: FC<PropsWithChildren<Props>> = ({ basePath, monitorId, dateRange, children }) => {
   const href = getMLJobLinkHref({ basePath, monitorId, dateRange });
   return (
     <EuiButtonEmpty

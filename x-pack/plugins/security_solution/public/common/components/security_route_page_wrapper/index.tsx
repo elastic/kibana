@@ -15,7 +15,6 @@ import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 interface SecurityRoutePageWrapperProps {
-  children: React.ReactNode;
   pageName: SecurityPageName;
   redirectOnMissing?: boolean;
 }
@@ -37,7 +36,7 @@ interface SecurityRoutePageWrapperProps {
  * </PluginTemplateWrapper>
  * ```
  */
-export const SecurityRoutePageWrapper: React.FC<SecurityRoutePageWrapperProps> = ({
+export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWrapperProps>> = ({
   children,
   pageName,
   redirectOnMissing,

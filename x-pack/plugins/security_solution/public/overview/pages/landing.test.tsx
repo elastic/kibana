@@ -9,13 +9,13 @@ import { render } from '@testing-library/react';
 import { LandingPage } from './landing';
 import { Router } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 jest.mock('../../common/components/landing_page');
 jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: jest
     .fn()
-    .mockImplementation(({ children }: { children?: React.ReactNode }) => <div>{children}</div>),
+    .mockImplementation(({ children }: PropsWithChildren) => <div>{children}</div>),
 }));
 const history = createBrowserHistory();
 describe('LandingPage', () => {

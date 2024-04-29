@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context } from 'react';
+import React, { createContext, useContext, Context, FC, PropsWithChildren  } from 'react';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
 import { SidebarItems } from '../../step_detail/waterfall/types';
@@ -59,10 +59,9 @@ interface ProviderProps {
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
   markerItems?: MarkerItems;
   activeStep?: JourneyStep;
-  children: React.ReactNode;
 }
 
-export const WaterfallProvider: React.FC<ProviderProps> = ({
+export const WaterfallProvider: FC<PropsWithChildren<ProviderProps>> = ({
   children,
   data,
   markerItems,

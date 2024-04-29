@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export const createQueryWrapperMock = (): {
   queryClient: QueryClient;
-  wrapper: React.FC<{ children: React.ReactNode }>;
+  wrapper: FC<PropsWithChildren>;
 } => {
   const queryClient = new QueryClient({
     defaultOptions: {

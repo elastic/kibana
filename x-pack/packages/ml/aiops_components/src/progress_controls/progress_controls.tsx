@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
   useEuiTheme,
@@ -30,7 +30,6 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
  * Props for ProgressControlProps
  */
 interface ProgressControlProps {
-  children?: React.ReactNode;
   isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
@@ -50,7 +49,7 @@ interface ProgressControlProps {
  * @param props ProgressControls component props
  * @returns The ProgressControls component.
  */
-export const ProgressControls: FC<ProgressControlProps> = (props) => {
+export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
     isBrushCleared,

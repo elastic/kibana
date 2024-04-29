@@ -266,10 +266,16 @@ export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
   // eslint-disable-next-line react/display-name
-  return ({ children }: { children: React.ReactNode }) =>
+  return ({
+    children,
+    startServices: startServicesMock,
+  }: {
+    children: React.ReactNode;
+    startServices?: StartServices;
+  }) =>
     React.createElement(
       KibanaContextProvider,
-      { services },
+      { services: startServicesMock || services },
       React.createElement(NavigationProvider, { core: services }, children)
     );
 };

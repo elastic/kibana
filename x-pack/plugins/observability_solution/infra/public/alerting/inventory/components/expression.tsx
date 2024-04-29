@@ -29,7 +29,15 @@ import {
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { debounce, omit } from 'lodash';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  FC,
+  PropsWithChildren,
+} from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import {
   findInventoryModel,
@@ -408,7 +416,6 @@ export const Expressions: React.FC<Props> = (props) => {
 export default withSourceProvider<Props>(Expressions)('default');
 
 interface ExpressionRowProps {
-  children?: React.ReactNode;
   nodeType: InventoryItemType;
   expressionId: number;
   expression: Omit<InventoryMetricConditions, 'metric'> & {
@@ -440,7 +447,7 @@ const StyledHealthCss = css`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, fields } =

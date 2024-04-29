@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -28,7 +28,7 @@ describe('Tags', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },
       schema: {

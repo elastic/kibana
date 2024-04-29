@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { PropsWithChildren } from 'react';
 import type {
   Action,
   ActionExecutionContext,
@@ -14,14 +16,13 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
-export interface CellActionsProviderProps {
+export type CellActionsProviderProps = PropsWithChildren<{
   /**
    * Please assign `uiActions.getTriggerCompatibleActions` function.
    * This function should return a list of actions for a triggerId that are compatible with the provided context.
    */
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
-  children: React.ReactNode;
-}
+}>;
 
 type Metadata = Record<string, unknown>;
 
@@ -47,7 +48,7 @@ export interface CellActionsData {
   value: CellActionFieldValue;
 }
 
-export interface CellActionsProps {
+export type CellActionsProps = PropsWithChildren<{
   data: CellActionsData | CellActionsData[];
 
   /**
@@ -83,9 +84,7 @@ export interface CellActionsProps {
   metadata?: Metadata;
 
   className?: string;
-
-  children?: React.ReactNode;
-}
+}>
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
   data: CellActionsData[];

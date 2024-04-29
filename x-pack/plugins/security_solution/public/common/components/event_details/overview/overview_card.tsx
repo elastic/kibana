@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
@@ -52,10 +52,9 @@ const OverviewPanel = euiStyled(EuiPanel)`
 
 interface OverviewCardProps {
   title: string;
-  children: React.ReactNode;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
+export const OverviewCard: FC<PropsWithChildren<OverviewCardProps>> = ({ title, children }) => (
   <OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
     <EuiText size="s">{title}</EuiText>
     <EuiSpacer size="s" />
@@ -79,10 +78,9 @@ type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfo;
   dataTestSubj?: string;
-  children: React.ReactNode;
 };
 
-export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
+export const OverviewCardWithActions: FC<PropsWithChildren<OverviewCardWithActionsProps>> = ({
   title,
   children,
   contextId,

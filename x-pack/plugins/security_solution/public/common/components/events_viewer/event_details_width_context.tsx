@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, PropsWithChildren } from 'react';
 import { useThrottledResizeObserver } from '../utils';
 
 const DEFAULT_WIDTH = 0;
@@ -14,8 +14,8 @@ const EventDetailsWidthContext = createContext(DEFAULT_WIDTH);
 
 export const useEventDetailsWidthContext = () => useContext(EventDetailsWidthContext);
 
-export const EventDetailsWidthProvider = React.memo(
-  ({ children }: { children?: React.ReactNode }) => {
+export const EventDetailsWidthProvider = React.memo<PropsWithChildren>(
+  ({ children }) => {
     const { ref, width } = useThrottledResizeObserver();
 
     return (

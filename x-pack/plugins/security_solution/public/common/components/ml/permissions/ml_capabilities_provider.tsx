@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, PropsWithChildren } from 'react';
 
 import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
@@ -29,7 +29,7 @@ export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
-export const MlCapabilitiesProvider = React.memo<{ children: React.ReactNode }>(({ children }) => {
+export const MlCapabilitiesProvider = React.memo<PropsWithChildren>(({ children }) => {
   const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
     emptyMlCapabilitiesProvider
   );

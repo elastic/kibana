@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render } from '@testing-library/react';
 
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -47,7 +47,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}

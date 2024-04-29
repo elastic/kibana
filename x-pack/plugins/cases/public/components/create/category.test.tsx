@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -26,7 +26,7 @@ describe('Category', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
-  const FormComponent: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const FormComponent: FC<PropsWithChildren> = ({ children }) => {
     const { form } = useForm<FormProps>({ onSubmit });
 
     return (

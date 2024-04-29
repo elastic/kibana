@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
@@ -36,9 +36,7 @@ const queryClient = new QueryClient({
 });
 
 const getWrapper =
-  (
-    { canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }
-  ): React.FC<{ children: React.ReactNode }> =>
+  ({ canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }): FC<PropsWithChildren> =>
   ({ children }) => {
     const coreStart = coreMock.createStart();
     const core = {

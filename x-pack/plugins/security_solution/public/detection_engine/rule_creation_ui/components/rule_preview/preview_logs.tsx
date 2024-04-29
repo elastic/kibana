@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useMemo, FC, PropsWithChildren } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -25,7 +25,6 @@ interface SortedLogs {
 interface LogAccordionProps {
   logs: SortedLogs[];
   isError?: boolean;
-  children?: React.ReactNode;
 }
 
 const CustomWarning: React.FC<{ message: string }> = ({ message }) => (
@@ -73,7 +72,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
 export const PreviewLogs = React.memo(PreviewLogsComponent);
 PreviewLogs.displayName = 'PreviewLogs';
 
-const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
+const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError, children }) => {
   const firstLog = logs[0];
   if (!(children || firstLog)) return null;
 

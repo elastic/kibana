@@ -54,6 +54,7 @@ export const StateProvider: React.FC<{ children?: React.ReactNode }> = ({ childr
       term: '',
       result: [],
     },
+    inferenceToModelIdMap: {},
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);

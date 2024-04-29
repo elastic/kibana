@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TimeSeriesExplorerUrlStateManager } from './state_manager';
@@ -24,7 +24,7 @@ jest.mock('../../../timeseriesexplorer', () => ({
 }));
 
 jest.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => ({
-  TimeSeriesExplorerPage: jest.fn(({ children }: { children?: React.ReactNode }) => {
+  TimeSeriesExplorerPage: jest.fn(({ children }: PropsWithChildren) => {
     return <>{children}</>;
   }),
 }));

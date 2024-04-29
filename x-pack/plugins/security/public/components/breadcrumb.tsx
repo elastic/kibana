@@ -55,7 +55,6 @@ export const Breadcrumb: FunctionComponent<BreadcrumbProps> = ({ children, ...br
 
 export interface BreadcrumbsProviderProps {
   onChange?: BreadcrumbsChangeHandler;
-  children: React.ReactNode;
 }
 
 export type BreadcrumbsChangeHandler = (breadcrumbs: BreadcrumbProps[]) => void;
@@ -72,7 +71,7 @@ export type BreadcrumbsChangeHandler = (breadcrumbs: BreadcrumbProps[]) => void;
  * </Breadcrumbs>
  * ```
  */
-export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = ({
+export const BreadcrumbsProvider: FC<PropsWithChildren<BreadcrumbsProviderProps>> = ({
   children,
   onChange,
 }) => {
@@ -119,10 +118,9 @@ export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = 
 
 export interface InnerBreadcrumbProps {
   breadcrumb: BreadcrumbProps;
-  children: React.ReactNode;
 }
 
-export const InnerBreadcrumb: FunctionComponent<InnerBreadcrumbProps> = ({
+export const InnerBreadcrumb: FC<PropsWithChildren<InnerBreadcrumbProps>> = ({
   breadcrumb,
   children,
 }) => {

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, FC, PropsWithChildren } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
 
 export const UptimeDataViewContext = createContext({} as DataView);
 
-export const UptimeDataViewContextProvider: React.FC<{
-  children: React.ReactNode;
+export const UptimeDataViewContextProvider: FC<PropsWithChildren<{
   dataViews: DataViewsPublicPluginStart;
-}> = ({ children, dataViews }) => {
+}>> = ({ children, dataViews }) => {
   const { settings, data: indexStatus } = useHasData();
 
   const heartbeatIndices = settings?.heartbeatIndices || '';

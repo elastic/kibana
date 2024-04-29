@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 const Panel = styled(EuiPanel)`
@@ -18,8 +18,8 @@ export interface EmbeddableProps {
   children: React.ReactNode;
 }
 
-export const Embeddable = React.memo<EmbeddableProps>(
-  ({ children }: { children?: React.ReactNode }) => (
+export const Embeddable = React.memo<PropsWithChildren<EmbeddableProps>>(
+  ({ children }) => (
     <section className="siemEmbeddable" data-test-subj="siemEmbeddable">
       <Panel paddingSize="none" hasBorder>
         {children}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
@@ -41,7 +41,7 @@ describe('useExecutionEvents', () => {
         },
       },
     });
-    const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+    const wrapper: FC<PropsWithChildren> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;

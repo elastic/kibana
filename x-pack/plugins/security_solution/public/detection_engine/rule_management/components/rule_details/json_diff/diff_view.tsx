@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import classNames from 'classnames';
 import { css, Global } from '@emotion/react';
 import {
@@ -145,7 +145,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   return diffFile;
 };
 
-const CustomStyles: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const CustomStyles: FC<PropsWithChildren> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
   const customCss = css`

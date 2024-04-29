@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface ContextProps {
@@ -17,11 +17,10 @@ export const TriggerActionsContext = React.createContext<ContextProps>({
 });
 
 interface Props {
-  children: React.ReactNode;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
 }
 
-export const TriggersActionsProvider: React.FC<Props> = (props) => {
+export const TriggersActionsProvider: FC<PropsWithChildren<Props>> = (props) => {
   return (
     <TriggerActionsContext.Provider
       value={{

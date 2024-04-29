@@ -6,7 +6,7 @@
  */
 
 import { euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
@@ -93,7 +93,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  * It is a simplified version of TestProvidersComponent.
  * To reuse TestProvidersComponent here, we need to remove all references to jest from mocks.
  */
-export const StorybookProviders: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export const StorybookProviders: FC<PropsWithChildren> = ({ children }) => {
   const store = createMockStore();
 
   return (

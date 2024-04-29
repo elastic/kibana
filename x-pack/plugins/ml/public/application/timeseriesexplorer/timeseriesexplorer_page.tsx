@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -21,13 +21,12 @@ import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 
 interface TimeSeriesExplorerPageProps {
-  children: React.ReactNode;
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
+export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPageProps>> = ({
   children,
   dateFormatTz,
   resizeRef,

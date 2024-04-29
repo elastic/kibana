@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { Store } from 'redux';
 import { createStore as createReduxStore, applyMiddleware } from 'redux';
 
@@ -23,12 +23,11 @@ export const createRealStore = (): Store => {
   return store;
 };
 
-export const MountWithReduxProvider: React.FC<{
+export const MountWithReduxProvider: FC<PropsWithChildren<{
   state?: AppState;
   useRealStore?: boolean;
   store?: Store;
-  children: React.ReactNode;
-}> = ({ children, state, store, useRealStore }) => {
+}>> = ({ children, state, store, useRealStore }) => {
   const newStore = useRealStore
     ? createRealStore()
     : {
