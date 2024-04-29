@@ -16,7 +16,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,7 @@ import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
+import { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
@@ -32,13 +33,15 @@ interface TakeActionProps {
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
   isCreateDetectionRuleDisabled?: boolean;
+  startServices: CloudSecurityPostureStartServices;
 }
 
 export const showCreateDetectionRuleSuccessToast = (
-  notifications: NotificationsStart,
+  cloudSecurityStartServices: CloudSecurityPostureStartServices,
   http: HttpSetup,
   ruleResponse: RuleResponse
 ) => {
+  const { notifications, ...startServices } = cloudSecurityStartServices;
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
@@ -60,7 +63,8 @@ export const showCreateDetectionRuleSuccessToast = (
             defaultMessage="Add rule actions to get notified when alerts are generated."
           />
         </EuiText>
-      </div>
+      </div>,
+      startServices
     ),
     text: toMountPoint(
       <div>
@@ -78,19 +82,21 @@ export const showCreateDetectionRuleSuccessToast = (
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </div>,
+      startServices
     ),
   });
 };
 
 export const showChangeBenchmarkRuleStatesSuccessToast = (
-  notifications: NotificationsStart,
+  clousSecurityStartServices: CloudSecurityPostureStartServices,
   isBenchmarkRuleMuted: boolean,
   data: {
     numberOfRules: number;
     numberOfDetectionRules: number;
   }
 ) => {
+  const { notifications, ...startServices } = clousSecurityStartServices;
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
@@ -111,7 +117,8 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
             />
           )}
         </strong>
-      </EuiText>
+      </EuiText>,
+      startServices
     ),
     text: toMountPoint(
       <div>
@@ -145,7 +152,8 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
             )}
           </>
         )}
-      </div>
+      </div>,
+      startServices
     ),
   });
 };
@@ -159,6 +167,7 @@ export const TakeAction = ({
   enableBenchmarkRuleFn,
   disableBenchmarkRuleFn,
   isCreateDetectionRuleDisabled = false,
+  startServices,
 }: TakeActionProps) => {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -193,10 +202,10 @@ export const TakeAction = ({
         createRuleFn={createRuleFn}
         setIsLoading={setIsLoading}
         closePopover={closePopover}
-        notifications={notifications}
         http={http}
         queryClient={queryClient}
         isCreateDetectionRuleDisabled={isCreateDetectionRuleDisabled}
+        startServices={startServices}
       />
     );
   if (enableBenchmarkRuleFn)
@@ -243,18 +252,18 @@ const CreateDetectionRule = ({
   createRuleFn,
   setIsLoading,
   closePopover,
-  notifications,
   http,
   queryClient,
   isCreateDetectionRuleDisabled = false,
+  startServices,
 }: {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   setIsLoading: (isLoading: boolean) => void;
   closePopover: () => void;
-  notifications: NotificationsStart;
   http: HttpSetup;
   queryClient: QueryClient;
   isCreateDetectionRuleDisabled: boolean;
+  startServices: CloudSecurityPostureStartServices;
 }) => {
   return (
     <EuiContextMenuItem
@@ -265,7 +274,7 @@ const CreateDetectionRule = ({
         setIsLoading(true);
         const ruleResponse = await createRuleFn(http);
         setIsLoading(false);
-        showCreateDetectionRuleSuccessToast(notifications, http, ruleResponse);
+        showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
         // Triggering a refetch of rules and alerts to update the UI
         queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
         queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
@@ -284,7 +293,6 @@ const EnableBenchmarkRule = ({
   enableBenchmarkRuleFn,
   setIsLoading,
   closePopover,
-  notifications,
 }: {
   enableBenchmarkRuleFn: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
@@ -313,7 +321,6 @@ const DisableBenchmarkRule = ({
   disableBenchmarkRuleFn,
   setIsLoading,
   closePopover,
-  notifications,
 }: {
   disableBenchmarkRuleFn: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
