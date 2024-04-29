@@ -24,9 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       y: number;
     };
 
-    const DEFAULT_WINDOW_SIZE = [1400, 900];
+    const DEFAULT_WINDOW_SIZE = [1400, 950];
     const VERTICAL_16_9 = 16 / 9;
-    const outerWorkspaceDimensions = { width: 690, height: 400 };
+    const outerWorkspaceDimensions = { width: 690, height: 420 };
     let UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
 
     before(async () => {
@@ -45,12 +45,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (width !== DEFAULT_WINDOW_SIZE[0] || height !== DEFAULT_WINDOW_SIZE[1]) {
         const { width: containerWidth, height: containerHeight } =
           await PageObjects.lens.getWorkspaceVisContainerDimensions();
+
+        const newRatio = pxToN(containerWidth) / pxToN(containerHeight);
         log.debug(
-          `Detected Chrome bug, adjusting aspect ratio from ${UNCONSTRAINED} to ${
-            pxToN(containerWidth) / pxToN(containerHeight)
-          }`
+          `Detected Chrome bug, adjusting aspect ratio from ${UNCONSTRAINED} to ${newRatio}`
         );
-        UNCONSTRAINED = pxToN(containerWidth) / pxToN(containerHeight);
+        UNCONSTRAINED = newRatio;
       }
 
       await PageObjects.lens.configureDimension({
@@ -226,13 +226,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'ip',
       });
 
-      await assertWorkspaceDimensions('600px', '400px');
+      await assertWorkspaceDimensions('600px', '430px');
 
       await PageObjects.lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
       await testSubjects.setValue('lnsMetric_max_cols', '2');
       await PageObjects.lens.closeDimensionEditor();
 
-      await assertWorkspaceDimensions('400px', '400px');
+      await assertWorkspaceDimensions('430px', '430px');
     });
 
     it('gauge size (absolute pixels) - horizontal', async () => {
@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and the chart is forced to shrink.
       //
       // this is a good thing because it makes this a test case for that scenario
-      await assertWorkspaceDimensions('400px', '400px');
+      await assertWorkspaceDimensions('430px', '430px');
     });
 
     it('gauge size (absolute pixels) - arc', async () => {
@@ -267,14 +267,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
       });
-      await assertWorkspaceDimensions('600px', '400px');
+      await assertWorkspaceDimensions('600px', '430px');
     });
 
     it('gauge size (absolute pixels) - circle', async () => {
       await retry.try(async () => {
         await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
       });
-      await assertWorkspaceDimensions('600px', '400px');
+      await assertWorkspaceDimensions('600px', '430px');
     });
 
     it('XY chart size', async () => {
