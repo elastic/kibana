@@ -105,7 +105,7 @@ export const useTopNavLinks = ({
       isTextBased
     );
 
-      const { locator, notifications } = services;
+    const { locator } = services;
     const appState = state.appState.getState();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
@@ -219,7 +219,7 @@ export const useTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
-        toasts: notifications.toasts,
+        toasts: services.notifications.toasts,
       });
     },
   };
@@ -231,17 +231,17 @@ export const useTopNavLinks = ({
     }),
     description: linkCopied
       ? i18n.translate('discover.localMenu.shareSearchDescriptionCopied', {
-          defaultMessage: 'Link copied to clipboard',
+          defaultMessage: 'Permalink copied to clipboard',
         })
       : i18n.translate('discover.localMenu.shareSearchDescription', {
-          defaultMessage: 'Copy link to clipboard',
+          defaultMessage: 'Copy permalink to clipboard',
         }),
     tooltip: linkCopied
       ? i18n.translate('discover.localMenu.shareSearchDescriptionCopied', {
-          defaultMessage: 'Link copied to clipboard',
+          defaultMessage: 'Permalink copied to clipboard',
         })
       : i18n.translate('discover.localMenu.shareSearchDescription', {
-          defaultMessage: 'Copy link to clipboard',
+          defaultMessage: 'Copy permalink to clipboard',
         }),
     iconType: linkCopied ? 'check' : 'link',
     emphasize: true,
@@ -249,6 +249,39 @@ export const useTopNavLinks = ({
     testId: 'shareTopNavButtonSm',
     run: async () => {
       if (!services.share) return;
+      const audioContext = new AudioContext();
+      const gainNode = audioContext.createGain();
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 30;
+      oscillator.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.005);
+      const channels = 1;
+      const sampleRate = audioContext.sampleRate;
+      const frameCount = sampleRate * 3;
+      const arrayBuffer = audioContext.createBuffer(channels, frameCount, sampleRate);
+
+      // getChannelData allows us to access and edit the buffer data and change.
+      const bufferData = arrayBuffer.getChannelData(0);
+      for (let i = 0; i < frameCount; i++) {
+        // if the sample lies between 0 and 0.4 seconds, or 0.6 and 1 second, we want it to be on.
+        if (
+          (i / sampleRate > 0 && i / sampleRate < 0.4) ||
+          (i / sampleRate > 0.6 && i / sampleRate < 1.0)
+        ) {
+          bufferData[i] = 0.25;
+        }
+      }
+
+      const ringerLFOBuffer = arrayBuffer;
+      const ringerLFOSource = audioContext.createBufferSource();
+      ringerLFOSource.buffer = ringerLFOBuffer;
+      ringerLFOSource.loop = true;
+      // connect the ringerLFOSource to the gain Node audio param
+      ringerLFOSource.connect(gainNode.gain);
+      ringerLFOSource.start(0);
+
       getShareLink().then(async (res) => {
         let link = '';
         if (!services.share) return;
@@ -264,6 +297,8 @@ export const useTopNavLinks = ({
           copyToClipboard(res.shareableUrl);
         }
         setLinkCopied(true);
+        // play a click sound generated with web audio api
+
         setTimeout(() => setLinkCopied(false), 2000);
       });
     },
