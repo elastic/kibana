@@ -74,6 +74,13 @@ export const getClustersQuery = (
   },
 });
 
+const getCloudOrCluster = (finding: CspFinding): string => {
+  if (finding.rule.benchmark.posture_type === 'cspm') {
+    return finding.cloud?.provider ?? '';
+  }
+  return finding.orchestrator?.cluster?.name ?? '';
+};
+
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((clusterBucket) => {
     const latestFindingHit: SearchHit<CspFinding> = clusterBucket.latestFindingTopHit.hits.hits[0];
@@ -84,8 +91,12 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
       assetIdentifierId: clusterBucket.key,
       lastUpdate: latestFindingHit._source['@timestamp'],
       benchmark: latestFindingHit._source.rule.benchmark,
-      cloud: latestFindingHit._source.cloud, // only available on CSPM findings
-      cluster: latestFindingHit._source.orchestrator?.cluster, // only available on KSPM findings
+      cloud:
+        latestFindingHit._source.rule.benchmark.posture_type === 'cspm' &&
+        latestFindingHit._source.cloud, // only available on CSPM findings
+      cluster:
+        latestFindingHit._source.rule.benchmark.posture_type === 'kspm' &&
+        latestFindingHit._source.orchestrator?.cluster, // only available on KSPM findings
     };
 
     // get cluster's stats

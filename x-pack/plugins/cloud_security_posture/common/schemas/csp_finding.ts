@@ -9,7 +9,38 @@
 import type { EcsEvent } from '@elastic/ecs';
 import { CspBenchmarkRuleMetadata } from '../types/latest';
 
-export interface CspFindingBase {
+// export type CspFinding = {
+//   '@timestamp': string;
+//   cluster_id: string;
+//   result: CspFindingResult;
+//   resource: CspFindingResource;
+//   rule: CspBenchmarkRuleMetadata;
+//   host: CspFindingHost;
+//   event: EcsEvent;
+//   agent: CspFindingAgent;
+//   ecs: {
+//     version: string;
+//   };
+// } & (
+//   | {
+//       cloud: CspFindingCloud;
+//       rule: {
+//         benchmark: {
+//           posture_type: 'cspm';
+//         };
+//       };
+//     }
+//   | {
+//       orchestrator: CspFindingOrchestrator;
+//       rule: {
+//         benchmark: {
+//           posture_type: 'kspm';
+//         };
+//       };
+//     }
+// );
+
+export type CspFinding = {
   '@timestamp': string;
   cluster_id: string;
   result: CspFindingResult;
@@ -21,27 +52,33 @@ export interface CspFindingBase {
   ecs: {
     version: string;
   };
+} & (CspFindingCSPM | CspFindingKSPM);
+
+interface CspFindingCSPM {
+  cloud: CspFindingCloud;
+  rule: CspBenchmarkRuleMetadata & {
+    benchmark: {
+      name: string;
+      id: string;
+      version: string;
+      rule_number: string | undefined;
+      posture_type: 'cspm';
+    };
+  };
 }
 
-type CspFindingCSPM = CspFindingBase & {
-  cloud: CspFindingCloud;
-  rule: {
-    benchmark: {
-      posture_type?: 'cspm';
-    };
-  };
-};
-
-type CspFindingKSPM = CspFindingBase & {
+interface CspFindingKSPM {
   orchestrator: CspFindingOrchestrator;
-  rule: {
+  rule: CspBenchmarkRuleMetadata & {
     benchmark: {
-      posture_type?: 'kspm';
+      name: string;
+      id: string;
+      version: string;
+      rule_number: string | undefined;
+      posture_type: 'kspm';
     };
   };
-};
-
-export type CspFinding = CspFindingCSPM | CspFindingKSPM;
+}
 
 export interface CspFindingOrchestrator {
   cluster?: {
