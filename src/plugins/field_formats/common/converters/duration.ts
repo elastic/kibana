@@ -108,24 +108,22 @@ export class DurationFormat extends FieldFormat {
 
 // function to calculate the precision part of the value
 const calculatePrecision = (valueInSeconds: number, unitValue: number, secondsPerUnit: number) => {
-  return Math.floor(unitValue) + (valueInSeconds - unitValue * secondsPerUnit) / secondsPerUnit;
+  const unitValueFloor = Math.floor(unitValue);
+  const precision = (valueInSeconds - unitValueFloor * secondsPerUnit) / secondsPerUnit;
+  return unitValueFloor + precision;
 };
 
 // Array of units is to find the first unit duration value that is not 0
 const units = [
-  { getValue: (dur: moment.Duration) => dur.years(), seconds: 31536000, method: 'asYears' },
+  { seconds: 31536000, method: 'asYears' },
   // Note: 30 days is used as a month in the duration format
-  { getValue: (dur: moment.Duration) => dur.months(), seconds: 2592000, method: 'asMonths' },
-  { getValue: (dur: moment.Duration) => dur.weeks(), seconds: 604800, method: 'asWeeks' },
-  { getValue: (dur: moment.Duration) => dur.days(), seconds: 86400, method: 'asDays' },
-  { getValue: (dur: moment.Duration) => dur.hours(), seconds: 3600, method: 'asHours' },
-  { getValue: (dur: moment.Duration) => dur.minutes(), seconds: 60, method: 'asMinutes' },
-  { getValue: (dur: moment.Duration) => dur.seconds(), seconds: 1, method: 'asSeconds' },
-  {
-    getValue: (dur: moment.Duration) => dur.milliseconds(),
-    seconds: 0.001,
-    method: 'asMilliseconds',
-  },
+  { seconds: 2592000, method: 'asMonths' },
+  { seconds: 604800, method: 'asWeeks' },
+  { seconds: 86400, method: 'asDays' },
+  { seconds: 3600, method: 'asHours' },
+  { seconds: 60, method: 'asMinutes' },
+  { seconds: 1, method: 'asSeconds' },
+  { seconds: 0.001, method: 'asMilliseconds' },
 ];
 
 function formatDurationHumanPrecise(
@@ -145,8 +143,7 @@ function formatDurationHumanPrecise(
   };
 
   for (const unit of units) {
-    // this is the formatted duration value of the unit
-    const unitValue = unit.getValue(duration);
+    const unitValue = valueInSeconds / unit.seconds;
     if (unitValue >= 1 || unit === units[units.length - 1]) {
       // return a value if it's the first iteration where the value > 1, or the last iteration
       // calculate the fractional part of the value based on conversion to seconds

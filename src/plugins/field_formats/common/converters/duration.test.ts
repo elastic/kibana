@@ -217,6 +217,10 @@ describe('Duration Format', () => {
     showSuffix: true,
     fixtures: [
       {
+        input: 0.1,
+        output: '100 milliseconds',
+      },
+      {
         input: 600,
         output: '10 minutes',
       },
@@ -343,6 +347,14 @@ describe('Duration Format', () => {
     useShortSuffix: true,
     fixtures: [
       {
+        input: 0.5,
+        output: '0.50 ms',
+      },
+      {
+        input: -123.5,
+        output: '-123.50 ms',
+      },
+      {
         input: -123,
         output: '-123.00 ms',
       },
@@ -392,6 +404,10 @@ describe('Duration Format', () => {
     showSuffix: true,
     fixtures: [
       {
+        input: 0.5,
+        output: '500.00 milliseconds',
+      },
+      {
         input: 600,
         output: '10.00 minutes',
       },
@@ -427,6 +443,10 @@ describe('Duration Format', () => {
     useShortSuffix: true,
     fixtures: [
       {
+        input: 0.5,
+        output: '30 min',
+      },
+      {
         input: 339,
         output: '2 w',
       },
@@ -440,6 +460,10 @@ describe('Duration Format', () => {
     showSuffix: true,
     useShortSuffix: true,
     fixtures: [
+      {
+        input: 0.1,
+        output: '6.00 min',
+      },
       {
         input: 12,
         output: '12.00 h',
@@ -471,6 +495,14 @@ describe('Duration Format', () => {
     useShortSuffix: false,
     fixtures: [
       {
+        input: 0.1,
+        output: '6.00 seconds',
+      },
+      {
+        input: 100.1,
+        output: '1.67 hours',
+      },
+      {
         input: 10750,
         output: '1.07 weeks',
       },
@@ -485,6 +517,10 @@ describe('Duration Format', () => {
     useShortSuffix: true,
     includeSpaceWithSuffix: false,
     fixtures: [
+      {
+        input: 0.5,
+        output: '1ms',
+      },
       {
         input: -123,
         output: '-123ms',
