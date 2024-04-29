@@ -9,10 +9,10 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import type { AfterKeys } from '../../../../../common/entity_analytics/risk_engine';
-import { riskScoreEntityCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_entity_calculation/request_schema';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { CalculateAndPersistScoresResponse, EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
@@ -39,7 +39,9 @@ export const riskScoreEntityCalculationRoute = (
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidation(riskScoreEntityCalculationRequestSchema) },
+          request: {
+            body: buildRouteValidationWithZod(RiskScoresEntityCalculationRequest),
+          },
         },
       },
       withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
