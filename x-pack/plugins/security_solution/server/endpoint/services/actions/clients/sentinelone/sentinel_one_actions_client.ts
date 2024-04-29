@@ -32,8 +32,10 @@ import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
+  GetFileInfoResponse,
   ProcessPendingActionsMethodOptions,
-} from '../../..';
+  GetFileDownloadMethodResponse,
+} from '../lib/types';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -461,6 +463,61 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         SentinelOneGetFileRequestMeta
       >(reqIndexOptions)
     ).actionDetails;
+  }
+
+  async getFileInfo(actionId: string, agentId: string): Promise<GetFileInfoResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const [_, responseDocs] = await Promise.all([
+      this.ensureValidActionId(actionId),
+      this.fetchActionResponseEsDocs(actionId, [agentId]),
+    ]);
+    const agentResponse = responseDocs[agentId];
+
+    if (!agentResponse) {
+      throw new ResponseActionsClientError(
+        `File not found for action id [${actionId}] and agent id [${actionId}]`,
+        404
+      );
+    }
+
+    if (agentResponse.EndpointActions.data.command !== 'get-file') {
+      throw new ResponseActionsClientError(
+        `File information not supported for response action [${agentResponse.EndpointActions.data.command}]`,
+        400
+      );
+    }
+
+    // FIXME:PT working here. Need to finish implementation to return normalized data for get file info
+  }
+
+  async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const [_, responseDocs] = await Promise.all([
+      this.ensureValidActionId(actionId),
+      this.fetchActionResponseEsDocs(actionId, [agentId]),
+    ]);
+
+    if (actionDetails.command !== 'get-file') {
+      throw new ResponseActionsClientError(
+        `Action id [${actionId}] for command [${actionDetails.command}] does not support file downloads`
+      );
+    }
   }
 
   async processPendingActions({
