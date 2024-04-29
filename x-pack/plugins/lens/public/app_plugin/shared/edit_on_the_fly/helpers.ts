@@ -6,7 +6,7 @@
  */
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getESQLQueryColumns } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -65,7 +65,12 @@ export const getSuggestions = async (
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
-    const columns = await getQueryColumns(query, deps, abortController);
+    // const columns = await getQueryColumns(query, deps, abortController);
+    const columns = await getESQLQueryColumns({
+      esqlQuery: 'esql' in query ? query.esql : '',
+      search: deps.data.search,
+      signal: abortController?.signal,
+    });
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
