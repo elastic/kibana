@@ -693,13 +693,5 @@ export function MachineLearningJobWizardCommonProvider(
         )}`
       );
     },
-
-    async cloneJob() {
-      await testSubjects.click('euiCollapsedItemActionsButton');
-      await testSubjects.click('mlActionButtonCloneJob');
-      await testSubjects.existOrFail('mlPageJobWizardHeader-single_metric', {
-        timeout: 3_000,
-      });
-    },
   };
 }
