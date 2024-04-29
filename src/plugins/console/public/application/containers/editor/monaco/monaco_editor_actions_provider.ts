@@ -34,6 +34,7 @@ import {
   tokenizeRequestUrl,
   getDocumentationLinkFromAutocompleteContext,
 } from './utils';
+import { hasComments } from '../../../../lib/utils';
 
 const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
 
@@ -272,32 +273,47 @@ export class MonacoEditorActionsProvider {
     const requests = await this.getRequests();
     const { range } = await this.getSelectedParsedRequestsAndRange();
 
-    console.log(range);
-
     if (requests.length < 1) {
       return;
     }
 
+    const newRequestsText: string[] = [];
+
     requests.forEach((request) => {
+      if (newRequestsText.length > 0) {
+        newRequestsText.push(`\n`);
+      }
+      newRequestsText.push(request.method + ' ' + request.url);
+
       if (request.data && request.data.length > 0) {
-        let indent = request.data.length === 1; // unindent multi docs by default
-        let formattedData = formatRequestBodyDoc(request.data, indent);
-        if (!formattedData.changed) {
-          // toggle.
-          indent = !indent;
-          formattedData = formatRequestBodyDoc(request.data, indent);
+        // TODO: The parsed request's data property is not split into multiple strings representing lines
+        const requestData = request.data[0].split(`\n`);
+
+        if (requestData.some((doc) => hasComments(doc))) {
+          /**
+           * Comments require different approach for indentation and do not have condensed format
+           * We need to delegate indentation logic to coreEditor since it has access to session and other methods used for formatting and indenting the comments
+           */
+          // TODO: Handle indentation with comments
+        } else {
+          let indent = requestData.length === 1; // Unindent multi docs by default
+          let formattedData = formatRequestBodyDoc(requestData, indent);
+          if (!formattedData.changed) {
+            // toggle
+            indent = !indent;
+            formattedData = formatRequestBodyDoc(requestData, indent);
+          }
+
+          newRequestsText.push(...formattedData.data);
         }
-
-        const firstLine = request.data + ' ' + request.url;
-        const newRequest = [firstLine, ...formattedData.data];
-
-        this.editor.executeEdits('', [
-          {
-            range,
-            text: newRequest.join('/n'),
-          },
-        ]);
       }
     });
+
+    this.editor.executeEdits('', [
+      {
+        range,
+        text: newRequestsText.join(`\n`),
+      },
+    ]);
   }
 }
