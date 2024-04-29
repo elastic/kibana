@@ -52,12 +52,14 @@ export const editLegacyEmbeddable = async (embeddable: LegacyCompatibleEmbeddabl
       serializeState: () => ({
         rawState: getExplicitInput(embeddable),
       }),
-      getEditorAppTarget: () =>
-        Promise.resolve({
-          editPath: embeddable.getOutput().editPath,
-          editApp: embeddable.getOutput().editApp,
-          editUrl: embeddable.getOutput().editUrl,
-        }),
+      getEditorAppTarget: () => {
+        const output = embeddable.getOutput();
+        return Promise.resolve({
+          editPath: output.editPath,
+          editApp: output.editApp,
+          editUrl: output.editUrl,
+        });
+      },
     }
   );
 };
