@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLSearchReponse } from '@kbn/es-types';
@@ -32,7 +31,7 @@ export async function getESQLQueryColumns({
       },
       {
         abortSignal: signal,
-        strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+        strategy: 'esql_async',
       }
     )
   );

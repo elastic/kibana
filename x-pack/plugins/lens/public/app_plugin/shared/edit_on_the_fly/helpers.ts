@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+  getESQLAdHocDataview,
+  getESQLQueryColumns,
+} from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLAdHocDataview, getESQLQueryColumns } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
@@ -42,6 +46,7 @@ export const getSuggestions = async (
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
+
     const columns = await getESQLQueryColumns({
       esqlQuery: 'esql' in query ? query.esql : '',
       search: deps.data.search,

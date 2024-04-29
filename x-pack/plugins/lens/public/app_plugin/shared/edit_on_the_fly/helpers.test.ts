@@ -24,9 +24,9 @@ jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
 }));
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryColumns: jest.fn(() => {
-    return [
+jest.mock('@kbn/esql-utils', () => {
+  return {
+    getESQLQueryColumns: jest.fn().mockResolvedValue(() => [
       {
         name: '@timestamp',
         id: '@timestamp',
@@ -48,9 +48,10 @@ jest.mock('@kbn/esql-utils', () => ({
           type: 'number',
         },
       },
-    ];
-  }),
-}));
+    ]),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
+  };
+});
 
 describe('getSuggestions', () => {
   const query = {
