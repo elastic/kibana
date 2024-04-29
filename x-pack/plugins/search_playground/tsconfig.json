@@ -35,6 +35,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
+    "@kbn/doc-links",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin"
   ],
