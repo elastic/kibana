@@ -77,7 +77,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.title"
-              defaultMessage="Edit Context"
+              defaultMessage="Edit context"
             />
           </h2>
         </EuiTitle>
@@ -86,7 +86,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.description"
-              defaultMessage="Documents retrieved and selected fields will be used to build the context."
+              defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
           </p>
         </EuiText>
@@ -100,7 +100,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                   prepend={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Retrieved Documents',
+                      defaultMessage: 'Retrieved documents',
                     }
                   )}
                   options={[
@@ -125,7 +125,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                 <h5>
                   <FormattedMessage
                     id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected Fields"
+                    defaultMessage="Selected fields"
                   />
                 </h5>
               </EuiText>
