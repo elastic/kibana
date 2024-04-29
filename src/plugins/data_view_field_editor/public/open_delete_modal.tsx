@@ -114,7 +114,7 @@ export const getFieldDeleteModalOpener =
             closeModal={closeModal}
             confirmDelete={onConfirmDelete}
           />,
-          { theme$: core.theme.theme$ }
+          core
         )
       );
 
