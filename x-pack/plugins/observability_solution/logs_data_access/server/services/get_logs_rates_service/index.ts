@@ -79,12 +79,14 @@ export function createGetLogsRatesService() {
       const logErrorBuckets = bucket.logErrors
         .buckets as estypes.AggregationsStringRareTermsBucketKeys[];
 
-      const logErrorRate = (logErrorBuckets[0]?.doc_count ?? 0) / bucket.doc_count;
+      const logErrorCount = logErrorBuckets[0]?.doc_count;
+      const logErrorRate = (logErrorCount ?? 0) / bucket.doc_count;
+
       return {
         ...acc,
         [bucket.key]: {
           logRate,
-          logErrorRate,
+          logErrorRate: logErrorCount ? logErrorRate : null,
         },
       };
     }, {});
