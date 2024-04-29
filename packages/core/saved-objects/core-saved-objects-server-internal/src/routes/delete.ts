@@ -41,25 +41,25 @@ export const registerDeleteRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'delete',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { force } = req.query;
+      const { type, id } = request.params;
+      const { force } = request.query;
       const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsDelete({ request, types: [type] }).catch(() => {});
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, typeRegistry);
       }
       const client = getClient();
       const result = await client.delete(type, id, { force });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

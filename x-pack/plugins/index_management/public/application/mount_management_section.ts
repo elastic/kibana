@@ -11,7 +11,6 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
