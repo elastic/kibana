@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useRef, useState } from 'react';
@@ -15,13 +16,13 @@ import {
   PopoverAnchorPosition,
   type EuiPopoverProps,
 } from '@elastic/eui';
-import { useHoverActions } from '../../../hooks/use_hover_actions';
+import { useUIFieldActions } from '../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   field: string;
-  value: string;
-  title?: string;
+  value: unknown;
+  title?: unknown;
   anchorPosition?: PopoverAnchorPosition;
   display?: EuiPopoverProps['display'];
 }
@@ -36,7 +37,7 @@ export const HoverActionPopover = ({
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const hoverActions = useHoverActions({ field, value });
+  const uiFieldActions = useUIFieldActions({ field, value });
 
   // The timeout hack is required because we are using a Popover which ideally should be used with a mouseclick,
   // but we are using it as a Tooltip. Which means we now need to manually handle the open and close
@@ -54,11 +55,12 @@ export const HoverActionPopover = ({
   };
 
   return (
-    <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <EuiPopover
         button={children}
         isOpen={isPopoverOpen}
         anchorPosition={anchorPosition}
+        closePopover={closePopoverPlaceholder}
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display={display}
@@ -69,19 +71,21 @@ export const HoverActionPopover = ({
           </EuiPopoverTitle>
         )}
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-          {hoverActions.map((action) => (
-            <EuiToolTip content={action.tooltipContent} key={action.id}>
+          {uiFieldActions.map((action) => (
+            <EuiToolTip content={action.label} key={action.id}>
               <EuiButtonIcon
-                data-test-subj="logsExplorerHoverActionPopoverButton"
+                data-test-subj="unifiedDocViewLogsOverviewHoverActionPopoverButton"
                 size="xs"
                 iconType={action.iconType}
-                aria-label={action.tooltipContent as string}
-                onClick={() => action.onClick()}
+                aria-label={action.label}
+                onClick={action.onClick}
               />
             </EuiToolTip>
           ))}
         </EuiFlexGroup>
       </EuiPopover>
-    </div>
+    </span>
   );
 };
+
+const closePopoverPlaceholder = () => {};
