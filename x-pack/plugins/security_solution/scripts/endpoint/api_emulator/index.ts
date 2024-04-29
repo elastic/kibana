@@ -7,6 +7,7 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { getSentinelOneEmulator } from './emulators/sentinelone';
 import { handleProcessInterruptions } from '../common/nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { EmulatorServer } from './lib/emulator_server';
@@ -27,8 +28,11 @@ export const cli = () => {
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
+          port: 0,
         },
         help: `
+        --port              The port number where the server should listen on
+                            (Default is 0 - which means an available port is assigned randomly)
         --username          User name to be used for auth against elasticsearch and
                             kibana (Default: elastic).
                             **IMPORTANT:** if 'asSuperuser' option is not used, then the
@@ -56,15 +60,18 @@ const cliRunner: RunFn = async (cliContext) => {
     fleetServerUrl: cliContext.flags.fleetServer as string | undefined,
     asSuperuser: cliContext.flags.asSuperuser as boolean,
     log: cliContext.log,
+    port: Number(cliContext.flags.port as string),
   };
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
 
-  const emulator = new EmulatorServer({ logger: cliOptions.log });
+  const emulator = new EmulatorServer({ logger: cliOptions.log, port: cliOptions.port });
   let stopping: Promise<void> | undefined;
 
   await handleProcessInterruptions(
     async () => {
+      await emulator.register(getSentinelOneEmulator());
+
       await emulator.start();
       await emulator.stopped;
     },

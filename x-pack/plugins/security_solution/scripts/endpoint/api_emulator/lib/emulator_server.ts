@@ -7,6 +7,10 @@
 
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type {
+  EmulatorServerPlugin,
+  EmulatorServerPluginRegisterOptions,
+} from './emulator_server.types';
 import type { DeferredPromiseInterface } from '../../common/utils';
 import { getDeferredPromise, prefixedOutputLogger } from '../../common/utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -14,12 +18,14 @@ import { createToolingLogger } from '../../../../common/endpoint/data_loaders/ut
 interface EmulatorServerOptions {
   logger?: ToolingLog;
   logPrefix?: string;
+  port?: number;
 }
 
 export class EmulatorServer {
-  protected server: Hapi.Server | undefined = undefined;
+  protected readonly server: Hapi.Server;
   protected log: ToolingLog;
-  private stoppedDeferred: DeferredPromiseInterface = getDeferredPromise();
+  private stoppedDeferred: DeferredPromiseInterface;
+  private wasStarted: boolean = false;
 
   constructor(protected readonly options: EmulatorServerOptions = {}) {
     this.log = prefixedOutputLogger(
@@ -27,39 +33,90 @@ export class EmulatorServer {
       options.logger ?? createToolingLogger()
     );
 
+    this.server = Hapi.server({
+      port: this.options.port ?? 0,
+    });
+    this.stoppedDeferred = getDeferredPromise();
     this.stoppedDeferred.resolve();
+
+    this.server.events.on('route', (route) => {
+      this.log.info(
+        `added route: [${route.realm.plugin ?? 'CORE'}] ${route.method.toUpperCase()} ${route.path}`
+      );
+    });
+
+    this.registerInternalRoutes();
     this.log.verbose(`Instance created`);
+  }
+
+  protected registerInternalRoutes() {
+    this.server.route({
+      method: 'GET',
+      path: '/_status',
+      handler: async () => ({ status: 'ok' }),
+    });
   }
 
   /**
    * Returns a promise that resolves when the server is stopped
    */
   public get stopped(): Promise<void> {
+    if (!this.wasStarted) {
+      this.log.warning(`Can not access 'stopped' promise. Server not started`);
+      return Promise.resolve();
+    }
+
     return this.stoppedDeferred.promise;
   }
 
-  public registerRoute() {}
+  public async register({ register, prefix, ...options }: EmulatorServerPlugin) {
+    await this.server.register(
+      {
+        register(server) {
+          const scopedServer: EmulatorServerPluginRegisterOptions = {
+            router: {
+              route: (...args) => {
+                return server.route(...args);
+              },
+            },
+          };
+
+          return register(scopedServer);
+        },
+        ...options,
+      },
+      {
+        routes: {
+          prefix: prefix || `/${options.name}`,
+        },
+      }
+    );
+  }
+
+  public route() {
+    // TODO:PT implememnt
+  }
 
   public async start() {
-    if (!this.server) {
-      this.server = Hapi.server();
-      this.stoppedDeferred = getDeferredPromise();
-      await this.server.start();
-
-      this.server.events.on('stop', () => {
-        this.log.verbose(`Hapi server was stopped!`);
-        this.stoppedDeferred.resolve();
-      });
-
-      this.log.debug(`Server started and available at: ${this.server.info.uri}`);
+    if (this.wasStarted) {
+      this.log.warning(`Can not start server - it already has been started and is running`);
     }
+
+    this.stoppedDeferred = getDeferredPromise();
+    await this.server.start();
+    this.wasStarted = true;
+
+    this.server.events.once('stop', () => {
+      this.log.verbose(`Hapi server was stopped!`);
+      this.wasStarted = false;
+      this.stoppedDeferred.resolve();
+    });
+
+    this.log.debug(`Server started and available at: ${this.server.info.uri}`);
   }
 
   public async stop() {
-    if (this.server) {
-      this.log.debug(`Stopping Hapi server: ${this.server.info.uri}`);
-      await this.server.stop();
-      this.server = undefined;
-    }
+    this.log.debug(`Stopping Hapi server: ${this.server.info.uri}`);
+    await this.server.stop();
   }
 }
