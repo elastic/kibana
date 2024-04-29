@@ -26,8 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const DEFAULT_WINDOW_SIZE = [1400, 900];
     const VERTICAL_16_9 = 16 / 9;
-    // Assume the Chrome bug is present to start with
-    let UNCONSTRAINED: number = 706 / 400;
+    const outerWorkspaceDimensions = { width: 690, height: 400 };
+    let UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
 
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
