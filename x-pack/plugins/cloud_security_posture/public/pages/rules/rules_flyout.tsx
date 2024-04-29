@@ -72,7 +72,7 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
     getFindingsDetectionRuleSearchTags(rule.metadata)
   );
   const isRuleMuted = rule?.state === 'muted';
-  const { notifications } = useKibana().services;
+  const startServices = useKibana().services;
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
@@ -83,8 +83,8 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       };
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
-      await refetchRulesStates();
-      await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+      refetchRulesStates();
+      showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
         numberOfRules: 1,
         numberOfDetectionRules: rulesData?.total || 0,
       });
@@ -138,12 +138,14 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
                 enableBenchmarkRuleFn={switchRuleStates}
                 createRuleFn={createMisconfigurationRuleFn}
                 isCreateDetectionRuleDisabled={true}
+                startServices={startServices}
               />
             ) : (
               <TakeAction
                 disableBenchmarkRuleFn={switchRuleStates}
                 createRuleFn={createMisconfigurationRuleFn}
                 isCreateDetectionRuleDisabled={false}
+                startServices={startServices}
               />
             )}
           </EuiFlexItem>

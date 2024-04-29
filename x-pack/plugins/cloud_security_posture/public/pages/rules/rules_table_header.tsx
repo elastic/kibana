@@ -254,7 +254,7 @@ const CurrentPageOfTotal = ({
     { match: 'any' }
   );
 
-  const { notifications } = useKibana().services;
+  const startServices = useKibana().services;
 
   const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {
@@ -269,9 +269,9 @@ const CurrentPageOfTotal = ({
     // Only do the API Call IF there are no undefined value for rule number in the selected rules
     if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
       await postRequestChangeRulesState(state, bulkSelectedRules);
-      await refetchRulesStates();
-      await setIsPopoverOpen(false);
-      await showChangeBenchmarkRuleStatesSuccessToast(notifications, state !== 'mute', {
+      refetchRulesStates();
+      setIsPopoverOpen(false);
+      showChangeBenchmarkRuleStatesSuccessToast(startServices, state !== 'mute', {
         numberOfRules: bulkSelectedRules.length,
         numberOfDetectionRules: rulesData?.total || 0,
       });

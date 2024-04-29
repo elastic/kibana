@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
@@ -29,6 +29,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { CloudSecurityPostureStartServices } from '../../types';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -61,8 +62,8 @@ type GetColumnProps = Pick<
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
     selectedRulesArray: CspBenchmarkRulesWithStates[]
   ) => boolean;
-  notifications: NotificationsStart;
   http: HttpSetup;
+  startServices: CloudSecurityPostureStartServices;
 };
 
 export const RulesTable = ({
@@ -132,7 +133,7 @@ export const RulesTable = ({
     return true;
   };
 
-  const { http, notifications } = useKibana<CoreStart>().services;
+  const { http, ...startServices } = useKibana<CoreStart>().services;
   useEffect(() => {
     if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
       setIsAllRulesSelectedThisPage(true);
@@ -151,8 +152,8 @@ export const RulesTable = ({
         isAllRulesSelectedThisPage,
         isCurrentPageRulesASubset,
         onRuleClick,
-        notifications,
         http,
+        startServices,
       }),
     [
       refetchRulesStates,
@@ -162,8 +163,8 @@ export const RulesTable = ({
       items,
       isAllRulesSelectedThisPage,
       onRuleClick,
-      notifications,
       http,
+      startServices,
     ]
   );
 
@@ -194,8 +195,8 @@ const getColumns = ({
   isAllRulesSelectedThisPage,
   isCurrentPageRulesASubset,
   onRuleClick,
-  notifications,
   http,
+  startServices,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
@@ -203,7 +204,7 @@ const getColumns = ({
       <EuiCheckbox
         id={RULES_ROW_SELECT_ALL_CURRENT_PAGE}
         checked={isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage}
-        onChange={(e) => {
+        onChange={(_e) => {
           const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
             setSelectedRules(uniqueSelectedRules);
@@ -227,7 +228,7 @@ const getColumns = ({
     ),
     width: '40px',
     sortable: false,
-    render: (rules, item: CspBenchmarkRulesWithStates) => {
+    render: (_rules, item: CspBenchmarkRulesWithStates) => {
       return (
         <EuiCheckbox
           checked={selectedRules.some(
@@ -300,7 +301,7 @@ const getColumns = ({
     align: 'right',
     width: '100px',
     truncateText: true,
-    render: (name, rule: CspBenchmarkRulesWithStates) => {
+    render: (_name, rule: CspBenchmarkRulesWithStates) => {
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
@@ -320,9 +321,9 @@ const getColumns = ({
               http
             )
           ).total;
-          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
-          await refetchRulesStates();
-          await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+          postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
+          refetchRulesStates();
+          showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
             numberOfRules: 1,
             numberOfDetectionRules: detectionRuleCount || 0,
           });
