@@ -498,7 +498,7 @@ export function getUiSettings(
         defaultMessage: 'Whether the filters should have a global state (be pinned) by default',
       }),
       schema: schema.boolean(),
-      requiresPageReload: true
+      requiresPageReload: true,
     },
     [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: {
       name: i18n.translate('data.advancedSettings.suggestFilterValuesTitle', {
@@ -511,7 +511,7 @@ export function getUiSettings(
           'Set this property to false to prevent the filter editor from suggesting values for fields.',
       }),
       schema: schema.boolean(),
-      requiresPageReload: true
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
       name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
