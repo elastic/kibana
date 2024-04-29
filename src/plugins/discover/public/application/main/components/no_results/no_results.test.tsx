@@ -35,6 +35,8 @@ jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   },
 }));
 
+const services = createDiscoverServicesMock();
+
 function findSubjects(component: ReactWrapper) {
   return {
     mainMsg: findTestSubject(component!, 'discoverNoResults').exists(),
@@ -58,7 +60,6 @@ async function mountAndFindSubjects(
     'onDisableFilters' | 'data' | 'isTimeBased' | 'stateContainer'
   >
 ) {
-  const services = createDiscoverServicesMock();
   const isTimeBased = props.dataView.isTimeBased();
 
   let component: ReactWrapper;
@@ -133,6 +134,35 @@ describe('DiscoverNoResults', () => {
           }
         `);
         expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(0);
+      });
+
+      test('passes strict_date_optional_time format to range query', async () => {
+        await mountAndFindSubjects({
+          dataView: stubDataView,
+          query: { language: 'lucene', query: '' },
+          filters: [],
+        });
+        expect(services.data.search.search).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            params: expect.objectContaining({
+              body: expect.objectContaining({
+                aggs: expect.objectContaining({
+                  earliest_timestamp: expect.objectContaining({
+                    min: expect.objectContaining({
+                      format: 'strict_date_optional_time',
+                    }),
+                  }),
+                  latest_timestamp: expect.objectContaining({
+                    max: expect.objectContaining({
+                      format: 'strict_date_optional_time',
+                    }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+          expect.any(Object)
+        );
       });
     });
 

@@ -8,6 +8,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useAssistantOverlay } from '.';
+import { waitFor } from '@testing-library/react';
 
 const mockUseAssistantContext = {
   registerPromptContext: jest.fn(),
@@ -20,6 +21,24 @@ jest.mock('../../assistant_context', () => {
   return {
     ...original,
     useAssistantContext: () => mockUseAssistantContext,
+  };
+});
+jest.mock('../use_conversation', () => {
+  return {
+    useConversation: jest.fn(() => ({
+      currentConversation: { id: 'conversation-id' },
+    })),
+  };
+});
+jest.mock('../helpers');
+jest.mock('../../connectorland/helpers');
+jest.mock('../../connectorland/use_load_connectors', () => {
+  return {
+    useLoadConnectors: jest.fn(() => ({
+      data: [],
+      error: null,
+      isSuccess: true,
+    })),
   };
 });
 
@@ -48,13 +67,15 @@ describe('useAssistantOverlay', () => {
       )
     );
 
-    expect(mockUseAssistantContext.registerPromptContext).toHaveBeenCalledWith({
-      category,
-      description,
-      getPromptContext,
-      id,
-      suggestedUserPrompt,
-      tooltip,
+    await waitFor(() => {
+      expect(mockUseAssistantContext.registerPromptContext).toHaveBeenCalledWith({
+        category,
+        description,
+        getPromptContext,
+        id,
+        suggestedUserPrompt,
+        tooltip,
+      });
     });
   });
 
