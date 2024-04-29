@@ -61,7 +61,7 @@ export interface Services {
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
   /** resolve user profiles for the user filter and creator functionality */
-  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
+  bulkGetUserProfiles: (uids: string[]) => Promise<UserProfile[]>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
