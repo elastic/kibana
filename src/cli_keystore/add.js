@@ -24,6 +24,8 @@ export async function add(keystore, key, options = {}) {
   const logger = new Logger(options);
   let value;
 
+  await keystore.load();
+
   if (!keystore.exists()) {
     return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
   }
