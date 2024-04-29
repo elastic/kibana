@@ -17,6 +17,7 @@ export interface EmbeddableApiContext {
 export {
   getInitialValuesFromComparators,
   runComparators,
+  getUnchangingComparator,
   type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,

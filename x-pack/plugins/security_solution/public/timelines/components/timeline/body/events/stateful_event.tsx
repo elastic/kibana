@@ -75,7 +75,7 @@ interface Props {
 
 const emptyNotes: string[] = [];
 
-const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
+const EventsTrSupplementContainerWrapper = React.memo<PropsWithChildren>(({ children }) => {
   const width = useEventDetailsWidthContext();
   return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
 });

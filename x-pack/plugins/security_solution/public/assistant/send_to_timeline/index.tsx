@@ -46,7 +46,7 @@ export interface SendToTimelineButtonProps {
   isDisabled?: boolean;
 }
 
-export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonProps> = ({
+export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProps>> = ({
   asEmptyButton,
   children,
   dataProviders,
