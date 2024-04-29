@@ -12,7 +12,7 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService, usageStatsServicePromise } = deps;
+  const { router, getSpacesService, usageStatsServicePromise, log } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   router.post(
@@ -37,7 +37,11 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
 
       usageStatsClientPromise
         .then((usageStatsClient) => usageStatsClient.incrementDisableLegacyUrlAliases())
-        .catch(() => {});
+        .catch((err) => {
+          log.error(
+            `Failed to report usage statistics for the disable legacy URL aliases route: ${err.message}`
+          );
+        });
 
       try {
         await spacesClient.disableLegacyUrlAliases(aliases);
