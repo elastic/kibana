@@ -140,10 +140,19 @@ describe('OpenAPI Bundler', () => {
     });
   });
 
-  describe('x-inline', () => {
-    it('inlines a reference', async () => {
-      await bundleFolder('inline_ref');
-      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join('inline_ref', 'expected.yaml'));
+  describe('inline references', () => {
+    it('inlines local references', async () => {
+      const folder = join('inline_ref', 'inline_local_ref');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
+    });
+
+    it('inlines external references', async () => {
+      const folder = join('inline_ref', 'inline_external_ref');
+
+      await bundleFolder(folder);
+      await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
     });
   });
 
