@@ -60,7 +60,7 @@ export enum TelemetryEventTypes {
   AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
   AssetCriticalityFileSelected = 'Asset Criticality File Selected',
   AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
-  InsightsGenerated = 'Insights Generated',
+  AttackDiscoveriesGenerated = 'Attack Discoveries Generated',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
