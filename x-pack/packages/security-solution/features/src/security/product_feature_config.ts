@@ -42,6 +42,16 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.investigationGuideInteractions]: {
+    privileges: {
+      all: {
+        ui: ['investigation-guide-interactions'],
+      },
+      read: {
+        ui: ['investigation-guide-interactions'],
+      },
+    },
+  },
 
   [ProductFeatureSecurityKey.threatIntelligence]: {
     privileges: {
