@@ -22,6 +22,8 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('@kbn/expandable-flyout');
 
+const onFlyoutCloseMock = jest.fn();
+
 describe('useUnifiedTimelineExpandableFlyout', () => {
   beforeEach(() => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
@@ -41,13 +43,21 @@ describe('useUnifiedTimelineExpandableFlyout', () => {
 
   it('should have expandable flyout disabled when flyout is disabled in Advanced Settings', () => {
     (useUiSetting$ as jest.Mock).mockReturnValue([false, jest.fn()]);
-    const { result } = renderHook(() => useUnifiedTableExpandableFlyout());
+    const { result } = renderHook(() =>
+      useUnifiedTableExpandableFlyout({
+        onClose: onFlyoutCloseMock,
+      })
+    );
 
     expect(result.current.isTimelineExpandableFlyoutEnabled).toBe(false);
   });
   it('should have expandable flyout disabled when flyout is disabled in Experimental Features', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    const { result } = renderHook(() => useUnifiedTableExpandableFlyout());
+    const { result } = renderHook(() =>
+      useUnifiedTableExpandableFlyout({
+        onClose: onFlyoutCloseMock,
+      })
+    );
 
     expect(result.current.isTimelineExpandableFlyoutEnabled).toBe(false);
   });
@@ -57,7 +67,11 @@ describe('useUnifiedTimelineExpandableFlyout', () => {
         search: '',
       });
 
-      const { result } = renderHook(() => useUnifiedTableExpandableFlyout());
+      const { result } = renderHook(() =>
+        useUnifiedTableExpandableFlyout({
+          onClose: onFlyoutCloseMock,
+        })
+      );
 
       expect(result.current.isTimelineExpandableFlyoutOpen).toBe(false);
     });
@@ -66,18 +80,42 @@ describe('useUnifiedTimelineExpandableFlyout', () => {
       (useLocation as jest.Mock).mockReturnValue({
         search: `${URL_PARAM_KEY.timelineFlyout}=(test:value)`,
       });
-      const { result } = renderHook(() => useUnifiedTableExpandableFlyout());
+      const { result } = renderHook(() =>
+        useUnifiedTableExpandableFlyout({
+          onClose: onFlyoutCloseMock,
+        })
+      );
 
       expect(result.current.isTimelineExpandableFlyoutOpen).toBe(true);
     });
 
     it('should mark flyout as close when location has  empty `timelineFlyout`', () => {
+      const { result, rerender } = renderHook(() =>
+        useUnifiedTableExpandableFlyout({
+          onClose: onFlyoutCloseMock,
+        })
+      );
+      expect(result.current.isTimelineExpandableFlyoutOpen).toBe(true);
+
       (useLocation as jest.Mock).mockReturnValue({
         search: `${URL_PARAM_KEY.timelineFlyout}=()`,
       });
-      const { result } = renderHook(() => useUnifiedTableExpandableFlyout());
+
+      rerender();
 
       expect(result.current.isTimelineExpandableFlyoutOpen).toBe(false);
+      expect(onFlyoutCloseMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call user provided close handler when flyout is closed', () => {
+      const { result } = renderHook(() =>
+        useUnifiedTableExpandableFlyout({
+          onClose: onFlyoutCloseMock,
+        })
+      );
+
+      result.current.closeFlyout();
+      expect(onFlyoutCloseMock).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
@@ -15,7 +15,13 @@ import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 
 const EMPTY_TIMELINE_FLYOUT_SEARCH_PARAMS = '()';
 
-export const useUnifiedTableExpandableFlyout = () => {
+interface UseUnifiedTableExpandableFlyoutArgs {
+  onClose?: () => void;
+}
+
+export const useUnifiedTableExpandableFlyout = ({
+  onClose,
+}: UseUnifiedTableExpandableFlyoutArgs) => {
   const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
     'expandableTimelineFlyoutEnabled'
   );
@@ -26,7 +32,12 @@ export const useUnifiedTableExpandableFlyout = () => {
 
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
 
-  const isNewExpandableFlyoutOpen = useMemo(() => {
+  const closeFlyoutWithEffect = useCallback(() => {
+    closeFlyout();
+    onClose?.();
+  }, [onClose, closeFlyout]);
+
+  const isFlyoutOpen = useMemo(() => {
     /**
      *  Currently, if new expanable flyout is closed, there is not way for
      *  consumer to trigger an effect `onClose` of flyout. So, we are using
@@ -42,10 +53,30 @@ export const useUnifiedTableExpandableFlyout = () => {
     );
   }, [location.search]);
 
+  const [isTimelineExpandableFlyoutOpen, setIsTimelineExpandableFlyoutOpen] =
+    useState(isFlyoutOpen);
+
+  useEffect(() => {
+    setIsTimelineExpandableFlyoutOpen((prev) => {
+      if (prev === isFlyoutOpen) {
+        return prev;
+      }
+      if (!isFlyoutOpen && onClose) {
+        // run onClose only when isFlyoutOpen changed from true to false
+        // should not be needed when
+        // https://github.com/elastic/kibana/issues/179520
+        // is resolved
+
+        onClose();
+      }
+      return isFlyoutOpen;
+    });
+  }, [isFlyoutOpen, onClose]);
+
   return {
-    isTimelineExpandableFlyoutOpen: isNewExpandableFlyoutOpen,
+    isTimelineExpandableFlyoutOpen,
     openFlyout,
-    closeFlyout,
+    closeFlyout: closeFlyoutWithEffect,
     isTimelineExpandableFlyoutEnabled: expandableTimelineFlyoutEnabled && isSecurityFlyoutEnabled,
   };
 };
