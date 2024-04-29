@@ -20,6 +20,8 @@ export interface StartPlugins {
   sessionView: SessionViewStart;
 }
 
+export type KubernetesSecurityStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
 export type KubernetesSecurityServices = CoreStart & StartPlugins;
 
 export interface IndexPattern {
@@ -39,6 +41,7 @@ export interface KubernetesSecurityDeps {
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
   dataViewId?: string;
+  startServices: KubernetesSecurityStartServices;
 }
 
 export interface KubernetesSecurityStart {
