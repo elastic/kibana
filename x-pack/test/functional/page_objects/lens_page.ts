@@ -44,6 +44,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'dashboard',
     'timeToVisualize',
     'unifiedSearch',
+    'share',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -1831,20 +1832,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('link');
     },
 
-    async closeShareModal() {
-      if (await testSubjects.exists('shareContextModal')) {
-        await find.clickByCssSelector(
-          '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
-        );
-      }
+    closeShareModal() {
+      return PageObjects.share.closeShareModal();
     },
 
     async getUrl() {
-      const copyButton = await testSubjects.find('copyShareUrlButton');
-      const url = await copyButton.getAttribute('data-share-url');
+      await this.ensureShareMenuIsOpen('link');
+      const url = await PageObjects.share.getSharedUrl();
+
       if (!url) {
         throw Error('No data-share-url attribute found');
       }
+
+      // close share modal after url is copied
+      await this.closeShareModal();
       return url;
     },
 
