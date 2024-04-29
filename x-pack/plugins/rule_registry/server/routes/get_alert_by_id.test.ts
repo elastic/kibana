@@ -31,23 +31,27 @@ import { requestContextMock } from './__mocks__/request_context';
 import { getReadRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
-const getMockAlert = (): ParsedTechnicalFields &
-  ParsedExperimentalFields & { _index?: string } => ({
-  [ALERT_INSTANCE_ID]: 'fake-alert-id',
-  [ALERT_RULE_CATEGORY]: 'apm.error_rate',
-  [ALERT_RULE_CONSUMER]: 'apm',
-  [ALERT_RULE_NAME]: 'Check error rate',
-  [ALERT_RULE_PRODUCER]: 'apm',
-  [ALERT_RULE_REVISION]: 0,
-  [ALERT_RISK_SCORE]: 20,
-  [ALERT_RULE_TYPE_ID]: 'fake-rule-type-id',
-  [ALERT_RULE_UUID]: 'fake-rule-uuid',
-  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-  [ALERT_UUID]: 'fake-alert-uuid',
-  [ECS_VERSION]: '1.0.0',
-  [SPACE_IDS]: ['fake-space-id'],
-  [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
-  [VERSION]: '7.13.0',
+const getMockAlert = (): {
+  _source: ParsedTechnicalFields & ParsedExperimentalFields;
+  _index: string;
+} => ({
+  _source: {
+    [ALERT_INSTANCE_ID]: 'fake-alert-id',
+    [ALERT_RULE_CATEGORY]: 'apm.error_rate',
+    [ALERT_RULE_CONSUMER]: 'apm',
+    [ALERT_RULE_NAME]: 'Check error rate',
+    [ALERT_RULE_PRODUCER]: 'apm',
+    [ALERT_RULE_REVISION]: 0,
+    [ALERT_RISK_SCORE]: 20,
+    [ALERT_RULE_TYPE_ID]: 'fake-rule-type-id',
+    [ALERT_RULE_UUID]: 'fake-rule-uuid',
+    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+    [ALERT_UUID]: 'fake-alert-uuid',
+    [ECS_VERSION]: '1.0.0',
+    [SPACE_IDS]: ['fake-space-id'],
+    [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
+    [VERSION]: '7.13.0',
+  },
   ['_index']: 'fake-alert-index',
 });
 

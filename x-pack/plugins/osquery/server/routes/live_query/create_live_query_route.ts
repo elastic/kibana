@@ -59,7 +59,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           ?.getRacClientWithRequest(request);
 
         const alertData = request.body.alert_ids?.length
-          ? await client?.get({ id: request.body.alert_ids[0] })
+          ? (await client?.get({ id: request.body.alert_ids[0] }))?._source
           : undefined;
 
         if (isInvalid) {

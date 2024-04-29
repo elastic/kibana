@@ -37,7 +37,10 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
     []
   );
 
-  const { loading, data: rawAlert } = useDataFetcher<AlertDetailParams, EcsFieldsResponse | null>({
+  const { loading, data: rawAlert } = useDataFetcher<
+    AlertDetailParams,
+    { _index: string; _source: EcsFieldsResponse | null } | null
+  >({
     paramsForApiCall: params,
     initialDataState: null,
     executeApiCall: fetchAlert,
@@ -45,10 +48,10 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
   });
 
   const data = useMemo(() => {
-    return rawAlert
+    return rawAlert?._source
       ? {
-          formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
-          raw: rawAlert,
+          formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert._source),
+          raw: rawAlert._source,
         }
       : null;
   }, [observabilityRuleTypeRegistry, rawAlert]);
@@ -62,7 +65,7 @@ const fetchAlert = async (
   http: HttpSetup
 ) => {
   return http
-    .get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
+    .get<{ _index: string; _source: EcsFieldsResponse }>(BASE_RAC_ALERTS_API_PATH, {
       query: {
         id,
       },
