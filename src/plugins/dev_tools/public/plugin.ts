@@ -60,7 +60,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
-        const { element, history, theme$ } = params;
+        const { element, history } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
@@ -81,9 +81,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
           application,
           chrome,
           history,
-          theme$,
           this.getSortedDevTools(),
-          appServices
+          appServices,
+          core
         );
       },
     });
