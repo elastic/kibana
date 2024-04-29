@@ -7,7 +7,7 @@
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 
 export interface CoreProvidersProps {
@@ -16,14 +16,14 @@ export interface CoreProvidersProps {
   theme$: AppMountParameters['theme$'];
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({ children, core, theme$ }) => {
+export const CoreProviders: React.FC<CoreProvidersProps> = ({ children, core }) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core);
 
   return (
-    <KibanaContextProviderForPlugin services={{ ...core }}>
-      <core.i18n.Context>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-      </core.i18n.Context>
-    </KibanaContextProviderForPlugin>
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProviderForPlugin services={{ ...core }}>
+        {children}
+      </KibanaContextProviderForPlugin>
+    </KibanaRenderContextProvider>
   );
 };
