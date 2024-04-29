@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from '@xstate/react';
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -17,33 +17,31 @@ export const useDatasetQualityFlyout = () => {
 
   const { service } = useDatasetQualityContext();
 
-  const {
-    dataset: dataStreamStat,
-    datasetSettings: dataStreamSettings,
-    datasetDetails: dataStreamDetails,
-    insightsTimeRange,
-    breakdownField,
-  } = useSelector(service, (state) => state.context.flyout);
+  const flyoutState = useSelector(service, (state) => state.context.flyout);
+  const [
+    {
+      dataset: dataStreamStat,
+      datasetSettings: dataStreamSettings,
+      datasetDetails: dataStreamDetails,
+      insightsTimeRange,
+      breakdownField,
+    },
+    setFlyoutState,
+  ] = useState(flyoutState);
+
+  useEffect(() => {
+    if (flyoutState) {
+      setFlyoutState(flyoutState);
+    }
+  }, [flyoutState]);
+
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
-  const dataStreamDetailsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamDetails.fetching')
-  );
-  const dataStreamSettingsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamSettings.fetching')
-  );
-
-  const datasetIntegrationsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.integrationDashboards.fetching')
-  );
-
-  const loadingState = useMemo(() => {
-    return {
-      dataStreamDetailsLoading,
-      dataStreamSettingsLoading,
-      datasetIntegrationsLoading,
-    };
-  }, [dataStreamDetailsLoading, dataStreamSettingsLoading, datasetIntegrationsLoading]);
+  const loadingState = useSelector(service, (state) => ({
+    dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
+    dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
+    datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
+  }));
 
   return {
     dataStreamStat,
