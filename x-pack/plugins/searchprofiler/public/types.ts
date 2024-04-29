@@ -9,6 +9,9 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+
+export type SearchProfilerStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export interface AppPublicPluginDependencies {
   licensing: LicensingPluginSetup;

@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core/public';
+
 export interface ConfigSchema {
   deeplinks: {
     navLinkStatus: 'default' | 'visible';
   };
 }
+
+export type DevToolsStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;

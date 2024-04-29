@@ -24,6 +24,8 @@ export interface CommonlyUsedDateRange {
   display: string;
 }
 
+export type SyntheticsStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
 export interface SyntheticsAppProps {
   basePath: string;
   canSave: boolean;
@@ -42,6 +44,7 @@ export interface SyntheticsAppProps {
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
+  startServices: SyntheticsStartServices;
 }
 
 export interface SyntheticsSettingsContextValues {

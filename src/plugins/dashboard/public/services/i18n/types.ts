@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { sendRequest, XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
-const { collapseLiteralStrings, expandLiteralStrings } = XJson;
-
-export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
-
-export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-
-export { toMountPoint } from '@kbn/react-kibana-mount';
+export type DashboardI18nService = CoreStart['i18n'];

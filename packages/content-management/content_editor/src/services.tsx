@@ -8,9 +8,12 @@
 
 import React, { useContext, useCallback, useMemo, PropsWithChildren } from 'react';
 import type { FC, ReactNode } from 'react';
-import type { Observable } from 'rxjs';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 
 type NotifyFn = (title: JSX.Element, text?: string) => void;
@@ -66,21 +69,10 @@ export interface ContentEditorKibanaDependencies {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
     };
-    theme: {
-      theme$: Observable<Theme>;
-    };
+    analytics: AnalyticsServiceStart;
+    i18n: I18nStart;
+    theme: ThemeServiceStart;
   };
-  /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
-   *
-   * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-   * ```
-   */
-  toMountPoint: (
-    node: React.ReactNode,
-    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
-  ) => MountPoint;
   /**
    * The public API from the savedObjectsTaggingOss plugin.
    * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
@@ -115,9 +107,8 @@ export interface ContentEditorKibanaDependencies {
 export const ContentEditorKibanaProvider: FC<
   PropsWithChildren<ContentEditorKibanaDependencies>
 > = ({ children, ...services }) => {
-  const { core, toMountPoint, savedObjectsTagging } = services;
+  const { core, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
-  const { theme$ } = core.theme;
 
   const TagList = useMemo(() => {
     const Comp: Services['TagList'] = ({ references }) => {
@@ -133,16 +124,16 @@ export const ContentEditorKibanaProvider: FC<
 
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-      return coreOpenFlyout(toMountPoint(node, { theme$ }), options);
+      return coreOpenFlyout(toMountPoint(node, core), options);
     },
-    [coreOpenFlyout, toMountPoint, theme$]
+    [coreOpenFlyout, core]
   );
 
   return (
     <ContentEditorProvider
       openFlyout={openFlyout}
       notifyError={(title, text) => {
-        core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+        core.notifications.toasts.addDanger({ title: toMountPoint(title, core), text });
       }}
       TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}

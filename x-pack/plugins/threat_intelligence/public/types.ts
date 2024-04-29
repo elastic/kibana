@@ -47,6 +47,8 @@ export interface ThreatIntelligencePluginStartDeps {
   data: DataPublicPluginStart;
 }
 
+export type ThreatIntelligenceStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
 export type Services = {
   cases: CasesPublicStart;
   data: DataPublicPluginStart;

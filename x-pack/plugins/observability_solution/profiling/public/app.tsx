@@ -34,7 +34,6 @@ interface Props {
   coreSetup: CoreSetup;
   pluginsStart: ProfilingPluginPublicStartDeps;
   pluginsSetup: ProfilingPluginPublicSetupDeps;
-  theme$: AppMountParameters['theme$'];
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
@@ -42,14 +41,14 @@ interface Props {
 const storage = new Storage(localStorage);
 
 function MountProfilingActionMenu({
-  theme$,
   setHeaderActionMenu,
+  startServices,
 }: {
-  theme$: AppMountParameters['theme$'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 }) {
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} startServices={startServices}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <ProfilingHeaderActionMenu />
@@ -65,12 +64,9 @@ function App({
   pluginsStart,
   pluginsSetup,
   profilingFetchServices,
-  theme$,
   history,
   setHeaderActionMenu,
 }: Props) {
-  const i18nCore = coreStart.i18n;
-
   const profilingDependencies = useMemo(() => {
     return {
       start: {
@@ -88,35 +84,33 @@ function App({
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
-        <i18nCore.Context>
-          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-            <RouterProvider router={profilingRouter as any} history={history}>
-              <RouterErrorBoundary>
-                <TimeRangeContextProvider>
-                  <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                    <ProfilingSetupStatusContextProvider>
-                      <LicenseProvider>
-                        <>
-                          <CheckSetup>
-                            <RedirectWithDefaultDateRange>
-                              <RouteBreadcrumbsContextProvider>
-                                <RouteRenderer />
-                              </RouteBreadcrumbsContextProvider>
-                            </RedirectWithDefaultDateRange>
-                          </CheckSetup>
-                          <MountProfilingActionMenu
-                            setHeaderActionMenu={setHeaderActionMenu}
-                            theme$={theme$}
-                          />
-                        </>
-                      </LicenseProvider>
-                    </ProfilingSetupStatusContextProvider>
-                  </ProfilingDependenciesContextProvider>
-                </TimeRangeContextProvider>
-              </RouterErrorBoundary>
-            </RouterProvider>
-          </RedirectAppLinks>
-        </i18nCore.Context>
+        <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
+          <RouterProvider router={profilingRouter as any} history={history}>
+            <RouterErrorBoundary>
+              <TimeRangeContextProvider>
+                <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                  <ProfilingSetupStatusContextProvider>
+                    <LicenseProvider>
+                      <>
+                        <CheckSetup>
+                          <RedirectWithDefaultDateRange>
+                            <RouteBreadcrumbsContextProvider>
+                              <RouteRenderer />
+                            </RouteBreadcrumbsContextProvider>
+                          </RedirectWithDefaultDateRange>
+                        </CheckSetup>
+                        <MountProfilingActionMenu
+                          setHeaderActionMenu={setHeaderActionMenu}
+                          startServices={coreStart}
+                        />
+                      </>
+                    </LicenseProvider>
+                  </ProfilingSetupStatusContextProvider>
+                </ProfilingDependenciesContextProvider>
+              </TimeRangeContextProvider>
+            </RouterErrorBoundary>
+          </RouterProvider>
+        </RedirectAppLinks>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

@@ -16,15 +16,13 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
-      "lens",
+      "lens"
     ],
-    "requiredBundles": [
-      "kibanaReact",
-    ],
+    "requiredBundles": [],
     "extraPublicDirs": []
   }
 }

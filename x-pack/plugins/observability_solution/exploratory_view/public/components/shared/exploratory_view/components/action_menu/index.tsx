@@ -17,10 +17,10 @@ interface Props {
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 export function ExpViewActionMenu(props: Props) {
-  const { setHeaderActionMenu, theme$ } = useExploratoryView();
+  const { setHeaderActionMenu, ...startServices } = useExploratoryView();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} startServices={startServices}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <ExpViewActionMenuContent {...props} />

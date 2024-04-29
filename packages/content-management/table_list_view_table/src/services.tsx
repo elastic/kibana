@@ -9,7 +9,11 @@
 import React, { FC, PropsWithChildren, useContext, useMemo, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 import {
@@ -17,8 +21,8 @@ import {
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 
-import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
+import { TAG_MANAGEMENT_APP_URL } from './constants';
 
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
@@ -99,23 +103,10 @@ export interface TableListViewKibanaDependencies {
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
-    theme: {
-      theme$: Observable<{
-        readonly darkMode: boolean;
-      }>;
-    };
+    analytics: AnalyticsServiceStart;
+    i18n: I18nStart;
+    theme: ThemeServiceStart;
   };
-  /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
-   *
-   * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-   * ```
-   */
-  toMountPoint: (
-    node: React.ReactNode,
-    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
-  ) => MountPoint;
   /**
    * The public API from the savedObjectsTaggingOss plugin.
    * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
@@ -165,7 +156,7 @@ export interface TableListViewKibanaDependencies {
 export const TableListViewKibanaProvider: FC<
   PropsWithChildren<TableListViewKibanaDependencies>
 > = ({ children, ...services }) => {
-  const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
+  const { core, savedObjectsTagging, FormattedRelative } = services;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -220,11 +211,7 @@ export const TableListViewKibanaProvider: FC<
 
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <ContentEditorKibanaProvider
-        core={core}
-        toMountPoint={toMountPoint}
-        savedObjectsTagging={savedObjectsTagging}
-      >
+      <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
         <TableListViewProvider
           canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
           getListingLimitSettingsUrl={() =>
@@ -233,7 +220,7 @@ export const TableListViewKibanaProvider: FC<
             })
           }
           notifyError={(title, text) => {
-            core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+            core.notifications.toasts.addDanger({ title: toMountPoint(title, core), text });
           }}
           searchQueryParser={searchQueryParser}
           DateFormatterComp={(props) => <FormattedRelative {...props} />}

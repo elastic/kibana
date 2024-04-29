@@ -14,13 +14,13 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http, theme } = useKibana().services;
+  const { http } = useKibana().services;
 
-  const { appMountParameters } = usePluginContext();
+  const { appMountParameters, ...startServices } = usePluginContext();
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
-      theme$={theme.theme$}
+      startServices={startServices}
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>

@@ -48,13 +48,15 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SloPlugin } from './plugin';
+
+export type SloStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export interface SloPublicPluginsSetup {
   data: DataPublicPluginSetup;

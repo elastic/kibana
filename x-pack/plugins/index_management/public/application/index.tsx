@@ -63,6 +63,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
     executionContext,
+    startServices: core,
   };
 
   return (

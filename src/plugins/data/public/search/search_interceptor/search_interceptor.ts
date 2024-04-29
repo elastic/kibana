@@ -42,12 +42,11 @@ import {
   DocLinksStart,
   ExecutionContextSetup,
   IUiSettingsClient,
-  ThemeServiceSetup,
   ToastsSetup,
 } from '@kbn/core/public';
 
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
@@ -83,7 +82,6 @@ export interface SearchInterceptorDeps {
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
-  theme: ThemeServiceSetup;
   searchConfig: SearchConfigSchema;
 }
 
@@ -551,10 +549,11 @@ export class SearchInterceptor {
     );
   }
 
-  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
+  private showTimeoutErrorToast = async (e: SearchTimeoutError, _sessionId?: string) => {
+    const [coreStart] = await this.deps.startServices;
     this.deps.toasts.addDanger({
       title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
+      text: toMountPoint(e.getErrorMessage(this.application), coreStart),
     });
   };
 
@@ -565,13 +564,12 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (sessionId?: string) => {
+  private showRestoreWarningToast = async (_sessionId?: string) => {
+    const [coreStart] = await this.deps.startServices;
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
-        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), {
-          theme$: this.deps.theme.theme$,
-        }),
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), coreStart),
       },
       {
         toastLifeTimeMs: 60000,
@@ -593,7 +591,7 @@ export class SearchInterceptor {
     }
   };
 
-  public showError(e: Error) {
+  public async showError(e: Error) {
     if (e instanceof AbortError || e instanceof SearchTimeoutError) {
       // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
       return;
@@ -602,9 +600,10 @@ export class SearchInterceptor {
     const searchErrorDisplay = renderSearchError(e);
 
     if (searchErrorDisplay) {
+      const [coreStart] = await this.deps.startServices;
       this.deps.toasts.addDanger({
         title: searchErrorDisplay.title,
-        text: toMountPoint(searchErrorDisplay.body, { theme$: this.deps.theme.theme$ }),
+        text: toMountPoint(searchErrorDisplay.body, coreStart),
       });
     } else {
       this.deps.toasts.addError(e, {

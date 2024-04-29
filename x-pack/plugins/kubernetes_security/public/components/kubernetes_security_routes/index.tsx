@@ -52,6 +52,7 @@ const KubernetesSecurityRoutesComponent = ({
   indexPattern,
   globalFilter,
   renderSessionsView,
+  startServices,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
@@ -208,6 +209,7 @@ const KubernetesSecurityRoutesComponent = ({
                       groupedBy={ENTRY_LEADER_INTERACTIVE}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceInteractiveAggs}
+                      startServices={startServices}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -256,6 +258,7 @@ const KubernetesSecurityRoutesComponent = ({
                       groupedBy={ENTRY_LEADER_USER_ID}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceRootAggs}
+                      startServices={startServices}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -268,6 +271,7 @@ const KubernetesSecurityRoutesComponent = ({
                   globalFilter={globalFilter}
                   groupedBy={CONTAINER_IMAGE_NAME}
                   countBy={ENTRY_LEADER_ENTITY_ID}
+                  startServices={startServices}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

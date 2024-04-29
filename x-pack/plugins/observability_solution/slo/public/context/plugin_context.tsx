@@ -10,8 +10,9 @@ import type { AppMountParameters } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { ExperimentalFeatures } from '../../common/config';
+import { SloStartServices } from '../types';
 
-export interface PluginContextValue {
+export interface PluginContextValue extends SloStartServices {
   isDev?: boolean;
   appMountParameters?: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;

@@ -142,7 +142,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     objectStorageClient,
     settings,
     storage,
-    theme$,
     trackUiMetric,
   } = dependencies;
   return (
@@ -162,10 +161,10 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             http,
             autocompleteInfo,
           },
-          theme$,
           config: {
             isMonacoEnabled,
           },
+          startServices: core,
         }}
       >
         <RequestContextProvider>

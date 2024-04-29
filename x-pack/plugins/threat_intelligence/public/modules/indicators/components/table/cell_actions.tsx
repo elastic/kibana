@@ -7,6 +7,7 @@
 
 import React, { VFC } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { ThreatIntelligenceStartServices } from '../../../../types';
 import { Indicator } from '../../../../../common/types/indicator';
 import { AddToTimelineCellAction } from '../../../timeline/components/add_to_timeline';
 import { FilterInCellAction } from '../../../query_bar/components/filter_in';
@@ -29,6 +30,10 @@ export interface CellActionsProps
    *  Received from the IndicatorsTable to extract the correct {@link Indicator} from the array of indicators.
    */
   pagination: Pagination;
+  /**
+   * used for shared modules that render React code
+   */
+  startServices: ThreatIntelligenceStartServices;
 }
 
 /**
@@ -43,6 +48,7 @@ export const CellActions: VFC<CellActionsProps> = ({
   Component,
   indicators,
   pagination,
+  startServices,
 }) => {
   const indicator = indicators[rowIndex % pagination.pageSize];
   const { key, value } = getIndicatorFieldAndValue(indicator, columnId);
@@ -69,6 +75,7 @@ export const CellActions: VFC<CellActionsProps> = ({
         field={key}
         Component={Component}
         data-test-subj={TIMELINE_BUTTON_TEST_ID}
+        startServices={startServices}
       />
     </>
   );

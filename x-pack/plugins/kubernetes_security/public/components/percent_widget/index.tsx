@@ -8,7 +8,7 @@
 import React, { ReactNode, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
-import type { IndexPattern, GlobalFilter } from '../../types';
+import type { IndexPattern, GlobalFilter, KubernetesSecurityStartServices } from '../../types';
 import { useSetFilter } from '../../hooks';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { AggregateResult } from '../../../common/types';
@@ -34,6 +34,7 @@ export interface PercentWidgetDeps {
   countBy?: string;
   onReduce: (result: AggregateResult) => Record<string, number>;
   dataViewId?: string;
+  startServices: KubernetesSecurityStartServices;
 }
 
 interface FilterButtons {
@@ -51,6 +52,7 @@ export const PercentWidget = ({
   countBy,
   onReduce,
   dataViewId,
+  startServices,
 }: PercentWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
@@ -95,6 +97,7 @@ export const PercentWidget = ({
             showTooltip: true,
             value: [groupedByValue],
             dataViewId,
+            startServices,
           })
         );
         result.filterOutButtons.push(
@@ -108,13 +111,21 @@ export const PercentWidget = ({
             showTooltip: true,
             value: [groupedByValue],
             dataViewId,
+            startServices,
           })
         );
       }
     });
 
     return result;
-  }, [dataValueMap, dataViewId, filterManager, getFilterForValueButton, getFilterOutValueButton]);
+  }, [
+    dataValueMap,
+    dataViewId,
+    filterManager,
+    getFilterForValueButton,
+    getFilterOutValueButton,
+    startServices,
+  ]);
 
   return (
     <div css={styles.container}>

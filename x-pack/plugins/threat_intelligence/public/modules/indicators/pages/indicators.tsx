@@ -6,6 +6,7 @@
  */
 
 import React, { FC, VFC, PropsWithChildren } from 'react';
+import { ThreatIntelligenceStartServices } from '../../../types';
 import { useBlockListContext } from '../hooks/use_block_list_context';
 import { BlockListProvider } from '../containers/block_list_provider';
 import { BlockListFlyout } from '../../block_list/containers/flyout';
@@ -34,7 +35,9 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
   </IndicatorsFilters>
 );
 
-const IndicatorsPageContent: VFC = () => {
+const IndicatorsPageContent: VFC<{ startServices: ThreatIntelligenceStartServices }> = ({
+  startServices,
+}) => {
   const { blockListIndicatorValue } = useBlockListContext();
 
   const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView();
@@ -109,6 +112,7 @@ const IndicatorsPageContent: VFC = () => {
           isFetching={isFetchingIndicators}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
+          startServices={startServices}
         />
 
         {blockListIndicatorValue && <BlockListFlyout indicatorFileHash={blockListIndicatorValue} />}
@@ -117,8 +121,10 @@ const IndicatorsPageContent: VFC = () => {
   );
 };
 
-export const IndicatorsPage: VFC = () => (
+export const IndicatorsPage: VFC<{ startServices: ThreatIntelligenceStartServices }> = ({
+  startServices,
+}) => (
   <IndicatorsPageProviders>
-    <IndicatorsPageContent />
+    <IndicatorsPageContent startServices={startServices} />
   </IndicatorsPageProviders>
 );
