@@ -10,18 +10,12 @@ import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
-import {
-  callAsyncWithDebug,
-  getDebugBody,
-  getDebugTitle,
-} from '../call_async_with_debug';
+import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
-export type APMInternalESClient = Awaited<
-  ReturnType<typeof createInternalESClientWithResources>
->;
+export type APMInternalESClient = Awaited<ReturnType<typeof createInternalESClientWithResources>>;
 
 export async function createInternalESClientWithResources({
   params,
@@ -64,9 +58,7 @@ export async function createInternalESClient({
       cb: () => {
         const controller = new AbortController();
         const res = makeRequestWithSignal(controller.signal);
-        return unwrapEsResponse(
-          request ? cancelEsRequestOnAbort(res, request, controller) : res
-        );
+        return unwrapEsResponse(request ? cancelEsRequestOnAbort(res, request, controller) : res);
       },
       getDebugMessage: () => {
         return {
@@ -83,10 +75,7 @@ export async function createInternalESClient({
   }
 
   return {
-    search: async <
-      TDocument = unknown,
-      TSearchRequest extends ESSearchRequest = ESSearchRequest
-    >(
+    search: async <TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       operationName: string,
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
@@ -108,10 +97,7 @@ export async function createInternalESClient({
         params,
       });
     },
-    delete: (
-      operationName: string,
-      params: estypes.DeleteRequest
-    ): Promise<{ result: string }> => {
+    delete: (operationName: string, params: estypes.DeleteRequest): Promise<{ result: string }> => {
       return callEs(operationName, {
         requestType: 'delete',
         makeRequestWithSignal: (signal) =>
@@ -119,10 +105,7 @@ export async function createInternalESClient({
         params,
       });
     },
-    indicesCreate: (
-      operationName: string,
-      params: estypes.IndicesCreateRequest
-    ) => {
+    indicesCreate: (operationName: string, params: estypes.IndicesCreateRequest) => {
       return callEs(operationName, {
         requestType: 'indices.create',
         makeRequestWithSignal: (signal) =>

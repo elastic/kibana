@@ -38,12 +38,12 @@ import { PageTitle, pageTitleContent } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
 import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 interface AlertDetailsPathParams {
@@ -133,11 +133,6 @@ export function AlertDetails() {
     return <CenterJustifiedSpinner />;
   }
 
-  // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.formatted, config)) {
-    return <PageNotFound />;
-  }
-
   if (!isLoading && !alertDetail)
     return (
       <EuiPanel data-test-subj="alertDetailsError">
@@ -167,27 +162,43 @@ export function AlertDetails() {
   const OVERVIEW_TAB_ID = 'overview';
   const METADATA_TAB_ID = 'metadata';
 
-  const overviewTab = (
-    <>
-      <EuiSpacer size="l" />
-      <AlertSummary alertSummaryFields={summaryFields} />
-
-      <AlertDetailContextualInsights alert={alertDetail} />
-      <EuiSpacer size="l" />
-      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
-        <AlertDetailsAppSection
-          alert={alertDetail.formatted}
-          rule={rule}
-          timeZone={timeZone}
-          setAlertSummaryFields={setSummaryFields}
-          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
-        />
-      )}
-    </>
+  const overviewTab = alertDetail ? (
+    AlertDetailsAppSection &&
+    /*
+    when feature flag is enabled, show alert details page with customized overview tab, 
+    otherwise show default overview tab 
+    */
+    isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
+      <>
+        <EuiSpacer size="l" />
+        <AlertSummary alertSummaryFields={summaryFields} />
+        <AlertDetailContextualInsights alert={alertDetail} />
+        <EuiSpacer size="l" />
+        {rule && alertDetail.formatted && (
+          <AlertDetailsAppSection
+            alert={alertDetail.formatted}
+            rule={rule}
+            timeZone={timeZone}
+            setAlertSummaryFields={setSummaryFields}
+            ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
+          />
+        )}
+      </>
+    ) : (
+      <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+        <EuiSpacer size="l" />
+        <AlertDetailContextualInsights alert={alertDetail} />
+        <EuiSpacer size="l" />
+        <AlertOverview alert={alertDetail.formatted} />
+      </EuiPanel>
+    )
+  ) : (
+    <></>
   );
 
   const metadataTab = alertDetail?.raw && (
-    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel">
+    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel" paddingSize="none">
+      <EuiSpacer size="l" />
       <AlertFieldsTable alert={alertDetail.raw} />
     </EuiPanel>
   );
@@ -263,14 +274,10 @@ export function getScreenDescription(alertDetail: AlertData) {
       : ''
   }
 
-  The alert details are:
+  Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.
   ${Object.entries(getRelevantAlertFields(alertDetail))
     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')}  
-
-  Do not repeat this information to the user, unless it is relevant for them to know. 
-  Please suggestion root causes if possible.
-  Suggest next steps for the user to take.
   `);
 }
 

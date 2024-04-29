@@ -65,6 +65,7 @@ describe('getCasesConnectorType', () => {
       name: 'my rule name',
       tags: ['my-tag'],
       consumer: 'test-consumer',
+      producer: 'test-producer',
     };
 
     const getParams = (overrides = {}) => ({
@@ -272,7 +273,12 @@ describe('getCasesConnectorType', () => {
       it('constructs the correct privileges from the consumer', () => {
         const adapter = getCasesConnectorAdapter();
 
-        expect(adapter.getKibanaPrivileges?.({ consumer: AlertConsumers.SIEM })).toEqual([
+        expect(
+          adapter.getKibanaPrivileges?.({
+            consumer: AlertConsumers.SIEM,
+            producer: AlertConsumers.SIEM,
+          })
+        ).toEqual([
           'cases:securitySolution/createCase',
           'cases:securitySolution/updateCase',
           'cases:securitySolution/deleteCase',
@@ -281,6 +287,26 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/updateComment',
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
+        ]);
+      });
+
+      it('constructs the correct privileges from the producer if the consumer is not found', () => {
+        const adapter = getCasesConnectorAdapter();
+
+        expect(
+          adapter.getKibanaPrivileges?.({
+            consumer: 'alerting',
+            producer: AlertConsumers.LOGS,
+          })
+        ).toEqual([
+          'cases:observability/createCase',
+          'cases:observability/updateCase',
+          'cases:observability/deleteCase',
+          'cases:observability/pushCase',
+          'cases:observability/createComment',
+          'cases:observability/updateComment',
+          'cases:observability/deleteComment',
+          'cases:observability/findConfigurations',
         ]);
       });
     });

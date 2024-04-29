@@ -11,6 +11,7 @@ import { Logger } from '@kbn/core/server';
 import { Duration } from '../domain/models';
 import { computeBurnRate, computeSLI } from '../domain/services';
 import { DefaultSLIClient } from './sli_client';
+import { SloDefinitionClient } from './slo_definition_client';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 
 interface Services {
@@ -24,19 +25,30 @@ interface LookbackWindow {
   duration: Duration;
 }
 
-export async function getBurnRates(
-  sloId: string,
-  instanceId: string,
-  windows: LookbackWindow[],
-  services: Services
-) {
+export async function getBurnRates({
+  sloId,
+  spaceId,
+  windows,
+  instanceId,
+  remoteName,
+  services,
+}: {
+  sloId: string;
+  spaceId: string;
+  instanceId: string;
+  remoteName?: string;
+  windows: LookbackWindow[];
+  services: Services;
+}) {
   const { soClient, esClient, logger } = services;
 
   const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
   const sliClient = new DefaultSLIClient(esClient);
-  const slo = await repository.findById(sloId);
+  const definitionClient = new SloDefinitionClient(repository, esClient, logger);
 
-  const sliData = await sliClient.fetchSLIDataFrom(slo, instanceId, windows);
+  const { slo } = await definitionClient.execute(sloId, spaceId, remoteName);
+
+  const sliData = await sliClient.fetchSLIDataFrom(slo, instanceId, windows, remoteName);
   return Object.keys(sliData).map((key) => {
     return {
       name: key,

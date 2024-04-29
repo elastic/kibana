@@ -24,18 +24,14 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  useEditableSettings,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public';
+import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 
 const LazyFieldRow = React.lazy(async () => ({
-  default: (await import('@kbn/management-settings-components-field-row'))
-    .FieldRow,
+  default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
 }));
 
 const FieldRow = withSuspense(LazyFieldRow);
@@ -54,14 +50,8 @@ export function LabsFlyout({ onClose }: Props) {
   );
   const labsItems = data?.labsItems || [];
 
-  const {
-    fields,
-    handleFieldChange,
-    unsavedChanges,
-    saveAll,
-    isSaving,
-    cleanUnsavedChanges,
-  } = useEditableSettings(labsItems);
+  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
+    useEditableSettings(labsItems);
 
   async function handleSave() {
     try {
@@ -119,11 +109,7 @@ export function LabsFlyout({ onClose }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText>
               {i18n.translate('xpack.apm.labs.description', {
@@ -160,8 +146,7 @@ export function LabsFlyout({ onClose }: Props) {
                   <FieldRowProvider
                     {...{
                       links: docLinks.links.management,
-                      showDanger: (message: string) =>
-                        notifications.toasts.addDanger(message),
+                      showDanger: (message: string) => notifications.toasts.addDanger(message),
                       validateChange: async () => settingsValidationResponse,
                     }}
                   >
@@ -180,10 +165,7 @@ export function LabsFlyout({ onClose }: Props) {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="apmLabsFlyoutCancelButton"
-                  onClick={handelCancel}
-                >
+                <EuiButtonEmpty data-test-subj="apmLabsFlyoutCancelButton" onClick={handelCancel}>
                   {i18n.translate('xpack.apm.labs.cancel', {
                     defaultMessage: 'Cancel',
                   })}

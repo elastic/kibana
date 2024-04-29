@@ -21,7 +21,9 @@
       "share",
       "security",
       "licensing",
-      "ml"
+      "ml",
+      "alerting",
+      "features"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],

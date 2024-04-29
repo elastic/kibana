@@ -130,6 +130,7 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
 export const HASH_TO_VERSION_MAP = {
   'action_task_params|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'action|0be88ebcc8560a075b6898236a202eb1': '10.0.0',
+  'ad_hoc_run_params|6aa8806a2e27d3be492a1da0d7721845': '10.0.0',
   'alert|96a5a144778243a9f4fece0e71c2197f': '10.0.0',
   'api_key_pending_invalidation|16f515278a295f6245149ad7c5ddedb7': '10.0.0',
   'apm-custom-dashboards|561810b957ac3c09fcfc08f32f168e97': '10.0.0',
@@ -218,6 +219,7 @@ export const HASH_TO_VERSION_MAP = {
   'siem-ui-timeline-note|28393dfdeb4e4413393eb5f7ec8c5436': '10.0.0',
   'siem-ui-timeline-pinned-event|293fce142548281599060e07ad2c9ddb': '10.0.0',
   'siem-ui-timeline|f6739fd4b17646a6c86321a746c247ef': '10.1.0',
+  'slo-settings|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'slo|dc7f35c0cf07d71bb36f154996fe10c6': '10.1.0',
   'space|c3aec2a5d4afcb75554fed96411170e1': '10.0.0',
   'spaces-usage-stats|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',

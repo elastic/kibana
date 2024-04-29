@@ -32,9 +32,7 @@ function generateData() {
     .duration(1000)
     .failure()
     .errors(
-      instanceJava
-        .error({ message: '[ResponseError] index_not_found_exception' })
-        .timestamp(50)
+      instanceJava.error({ message: '[ResponseError] index_not_found_exception' }).timestamp(50)
     )
     .children(
       instanceJava

@@ -20,13 +20,19 @@ import {
 interface Args extends QueryState {
   timeFieldName?: string;
   inputQuery?: Query;
+  titleForInspector?: string;
+  descriptionForInspector?: string;
 }
 
 /**
  * Converts QueryState to expression AST
  * @param filters array of kibana filters
  * @param query kibana query or aggregate query
+ * @param inputQuery
  * @param time kibana time range
+ * @param dataView
+ * @param titleForInspector
+ * @param descriptionForInspector
  */
 export function textBasedQueryStateToExpressionAst({
   filters,
@@ -34,6 +40,8 @@ export function textBasedQueryStateToExpressionAst({
   inputQuery,
   time,
   timeFieldName,
+  titleForInspector,
+  descriptionForInspector,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -51,7 +59,12 @@ export function textBasedQueryStateToExpressionAst({
     const mode = getAggregateQueryMode(query);
     for (const esMode of ['sql', 'esql']) {
       if (mode === esMode && esMode in query) {
-        const essql = aggregateQueryToAst(query, timeFieldName);
+        const essql = aggregateQueryToAst({
+          query,
+          timeField: timeFieldName,
+          titleForInspector,
+          descriptionForInspector,
+        });
 
         if (essql) {
           ast.chain.push(essql);

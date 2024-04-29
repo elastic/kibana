@@ -183,7 +183,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
       />,
       defaultOptions
     );
-    const errorMessage = await findByText('Unable to load the ML anomaly explorer data');
+    const errorMessage = await findByText('Unable to load the data for the anomaly charts');
     expect(errorMessage).toBeDefined();
   });
 });

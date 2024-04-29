@@ -10,6 +10,7 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   assets = 'assets',
+  attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members

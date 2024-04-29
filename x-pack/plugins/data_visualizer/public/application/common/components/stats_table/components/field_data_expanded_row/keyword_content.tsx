@@ -55,6 +55,16 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
         barColor="success"
         onAddFilter={onAddFilter}
       />
+      {config.stats?.sampledValues && fieldName !== undefined ? (
+        <TopValues
+          stats={stats}
+          fieldFormat={fieldFormat}
+          barColor="success"
+          onAddFilter={onAddFilter}
+          showSampledValues={true}
+        />
+      ) : null}
+
       {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}
     </ExpandedRowContent>
   );

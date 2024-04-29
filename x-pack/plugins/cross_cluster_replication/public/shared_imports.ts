@@ -15,4 +15,6 @@ export {
 
 export { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';

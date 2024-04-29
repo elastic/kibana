@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-} from '@elastic/eui';
+import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -53,12 +50,8 @@ export function ResourceContents({ elementData }: ContentsProps) {
           description && (
             <div key={title}>
               <ItemRow>
-                <SubduedDescriptionListTitle>
-                  {title}
-                </SubduedDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {description}
-                </EuiDescriptionListDescription>
+                <SubduedDescriptionListTitle>{title}</SubduedDescriptionListTitle>
+                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
               </ItemRow>
             </div>
           )

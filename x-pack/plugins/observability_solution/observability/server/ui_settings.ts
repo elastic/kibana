@@ -43,6 +43,7 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
+  profilingFetchTopNFunctionsFromStacktraces,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -599,6 +600,21 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
+  },
+  [profilingFetchTopNFunctionsFromStacktraces]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
+      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
+    }),
+    description: i18n.translate(
+      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
+      {
+        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
+      }
+    ),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: false,
   },
 };
 

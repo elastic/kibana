@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
-import { mockStatsGreenIndex } from '../mock/stats/mock_stats_green_index';
+import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
 import { ERROR_LOADING_STATS } from '../translations';
 import { useStats, UseStats } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -65,7 +65,7 @@ describe('useStats', () => {
     };
 
     beforeEach(async () => {
-      mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
+      mockHttpFetch.mockResolvedValue(mockStatsAuditbeatIndex);
 
       const { waitForNextUpdate } = renderHook(() => useStats({ pattern, startDate, endDate }), {
         wrapper: ContextWrapperILMNotAvailable,
@@ -81,7 +81,7 @@ describe('useStats', () => {
     let statsResult: UseStats | undefined;
 
     beforeEach(async () => {
-      mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
+      mockHttpFetch.mockResolvedValue(mockStatsAuditbeatIndex);
 
       const { result, waitForNextUpdate } = renderHook(() => useStats(params), {
         wrapper: ContextWrapper,
@@ -91,7 +91,7 @@ describe('useStats', () => {
     });
 
     test('it returns the expected stats', async () => {
-      expect(statsResult?.stats).toEqual(mockStatsGreenIndex);
+      expect(statsResult?.stats).toEqual(mockStatsAuditbeatIndex);
     });
 
     test('it returns loading: false, because the data has loaded', async () => {

@@ -10,11 +10,7 @@ import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe
 import { renderWithTheme } from '../../../utils/test_helpers';
 import { FrameHeading } from './frame_heading';
 
-function getRenderedStackframeText(
-  stackframe: Stackframe,
-  codeLanguage: string,
-  idx: string
-) {
+function getRenderedStackframeText(stackframe: Stackframe, codeLanguage: string, idx: string) {
   const result = renderWithTheme(
     <FrameHeading
       codeLanguage={codeLanguage}
@@ -77,13 +73,10 @@ describe('FrameHeading', () => {
             {
               classname: 'OpbeansDotnet.Controllers.CustomersController',
               exclude_from_grouping: false,
-              filename:
-                '/src/opbeans-dotnet/Controllers/CustomersController.cs',
-              abs_path:
-                '/src/opbeans-dotnet/Controllers/CustomersController.cs',
+              filename: '/src/opbeans-dotnet/Controllers/CustomersController.cs',
+              abs_path: '/src/opbeans-dotnet/Controllers/CustomersController.cs',
               line: { number: 23 },
-              module:
-                'opbeans-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null',
+              module: 'opbeans-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null',
               function: 'Get',
             },
             'C#',
@@ -152,9 +145,7 @@ describe('FrameHeading', () => {
             'javascript',
             '0'
           )
-        ).toEqual(
-          'at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)'
-        );
+        ).toEqual('at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)');
       });
     });
 
@@ -257,9 +248,7 @@ describe('FrameHeading', () => {
           'javascript',
           '0'
         )
-      ).toEqual(
-        'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)'
-      );
+      ).toEqual('at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)');
     });
   });
 

@@ -35,7 +35,7 @@ export class SearchPlaygroundPlugin
     this.logger.debug('searchPlayground: Setup');
     const router = core.http.createRouter();
 
-    defineRoutes({ router, log: this.logger, getStartServices: core.getStartServices });
+    defineRoutes({ router, logger: this.logger, getStartServices: core.getStartServices });
 
     return {};
   }

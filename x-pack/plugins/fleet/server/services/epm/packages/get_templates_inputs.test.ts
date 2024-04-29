@@ -7,7 +7,7 @@
 
 import type { PackagePolicyInput } from '../../../../common/types';
 
-import { templatePackagePolicyToFullInputs } from './get_template_inputs';
+import { templatePackagePolicyToFullInputStreams } from './get_template_inputs';
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -29,7 +29,7 @@ packageInfoCache.set('limited_package-0.0.0', {
   ],
 });
 
-describe('Fleet - templatePackagePolicyToFullInputs', () => {
+describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   const mockInput: PackagePolicyInput = {
     type: 'test-logs',
     enabled: true,
@@ -112,12 +112,15 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
   };
 
   it('returns no inputs for package policy with no inputs', async () => {
-    expect(await templatePackagePolicyToFullInputs([])).toEqual([]);
+    expect(await templatePackagePolicyToFullInputStreams([])).toEqual([]);
   });
 
   it('returns inputs even when inputs where disabled', async () => {
-    expect(await templatePackagePolicyToFullInputs([{ ...mockInput, enabled: false }])).toEqual([
+    expect(
+      await templatePackagePolicyToFullInputStreams([{ ...mockInput, enabled: false }])
+    ).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             data_stream: {
@@ -127,7 +130,6 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
             id: 'test-logs-foo',
-            type: 'test-logs',
           },
           {
             data_stream: {
@@ -135,7 +137,6 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
               type: 'logs',
             },
             id: 'test-logs-bar',
-            type: 'test-logs',
           },
         ],
       },
@@ -143,20 +144,19 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
   });
 
   it('returns agent inputs with streams', async () => {
-    expect(await templatePackagePolicyToFullInputs([mockInput])).toEqual([
+    expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
-            type: 'test-logs',
           },
           {
             id: 'test-logs-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
-            type: 'test-logs',
           },
         ],
       },
@@ -164,12 +164,12 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
   });
 
   it('returns unique agent inputs IDs, with policy template name if one exists for non-limited packages', async () => {
-    expect(await templatePackagePolicyToFullInputs([mockInput])).toEqual([
+    expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
-            type: 'test-logs',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
@@ -177,7 +177,6 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
           {
             id: 'test-logs-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
-            type: 'test-logs',
           },
         ],
       },
@@ -185,8 +184,9 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
   });
 
   it('returns agent inputs without streams', async () => {
-    expect(await templatePackagePolicyToFullInputs([mockInput2])).toEqual([
+    expect(await templatePackagePolicyToFullInputStreams([mockInput2])).toEqual([
       {
+        id: 'test-metrics-some-template',
         streams: [
           {
             data_stream: {
@@ -196,7 +196,6 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
             id: 'test-metrics-foo',
-            type: 'test-metrics',
           },
         ],
       },
@@ -205,7 +204,7 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
 
   it('returns agent inputs without disabled streams', async () => {
     expect(
-      await templatePackagePolicyToFullInputs([
+      await templatePackagePolicyToFullInputStreams([
         {
           ...mockInput,
           streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
@@ -213,10 +212,10 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
       ])
     ).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
-            type: 'test-logs',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
@@ -227,7 +226,6 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
               type: 'logs',
             },
             id: 'test-logs-bar',
-            type: 'test-logs',
           },
         ],
       },
@@ -236,7 +234,7 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
 
   it('returns agent inputs with deeply merged config values', async () => {
     expect(
-      await templatePackagePolicyToFullInputs([
+      await templatePackagePolicyToFullInputStreams([
         {
           ...mockInput,
           compiled_input: {
@@ -287,15 +285,15 @@ describe('Fleet - templatePackagePolicyToFullInputs', () => {
           },
           inputVar4: '',
         },
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
-            type: 'test-logs',
           },
-          { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' }, type: 'test-logs' },
+          { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' } },
         ],
       },
     ]);

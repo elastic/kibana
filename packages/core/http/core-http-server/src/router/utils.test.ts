@@ -8,7 +8,7 @@
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidator } from './route_validator';
-import { getRequestValidation, isFullValidatorContainer } from './utils';
+import { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';
 
 type Validator = RouteValidator<unknown, unknown, unknown>;
 
@@ -39,5 +39,32 @@ describe('getRequestValidation', () => {
 
     expect(getRequestValidation(fullValidatorContainer)).toBe(validationDummy);
     expect(getRequestValidation(fullValidator)).toBe(validationDummy);
+  });
+});
+
+describe('getResponseValidation', () => {
+  it('extracts validation config', () => {
+    const validationDummy = {
+      body: {} as unknown as ObjectType,
+    };
+    const fullValidatorContainer: Validator = {
+      request: {},
+      response: validationDummy,
+    };
+
+    expect(getResponseValidation(fullValidatorContainer)).toBe(validationDummy);
+  });
+
+  it('returns "undefined" when there is no response validation configured', () => {
+    const validationDummy = {
+      body: {} as unknown as ObjectType,
+    };
+    const fullValidatorContainer: Validator = {
+      request: {},
+    };
+    const fullValidator: Validator = validationDummy;
+
+    expect(getResponseValidation(fullValidatorContainer)).toBe(undefined);
+    expect(getResponseValidation(fullValidator)).toBe(undefined);
   });
 });

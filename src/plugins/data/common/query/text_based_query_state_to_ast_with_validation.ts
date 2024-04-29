@@ -14,13 +14,19 @@ interface Args extends QueryState {
   dataView?: DataView;
   inputQuery?: Query;
   timeFieldName?: string;
+  titleForInspector?: string;
+  descriptionForInspector?: string;
 }
 
 /**
  * Converts QueryState to expression AST
  * @param filters array of kibana filters
  * @param query kibana query or aggregate query
+ * @param inputQuery
  * @param time kibana time range
+ * @param dataView
+ * @param titleForInspector
+ * @param descriptionForInspector
  */
 export async function textBasedQueryStateToAstWithValidation({
   filters,
@@ -28,6 +34,8 @@ export async function textBasedQueryStateToAstWithValidation({
   inputQuery,
   time,
   dataView,
+  titleForInspector,
+  descriptionForInspector,
 }: Args) {
   let ast;
   if (query && isOfAggregateQueryType(query)) {
@@ -37,6 +45,8 @@ export async function textBasedQueryStateToAstWithValidation({
       inputQuery,
       time,
       timeFieldName: dataView?.timeFieldName,
+      titleForInspector,
+      descriptionForInspector,
     });
   }
   return ast;

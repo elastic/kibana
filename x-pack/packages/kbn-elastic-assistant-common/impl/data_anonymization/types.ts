@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacements } from '../schemas';
 import { AnonymizationFieldResponse } from '../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export interface AnonymizedValues {
@@ -12,7 +13,7 @@ export interface AnonymizedValues {
   anonymizedValues: string[];
 
   /** A map from replacement value to original value */
-  replacements: Record<string, string>;
+  replacements: Replacements;
 }
 
 export interface AnonymizedData {
@@ -20,7 +21,7 @@ export interface AnonymizedData {
   anonymizedData: Record<string, string[]>;
 
   /** A map from replacement value to original value */
-  replacements: Record<string, string>;
+  replacements: Replacements;
 }
 
 export type GetAnonymizedValues = ({
@@ -31,13 +32,13 @@ export type GetAnonymizedValues = ({
   rawData,
 }: {
   anonymizationFields?: AnonymizationFieldResponse[];
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacements | undefined;
   field: string;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   rawData: Record<string, unknown[]>;

@@ -8,9 +8,8 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -80,13 +79,11 @@ export const createAppMockRenderer = ({
     },
   };
   const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
-    <I18nProvider>
-      <KibanaThemeProvider theme={core.theme}>
-        <KibanaContextProvider services={services}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </I18nProvider>
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   ));
 
   AppWrapper.displayName = 'AppWrapper';

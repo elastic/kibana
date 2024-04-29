@@ -8,24 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SuggestionRawDefinition } from './types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
-import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getAllCommands } from '../shared/helpers';
 import {
-  getSuggestionFunctionDefinition,
   getSuggestionBuiltinDefinition,
   getSuggestionCommandDefinition,
   TRIGGER_SUGGESTION_COMMAND,
   buildConstantsDefinitions,
 } from './factories';
-
-export const mathCommandDefinition: SuggestionRawDefinition[] = evalFunctionsDefinitions.map(
-  getSuggestionFunctionDefinition
-);
-
-export const aggregationFunctionsDefinitions: SuggestionRawDefinition[] =
-  statsAggregationFunctionDefinitions.map(getSuggestionFunctionDefinition);
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;

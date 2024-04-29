@@ -76,9 +76,11 @@ export const SettingsFieldWrapper: React.FC<{
       description={
         <>
           {settingsConfig.description}.{' '}
-          <EuiLink href={settingsConfig.learnMoreLink} external>
-            Learn more.
-          </EuiLink>
+          {settingsConfig.learnMoreLink && (
+            <EuiLink href={settingsConfig.learnMoreLink} external>
+              Learn more.
+            </EuiLink>
+          )}
         </>
       }
     >

@@ -13,7 +13,6 @@ import { transformCreateBody } from './v1';
 
 describe('Transform actions V1', () => {
   const defaultAction: CreateRuleAction = {
-    actionTypeId: 'test',
     group: 'default',
     id: '2',
     params: {},
@@ -22,7 +21,6 @@ describe('Transform actions V1', () => {
   };
 
   const systemAction: CreateRuleAction = {
-    actionTypeId: 'test-2',
     id: 'system_action-id',
     params: {},
     uuid: '123-456',
@@ -42,14 +40,17 @@ describe('Transform actions V1', () => {
   };
 
   describe('transformCreateBody', () => {
-    const isSystemAction = jest.fn().mockImplementation((id) => id === 'system_action-id');
-
     it('should transform the system actions correctly', async () => {
-      expect(transformCreateBody(rule, isSystemAction)).toMatchInlineSnapshot(`
+      expect(
+        transformCreateBody({
+          createBody: rule,
+          actions: [defaultAction],
+          systemActions: [systemAction],
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "actions": Array [
             Object {
-              "actionTypeId": "test",
               "group": "default",
               "id": "2",
               "params": Object {},
@@ -68,7 +69,6 @@ describe('Transform actions V1', () => {
           },
           "systemActions": Array [
             Object {
-              "actionTypeId": "test-2",
               "id": "system_action-id",
               "params": Object {},
               "uuid": "123-456",

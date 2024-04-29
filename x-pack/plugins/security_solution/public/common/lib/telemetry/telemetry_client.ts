@@ -24,7 +24,7 @@ import type {
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
-  ReportInsightsGeneratedParams,
+  ReportAttackDiscoveriesGeneratedParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
   ReportDetailsFlyoutOpenedParams,
@@ -33,6 +33,9 @@ import type {
   ReportAssetCriticalityFileSelectedParams,
   ReportAssetCriticalityCsvImportedParams,
   ReportAddRiskInputToTimelineClickedParams,
+  OnboardingHubStepLinkClickedParams,
+  OnboardingHubStepOpenParams,
+  OnboardingHubStepFinishedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -71,8 +74,8 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params);
   };
 
-  public reportInsightsGenerated = (params: ReportInsightsGeneratedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.InsightsGenerated, params);
+  public reportAttackDiscoveriesGenerated = (params: ReportAttackDiscoveriesGeneratedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AttackDiscoveriesGenerated, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
@@ -157,5 +160,17 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportDetailsFlyoutTabClicked = (params: ReportDetailsFlyoutTabClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, params);
+  };
+
+  public reportOnboardingHubStepOpen = (params: OnboardingHubStepOpenParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepOpen, params);
+  };
+
+  public reportOnboardingHubStepFinished = (params: OnboardingHubStepFinishedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepFinished, params);
+  };
+
+  public reportOnboardingHubStepLinkClicked = (params: OnboardingHubStepLinkClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepLinkClicked, params);
   };
 }

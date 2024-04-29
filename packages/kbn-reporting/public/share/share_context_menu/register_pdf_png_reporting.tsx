@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingAPIClient, checkLicense } from '../..';
@@ -57,12 +57,10 @@ const getJobParams =
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   license,
   application,
   usesUiCapabilities,
-  theme,
+  startServices$,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -113,7 +111,7 @@ export const reportingScreenshotShareProvider = ({
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions = [];
+    const shareActions: ShareMenuItem[] = [];
 
     const pngPanelTitle = i18n.translate('reporting.share.contextMenu.pngReportsButtonLabel', {
       defaultMessage: 'PNG Reports',
@@ -150,15 +148,13 @@ export const reportingScreenshotShareProvider = ({
         content: (
           <ScreenCapturePanelContent
             apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
             reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
-            theme={theme}
+            startServices$={startServices$}
           />
         ),
       },
@@ -185,8 +181,6 @@ export const reportingScreenshotShareProvider = ({
         content: (
           <ScreenCapturePanelContent
             apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
             reportType={pdfReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
@@ -194,7 +188,7 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
-            theme={theme}
+            startServices$={startServices$}
           />
         ),
       },

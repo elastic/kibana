@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListProps,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiDescriptionListProps, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../common/utils/formatters';
@@ -32,10 +28,9 @@ export function ContainerDetails({ container, kubernetes }: Props) {
 
   if (kubernetes?.containerImages && kubernetes?.containerImages.length > 0) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.image.name',
-        { defaultMessage: 'Container images' }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.container.image.name', {
+        defaultMessage: 'Container images',
+      }),
       description: (
         <ul>
           {kubernetes.containerImages.map((deployment, index) => (
@@ -50,22 +45,18 @@ export function ContainerDetails({ container, kubernetes }: Props) {
 
   if (container.os) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.os.label',
-        {
-          defaultMessage: 'OS',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.container.os.label', {
+        defaultMessage: 'OS',
+      }),
       description: container.os,
     });
   }
 
   if (kubernetes?.deployments && kubernetes?.deployments.length > 0) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.kubernetes.deployments',
-        { defaultMessage: 'Deployments' }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.kubernetes.deployments', {
+        defaultMessage: 'Deployments',
+      }),
       description: (
         <ul>
           {kubernetes.deployments.map((deployment, index) => (
@@ -80,10 +71,9 @@ export function ContainerDetails({ container, kubernetes }: Props) {
 
   if (kubernetes?.namespaces && kubernetes?.namespaces.length > 0) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.kubernetes.namespaces',
-        { defaultMessage: 'Namespaces' }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.kubernetes.namespaces', {
+        defaultMessage: 'Namespaces',
+      }),
       description: (
         <ul>
           {kubernetes.namespaces.map((namespace, index) => (
@@ -98,10 +88,9 @@ export function ContainerDetails({ container, kubernetes }: Props) {
 
   if (kubernetes?.replicasets && kubernetes?.replicasets.length > 0) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.kubernetes.replicasets',
-        { defaultMessage: 'Replicasets' }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.kubernetes.replicasets', {
+        defaultMessage: 'Replicasets',
+      }),
       description: (
         <ul>
           {kubernetes.replicasets.map((replicaset, index) => (

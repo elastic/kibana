@@ -24,13 +24,10 @@ let mockHistoryReplace: jest.SpyInstance;
 function DatePickerWrapper() {
   const location = useLocation();
 
-  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = qs.parse(
-    location.search,
-    {
-      parseNumbers: true,
-      parseBooleans: true,
-    }
-  ) as {
+  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = qs.parse(location.search, {
+    parseNumbers: true,
+    parseBooleans: true,
+  }) as {
     rangeFrom?: string;
     rangeTo?: string;
     refreshInterval?: number;

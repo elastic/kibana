@@ -22,13 +22,7 @@ import { fromQuery } from '../../shared/links/url_helpers';
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import type { APIEndpoint } from '../../../../server';
 
-function wrapper({
-  children,
-  error = false,
-}: {
-  children?: ReactNode;
-  error: boolean;
-}) {
+function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
       await delay(100);
@@ -47,9 +41,7 @@ function wrapper({
           return { fieldCandidates: ['field-1', 'field2'] };
         case 'POST /internal/apm/correlations/field_value_pairs/transactions':
           return {
-            fieldValuePairs: [
-              { fieldName: 'field-name-1', fieldValue: 'field-value-1' },
-            ],
+            fieldValuePairs: [{ fieldName: 'field-name-1', fieldValue: 'field-value-1' }],
           };
         case 'POST /internal/apm/correlations/p_values/transactions':
           return {
@@ -111,12 +103,9 @@ describe('useFailedTransactionsCorrelations', () => {
 
   describe('when successfully loading results', () => {
     it('should automatically start fetching results', async () => {
-      const { result, unmount } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+      });
 
       try {
         expect(result.current.progress).toEqual({
@@ -132,12 +121,9 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should not have received any results after 50ms', async () => {
-      const { result, unmount } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+      });
 
       try {
         jest.advanceTimersByTime(50);
@@ -153,12 +139,9 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount, waitFor } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+      });
 
       try {
         // Each simulated request takes 100ms. After an initial 50ms
@@ -270,15 +253,12 @@ describe('useFailedTransactionsCorrelations', () => {
   });
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
-      const { result, unmount } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
-        }
-      );
+      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+        initialProps: {
+          error: true,
+        },
+      });
 
       try {
         expect(result.current.progress).toEqual({
@@ -291,15 +271,12 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should still be running after 50ms', async () => {
-      const { result, unmount } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
-        }
-      );
+      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+        initialProps: {
+          error: true,
+        },
+      });
 
       try {
         jest.advanceTimersByTime(50);
@@ -315,21 +292,16 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-          initialProps: {
-            error: true,
-          },
-        }
-      );
+      const { result, unmount, waitFor } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+        initialProps: {
+          error: true,
+        },
+      });
 
       try {
         jest.advanceTimersByTime(150);
-        await waitFor(() =>
-          expect(result.current.progress.error).toBeDefined()
-        );
+        await waitFor(() => expect(result.current.progress.error).toBeDefined());
 
         expect(result.current.progress).toEqual({
           error: 'Something went wrong',
@@ -344,12 +316,9 @@ describe('useFailedTransactionsCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(
-        () => useFailedTransactionsCorrelations(),
-        {
-          wrapper,
-        }
-      );
+      const { result, unmount, waitFor } = renderHook(() => useFailedTransactionsCorrelations(), {
+        wrapper,
+      });
 
       try {
         jest.advanceTimersByTime(50);
@@ -361,9 +330,7 @@ describe('useFailedTransactionsCorrelations', () => {
           result.current.cancelFetch();
         });
 
-        await waitFor(() =>
-          expect(result.current.progress.isRunning).toEqual(false)
-        );
+        await waitFor(() => expect(result.current.progress.isRunning).toEqual(false));
       } finally {
         unmount();
       }

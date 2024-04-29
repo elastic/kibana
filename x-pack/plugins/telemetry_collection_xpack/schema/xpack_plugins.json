@@ -8114,6 +8114,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8148,6 +8154,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8182,6 +8194,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8216,6 +8234,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8254,6 +8278,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8288,6 +8318,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8322,6 +8358,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8356,6 +8398,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8401,6 +8449,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8435,6 +8489,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8469,6 +8529,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8503,6 +8569,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8541,6 +8613,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8575,6 +8653,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8609,6 +8693,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8643,6 +8733,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -8903,6 +8999,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8937,6 +9039,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -8971,6 +9079,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9005,6 +9119,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -9043,6 +9163,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9077,6 +9203,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9111,6 +9243,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9145,6 +9283,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -9190,6 +9334,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9224,6 +9374,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9258,6 +9414,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9292,6 +9454,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -9330,6 +9498,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9364,6 +9538,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9398,6 +9578,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -9432,6 +9618,12 @@
                               },
                               "totalDurationSeconds": {
                                 "type": "long"
+                              },
+                              "topErrors": {
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }

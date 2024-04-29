@@ -24,7 +24,7 @@ import {
   EuiIconTip,
   EuiBetaBadge,
 } from '@elastic/eui';
-import { betaBadgeProps } from './beta_badge_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
@@ -191,8 +191,8 @@ export const AddConnectorInline = ({
             {actionTypeRegistered && actionTypeRegistered.isExperimental && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
-                  label={betaBadgeProps.label}
-                  tooltipContent={betaBadgeProps.tooltipContent}
+                  label={TECH_PREVIEW_LABEL}
+                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
                 />
               </EuiFlexItem>
             )}

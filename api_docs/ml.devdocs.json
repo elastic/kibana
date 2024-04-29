@@ -499,7 +499,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
+              "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; canCreateInferenceEndpoint: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false,
@@ -992,6 +992,62 @@
             "text": "AnomalySwimLaneEmbeddableState"
           },
           "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          },
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1572,6 +1628,18 @@
         "MlTrainedModelConfig",
         ">; installElasticTrainedModelConfig(modelId: string): Promise<",
         "MlTrainedModelConfig",
+        ">; }; inferenceModels: { createInferenceEndpoint(inferenceId: string, taskType: ",
+        "InferenceTaskType",
+        ", modelConfig: ",
+        {
+          "pluginId": "@kbn/inference_integration_flyout",
+          "scope": "common",
+          "docId": "kibKbnInferenceIntegrationFlyoutPluginApi",
+          "section": "def-common.ModelConfig",
+          "text": "ModelConfig"
+        },
+        "): Promise<",
+        "InferenceModelConfigContainer",
         ">; }; notifications: { findMessages(params: ",
         "NotificationsQueryParams",
         "): Promise<",

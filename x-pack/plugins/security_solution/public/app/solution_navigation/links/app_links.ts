@@ -6,7 +6,7 @@
  */
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { cloneDeep, find, remove } from 'lodash';
+import { cloneDeep, remove } from 'lodash';
 import type { AppLinkItems, LinkItem } from '../../../common/links/types';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
@@ -24,12 +24,6 @@ export const solutionAppLinksSwitcher = (appLinks: AppLinkItems): AppLinkItems =
   const [timelineLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.timelines });
   if (timelineLinkItem) {
     solutionAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
-  }
-
-  // Remove data quality dashboard link
-  const dashboardLinkItem = find(solutionAppLinks, { id: SecurityPageName.dashboards });
-  if (dashboardLinkItem && dashboardLinkItem.links) {
-    remove(dashboardLinkItem.links, { id: SecurityPageName.dataQuality });
   }
 
   // Remove manage link

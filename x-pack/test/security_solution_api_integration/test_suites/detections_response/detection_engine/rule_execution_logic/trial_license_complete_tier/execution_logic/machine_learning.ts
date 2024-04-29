@@ -56,6 +56,7 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { getMetricsRequest, getMetricsWithRetry } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -69,6 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
+  const retry = getService('retry');
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
@@ -85,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/171426
-  describe.skip('@ess @serverless Machine learning type rules', () => {
+  describe.skip('@ess @serverless @serverlessQA Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -181,15 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('classifies ml job missing errors as user errors', async () => {
-      function getMetricsRequest(reset: boolean = false) {
-        return request
-          .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => response.body);
-      }
-
-      await getMetricsRequest(true);
+      await getMetricsRequest(request, true);
       const badRule: MachineLearningRuleCreateProps = {
         ...rule,
         machine_learning_job_id: 'doesNotExist',
@@ -210,13 +204,17 @@ export default ({ getService }: FtrProviderContext) => {
         true
       );
 
-      const metricsResponse = await getMetricsRequest();
-      expect(
-        metricsResponse.metrics.task_run.value.by_type['alerting:siem__mlRule'].user_errors
-      ).toEqual(1);
+      const metricsResponse = await getMetricsWithRetry(
+        request,
+        retry,
+        false,
+        (metrics) =>
+          metrics.metrics?.task_run?.value.by_type['alerting:siem__mlRule'].user_errors === 1
+      );
+      expect(metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__mlRule']).toEqual(1);
     });
 
-    it('@skipInQA generates max alerts warning when circuit breaker is exceeded', async () => {
+    it('@skipInServerlessMKI generates max alerts warning when circuit breaker is exceeded', async () => {
       const { logs } = await previewRule({
         supertest,
         rule: { ...rule, anomaly_threshold: 1, max_signals: 5 }, // This threshold generates 10 alerts with the current esArchive
@@ -232,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
-    it('@skipInQA should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
+    it('@skipInServerlessMKI should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
       const { previewId } = await previewRule({
         supertest,
         rule: { ...rule, anomaly_threshold: 20 },
@@ -311,7 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
-      it('@skipInQA should be enriched with host risk score', async () => {
+      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts.length).toBe(1);

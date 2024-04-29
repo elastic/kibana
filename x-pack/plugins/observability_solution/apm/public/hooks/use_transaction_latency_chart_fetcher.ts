@@ -28,15 +28,11 @@ export function useTransactionLatencyChartsFetcher({
   transactionName: string | null;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { transactionType, serviceName, transactionTypeStatus } =
-    useApmServiceContext();
+  const { transactionType, serviceName, transactionTypeStatus } = useApmServiceContext();
 
   const {
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
@@ -50,8 +46,7 @@ export function useTransactionLatencyChartsFetcher({
   });
 
   const shouldUseDurationSummary =
-    latencyAggregationType === 'avg' &&
-    preferred?.source?.hasDurationSummaryField;
+    latencyAggregationType === 'avg' && preferred?.source?.hasDurationSummaryField;
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -59,39 +54,26 @@ export function useTransactionLatencyChartsFetcher({
         return Promise.resolve(undefined);
       }
 
-      if (
-        serviceName &&
-        start &&
-        end &&
-        transactionType &&
-        latencyAggregationType &&
-        preferred
-      ) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                transactionType,
-                useDurationSummary: !!shouldUseDurationSummary,
-                transactionName: transactionName || undefined,
-                latencyAggregationType,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-                documentType: preferred.source.documentType,
-                rollupInterval: preferred.source.rollupInterval,
-                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-              },
+      if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
+        return callApmApi('GET /internal/apm/services/{serviceName}/transactions/charts/latency', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              useDurationSummary: !!shouldUseDurationSummary,
+              transactionName: transactionName || undefined,
+              latencyAggregationType,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
             },
-          }
-        );
+          },
+        });
       }
     },
     [

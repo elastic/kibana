@@ -41,6 +41,7 @@ describe('utils', () => {
           'host.name': ['apache'],
           'host.ip': ['192.168.0.1'],
           'event.id': ['1'],
+          'event.kind': ['signal'],
           'event.action': ['Action'],
           'event.category': ['Access'],
           'event.module': ['nginx'],

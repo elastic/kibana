@@ -11,16 +11,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
-import {
-  asTransactionRate,
-  TimeFormatter,
-} from '../../../../../common/utils/formatters';
+import { asTransactionRate, TimeFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem =
-  ServiceInstanceMainStatistics['currentPeriod'][0];
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 
 const latencyLabel = i18n.translate(
   'xpack.apm.instancesLatencyDistributionChartTooltipLatencyLabel',
@@ -58,25 +54,18 @@ function SingleInstanceCustomTooltip({
 
   return (
     <>
-      <div className="echTooltip__header">
-        {getServiceNodeName(serviceNodeName)}
-      </div>
+      <div className="echTooltip__header">{getServiceNodeName(serviceNodeName)}</div>
       <div className="echTooltip__list">
         <div className="echTooltip__item">
           <div
             className="echTooltip__item--backgroundColor"
             style={{ backgroundColor: 'transparent' }}
           >
-            <div
-              className="echTooltip__item--color"
-              style={{ backgroundColor: color }}
-            />
+            <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
           </div>
           <div className="echTooltip__item--container">
             <span className="echTooltip__label">{latencyLabel}</span>
-            <span className="echTooltip__value">
-              {latencyFormatter(latency).formatted}
-            </span>
+            <span className="echTooltip__value">{latencyFormatter(latency).formatted}</span>
           </div>
         </div>
         <div className="echTooltip__item">
@@ -84,16 +73,11 @@ function SingleInstanceCustomTooltip({
             className="echTooltip__item--backgroundColor"
             style={{ backgroundColor: 'transparent' }}
           >
-            <div
-              className="echTooltip__item--color"
-              style={{ backgroundColor: color }}
-            />
+            <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
           </div>
           <div className="echTooltip__item--container">
             <span className="echTooltip__label">{throughputLabel}</span>
-            <span className="echTooltip__value">
-              {asTransactionRate(throughput)}
-            </span>
+            <span className="echTooltip__value">{asTransactionRate(throughput)}</span>
           </div>
         </div>
       </div>
@@ -113,14 +97,11 @@ function MultipleInstanceCustomTooltip({
   return (
     <>
       <div className="echTooltip__header">
-        {i18n.translate(
-          'xpack.apm.instancesLatencyDistributionChartTooltipInstancesTitle',
-          {
-            defaultMessage:
-              '{instancesCount} {instancesCount, plural, one {instance} other {instances}}',
-            values: { instancesCount: values.length },
-          }
-        )}
+        {i18n.translate('xpack.apm.instancesLatencyDistributionChartTooltipInstancesTitle', {
+          defaultMessage:
+            '{instancesCount} {instancesCount, plural, one {instance} other {instances}}',
+          values: { instancesCount: values.length },
+        })}
       </div>
       {values.map((value) => {
         const { color, seriesIdentifier } = value;
@@ -133,15 +114,10 @@ function MultipleInstanceCustomTooltip({
                 className="echTooltip__item--backgroundColor"
                 style={{ backgroundColor: 'transparent' }}
               >
-                <div
-                  className="echTooltip__item--color"
-                  style={{ backgroundColor: color }}
-                />
+                <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
               <div className="echTooltip__item--container">
-                <span className="echTooltip__label">
-                  {getServiceNodeName(serviceNodeName)}
-                </span>
+                <span className="echTooltip__label">{getServiceNodeName(serviceNodeName)}</span>
               </div>
             </div>
             <div className="echTooltip__item">
@@ -149,19 +125,14 @@ function MultipleInstanceCustomTooltip({
                 className="echTooltip__item--backgroundColor"
                 style={{ backgroundColor: 'transparent' }}
               >
-                <div
-                  className="echTooltip__item--color"
-                  style={{ backgroundColor: color }}
-                />
+                <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
               <div
                 className="echTooltip__item--container"
                 style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{latencyLabel}</span>
-                <span className="echTooltip__value">
-                  {latencyFormatter(latency).formatted}
-                </span>
+                <span className="echTooltip__value">{latencyFormatter(latency).formatted}</span>
               </div>
             </div>
             <div className="echTooltip__item">
@@ -169,19 +140,14 @@ function MultipleInstanceCustomTooltip({
                 className="echTooltip__item--backgroundColor"
                 style={{ backgroundColor: 'transparent' }}
               >
-                <div
-                  className="echTooltip__item--color"
-                  style={{ backgroundColor: color }}
-                />
+                <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
               <div
                 className="echTooltip__item--container"
                 style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{throughputLabel}</span>
-                <span className="echTooltip__value">
-                  {asTransactionRate(throughput)}
-                </span>
+                <span className="echTooltip__value">{asTransactionRate(throughput)}</span>
               </div>
             </div>
           </div>
@@ -198,9 +164,7 @@ function MultipleInstanceCustomTooltip({
  *
  * We probably won't need to do all of this once https://github.com/elastic/elastic-charts/issues/615 is completed.
  */
-export function CustomTooltip(
-  props: TooltipInfo & { latencyFormatter: TimeFormatter }
-) {
+export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeFormatter }) {
   const { values } = props;
   const theme = useTheme();
 

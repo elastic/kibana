@@ -202,6 +202,8 @@ export class ProjectNavigationService {
       changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
       /** In stateful Kibana, get the active solution navigation definition */
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
+      /** In stateful Kibana, get the id of the active solution navigation */
+      getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
     };
   }
 
