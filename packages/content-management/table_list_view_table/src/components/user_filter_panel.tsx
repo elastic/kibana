@@ -148,7 +148,7 @@ export const UserFilterPanel: FC<{}> = () => {
             />
           ) : undefined,
           emptyMessage: (
-            <p>
+            <p data-test-subj="userFilterEmptyMessage">
               <FormattedMessage
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
