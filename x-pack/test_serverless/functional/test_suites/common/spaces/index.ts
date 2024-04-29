@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './flyout_detail';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default ({ loadTestFile }: FtrProviderContext) => {
+  describe('Spaces', function () {
+    loadTestFile(require.resolve('./spaces_selection.ts'));
+  });
+};
