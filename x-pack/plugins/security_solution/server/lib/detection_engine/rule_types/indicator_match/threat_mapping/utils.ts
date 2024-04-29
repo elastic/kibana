@@ -273,6 +273,7 @@ export const getMaxClauseCountErrorValue = (
       const foundNestedClauseCountValue = tooManyNestedClausesMessage?.match(regex)?.[0];
 
       if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
+        const errorType = `${MANY_NESTED_CLAUSES_ERR} ${foundNestedClauseCountValue}`;
         const tempVal = parseInt(foundNestedClauseCountValue, 10);
         eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
           `Query contains too many nested clauses error received during IM search`,
@@ -294,11 +295,12 @@ export const getMaxClauseCountErrorValue = (
         if (val >= previousChunkSize) {
           return {
             maxClauseCountValue: Math.floor(previousChunkSize / 2),
-            errorType: MANY_NESTED_CLAUSES_ERR,
+            errorType,
           };
         }
-        return { maxClauseCountValue: val, errorType: MANY_NESTED_CLAUSES_ERR };
+        return { maxClauseCountValue: val, errorType };
       } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+        const errorType = `${FAILED_CREATE_QUERY_MAX_CLAUSE} ${foundNestedClauseCountValue}`;
         const tempVal = parseInt(foundMaxClauseCountValue, 10);
         eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
           `failed to create query error received during IM search`,
@@ -307,7 +309,10 @@ export const getMaxClauseCountErrorValue = (
         // and we add 1 to threatEntries to increase the number of "buckets"
         // that our searches are spread over, smaller buckets means less clauses
         const val = Math.floor((tempVal - 1) / (threatEntriesCount + 1));
-        return { maxClauseCountValue: val, errorType: FAILED_CREATE_QUERY_MAX_CLAUSE };
+        return {
+          maxClauseCountValue: val,
+          errorType,
+        };
       } else {
         return acc;
       }
