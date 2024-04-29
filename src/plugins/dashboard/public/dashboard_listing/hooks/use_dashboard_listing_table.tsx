@@ -13,7 +13,6 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
-import { UserProfile } from '@kbn/user-profile-components';
 
 import {
   DASHBOARD_CONTENT_ID,
@@ -99,7 +98,6 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
-    userProfile,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -265,15 +263,6 @@ export const useDashboardListingTable = ({
     [goToDashboard]
   );
 
-  const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
-    async (userProfileIds: string[]) => {
-      if (userProfileIds.length === 0) return [];
-
-      return userProfile.bulkGet({ uids: new Set(userProfileIds), dataPath: 'avatar' });
-    },
-    [userProfile]
-  );
-
   const onFetchSuccess = useCallback(() => {
     if (!hasInitialFetchReturned) {
       setHasInitialFetchReturned(true);
@@ -309,7 +298,7 @@ export const useDashboardListingTable = ({
       setPageDataTestSubject,
       title,
       urlStateEnabled,
-      bulkGetUserProfiles,
+      createdByEnabled: true,
     }),
     [
       contentEditorValidators,
@@ -332,7 +321,6 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
-      bulkGetUserProfiles,
     ]
   );
 

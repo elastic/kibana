@@ -13,12 +13,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useServices } from '../services';
 
 interface Context {
+  enabled: boolean;
   onSelectedUsersChange: (users: string[]) => void;
   selectedUsers: string[];
   allUsers: string[];
-  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
+  showNoUserOption: boolean;
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
@@ -27,7 +29,7 @@ const queryClient = new QueryClient({
 });
 
 export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
-  if (!props.bulkGetUserProfiles) {
+  if (!props.enabled) {
     return <>{children}</>;
   }
 
@@ -41,21 +43,22 @@ export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) =
 export const NULL_USER = 'no-user';
 
 export const UserFilterPanel: FC<{}> = () => {
+  const { bulkGetUserProfiles } = useServices();
   const { euiTheme } = useEuiTheme();
   const componentContext = React.useContext(UserFilterContext);
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
-  if (!componentContext.bulkGetUserProfiles)
+  if (!bulkGetUserProfiles)
     throw new Error('UserFilterPanel must be used with a bulkGetUserProfiles function');
 
-  const { onSelectedUsersChange, selectedUsers } = componentContext;
+  const { onSelectedUsersChange, selectedUsers, showNoUserOption } = componentContext;
 
   const [isPopoverOpen, setPopoverOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const query = useQuery({
     queryKey: ['user-filter-suggestions', componentContext.allUsers],
-    queryFn: () => componentContext.bulkGetUserProfiles!(componentContext.allUsers),
+    queryFn: () => bulkGetUserProfiles(componentContext.allUsers),
     enabled: isPopoverOpen,
   });
 
@@ -70,7 +73,7 @@ export const UserFilterPanel: FC<{}> = () => {
   const visibleOptions = React.useMemo(() => {
     if (!query.data || query.data.length === 0) return [];
     // attach null to the end of the list to represent the "no creator" option
-    const users = [...query.data, null];
+    const users = showNoUserOption ? [...query.data, null] : query.data;
 
     if (!searchTerm) {
       return users;
@@ -94,7 +97,7 @@ export const UserFilterPanel: FC<{}> = () => {
       ).toLowerCase();
       return searchString.includes(searchTerm.toLowerCase());
     });
-  }, [query.data, searchTerm, selectedUsers]);
+  }, [query.data, searchTerm, selectedUsers, showNoUserOption]);
 
   const noUsersTip = (
     <EuiIconTip

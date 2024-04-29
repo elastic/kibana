@@ -11,6 +11,8 @@ import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 import {
   ContentEditorKibanaProvider,
@@ -58,6 +60,8 @@ export interface Services {
   /** Handler to return the url to navigate to the kibana tags management */
   getTagManagementUrl: () => string;
   getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
+  /** resolve user profiles for the user filter and creator functionality */
+  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -100,6 +104,9 @@ export interface TableListViewKibanaDependencies {
       theme$: Observable<{
         readonly darkMode: boolean;
       }>;
+    };
+    userProfile: {
+      bulkGet: UserProfileServiceStart['bulkGet'];
     };
   };
   /**
@@ -216,6 +223,15 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     [getTagIdsFromReferences]
   );
 
+  const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
+    async (uids: string[]) => {
+      if (uids.length === 0) return [];
+
+      return core.userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
+    },
+    [core.userProfile]
+  );
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <ContentEditorKibanaProvider
@@ -242,6 +258,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
           getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+          bulkGetUserProfiles={bulkGetUserProfiles}
         >
           {children}
         </TableListViewProvider>

@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { UserProfile } from '@kbn/user-profile-components';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
@@ -68,8 +67,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
-  /** resolve user profiles for the user filter and creator functionality */
-  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
+  createdByEnabled: boolean;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -97,7 +95,7 @@ export function Table<T extends UserContentCommonSchema>({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
-  bulkGetUserProfiles,
+  createdByEnabled,
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -213,18 +211,18 @@ export function Table<T extends UserContentCommonSchema>({
   ]);
 
   const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
-    return bulkGetUserProfiles
+    return createdByEnabled
       ? {
           type: 'custom_component',
           component: UserFilterPanel,
         }
       : null;
-  }, [bulkGetUserProfiles]);
+  }, [createdByEnabled]);
 
   const searchFilters = useMemo(() => {
     return [tableSortSelectFilter, tagFilterPanel, userFilterPanel].filter(
-      Boolean
-    ) as SearchFilterConfig[];
+      (f: SearchFilterConfig | null): f is SearchFilterConfig => Boolean(f)
+    );
   }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
 
   const search = useMemo((): Search => {
@@ -260,24 +258,29 @@ export function Table<T extends UserContentCommonSchema>({
     return items;
   }, [items, tableFilter]);
 
-  const allUsers = useMemo(() => {
-    if (!bulkGetUserProfiles) return []; /* no user profiles, no users */
+  const { allUsers, showNoUserOption } = useMemo(() => {
+    if (!createdByEnabled) return { allUsers: [], showNoUserOption: false };
 
+    let _showNoUserOption = false;
     const users = new Set<string>();
     items.forEach((item) => {
       if (item.createdBy) users.add(item.createdBy);
+      else {
+        _showNoUserOption = true;
+      }
     });
-    return Array.from(users);
-  }, [bulkGetUserProfiles, items]);
+    return { allUsers: Array.from(users), showNoUserOption: _showNoUserOption };
+  }, [createdByEnabled, items]);
 
   return (
     <UserFilterContextProvider
-      bulkGetUserProfiles={bulkGetUserProfiles}
+      enabled={createdByEnabled}
       allUsers={allUsers}
       onSelectedUsersChange={(selectedUsers) => {
         onFilterChange({ createdBy: selectedUsers });
       }}
       selectedUsers={tableFilter.createdBy}
+      showNoUserOption={showNoUserOption}
     >
       <EuiInMemoryTable<T>
         itemId="id"

@@ -32,7 +32,6 @@ import type {
   SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { UserProfile } from '@kbn/user-profile-components';
 
 import {
   Table,
@@ -66,6 +65,7 @@ export interface TableListViewTableProps<
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   urlStateEnabled?: boolean;
+  createdByEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -114,9 +114,6 @@ export interface TableListViewTableProps<
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
-
-  /** resolve user profiles for the user filter and creator functionality */
-  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -290,7 +287,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
-  bulkGetUserProfiles,
+  createdByEnabled = false,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -1075,7 +1072,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
-          bulkGetUserProfiles={bulkGetUserProfiles}
+          createdByEnabled={createdByEnabled}
         />
 
         {/* Delete modal */}
