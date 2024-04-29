@@ -30,11 +30,11 @@ const route: VersionedRouterRoute = {
           response: {
             200: {
               bodyContentType: 'application/test+json',
-              body: schema.object({ bar: schema.number({ min: 1, max: 99 }) }),
+              body: () => schema.object({ bar: schema.number({ min: 1, max: 99 }) }),
             },
             404: {
               bodyContentType: 'application/test2+json',
-              body: schema.object({ ok: schema.literal(false) }),
+              body: () => schema.object({ ok: schema.literal(false) }),
             },
             unsafe: { body: false },
           },
@@ -52,11 +52,11 @@ const route: VersionedRouterRoute = {
           response: {
             200: {
               bodyContentType: 'application/test+json',
-              body: schema.object({ bar2: schema.number({ min: 1, max: 99 }) }),
+              body: () => schema.object({ bar2: schema.number({ min: 1, max: 99 }) }),
             },
             500: {
               bodyContentType: 'application/test2+json',
-              body: schema.object({ ok: schema.literal(false) }),
+              body: () => schema.object({ ok: schema.literal(false) }),
             },
             unsafe: { body: false },
           },

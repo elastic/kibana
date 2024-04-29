@@ -34,25 +34,25 @@ export const registerResolveRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    router.handleLegacyErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/resolve/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
+      const { type, id } = request.params;
       const { savedObjects } = await context.core;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsResolve({ request, types: [type] }).catch(() => {});
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
       const result = await savedObjects.client.resolve(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

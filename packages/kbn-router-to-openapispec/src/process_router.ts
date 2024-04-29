@@ -96,7 +96,7 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
     const contentType = extractContentType(route.options?.body);
     return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
       (acc, [statusCode, schema]) => {
-        const oasSchema = converter.convert(schema.body);
+        const oasSchema = converter.convert(schema.body());
         acc[statusCode] = {
           ...acc[statusCode],
           description: route.options.description ?? 'No description',

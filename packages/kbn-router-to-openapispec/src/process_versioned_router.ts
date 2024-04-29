@@ -10,6 +10,7 @@ import {
   type CoreVersionedRouter,
   versionHandlerResolvers,
   VersionedRouterRoute,
+  unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
@@ -117,7 +118,7 @@ export const extractVersionedResponses = (
     if (!schemas?.response) return acc;
     const { unsafe, ...responses } = schemas.response;
     for (const [statusCode, responseSchema] of Object.entries(responses)) {
-      const maybeSchema = responseSchema.body;
+      const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
       const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],

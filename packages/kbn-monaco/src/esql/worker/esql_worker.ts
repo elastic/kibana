@@ -60,8 +60,8 @@ export class ESQLWorker implements BaseWorkerDefinition {
     return [];
   }
 
-  async getAst(text: string | undefined) {
-    const rawAst = await getAstAndSyntaxErrors(text);
+  getAst(text: string | undefined) {
+    const rawAst = getAstAndSyntaxErrors(text);
     return {
       ast: rawAst.ast,
       errors: rawAst.errors.map(inlineToMonacoErrors),

@@ -7,7 +7,8 @@
 import '../_index.scss';
 import type { FC } from 'react';
 import React from 'react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
@@ -42,7 +43,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView
@@ -56,7 +57,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
           />
         </CloudContext>
       </KibanaContextProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

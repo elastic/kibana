@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -18,6 +17,7 @@ import type {
   RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
   RouteValidationFunction,
+  LazyValidator,
 } from '../..';
 
 type RqCtx = RequestHandlerContextBase;
@@ -202,9 +202,42 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 /** @public */
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
+/** @public */
+export interface VersionedRouteCustomResponseBodyValidation {
+  /** A custom validation function */
+  custom: RouteValidationFunction<unknown>;
+}
+
+/** @public */
+export type VersionedResponseBodyValidation =
+  | LazyValidator
+  | VersionedRouteCustomResponseBodyValidation;
+
 /**
- * Map of status codes to response schemas.
+ * Map of response status codes to response schemas
  *
+ * @note Instantiating response schemas is expensive, especially when it is
+ *       not needed in most cases. See example below to ensure this is lazily
+ *       provided.
+ *
+ * @note The {@link TypeOf} type utility from @kbn/config-schema can extract
+ *       types from lazily created schemas
+ *
+ * @example
+ * ```ts
+ * // Avoid this:
+ * const badResponseSchema = schema.object({ foo: foo.string() });
+ * // Do this:
+ * const goodResponseSchema = () => schema.object({ foo: foo.string() });
+ *
+ * type ResponseType = TypeOf<typeof goodResponseSchema>;
+ * ...
+ * .addVersion(
+ *  { ... validation: { response: { 200: { body: goodResponseSchema } } } },
+ *  handlerFn
+ * )
+ * ...
+ * ```
  * @example
  * ```ts
  * {
@@ -213,7 +246,6 @@ export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigR
  *       bodyContentType: 'application/octet-stream'
  *    }
  * }
- * ```
  * @public
  */
 export interface VersionedRouteResponseValidation {
@@ -223,7 +255,7 @@ export interface VersionedRouteResponseValidation {
      * @public
      */
     bodyContentType?: string;
-    body: RouteValidationFunction<unknown> | Type<unknown>;
+    body: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };
 }
@@ -239,9 +271,11 @@ export interface VersionedRouteValidation<P, Q, B> {
    */
   request?: VersionedRouteRequestValidation<P, Q, B>;
   /**
-   * Validation to run against route output
+   * Validation to run against route output.
+   *
    * @note This validation is only intended to run in development. Do not use this
    *       for setting default values!
+   *
    * @public
    */
   response?: VersionedRouteResponseValidation;
