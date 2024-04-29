@@ -7,15 +7,15 @@
  */
 
 import { HasSerializableState } from '@kbn/presentation-containers';
-import { HasParentApi, HasUniqueId } from '@kbn/presentation-publishing';
+import { HasParentApi, HasType, HasUniqueId } from '@kbn/presentation-publishing';
 import { EmbeddableAppContext } from '..';
+import { LegacyCompatibleEmbeddable } from '../../embeddable_panel/types';
 
 export type EditorAppTarget = { editApp?: string; editPath?: string; editUrl?: string };
 
 export interface HasEditorApp {
   getEditorAppTarget: () => Promise<EditorAppTarget>;
 }
-
 export interface HasAppContext {
   getAppContext: () => EmbeddableAppContext | undefined;
 }
@@ -27,6 +27,11 @@ export const apiHasAppContext = (unknownApi: unknown): unknownApi is HasAppConte
   );
 };
 
-export type NavigateToEditorApi = HasUniqueId &
-  HasEditorApp &
-  Partial<HasSerializableState & HasAppContext & HasParentApi<unknown>>;
+export type NavigateToEditorApi = HasEditorApp &
+  (
+    | LegacyCompatibleEmbeddable
+    | (HasUniqueId &
+        HasType &
+        HasEditorApp &
+        Partial<HasSerializableState & HasAppContext & HasParentApi<unknown>>)
+  );

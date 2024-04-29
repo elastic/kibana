@@ -49,9 +49,7 @@ export const editLegacyEmbeddable = async (embeddable: LegacyCompatibleEmbeddabl
     { core, embeddable: embeddableStart },
     {
       ...embeddable,
-      serializeState: () => ({
-        rawState: getExplicitInput(embeddable),
-      }),
+      getExplicitInput: () => getExplicitInput(embeddable),
       getEditorAppTarget: () => {
         const output = embeddable.getOutput();
         return Promise.resolve({

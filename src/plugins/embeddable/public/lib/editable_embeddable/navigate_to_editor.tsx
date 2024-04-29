@@ -7,9 +7,11 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { apiHasParentApi, apiPublishesSearchSession } from '@kbn/presentation-publishing';
 import { firstValueFrom } from 'rxjs';
-import { EmbeddableStart } from '../..';
+import { EmbeddableStart, reactEmbeddableRegistryHasKey } from '../..';
+import { LegacyCompatibleEmbeddable } from '../../embeddable_panel/types';
 import { apiHasAppContext, NavigateToEditorApi } from './types';
 
 /**
@@ -35,7 +37,17 @@ export const navigateToEditor = async (
       /** If the API is not providing a current app ID, then get it from Core */
       currentAppId = await firstValueFrom(services.core.application.currentAppId$);
     }
-    const serializedState = api.serializeState?.().rawState;
+
+    let serializedState;
+    if (reactEmbeddableRegistryHasKey(api.type)) {
+      /**
+       * React embeddables send the whole serialized state, including references, through the state
+       * transfer service. Therefore, the editor is responsible for deserializing it once recieved.
+       */
+      serializedState = apiHasSerializableState(api) ? api.serializeState() : undefined;
+    } else {
+      serializedState = (api as LegacyCompatibleEmbeddable).getExplicitInput();
+    }
 
     if (currentAppId && serializedState) {
       /**
@@ -52,7 +64,7 @@ export const navigateToEditor = async (
           searchSessionId: apiPublishesSearchSession(api.parentApi)
             ? api.parentApi.searchSessionId$.getValue()
             : undefined,
-          valueInput: serializedState ? { id: api.uuid, ...serializedState } : undefined,
+          valueInput: serializedState,
         },
       });
     } else {
