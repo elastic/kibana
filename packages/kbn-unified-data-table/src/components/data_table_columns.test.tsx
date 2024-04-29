@@ -348,10 +348,10 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         columnsMeta: {
-          var_test: { type: 'number' },
+          extension: { type: 'string' },
         },
       });
-      expect(gridColumns[1].schema).toBe('kibana-json');
+      expect(gridColumns[1].schema).toBe('string');
     });
 
     it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {

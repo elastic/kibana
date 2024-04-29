@@ -459,6 +459,7 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
+      // I don't want to create filters when is embedded
       ...(!this.isTextBasedSearch(savedSearch) && {
         onFilter: async (field, value, operator) => {
           let filters = generateFilters(

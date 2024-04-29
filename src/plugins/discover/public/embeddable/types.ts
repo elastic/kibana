@@ -16,6 +16,7 @@ import type {
 
 import type { Adapters } from '@kbn/embeddable-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+
 import type { DiscoverServices } from '../build_services';
 import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
 import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
