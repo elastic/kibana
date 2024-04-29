@@ -13,6 +13,7 @@ import {
   normalizeThresholdField,
   isMlRule,
   isEsqlRule,
+  isSuppressionRuleInGA,
   isSuppressibleAlertRule,
   isSuppressionRuleConfiguredWithDuration,
   isSuppressionRuleConfiguredWithGroupBy,
@@ -247,6 +248,21 @@ describe('Alert Suppression Rules', () => {
     });
   });
 
+  describe('isSuppressionRuleInGA', () => {
+    test('should return true for rule type suppression in global availability', () => {
+      expect(isSuppressionRuleInGA('saved_query')).toBe(true);
+      expect(isSuppressionRuleInGA('query')).toBe(true);
+    });
+
+    test('should return false for rule type suppression in tech preview', () => {
+      expect(isSuppressionRuleInGA('machine_learning')).toBe(false);
+      expect(isSuppressionRuleInGA('esql')).toBe(false);
+      expect(isSuppressionRuleInGA('threshold')).toBe(false);
+      expect(isSuppressionRuleInGA('threat_match')).toBe(false);
+      expect(isSuppressionRuleInGA('new_terms')).toBe(false);
+      expect(isSuppressionRuleInGA('eql')).toBe(false);
+    });
+  });
   describe('isSuppressionRuleConfiguredWithDuration', () => {
     test('should return true for a suppressible rule type', () => {
       // Rule types that support alert suppression:

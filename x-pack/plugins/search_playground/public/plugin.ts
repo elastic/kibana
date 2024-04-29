@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
+import {
+  CoreSetup,
+  Plugin,
+  CoreStart,
+  AppMountParameters,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { docLinks } from '../common/doc_links';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
 import {
   AppPluginStartDependencies,
+  SearchPlaygroundConfigType,
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
 } from './types';
@@ -17,27 +26,43 @@ import {
 export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
-  public setup(core: CoreSetup): SearchPlaygroundPluginSetup {
-    return {};
+  private config: SearchPlaygroundConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<SearchPlaygroundConfigType>();
+  }
+
+  public setup(
+    core: CoreSetup<AppPluginStartDependencies, SearchPlaygroundPluginStart>
+  ): SearchPlaygroundPluginSetup {
+    if (!this.config.ui?.enabled) return {};
 
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/search_playground',
       title: PLUGIN_NAME,
-      async mount(params: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        const startDeps: AppPluginStartDependencies = {
+          ...depsStart,
+          history,
+        };
 
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, startDeps, element);
       },
     });
+
+    return {};
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
+    docLinks.setDocLinks(core.docLinks.links);
     return {
       PlaygroundProvider: getPlaygroundProvider(core, deps),
       PlaygroundToolbar,
       Playground,
+      PlaygroundHeaderDocs,
     };
   }
 
