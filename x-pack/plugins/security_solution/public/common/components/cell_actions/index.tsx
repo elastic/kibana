@@ -13,7 +13,7 @@ import type {
 } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
-import type { SecurityMetadata } from '../../../app/actions/types';
+import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
@@ -39,14 +39,14 @@ export interface SecurityCellActionsProps
   data: SecurityCellActionsData | SecurityCellActionsData[];
   triggerId: SecurityCellActionsTrigger;
   disabledActionTypes?: SecurityCellActionType[];
-  metadata?: SecurityMetadata;
+  metadata?: SecurityCellActionMetadata;
 }
 
 export interface UseDataGridColumnsSecurityCellActionsProps
   extends UseDataGridColumnsCellActionsProps {
   triggerId: SecurityCellActionsTrigger;
   disabledActionTypes?: SecurityCellActionType[];
-  metadata?: SecurityMetadata;
+  metadata?: SecurityCellActionMetadata;
 }
 
 export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellActions<UseDataGridColumnsSecurityCellActionsProps> =

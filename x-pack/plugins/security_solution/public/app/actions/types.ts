@@ -14,7 +14,7 @@ export interface AndFilter {
   operator?: QueryOperator;
 }
 
-export interface SecurityMetadata extends Record<string, unknown> {
+export interface SecurityCellActionMetadata extends Record<string, unknown> {
   /**
    * `metadata.scopeId` is used by some actions (e.g. filterIn/Out) to discriminate the Timeline
    * and the DataTables scope (alerts, events, rules preview..) in the actions execution.
@@ -52,7 +52,7 @@ export interface SecurityMetadata extends Record<string, unknown> {
 }
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
-  metadata: SecurityMetadata | undefined;
+  metadata: SecurityCellActionMetadata | undefined;
 }
 export type SecurityCellAction = CellAction<SecurityCellActionExecutionContext>;
 
