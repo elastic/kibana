@@ -41,7 +41,7 @@ export type PageSize = z.infer<typeof PageSize>;
 export const PageSize = z.number().default(1000);
 
 export type KibanaDate = z.infer<typeof KibanaDate>;
-export const KibanaDate = z.string();
+export const KibanaDate = z.union([z.string(), z.string().datetime(), z.string()]);
 
 /**
  * Defines the time period on which risk inputs will be filtered.
