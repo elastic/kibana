@@ -21,6 +21,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface IndexManagementPluginStart {
+  extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexMappingProps>;
