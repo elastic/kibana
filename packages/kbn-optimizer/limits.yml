@@ -30,7 +30,7 @@ pageLoadAssetSize:
   data: 454087
   datasetQuality: 50624
   dataViewEditor: 28082
-  dataViewFieldEditor: 40000
+  dataViewFieldEditor: 27000
   dataViewManagement: 5176
   dataViews: 65000
   dataVisualizer: 27530
@@ -51,7 +51,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 31000
+  expressionPartitionVis: 29000
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -115,7 +115,7 @@ pageLoadAssetSize:
   presentationUtil: 58834
   profiling: 36694
   remoteClusters: 51327
-  reporting: 59000
+  reporting: 58600
   rollup: 97204
   runtimeFields: 41752
   savedObjects: 108518
