@@ -14,7 +14,6 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"
@@ -31,8 +30,8 @@ const EXPECTED_KPI_COUNTS = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Timeline Details', () => {
     before(
@@ -43,35 +42,23 @@ export default function ({ getService }: FtrProviderContext) {
     );
 
     it('Make sure that we get Event Details data', async () => {
-      const { data: detailsData } = await secureBsearch.send<TimelineEventsDetailsStrategyResponse>(
-        {
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
-          options: {
-            factoryQueryType: TimelineEventsQueries.details,
-            indexName: INDEX_NAME,
-            inspect: false,
-            eventId: ID,
-          },
-          strategy: 'timelineSearchStrategy',
-        }
-      );
+      const { data: detailsData } = await bsearch.send<TimelineEventsDetailsStrategyResponse>({
+        supertest,
+        options: {
+          factoryQueryType: TimelineEventsQueries.details,
+          indexName: INDEX_NAME,
+          inspect: false,
+          eventId: ID,
+        },
+        strategy: 'timelineSearchStrategy',
+      });
       expect(sortBy(detailsData, 'field')).to.eql(sortBy(EXPECTED_DATA, 'field'));
     });
 
     it('Make sure that we get kpi data', async () => {
       const { destinationIpCount, hostCount, processCount, sourceIpCount, userCount } =
-        await secureBsearch.send<TimelineKpiStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        await bsearch.send<TimelineKpiStrategyResponse>({
+          supertest,
           options: {
             factoryQueryType: TimelineEventsQueries.kpi,
             indexName: INDEX_NAME,

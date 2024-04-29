@@ -15,7 +15,6 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
 import { getFieldsToRequest, getFilterValue } from '../../../../utils';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 const TO = '3000-01-01T00:00:00.000Z';
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -30,8 +29,8 @@ const LIMITED_PAGE_SIZE = 2;
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   const getPostBody = (): JsonObject => ({
     defaultIndex: ['auditbeat-*'],
@@ -68,19 +67,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns Timeline data', async () => {
-      const timeline = await secureBsearch.send<TimelineEventsAllStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
+        supertest,
         options: {
           ...getPostBody(),
         },
         strategy: 'timelineSearchStrategy',
       });
-
       expect(timeline.edges.length).to.be(EDGE_LENGTH);
       expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
       expect(timeline.totalCount).to.be(TOTAL_COUNT);
@@ -89,13 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns paginated Timeline query', async () => {
-      const timeline = await secureBsearch.send<TimelineEventsAllStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
+        supertest,
         options: {
           ...getPostBody(),
           pagination: {

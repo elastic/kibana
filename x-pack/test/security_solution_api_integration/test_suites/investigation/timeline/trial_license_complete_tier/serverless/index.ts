@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@serverless SecuritySolution Timeline', () => {
     loadTestFile(require.resolve('./events'));
-    loadTestFile(require.resolve('../timeline'));
-    loadTestFile(require.resolve('../timeline_migrations'));
     loadTestFile(require.resolve('./timeline_details'));
   });
 }

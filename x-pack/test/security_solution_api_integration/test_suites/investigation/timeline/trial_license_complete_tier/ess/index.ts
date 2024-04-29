@@ -22,8 +22,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./events'));
-    loadTestFile(require.resolve('../timeline'));
-    loadTestFile(require.resolve('../timeline_migrations'));
     loadTestFile(require.resolve('./timeline_details'));
+    loadTestFile(require.resolve('./timeline'));
+    loadTestFile(require.resolve('./timeline_migrations'));
   });
 }

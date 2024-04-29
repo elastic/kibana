@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('@serverless @ess SecuritySolution Sources', () => {
+  describe('@ess SecuritySolution Sources', () => {
     loadTestFile(require.resolve('./sources'));
   });
 }
