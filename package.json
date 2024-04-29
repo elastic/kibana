@@ -78,7 +78,7 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@hello-pangea/dnd": "16.2.0",
+    "**/@hello-pangea/dnd": "16.6.0",
     "**/@langchain/core": "0.1.53",
     "**/@types/node": "20.10.5",
     "**/@typescript-eslint/utils": "5.62.0",
@@ -133,7 +133,7 @@
     "@hapi/hoek": "^9.2.1",
     "@hapi/inert": "^6.0.4",
     "@hapi/wreck": "^17.1.0",
-    "@hello-pangea/dnd": "16.2.0",
+    "@hello-pangea/dnd": "16.6.0",
     "@kbn/aad-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/aad",
     "@kbn/ace": "link:packages/kbn-ace",
     "@kbn/actions-plugin": "link:x-pack/plugins/actions",
