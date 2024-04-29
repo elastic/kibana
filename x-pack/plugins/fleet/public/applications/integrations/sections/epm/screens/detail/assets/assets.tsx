@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } f
 import type {
   EsAssetReference,
   AssetSOObject,
-  SimpleSOAssetType,
+  GetBulkAssetsResponse,
 } from '../../../../../../../../common';
 import { displayedAssetTypes } from '../../../../../../../../common/constants';
 
@@ -56,7 +56,9 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   // assume assets are installed in this space until we find otherwise
   const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
-  const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | SimpleSOAssetType[]>();
+  const [assetSavedObjects, setAssetsSavedObjects] = useState<
+    undefined | GetBulkAssetsResponse['items']
+  >();
   const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
 
   const [fetchError, setFetchError] = useState<undefined | Error>();

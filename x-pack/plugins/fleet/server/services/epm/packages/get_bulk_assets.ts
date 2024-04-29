@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  ISavedObjectTypeRegistry,
+  SavedObjectsType,
+} from '@kbn/core/server';
 
 import type {
   AssetSOObject,
@@ -20,11 +24,14 @@ import type { SimpleSOAssetAttributes } from '../../../types';
 
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
+  soTypeRegistry: ISavedObjectTypeRegistry,
   assetIds: AssetSOObject[]
 ) {
   const { resolved_objects: resolvedObjects } = await soClient.bulkResolve<SimpleSOAssetAttributes>(
     assetIds
   );
+  const types: Record<string, SavedObjectsType | undefined> = {};
+
   const res: SimpleSOAssetType[] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
@@ -32,6 +39,13 @@ export async function getBulkAssets(
         savedObject?.error?.statusCode !== 404 && displayedAssetTypesLookup.has(savedObject.type)
     )
     .map((obj) => {
+      if (!types[obj.type]) {
+        types[obj.type] = soTypeRegistry.getType(obj.type);
+      }
+      let appLink: string = '';
+      if (types[obj.type]?.management?.getInAppUrl) {
+        appLink = types[obj.type]!.management!.getInAppUrl!(obj)?.path || '';
+      }
       return {
         id: obj.id,
         type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
@@ -40,6 +54,7 @@ export async function getBulkAssets(
           title: obj.attributes?.title,
           description: obj.attributes?.description,
         },
+        appLink,
       };
     });
   return res;
