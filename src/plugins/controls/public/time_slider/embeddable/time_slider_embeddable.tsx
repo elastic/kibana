@@ -16,7 +16,7 @@ import { debounceTime, first, map } from 'rxjs';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { TIME_SLIDER_CONTROL } from '../..';
 import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/types';
@@ -387,7 +387,7 @@ export class TimeSliderControlEmbeddable
     }
     this.node = node;
     ReactDOM.render(
-      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
+      <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <TimeSliderControlContext.Provider value={this}>
           <TimeSlider
             formatDate={this.formatDate}
@@ -398,7 +398,7 @@ export class TimeSliderControlEmbeddable
             }}
           />
         </TimeSliderControlContext.Provider>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       node
     );
   };

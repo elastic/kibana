@@ -57,15 +57,15 @@ export const registerCreateRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/{type}/{id?}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { overwrite } = req.query;
+      const { type, id } = request.params;
+      const { overwrite } = request.query;
       const {
         attributes,
         migrationVersion,
@@ -73,10 +73,10 @@ export const registerCreateRoute = (
         typeMigrationVersion,
         references,
         initialNamespaces,
-      } = req.body;
+      } = request.body;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsCreate({ request, types: [type] }).catch(() => {});
 
       const { savedObjects } = await context.core;
       if (!allowHttpApiAccess) {
@@ -93,7 +93,7 @@ export const registerCreateRoute = (
         migrationVersionCompatibility: 'compatible' as const,
       };
       const result = await savedObjects.client.create(type, attributes, options);
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };
