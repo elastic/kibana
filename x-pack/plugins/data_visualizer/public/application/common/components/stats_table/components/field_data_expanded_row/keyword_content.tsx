@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../top_values';
@@ -17,31 +17,41 @@ import { ChoroplethMap } from './choropleth_map';
 import { ErrorMessageContent } from './error_message';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
-  const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
+  const [suggestion, setSuggestion] = useState<EMSTermJoinConfig | null>(null);
   const { stats, fieldName } = config;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const {
     services: { maps: mapsPlugin },
   } = useDataVisualizerKibana();
 
-  const loadEMSTermSuggestions = useCallback(async () => {
+  useEffect(() => {
     if (!mapsPlugin) return;
-    const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
-      sampleValues: Array.isArray(stats?.topValues)
-        ? stats?.topValues.map((value) => value.key)
-        : [],
-      sampleValuesColumnName: fieldName || '',
-    });
-    setEMSSuggestion(suggestion);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldName]);
+    if (!stats?.topValues) {
+      setSuggestion(null);
+      return;
+    }
 
-  useEffect(
-    function getInitialEMSTermSuggestion() {
-      loadEMSTermSuggestions();
-    },
-    [loadEMSTermSuggestions]
-  );
+    let ignore = false;
+    mapsPlugin
+      .suggestEMSTermJoinConfig({
+        sampleValues: stats.topValues.map((value) => value.key),
+        sampleValuesColumnName: fieldName || '',
+      })
+      .then((nextSuggestion) => {
+        if (!ignore) {
+          setSuggestion(nextSuggestion);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setSuggestion(null);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [fieldName, mapsPlugin, stats?.topValues]);
 
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerKeywordContent'}>
@@ -65,7 +75,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
         />
       ) : null}
 
-      {EMSSuggestion && stats && <ChoroplethMap stats={stats} suggestion={EMSSuggestion} />}
+      {suggestion && stats && <ChoroplethMap stats={stats} suggestion={suggestion} />}
     </ExpandedRowContent>
   );
 };
