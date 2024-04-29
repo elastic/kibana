@@ -99,7 +99,7 @@ const formDeserializer = (formData: GenericObject) => {
 
 export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
   const {
-    config: { enableMappingsSourceField },
+    config: { enableMappingsSourceFieldSection },
   } = useAppContext();
 
   const isMounted = useRef(false);
@@ -164,7 +164,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      {enableMappingsSourceField && (
+      {enableMappingsSourceFieldSection && (
         <>
           <SourceFieldSection /> <EuiSpacer size="xl" />
         </>

@@ -62,7 +62,7 @@ export interface AppDependencies {
     enableIndexStats: boolean;
     editableIndexSettings: 'all' | 'limited';
     enableDataStreamsStorageColumn: boolean;
-    enableMappingsSourceField: boolean;
+    enableMappingsSourceFieldSection: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;

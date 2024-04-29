@@ -53,7 +53,7 @@ describe('Mappings editor: configuration form', () => {
   it('renders the form', async () => {
     const ctx = {
       config: {
-        enableMappingsSourceField: true,
+        enableMappingsSourceFieldSection: true,
       },
     } as unknown as AppDependencies;
 
@@ -70,7 +70,7 @@ describe('Mappings editor: configuration form', () => {
     it('renders the _source field when it is enabled', async () => {
       const ctx = {
         config: {
-          enableMappingsSourceField: true,
+          enableMappingsSourceFieldSection: true,
         },
       } as unknown as AppDependencies;
 
@@ -86,7 +86,7 @@ describe('Mappings editor: configuration form', () => {
     it("doesn't render the _source field when it is disabled", async () => {
       const ctx = {
         config: {
-          enableMappingsSourceField: false,
+          enableMappingsSourceFieldSection: false,
         },
       } as unknown as AppDependencies;
 

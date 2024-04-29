@@ -57,7 +57,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         isLegacyTemplatesEnabled: this.config.enableLegacyTemplates,
         isIndexStatsEnabled: this.config.enableIndexStats,
         isDataStreamsStorageColumnEnabled: this.config.enableDataStreamsStorageColumn,
-        enableMappingsSourceField: this.config.enableMappingsSourceField,
+        enableMappingsSourceFieldSection: this.config.enableMappingsSourceFieldSection,
       },
       indexDataEnricher: this.indexDataEnricher,
       lib: {

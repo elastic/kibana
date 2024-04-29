@@ -135,7 +135,7 @@ describe('Mappings editor: core', () => {
 
     const ctx = {
       config: {
-        enableMappingsSourceField: true,
+        enableMappingsSourceFieldSection: true,
       },
     };
 
@@ -293,7 +293,7 @@ describe('Mappings editor: core', () => {
 
     const ctx = {
       config: {
-        enableMappingsSourceField: true,
+        enableMappingsSourceFieldSection: true,
       },
     };
 
