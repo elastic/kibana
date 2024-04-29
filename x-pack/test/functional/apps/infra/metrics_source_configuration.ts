@@ -9,11 +9,11 @@ import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import {
   Aggregators,
-  COMPARATORS,
   InfraRuleType,
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { createRule } from '../../../alerting_api_integration/observability/helpers/alerting_api_helper';
 import {
   waitForDocumentInIndex,

@@ -12,7 +12,6 @@ import {
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
-  COMPARATORS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   MAX_SELECTABLE_SOURCE_FIELDS,
