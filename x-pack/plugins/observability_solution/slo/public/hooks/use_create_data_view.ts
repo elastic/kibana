@@ -16,9 +16,17 @@ interface UseCreateDataViewProps {
 export function useCreateDataView({ indexPatternString, dataViewId }: UseCreateDataViewProps) {
   const { dataViews } = useKibana().services;
 
-  const { data: dataView, loading } = useFetcher(() => {
+  const { data: dataView, loading } = useFetcher(async () => {
     if (dataViewId) {
-      return dataViews.get(dataViewId);
+      try {
+        return await dataViews.get(dataViewId);
+      } catch (e) {
+        return dataViews.create({
+          id: `${indexPatternString}-id`,
+          title: indexPatternString,
+          allowNoIndex: true,
+        });
+      }
     } else if (indexPatternString) {
       return dataViews.create({
         id: `${indexPatternString}-id`,
