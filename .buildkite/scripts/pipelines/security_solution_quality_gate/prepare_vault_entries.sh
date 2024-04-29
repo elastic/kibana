@@ -13,6 +13,6 @@ vault_get security-quality-gate/role-users/sec-sol-auto-03 data -format=json > .
 export CLOUD_QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 export QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
 # The vault entries relevant to the Proxy service (Cloud Handler)
-export PROXY_URL=$(vault_get security-solution-quality-gate-proxy proxy_url_test)
+export PROXY_URL=$(vault_get security-solution-quality-gate-proxy proxy_url_prod)
 export PROXY_CLIENT_ID=$(vault_get security-solution-quality-gate-proxy client_id)
 export PROXY_SECRET=$(vault_get security-solution-quality-gate-proxy secret)

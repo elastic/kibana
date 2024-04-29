@@ -15,8 +15,10 @@ import {
   getLeftSectionTourSteps,
 } from '../../shared/utils/tour_step_config';
 import { getField } from '../../shared/utils';
-import { DocumentDetailsRightPanelKey } from '..';
-import { DocumentDetailsLeftPanelKey } from '../../left';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 
