@@ -54,9 +54,11 @@ const panelContextValue = {
 
 const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
-    <RightPanelContext.Provider value={panelContextValue}>
-      <HighlightedFieldsCell values={values} field={field} />
-    </RightPanelContext.Provider>
+    <TestProviders>
+      <RightPanelContext.Provider value={panelContextValue}>
+        <HighlightedFieldsCell values={values} field={field} />
+      </RightPanelContext.Provider>
+    </TestProviders>
   );
 
 describe('<HighlightedFieldsCell />', () => {
@@ -65,7 +67,11 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render a basic cell', () => {
-    const { getByTestId } = render(<HighlightedFieldsCell values={['value']} field={'field'} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={['value']} field={'field'} />
+      </TestProviders>
+    );
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
@@ -135,7 +141,11 @@ describe('<HighlightedFieldsCell />', () => {
   );
 
   it('should not render if values is null', () => {
-    const { container } = render(<HighlightedFieldsCell values={null} field={'field'} />);
+    const { container } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={null} field={'field'} />
+      </TestProviders>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
