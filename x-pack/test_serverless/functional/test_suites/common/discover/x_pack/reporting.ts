@@ -83,9 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
+          await PageObjects.share.closeShareModal();
           return await testSubjects.exists('shareTopNavButton');
         });
       });
