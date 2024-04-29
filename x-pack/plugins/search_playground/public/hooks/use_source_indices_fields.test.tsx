@@ -20,7 +20,8 @@ let formHookSpy: jest.SpyInstance;
 import { getIndicesWithNoSourceFields, useSourceIndicesFields } from './use_source_indices_field';
 import { IndicesQuerySourceFields } from '../types';
 
-describe('useSourceIndicesFields Hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/181102
+describe.skip('useSourceIndicesFields Hook', () => {
   let postMock: jest.Mock;
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (

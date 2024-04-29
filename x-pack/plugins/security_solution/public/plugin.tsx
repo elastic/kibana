@@ -304,8 +304,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
-        aiInsights: new subPluginClasses.AiInsights(),
         alerts: new subPluginClasses.Detections(),
+        attackDiscovery: new subPluginClasses.AttackDiscovery(),
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
@@ -337,8 +337,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.createSubPlugins();
     return {
-      aiInsights: subPlugins.aiInsights.start(this.experimentalFeatures.assistantAlertsInsights),
       alerts: subPlugins.alerts.start(storage),
+      attackDiscovery: subPlugins.attackDiscovery.start(
+        this.experimentalFeatures.attackDiscoveryEnabled
+      ),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
