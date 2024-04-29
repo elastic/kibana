@@ -1405,7 +1405,7 @@ describe('Response factory', () => {
             },
             response: {
               200: {
-                body: runtimeValidation,
+                body: () => runtimeValidation,
               },
             },
           },
