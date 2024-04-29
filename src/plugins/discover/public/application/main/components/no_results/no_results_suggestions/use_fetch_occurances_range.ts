@@ -122,6 +122,7 @@ async function fetchDocumentsTimeRange({
         params: {
           index: dataView.getIndexPattern(),
           size: 0,
+          track_total_hits: false,
           body: {
             timeout: '20s',
             query: dslQuery ?? { match_all: {} },
@@ -129,11 +130,13 @@ async function fetchDocumentsTimeRange({
               earliest_timestamp: {
                 min: {
                   field: dataView.timeFieldName,
+                  format: 'strict_date_optional_time',
                 },
               },
               latest_timestamp: {
                 max: {
                   field: dataView.timeFieldName,
+                  format: 'strict_date_optional_time',
                 },
               },
             },
