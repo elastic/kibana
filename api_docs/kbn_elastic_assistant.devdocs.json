@@ -2468,7 +2468,7 @@
             "tags": [],
             "label": "replacements",
             "description": [
-              "\nReplacements associated with the context, i.e. replacements for an insight provided as context"
+              "\nReplacements associated with the context, i.e. replacements for an attack discovery provided as context"
             ],
             "signature": [
               "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
@@ -2594,13 +2594,13 @@
     "misc": [
       {
         "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.AI_INSIGHTS_STORAGE_KEY",
+        "id": "def-public.ATTACK_DISCOVERY_STORAGE_KEY",
         "type": "string",
         "tags": [],
-        "label": "AI_INSIGHTS_STORAGE_KEY",
+        "label": "ATTACK_DISCOVERY_STORAGE_KEY",
         "description": [],
         "signature": [
-          "\"aiInsights\""
+          "\"attackDiscovery\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,

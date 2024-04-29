@@ -5,7 +5,7 @@
  * 2.0.
  */
 import '../_index.scss';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -39,7 +39,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
     fieldFormats,
   };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (
