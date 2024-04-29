@@ -51,7 +51,7 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
           return response.ok({
             body: {
               success: true,
-              ...(headers.warning ? { warning: headers.warning } : {}),
+              ...(headers?.warning ? { warning: headers.warning } : {}),
             },
           });
         }
