@@ -10,8 +10,6 @@ require('./polyfills');
 
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
-// mutates window.jQuery and window.$
-require('@kbn/flot-charts');
 
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
@@ -74,3 +72,4 @@ export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
+export const KbnEsqlAst = require('@kbn/esql-ast');
