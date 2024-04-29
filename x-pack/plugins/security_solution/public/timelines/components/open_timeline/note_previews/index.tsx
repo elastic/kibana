@@ -23,7 +23,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
