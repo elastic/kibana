@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
@@ -18,7 +19,7 @@ import { CaseMetricsFeature } from '../../common/types/api';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: FC<PropsWithChildren> = ({ children }) => <TestProviders>{children}</TestProviders>;
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
