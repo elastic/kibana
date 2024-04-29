@@ -5,77 +5,23 @@
  * 2.0.
  */
 
-import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { BulkGetRulesSourcesResponse } from '../../../../../../../common/api/detection_engine/rule_management/bulk_get_sources/bulk_get_sources_route.gen';
 import { BulkGetRulesSourcesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management/bulk_get_sources/bulk_get_sources_route.gen';
-import type { RuleAlertType } from '../../../../rule_schema';
 import {
   DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
-  MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
-import { initPromisePool } from '../../../../../../utils/promise_pool';
-import { findRules } from '../../../logic/search/find_rules';
-import { readRules } from '../../../logic/crud/read_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { fetchRulesByQueryOrIds } from '../bulk_actions/fetch_rules_by_query_or_ids';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
-
-const fetchRulesByQueryOrIds = async ({
-  query,
-  ids,
-  rulesClient,
-  abortSignal,
-}: {
-  query: string | undefined;
-  ids: string[] | undefined;
-  rulesClient: RulesClient;
-  abortSignal: AbortSignal;
-}): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
-  if (ids) {
-    return initPromisePool({
-      concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-      items: ids,
-      executor: async (id: string) => {
-        const rule = await readRules({ id, rulesClient, ruleId: undefined });
-        if (rule == null) {
-          throw Error('Rule not found');
-        }
-        return rule;
-      },
-      abortSignal,
-    });
-  }
-
-  const { data, total } = await findRules({
-    rulesClient,
-    perPage: MAX_RULES_TO_PROCESS_TOTAL,
-    filter: query,
-    page: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
-    fields: undefined,
-  });
-
-  if (total > MAX_RULES_TO_PROCESS_TOTAL) {
-    throw new BadRequestError(
-      `More than ${MAX_RULES_TO_PROCESS_TOTAL} rules matched the filter query. Try to narrow it down.`
-    );
-  }
-
-  return {
-    results: data.map((rule) => ({ item: rule.id, result: rule })),
-    errors: [],
-  };
-};
 
 export const performBulkGetRulesSourcesRoute = (
   router: SecuritySolutionPluginRouter,

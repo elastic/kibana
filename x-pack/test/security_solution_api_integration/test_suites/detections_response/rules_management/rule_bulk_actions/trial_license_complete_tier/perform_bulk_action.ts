@@ -42,6 +42,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -1089,16 +1090,19 @@ export default ({ getService }: FtrProviderContext): void => {
           const ruleId = 'ruleId';
           await createRule(supertest, log, getSimpleRule(ruleId));
 
-          const { body: bulkEditResponse } = await postBulkAction()
-            .send({
-              query: '',
-              action: BulkActionTypeEnum.edit,
-              [BulkActionTypeEnum.edit]: [
-                {
-                  type: BulkActionEditTypeEnum.set_investigation_fields,
-                  value: { field_names: ['field-1'] },
-                },
-              ],
+          const { body: bulkEditResponse } = await securitySolutionApi
+            .performBulkAction({
+              query: {},
+              body: {
+                query: '',
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.set_investigation_fields,
+                    value: { field_names: ['field-1'] },
+                  },
+                ],
+              },
             })
             .expect(200);
 
@@ -1129,16 +1133,19 @@ export default ({ getService }: FtrProviderContext): void => {
             investigation_fields: investigationFields,
           });
 
-          const { body: bulkEditResponse } = await postBulkAction()
-            .send({
-              query: '',
-              action: BulkActionTypeEnum.edit,
-              [BulkActionTypeEnum.edit]: [
-                {
-                  type: BulkActionEditTypeEnum.add_investigation_fields,
-                  value: { field_names: ['field-3'] },
-                },
-              ],
+          const { body: bulkEditResponse } = await securitySolutionApi
+            .performBulkAction({
+              query: {},
+              body: {
+                query: '',
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.add_investigation_fields,
+                    value: { field_names: ['field-3'] },
+                  },
+                ],
+              },
             })
             .expect(200);
 
@@ -1169,16 +1176,19 @@ export default ({ getService }: FtrProviderContext): void => {
             investigation_fields: investigationFields,
           });
 
-          const { body: bulkEditResponse } = await postBulkAction()
-            .send({
-              query: '',
-              action: BulkActionTypeEnum.edit,
-              [BulkActionTypeEnum.edit]: [
-                {
-                  type: BulkActionEditTypeEnum.delete_investigation_fields,
-                  value: { field_names: ['field-2'] },
-                },
-              ],
+          const { body: bulkEditResponse } = await securitySolutionApi
+            .performBulkAction({
+              query: {},
+              body: {
+                query: '',
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.delete_investigation_fields,
+                    value: { field_names: ['field-2'] },
+                  },
+                ],
+              },
             })
             .expect(200);
 
@@ -1242,16 +1252,19 @@ export default ({ getService }: FtrProviderContext): void => {
                 investigation_fields: existingInvestigationFields,
               });
 
-              const { body: bulkEditResponse } = await postBulkAction()
-                .send({
-                  query: '',
-                  action: BulkActionTypeEnum.edit,
-                  [BulkActionTypeEnum.edit]: [
-                    {
-                      type: operation,
-                      value: investigationFieldsToUpdate,
-                    },
-                  ],
+              const { body: bulkEditResponse } = await securitySolutionApi
+                .performBulkAction({
+                  query: {},
+                  body: {
+                    query: '',
+                    action: BulkActionTypeEnum.edit,
+                    [BulkActionTypeEnum.edit]: [
+                      {
+                        type: operation,
+                        value: investigationFieldsToUpdate,
+                      },
+                    ],
+                  },
                 })
                 .expect(200);
 

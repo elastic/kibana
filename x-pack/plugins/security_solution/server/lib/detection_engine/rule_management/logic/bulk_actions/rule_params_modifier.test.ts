@@ -732,7 +732,7 @@ describe('ruleParamsModifier', () => {
       );
     });
 
-    describe('Inv 3', () => {
+    describe('feature flag disabled state', () => {
       test('should throw error on adding investigation fields if feature is disabled', () => {
         expect(() =>
           ruleParamsModifier(
