@@ -8,18 +8,18 @@
 
 import { OpenAPIV3 } from 'openapi-types';
 import { BundledDocument } from '../bundle_document';
-import { createBlankOpenApiDocument } from './create_blank_oas_document';
 import { mergePaths } from './merge_paths';
 import { mergeSharedComponents } from './merge_shared_components';
 
 export async function mergeDocuments(
-  bundledDocuments: BundledDocument[]
+  bundledDocuments: BundledDocument[],
+  blankOasFactory: (version: string) => OpenAPIV3.Document
 ): Promise<Map<string, OpenAPIV3.Document>> {
   const bundledDocumentsByVersion = splitByVersions(bundledDocuments);
   const mergedByVersion = new Map<string, OpenAPIV3.Document>();
 
   for (const [version, singleVersionBundledDocuments] of bundledDocumentsByVersion.entries()) {
-    const mergedDocument = createBlankOpenApiDocument(version);
+    const mergedDocument = blankOasFactory(version);
 
     mergedDocument.paths = mergePaths(singleVersionBundledDocuments);
     mergedDocument.components = {

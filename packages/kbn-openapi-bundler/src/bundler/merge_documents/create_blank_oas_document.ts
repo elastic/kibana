@@ -8,13 +8,10 @@
 
 import { OpenAPIV3 } from 'openapi-types';
 
-export function createBlankOpenApiDocument(version: string): OpenAPIV3.Document {
+export function createBlankOpenApiDocument(info: OpenAPIV3.InfoObject): OpenAPIV3.Document {
   return {
     openapi: '3.0.3',
-    info: {
-      title: 'Bundled OpenAPI specs',
-      version,
-    },
+    info,
     servers: [
       {
         url: 'http://{kibana_host}:{port}',

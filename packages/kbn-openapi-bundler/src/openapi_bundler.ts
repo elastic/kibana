@@ -7,6 +7,7 @@
  */
 
 import chalk from 'chalk';
+import { isUndefined, omitBy } from 'lodash';
 import { OpenAPIV3 } from 'openapi-types';
 import globby from 'globby';
 import { basename, dirname, resolve } from 'path';
@@ -15,17 +16,20 @@ import { mergeDocuments } from './bundler/merge_documents';
 import { removeFilesByGlob } from './utils/remove_files_by_glob';
 import { logger } from './logger';
 import { writeYamlDocument } from './utils/write_yaml_document';
+import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
 
 export interface BundlerConfig {
   rootDir: string;
   sourceGlob: string;
   outputFilePath: string;
+  specInfo?: Omit<Partial<OpenAPIV3.InfoObject>, 'version'>;
 }
 
 export const bundle = async ({
   rootDir,
   sourceGlob,
   outputFilePath = 'bundled-{version}.schema.yaml',
+  specInfo,
 }: BundlerConfig) => {
   logger.debug(chalk.bold(`Bundling API route schemas`));
   logger.debug(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));
@@ -68,7 +72,21 @@ export const bundle = async ({
 
   logger.success(`Processed ${processedDocuments.length} schemas`);
 
-  const resultDocumentsMap = await mergeDocuments(processedDocuments);
+  const blankOasFactory = (version: string) =>
+    createBlankOpenApiDocument({
+      version,
+      title: specInfo?.title ?? 'Bundled OpenAPI specs',
+      ...omitBy(
+        {
+          description: specInfo?.description,
+          termsOfService: specInfo?.termsOfService,
+          contact: specInfo?.contact,
+          license: specInfo?.license,
+        },
+        isUndefined
+      ),
+    });
+  const resultDocumentsMap = await mergeDocuments(processedDocuments, blankOasFactory);
 
   await writeDocuments(resultDocumentsMap, outputFilePath);
 };
