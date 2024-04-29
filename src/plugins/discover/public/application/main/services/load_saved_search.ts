@@ -7,12 +7,12 @@
  */
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
+import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { loadAndResolveDataView } from '../utils/resolve_data_view';
+import { loadAndResolveDataView } from './resolve_data_view';
 import { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { DiscoverDataStateContainer } from './discover_data_state_container';
-import { cleanupUrlState } from '../utils/cleanup_url_state';
+import { cleanupUrlState } from './cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { DiscoverStateContainer, LoadParams } from './discover_state';
 import { addLog } from '../../../utils/add_log';

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import type { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
-import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
-import type { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import type { DiscoverServices } from '../../../build_services';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import type { DiscoverDataStateContainer } from './discover_data_state_container';
+import type { DiscoverStateContainer } from './discover_state';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   isEqualState,
-} from '../../services/discover_app_state_container';
-import { addLog } from '../../../../utils/add_log';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
-import { FetchStatus } from '../../../types';
-import { loadAndResolveDataView } from '../../utils/resolve_data_view';
+} from './discover_app_state_container';
+import { addLog } from '../../../utils/add_log';
+import { isTextBasedQuery } from '../utils/is_text_based_query';
+import { FetchStatus } from '../../types';
+import { loadAndResolveDataView } from './resolve_data_view';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL

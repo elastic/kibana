@@ -27,8 +27,8 @@ import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plug
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
-import { cleanupUrlState } from '../utils/cleanup_url_state';
-import { getStateDefaults } from '../utils/get_state_defaults';
+import { cleanupUrlState } from './cleanup_url_state';
+import { getStateDefaults } from './get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
 export const APP_STATE_URL_KEY = '_a';

@@ -19,12 +19,12 @@ import {
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { updateSavedSearch } from '../utils/update_saved_search';
+import { updateSavedSearch } from './update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DiscoverAppState, isEqualFilters } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { getStateDefaults } from '../utils/get_state_defaults';
+import { getStateDefaults } from './get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {

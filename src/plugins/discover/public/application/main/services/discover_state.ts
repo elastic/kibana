@@ -27,8 +27,8 @@ import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
-import { changeDataView } from '../hooks/utils/change_data_view';
-import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
+import { changeDataView } from './change_data_view';
+import { buildStateSubscribe } from './build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -48,7 +48,7 @@ import {
   getSavedSearchContainer,
   DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
-import { updateFiltersReferences } from '../utils/update_filter_references';
+import { updateFiltersReferences } from './update_filter_references';
 import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,

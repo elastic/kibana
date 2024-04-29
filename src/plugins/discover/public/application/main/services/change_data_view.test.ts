@@ -9,14 +9,14 @@
 import {
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
-} from '../../../../__mocks__/data_view_complex';
+} from '../../../__mocks__/data_view_complex';
 import { changeDataView } from './change_data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { PureTransitionsToTransitions } from '@kbn/kibana-utils-plugin/common/state_containers';
-import { InternalStateTransitions } from '../../services/discover_internal_state_container';
+import { InternalStateTransitions } from './discover_internal_state_container';
 
 const setupTestParams = (dataView: DataView | undefined) => {
   const savedSearch = savedSearchMock;
