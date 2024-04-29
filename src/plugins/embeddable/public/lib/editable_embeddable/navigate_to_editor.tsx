@@ -36,10 +36,10 @@ export const navigateToEditor = async (
     }
     const serializedState = api.serializeState?.().rawState;
 
-    if ((parentApiContext || apiContext) && currentAppId && serializedState) {
+    if (currentAppId && serializedState) {
       /**
-       * The state transfer service should only be used when both (1) the parent API is providing context so that the
-       * current app can be returned to and (2) there is actually state to transfer
+       * The state transfer service should only be used when both (1) the current app ID is defined so
+       * that we know where to return to and (2) there is actually state to transfer
        */
       const stateTransfer = services.embeddable.getStateTransfer();
       await stateTransfer.navigateToEditor(appTarget.editApp, {
