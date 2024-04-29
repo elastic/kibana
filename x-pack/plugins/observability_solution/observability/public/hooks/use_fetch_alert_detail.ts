@@ -23,6 +23,7 @@ interface AlertDetailParams {
 export interface AlertData {
   formatted: TopAlert;
   raw: EcsFieldsResponse;
+  _index?: string;
 }
 
 export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => {
@@ -52,6 +53,7 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
       ? {
           formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert._source),
           raw: rawAlert._source,
+          _index: rawAlert._index,
         }
       : null;
   }, [observabilityRuleTypeRegistry, rawAlert]);
