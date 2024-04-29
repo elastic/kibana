@@ -43,6 +43,7 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 import { initializeTimelineSettings } from '../../../store/actions';
+import { selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -110,6 +111,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const { isESQLTabInTimelineEnabled } = useEsqlAvailability();
+    const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
+      selectTimelineESQLSavedSearchId(state, timelineId)
+    );
+    const shouldShowESQLTab = isESQLTabInTimelineEnabled || timelineESQLSavedSearch != null;
     const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -177,7 +182,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {showTimeline && isESQLTabInTimelineEnabled && activeTimelineTab === TimelineTabs.esql && (
+        {showTimeline && shouldShowESQLTab && activeTimelineTab === TimelineTabs.esql && (
           <HideShowContainer
             $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
@@ -258,7 +263,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineDescription,
 }) => {
   const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
-  const { isESQLTabInTimelineEnabled } = useEsqlAvailability();
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -267,9 +271,14 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getAppNotes = useMemo(() => getNotesSelector(), []);
   const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
   const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
+  const { isESQLTabInTimelineEnabled } = useEsqlAvailability();
+  const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
+    selectTimelineESQLSavedSearchId(state, timelineId)
+  );
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
+  const shouldShowESQLTab = isESQLTabInTimelineEnabled || timelineESQLSavedSearch != null;
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
@@ -372,7 +381,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             <span>{i18n.QUERY_TAB}</span>
             {showTimeline && <TimelineEventsCountBadge />}
           </StyledEuiTab>
-          {isESQLTabInTimelineEnabled && (
+          {shouldShowESQLTab && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.esql}`}
               onClick={setEsqlAsActiveTab}
