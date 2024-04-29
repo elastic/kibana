@@ -11,6 +11,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 
 export interface CoreProvidersProps {
+  children?: React.ReactNode;
   core: CoreStart;
   theme$: AppMountParameters['theme$'];
 }

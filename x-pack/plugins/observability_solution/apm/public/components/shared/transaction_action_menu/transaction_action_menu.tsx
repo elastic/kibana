@@ -21,12 +21,9 @@ import {
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -124,9 +121,9 @@ function ActionMenuSections({
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
 
-  const allDatasetsLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
   const logsLocators = getLogsLocatorsFromUrlService(share.url);
+
+  const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
 
   const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
 
@@ -145,11 +142,11 @@ function ActionMenuSections({
     location,
     apmRouter,
     infraLinksAvailable,
+    uptimeLocator,
     profilingLocators,
     rangeFrom,
     rangeTo,
     environment,
-    allDatasetsLocator,
     logsLocators,
     dataViewId: dataView?.id,
   });

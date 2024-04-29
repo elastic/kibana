@@ -20,6 +20,8 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
@@ -132,20 +134,31 @@ describe('CsvGenerator', () => {
 
     mockConfig = getMockConfig();
 
+    const dataView = createStubDataView({
+      spec: {
+        id: 'test',
+        title: 'logstash-*',
+        fields: {
+          ...stubLogstashFieldSpecMap,
+          bytes: {
+            ...stubLogstashFieldSpecMap.bytes,
+            customLabel: 'bytes_custom_label',
+          },
+        },
+      },
+      opts: {
+        metaFields: ['_id', '_index', '_type', '_score'],
+      },
+    });
+
+    dataView.getFormatterForField = jest.fn();
+
     searchSourceMock.getField = jest.fn((key: string) => {
       switch (key) {
         case 'pit':
           return { id: mockCursorId };
         case 'index':
-          return {
-            fields: {
-              getByName: jest.fn(() => []),
-              getByType: jest.fn(() => []),
-            },
-            metaFields: ['_id', '_index', '_type', '_score'],
-            getFormatterForField: jest.fn(),
-            getIndexPattern: () => 'logstash-*',
-          };
+          return dataView;
       }
     });
 
@@ -184,13 +197,14 @@ describe('CsvGenerator', () => {
               date: `["2020-12-31T00:14:28.000Z"]`,
               ip: `["110.135.176.89"]`,
               message: `["This is a great message!"]`,
+              bytes: `[100]`,
             },
           } as unknown as estypes.SearchHit,
         ]),
       })
     );
     const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      createMockJob({ columns: ['date', 'ip', 'message', 'bytes'] }),
       mockConfig,
       mockTaskInstanceFields,
       {
