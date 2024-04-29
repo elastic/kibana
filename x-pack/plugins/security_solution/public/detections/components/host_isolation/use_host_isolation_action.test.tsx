@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useHostIsolationAction } from './use_host_isolation_action';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

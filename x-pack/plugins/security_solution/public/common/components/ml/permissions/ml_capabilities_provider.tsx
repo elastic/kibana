@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';

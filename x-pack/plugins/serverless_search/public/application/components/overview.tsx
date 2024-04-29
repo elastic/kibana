@@ -30,7 +30,7 @@ import {
   getConsoleRequest,
 } from '@kbn/search-api-panels';
 
-import React, { useEffect, useMemo, useState,  FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,

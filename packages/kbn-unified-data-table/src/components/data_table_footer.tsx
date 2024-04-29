@@ -28,7 +28,9 @@ export interface UnifiedDataTableFooterProps {
   fieldFormats: FieldFormatsStart;
 }
 
-export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooterProps>> = (props) => {
+export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooterProps>> = (
+  props
+) => {
   const {
     isLoadingMore,
     rowCount,

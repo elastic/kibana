@@ -17,10 +17,12 @@ export const TestComponent: FC<PropsWithChildren<TestComponentProps>> = ({ child
   return <span>{children} Test component</span>;
 };
 
-export const ForwardeRefTestComponent: FC<PropsWithChildren<TestComponentProps>> =
-  React.forwardRef<HTMLSpanElement, PropsWithChildren<TestComponentProps>>(({ children }, ref) => {
-    return <span ref={ref}>{children} Test component</span>;
-  });
+export const ForwardeRefTestComponent: FC<PropsWithChildren<TestComponentProps>> = React.forwardRef<
+  HTMLSpanElement,
+  PropsWithChildren<TestComponentProps>
+>(({ children }, ref) => {
+  return <span ref={ref}>{children} Test component</span>;
+});
 
 // eslint-disable-next-line import/no-default-export
 export default TestComponent;

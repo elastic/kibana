@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
 import React, { FC, PropsWithChildren } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 

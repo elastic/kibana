@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import type { useKibana } from '../../common/lib/kibana';
 
 export const DETAILS_QUERY = 'select * from uptime';
@@ -77,6 +78,4 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
     },
   } as unknown as ReturnType<typeof useKibana>);
 
-export const mockCasesContext: FC<PropsWithChildren> = (props) => (
-  <>{props?.children ?? null}</>
-);
+export const mockCasesContext: FC<PropsWithChildren> = (props) => <>{props?.children ?? null}</>;

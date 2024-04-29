@@ -81,7 +81,9 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: FC<PropsWithChildren<ConnectorConfigurationProps>> = ({
+export const ConnectorConfigurationComponent: FC<
+  PropsWithChildren<ConnectorConfigurationProps>
+> = ({
   children,
   connector,
   hasPlatinumLicense,

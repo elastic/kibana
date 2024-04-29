@@ -17,10 +17,12 @@ interface ContextValue {
 
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
-export const InternalApiClientProvider: FC<PropsWithChildren<{
-  apiClient: ReportingAPIClient;
-  http: HttpSetup;
-}>> = ({ apiClient, http, children }) => {
+export const InternalApiClientProvider: FC<
+  PropsWithChildren<{
+    apiClient: ReportingAPIClient;
+    http: HttpSetup;
+  }>
+> = ({ apiClient, http, children }) => {
   return (
     <InternalApiClientContext.Provider value={{ http, apiClient }}>
       {children}

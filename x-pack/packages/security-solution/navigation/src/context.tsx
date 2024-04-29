@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, createContext, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext, createContext } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 
 const navigationContext = createContext<CoreStart | null>(null);

@@ -31,7 +31,11 @@ interface SchedulePanelProps {
   description: string;
   title: string;
 }
-export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({ title, description, children }) => {
+export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
+  title,
+  description,
+  children,
+}) => {
   return (
     <>
       <EuiSplitPanel.Outer>

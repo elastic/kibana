@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import { css, Global } from '@emotion/react';
 import {

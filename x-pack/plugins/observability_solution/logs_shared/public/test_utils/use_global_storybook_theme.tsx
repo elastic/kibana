@@ -28,9 +28,11 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
   };
 };
 
-export const GlobalStorybookThemeProviders: FC<PropsWithChildren<{
-  storyContext: StoryContext;
-}>> = ({ children, storyContext }) => {
+export const GlobalStorybookThemeProviders: FC<
+  PropsWithChildren<{
+    storyContext: StoryContext;
+  }>
+> = ({ children, storyContext }) => {
   const { theme, theme$ } = useGlobalStorybookTheme(storyContext);
   return (
     <KibanaThemeProvider theme$={theme$}>

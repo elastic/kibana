@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';

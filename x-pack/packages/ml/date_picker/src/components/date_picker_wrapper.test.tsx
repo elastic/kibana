@@ -7,7 +7,8 @@
 
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 

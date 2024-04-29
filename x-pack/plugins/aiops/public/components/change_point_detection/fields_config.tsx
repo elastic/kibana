@@ -631,7 +631,11 @@ interface FieldsControlsProps {
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({ fieldConfig, onChange, children }) => {
+export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
+  fieldConfig,
+  onChange,
+  children,
+}) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();

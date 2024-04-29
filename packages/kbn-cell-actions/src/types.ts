@@ -84,7 +84,7 @@ export type CellActionsProps = PropsWithChildren<{
   metadata?: Metadata;
 
   className?: string;
-}>
+}>;
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
   data: CellActionsData[];

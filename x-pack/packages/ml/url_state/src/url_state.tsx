@@ -14,7 +14,7 @@ import React, {
   useRef,
   useEffect,
   type FC,
-  type PropsWithChildren
+  type PropsWithChildren,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';

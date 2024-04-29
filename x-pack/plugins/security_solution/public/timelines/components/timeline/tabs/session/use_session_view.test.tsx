@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, FC, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';

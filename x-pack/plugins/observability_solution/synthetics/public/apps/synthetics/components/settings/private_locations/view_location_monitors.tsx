@@ -62,7 +62,7 @@ export const ViewLocationMonitors = ({
   );
 };
 
-const ViewLocationMonitorsButton: FC<PropsWithChildren<{ href: string;  }>> = ({
+const ViewLocationMonitorsButton: FC<PropsWithChildren<{ href: string }>> = ({
   href,
   children,
 }) => {

@@ -7,7 +7,6 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import type { FunctionComponent } from 'react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';

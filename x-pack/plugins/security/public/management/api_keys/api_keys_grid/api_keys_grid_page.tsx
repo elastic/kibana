@@ -705,7 +705,10 @@ export interface TimeToolTipProps {
   timestamp: number;
 }
 
-export const TimeToolTip: FunctionComponent<PropsWithChildren<TimeToolTipProps>> = ({ timestamp, children }) => {
+export const TimeToolTip: FunctionComponent<PropsWithChildren<TimeToolTipProps>> = ({
+  timestamp,
+  children,
+}) => {
   return (
     <EuiToolTip content={moment(timestamp).format('LLL')}>
       <span>{children ?? moment(timestamp).fromNow()}</span>

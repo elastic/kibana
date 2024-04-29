@@ -14,7 +14,8 @@ import React, {
   useMemo,
   useEffect,
   useRef,
-  FC, PropsWithChildren
+  FC,
+  PropsWithChildren,
 } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 

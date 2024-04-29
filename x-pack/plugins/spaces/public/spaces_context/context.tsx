@@ -6,6 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
+
 import type { CoreStart } from '@kbn/core/public';
 
 import type { SpacesReactContext, SpacesReactContextValue } from './types';

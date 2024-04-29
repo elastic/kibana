@@ -14,7 +14,7 @@ import React, {
   useMemo,
   useLayoutEffect,
   FC,
-  PropsWithChildren
+  PropsWithChildren,
 } from 'react';
 import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 

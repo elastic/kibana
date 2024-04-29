@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context, FC, PropsWithChildren  } from 'react';
+import React, { createContext, useContext, Context, FC, PropsWithChildren } from 'react';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
 import { SidebarItems } from '../../step_detail/waterfall/types';
