@@ -222,7 +222,7 @@ export const createThreatSignals = async ({
 
         // push warning message to appear in rule execution log
         results.warningMessages.push(
-          `maxClauseCount error received from elasticsearch (${errorType})`
+          `maxClauseCount error received from elasticsearch (${errorType}), setting IM rule page size to ${maxClauseCountValue}`
         );
       } else {
         results = combineConcurrentResults(results, searchesPerformed);
