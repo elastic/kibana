@@ -17,7 +17,13 @@ import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-intern
 import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
-import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
+import {
+  getSavedObjectNamespaces,
+  getCurrentTime,
+  normalizeNamespace,
+  setManaged,
+  getRawDocNamespacesFromSource,
+} from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformCreateParams<T = unknown> {
@@ -80,7 +86,6 @@ export const performCreate = async <T>(
   if (registry.isSingleNamespace(type)) {
     savedObjectNamespace = initialNamespaces ? normalizeNamespace(initialNamespaces[0]) : namespace;
   } else if (registry.isMultiNamespace(type)) {
-    console.log('Registry is multi-namespace');
     if (options.id) {
       // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
       // note: this check throws an error if the object is found but does not exist in this namespace
@@ -100,13 +105,17 @@ export const performCreate = async <T>(
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
 
+  const existingNamespaces = preflightResult?.existingDocument
+    ? getRawDocNamespacesFromSource(registry, preflightResult?.existingDocument._source)
+    : [];
+
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,
     object: {
       type,
       id,
       initialNamespaces,
-      existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+      existingNamespaces,
     },
   });
 
