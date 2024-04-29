@@ -16,12 +16,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_source_selector'));
     loadTestFile(require.resolve('./field_list'));
     loadTestFile(require.resolve('./filter_controls'));
-<<<<<<< HEAD
     loadTestFile(require.resolve('./flyout'));
-=======
-    // loadTestFile(require.resolve('./flyout_highlights'));
-    // loadTestFile(require.resolve('./flyout'));
->>>>>>> f53b567e13b79b13fdd2aa219d7f800c0e5a10be
     loadTestFile(require.resolve('./header_menu'));
   });
 }
