@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(expectedRule);
       });
 
-      it('@brokenInServerless should return a 403 forbidden if it is a machine learning job', async () => {
+      it('@skipInServerless should return a 403 forbidden if it is a machine learning job', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's type to try to be a machine learning job type

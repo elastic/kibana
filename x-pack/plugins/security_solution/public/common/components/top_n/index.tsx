@@ -126,7 +126,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
               language: 'kuery',
               query: activeTimelineKqlQueryExpression ?? '',
             },
-          })?.filterQuery
+          })
         : undefined,
     [
       scopeId,
@@ -147,7 +147,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
   return (
     <TopN
-      combinedQueries={combinedQueries}
+      filterQuery={combinedQueries?.filterQuery}
       data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}

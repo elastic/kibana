@@ -14,6 +14,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import {
   type AfterKeys,
   type IdentifierType,
@@ -56,6 +57,7 @@ export const registerRiskScoringTask = ({
   getStartServices,
   kibanaVersion,
   logger,
+  auditLogger,
   taskManager,
   telemetry,
   entityAnalyticsConfig,
@@ -63,6 +65,7 @@ export const registerRiskScoringTask = ({
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
+  auditLogger: AuditLogger | undefined;
   taskManager: TaskManagerSetupContract | undefined;
   telemetry: AnalyticsServiceSetup;
   entityAnalyticsConfig: EntityAnalyticsConfig;
@@ -80,6 +83,7 @@ export const registerRiskScoringTask = ({
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,
         logger,
+        auditLogger,
         namespace,
       });
 
@@ -94,6 +98,7 @@ export const registerRiskScoringTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,
@@ -101,6 +106,7 @@ export const registerRiskScoringTask = ({
         esClient,
         namespace,
         soClient,
+        auditLogger,
       });
 
       return riskScoreServiceFactory({

@@ -6,7 +6,10 @@
  */
 
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+} from '@kbn/elastic-assistant-common/impl/language_models';
 import { v4 as uuidv4 } from 'uuid';
 import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';

@@ -34,14 +34,10 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
   scopeId,
   eventId,
 }) => {
-  const { loading, error, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
+  const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
     scopeId,
   });
-
-  if (error) {
-    return null;
-  }
 
   return (
     <CorrelationsDetailsAlertsTable

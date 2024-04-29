@@ -14,7 +14,8 @@
       "dashboard",
       "data",
       "charts",
-      "fieldFormats"
+      "fieldFormats",
+      "developerExamples"
     ],
     "requiredBundles": ["presentationUtil"],
     "extraPublicDirs": ["public/hello_world"]

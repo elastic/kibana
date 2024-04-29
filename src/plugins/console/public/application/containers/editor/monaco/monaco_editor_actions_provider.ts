@@ -17,8 +17,11 @@ import {
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+import { populateContext } from '../../../../lib/autocomplete/engine';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
+import { getTopLevelUrlCompleteComponents } from '../../../../lib/kb';
 import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
 import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
@@ -27,6 +30,8 @@ import {
   replaceRequestVariables,
   getCurlRequest,
   trackSentRequests,
+  tokenizeRequestUrl,
+  getDocumentationLinkFromAutocompleteContext,
 } from './utils';
 
 const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
@@ -234,5 +239,30 @@ export class MonacoEditorActionsProvider {
         });
       }
     }
+  }
+
+  public async getDocumentationLink(docLinkVersion: string): Promise<string | null> {
+    const requests = await this.getRequests();
+    if (requests.length < 1) {
+      return null;
+    }
+    const request = requests[0];
+
+    // get autocomplete components for the request method
+    const components = getTopLevelUrlCompleteComponents(request.method);
+    // get the url parts from the request url
+    const urlTokens = tokenizeRequestUrl(request.url);
+
+    // this object will contain the information later, it needs to be initialized with some data
+    // similar to the old ace editor context
+    const context: AutoCompleteContext = {
+      method: request.method,
+      urlTokenPath: urlTokens,
+    };
+
+    // this function uses the autocomplete info and the url tokens to find the correct endpoint
+    populateContext(urlTokens, context, undefined, true, components);
+
+    return getDocumentationLinkFromAutocompleteContext(context, docLinkVersion);
   }
 }
