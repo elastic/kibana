@@ -31,14 +31,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
-
+      log.debug(
+        `Changing browser window size to ${DEFAULT_WINDOW_SIZE[0]}x${DEFAULT_WINDOW_SIZE[1]}`
+      );
       await browser.setWindowSize(DEFAULT_WINDOW_SIZE[0], DEFAULT_WINDOW_SIZE[1]);
       const { width, height } = await browser.getWindowSize();
+      log.debug(`Current browser window size set to ${width}x${height}`);
 
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
-
       // Detect here if the Chrome bug is present, and adjust the aspect ratio accordingly if not
       if (width !== DEFAULT_WINDOW_SIZE[0] || height !== DEFAULT_WINDOW_SIZE[1]) {
         const { width: containerWidth, height: containerHeight } =
