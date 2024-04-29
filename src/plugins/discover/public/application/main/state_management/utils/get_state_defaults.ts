@@ -16,11 +16,11 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { DiscoverAppState } from './discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
-import { getDefaultSort, getSortArray } from '../../../utils/sorting';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { getValidViewMode } from '../utils/get_valid_view_mode';
+import { DiscoverAppState } from '../discover_app_state_container';
+import { DiscoverServices } from '../../../../build_services';
+import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {

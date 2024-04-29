@@ -8,10 +8,10 @@
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
-import type { DiscoverAppState } from './discover_app_state_container';
-import type { DiscoverServices } from '../../../build_services';
-import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 
 /**
  * Updates the saved search with a given data view & Appstate

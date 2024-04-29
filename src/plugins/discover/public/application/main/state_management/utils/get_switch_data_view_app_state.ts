@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { getSortArray } from '../../../utils/sorting';
+import { getSortArray } from '../../../../utils/sorting';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

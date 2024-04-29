@@ -12,7 +12,7 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DiscoverServices } from '../../../build_services';
+import { DiscoverServices } from '../../../../build_services';
 
 export const updateFiltersReferences = ({
   prevDataView,

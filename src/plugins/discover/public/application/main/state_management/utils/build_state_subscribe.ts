@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
-import type { DiscoverServices } from '../../../build_services';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import type { DiscoverDataStateContainer } from './discover_data_state_container';
-import type { DiscoverStateContainer } from './discover_state';
+import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
+import type { DiscoverDataStateContainer } from '../discover_data_state_container';
+import type { DiscoverStateContainer } from '../discover_state';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   isEqualState,
-} from './discover_app_state_container';
-import { addLog } from '../../../utils/add_log';
-import { isTextBasedQuery } from '../utils/is_text_based_query';
-import { FetchStatus } from '../../types';
+} from '../discover_app_state_container';
+import { addLog } from '../../../../utils/add_log';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
 
 /**

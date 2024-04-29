@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { AppStateUrl } from './discover_app_state_container';
+import { AppStateUrl } from '../discover_app_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
-import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
 const services = createDiscoverServicesMock();
 
