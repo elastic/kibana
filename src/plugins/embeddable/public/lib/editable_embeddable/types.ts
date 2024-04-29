@@ -10,12 +10,14 @@ import { HasSerializableState } from '@kbn/presentation-containers';
 import { HasParentApi, HasUniqueId } from '@kbn/presentation-publishing';
 import { EmbeddableAppContext } from '..';
 
+export type EditorAppTarget = { editApp?: string; editPath?: string; editUrl?: string };
+
 export interface HasEditorApp {
-  getEditorAppTarget: () => Promise<{ editApp?: string; editPath?: string; editUrl?: string }>;
+  getEditorAppTarget: () => Promise<EditorAppTarget>;
 }
 
 export interface HasAppContext {
-  getAppContext: () => EmbeddableAppContext;
+  getAppContext: () => EmbeddableAppContext | undefined;
 }
 
 export const apiHasAppContext = (unknownApi: unknown): unknownApi is HasAppContext => {

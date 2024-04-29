@@ -29,6 +29,7 @@ import {
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
 import { IContainer } from '../containers/i_container';
+import { EditorAppTarget } from '../editable_embeddable/types';
 import { EmbeddableHasTimeRange } from '../filterable_embeddable/types';
 import { HasInspectorAdapters } from '../inspector';
 import { Adapters } from '../types';
@@ -66,16 +67,13 @@ export interface EmbeddableAppContext {
   currentAppId?: string;
 }
 
-export interface EmbeddableOutput {
+export interface EmbeddableOutput extends EditorAppTarget {
   // Whether the embeddable is actively loading.
   loading?: boolean;
   // Whether the embeddable is rendered.
   rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
-  editUrl?: string;
-  editApp?: string;
-  editPath?: string;
   defaultTitle?: string;
   defaultDescription?: string;
   title?: string;
