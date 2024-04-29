@@ -38,7 +38,7 @@ describe('useStepFromQueryString', () => {
   });
 
   it('should try to update mappings if there is impacted data_streams', async () => {
-    const { api, overlays } = jest.mocked(useComponentTemplatesContext());
+    const { api, startServices } = jest.mocked(useComponentTemplatesContext());
 
     api.getComponentTemplateDatastreams.mockResolvedValue({
       data: { data_streams: ['logs-test.data-default'] },
@@ -51,7 +51,7 @@ describe('useStepFromQueryString', () => {
     });
 
     jest
-      .mocked(useComponentTemplatesContext().overlays.openModal)
+      .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
       .mockReturnValue({ onClose: jest.fn() } as any);
 
     const {
@@ -63,11 +63,11 @@ describe('useStepFromQueryString', () => {
     await showDatastreamRolloverModal('logs-test.data@custom');
 
     expect(api.postDataStreamMappingsFromTemplate).toBeCalledTimes(1);
-    expect(overlays.openModal).not.toBeCalled();
+    expect(startServices.overlays.openModal).not.toBeCalled();
   });
 
   it('should show datastream rollover modal if there is an error when updating mappings', async () => {
-    const { api, overlays } = jest.mocked(useComponentTemplatesContext());
+    const { api, startServices } = jest.mocked(useComponentTemplatesContext());
 
     api.getComponentTemplateDatastreams.mockResolvedValue({
       data: { data_streams: ['logs-test.data-default'] },
@@ -80,7 +80,7 @@ describe('useStepFromQueryString', () => {
     });
 
     jest
-      .mocked(useComponentTemplatesContext().overlays.openModal)
+      .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
       .mockReturnValue({ onClose: jest.fn() } as any);
 
     const {
@@ -90,6 +90,6 @@ describe('useStepFromQueryString', () => {
     } = renderHook(() => useDatastreamsRollover());
 
     await showDatastreamRolloverModal('logs-test.data@custom');
-    expect(overlays.openModal).toBeCalled();
+    expect(startServices.overlays.openModal).toBeCalled();
   });
 });
