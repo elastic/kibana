@@ -22,7 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { CellActionsMode } from '@kbn/cell-actions';
-import { SecurityCellActionsTrigger } from '../../../../actions/constants';
+import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 

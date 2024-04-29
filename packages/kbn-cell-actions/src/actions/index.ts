@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './src/types';
+export * from './types';
 
-export * from './src/context';
-export * from './src/components';
-export * from './src/hooks';
+export { createCellActionFactory } from './factory';
+
+export { createCopyToClipboardActionFactory } from './copy_to_clipboard';
+export {
+  createFilterInActionFactory,
+  createFilterOutActionFactory,
+  addFilterIn,
+  addFilterOut,
+  addExistsFilter,
+} from './filter';

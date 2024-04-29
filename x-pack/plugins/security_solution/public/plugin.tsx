@@ -520,8 +520,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "actions" */
-      './actions'
+      /* webpackChunkName: "lazy_actions" */
+      './lazy_actions'
     );
   }
 
@@ -531,7 +531,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "actions" */
+      /* webpackChunkName: "lazy_assistant_settings_management" */
       './lazy_assistant_settings_management'
     );
   }

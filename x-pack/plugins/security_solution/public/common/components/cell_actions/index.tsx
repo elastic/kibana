@@ -13,8 +13,8 @@ import type {
 } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
-import type { SecurityMetadata } from '../../../actions/types';
-import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
+import type { SecurityMetadata } from '../../../app/actions/types';
+import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 import { useDataViewId } from '../../hooks/use_data_view_id';

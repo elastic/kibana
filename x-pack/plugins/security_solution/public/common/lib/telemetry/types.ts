@@ -12,7 +12,7 @@ import type {
   ReportInsightsGeneratedParams,
   ReportInsightsTelemetryEventParams,
 } from './events/insights/types';
-import type { SecurityMetadata } from '../../../actions/types';
+import type { SecurityMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
   AlertsGroupingTelemetryEvent,
