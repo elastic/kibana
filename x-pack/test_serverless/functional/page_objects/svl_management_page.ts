@@ -43,5 +43,10 @@ export function SvlManagementPageProvider({ getService }: FtrProviderContext) {
     async clickOrgMembersManagementCard() {
       await testSubjects.click('app-card-organization_members');
     },
+
+    // Ingest Pipelines
+    async clickIngestPipelinesManagementCard() {
+      await testSubjects.click('app-card-ingest_pipelines');
+    },
   };
 }
