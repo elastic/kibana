@@ -2,7 +2,9 @@
 == Start and stop {kib}
 
 The method for starting and stopping {kib} varies depending on how you installed
-it.
+it.  If a password protected keystore is used, you will either be prompted to enter
+to enter the password on startup or the environment variable `KBN_KEYSTORE_PASSPHRASE_FILE`
+can be used to point to a file containing the password.
 
 [float]
 [[start-start-targz]]
