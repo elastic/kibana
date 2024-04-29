@@ -212,7 +212,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
     legend: {
       flat: true,
-      defaultLegendStats: [LegendStats.values],
+      defaultLegendStats: [LegendStats.Value],
       hideNestedLegendSwitch: true,
       getShowLegendDefault: () => true,
     },

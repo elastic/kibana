@@ -212,7 +212,7 @@ export const waffleArgTypes: ArgTypes = {
     description: 'Legend stats',
     type: { name: 'string', required: false },
     table: { type: { summary: 'string' }, defaultValue: { summary: undefined } },
-    options: [LegendStats.values],
+    options: [LegendStats.Value],
     control: { type: 'select' },
   },
 };

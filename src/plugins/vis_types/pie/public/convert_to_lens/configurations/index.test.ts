@@ -39,7 +39,7 @@ describe('getConfiguration', () => {
           percentDecimals: 2,
           primaryGroups: ['bucket-1'],
           secondaryGroups: [],
-          legendStats: [LegendStats.values],
+          legendStats: [LegendStats.Value],
           truncateLegend: true,
         },
       ],

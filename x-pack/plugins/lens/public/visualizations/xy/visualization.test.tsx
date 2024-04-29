@@ -612,13 +612,13 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: ['values' as LegendStats.values],
+            legendStats: ['value' as LegendStats.Value],
           },
         };
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['values']);
+        expect(transformedState.legend.legendStats).toEqual(['value']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
       it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
@@ -641,7 +641,7 @@ describe('xy_visualization', () => {
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['values']);
+        expect(transformedState.legend.legendStats).toEqual(['value']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
 
@@ -3844,7 +3844,7 @@ describe('xy_visualization', () => {
       expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
       expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
 
-      state.legend.legendStats = ['values' as LegendStats.values];
+      state.legend.legendStats = ['value' as LegendStats.Value];
       const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
       expect(legendStatsState.legend.legendStats).not.toBeDefined();
       expect(legendStatsState.valuesInLegend).toEqual(true);

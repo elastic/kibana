@@ -333,10 +333,10 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-show-value"
                 showLabel={false}
-                checked={legendStats?.[0] === LegendStats.values}
+                checked={legendStats?.[0] === LegendStats.Value}
                 onChange={(ev) => {
                   if (ev.target.checked) {
-                    onLegendStatsChange([LegendStats.values]);
+                    onLegendStatsChange([LegendStats.Value]);
                   } else {
                     onLegendStatsChange([]);
                   }

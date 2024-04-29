@@ -237,7 +237,7 @@ export const getConfiguration = (
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
       legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
-        ? [LegendStats.values]
+        ? [LegendStats.Value]
         : undefined,
     },
     fittingFunction: fittingFunction

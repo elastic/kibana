@@ -280,7 +280,7 @@ function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
         ...state.legend,
         legendStats: [
           ...new Set([
-            ...(valuesInLegend ? [LegendStats.values] : []),
+            ...(valuesInLegend ? [LegendStats.Value] : []),
             ...(state.legend.legendStats || []),
           ]),
         ],
@@ -296,7 +296,7 @@ function convertToValuesInLegend(state: XYState) {
   const newState: XYPersistedState = cloneDeep(state);
 
   if ('legendStats' in newState.legend && Array.isArray(newState.legend.legendStats)) {
-    newState.valuesInLegend = newState.legend.legendStats.includes(LegendStats.values);
+    newState.valuesInLegend = newState.legend.legendStats.includes(LegendStats.Value);
     delete newState.legend.legendStats;
   }
   return newState;

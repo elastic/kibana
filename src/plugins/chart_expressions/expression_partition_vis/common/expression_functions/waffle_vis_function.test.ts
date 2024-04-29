@@ -34,7 +34,7 @@ describe('interpreter/functions#waffleVis', () => {
 
   const visConfig: WaffleVisConfig = {
     addTooltip: true,
-    legendStats: [LegendStats.values],
+    legendStats: [LegendStats.Value],
     metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
