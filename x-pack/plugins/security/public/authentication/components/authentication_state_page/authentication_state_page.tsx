@@ -8,7 +8,7 @@
 import './authentication_state_page.scss';
 
 import { EuiIcon, EuiImage, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 interface Props {
   className?: string;
@@ -16,7 +16,7 @@ interface Props {
   logo?: string;
 }
 
-export const AuthenticationStatePage: React.FC<Props> = (props) => (
+export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => (
   <div className={`secAuthenticationStatePage ${props.className || ''}`}>
     <header className="secAuthenticationStatePage__header">
       <div className="secAuthenticationStatePage__content eui-textCenter">
