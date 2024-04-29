@@ -61,13 +61,19 @@ const cliRunner: RunFn = async (cliContext) => {
   createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
 
   const emulator = new EmulatorServer({ logger: cliOptions.log });
+  let stopping: Promise<void> | undefined;
 
   await handleProcessInterruptions(
     async () => {
       await emulator.start();
+      await emulator.stopped;
     },
     () => {
-      emulator.stop();
+      stopping = emulator.stop();
     }
   );
+
+  if (stopping) {
+    await stopping;
+  }
 };
