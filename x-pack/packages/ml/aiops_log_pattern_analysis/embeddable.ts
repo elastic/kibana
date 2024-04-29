@@ -10,7 +10,7 @@ import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-export interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
+export interface EmbeddablePatternAnalysisProps<T = Query | AggregateQuery> {
   dataView: DataView;
   savedSearch?: SavedSearch | null;
   query?: T;
@@ -25,10 +25,10 @@ export interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
   setOptionsMenu: (optionsMenu: React.ReactElement | undefined) => void;
 }
 
-export type EmbeddableLogCategorizationInput = EmbeddableInput & EmbeddableLogCategorizationProps;
+export type EmbeddablePatternAnalysisInput = EmbeddableInput & EmbeddablePatternAnalysisProps;
 
-export type EmbeddableLogCategorizationOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
+export type EmbeddablePatternAnalysisOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
-export const EMBEDDABLE_LOG_CATEGORIZATION_TYPE = 'aiopsLogCategorization' as const;
+export const EMBEDDABLE_PATTERN_ANALYSIS_TYPE = 'aiopsPatternAnalysis' as const;
 
-export type EmbeddableLogCategorizationType = typeof EMBEDDABLE_LOG_CATEGORIZATION_TYPE;
+export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;

@@ -10,14 +10,11 @@ import React, { useState, memo, type ReactElement, type FC } from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSavedSearch } from '../../services/discover_state_provider';
-import {
-  LogCategorizationTable,
-  type LogCategorizationTableProps,
-} from './log_categorization_table';
+import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
-export const LogCategorizationTab: FC<
-  Omit<LogCategorizationTableProps, 'query' | 'filters' | 'setOptionsMenu'>
+export const PatternAnalysisTab: FC<
+  Omit<PatternAnalysisTableProps, 'query' | 'filters' | 'setOptionsMenu'>
 > = memo((props) => {
   const services = useDiscoverServices();
   const querySubscriberResult = useQuerySubscriber({
@@ -35,7 +32,7 @@ export const LogCategorizationTab: FC<
           <EuiFlexItem grow={false}>{optionsMenu}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <LogCategorizationTable
+      <PatternAnalysisTable
         {...props}
         savedSearch={savedSearch}
         query={querySubscriberResult.query}

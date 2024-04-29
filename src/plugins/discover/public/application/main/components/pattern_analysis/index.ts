@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { LogCategorizationTable } from './log_categorization_table';
-export { LogCategorizationTab } from './log_categorization_tab';
+export { PatternAnalysisTable } from './pattern_analysis_table';
+export { PatternAnalysisTab } from './pattern_analysis_tab';

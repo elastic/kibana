@@ -20,7 +20,7 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import type { EmbeddableLogCategorizationInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -47,7 +47,7 @@ import { OpenInDiscoverButtons } from '../category_table/table_header';
 export interface LogCategorizationPageProps {
   onClose: () => void;
   embeddingOrigin: string;
-  input: Readonly<EmbeddableLogCategorizationInput>;
+  input: Readonly<EmbeddablePatternAnalysisInput>;
 }
 
 const BAR_TARGET = 20;

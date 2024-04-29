@@ -25,12 +25,12 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
-import type { EmbeddableLogCategorizationType } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import type { EmbeddablePatternAnalysisType } from '@kbn/aiops-log-pattern-analysis/embeddable';
 
 import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type {
-  EmbeddableLogCategorizationInput,
-  EmbeddableLogCategorizationOutput,
+  EmbeddablePatternAnalysisInput,
+  EmbeddablePatternAnalysisOutput,
 } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import useObservable from 'react-use/lib/useObservable';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -75,8 +75,8 @@ const LogCategorizationEmbeddableWrapper = (props: {
 };
 
 export class EmbeddableLogCategorization extends AbstractEmbeddable<
-  EmbeddableLogCategorizationInput,
-  EmbeddableLogCategorizationOutput
+  EmbeddablePatternAnalysisInput,
+  EmbeddablePatternAnalysisOutput
 > {
   private reload$ = new Subject<number>();
 
@@ -90,9 +90,9 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
   deferEmbeddableLoad = true;
 
   constructor(
-    public readonly type: EmbeddableLogCategorizationType,
+    public readonly type: EmbeddablePatternAnalysisType,
     private readonly deps: EmbeddableLogCategorizationDeps,
-    initialInput: EmbeddableLogCategorizationInput,
+    initialInput: EmbeddablePatternAnalysisInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);

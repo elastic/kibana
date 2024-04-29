@@ -9,15 +9,15 @@ import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
-import { EMBEDDABLE_LOG_CATEGORIZATION_TYPE } from '@kbn/aiops-log-pattern-analysis/embeddable';
-import type { EmbeddableLogCategorizationInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import type { EmbeddableLogCategorizationDeps } from './log_categorization_embeddable';
 
 export class EmbeddableLogCategorizationFactory
-  implements EmbeddableFactoryDefinition<EmbeddableLogCategorizationInput>
+  implements EmbeddableFactoryDefinition<EmbeddablePatternAnalysisInput>
 {
-  public readonly type = EMBEDDABLE_LOG_CATEGORIZATION_TYPE;
+  public readonly type = EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
   public readonly grouping = [
     {
@@ -76,7 +76,7 @@ export class EmbeddableLogCategorizationFactory
     };
   }
 
-  public async create(input: EmbeddableLogCategorizationInput, parent?: IContainer) {
+  public async create(input: EmbeddablePatternAnalysisInput, parent?: IContainer) {
     const [deps, { EmbeddableLogCategorization }] = await Promise.all([
       this.getServices(),
       import('./log_categorization_embeddable'),

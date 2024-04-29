@@ -22,8 +22,8 @@ import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
-import { LogCategorizationTab } from '../log_categorization/log_categorization_tab';
-import { PATTERN_ANALYSIS_LOADED } from '../log_categorization/constants';
+import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
+import { PATTERN_ANALYSIS_LOADED } from '../pattern_analysis/constants';
 
 const DROP_PROPS = {
   value: {
@@ -153,7 +153,7 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
             <>
-              <LogCategorizationTab
+              <PatternAnalysisTab
                 dataView={dataView}
                 stateContainer={stateContainer}
                 onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}

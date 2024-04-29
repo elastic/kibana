@@ -14,10 +14,10 @@ import {
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import {
-  type EmbeddableLogCategorizationInput,
-  type EmbeddableLogCategorizationOutput,
-  type EmbeddableLogCategorizationProps,
-  EMBEDDABLE_LOG_CATEGORIZATION_TYPE,
+  type EmbeddablePatternAnalysisInput,
+  type EmbeddablePatternAnalysisOutput,
+  type EmbeddablePatternAnalysisProps,
+  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
 } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,7 +27,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 
-export type LogCategorizationTableProps = EmbeddableLogCategorizationProps & {
+export type PatternAnalysisTableProps = EmbeddablePatternAnalysisProps & {
   searchDescription?: string;
 
   /**
@@ -40,7 +40,7 @@ export type LogCategorizationTableProps = EmbeddableLogCategorizationProps & {
   setOptionsMenu: (optionsMenu: React.ReactElement | undefined) => void;
 };
 
-export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
+export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
   const {
     dataView,
     savedSearch,
@@ -58,7 +58,7 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
-    | IEmbeddable<EmbeddableLogCategorizationInput, EmbeddableLogCategorizationOutput>
+    | IEmbeddable<EmbeddablePatternAnalysisInput, EmbeddablePatternAnalysisOutput>
     | undefined
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -102,13 +102,13 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
     const loadEmbeddable = async () => {
       if (services.embeddable) {
         const factory = services.embeddable.getEmbeddableFactory<
-          EmbeddableLogCategorizationInput,
-          EmbeddableLogCategorizationOutput
-        >(EMBEDDABLE_LOG_CATEGORIZATION_TYPE);
+          EmbeddablePatternAnalysisInput,
+          EmbeddablePatternAnalysisOutput
+        >(EMBEDDABLE_PATTERN_ANALYSIS_TYPE);
         if (factory) {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
-            id: EMBEDDABLE_LOG_CATEGORIZATION_TYPE,
+            id: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
             dataView,
             savedSearch,
             query,
