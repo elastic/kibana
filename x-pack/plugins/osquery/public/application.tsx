@@ -20,17 +20,17 @@ import { OsqueryApp } from './components/app';
 import { PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
-import { KibanaThemeProvider } from './shared_imports';
+import { KibanaRenderContextProvider } from './shared_imports';
 
 export const renderApp = (
   core: CoreStart,
   services: AppPluginStartDependencies,
-  { element, history, theme$ }: AppMountParameters,
+  { element, history }: AppMountParameters,
   storage: Storage,
   kibanaVersion: string
 ) => {
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         services={{
@@ -52,7 +52,7 @@ export const renderApp = (
           </Router>
         </EuiErrorBoundary>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
 
