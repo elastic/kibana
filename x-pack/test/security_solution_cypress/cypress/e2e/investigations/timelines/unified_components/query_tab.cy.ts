@@ -25,7 +25,8 @@ import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { createNewTimeline, executeTimelineSearch } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/181882
+describe.skip(
   'Unsaved Timeline query tab',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
