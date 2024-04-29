@@ -48,11 +48,26 @@ export interface PanelActionDependencies {
   licensing: LicensingPluginStart;
 }
 
+type StartServices = [
+  Pick<
+    CoreStart,
+    // required for modules that render React
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    // used extensively in Reporting share panel action
+    | 'application'
+    | 'uiSettings'
+  >,
+  PanelActionDependencies,
+  unknown
+];
+
 interface Params {
   apiClient: ReportingAPIClient;
   csvConfig: ClientConfigType['csv'];
   core: CoreSetup;
-  startServices$: Observable<[CoreStart, PanelActionDependencies, unknown]>;
+  startServices$: Observable<StartServices>;
   usesUiCapabilities: boolean;
 }
 

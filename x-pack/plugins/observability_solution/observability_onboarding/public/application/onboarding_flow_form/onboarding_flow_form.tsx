@@ -26,6 +26,7 @@ import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
+import { useVirtualSearchResults } from './use_virtual_search_results';
 
 interface UseCaseOption {
   id: Category;
@@ -89,7 +90,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     setHasPackageListLoaded(true);
   }, []);
   const packageListRef = useRef<HTMLDivElement | null>(null);
-  const customCardsRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
   const selectedCategory: Category | null = searchParams.get('category') as Category | null;
 
@@ -99,7 +100,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     }
 
     const timeout = setTimeout(() => {
-      customCardsRef.current?.scrollIntoView({
+      formRef.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'end',
       });
@@ -140,9 +141,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     createCollectionCardHandler,
     searchParams.get('category') as Category | null
   );
+  const virtualSearchResults = useVirtualSearchResults();
 
   return (
-    <EuiPanel hasBorder paddingSize="xl">
+    <EuiPanel hasBorder paddingSize="xl" panelRef={formRef}>
       <TitleWithIcon
         iconType="indexRollupApp"
         title={i18n.translate(
@@ -195,7 +197,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
           {Array.isArray(customCards) && (
             <OnboardingFlowPackageList
-              ref={customCardsRef}
               customCards={customCards}
               flowSearch={integrationSearch}
               flowCategory={searchParams.get('category')}
@@ -216,10 +217,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             setSearchQuery={setIntegrationSearch}
             flowCategory={searchParams.get('category')}
             ref={packageListRef}
-            customCards={customCards?.filter(
-              // Filter out collection cards and regular integrations that show up via search anyway
-              (card) => card.type === 'virtual' && !card.isCollectionCard
-            )}
+            customCards={customCards
+              ?.filter(
+                // Filter out collection cards and regular integrations that show up via search anyway
+                (card) => card.type === 'virtual' && !card.isCollectionCard
+              )
+              .concat(virtualSearchResults)}
             joinCardLists
           />
         </>
