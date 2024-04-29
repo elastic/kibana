@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from './use_kibana';
-import { ElasticsearchIndex } from '../types';
+import { APIRoutes } from '../types';
 
 export const useQueryIndices = (
   query: string = ''
@@ -19,18 +19,15 @@ export const useQueryIndices = (
     queryKey: ['indices', query],
     queryFn: async () => {
       const response = await services.http.get<{
-        indices: ElasticsearchIndex[];
-      }>('/internal/enterprise_search/indices', {
+        indices: string[];
+      }>(APIRoutes.GET_INDICES, {
         query: {
-          from: 0,
-          only_show_search_optimized_indices: false,
-          return_hidden_indices: false,
           search_query: query,
-          size: 20,
+          size: 10,
         },
       });
 
-      return response.indices.map((index) => index.name);
+      return response.indices;
     },
   });
 
