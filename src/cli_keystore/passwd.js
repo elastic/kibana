@@ -17,13 +17,11 @@ export async function passwd(keystore, options = {}) {
     return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
   }
 
-  const password = await question(
-    'Enter new password for the kibana keystore (empty for no password)',
-    {
+  const password =
+    (await question('Enter new password for the kibana keystore (empty for no password)', {
       mask: '*',
-    }
-  );
-  if (password) keystore.setPassword(password);
+    })) || '';
+  keystore.setPassword(password);
   keystore.save();
 }
 
