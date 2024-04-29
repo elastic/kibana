@@ -31,13 +31,29 @@ export function registerCreate(router: VersionedRouter, cmStorage: DashboardStor
         },
       },
       async (ctx, req, res) => {
-        const {
-          id,
-          ...attrs
-        } = req.body;
+        const { id: reqId, ...attrs } = req.body;
+        let id = reqId;
         try {
-          await cmStorage.create({} as any, { ...attrs, version: LATEST_VERSION }, {id: req.body.id})
+          ({
+            item: { id },
+          } = await cmStorage.create(
+            {} as any,
+            {
+              ...attrs,
+              timeRestore: attrs.timeRestore ?? false,
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: attrs.kibanaSavedObjectMeta.searchSourceJSON ?? '',
+              },
+              panelsJSON: attrs.panelsJSON ?? '[]',
+              version: LATEST_VERSION,
+            },
+            { id: req.body.id }
+          ));
+        } catch (e) {
+          // do some handling;
+          throw e;
         }
+        return res.ok({ body: { id, ...req.body } });
       }
     );
 }
