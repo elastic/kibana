@@ -13,9 +13,10 @@ import { EmbeddableStart } from '../..';
 import { apiHasAppContext, NavigateToEditorApi } from './types';
 
 /**
- * Call this function to navigate to a given
- * @param services There services needed to perform the navigation
- * @param api The embeddable API, which s
+ * Call this function to navigate to a given editor application
+ * @param services The services needed to perform the navigation
+ * @param api The embeddable API, which should, at minimum, provide a callback for fetching
+ *            the editor app target (app ID, path to navigate to, and generic editor URL)
  */
 export const navigateToEditor = async (
   services: { core: CoreStart; embeddable: EmbeddableStart },
