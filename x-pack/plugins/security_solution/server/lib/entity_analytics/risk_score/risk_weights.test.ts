@@ -6,11 +6,7 @@
  */
 
 import { RiskWeightTypes, RiskCategories } from '../../../../common/entity_analytics/risk_engine';
-import {
-  buildCategoryAssignment,
-  buildCategoryWeights,
-  buildWeightingOfScoreByCategory,
-} from './risk_weights';
+import { buildCategoryWeights, buildWeightingOfScoreByCategory } from './risk_weights';
 
 describe('buildCategoryWeights', () => {
   it('returns the default weights if nothing else is provided', () => {
@@ -49,16 +45,6 @@ describe('buildCategoryWeights', () => {
     expect(result).toEqual([
       { host: 0.1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.category_1 },
     ]);
-  });
-});
-
-describe('buildCategoryAssignment', () => {
-  it('builds the expected assignment statement', () => {
-    const result = buildCategoryAssignment();
-
-    expect(result).toMatchInlineSnapshot(
-      `"if (inputs[i].category == 'signal') { results['category_1_score'] += current_score; results['category_1_count'] += 1; }"`
-    );
   });
 });
 
