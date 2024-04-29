@@ -7,6 +7,7 @@
 
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
+import { ThreatIntelligenceStartServices } from '../../../types';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { Indicator } from '../../../../common/types/indicator';
@@ -20,6 +21,10 @@ export interface UseAddToTimelineParam {
    * Indicator's field to retrieve indicator's value
    */
   field: string;
+  /**
+   * services needed for shared modules that render React component
+   */
+  startServices: ThreatIntelligenceStartServices;
 }
 
 export interface UseAddToTimelineValue {
@@ -37,6 +42,7 @@ export interface UseAddToTimelineValue {
 export const useAddToTimeline = ({
   indicator,
   field,
+  startServices,
 }: UseAddToTimelineParam): UseAddToTimelineValue => {
   const { key, value } =
     typeof indicator === 'string'
@@ -53,6 +59,7 @@ export const useAddToTimeline = ({
     dataProvider,
     field: key,
     ownFocus: false,
+    startServices,
   };
 
   return {

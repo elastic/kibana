@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorValueActions } from './indicator_value_actions';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+
+const coreStart = coreMock.createStart();
 
 export default {
   title: 'IndicatorValueActions',
@@ -26,7 +29,7 @@ export const Default: Story<void> = () => {
   return (
     <StoryProvidersComponent>
       <IndicatorsFlyoutContext.Provider value={context}>
-        <IndicatorValueActions indicator={indicator} field={field} />
+        <IndicatorValueActions indicator={indicator} field={field} startServices={coreStart} />
       </IndicatorsFlyoutContext.Provider>
     </StoryProvidersComponent>
   );
@@ -39,7 +42,7 @@ export const WithoutFilterInOut: Story<void> = () => {
   return (
     <StoryProvidersComponent>
       <IndicatorsFlyoutContext.Provider value={context}>
-        <IndicatorValueActions indicator={indicator} field={field} />
+        <IndicatorValueActions indicator={indicator} field={field} startServices={coreStart} />
       </IndicatorsFlyoutContext.Provider>
     </StoryProvidersComponent>
   );
