@@ -11,7 +11,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
-import deepMerge from 'deepmerge';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -367,18 +366,17 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: restOfBody.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
 
-      if (overrides?.inputs) {
-        const targetId = Object.keys(overrides?.inputs)[0];
-        newData = deepMerge<NewPackagePolicy>(newData, overrides?.inputs[targetId]);
+      if (overrides) {
+        newData.overrides = overrides;
       }
     }
-
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
       request.params.packagePolicyId,
       newData,
-      { user, force }
+      { user, force },
+      packagePolicy.package?.version
     );
     return response.ok({
       body: {
