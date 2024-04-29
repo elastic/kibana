@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React, { useMemo } from 'react';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -41,7 +41,7 @@ interface CloudDefendAppDeps {
   params: AppMountParameters;
 }
 
-export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
+export const TestProvider: FC<PropsWithChildren<Partial<CloudDefendAppDeps>>> = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),
