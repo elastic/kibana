@@ -7,7 +7,6 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import { once } from 'lodash';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
@@ -35,6 +34,7 @@ import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
+import { prepareRouteConfigValidation } from './util';
 
 export type ContextEnhancer<
   P,
@@ -125,6 +125,9 @@ export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
 
+  /** Plugin for which this router was registered */
+  pluginId?: symbol;
+
   versionedRouterOptions?: {
     /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
     defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
@@ -163,6 +166,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   implements IRouter<Context>
 {
   public routes: Array<Readonly<InternalRouterRoute>> = [];
+  public pluginId?: symbol;
   public get: InternalRegistrar<'get', Context>;
   public post: InternalRegistrar<'post', Context>;
   public delete: InternalRegistrar<'delete', Context>;
@@ -175,6 +179,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
     private readonly options: RouterOptions
   ) {
+    this.pluginId = options.pluginId;
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(
@@ -182,9 +187,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
-        if (typeof route.validate === 'function') {
-          route = { ...route, validate: once(route.validate) };
-        }
+        route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({

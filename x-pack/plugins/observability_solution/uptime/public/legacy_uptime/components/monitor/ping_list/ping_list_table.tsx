@@ -226,8 +226,6 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
       loading={loading}
       columns={columns}
       error={error?.message}
-      isExpandable={true}
-      hasActions={true}
       items={pings}
       itemId="docId"
       itemIdToExpandedRowMap={expandedRows}
@@ -241,7 +239,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
               defaultMessage: 'No history found',
             })
       }
-      tableLayout={'auto'}
+      tableLayout="auto"
       rowProps={getRowProps}
       onChange={onChange}
     />

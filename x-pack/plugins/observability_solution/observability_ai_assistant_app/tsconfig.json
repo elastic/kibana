@@ -55,7 +55,13 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/management-settings-ids",
-    "@kbn/apm-utils"
+    "@kbn/apm-utils",
+    "@kbn/alerting-plugin",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/features-plugin",
+    "@kbn/serverless",
+    "@kbn/task-manager-plugin",
+    "@kbn/cloud-plugin"
   ],
   "exclude": ["target/**/*"]
 }

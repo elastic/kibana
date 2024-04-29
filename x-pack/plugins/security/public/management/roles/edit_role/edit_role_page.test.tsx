@@ -12,6 +12,7 @@ import React from 'react';
 import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -192,6 +193,7 @@ function getProps({
       return [];
     }
   });
+  const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
   const i18nMock = i18nServiceMock.createStartContract();
   const themeMock = themeServiceMock.createStartContract();
   return {
@@ -213,7 +215,8 @@ function getProps({
     spacesApiUi,
     buildFlavor,
     theme: themeMock,
-    i18nStart: i18nMock,
+    i18n: i18nMock,
+    analytics: analyticsMock,
   };
 }
 

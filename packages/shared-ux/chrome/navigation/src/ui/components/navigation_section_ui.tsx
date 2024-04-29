@@ -318,15 +318,9 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
-// Temporary solution to prevent showing the outline when the page load when the
-// accordion is auto-expanded if one of its children is active
-// Once https://github.com/elastic/eui/pull/7314 is released in Kibana we can
-// safely remove this CSS class.
 const className = css`
-  .euiAccordion__childWrapper,
-  .euiAccordion__children,
-  .euiCollapsibleNavAccordion__children {
-    outline: none;
+  .euiAccordion__childWrapper {
+    transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
   }
 `;
 

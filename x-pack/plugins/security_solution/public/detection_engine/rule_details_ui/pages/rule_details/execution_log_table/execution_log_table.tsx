@@ -524,7 +524,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         onChange={onTableChangeCallback}
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
-        isExpandable={true}
       />
     </EuiPanel>
   );
