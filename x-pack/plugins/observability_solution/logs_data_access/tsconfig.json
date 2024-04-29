@@ -7,5 +7,8 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/logging",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
   ]
 }
