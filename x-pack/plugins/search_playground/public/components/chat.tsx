@@ -76,7 +76,7 @@ export const Chat = () => {
       {
         id: uuidv4(),
         role: MessageRole.system,
-        content: 'You can start chat now',
+        content: 'Welcome to Playground! Ask a question to get started.',
       },
       ...transformFromChatMessages(messages),
     ],
