@@ -27,7 +27,7 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/ser
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  AlertsInsightsPostRequestBody,
+  AttackDiscoveryPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
@@ -218,7 +218,7 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AlertsInsightsPostRequestBody
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
 }
