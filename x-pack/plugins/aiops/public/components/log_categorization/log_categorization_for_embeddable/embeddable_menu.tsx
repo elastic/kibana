@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
+import { EuiSuperSelect, useEuiPaddingSize } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -37,6 +37,11 @@ interface Props {
   reload: () => void;
 }
 
+const minimumTimeRangeOptions = Object.keys(MINIMUM_TIME_RANGE).map((value) => ({
+  inputDisplay: value,
+  value: value as MinimumTimeRangeOption,
+}));
+
 export const EmbeddableMenu: FC<Props> = ({
   randomSampler,
   fields,
@@ -49,16 +54,12 @@ export const EmbeddableMenu: FC<Props> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const togglePopover = () => setShowMenu(!showMenu);
+  const xs = useEuiPaddingSize('xs');
 
   const fieldOptions = useMemo(
     () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
     [fields]
   );
-
-  const minimumTimeRangeOptions = Object.keys(MINIMUM_TIME_RANGE).map((value) => ({
-    inputDisplay: value,
-    value: value as MinimumTimeRangeOption,
-  }));
 
   const button = (
     <EuiButtonEmpty
@@ -67,7 +68,7 @@ export const EmbeddableMenu: FC<Props> = ({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => togglePopover()}
-      css={{ marginRight: '4px' }}
+      css={{ marginRight: xs }}
     >
       Options
     </EuiButtonEmpty>

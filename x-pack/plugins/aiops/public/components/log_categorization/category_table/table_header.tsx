@@ -82,7 +82,6 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
             iconSide="left"
           >
             {labels.multiSelect.in}
-            {/* {showText ? labels.multiSelect.in : null} */}
           </EuiButtonEmpty>
         </TooltipWrapper>
       </EuiFlexItem>
@@ -96,7 +95,6 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
             iconSide="left"
           >
             {labels.multiSelect.out}
-            {/* {showText ? labels.multiSelect.out : null} */}
           </EuiButtonEmpty>
         </TooltipWrapper>
       </EuiFlexItem>

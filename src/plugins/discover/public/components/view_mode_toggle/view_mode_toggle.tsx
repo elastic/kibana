@@ -49,6 +49,7 @@ export const DocumentViewModeToggle = ({
 
   useEffect(() => {
     if (showPatternAnalysisTab === false && viewMode === VIEW_MODE.PATTERN_LEVEL) {
+      // switch to document view if no text fields are available
       setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);

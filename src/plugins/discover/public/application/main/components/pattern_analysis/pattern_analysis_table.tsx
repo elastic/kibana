@@ -77,7 +77,6 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
-      // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
         dataView,
         savedSearch,
@@ -106,7 +105,6 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
           EmbeddablePatternAnalysisOutput
         >(EMBEDDABLE_PATTERN_ANALYSIS_TYPE);
         if (factory) {
-          // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
             dataView,
