@@ -15,7 +15,7 @@ import type {
   AssetSOObject,
   SimpleSOAssetType,
 } from '../../../../../../../../common';
-import { allowedAssetTypes } from '../../../../../../../../common/constants';
+import { displayedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
@@ -222,7 +222,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     }
   } else {
     content = [
-      ...allowedAssetTypes.map((assetType) => {
+      ...displayedAssetTypes.map((assetType) => {
         const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
 
         if (!sectionAssetSavedObjects.length) {

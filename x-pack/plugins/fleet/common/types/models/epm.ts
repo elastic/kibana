@@ -99,12 +99,7 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType.index
 >;
 
-export type AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization,
-  ElasticsearchAssetType.transform
-];
+export type DisplayedAssetTypes = Array<`${KibanaAssetType | ElasticsearchAssetType}`>;
 
 // Defined as part of the removing public references to saved object schemas
 export interface SimpleSOAssetType {
@@ -112,6 +107,7 @@ export interface SimpleSOAssetType {
   type: ElasticsearchAssetType | KibanaSavedObjectType;
   updatedAt?: string;
   attributes: {
+    service?: string;
     title?: string;
     description?: string;
   };

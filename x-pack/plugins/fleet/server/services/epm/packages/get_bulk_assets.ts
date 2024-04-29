@@ -14,7 +14,7 @@ import type {
   SimpleSOAssetType,
 } from '../../../../common';
 
-import { allowedAssetTypesLookup } from '../../../../common/constants';
+import { displayedAssetTypesLookup } from '../../../../common/constants';
 
 import type { SimpleSOAssetAttributes } from '../../../types';
 
@@ -29,7 +29,7 @@ export async function getBulkAssets(
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
       (savedObject) =>
-        savedObject?.error?.statusCode !== 404 && allowedAssetTypesLookup.has(savedObject.type)
+        savedObject?.error?.statusCode !== 404 && displayedAssetTypesLookup.has(savedObject.type)
     )
     .map((obj) => {
       return {

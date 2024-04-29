@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AllowedAssetTypes } from '../types/models';
+import type { DisplayedAssetTypes } from '../types/models';
 import { ElasticsearchAssetType, KibanaAssetType } from '../types/models';
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
@@ -87,11 +87,9 @@ export const installationStatuses = {
   NotInstalled: 'not_installed',
 } as const;
 
-export const allowedAssetTypes: AllowedAssetTypes = [
-  KibanaAssetType.dashboard,
-  KibanaAssetType.search,
-  KibanaAssetType.visualization,
-  ElasticsearchAssetType.transform,
+export const displayedAssetTypes: DisplayedAssetTypes = [
+  ...Object.values(ElasticsearchAssetType),
+  ...Object.values(KibanaAssetType),
 ];
 
-export const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
+export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);
