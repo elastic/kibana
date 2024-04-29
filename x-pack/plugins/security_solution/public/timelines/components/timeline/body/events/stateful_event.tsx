@@ -12,7 +12,7 @@ import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {

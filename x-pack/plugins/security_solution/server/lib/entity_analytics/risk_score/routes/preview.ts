@@ -20,6 +20,8 @@ import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskScoreAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const riskScorePreviewRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -103,6 +105,16 @@ export const riskScorePreviewRoute = (
             runtimeMappings,
             weights,
             alertSampleSizePerShard,
+          });
+
+          securityContext.getAuditLogger()?.log({
+            message: 'User triggered custom manual scoring',
+            event: {
+              action: RiskScoreAuditActions.RISK_ENGINE_PREVIEW,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CHANGE,
+              outcome: AUDIT_OUTCOME.SUCCESS,
+            },
           });
 
           return response.ok({ body: result });
