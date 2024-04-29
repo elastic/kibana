@@ -6,6 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from 'zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
@@ -13,7 +14,7 @@ export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
 const toolDetails = {
   description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Only output valid ES|QL queries as described above. Do not add any additional text to describe your output.',
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Only output valid ES|QL queries as described above. Format ESQL correctly by surrounding it with back ticks. Do not add any additional text to describe your output.',
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
@@ -33,10 +34,13 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
+      schema: z.object({
+        question: z.string().describe(`The user's exact question about ESQL`),
+      }),
       func: async (input, _, cbManager) => {
         const result = await chain.invoke(
           {
-            query: input,
+            query: input.question,
           },
           cbManager
         );

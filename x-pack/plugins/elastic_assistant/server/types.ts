@@ -40,6 +40,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 
+import { DynamicStructuredTool } from '@langchain/core/dist/tools';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -203,7 +204,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | null;
+  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
 
 export interface AssistantToolParams {

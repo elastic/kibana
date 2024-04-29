@@ -133,8 +133,13 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         agentType: 'structured-chat-zero-shot-react-description',
         memory,
         verbose: false,
+        returnIntermediateSteps: false,
+        handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
+        agentArgs: {
+          // this is important to help LangChain correctly format tool input
+          humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+        },
       });
-
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
