@@ -84,6 +84,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.tryForTime(2000, async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+        log.debug(
+          `Checking workspace dimensions: ${width}x${height} against ${expectedMaxWidth}x${expectedMaxHeight}`
+        );
 
         // Make sure size didn't go past the max passed
         expect(pxToN(width)).to.be.below(pxToN(expectedMaxWidth) + 1);
