@@ -28,7 +28,7 @@ export function appendWhereClauseToESQLQuery(
   // casting to string
   // there are some field types such as the ip that need
   // to cast in string first otherwise ES will fail
-  if (fieldType !== 'string' && fieldType !== 'number') {
+  if (fieldType !== 'string' && fieldType !== 'number' && fieldType !== 'boolean') {
     fieldName = `${fieldName}::string`;
   }
 
