@@ -16,7 +16,8 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -91,6 +92,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     charts,
     unifiedSearch,
   };
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
@@ -128,7 +130,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
   });
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={{ ...services }}>
         <UrlStateProvider>
           <DataSourceContext.Provider value={{ dataView, savedSearch }}>
@@ -148,6 +150,6 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
           </DataSourceContext.Provider>
         </UrlStateProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };
