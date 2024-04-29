@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { act, type WrapperComponent } from '@testing-library/react-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';
 
 import { useInstallPackage, PackageInstallProvider } from './use_package_install';
+
+const coreStart = coreMock.createStart();
 
 describe('usePackageInstall', () => {
   beforeEach(() => {
@@ -42,12 +45,7 @@ describe('usePackageInstall', () => {
 
       const notifications = renderer.startServices.notifications;
       const wrapper: WrapperComponent<any> = ({ children }) => (
-        <PackageInstallProvider
-          notifications={notifications}
-          theme$={renderer.startServices.theme.theme$}
-        >
-          {children}
-        </PackageInstallProvider>
+        <PackageInstallProvider startServices={coreStart}>{children}</PackageInstallProvider>
       );
       const { result } = renderer.renderHook(() => useInstallPackage(), wrapper);
 
