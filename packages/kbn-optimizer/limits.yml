@@ -37,6 +37,7 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
+  discoverShared: 17111
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
@@ -143,7 +144,7 @@ pageLoadAssetSize:
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
-  stackConnectors: 52131
+  stackConnectors: 67227
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
