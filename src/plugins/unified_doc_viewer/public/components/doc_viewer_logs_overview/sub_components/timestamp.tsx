@@ -5,10 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 
-export const serviceContractMock = (): jest.Mocked<UserSettingsService> => {
-  return {
-    setup: jest.fn(),
-  } as unknown as jest.Mocked<UserSettingsService>;
-};
+import React from 'react';
+import { EuiBadge } from '@elastic/eui';
+
+interface TimestampProps {
+  timestamp?: string;
+}
+
+export function Timestamp({ timestamp }: TimestampProps) {
+  if (!timestamp) return null;
+
+  return (
+    <EuiBadge color="hollow" data-test-subj="unifiedDocViewLogsOverviewTimestamp">
+      {timestamp}
+    </EuiBadge>
+  );
+}
