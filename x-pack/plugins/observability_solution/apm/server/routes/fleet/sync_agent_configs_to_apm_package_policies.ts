@@ -36,12 +36,11 @@ export async function syncAgentConfigsToApmPackagePolicies({
   }
   const coreStart = await coreStartPromise;
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  const [savedObjectsClient, agentConfigurations, packagePolicies] =
-    await Promise.all([
-      getInternalSavedObjectsClient(coreStart),
-      listConfigurations({ internalESClient, apmIndices }),
-      getApmPackagePolicies({ coreStart, fleetPluginStart }),
-    ]);
+  const [savedObjectsClient, agentConfigurations, packagePolicies] = await Promise.all([
+    getInternalSavedObjectsClient(coreStart),
+    listConfigurations({ internalESClient, apmIndices }),
+    getApmPackagePolicies({ coreStart, fleetPluginStart }),
+  ]);
 
   return Promise.all(
     packagePolicies.items.map(async (item) => {

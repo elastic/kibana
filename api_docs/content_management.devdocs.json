@@ -2916,7 +2916,7 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\" | \"mSearch\""
+          "\"search\" | \"create\" | \"update\" | \"get\" | \"delete\" | \"bulkGet\" | \"mSearch\""
         ],
         "path": "src/plugins/content_management/common/rpc/constants.ts",
         "deprecated": false,

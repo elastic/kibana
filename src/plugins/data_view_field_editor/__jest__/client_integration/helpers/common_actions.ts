@@ -40,7 +40,7 @@ export const waitForUpdates = async (testBed?: TestBed) => {
 
 export const getCommonActions = (testBed: TestBed) => {
   const toggleFormRow = async (
-    row: 'customLabel' | 'value' | 'format',
+    row: 'customLabel' | 'customDescription' | 'value' | 'format',
     value: 'on' | 'off' = 'on'
   ) => {
     const testSubj = `${row}Row.toggle`;

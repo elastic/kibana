@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
-import { take, bufferCount, skip } from 'rxjs/operators';
+import { take, bufferCount, skip } from 'rxjs';
 import {
   isTaskManagerMetricEvent,
   isTaskManagerStatEvent,
@@ -62,11 +62,6 @@ const config: TaskManagerConfig = {
   },
   poll_interval: 6000000,
   request_capacity: 1000,
-  requeue_invalid_tasks: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
   unsafe: {
     authenticate_background_task_utilization: true,
     exclude_task_types: [],
@@ -122,47 +117,113 @@ describe('createAggregator', () => {
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[1]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 2, duration: { counts: [2], values: [100] } },
+              value: {
+                success: 2,
+                total: 2,
+                total_errors: 0,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
             });
             expect(metrics[2]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 3, duration: { counts: [3], values: [100] } },
+              value: {
+                success: 3,
+                total: 3,
+                total_errors: 0,
+                duration: { counts: [3], values: [100] },
+                duration_values: [10, 10, 10],
+              },
             });
             expect(metrics[3]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 4, duration: { counts: [4], values: [100] } },
+              value: {
+                success: 4,
+                total: 4,
+                total_errors: 0,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
             });
             expect(metrics[4]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 5, duration: { counts: [4], values: [100] } },
+              value: {
+                success: 4,
+                total: 5,
+                total_errors: 1,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
             });
             expect(metrics[5]).toEqual({
               key: 'task_claim',
-              value: { success: 5, total: 6, duration: { counts: [5], values: [100] } },
+              value: {
+                success: 5,
+                total: 6,
+                total_errors: 1,
+                duration: { counts: [5], values: [100] },
+                duration_values: [10, 10, 10, 10, 10],
+              },
             });
             expect(metrics[6]).toEqual({
               key: 'task_claim',
-              value: { success: 6, total: 7, duration: { counts: [6], values: [100] } },
+              value: {
+                success: 6,
+                total: 7,
+                total_errors: 1,
+                duration: { counts: [6], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10],
+              },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
-              value: { success: 7, total: 8, duration: { counts: [7], values: [100] } },
+              value: {
+                success: 7,
+                total: 8,
+                total_errors: 1,
+                duration: { counts: [7], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10, 10],
+              },
             });
             expect(metrics[8]).toEqual({
               key: 'task_claim',
-              value: { success: 8, total: 9, duration: { counts: [8], values: [100] } },
+              value: {
+                success: 8,
+                total: 9,
+                total_errors: 1,
+                duration: { counts: [8], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
+              },
             });
             expect(metrics[9]).toEqual({
               key: 'task_claim',
-              value: { success: 8, total: 10, duration: { counts: [8], values: [100] } },
+              value: {
+                success: 8,
+                total: 10,
+                total_errors: 2,
+                duration: { counts: [8], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
+              },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
-              value: { success: 9, total: 11, duration: { counts: [9], values: [100] } },
+              value: {
+                success: 9,
+                total: 11,
+                total_errors: 2,
+                duration: { counts: [9], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10, 10, 10, 10],
+              },
             });
             resolve();
           });
@@ -214,48 +275,114 @@ describe('createAggregator', () => {
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[1]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 2, duration: { counts: [2], values: [100] } },
+              value: {
+                success: 2,
+                total: 2,
+                total_errors: 0,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
             });
             expect(metrics[2]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 3, duration: { counts: [3], values: [100] } },
+              value: {
+                success: 3,
+                total: 3,
+                total_errors: 0,
+                duration: { counts: [3], values: [100] },
+                duration_values: [10, 10, 10],
+              },
             });
             expect(metrics[3]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 4, duration: { counts: [4], values: [100] } },
+              value: {
+                success: 4,
+                total: 4,
+                total_errors: 0,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
             });
             expect(metrics[4]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 5, duration: { counts: [4], values: [100] } },
+              value: {
+                success: 4,
+                total: 5,
+                total_errors: 1,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
             });
             expect(metrics[5]).toEqual({
               key: 'task_claim',
-              value: { success: 5, total: 6, duration: { counts: [5], values: [100] } },
+              value: {
+                success: 5,
+                total: 6,
+                total_errors: 1,
+                duration: { counts: [5], values: [100] },
+                duration_values: [10, 10, 10, 10, 10],
+              },
             });
             // reset event should have been received here
             expect(metrics[6]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 2, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 2,
+                total_errors: 1,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[8]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 3, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 3,
+                total_errors: 2,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[9]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 4, duration: { counts: [2], values: [100] } },
+              value: {
+                success: 2,
+                total: 4,
+                total_errors: 2,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 5, duration: { counts: [3], values: [100] } },
+              value: {
+                success: 3,
+                total: 5,
+                total_errors: 2,
+                duration: { counts: [3], values: [100] },
+                duration_values: [10, 10, 10],
+              },
             });
             resolve();
           });
@@ -315,48 +442,114 @@ describe('createAggregator', () => {
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[1]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 2, duration: { counts: [2], values: [100] } },
+              value: {
+                success: 2,
+                total: 2,
+                total_errors: 0,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
             });
             expect(metrics[2]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 3, duration: { counts: [3], values: [100] } },
+              value: {
+                success: 3,
+                total: 3,
+                total_errors: 0,
+                duration: { counts: [3], values: [100] },
+                duration_values: [10, 10, 10],
+              },
             });
             expect(metrics[3]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 4, duration: { counts: [4], values: [100] } },
+              value: {
+                success: 4,
+                total: 4,
+                total_errors: 0,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
             });
             expect(metrics[4]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 5, duration: { counts: [4], values: [100] } },
+              value: {
+                success: 4,
+                total: 5,
+                total_errors: 1,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
             });
             expect(metrics[5]).toEqual({
               key: 'task_claim',
-              value: { success: 5, total: 6, duration: { counts: [5], values: [100] } },
+              value: {
+                success: 5,
+                total: 6,
+                total_errors: 1,
+                duration: { counts: [5], values: [100] },
+                duration_values: [10, 10, 10, 10, 10],
+              },
             });
             // reset interval should have fired here
             expect(metrics[6]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 2, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 2,
+                total_errors: 1,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[8]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 3, duration: { counts: [1], values: [100] } },
+              value: {
+                success: 1,
+                total: 3,
+                total_errors: 2,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
             });
             expect(metrics[9]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 4, duration: { counts: [2], values: [100] } },
+              value: {
+                success: 2,
+                total: 4,
+                total_errors: 2,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 5, duration: { counts: [3], values: [100] } },
+              value: {
+                success: 3,
+                total: 5,
+                total_errors: 2,
+                duration: { counts: [3], values: [100] },
+                duration_values: [10, 10, 10],
+              },
             });
             resolve();
           });
@@ -428,6 +621,7 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -442,6 +636,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -474,6 +669,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [3, 10],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -506,6 +702,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [3, 10],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -546,6 +743,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [3, 10, 3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -586,6 +784,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [3, 10, 3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -626,6 +825,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -666,6 +866,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -714,6 +915,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -762,6 +964,7 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -810,6 +1013,7 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -858,6 +1062,7 @@ describe('createAggregator', () => {
                   not_timed_out: 6,
                   total: 6,
                   delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -914,6 +1119,7 @@ describe('createAggregator', () => {
                   not_timed_out: 6,
                   total: 6,
                   delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -970,6 +1176,7 @@ describe('createAggregator', () => {
                   not_timed_out: 7,
                   total: 7,
                   delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -1026,6 +1233,7 @@ describe('createAggregator', () => {
                   not_timed_out: 7,
                   total: 7,
                   delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -1082,6 +1290,7 @@ describe('createAggregator', () => {
                   not_timed_out: 8,
                   total: 8,
                   delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12, 4],
                   framework_errors: 2,
                   user_errors: 0,
                   total_errors: 2,
@@ -1138,6 +1347,7 @@ describe('createAggregator', () => {
                   not_timed_out: 8,
                   total: 8,
                   delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12, 4, 4],
                   framework_errors: 2,
                   user_errors: 0,
                   total_errors: 2,
@@ -1194,6 +1404,7 @@ describe('createAggregator', () => {
                   not_timed_out: 9,
                   total: 9,
                   delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12, 4, 4],
                   framework_errors: 2,
                   user_errors: 0,
                   total_errors: 2,
@@ -1250,6 +1461,7 @@ describe('createAggregator', () => {
                   not_timed_out: 9,
                   total: 9,
                   delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12, 4, 4, 3],
                   framework_errors: 2,
                   user_errors: 0,
                   total_errors: 2,
@@ -1306,6 +1518,7 @@ describe('createAggregator', () => {
                   not_timed_out: 10,
                   total: 10,
                   delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9, 5, 12, 4, 4, 3],
                   framework_errors: 3,
                   user_errors: 0,
                   total_errors: 3,
@@ -1436,6 +1649,7 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1450,6 +1664,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1482,6 +1697,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [3, 10],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1514,6 +1730,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [3, 10],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1554,6 +1771,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [3, 10, 3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1594,6 +1812,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [3, 10, 3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1634,6 +1853,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1674,6 +1894,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1722,6 +1943,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1770,6 +1992,7 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -1819,6 +2042,7 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [5],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1867,6 +2091,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [5],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1915,6 +2140,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [5, 12],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -1963,6 +2189,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [5, 12],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2011,6 +2238,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2059,6 +2287,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -2107,6 +2336,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -2155,6 +2385,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -2203,6 +2434,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4, 3],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -2251,6 +2483,7 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4, 3],
                   framework_errors: 2,
                   user_errors: 0,
                   total_errors: 2,
@@ -2381,6 +2614,7 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2395,6 +2629,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2427,6 +2662,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [3, 10],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2459,6 +2695,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [3, 10],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2499,6 +2736,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [3, 10, 3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2539,6 +2777,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [3, 10, 3],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2579,6 +2818,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2619,6 +2859,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2667,6 +2908,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2715,6 +2957,7 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  delay_values: [3, 10, 3, 35, 9],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -2764,6 +3007,7 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [5],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2812,6 +3056,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  delay_values: [5],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2860,6 +3105,7 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [5, 12],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2908,6 +3154,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  delay_values: [5, 12],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -2956,6 +3203,7 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4],
                   framework_errors: 0,
                   user_errors: 0,
                   total_errors: 0,
@@ -3004,6 +3252,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -3052,6 +3301,7 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -3100,6 +3350,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -3148,6 +3399,7 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4, 3],
                   framework_errors: 1,
                   user_errors: 0,
                   total_errors: 1,
@@ -3196,6 +3448,7 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  delay_values: [5, 12, 4, 4, 3],
                   framework_errors: 2,
                   user_errors: 0,
                   total_errors: 2,
@@ -3344,6 +3597,7 @@ describe('createAggregator', () => {
                     counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
                     values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
                   },
+                  overdue_by_values: [0, 0, 0, 20, 20, 40, 120],
                 },
                 by_type: {
                   'alerting:example': {
@@ -3351,36 +3605,42 @@ describe('createAggregator', () => {
                       counts: [0, 0, 0, 0, 1],
                       values: [10, 20, 30, 40, 50],
                     },
+                    overdue_by_values: [40],
                   },
                   'alerting:__index-threshold': {
                     overdue_by: {
                       counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
                     },
+                    overdue_by_values: [20, 20, 120],
                   },
                   alerting: {
                     overdue_by: {
                       counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
                       values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
                     },
+                    overdue_by_values: [40, 20, 20, 120],
                   },
                   'actions:webhook': {
                     overdue_by: {
                       counts: [2],
                       values: [10],
                     },
+                    overdue_by_values: [0, 0],
                   },
                   'actions:__email': {
                     overdue_by: {
                       counts: [1],
                       values: [10],
                     },
+                    overdue_by_values: [0],
                   },
                   actions: {
                     overdue_by: {
                       counts: [3],
                       values: [10],
                     },
+                    overdue_by_values: [0, 0, 0],
                   },
                 },
               },
@@ -3388,7 +3648,10 @@ describe('createAggregator', () => {
             expect(metrics[1]).toEqual({
               key: 'task_overdue',
               value: {
-                overall: { overdue_by: { counts: [], values: [] } },
+                overall: {
+                  overdue_by: { counts: [], values: [] },
+                  overdue_by_values: [],
+                },
                 by_type: {},
               },
             });
@@ -3400,6 +3663,9 @@ describe('createAggregator', () => {
                     counts: [16, 0, 1, 2, 0, 1],
                     values: [10, 20, 30, 40, 50, 60],
                   },
+                  overdue_by_values: [
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 30, 30, 50,
+                  ],
                 },
                 by_type: {
                   telemetry: {
@@ -3407,30 +3673,35 @@ describe('createAggregator', () => {
                       counts: [1, 0, 1],
                       values: [10, 20, 30],
                     },
+                    overdue_by_values: [0, 20],
                   },
                   reporting: {
                     overdue_by: {
                       counts: [1],
                       values: [10],
                     },
+                    overdue_by_values: [0],
                   },
                   'actions:webhook': {
                     overdue_by: {
                       counts: [3, 0, 0, 2, 0, 1],
                       values: [10, 20, 30, 40, 50, 60],
                     },
+                    overdue_by_values: [0, 0, 0, 30, 30, 50],
                   },
                   'actions:__email': {
                     overdue_by: {
                       counts: [11],
                       values: [10],
                     },
+                    overdue_by_values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   },
                   actions: {
                     overdue_by: {
                       counts: [14, 0, 0, 2, 0, 1],
                       values: [10, 20, 30, 40, 50, 60],
                     },
+                    overdue_by_values: [0, 0, 0, 30, 30, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   },
                 },
               },

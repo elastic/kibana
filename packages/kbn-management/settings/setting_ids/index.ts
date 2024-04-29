@@ -134,8 +134,11 @@ export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
   'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
-
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
+export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
+  'observability:apmEnableServiceInventoryTableSearchBar';
+export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
+  'observability:logsExplorer:allowedDataViews';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';

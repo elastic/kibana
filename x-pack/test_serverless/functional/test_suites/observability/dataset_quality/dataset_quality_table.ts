@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await synthtrace.clean();
+      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     it('shows the right number of rows in correct order', async () => {
@@ -224,6 +225,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('hides inactive datasets', async () => {
+      await PageObjects.datasetQuality.waitUntilTableLoaded();
+
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];

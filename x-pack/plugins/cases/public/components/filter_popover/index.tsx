@@ -17,7 +17,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 interface FilterPopoverProps {
   buttonLabel: string;
@@ -28,11 +28,6 @@ interface FilterPopoverProps {
   limitReachedMessage?: string;
   selectedOptions: string[];
 }
-
-const ScrollableDiv = styled.div`
-  max-height: 250px;
-  overflow: auto;
-`;
 
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
@@ -105,7 +100,12 @@ export const FilterPopoverComponent = ({
           <EuiHorizontalRule margin="none" />
         </>
       ) : null}
-      <ScrollableDiv>
+      <div
+        css={css`
+          max-height: 250px;
+          overflow: auto;
+        `}
+      >
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
@@ -119,7 +119,7 @@ export const FilterPopoverComponent = ({
             {option}
           </EuiFilterSelectItem>
         ))}
-      </ScrollableDiv>
+      </div>
       {options.length === 0 && optionsEmptyLabel != null && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>

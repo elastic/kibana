@@ -46,6 +46,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   children,
 } = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
+
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>

@@ -44,10 +44,10 @@
     ]
   },
   "loading": false,
-  "plotEarliest": 1487774250000,
-  "plotLatest": 1487900250000,
-  "selectedEarliest": 1487836800000,
-  "selectedLatest": 1487837699999,
+  "plotEarliest": 1708171200000,
+  "plotLatest": 1709294400000,
+  "selectedEarliest": 1708646400000,
+  "selectedLatest": 1708819200000,
   "chartLimits": {
     "max": 9294.095580000001,
     "min": 5.74774

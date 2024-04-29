@@ -7,19 +7,24 @@
 import { RuleDomain } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
 import { getMappedParams } from '../../../rules_client/common';
+import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RuleAttributes['legacyId'];
-  actionsWithRefs: RuleAttributes['actions'];
   paramsWithRefs: RuleAttributes['params'];
   meta?: RuleAttributes['meta'];
 }
 
-export const transformRuleDomainToRuleAttributes = (
-  rule: Omit<RuleDomain, 'actions' | 'params'>,
-  params: TransformRuleToEsParams
-): RuleAttributes => {
-  const { legacyId, actionsWithRefs, paramsWithRefs, meta } = params;
+export const transformRuleDomainToRuleAttributes = ({
+  actionsWithRefs,
+  rule,
+  params,
+}: {
+  actionsWithRefs: DenormalizedAction[];
+  rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
+  params: TransformRuleToEsParams;
+}): RuleAttributes => {
+  const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
 
   return {

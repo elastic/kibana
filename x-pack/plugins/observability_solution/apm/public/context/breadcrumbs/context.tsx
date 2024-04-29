@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Route,
-  RouteMatch,
-  useMatchRoutes,
-} from '@kbn/typed-react-router-config';
+import { Route, RouteMatch, useMatchRoutes } from '@kbn/typed-react-router-config';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
@@ -25,15 +21,9 @@ interface BreadcrumbApi {
   getBreadcrumbs(matches: RouteMatch[]): Breadcrumb[];
 }
 
-export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(
-  undefined
-);
+export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undefined);
 
-export function BreadcrumbsContextProvider({
-  children,
-}: {
-  children: React.ReactElement;
-}) {
+export function BreadcrumbsContextProvider({ children }: { children: React.ReactElement }) {
   const [, forceUpdate] = useState({});
 
   const breadcrumbs = useMemo(() => {
@@ -84,9 +74,5 @@ export function BreadcrumbsContextProvider({
 
   useBreadcrumbs(formattedBreadcrumbs);
 
-  return (
-    <BreadcrumbsContext.Provider value={api}>
-      {children}
-    </BreadcrumbsContext.Provider>
-  );
+  return <BreadcrumbsContext.Provider value={api}>{children}</BreadcrumbsContext.Provider>;
 }

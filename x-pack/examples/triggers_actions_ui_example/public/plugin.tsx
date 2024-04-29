@@ -23,6 +23,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { EuiDataGridColumn } from '@elastic/eui';
+import { getConnectorType as getSystemLogExampleConnectorType } from './connector_types/system_log_example/system_log_example';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {
   alerting: AlertingSetup;
@@ -132,8 +133,11 @@ export class TriggersActionsUiExamplePlugin
       id: 'observabilityCases',
       columns,
       useInternalFlyout,
-      getRenderCellValue: () => (props) => {
-        const value = props.data.find((d) => d.field === props.columnId)?.value ?? [];
+      getRenderCellValue: (props: {
+        data?: Array<{ field: string; value: string }>;
+        columnId?: string;
+      }) => {
+        const value = props.data?.find((d) => d.field === props.columnId)?.value ?? [];
 
         if (Array.isArray(value)) {
           return <>{value.length ? value.join() : '--'}</>;
@@ -145,6 +149,8 @@ export class TriggersActionsUiExamplePlugin
     };
 
     alertsTableConfigurationRegistry.register(config);
+
+    triggersActionsUi.actionTypeRegistry.register(getSystemLogExampleConnectorType());
   }
 
   public stop() {}

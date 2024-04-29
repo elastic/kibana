@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
@@ -17,20 +18,17 @@ import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useRightPanelContext } from '../context';
 
-export interface DescriptionSectionProps {
-  /**
-   * Boolean to allow the component to be expanded or collapsed on first render
-   */
-  expanded?: boolean;
-}
+const KEY = 'investigation';
 
 /**
  * Second section of the overview tab in details flyout.
  * It contains investigation guide (alerts only) and highlighted fields
  */
-export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
+export const InvestigationSection: FC = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
+
+  const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
   return (
     <ExpandableSection
@@ -41,8 +39,9 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
           defaultMessage="Investigation"
         />
       }
-      data-test-subj={INVESTIGATION_SECTION_TEST_ID}
+      localStorageKey={KEY}
       gutterSize="s"
+      data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
       {eventKind === EventKind.signal && (
         <>
@@ -53,6 +52,6 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
       <HighlightedFields />
     </ExpandableSection>
   );
-};
+});
 
 InvestigationSection.displayName = 'InvestigationSection';

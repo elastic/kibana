@@ -170,7 +170,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
-          errorSource: TaskErrorSource.USER,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message:
             'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
         });
@@ -251,7 +251,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
-          errorSource: TaskErrorSource.USER,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: `Sub action \"notRegistered\" is not registered. Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
@@ -272,7 +272,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
-          errorSource: TaskErrorSource.USER,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: `Method \"notAFunction\" does not exists in service. Sub action: \"notAFunction\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
@@ -293,7 +293,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
-          errorSource: TaskErrorSource.USER,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: `Method \"notExist\" does not exists in service. Sub action: \"notExist\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
@@ -317,7 +317,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
-          errorSource: TaskErrorSource.USER,
+          errorSource: TaskErrorSource.FRAMEWORK,
           service_message: 'You should register at least one subAction for your connector type',
         });
       });

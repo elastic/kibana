@@ -13,6 +13,7 @@ import {
   EuiSkeletonText,
   EuiFormControlLayout,
   EuiErrorBoundary,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
@@ -56,8 +57,11 @@ export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props) => {
-  const { width, height, options, fullWidth, useDarkTheme } = props;
+  const { width, height, options, fullWidth, useDarkTheme: useDarkThemeProp } = props;
+  const { colorMode } = useEuiTheme();
+  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
   const theme = useDarkTheme ? darkTheme : lightTheme;
+
   const style = {
     width,
     height,

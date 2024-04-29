@@ -8,3 +8,4 @@ ECS_Version,Indexed,Field_Set,Field,Type,Level,Normalization,Example,Description
 8.0.0,true,http,http.response.status_code,long,extended,,404,HTTP response status code.
 8.0.0,true,log,log.level,keyword,core,,error,Log level of the log event.
 8.0.0,true,log,log.logger,keyword,core,,org.elasticsearch.bootstrap.Bootstrap,Name of the logger.
+8.0.0,true,url,url.domain,keyword,extended,,www.elastic.co,Domain of the url.

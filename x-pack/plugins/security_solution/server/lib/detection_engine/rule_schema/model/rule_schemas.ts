@@ -153,6 +153,7 @@ export const EqlSpecificRuleParams = z.object({
   eventCategoryOverride: EventCategoryOverride.optional(),
   timestampField: TimestampField.optional(),
   tiebreakerField: TiebreakerField.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
@@ -268,6 +269,7 @@ export const NewTermsSpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   language: KqlQueryLanguage,
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;

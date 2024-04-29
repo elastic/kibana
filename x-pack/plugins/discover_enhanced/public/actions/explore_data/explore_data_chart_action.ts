@@ -7,9 +7,9 @@
 
 import {
   apiIsOfType,
-  apiPublishesPartialLocalUnifiedSearch,
+  apiPublishesPartialUnifiedSearch,
   HasParentApi,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
@@ -19,8 +19,8 @@ import { AbstractExploreDataAction } from './abstract_explore_data_action';
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
 export interface ExploreDataChartActionContext extends ApplyGlobalFilterActionContext {
-  embeddable: Partial<PublishesLocalUnifiedSearch> &
-    Partial<HasParentApi<Partial<PublishesLocalUnifiedSearch>>>;
+  embeddable: Partial<PublishesUnifiedSearch> &
+    Partial<HasParentApi<Partial<PublishesUnifiedSearch>>>;
 }
 
 /**
@@ -43,7 +43,7 @@ export class ExploreDataChartAction
     if (apiIsOfType(embeddable, 'map')) {
       return false; // TODO: https://github.com/elastic/kibana/issues/73043
     }
-    return apiPublishesPartialLocalUnifiedSearch(embeddable) && super.isCompatible(context);
+    return apiPublishesPartialUnifiedSearch(embeddable) && super.isCompatible(context);
   }
 
   protected readonly getLocation = async (

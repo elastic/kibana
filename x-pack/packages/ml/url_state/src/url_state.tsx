@@ -23,7 +23,7 @@ import { decode, encode } from '@kbn/rison';
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {

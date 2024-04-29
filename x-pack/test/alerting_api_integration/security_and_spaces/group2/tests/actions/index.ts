@@ -21,6 +21,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
 
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));
+    loadTestFile(require.resolve('./connector_types/crowdstrike'));
     loadTestFile(require.resolve('./connector_types/jira'));
     loadTestFile(require.resolve('./connector_types/resilient'));
     loadTestFile(require.resolve('./connector_types/servicenow_itsm'));
@@ -47,8 +48,10 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_all_system'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_enqueue'));
 

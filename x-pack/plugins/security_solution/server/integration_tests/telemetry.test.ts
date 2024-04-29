@@ -7,12 +7,15 @@
 import Path from 'path';
 import axios, { type AxiosRequestConfig } from 'axios';
 
+import type { ElasticsearchClient } from '@kbn/core/server';
+
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_STAGING } from '@kbn/telemetry-plugin/common/constants';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../lib/telemetry/constants';
 
 import { eventually, setupTestServers, removeFile } from './lib/helpers';
 import {
@@ -26,6 +29,9 @@ import {
   getTelemetryTask,
   getTelemetryTaskType,
   getTelemetryTasks,
+  initEndpointIndices,
+  dropEndpointIndices,
+  mockEndpointData,
 } from './lib/telemetry_helpers';
 
 import {
@@ -40,13 +46,14 @@ import {
 import type { SecurityTelemetryTask } from '../lib/telemetry/task';
 import { TelemetryChannel } from '../lib/telemetry/types';
 import type { AsyncTelemetryEventsSender } from '../lib/telemetry/async_sender';
+import endpointMetaTelemetryRequest from './__mocks__/endpoint-meta-telemetry-request.json';
 
 jest.mock('axios');
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
-const telemetrySenderStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
+const securitySolutionStartSpy = jest.spyOn(SecuritySolutionPlugin.prototype, 'start');
 const mockedAxiosGet = jest.spyOn(axios, 'get');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
 
@@ -58,6 +65,7 @@ describe('telemetry tasks', () => {
   let asyncTelemetryEventSender: AsyncTelemetryEventsSender;
   let exceptionsList: ExceptionListSchema[] = [];
   let exceptionsListItem: ExceptionListItemSchema[] = [];
+  let esClient: ElasticsearchClient;
 
   beforeAll(async () => {
     await removeFile(logFilePath);
@@ -69,10 +77,10 @@ describe('telemetry tasks', () => {
     expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
     taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
 
-    expect(telemetrySenderStartSpy).toHaveBeenCalledTimes(1);
+    expect(securitySolutionStartSpy).toHaveBeenCalledTimes(1);
 
-    tasks = getTelemetryTasks(telemetrySenderStartSpy);
-    asyncTelemetryEventSender = getAsyncTelemetryEventSender(telemetrySenderStartSpy);
+    tasks = getTelemetryTasks(securitySolutionStartSpy);
+    asyncTelemetryEventSender = getAsyncTelemetryEventSender(securitySolutionStartSpy);
 
     // update queue config to not wait for a long bufferTimeSpanMillis
     asyncTelemetryEventSender.updateQueueConfig(TelemetryChannel.TASK_METRICS, {
@@ -80,6 +88,8 @@ describe('telemetry tasks', () => {
       inflightEventsThreshold: 1_000,
       maxPayloadSizeBytes: 1024 * 1024,
     });
+
+    esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
   });
 
   afterAll(async () => {
@@ -238,6 +248,35 @@ describe('telemetry tasks', () => {
     });
   });
 
+  describe('endpoint-meta-telemetry', () => {
+    beforeEach(async () => {
+      await initEndpointIndices(esClient);
+    });
+
+    afterEach(async () => {
+      await dropEndpointIndices(esClient);
+    });
+
+    it('should execute when scheduled', async () => {
+      await mockAndScheduleEndpointTask();
+
+      const body = await eventually(async () => {
+        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+          return url.startsWith(ENDPOINT_STAGING) && url.endsWith(TELEMETRY_CHANNEL_ENDPOINT_META);
+        });
+
+        expect(found).not.toBeFalsy();
+
+        return JSON.parse((found ? found[1] : '{}') as string);
+      });
+
+      expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
+      expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+    });
+  });
+
   async function mockAndScheduleDetectionRulesTask(): Promise<SecurityTelemetryTask> {
     const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
 
@@ -252,6 +291,19 @@ describe('telemetry tasks', () => {
 
     exceptionsList.push(exceptionList);
     exceptionsListItem.push(exceptionListItem);
+
+    // schedule task to run ASAP
+    await eventually(async () => {
+      await taskManagerPlugin.runSoon(task.getTaskId());
+    });
+
+    return task;
+  }
+
+  async function mockAndScheduleEndpointTask(): Promise<SecurityTelemetryTask> {
+    const task = getTelemetryTask(tasks, 'security:endpoint-meta-telemetry');
+
+    await mockEndpointData(esClient, kibanaServer.coreStart.savedObjects);
 
     // schedule task to run ASAP
     await eventually(async () => {

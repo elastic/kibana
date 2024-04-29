@@ -16,7 +16,7 @@ import {
 } from '../../../screens/timeline';
 import { TIMELINES_DESCRIPTION, TIMELINES_USERNAME } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';

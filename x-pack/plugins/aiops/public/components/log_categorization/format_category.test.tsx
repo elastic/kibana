@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Category } from '../../../common/api/log_categorization/types';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import { useCreateFormattedExample } from './format_category';
 import { renderHook } from '@testing-library/react-hooks';
 

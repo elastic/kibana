@@ -30,7 +30,7 @@ export interface DeleteConnectorModalProps {
   isCrawler: boolean;
 }
 export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCrawler }) => {
-  const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic);
+  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,
     deleteModalConnectorName,
@@ -66,10 +66,16 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         closeDeleteModal();
       }}
       onConfirm={() => {
-        deleteConnector({
-          connectorId,
-          shouldDeleteIndex: isCrawler ? true : shouldDeleteIndex,
-        });
+        if (isCrawler) {
+          if (deleteModalIndexName) {
+            deleteIndex({ indexName: deleteModalIndexName });
+          }
+        } else {
+          deleteConnector({
+            connectorId,
+            shouldDeleteIndex,
+          });
+        }
       }}
       cancelButtonText={
         isDeleteLoading
@@ -128,21 +134,19 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
       </p>
       <p>
         {isCrawler && (
-          <>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.deleteConnectorModal.crawler.warning"
-                defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
-                values={{
-                  connectorName: (
-                    <strong>
-                      <EuiTextColor color="danger">{connectorName}</EuiTextColor>
-                    </strong>
-                  ),
-                }}
-              />
-            </EuiText>
-          </>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.deleteConnectorModal.crawler.warning"
+              defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
+              values={{
+                connectorName: (
+                  <strong>
+                    <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
         )}
         {!isCrawler && (
           <EuiText>
@@ -166,7 +170,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
             id="delete-related-index"
             label={i18n.translate(
               'xpack.enterpriseSearch.deleteConnectorModal.euiCheckbox.deleteAlsoRelatedIndexLabel',
-              { defaultMessage: 'Delete also related index' }
+              { defaultMessage: 'Also delete related index' }
             )}
             checked={shouldDeleteIndex}
             onChange={() => setShouldDeleteIndex(!shouldDeleteIndex)}
@@ -193,13 +197,13 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
           }
         >
           <EuiFieldText
+            data-test-subj="entSearchContent-connectors-deleteModal-input"
+            data-telemetry-id="entSearchContent-connectors-deleteModal-input"
             onChange={(e) => setInputConnectorName(e.target.value)}
             value={inputConnectorName}
           />
         </EuiFormRow>
       </EuiForm>
     </EuiConfirmModal>
-  ) : (
-    <></>
-  );
+  ) : null;
 };

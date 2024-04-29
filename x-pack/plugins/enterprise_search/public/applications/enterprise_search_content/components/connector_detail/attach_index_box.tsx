@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -30,7 +31,9 @@ import { Connector } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
-import { FetchAllIndicesAPILogic } from '../../api/index/fetch_all_indices_api_logic';
+import { FetchAvailableIndicesAPILogic } from '../../api/index/fetch_available_indices_api_logic';
+
+import { formatApiName } from '../../utils/format_api_name';
 
 import { AttachIndexLogic } from './attach_index_logic';
 
@@ -73,13 +76,13 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   );
   const [selectedLanguage] = useState<string>();
   const [query, setQuery] = useState<{
-    hasMatchingOptions: boolean;
     isFullMatch: boolean;
     searchValue: string;
   }>();
+  const [sanitizedName, setSanitizedName] = useState<string>(formatApiName(connector.name));
 
-  const { makeRequest } = useActions(FetchAllIndicesAPILogic);
-  const { data, status } = useValues(FetchAllIndicesAPILogic);
+  const { makeRequest } = useActions(FetchAvailableIndicesAPILogic);
+  const { data, status } = useValues(FetchAvailableIndicesAPILogic);
   const isLoading = [Status.IDLE, Status.LOADING].includes(status);
 
   const onSave = () => {
@@ -92,14 +95,22 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
-    : data?.indices.map((index) => {
+    : data?.indexNames.map((name) => {
         return {
-          label: index.name,
+          label: name,
         };
       }) ?? [];
 
-  const shouldPrependUserInputAsOption =
-    !!query?.searchValue && query.hasMatchingOptions && !query.isFullMatch;
+  const hasMatchingOptions =
+    data?.indexNames.some((name) =>
+      name.toLocaleLowerCase().includes(query?.searchValue.toLocaleLowerCase() ?? '')
+    ) ?? false;
+  const isFullMatch =
+    data?.indexNames.some(
+      (name) => name.toLocaleLowerCase() === query?.searchValue.toLocaleLowerCase()
+    ) ?? false;
+
+  const shouldPrependUserInputAsOption = !!query?.searchValue && hasMatchingOptions && !isFullMatch;
 
   const groupedOptions: Array<EuiComboBoxOptionOption<string>> = shouldPrependUserInputAsOption
     ? [
@@ -120,16 +131,21 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   useEffect(() => {
     setConnector(connector);
     makeRequest({});
-    if (!connector.index_name && connector.name) {
-      checkIndexExists({ indexName: connector.name });
+    if (!connector.index_name && connector.name && sanitizedName) {
+      checkIndexExists({ indexName: sanitizedName });
     }
   }, [connector.id]);
 
   useEffect(() => {
-    if (query) {
+    makeRequest({ searchQuery: query?.searchValue || undefined });
+    if (query?.searchValue) {
       checkIndexExists({ indexName: query.searchValue });
     }
   }, [query]);
+
+  useEffect(() => {
+    setSanitizedName(formatApiName(connector.name));
+  }, [connector.name]);
 
   const { hash } = useLocation();
   useEffect(() => {
@@ -206,9 +222,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               )}
               isLoading={isLoading}
               options={groupedOptions}
-              onSearchChange={(searchValue, hasMatchingOptions) => {
+              onSearchChange={(searchValue) => {
                 setQuery({
-                  hasMatchingOptions: !!hasMatchingOptions,
                   isFullMatch: options.some((option) => option.label === searchValue),
                   searchValue,
                 });
@@ -236,36 +251,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup>
-        {!connector.index_name && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              onClick={() => {
-                createIndex({ indexName: connector.name, language: null });
-              }}
-              isLoading={isSaveLoading || isExistLoading}
-              disabled={indexExists[connector.name]}
-            >
-              {i18n.translate('xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel', {
-                defaultMessage: 'Create and attach an index named {indexName}',
-                values: { indexName: connector.name },
-              })}
-            </EuiButton>
-            {indexExists[connector.name] ? (
-              <EuiText size="xs">
-                {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
-                  defaultMessage: 'Index with name {indexName} already exists',
-                  values: { indexName: connector.name },
-                })}
-              </EuiText>
-            ) : (
-              <></>
-            )}
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="entSearchContent-connector-connectorDetail-saveConfigurationButton"
+            data-telemetry-id="entSearchContent-connector-connectorDetail-saveConfigurationButton"
             onClick={() => onSave()}
             disabled={!selectedIndex || selectedIndex.label === connector.index_name}
             isLoading={isSaveLoading}
@@ -276,6 +265,63 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {!connector.index_name && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup responsive={false} justifyContent="center" alignItems="center">
+            <EuiFlexItem>
+              <EuiHorizontalRule size="full" />
+            </EuiFlexItem>
+            <EuiText>
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.attachIndexBox.orPanelLabel', {
+                  defaultMessage: 'OR',
+                })}
+              </p>
+            </EuiText>
+            <EuiFlexItem>
+              <EuiHorizontalRule size="full" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-telemetry-id="entSearchContent-connector-connectorDetail-createAttachIndexButton"
+                data-test-subj="entSearchContent-connector-connectorDetail-createAttachIndexButton"
+                iconType="sparkles"
+                color="primary"
+                fill
+                onClick={() => {
+                  createIndex({ indexName: sanitizedName, language: null });
+                  setSelectedIndex({ label: sanitizedName });
+                }}
+                isLoading={isSaveLoading || isExistLoading}
+                disabled={indexExists[sanitizedName]}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel',
+                  {
+                    defaultMessage: 'Create and attach an index named {indexName}',
+                    values: { indexName: sanitizedName },
+                  }
+                )}
+              </EuiButton>
+              {indexExists[sanitizedName] ? (
+                <EuiText size="xs">
+                  {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
+                    defaultMessage: 'Index with name {indexName} already exists',
+                    values: { indexName: sanitizedName },
+                  })}
+                </EuiText>
+              ) : (
+                <></>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 };

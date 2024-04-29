@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import deepEqual from 'fast-deep-equal';
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -17,17 +18,19 @@ import {
   type ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  EmbeddableFactory,
-  isErrorEmbeddable,
-  reactEmbeddableRegistryHasKey,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
-import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { map, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { map, distinctUntilChanged, startWith } from 'rxjs';
 import { v4 } from 'uuid';
 import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
@@ -340,10 +343,10 @@ export const initializeDashboard = async ({
         const createdEmbeddable = await (async () => {
           // if there is no width or height we can add the panel using the default behaviour.
           if (!incomingEmbeddable.size) {
-            return await container.addNewEmbeddable(
-              incomingEmbeddable.type,
-              incomingEmbeddable.input
-            );
+            return await container.addNewPanel<{ uuid: string }>({
+              panelType: incomingEmbeddable.type,
+              initialState: incomingEmbeddable.input,
+            });
           }
 
           // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
@@ -370,42 +373,14 @@ export const initializeDashboard = async ({
               [newPanelState.explicitInput.id]: newPanelState,
             },
           });
-          if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
-            return { id: embeddableId };
-          }
 
           return await container.untilEmbeddableLoaded(embeddableId);
         })();
-        scrolltoIncomingEmbeddable(container, createdEmbeddable.id);
+        if (createdEmbeddable) {
+          scrolltoIncomingEmbeddable(container, createdEmbeddable.uuid);
+        }
       });
     }
-  }
-
-  // --------------------------------------------------------------------------------------
-  // Set up search sessions integration.
-  // --------------------------------------------------------------------------------------
-  let initialSearchSessionId;
-  if (searchSessionSettings) {
-    const { sessionIdToRestore } = searchSessionSettings;
-
-    // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      session.continue(incomingEmbeddable.searchSessionId);
-    }
-    if (sessionIdToRestore) {
-      session.restore(sessionIdToRestore);
-    }
-    const existingSession = session.getSessionId();
-
-    initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddable ? existingSession : session.start());
-
-    untilDashboardReady().then((container) => {
-      startDashboardSearchSessionIntegration.bind(container)(
-        creationOptions?.searchSessionSettings
-      );
-    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -472,7 +447,7 @@ export const initializeDashboard = async ({
   );
 
   // --------------------------------------------------------------------------------------
-  // Set parentApi.localFilters to include dashboardContainer filters and control group filters
+  // Set parentApi.filters$ to include dashboardContainer filters and control group filters
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
     if (!dashboardContainer.controlGroup) {
@@ -486,14 +461,14 @@ export const initializeDashboard = async ({
       );
     }
 
-    const localFilters = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
-    dashboardContainer.localFilters = localFilters;
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+    dashboardContainer.filters$ = filters$;
 
     const inputFilters$ = dashboardContainer.getInput$().pipe(
       startWith(dashboardContainer.getInput()),
       map((input) => input.filters),
       distinctUntilChanged((previous, current) => {
-        return compareFilters(previous ?? [], current ?? []);
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
       })
     );
 
@@ -505,10 +480,55 @@ export const initializeDashboard = async ({
 
     dashboardContainer.integrationSubscriptions.add(
       combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
-        localFilters.next(getCombinedFilters());
+        filters$.next(getCombinedFilters());
       })
     );
   });
+
+  // --------------------------------------------------------------------------------------
+  // Set up parentApi.query$
+  // Can not use legacyEmbeddableToApi since query$ setting is delayed
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      dashboardContainer.getInput().query
+    );
+    dashboardContainer.query$ = query$;
+    dashboardContainer.integrationSubscriptions.add(
+      dashboardContainer.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up search sessions integration.
+  // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
+  if (searchSessionSettings) {
+    const { sessionIdToRestore } = searchSessionSettings;
+
+    // if this incoming embeddable has a session, continue it.
+    if (incomingEmbeddable?.searchSessionId) {
+      session.continue(incomingEmbeddable.searchSessionId);
+    }
+    if (sessionIdToRestore) {
+      session.restore(sessionIdToRestore);
+    }
+    const existingSession = session.getSessionId();
+
+    initialSearchSessionId =
+      sessionIdToRestore ??
+      (existingSession && incomingEmbeddable ? existingSession : session.start());
+
+    untilDashboardReady().then((container) => {
+      startDashboardSearchSessionIntegration.bind(container)(
+        creationOptions?.searchSessionSettings
+      );
+    });
+  }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

@@ -50,14 +50,14 @@ import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineButtonOverview } from './pipeline_button_overview';
+import { SelectClientCallouts } from './select_client_callouts';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const { application, cloud, http, user, share, console: consolePlugin } = useKibanaServices();
+  const { application, cloud, user, share, console: consolePlugin } = useKibanaServices();
   const { elasticsearchURL, cloudId } = useMemo(() => {
     return {
       elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
@@ -76,7 +76,7 @@ export const ElasticsearchOverview = () => {
     }
   }, [hash]);
   const embeddableConsole = useMemo(
-    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
 
@@ -98,7 +98,13 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="select-client-section"
       >
-        <SelectClientPanel docLinks={docLinks} http={http} callout={<ConnectorsCallout />}>
+        <SelectClientPanel
+          docLinks={docLinks}
+          callout={<SelectClientCallouts />}
+          application={application}
+          consolePlugin={consolePlugin}
+          sharePlugin={share}
+        >
           <EuiFlexItem>
             <LanguageGrid
               assetBasePath={assetBasePath}

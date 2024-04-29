@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "test-helper",
   "id": "@kbn/performance-testing-dataset-extractor",
   "devOnly": true,
   "owner": "@elastic/kibana-performance-testing"

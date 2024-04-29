@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 
 import {
   TaskInstance,

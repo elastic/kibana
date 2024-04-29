@@ -560,7 +560,7 @@
                 "section": "def-common.PersistableControlGroupInput",
                 "text": "PersistableControlGroupInput"
               },
-              ") => void"
+              " | undefined) => void"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -580,12 +580,13 @@
                     "docId": "kibControlsPluginApi",
                     "section": "def-common.PersistableControlGroupInput",
                     "text": "PersistableControlGroupInput"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4724,7 +4725,7 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"HIERARCHICAL\" | \"NONE\""
+              "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -6933,7 +6934,7 @@
             "section": "def-common.RawControlGroupAttributes",
             "text": "RawControlGroupAttributes"
           },
-          ", \"type\" | \"id\">"
+          ", \"id\" | \"type\">"
         ],
         "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
         "deprecated": false,
@@ -7004,7 +7005,7 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"HIERARCHICAL\" | \"NONE\""
+              "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,

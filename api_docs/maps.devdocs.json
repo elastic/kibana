@@ -1250,6 +1250,286 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.linkToLibrary",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "linkToLibrary",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.unlinkFromLibrary",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "unlinkFromLibrary",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.checkForDuplicateTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "checkForDuplicateTitle",
+            "description": [],
+            "signature": [
+              "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "newTitle",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isTitleDuplicateConfirmed",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "onTitleDuplicate",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.saveToLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "saveToLibrary",
+            "description": [],
+            "signature": [
+              "(title: string) => Promise<string>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.saveToLibrary.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getByReferenceState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByReferenceState",
+            "description": [],
+            "signature": [
+              "(libraryId: string) => { savedObjectId: string; id: string; title?: string | undefined; query?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined; version?: string | undefined; filters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined; description?: string | undefined; executionContext?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined; viewMode?: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.ViewMode",
+                "text": "ViewMode"
+              },
+              " | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeRange?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined; timeslice?: [number, number] | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
+              "MapCenterAndZoom",
+              " | undefined; mapBuffer?: ",
+              "MapExtent",
+              " | undefined; mapSettings?: Partial<",
+              "MapSettings",
+              "> | undefined; hiddenLayers?: string[] | undefined; hideFilterActions?: boolean | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.getByReferenceState.$1",
+                "type": "string",
+                "tags": [],
+                "label": "libraryId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getByValueState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByValueState",
+            "description": [],
+            "signature": [
+              "() => { attributes: ",
+              "MapAttributes",
+              "; id: string; title?: string | undefined; query?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined; version?: string | undefined; filters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined; description?: string | undefined; executionContext?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined; viewMode?: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.ViewMode",
+                "text": "ViewMode"
+              },
+              " | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeRange?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined; timeslice?: [number, number] | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; mapCenter?: ",
+              "MapCenterAndZoom",
+              " | undefined; mapBuffer?: ",
+              "MapExtent",
+              " | undefined; mapSettings?: Partial<",
+              "MapSettings",
+              "> | undefined; hiddenLayers?: string[] | undefined; hideFilterActions?: boolean | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable._setMapExtentFilter",
             "type": "Function",
             "tags": [],
@@ -4006,10 +4286,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesLocalUnifiedSearch",
-            "text": "PublishesLocalUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & Partial<",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

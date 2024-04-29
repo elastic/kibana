@@ -31,6 +31,7 @@ import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
+import { isPercent } from '../helpers/threshold_unit';
 
 // Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
 const updatedBuiltInComparators = { ...builtInComparators };
@@ -84,10 +85,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const { metrics, comparator = Comparator.GT, threshold = [] } = expression;
 
-  const isMetricPct = useMemo(
-    () => Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct')),
-    [metrics]
-  );
+  const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
 
   const updateComparator = useCallback(

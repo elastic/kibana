@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useContext, useState } from 'react';
 
 import type { GetFleetStatusResponse } from '../types';
 
 import { useConfig } from './use_config';
-import { sendGetFleetStatus } from './use_request';
+import { useGetFleetStatusQuery } from './use_request';
 
 export interface FleetStatusProviderProps {
   enabled: boolean;
@@ -19,10 +19,11 @@ export interface FleetStatusProviderProps {
   error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
   missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
+  isSecretsStorageEnabled?: GetFleetStatusResponse['is_secrets_storage_enabled'];
 }
 
 interface FleetStatus extends FleetStatusProviderProps {
-  refresh: () => Promise<void>;
+  refetch: () => Promise<unknown>;
 
   // This flag allows us to opt into displaying the Fleet Server enrollment instructions even if
   // a healthy Fleet Server has been detected, so we can delay removing the enrollment UI until
@@ -39,49 +40,26 @@ export const FleetStatusProvider: React.FC<{
   const config = useConfig();
   const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
 
-  const [state, setState] = useState<FleetStatusProviderProps>(
-    defaultFleetStatus ?? {
-      enabled: config.agents.enabled,
-      isLoading: false,
-      isReady: false,
-    }
-  );
+  const { data, isLoading, refetch } = useGetFleetStatusQuery();
 
-  // TODO: Refactor to use react-query
-  const sendGetStatus = useCallback(
-    async function sendGetStatus() {
-      try {
-        setState((s) => ({ ...s, isLoading: true }));
-        const res = await sendGetFleetStatus();
-        if (res.error) {
-          throw res.error;
-        }
-
-        setState((s) => ({
-          ...s,
-          isLoading: false,
-          isReady: res.data?.isReady ?? false,
-          missingRequirements: res.data?.missing_requirements,
-          missingOptionalFeatures: res.data?.missing_optional_features,
-        }));
-      } catch (error) {
-        setState((s) => ({ ...s, isLoading: false, error }));
-      }
-    },
-    [setState]
-  );
-
-  useEffect(() => {
-    if (!defaultFleetStatus) {
-      sendGetStatus();
-    }
-  }, [sendGetStatus, defaultFleetStatus]);
-
-  const refresh = useCallback(() => sendGetStatus(), [sendGetStatus]);
+  const state = {
+    ...defaultFleetStatus,
+    enabled: config.agents.enabled,
+    isLoading,
+    isReady: (!isLoading && data?.isReady) ?? defaultFleetStatus?.isReady ?? false,
+    missingRequirements: data?.missing_requirements,
+    missingOptionalFeatures: data?.missing_optional_features,
+    isSecretsStorageEnabled: data?.is_secrets_storage_enabled,
+  };
 
   return (
     <FleetStatusContext.Provider
-      value={{ ...state, refresh, forceDisplayInstructions, setForceDisplayInstructions }}
+      value={{
+        ...state,
+        refetch,
+        forceDisplayInstructions,
+        setForceDisplayInstructions,
+      }}
     >
       {children}
     </FleetStatusContext.Provider>

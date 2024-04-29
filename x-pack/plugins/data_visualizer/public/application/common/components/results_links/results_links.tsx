@@ -16,6 +16,7 @@ import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { ResultLinks } from '../../../../../common/app';
 import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
@@ -50,6 +51,7 @@ interface Props {
   createDataView: boolean;
   showFilebeatFlyout(): void;
   getAdditionalLinks?: GetAdditionalLinks;
+  resultLinks?: ResultLinks;
 }
 
 interface GlobalState {
@@ -67,6 +69,7 @@ export const ResultsLinks: FC<Props> = ({
   createDataView,
   showFilebeatFlyout,
   getAdditionalLinks,
+  resultLinks,
 }) => {
   const {
     services: {
@@ -257,21 +260,25 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <EuiCard
-          hasBorder
-          icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
-          data-test-subj="fileDataVisFilebeatConfigLink"
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.resultsLinks.fileBeatConfig"
-              defaultMessage="Create Filebeat configuration"
-            />
-          }
-          description=""
-          onClick={showFilebeatFlyout}
-        />
-      </EuiFlexItem>
+
+      {resultLinks?.fileBeat?.enabled === false ? null : (
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+            data-test-subj="fileDataVisFilebeatConfigLink"
+            title={
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.resultsLinks.fileBeatConfig"
+                defaultMessage="Create Filebeat configuration"
+              />
+            }
+            description=""
+            onClick={showFilebeatFlyout}
+          />
+        </EuiFlexItem>
+      )}
+
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
           <EuiFlexItem key={link.title}>

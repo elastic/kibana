@@ -20,14 +20,9 @@ describe('chatFunctionClient', () => {
       });
 
       client = new ChatFunctionClient([]);
-      client.registerContext({
-        description: '',
-        name: 'core',
-      });
 
       client.registerFunction(
         {
-          contexts: ['core'],
           description: '',
           name: 'myFunction',
           parameters: {
@@ -46,6 +41,7 @@ describe('chatFunctionClient', () => {
     it('throws an error', async () => {
       await expect(async () => {
         await client.executeFunction({
+          chat: jest.fn(),
           name: 'myFunction',
           args: JSON.stringify({
             foo: 0,
@@ -92,7 +88,6 @@ describe('chatFunctionClient', () => {
 
       expect(functions[0]).toEqual({
         definition: {
-          contexts: ['core'],
           description: expect.any(String),
           name: 'get_data_on_screen',
           parameters: expect.any(Object),
@@ -108,6 +103,7 @@ describe('chatFunctionClient', () => {
       );
 
       const result = await client.executeFunction({
+        chat: jest.fn(),
         name: 'get_data_on_screen',
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],

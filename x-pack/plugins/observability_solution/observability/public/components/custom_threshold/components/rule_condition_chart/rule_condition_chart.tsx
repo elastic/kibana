@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { Query, Filter } from '@kbn/es-query';
 import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
@@ -27,7 +26,10 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { EventsAsUnit } from '../../../../../common/constants';
-import { Comparator } from '../../../../../common/custom_threshold_rule/types';
+import {
+  Comparator,
+  CustomThresholdSearchSourceFields,
+} from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
@@ -46,7 +48,7 @@ interface ChartOptions {
 
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: CustomThresholdSearchSourceFields;
   dataView?: DataView;
   groupBy?: string | string[];
   error?: IErrorObject;

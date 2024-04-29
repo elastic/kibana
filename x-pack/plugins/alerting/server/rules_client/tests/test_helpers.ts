@@ -148,6 +148,122 @@ export const enabledRuleForBulkOps2 = {
   },
 };
 
+export const enabledRuleForBulkOpsWithActions1 = {
+  ...defaultRuleForBulkDelete,
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: true,
+    scheduledTaskId: 'id1',
+    apiKey: Buffer.from('123:abc').toString('base64'),
+    actions: [
+      {
+        uuid: '1',
+        id: 'system_action:id',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+  references: [
+    {
+      id: 'system_action:id',
+      name: '1',
+      type: 'action',
+    },
+  ],
+};
+
+export const enabledRuleForBulkOpsWithActions2 = {
+  ...defaultRuleForBulkDelete,
+  id: 'id2',
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: true,
+    scheduledTaskId: 'id2',
+    apiKey: Buffer.from('321:abc').toString('base64'),
+    actions: [
+      {
+        uuid: '2',
+        id: 'default_action:id',
+        group: 'default',
+        actionTypeId: '2',
+        actionRef: '2',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+  references: [
+    {
+      id: 'default_action:id',
+      name: '2',
+      type: 'action',
+    },
+  ],
+};
+
+export const disabledRuleForBulkOpsWithActions1 = {
+  ...defaultRuleForBulkDelete,
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: false,
+    scheduledTaskId: 'id1',
+    apiKey: Buffer.from('123:abc').toString('base64'),
+    actions: [
+      {
+        uuid: '1',
+        id: 'system_action:id',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+  references: [
+    {
+      id: 'system_action:id',
+      name: '1',
+      type: 'action',
+    },
+  ],
+};
+
+export const disabledRuleForBulkOpsWithActions2 = {
+  ...defaultRuleForBulkDelete,
+  id: 'id2',
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: false,
+    scheduledTaskId: 'id2',
+    apiKey: Buffer.from('321:abc').toString('base64'),
+    actions: [
+      {
+        uuid: '2',
+        id: 'default_action:id',
+        group: 'default',
+        actionTypeId: '2',
+        actionRef: '2',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+  references: [
+    {
+      id: 'default_action:id',
+      name: '2',
+      type: 'action',
+    },
+  ],
+};
+
 export const enabledRuleForBulkOps3 = {
   ...defaultRuleForBulkDelete,
   id: 'id3',
@@ -304,7 +420,7 @@ export const returnedRule2 = {
   snoozeSchedule: [],
 };
 
-export const returnedRuleForBulkDelete1 = {
+export const returnedRuleForBulkOps1 = {
   actions: [],
   alertTypeId: 'fakeType',
   consumer: 'fakeConsumer',
@@ -322,6 +438,7 @@ export const returnedRuleForBulkDelete1 = {
   },
   scheduledTaskId: 'id1',
   snoozeSchedule: [],
+  systemActions: [],
   tags: ['ups'],
   params: { param: 1 },
   muteAll: false,
@@ -329,7 +446,7 @@ export const returnedRuleForBulkDelete1 = {
   revision: 1,
 };
 
-export const returnedRuleForBulkDelete2 = {
+export const returnedRuleForBulkOps2 = {
   actions: [],
   alertTypeId: 'fakeType',
   consumer: 'fakeConsumer',
@@ -347,6 +464,7 @@ export const returnedRuleForBulkDelete2 = {
   },
   scheduledTaskId: 'id2',
   snoozeSchedule: [],
+  systemActions: [],
   tags: ['ups'],
   params: { param: 1 },
   muteAll: false,
@@ -354,7 +472,7 @@ export const returnedRuleForBulkDelete2 = {
   revision: 1,
 };
 
-export const returnedRuleForBulkDelete3 = {
+export const returnedRuleForBulkOps3 = {
   actions: [],
   alertTypeId: 'fakeType',
   apiKeyCreatedByUser: true,
@@ -373,6 +491,7 @@ export const returnedRuleForBulkDelete3 = {
   },
   scheduledTaskId: 'id3',
   snoozeSchedule: [],
+  systemActions: [],
   tags: ['ups'],
   params: { param: 1 },
   muteAll: false,
@@ -381,13 +500,71 @@ export const returnedRuleForBulkDelete3 = {
 };
 
 export const returnedRuleForBulkDisable1 = {
-  ...returnedRuleForBulkDelete1,
+  ...returnedRuleForBulkOps1,
   enabled: false,
 };
 
 export const returnedRuleForBulkDisable2 = {
-  ...returnedRuleForBulkDelete2,
+  ...returnedRuleForBulkOps2,
   enabled: false,
+};
+
+export const returnedRuleForBulkDisableWithActions1 = {
+  ...returnedRuleForBulkDisable1,
+  systemActions: [
+    {
+      actionTypeId: '1',
+      id: 'system_action:id',
+      params: {
+        foo: true,
+      },
+      uuid: '1',
+    },
+  ],
+};
+
+export const returnedRuleForBulkDisableWithActions2 = {
+  ...returnedRuleForBulkDisable2,
+  actions: [
+    {
+      actionTypeId: '2',
+      group: 'default',
+      id: 'default_action:id',
+      params: {
+        foo: true,
+      },
+      uuid: '2',
+    },
+  ],
+};
+
+export const returnedRuleForBulkEnableWithActions1 = {
+  ...returnedRuleForBulkOps1,
+  systemActions: [
+    {
+      actionTypeId: '1',
+      id: 'system_action:id',
+      params: {
+        foo: true,
+      },
+      uuid: '1',
+    },
+  ],
+};
+
+export const returnedRuleForBulkEnableWithActions2 = {
+  ...returnedRuleForBulkOps2,
+  actions: [
+    {
+      actionTypeId: '2',
+      group: 'default',
+      id: 'default_action:id',
+      params: {
+        foo: true,
+      },
+      uuid: '2',
+    },
+  ],
 };
 
 export const returnedDisabledRule1 = {

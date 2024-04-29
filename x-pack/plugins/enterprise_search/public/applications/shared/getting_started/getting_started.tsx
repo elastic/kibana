@@ -74,9 +74,11 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
           elasticsearchClients: docLinks.clientsGuide,
           kibanaRunApiInConsole: docLinks.consoleGuide,
         }}
-        http={http}
         isPanelLeft={isPanelLeft}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        application={services.application}
+        sharePlugin={services.share}
+        consolePlugin={services.console}
       >
         {languageDefinitions.map((language, index) => (
           <EuiFlexItem key={`panelItem.${index}`}>

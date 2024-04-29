@@ -7,21 +7,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
+import { addPanelGrouping } from '../add_panel_grouping';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_FIELD_LIST_ACTION_ID,
+    grouping: [addPanelGrouping],
     getIconType: () => 'indexOpen',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return apiCanAddNewPanel(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       embeddable.addNewPanel({
         panelType: FIELD_LIST_ID,
       });

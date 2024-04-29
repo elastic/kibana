@@ -44,9 +44,9 @@ import {
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { AppStateSelectedCells, SwimlaneData } from '../explorer_utils';
-import { Y_AXIS_LABEL_WIDTH } from '../swimlane_annotation_container';
 import { CELL_HEIGHT } from '../swimlane_container';
 import { statusNameMap } from './const';
+import { Y_AXIS_LABEL_WIDTH } from '../constants';
 
 export interface SwimLaneWrapperProps {
   selection?: AppStateSelectedCells | null;

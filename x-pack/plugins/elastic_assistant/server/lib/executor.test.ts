@@ -14,13 +14,33 @@
 import { executeAction, Props } from './executor';
 import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { RequestBody } from './langchain/types';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import { handleStreamStorage } from './parse_stream';
 const request = {
   body: {
-    params: {},
+    subAction: 'invokeAI',
+    message: 'hello',
   },
-} as KibanaRequest<unknown, unknown, RequestBody>;
+} as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+const onLlmResponse = jest.fn();
+const connectorId = 'testConnectorId';
+const mockLogger = loggerMock.create();
+const testProps: Omit<Props, 'actions'> = {
+  params: {
+    subAction: 'invokeAI',
+    subActionParams: { messages: [{ content: 'hello', role: 'user' }] },
+  },
+  actionTypeId: '.bedrock',
+  request,
+  connectorId,
+  onLlmResponse,
+  logger: mockLogger,
+};
+jest.mock('./parse_stream');
+
+const mockHandleStreamStorage = handleStreamStorage as jest.Mock;
 
 describe('executeAction', () => {
   beforeEach(() => {
@@ -35,16 +55,16 @@ describe('executeAction', () => {
           },
         }),
       }),
-    };
-    const connectorId = 'testConnectorId';
+    } as unknown as Props['actions'];
 
-    const result = await executeAction({ actions, request, connectorId } as unknown as Props);
+    const result = await executeAction({ ...testProps, actions });
 
     expect(result).toEqual({
       connector_id: connectorId,
       data: 'Test message',
       status: 'ok',
     });
+    expect(onLlmResponse).toHaveBeenCalledWith('Test message');
   });
 
   it('should execute an action and return a Readable object when the response from the actions framework is a stream', async () => {
@@ -55,14 +75,20 @@ describe('executeAction', () => {
           data: readableStream,
         }),
       }),
-    };
-    const connectorId = 'testConnectorId';
+    } as unknown as Props['actions'];
 
-    const result = await executeAction({ actions, request, connectorId } as unknown as Props);
+    const result = await executeAction({ ...testProps, actions });
 
     expect(JSON.stringify(result)).toStrictEqual(
       JSON.stringify(readableStream.pipe(new PassThrough()))
     );
+
+    expect(mockHandleStreamStorage).toHaveBeenCalledWith({
+      actionTypeId: '.bedrock',
+      onMessageSent: onLlmResponse,
+      logger: mockLogger,
+      responseStream: readableStream,
+    });
   });
 
   it('should throw an error if the actions plugin fails to retrieve the actions client', async () => {
@@ -70,12 +96,11 @@ describe('executeAction', () => {
       getActionsClientWithRequest: jest
         .fn()
         .mockRejectedValue(new Error('Failed to retrieve actions client')),
-    };
-    const connectorId = 'testConnectorId';
+    } as unknown as Props['actions'];
 
-    await expect(
-      executeAction({ actions, request, connectorId } as unknown as Props)
-    ).rejects.toThrowError('Failed to retrieve actions client');
+    await expect(executeAction({ ...testProps, actions })).rejects.toThrowError(
+      'Failed to retrieve actions client'
+    );
   });
 
   it('should throw an error if the actions client fails to execute the action', async () => {
@@ -83,12 +108,11 @@ describe('executeAction', () => {
       getActionsClientWithRequest: jest.fn().mockResolvedValue({
         execute: jest.fn().mockRejectedValue(new Error('Failed to execute action')),
       }),
-    };
-    const connectorId = 'testConnectorId';
+    } as unknown as Props['actions'];
 
-    await expect(
-      executeAction({ actions, request, connectorId } as unknown as Props)
-    ).rejects.toThrowError('Failed to execute action');
+    await expect(executeAction({ ...testProps, actions })).rejects.toThrowError(
+      'Failed to execute action'
+    );
   });
 
   it('should throw an error when the response from the actions framework is null or undefined', async () => {
@@ -98,11 +122,10 @@ describe('executeAction', () => {
           data: null,
         }),
       }),
-    };
-    const connectorId = 'testConnectorId';
+    } as unknown as Props['actions'];
 
     try {
-      await executeAction({ actions, request, connectorId } as unknown as Props);
+      await executeAction({ ...testProps, actions });
     } catch (e) {
       expect(e.message).toBe('Action result status is error: result is not streamable');
     }
@@ -118,11 +141,14 @@ describe('executeAction', () => {
         }),
       }),
     } as unknown as ActionsPluginStart;
-    const connectorId = '12345';
 
-    await expect(executeAction({ actions, request, connectorId })).rejects.toThrowError(
-      'Action result status is error: Error message - Service error message'
-    );
+    await expect(
+      executeAction({
+        ...testProps,
+        actions,
+        connectorId: '12345',
+      })
+    ).rejects.toThrowError('Action result status is error: Error message - Service error message');
   });
 
   it('should throw an error if content of response data is not a string or streamable', async () => {
@@ -136,10 +162,14 @@ describe('executeAction', () => {
         }),
       }),
     } as unknown as ActionsPluginStart;
-    const connectorId = '12345';
 
-    await expect(executeAction({ actions, request, connectorId })).rejects.toThrowError(
-      'Action result status is error: result is not streamable'
-    );
+    await expect(
+      executeAction({
+        ...testProps,
+
+        actions,
+        connectorId: '12345',
+      })
+    ).rejects.toThrowError('Action result status is error: result is not streamable');
   });
 });

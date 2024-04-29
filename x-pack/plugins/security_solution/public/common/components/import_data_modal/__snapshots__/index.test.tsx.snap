@@ -14,7 +14,9 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal"
+          role="dialog"
           style="max-inline-size: 750px;"
           tabindex="0"
         >
@@ -224,7 +226,9 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal"
+          role="dialog"
           style="max-inline-size: 750px;"
           tabindex="0"
         >
@@ -513,7 +517,9 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal"
+          role="dialog"
           style="max-inline-size: 750px;"
           tabindex="0"
         >

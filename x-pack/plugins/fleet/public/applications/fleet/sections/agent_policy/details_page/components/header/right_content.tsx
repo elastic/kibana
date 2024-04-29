@@ -20,7 +20,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { useLink } from '../../../../../hooks';
+import { useAuthz, useLink } from '../../../../../hooks';
 import type { AgentPolicy, GetAgentStatusResponse } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
 import { AddAgentHelpPopover } from '../../../../../components';
@@ -53,6 +53,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   isAddAgentHelpPopoverOpen,
   setIsAddAgentHelpPopoverOpen,
 }) => {
+  const authz = useAuthz();
   const { getPath } = useLink();
   const history = useHistory();
 
@@ -68,19 +69,18 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
     return null;
   }
 
+  const addFleetServerLink = (
+    <EuiLink onClick={addAgent} data-test-subj="addAgentLink">
+      <FormattedMessage
+        id="xpack.fleet.policyDetails.addFleetServerButton"
+        defaultMessage="Add Fleet Server"
+      />
+    </EuiLink>
+  );
+
   const addAgentLink = (
     <EuiLink onClick={addAgent} data-test-subj="addAgentLink">
-      {isFleetServerPolicy ? (
-        <FormattedMessage
-          id="xpack.fleet.policyDetails.addFleetServerButton"
-          defaultMessage="Add Fleet Server"
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.fleet.policyDetails.addAgentButton"
-          defaultMessage="Add agent"
-        />
-      )}
+      <FormattedMessage id="xpack.fleet.policyDetails.addAgentButton" defaultMessage="Add agent" />
     </EuiLink>
   );
 
@@ -110,35 +110,48 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
           ),
         },
         { isDivider: true },
-        {
-          label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
-            defaultMessage: 'Agents',
-          }),
-          content:
-            agentStatus && agentStatus!.total ? (
-              <LinkedAgentCount
-                count={agentStatus.total}
-                agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
-                showAgentText
-              />
-            ) : agentPolicy?.is_managed ? (
-              <LinkedAgentCount
-                count={0}
-                agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
-                showAgentText
-              />
-            ) : (
-              <AddAgentHelpPopover
-                button={addAgentLink}
-                isOpen={isAddAgentHelpPopoverOpen}
-                offset={15}
-                closePopover={() => {
-                  setIsAddAgentHelpPopoverOpen(false);
-                }}
-              />
-            ),
-        },
-        { isDivider: true },
+        ...(authz.fleet.readAgents
+          ? [
+              {
+                label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
+                  defaultMessage: 'Agents',
+                }),
+                content:
+                  agentStatus && agentStatus!.total ? (
+                    <LinkedAgentCount
+                      count={agentStatus.total}
+                      agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
+                      showAgentText
+                    />
+                  ) : isFleetServerPolicy && authz.fleet.addFleetServers ? (
+                    <AddAgentHelpPopover
+                      button={addFleetServerLink}
+                      isOpen={isAddAgentHelpPopoverOpen}
+                      offset={15}
+                      closePopover={() => {
+                        setIsAddAgentHelpPopoverOpen(false);
+                      }}
+                    />
+                  ) : !isFleetServerPolicy && authz.fleet.addAgents ? (
+                    <AddAgentHelpPopover
+                      button={addAgentLink}
+                      isOpen={isAddAgentHelpPopoverOpen}
+                      offset={15}
+                      closePopover={() => {
+                        setIsAddAgentHelpPopoverOpen(false);
+                      }}
+                    />
+                  ) : (
+                    <LinkedAgentCount
+                      count={0}
+                      agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
+                      showAgentText
+                    />
+                  ),
+              },
+              { isDivider: true },
+            ]
+          : []),
         {
           label: i18n.translate('xpack.fleet.policyDetails.summary.lastUpdated', {
             defaultMessage: 'Last updated on',

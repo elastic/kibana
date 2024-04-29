@@ -33,13 +33,18 @@ interface WrapParams<T extends ISearchSource | SearchSource> {
   requestTimeout?: number;
 }
 
+export interface WrappedSearchSourceClient {
+  searchSourceClient: ISearchStartSearchSource;
+  getMetrics: () => SearchMetrics;
+}
+
 export function wrapSearchSourceClient({
   logger,
   rule,
   abortController,
   searchSourceClient: pureSearchSourceClient,
   requestTimeout,
-}: Props) {
+}: Props): WrappedSearchSourceClient {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;

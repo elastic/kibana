@@ -73,13 +73,8 @@ function Wrapper({
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
-          <MockApmPluginContextWrapper
-            history={history}
-            value={mockPluginContext}
-          >
-            <MockUrlParamsContextProvider>
-              {children}
-            </MockUrlParamsContextProvider>
+          <MockApmPluginContextWrapper history={history} value={mockPluginContext}>
+            <MockUrlParamsContextProvider>{children}</MockUrlParamsContextProvider>
           </MockApmPluginContextWrapper>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -36,6 +36,10 @@ jest.mock('../../utils/kibana_react', () => ({
       observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   })),
+}));
+
+jest.mock('../../hooks/use_get_available_rules_with_descriptions', () => ({
+  useGetAvailableRulesWithDescriptions: jest.fn(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -85,10 +89,10 @@ describe('RulesPage with all capabilities', () => {
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           actionVariables: { context: [], state: [] },
           defaultActionGroupId: 'default',
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           minimumLicenseRequired: 'basic',
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { all: true },
+            [ALERTING_FEATURE_ID]: { all: true },
           },
           ruleTaskTimeout: '1m',
         },
@@ -100,10 +104,10 @@ describe('RulesPage with all capabilities', () => {
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           actionVariables: { context: [], state: [] },
           defaultActionGroupId: 'default',
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           minimumLicenseRequired: 'basic',
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { all: true },
+            [ALERTING_FEATURE_ID]: { all: true },
           },
           ruleTaskTimeout: '1m',
         },
@@ -115,10 +119,10 @@ describe('RulesPage with all capabilities', () => {
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           actionVariables: { context: [], state: [] },
           defaultActionGroupId: 'default',
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           minimumLicenseRequired: 'basic',
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { all: true },
+            [ALERTING_FEATURE_ID]: { all: true },
           },
           ruleTaskTimeout: '1m',
         },
@@ -166,10 +170,10 @@ describe('RulesPage with show only capability', () => {
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           actionVariables: { context: [], state: [] },
           defaultActionGroupId: 'default',
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           minimumLicenseRequired: 'basic',
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: false },
+            [ALERTING_FEATURE_ID]: { read: true, all: false },
           },
           ruleTaskTimeout: '1m',
         },
@@ -179,10 +183,10 @@ describe('RulesPage with show only capability', () => {
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           actionVariables: { context: [], state: [] },
           defaultActionGroupId: 'default',
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           minimumLicenseRequired: 'basic',
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: false },
+            [ALERTING_FEATURE_ID]: { read: true, all: false },
           },
           ruleTaskTimeout: '1m',
           id: '2',
@@ -196,10 +200,10 @@ describe('RulesPage with show only capability', () => {
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           actionVariables: { context: [], state: [] },
           defaultActionGroupId: 'default',
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           minimumLicenseRequired: 'basic',
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: false },
+            [ALERTING_FEATURE_ID]: { read: true, all: false },
           },
           ruleTaskTimeout: '1m',
         },

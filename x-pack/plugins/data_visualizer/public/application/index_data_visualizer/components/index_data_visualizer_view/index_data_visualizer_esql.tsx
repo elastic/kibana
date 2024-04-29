@@ -161,6 +161,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const {
     totalCount,
     progress: combinedProgress,
+    queryHistoryStatus,
     overallStatsProgress,
     configs,
     documentCountStats,
@@ -256,6 +257,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           detectTimestamp={true}
           hideMinimizeButton={true}
           hideRunQueryText={false}
+          isLoading={queryHistoryStatus ?? false}
         />
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject } from '../publishing_subject';
 
 /**
  * This API publishes a saved object id which can be used to determine which saved object this API is linked to.
@@ -23,9 +23,3 @@ export const apiPublishesSavedObjectId = (
 ): unknownApi is PublishesSavedObjectId => {
   return Boolean(unknownApi && (unknownApi as PublishesSavedObjectId)?.savedObjectId !== undefined);
 };
-
-/**
- * A hook that gets this API's saved object ID as a reactive variable which will cause re-renders on change.
- */
-export const useSavedObjectId = (api: PublishesSavedObjectId | undefined) =>
-  useStateFromPublishingSubject(api?.savedObjectId);

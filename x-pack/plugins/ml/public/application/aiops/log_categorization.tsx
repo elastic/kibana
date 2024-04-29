@@ -15,7 +15,6 @@ import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
@@ -34,9 +33,6 @@ export const LogCategorizationPage: FC = () => {
               defaultMessage="Log pattern analysis"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
       {dataView && (
@@ -45,6 +41,7 @@ export const LogCategorizationPage: FC = () => {
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',

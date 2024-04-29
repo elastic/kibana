@@ -164,6 +164,7 @@ export const policySettingsReducer: ImmutableReducer<PolicyDetailsState, AppActi
           windows: {
             ...policyConfig.windows,
             antivirus_registration: {
+              ...policyConfig.windows.antivirus_registration,
               enabled: action.payload.enabled,
             },
           },

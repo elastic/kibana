@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type {
   AfterKey,
   AfterKeys,
@@ -15,7 +16,17 @@ import type {
   RiskEngineStatus,
   RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
+import type { ConfigType } from '../../config';
+import type { StartPlugins } from '../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../types';
+export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 
+export interface EntityAnalyticsRoutesDeps {
+  router: SecuritySolutionPluginRouter;
+  logger: Logger;
+  config: ConfigType;
+  getStartServices: StartServicesAccessor<StartPlugins>;
+}
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
   debug?: boolean;
@@ -26,6 +37,7 @@ export interface CalculateScoresParams {
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -38,6 +50,7 @@ export interface CalculateAndPersistScoresParams {
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
+  alertSampleSizePerShard?: number;
 }
 
 export interface CalculateAndPersistScoresResponse {
@@ -109,19 +122,31 @@ export interface CalculateRiskScoreAggregations {
   };
 }
 
+export interface SearchHitRiskInput {
+  id: string;
+  index: string;
+  rule_name?: string;
+  time?: string;
+  score?: number;
+  contribution?: number;
+}
+
 export interface RiskScoreBucket {
   key: { [identifierField: string]: string };
   doc_count: number;
-  risk_details: {
-    value: {
-      score: number;
-      normalized_score: number;
-      notes: string[];
-      category_1_score: number;
-      category_1_count: number;
+  top_inputs: {
+    doc_count: number;
+    risk_details: {
+      value: {
+        score: number;
+        normalized_score: number;
+        notes: string[];
+        category_1_score: number;
+        category_1_count: number;
+        risk_inputs: SearchHitRiskInput[];
+      };
     };
   };
-  inputs: SearchResponse;
 }
 
 export interface RiskEngineConfiguration {
@@ -132,4 +157,5 @@ export interface RiskEngineConfiguration {
   interval: string;
   pageSize: number;
   range: Range;
+  alertSampleSizePerShard?: number;
 }

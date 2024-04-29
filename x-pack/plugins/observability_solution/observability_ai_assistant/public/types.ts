@@ -8,13 +8,13 @@
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Observable } from 'rxjs';
-import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
-  ContextDefinition,
-  FunctionDefinition,
-  FunctionResponse,
-} from '../common/functions/types';
+  MessageAddEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../common/conversation_complete';
+import type { FunctionDefinition, FunctionResponse } from '../common/functions/types';
 import type {
   Message,
   ObservabilityAIAssistantScreenContext,
@@ -30,6 +30,7 @@ import { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
 import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
+import { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -47,7 +48,7 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
@@ -55,9 +56,9 @@ export interface ObservabilityAIAssistantChatService {
     signal: AbortSignal;
     responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
+  getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,
@@ -80,6 +81,7 @@ export interface ObservabilityAIAssistantService {
   setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
+  navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -90,7 +92,7 @@ export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (op
 
 export type RegisterRenderFunctionDefinition<
   TFunctionArguments = any,
-  TFunctionResponse extends FunctionResponse = FunctionResponse
+  TFunctionResponse extends FunctionResponse = any
 > = (name: string, render: RenderFunction<TFunctionArguments, TFunctionResponse>) => void;
 
 export type ChatRegistrationRenderFunction = ({}: {
@@ -109,6 +111,7 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   ml: MlPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}
@@ -123,4 +126,5 @@ export interface ObservabilityAIAssistantPublicStart {
   useChat: typeof useChat;
   useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
+  createScreenContextAction: typeof createScreenContextAction;
 }

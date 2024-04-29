@@ -9,6 +9,7 @@ import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { asyncForEach } from '@kbn/std';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import {
   ALERT_APP,
@@ -25,7 +26,7 @@ import { getObservabilityAlerts } from './get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../../common/typings';
 
-type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
+export type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
 export type HasDataMap = Record<
   DataContextApps,
@@ -56,6 +57,30 @@ const apps: DataContextApps[] = [
   ALERT_APP,
   UNIVERSAL_PROFILING_APP,
 ];
+
+export const appLabels: Record<DataContextApps, string> = {
+  alert: i18n.translate('xpack.observability.overview.alertsLabel', {
+    defaultMessage: 'Alerts',
+  }),
+  apm: i18n.translate('xpack.observability.overview.apmLabel', {
+    defaultMessage: 'APM',
+  }),
+  infra_logs: i18n.translate('xpack.observability.overview.logsLabel', {
+    defaultMessage: 'Logs',
+  }),
+  infra_metrics: i18n.translate('xpack.observability.overview.metricsLabel', {
+    defaultMessage: 'Metrics',
+  }),
+  universal_profiling: i18n.translate('xpack.observability.overview.profilingLabel', {
+    defaultMessage: 'Profiling',
+  }),
+  uptime: i18n.translate('xpack.observability.overview.uptimeLabel', {
+    defaultMessage: 'Uptime',
+  }),
+  ux: i18n.translate('xpack.observability.overview.uxLabel', {
+    defaultMessage: 'UX',
+  }),
+};
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { http } = useKibana().services;

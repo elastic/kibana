@@ -33,9 +33,7 @@ describe('Embedded Map', () => {
     }));
 
     const mockSpaces = {
-      getActiveSpace: jest
-        .fn()
-        .mockImplementation(() => ({ id: 'mockSpaceId' })),
+      getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
     };
 
     const mockDataView = {
@@ -51,14 +49,10 @@ describe('Embedded Map', () => {
 
     const { findByTestId } = render(
       <MemoryRouter
-        initialEntries={[
-          '/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&',
-        ]}
+        initialEntries={['/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&']}
       >
         <MockApmPluginContextWrapper>
-          <KibanaContextProvider
-            services={{ embeddable: mockEmbeddable, spaces: mockSpaces }}
-          >
+          <KibanaContextProvider services={{ embeddable: mockEmbeddable, spaces: mockSpaces }}>
             <EmbeddedMap
               selectedMap={MapTypes.Http}
               filters={[]}
@@ -70,9 +64,7 @@ describe('Embedded Map', () => {
         </MockApmPluginContextWrapper>
       </MemoryRouter>
     );
-    expect(
-      await findByTestId('serviceOverviewEmbeddedMap')
-    ).toBeInTheDocument();
+    expect(await findByTestId('serviceOverviewEmbeddedMap')).toBeInTheDocument();
 
     expect(mockSetLayerList).toHaveBeenCalledTimes(1);
     expect(mockUpdateInput).toHaveBeenCalledTimes(1);

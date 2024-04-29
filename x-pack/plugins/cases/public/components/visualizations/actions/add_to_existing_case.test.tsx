@@ -14,7 +14,7 @@ import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 import type { ActionContext } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import React from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   getMockApplications$,
   getMockCaseUiActionProps,
@@ -44,8 +44,11 @@ jest.mock('../../../client/helpers/can_use_cases', () => {
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  toMountPoint: jest.fn(),
   KibanaThemeProvider: jest.fn().mockImplementation(({ children }) => <>{children}</>),
+}));
+
+jest.mock('@kbn/react-kibana-mount', () => ({
+  toMountPoint: jest.fn(),
 }));
 
 jest.mock('../../../common/lib/kibana', () => {
@@ -110,7 +113,7 @@ describe('createAddToExistingCaseLensAction', () => {
   });
 
   test('it should return display name', () => {
-    expect(action.getDisplayName(context)).toEqual('Add to existing case');
+    expect(action.getDisplayName(context)).toEqual('Add to case');
   });
 
   it('should return icon type', () => {

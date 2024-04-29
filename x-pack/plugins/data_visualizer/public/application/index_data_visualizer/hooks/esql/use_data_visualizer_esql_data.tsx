@@ -18,10 +18,10 @@ import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
-import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import type {
   MetricFieldsStats,
@@ -43,6 +43,7 @@ import type {
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
+import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -105,7 +106,7 @@ export const useESQLDataVisualizerData = (
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: true,
     autoRefreshSelector: true,
@@ -195,7 +196,7 @@ export const useESQLDataVisualizerData = (
         aggInterval,
         intervalMs: aggInterval?.asMilliseconds(),
         searchQuery: query,
-        limitSize,
+        limit: limitSize !== undefined ? parseInt(limitSize, 10) : DEFAULT_ESQL_LIMIT,
         sessionId: undefined,
         indexPattern,
         timeFieldName: currentDataView?.timeFieldName,
@@ -269,10 +270,13 @@ export const useESQLDataVisualizerData = (
     documentCountStats,
     totalCount,
     overallStats,
+    totalFields,
     overallStatsProgress,
     columns,
     cancelOverallStatsRequest,
     timeFieldName,
+    queryHistoryStatus,
+    exampleDocs,
   } = useESQLOverallStatsData(fieldStatsRequest);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
@@ -337,7 +341,7 @@ export const useESQLDataVisualizerData = (
     searchQuery: fieldStatsRequest?.searchQuery,
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
-    limitSize: fieldStatsRequest?.limitSize,
+    limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
   });
 
   useEffect(
@@ -496,13 +500,7 @@ export const useESQLDataVisualizerData = (
     if (!overallStats) return;
 
     let _visibleFieldsCount = 0;
-    let _totalFieldsCount = 0;
-    Object.keys(overallStats).forEach((key) => {
-      const fieldsGroup = overallStats[key as keyof typeof overallStats];
-      if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
-        _totalFieldsCount += fieldsGroup.length;
-      }
-    });
+    const _totalFieldsCount = totalFields ?? 0;
 
     if (showEmptyFields === true) {
       _visibleFieldsCount = _totalFieldsCount;
@@ -512,7 +510,7 @@ export const useESQLDataVisualizerData = (
         overallStats.nonAggregatableExistsFields.length;
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
-  }, [overallStats, showEmptyFields]);
+  }, [overallStats, showEmptyFields, totalFields]);
 
   useEffect(
     () => {
@@ -532,9 +530,14 @@ export const useESQLDataVisualizerData = (
         visibleFieldTypes
       ).filteredFields;
 
+      const examples = exampleDocs?.reduce((map, exampleDoc) => {
+        map.set(exampleDoc.fieldName, exampleDoc);
+        return map;
+      }, new Map());
+
       if (fieldStatsProgress.loaded === 100 && fieldStats) {
         combinedConfigs = combinedConfigs.map((c) => {
-          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? examples?.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
                 ...c,
@@ -554,6 +557,7 @@ export const useESQLDataVisualizerData = (
       fieldStatsProgress.loaded,
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
+      exampleDocs,
     ]
   );
 
@@ -569,13 +573,14 @@ export const useESQLDataVisualizerData = (
               esql={query.esql}
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
+              timeFieldName={timeFieldName}
             />
           );
         }
         return map;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, totalCount, query.esql]
+    [currentDataView, totalCount, query.esql, timeFieldName]
   );
 
   const combinedProgress = useMemo(
@@ -625,5 +630,6 @@ export const useESQLDataVisualizerData = (
     showEmptyFields,
     fieldsCountStats,
     timeFieldName,
+    queryHistoryStatus,
   };
 };

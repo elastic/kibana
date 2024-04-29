@@ -19,12 +19,16 @@ export const ML_EXTERNAL_BASE_PATH = '/api/ml';
 
 export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
 export type CompatibleModule = 'security' | 'observability' | 'search';
+export type ExperimentalFeatures = Record<'ruleFormV2', boolean>;
 
 export interface ConfigSchema {
   ad?: { enabled: boolean };
   dfa?: { enabled: boolean };
   nlp?: { enabled: boolean };
   compatibleModuleType?: CompatibleModule;
+  experimental?: {
+    ruleFormV2?: { enabled: boolean };
+  };
 }
 
 export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {
@@ -36,5 +40,14 @@ export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigS
   }
   if (config.nlp?.enabled !== undefined) {
     enabledFeatures.nlp = config.nlp.enabled;
+  }
+}
+
+export function initExperimentalFeatures(
+  experimentalFeatures: ExperimentalFeatures,
+  config: ConfigSchema
+) {
+  if (config.experimental?.ruleFormV2?.enabled !== undefined) {
+    experimentalFeatures.ruleFormV2 = config.experimental.ruleFormV2.enabled;
   }
 }

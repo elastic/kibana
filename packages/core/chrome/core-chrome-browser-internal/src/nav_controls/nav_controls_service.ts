@@ -8,7 +8,7 @@
 
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs';
 import type {
   ChromeNavControl,
   ChromeNavControls,

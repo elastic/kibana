@@ -37,26 +37,16 @@ const servicesFlamegraphRoute = createApmServerRoute({
   handler: async (resources): Promise<BaseFlameGraph | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
-    const [esClient, profilingDataAccessStart, apmEventClient] =
-      await Promise.all([
-        core.elasticsearch.client,
-        await plugins.profilingDataAccess?.start(),
-        getApmEventClient(resources),
-      ]);
+    const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+    ]);
     if (profilingDataAccessStart) {
       const { serviceName } = params.path;
-      const {
-        start,
-        end,
-        kuery,
-        transactionName,
-        transactionType,
-        environment,
-      } = params.query;
+      const { start, end, kuery, transactionName, transactionType, environment } = params.query;
 
-      const indices = apmEventClient.getIndicesFromProcessorEvent(
-        ProcessorEvent.transaction
-      );
+      const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
 
       return fetchFlamegraph({
         profilingDataAccessStart,
@@ -102,12 +92,11 @@ const servicesFunctionsRoute = createApmServerRoute({
     const { context, plugins, params } = resources;
     const core = await context.core;
 
-    const [esClient, profilingDataAccessStart, apmEventClient] =
-      await Promise.all([
-        core.elasticsearch.client,
-        await plugins.profilingDataAccess?.start(),
-        getApmEventClient(resources),
-      ]);
+    const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+    ]);
     if (profilingDataAccessStart) {
       const {
         start,
@@ -121,9 +110,7 @@ const servicesFunctionsRoute = createApmServerRoute({
       } = params.query;
       const { serviceName } = params.path;
 
-      const indices = apmEventClient.getIndicesFromProcessorEvent(
-        ProcessorEvent.transaction
-      );
+      const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
 
       return fetchFunctions({
         profilingDataAccessStart,
@@ -161,9 +148,7 @@ const profilingStatusRoute = createApmServerRoute({
         const response = await profilingDataAccessStart?.services.getStatus({
           esClient,
           soClient: (await context.core).savedObjects.client,
-          spaceId: (
-            await plugins.spaces?.start()
-          )?.spacesService.getSpaceId(resources.request),
+          spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(resources.request),
         });
 
         return { initialized: response.has_setup };

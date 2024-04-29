@@ -111,6 +111,10 @@ describe('FeatureTable', () => {
             primaryFeaturePrivilege: 'none',
             subFeaturePrivileges: [],
           },
+          with_require_all_spaces_for_feature_and_sub_features: {
+            primaryFeaturePrivilege: 'none',
+            subFeaturePrivileges: [],
+          },
         });
       });
 
@@ -164,9 +168,13 @@ describe('FeatureTable', () => {
           with_require_all_spaces_sub_features: {
             primaryFeaturePrivilege: 'all',
             ...(canCustomizeSubFeaturePrivileges
-              ? {
-                  subFeaturePrivileges: ['cool_toggle_1'],
-                }
+              ? { subFeaturePrivileges: ['cool_toggle_1'] }
+              : { subFeaturePrivileges: [] }),
+          },
+          with_require_all_spaces_for_feature_and_sub_features: {
+            primaryFeaturePrivilege: 'all',
+            ...(canCustomizeSubFeaturePrivileges
+              ? { subFeaturePrivileges: ['cool_toggle_1'] }
               : { subFeaturePrivileges: [] }),
           },
         });
@@ -221,6 +229,10 @@ describe('FeatureTable', () => {
               : { subFeaturePrivileges: [] }),
           },
           with_require_all_spaces_sub_features: {
+            primaryFeaturePrivilege: 'none',
+            subFeaturePrivileges: [],
+          },
+          with_require_all_spaces_for_feature_and_sub_features: {
             primaryFeaturePrivilege: 'none',
             subFeaturePrivileges: [],
           },
@@ -319,6 +331,10 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: ['cool_all'],
       },
       with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
+      with_require_all_spaces_for_feature_and_sub_features: {
         primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },
@@ -708,6 +724,10 @@ describe('FeatureTable', () => {
         primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },
+      with_require_all_spaces_for_feature_and_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
     });
   });
 
@@ -750,6 +770,10 @@ describe('FeatureTable', () => {
         primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },
+      with_require_all_spaces_for_feature_and_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
     });
   });
 
@@ -789,6 +813,10 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
+      with_require_all_spaces_for_feature_and_sub_features: {
         primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },
@@ -978,6 +1006,10 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
+      with_require_all_spaces_for_feature_and_sub_features: {
         primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },

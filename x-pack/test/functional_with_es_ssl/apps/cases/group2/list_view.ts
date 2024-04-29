@@ -752,8 +752,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await testSubjects.exists('all-cases-clear-filters-link-icon')).to.be(false);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/176716
-      describe.skip('assignees filtering', () => {
+      describe('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);

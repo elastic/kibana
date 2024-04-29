@@ -14,5 +14,9 @@ export {
   removeDropCommandsFromESQLQuery,
   getIndexForESQLQuery,
   getInitialESQLQuery,
+  getESQLWithSafeLimit,
+  appendToESQLQuery,
   TextBasedLanguages,
 } from './src';
+
+export { ESQL_LATEST_VERSION } from './constants';

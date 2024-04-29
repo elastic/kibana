@@ -136,10 +136,15 @@ export interface TimelineModel {
   savedSearchId: string | null;
   /* local saved search object, it's not sent to the server */
   savedSearch: SavedSearch | null;
-  isDiscoverSavedSearchLoaded?: boolean;
   isDataProviderVisible: boolean;
   /** used to mark the timeline as unsaved in the UI */
   changed?: boolean;
+  /* row height, used only by unified data table */
+  rowHeight?: number;
+  /* sample size, total record number stored in in memory EuiDataGrid */
+  sampleSize: number;
+  /** the note id pending deletion */
+  confirmingNoteId?: string | null;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -194,7 +199,6 @@ export type SubsetTimelineModel = Readonly<
     | 'filters'
     | 'savedSearchId'
     | 'savedSearch'
-    | 'isDiscoverSavedSearchLoaded'
     | 'isDataProviderVisible'
     | 'changed'
   >

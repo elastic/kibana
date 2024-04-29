@@ -50,7 +50,7 @@ Object {
       "palette": undefined,
       "percentageMode": false,
       "respectRanges": false,
-      "shape": "arc",
+      "shape": "semiCircle",
       "ticksPosition": "auto",
     },
     "canNavigateToLens": false,
@@ -91,7 +91,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "centralMajor": undefined,
-      "centralMajorMode": "auto",
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -144,6 +144,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -196,6 +198,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -248,6 +252,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -355,7 +361,7 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "centralMajor": undefined,
-      "centralMajorMode": "auto",
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -408,6 +414,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -460,6 +468,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -512,6 +522,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -564,6 +576,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -616,6 +630,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -668,6 +684,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "palette",
       "commonLabel": undefined,
       "goal": undefined,
@@ -713,6 +731,60 @@ Object {
 }
 `;
 
+exports[`interpreter/functions#gauge returns an object with the correct structure for the semiCircle shape 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "semiCircle",
+      "ticksPosition": "auto",
+    },
+    "canNavigateToLens": false,
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+    "overrides": undefined,
+  },
+}
+`;
+
 exports[`interpreter/functions#gauge returns an object with the correct structure for the verticalBullet shape 1`] = `
 Object {
   "as": "gauge",
@@ -720,6 +792,8 @@ Object {
   "value": Object {
     "args": Object {
       "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": undefined,
       "colorMode": "none",
       "commonLabel": undefined,
       "goal": undefined,
@@ -764,7 +838,3 @@ Object {
   },
 }
 `;
-
-exports[`interpreter/functions#gauge throws error if centralMajor or centralMajorMode are provided for the horizontalBullet shape 1`] = `"Fields \\"centralMajor\\" and \\"centralMajorMode\\" are not supported by the shape \\"horizontalBullet\\""`;
-
-exports[`interpreter/functions#gauge throws error if centralMajor or centralMajorMode are provided for the vertical shape 1`] = `"Fields \\"centralMajor\\" and \\"centralMajorMode\\" are not supported by the shape \\"verticalBullet\\""`;

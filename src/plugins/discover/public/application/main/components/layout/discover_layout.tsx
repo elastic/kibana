@@ -51,7 +51,6 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 
@@ -72,7 +71,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     filterManager,
     history,
     spaces,
-    docLinks,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -83,8 +81,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.columns,
     state.sort,
   ]);
+  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isPlainRecord)
+      return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
@@ -112,7 +112,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]
@@ -218,8 +217,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
-        {/* Temporarily display a tech preview callout for ES|QL*/}
-        {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
@@ -238,7 +235,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     currentColumns,
     dataView,
-    docLinks,
     isPlainRecord,
     mainContainer,
     onAddFilter,

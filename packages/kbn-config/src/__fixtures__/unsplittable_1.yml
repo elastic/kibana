@@ -1,0 +1,6 @@
+foo: 1
+bar: 3
+'[foo.bar]': "foobar"
+nested:
+  str1: "foo"
+  '[a.b]': "ab"

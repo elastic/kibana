@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
@@ -71,8 +65,7 @@ export function TransactionColdstartRateChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { serviceName, transactionType, transactionTypeStatus } =
-    useApmServiceContext();
+  const { serviceName, transactionType, transactionTypeStatus } = useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme();
 
   const endpoint = transactionName
@@ -97,10 +90,7 @@ export function TransactionColdstartRateChart({
               start,
               end,
               transactionType,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               ...(transactionName ? { transactionName } : {}),
             },
           },

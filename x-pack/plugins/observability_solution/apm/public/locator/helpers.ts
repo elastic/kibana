@@ -29,6 +29,7 @@ export const APMLocatorPayloadValidator = t.union([
         metrics: null,
         logs: null,
         errors: null,
+        transactions: null,
       }),
     }),
     t.type({
@@ -90,6 +91,7 @@ export function getPathForServiceDetail(
       logs: '/services/{serviceName}/logs',
       metrics: '/services/{serviceName}/metrics',
       traces: '/services/{serviceName}/transactions',
+      transactions: '/services/{serviceName}/transactions/view',
       errors: '/services/{serviceName}/errors',
       default: '/services/{serviceName}/overview',
     } as const;

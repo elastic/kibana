@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 import apm from 'elastic-apm-node';

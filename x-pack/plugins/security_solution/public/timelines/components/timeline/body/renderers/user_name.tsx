@@ -52,6 +52,9 @@ const UserNameComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
+  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableTimelineFlyoutEnabled'
+  );
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutApi();
@@ -64,49 +67,64 @@ const UserNameComponent: React.FC<Props> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
+      if (!eventContext || !isInTimelineContext) {
+        return;
+      }
 
-        if (isNewUserDetailsFlyoutEnable && !isTimelineScope(timelineID)) {
-          openRightPanel({
-            id: UserPanelKey,
-            params: {
-              userName,
-              contextID: contextId,
-              scopeId: TableId.alertsOnAlertsPage,
-              isDraggable,
-            },
-          });
-        } else {
-          const updatedExpandedDetail: ExpandedDetailType = {
-            panelView: 'userDetail',
-            params: {
-              userName,
-            },
-          };
-          const scopedActions = getScopedActions(timelineID);
-          if (scopedActions) {
-            dispatch(
-              scopedActions.toggleDetailPanel({
-                ...updatedExpandedDetail,
-                id: timelineID,
-                tabType: tabType as TimelineTabs,
-              })
-            );
-          }
+      const { timelineID, tabType } = eventContext;
+
+      const openNewFlyout = () =>
+        openRightPanel({
+          id: UserPanelKey,
+          params: {
+            userName,
+            contextID: contextId,
+            scopeId: TableId.alertsOnAlertsPage,
+            isDraggable,
+          },
+        });
+
+      const openOldFlyout = () => {
+        const updatedExpandedDetail: ExpandedDetailType = {
+          panelView: 'userDetail',
+          params: {
+            userName,
+          },
+        };
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
         }
+      };
+
+      if (
+        (isTimelineScope(timelineID) &&
+          isNewUserDetailsFlyoutEnable &&
+          expandableTimelineFlyoutEnabled) ||
+        isNewUserDetailsFlyoutEnable
+      ) {
+        openNewFlyout();
+      } else {
+        openOldFlyout();
       }
     },
     [
-      onClick,
+      contextId,
+      dispatch,
       eventContext,
-      isNewUserDetailsFlyoutEnable,
+      expandableTimelineFlyoutEnabled,
+      isDraggable,
       isInTimelineContext,
+      isNewUserDetailsFlyoutEnable,
+      onClick,
       openRightPanel,
       userName,
-      contextId,
-      isDraggable,
-      dispatch,
     ]
   );
 

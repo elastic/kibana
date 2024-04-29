@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
+  const excludeKeysFromServerless = ['estimatedData']; // https://github.com/elastic/kibana/issues/178954
 
   describe('Dataset quality summary', () => {
     before(async () => {
@@ -33,13 +34,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows poor, degraded and good count', async () => {
-      const summary = await PageObjects.datasetQuality.parseSummaryPanel();
+      const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
       expect(summary).to.eql({
         datasetHealthPoor: '0',
         datasetHealthDegraded: '0',
         datasetHealthGood: '3',
         activeDatasets: '0 of 3',
-        estimatedData: '0 Bytes',
+        // estimatedData: '0.0 B', https://github.com/elastic/kibana/issues/178954
       });
     });
 
@@ -58,7 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
 
       await retry.try(async () => {
-        const summary = await PageObjects.datasetQuality.parseSummaryPanel();
+        const summary = await PageObjects.datasetQuality.parseSummaryPanel(
+          excludeKeysFromServerless
+        );
         const { estimatedData, ...restOfSummary } = summary;
         expect(restOfSummary).to.eql({
           datasetHealthPoor: '1',
@@ -95,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         const { estimatedData, ...restOfSummary } =
-          await PageObjects.datasetQuality.parseSummaryPanel();
+          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
         expect(restOfSummary).to.eql({
           datasetHealthPoor: '1',
           datasetHealthDegraded: '1',
@@ -107,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('updates active datasets and estimated data KPIs', async () => {
       const { estimatedData: _existingEstimatedData } =
-        await PageObjects.datasetQuality.parseSummaryPanel();
+        await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
 
       // Index document at current time to mark dataset as active
       await synthtrace.index(
@@ -124,11 +127,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         const { activeDatasets: updatedActiveDatasets, estimatedData: _updatedEstimatedData } =
-          await PageObjects.datasetQuality.parseSummaryPanel();
+          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
 
         expect(updatedActiveDatasets).to.eql('3 of 3');
 
-        // TODO: Investigate. This fails on Serverless.
+        // TODO: `_stats` not available on Serverless. // https://github.com/elastic/kibana/issues/178954
         // expect(_updatedEstimatedData).to.not.eql(_existingEstimatedData);
       });
     });

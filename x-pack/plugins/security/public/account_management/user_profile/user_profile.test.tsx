@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
 import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
@@ -22,14 +22,12 @@ import { Providers } from '../account_management_app';
 
 const user = mockAuthenticatedUser();
 const coreStart = coreMock.createStart();
-const theme$ = themeServiceMock.createTheme$();
 let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
 
 const wrapper: FunctionComponent = ({ children }) => (
   <Providers
     services={coreStart}
-    theme$={theme$}
     history={history}
     authc={authc}
     securityApiClients={{
@@ -197,7 +195,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -220,7 +217,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -245,7 +241,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -279,7 +274,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -330,7 +324,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -367,7 +360,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -406,7 +398,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{
@@ -434,7 +425,6 @@ describe('useUserProfileForm', () => {
       const testWrapper = mount(
         <Providers
           services={coreStart}
-          theme$={theme$}
           history={history}
           authc={authc}
           securityApiClients={{

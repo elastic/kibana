@@ -35,16 +35,19 @@ import {
   createUncategorizedStatusItem,
 } from './utils';
 import { AddDataButton } from './sub_components/add_data_button';
+import { DataViewsFilter } from './sub_components/data_view_filter';
 
 export function DataSourceSelector({
   datasets,
   dataSourceSelection,
   datasetsError,
   dataViews,
+  dataViewCount,
   dataViewsError,
   discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isDataViewAllowed,
   isDataViewAvailable,
   isEsqlEnabled,
   isLoadingDataViews,
@@ -53,6 +56,7 @@ export function DataSourceSelector({
   isSearchingIntegrations,
   onDataViewsReload,
   onDataViewsSearch,
+  onDataViewsFilter,
   onDataViewsSort,
   onDataViewsTabClick,
   onIntegrationsLoadMore,
@@ -70,6 +74,7 @@ export function DataSourceSelector({
   const {
     panelId,
     search,
+    dataViewsFilter,
     tabId,
     isOpen,
     isAllMode,
@@ -77,6 +82,7 @@ export function DataSourceSelector({
     closePopover,
     scrollToIntegrationsBottom,
     searchByName,
+    filterByType,
     selectAllLogs,
     selectDataset,
     selectDataView,
@@ -88,6 +94,7 @@ export function DataSourceSelector({
   } = useDataSourceSelector({
     initialContext: { selection: dataSourceSelection },
     onDataViewsSearch,
+    onDataViewsFilter,
     onDataViewsSort,
     onIntegrationsLoadMore,
     onIntegrationsReload,
@@ -164,13 +171,14 @@ export function DataSourceSelector({
 
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
-      name: <DataViewMenuItem dataView={dataView} />,
+      name: <DataViewMenuItem dataView={dataView} isAvailable={isDataViewAllowed(dataView)} />,
       onClick: () => selectDataView(dataView),
       disabled: !isDataViewAvailable(dataView),
     }));
   }, [
     dataViews,
     dataViewsError,
+    isDataViewAllowed,
     isDataViewAvailable,
     isLoadingDataViews,
     onDataViewsReload,
@@ -233,7 +241,17 @@ export function DataSourceSelector({
         onSearch={searchByName}
         onSort={sortByOrder}
         isLoading={isSearchingIntegrations || isLoadingUncategorized}
+        filterComponent={
+          tabId === DATA_VIEWS_TAB_ID && (
+            <DataViewsFilter
+              filter={dataViewsFilter}
+              count={dataViewCount}
+              onFilter={filterByType}
+            />
+          )
+        }
       />
+
       <EuiHorizontalRule margin="none" />
       {/* For a smoother user experience, we keep each tab content mount and we only show the select one
       "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
@@ -279,7 +297,6 @@ export function DataSourceSelector({
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
-            title: dataViewsLabel,
             width: DATA_SOURCE_SELECTOR_WIDTH,
             items: dataViewsItems,
           },

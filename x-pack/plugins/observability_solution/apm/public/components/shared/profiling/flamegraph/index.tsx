@@ -37,32 +37,21 @@ export function ProfilingFlamegraph({
       if (!transactionType) {
         return;
       }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
-        {
-          params: {
-            path: { serviceName },
-            query: {
-              start,
-              end,
-              kuery,
-              transactionName,
-              transactionType,
-              environment,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/profiling/flamegraph', {
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            kuery,
+            transactionName,
+            transactionType,
+            environment,
           },
-        }
-      );
+        },
+      });
     },
-    [
-      serviceName,
-      start,
-      end,
-      kuery,
-      transactionName,
-      transactionType,
-      environment,
-    ]
+    [serviceName, start, end, kuery, transactionName, transactionType, environment]
   );
 
   return (

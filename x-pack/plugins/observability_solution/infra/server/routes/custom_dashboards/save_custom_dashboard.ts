@@ -9,24 +9,26 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraCustomDashboard } from '../../../common/custom_dashboards';
 import {
   InfraSaveCustomDashboardsRequestPayloadRT,
-  InfraSaveCustomDashboardsRequestPayload,
   InfraSaveCustomDashboardsResponseBodyRT,
+  InfraGetCustomDashboardsRequestPathParamsRT,
 } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
-import { findCustomDashboard } from './lib/find_custom_dashboard';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
+import { findCustomDashboard } from './lib/find_custom_dashboard';
 
 export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
   const validatePayload = createRouteValidationFunction(InfraSaveCustomDashboardsRequestPayloadRT);
+  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestPathParamsRT);
 
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/infra/custom-dashboards',
+      path: '/api/infra/{assetType}/custom-dashboards',
       validate: {
         body: validatePayload,
+        params: validateParams,
       },
       options: {
         access: 'internal',
@@ -37,29 +39,33 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const payload: InfraSaveCustomDashboardsRequestPayload = request.body;
-      const customDashboards = await findCustomDashboard(payload.assetType, savedObjectsClient);
+      const { dashboardSavedObjectId } = request.body;
 
-      if (customDashboards.total === 0) {
-        const savedCustomDashboard = await savedObjectsClient.create<InfraCustomDashboard>(
-          INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          payload
-        );
+      const { assetType } = request.params;
 
-        return response.ok({
-          body: InfraSaveCustomDashboardsResponseBodyRT.encode(savedCustomDashboard.attributes),
+      const customDashboards = await findCustomDashboard(assetType, savedObjectsClient);
+
+      const dashboardExist = customDashboards.find(
+        (customDashboard) => customDashboard.dashboardSavedObjectId === dashboardSavedObjectId
+      );
+
+      if (dashboardExist) {
+        return response.badRequest({
+          body: `Dashboard with id ${dashboardSavedObjectId} has already been linked to ${assetType}`,
         });
       }
 
-      const savedCustomDashboard = await savedObjectsClient.update<InfraCustomDashboard>(
+      const savedCustomDashboard = await savedObjectsClient.create<InfraCustomDashboard>(
         INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        customDashboards.saved_objects[0].id,
-        payload
+        {
+          assetType,
+          ...request.body,
+        }
       );
 
       return response.ok({
         body: InfraSaveCustomDashboardsResponseBodyRT.encode({
-          ...payload,
+          id: savedCustomDashboard.id,
           ...savedCustomDashboard.attributes,
         }),
       });

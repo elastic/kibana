@@ -467,7 +467,6 @@ export function registerIndexRoutes({
         const createPipelineResult = await preparePipelineAndIndexForMlInference(
           indexName,
           pipelineName,
-          // @ts-expect-error pipeline._meta defined as mandatory
           pipelineDefinition,
           modelId,
           fieldMappings,
@@ -664,7 +663,6 @@ export function registerIndexRoutes({
 
       const simulateRequest: IngestSimulateRequest = {
         docs,
-        // @ts-expect-error pipeline._meta defined as mandatory
         pipeline: { description: defaultDescription, ...pipeline },
       };
 

@@ -13,6 +13,7 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../../common/schemas';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
 import { DataViewSpecRestResponse } from '../../route_types';
 import type {
@@ -43,7 +44,7 @@ export const updateFields = async ({
   fields,
 }: UpdateFieldsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const fieldNames = Object.keys(fields);
 
@@ -58,6 +59,11 @@ export const updateFields = async ({
     if (field.customLabel !== undefined) {
       changeCount++;
       dataView.setFieldCustomLabel(fieldName, field.customLabel);
+    }
+
+    if (field.customDescription !== undefined) {
+      changeCount++;
+      dataView.setFieldCustomDescription(fieldName, field.customDescription);
     }
 
     if (field.count !== undefined) {
@@ -85,6 +91,7 @@ export const updateFields = async ({
 
 interface FieldUpdateType {
   customLabel?: string | null;
+  customDescription?: string | null;
   count?: number | null;
   format?: SerializedFieldFormat | null;
 }
@@ -95,6 +102,14 @@ const fieldUpdateSchema = schema.object({
       schema.string({
         minLength: 1,
         maxLength: 1_000,
+      })
+    )
+  ),
+  customDescription: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
       })
     )
   ),
@@ -167,7 +182,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           });
 
           const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: dataView.toSpec(),
+            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({

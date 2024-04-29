@@ -387,7 +387,14 @@ describe('When the add exception modal is opened', () => {
             exceptionItems: [
               {
                 ...getExceptionListItemSchemaMock(),
-                entries: [{ field: 'file.hash.sha256', operator: 'included', type: 'match' }],
+                entries: [
+                  {
+                    field: 'file.hash.sha256',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'some value',
+                  },
+                ],
               },
             ],
           })
@@ -781,7 +788,14 @@ describe('When the add exception modal is opened', () => {
             exceptionItems: [
               {
                 ...getExceptionListItemSchemaMock(),
-                entries: [{ field: 'file.hash.sha256', operator: 'included', type: 'match' }],
+                entries: [
+                  {
+                    field: 'file.hash.sha256',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'some value',
+                  },
+                ],
               },
             ],
           })

@@ -224,22 +224,6 @@ describe('duplicateRule', () => {
         })
       );
     });
-
-    it('resets setup guide to an empty string', async () => {
-      const rule = createPrebuiltRule();
-      rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
-      const result = await duplicateRule({
-        rule,
-      });
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            setup: '',
-          }),
-        })
-      );
-    });
   });
 
   describe('when duplicating a custom (mutable) rule', () => {

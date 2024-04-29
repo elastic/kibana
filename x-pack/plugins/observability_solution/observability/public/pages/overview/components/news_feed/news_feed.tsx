@@ -15,16 +15,21 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { truncate } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { NewsItem as INewsItem } from './helpers/get_news_feed';
-import './news_feed.scss';
 
 interface Props {
   items: INewsItem[];
 }
+
+const imageClassName = css`
+  box-shadow: 0 0.7px 1.4px rgba(0, 0, 0, 0.07), 0 1.9px 4px rgba(0, 0, 0, 0.05),
+    0 4.5px 10px rgba(0, 0, 0, 0.05);
+`;
 
 export function NewsFeed({ items }: Props) {
   return (
@@ -98,7 +103,7 @@ function NewsItem({ item }: { item: INewsItem }) {
                   height={48}
                   alt={item.title.en}
                   src={item.image_url.en}
-                  className="obsNewsFeed__itemImg"
+                  className={imageClassName}
                 />
               </EuiFlexItem>
             )}

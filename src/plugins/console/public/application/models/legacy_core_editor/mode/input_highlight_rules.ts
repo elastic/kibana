@@ -31,11 +31,12 @@ export function addEOL(
 export const mergeTokens = (...args: any[]) => [].concat.apply([], args);
 
 const TextHighlightRules = ace.acequire('ace/mode/text_highlight_rules').TextHighlightRules;
-
+// translating this to monaco
 export class InputHighlightRules extends TextHighlightRules {
   constructor() {
     super();
     this.$rules = {
+      // TODO
       'start-sql': [
         { token: 'whitespace', regex: '\\s+' },
         { token: 'paren.lparen', regex: '{', next: 'json-sql', push: true },
@@ -43,16 +44,22 @@ export class InputHighlightRules extends TextHighlightRules {
       ],
       start: mergeTokens(
         [
+          // done
           { token: 'warning', regex: '#!.*$' },
+          // done
           { include: 'comments' },
+          // done
           { token: 'paren.lparen', regex: '{', next: 'json', push: true },
         ],
+        // done
         addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),
         [
+          // done
           {
             token: 'whitespace',
             regex: '\\s+',
           },
+          // done
           {
             token: 'text',
             regex: '.+?',
@@ -60,39 +67,58 @@ export class InputHighlightRules extends TextHighlightRules {
         ]
       ),
       method_sep: mergeTokens(
+        // done
         addEOL(
           ['whitespace', 'url.protocol_host', 'url.slash'],
           /(\s+)(https?:\/\/[^?\/,]+)(\/)/,
           'start',
           'url'
         ),
+        // done
         addEOL(['whitespace', 'variable.template'], /(\s+)(\${\w+})/, 'start', 'url'),
+        // done
         addEOL(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'start', 'url'),
+        // done
         addEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'start', 'url'),
+        // done
         addEOL(['whitespace'], /(\s+)/, 'start', 'url')
       ),
       url: mergeTokens(
+        // done
         addEOL(['variable.template'], /(\${\w+})/, 'start'),
+        // TODO
         addEOL(['url.part'], /(_sql)/, 'start-sql', 'url-sql'),
+        // done
         addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
+        // done
         addEOL(['url.comma'], /(,)/, 'start'),
+        // done
         addEOL(['url.slash'], /(\/)/, 'start'),
+        // done
         addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams'),
+        // done
         addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'start')
       ),
       urlParams: mergeTokens(
+        // done
         addEOL(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/, 'start'),
+        // done
         addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
+        // done
         addEOL(['url.param'], /([^&=]+)/, 'start'),
+        // done
         addEOL(['url.amp'], /(&)/, 'start'),
+        // done
         addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'start')
       ),
+      // TODO
       'url-sql': mergeTokens(
         addEOL(['url.part'], /([^?\/,\s]+)/, 'start-sql'),
         addEOL(['url.comma'], /(,)/, 'start-sql'),
         addEOL(['url.slash'], /(\/)/, 'start-sql'),
         addEOL(['url.questionmark'], /(\?)/, 'start-sql', 'urlParams-sql')
       ),
+      // TODO
       'urlParams-sql': mergeTokens(
         addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start-sql'),
         addEOL(['url.param'], /([^&=]+)/, 'start-sql'),
@@ -108,27 +134,32 @@ export class InputHighlightRules extends TextHighlightRules {
       comments: [
         {
           // Capture a line comment, indicated by #
+          // done
           token: ['comment.punctuation', 'comment.line'],
           regex: /(#)(.*$)/,
         },
         {
           // Begin capturing a block comment, indicated by /*
+          // done
           token: 'comment.punctuation',
           regex: /\/\*/,
           push: [
             {
               // Finish capturing a block comment, indicated by */
+              // done
               token: 'comment.punctuation',
               regex: /\*\//,
               next: 'pop',
             },
             {
+              // done
               defaultToken: 'comment.block',
             },
           ],
         },
         {
           // Capture a line comment, indicated by //
+          // done
           token: ['comment.punctuation', 'comment.line'],
           regex: /(\/\/)(.*$)/,
         },

@@ -23,7 +23,7 @@ export const IMPORT_RULE = i18n.translate(
 export const IMPORT_VALUE_LISTS = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Import value lists',
+    defaultMessage: 'Manage value lists',
   }
 );
 
@@ -544,6 +544,13 @@ export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
   }
 );
 

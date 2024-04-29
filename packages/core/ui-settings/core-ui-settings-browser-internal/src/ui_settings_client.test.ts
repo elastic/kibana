@@ -7,7 +7,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { materialize, take, toArray } from 'rxjs/operators';
+import { materialize, take, toArray } from 'rxjs';
 
 import { UiSettingsClient } from './ui_settings_client';
 import { ValidationApiResponse } from './ui_settings_api';

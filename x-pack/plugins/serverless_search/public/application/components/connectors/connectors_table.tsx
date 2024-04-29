@@ -54,7 +54,7 @@ export const ConnectorsTable: React.FC = () => {
   const [query, setQuery] = useState<string>('');
 
   const { data, isError, isLoading } = useConnectors();
-  const { data: connectorTypes } = useConnectorTypes();
+  const connectorTypes = useConnectorTypes();
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
@@ -128,7 +128,7 @@ export const ConnectorsTable: React.FC = () => {
       field: 'service_type',
       name: typeLabel,
       render: (serviceType: string | null) => {
-        const typeData = (connectorTypes?.connectors || []).find(
+        const typeData = connectorTypes.find(
           (connector) => connector.serviceType === (serviceType ?? '')
         );
         if (!typeData) {

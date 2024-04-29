@@ -9,9 +9,13 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
+import { embeddableOutputToSubject } from '@kbn/embeddable-plugin/public';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -40,12 +44,30 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
+  // API
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
+  public entityFields: BehaviorSubject<MlEntityField[] | undefined>;
+
+  private apiSubscriptions = new Subscription();
+
   constructor(
     initialInput: AnomalyChartsEmbeddableInput,
     public services: [CoreStart, MlDependencies, AnomalyChartsServices],
     parent?: IContainer
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
+
+    this.jobIds = embeddableInputToSubject<JobId[], AnomalyChartsEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'jobIds'
+    );
+
+    this.entityFields = embeddableOutputToSubject<MlEntityField[], AnomalyChartsEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'entityFields'
+    );
   }
 
   public onLoading() {
@@ -70,44 +92,42 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
-    const I18nContext = this.services[0].i18n.Context;
-    const theme$ = this.services[0].theme.theme$;
-
     ReactDOM.render(
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              mlServices: {
-                ...this.services[2],
-              },
-              ...this.services[0],
-              ...this.services[1],
-            }}
-          >
-            <Suspense fallback={<EmbeddableLoading />}>
-              <EmbeddableAnomalyChartsContainer
-                id={this.input.id}
-                embeddableContext={this}
-                embeddableInput={this.getInput$()}
-                services={this.services}
-                refresh={this.reload$.asObservable()}
-                onInputChange={this.updateInput.bind(this)}
-                onOutputChange={this.updateOutput.bind(this)}
-                onRenderComplete={this.onRenderComplete.bind(this)}
-                onLoading={this.onLoading.bind(this)}
-                onError={this.onError.bind(this)}
-              />
-            </Suspense>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>,
+      <KibanaRenderContextProvider {...this.services[0]}>
+        <KibanaContextProvider
+          services={{
+            mlServices: {
+              ...this.services[2],
+            },
+            ...this.services[0],
+            ...this.services[1],
+          }}
+        >
+          <Suspense fallback={<EmbeddableLoading />}>
+            <EmbeddableAnomalyChartsContainer
+              id={this.input.id}
+              embeddableContext={this}
+              embeddableInput={this.getInput$()}
+              services={this.services}
+              refresh={this.reload$.asObservable()}
+              onInputChange={this.updateInput.bind(this)}
+              onOutputChange={this.updateOutput.bind(this)}
+              onRenderComplete={this.onRenderComplete.bind(this)}
+              onLoading={this.onLoading.bind(this)}
+              onError={this.onError.bind(this)}
+            />
+          </Suspense>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>,
       node
     );
   }
 
   public destroy() {
     super.destroy();
+
+    this.apiSubscriptions.unsubscribe();
+
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }

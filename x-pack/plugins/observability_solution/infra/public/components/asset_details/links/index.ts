@@ -6,5 +6,4 @@
  */
 
 export { LinkToApmServices } from './link_to_apm_services';
-export { LinkToAlertsRule } from './link_to_alerts';
 export { LinkToNodeDetails } from './link_to_node_details';

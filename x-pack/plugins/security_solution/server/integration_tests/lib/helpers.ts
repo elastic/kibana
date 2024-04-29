@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidGen } from 'uuid';
 import Fs from 'fs';
 import Util from 'util';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import deepmerge from 'deepmerge';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 const asyncUnlink = Util.promisify(Fs.unlink);
@@ -20,7 +22,7 @@ const asyncUnlink = Util.promisify(Fs.unlink);
  */
 export async function eventually<T>(
   cb: () => Promise<T>,
-  duration: number = 10000,
+  duration: number = 30000,
   interval: number = 200
 ) {
   let elapsed = 0;
@@ -54,9 +56,6 @@ export async function setupTestServers(logFilePath: string, settings = {}) {
   const root = createRootWithCorePlugins(
     deepmerge(
       {
-        server: {
-          port: 9991,
-        },
         logging: {
           appenders: {
             file: {
@@ -106,4 +105,25 @@ export async function setupTestServers(logFilePath: string, settings = {}) {
 
 export async function removeFile(path: string) {
   await asyncUnlink(path).catch(() => void 0);
+}
+
+export async function bulkInsert(
+  esClient: ElasticsearchClient,
+  index: string,
+  data: unknown[],
+  ids: string[] = []
+): Promise<void> {
+  const bulk = data.flatMap((d, i) => {
+    const _id = ids[i] ?? uuidGen();
+    return [{ create: { _index: index, _id } }, d];
+  });
+  await esClient.bulk({ body: bulk, refresh: 'wait_for' }).catch(() => {});
+}
+
+export function updateTimestamps(data: object[]): object[] {
+  const currentTimeMillis = new Date().getTime();
+  return data.map((d, i) => {
+    // wait a couple of millisecs to not make timestamps overlap
+    return { ...d, '@timestamp': new Date(currentTimeMillis + (i + 1) * 100) };
+  });
 }
