@@ -7,16 +7,24 @@
  */
 
 import { Logger } from '../cli/logger';
+import { question } from './utils';
 
-export function list(keystore, options = {}) {
+export async function passwd(keystore, options = {}) {
   const logger = new Logger(options);
+  await keystore.load();
 
   if (!keystore.exists()) {
     return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
   }
 
-  const keys = keystore.keys();
-  logger.log(keys.join('\n'));
+  const password = await question(
+    'Enter new password for the kibana keystore (empty for no password)',
+    {
+      mask: '*',
+    }
+  );
+  if (password) keystore.setPassword(password);
+  keystore.save();
 }
 
 export function passwdCli(program, keystore) {
@@ -24,5 +32,5 @@ export function passwdCli(program, keystore) {
     .command('passwd')
     .description('Changes the password of a keystore')
     .option('-s, --silent', 'prevent all logging')
-    .action(list.bind(null, keystore));
+    .action(passwd.bind(null, keystore));
 }
