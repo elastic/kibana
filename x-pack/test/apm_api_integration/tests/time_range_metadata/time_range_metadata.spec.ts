@@ -158,7 +158,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ]);
           });
 
-          it('returns support for all document types with duration sumary field', async () => {
+          it('returns support for all document types with duration summary field', async () => {
             const response = await getTimeRangeMedata({
               start: withSummaryFieldStart,
               end: withSummaryFieldEnd,
@@ -602,14 +602,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
-              hasDocs: false,
-              hasDurationSummaryField: false,
+              hasDocs: true,
+              hasDurationSummaryField: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
+              hasDocs: false,
+              hasDurationSummaryField: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
