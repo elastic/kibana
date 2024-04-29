@@ -172,7 +172,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       >
         <>
           {getLifecycleValue(lifecycle, INFINITE_AS_ICON)}{' '}
-
           {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
             <EuiToolTip
               content={i18n.translate(
@@ -180,7 +179,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                 {
                   defaultMessage: `This data stream is using the maximum allowed data retention: [{effectiveRetention}].`,
                   values: {
-                    effectiveRetention: lifecycle?.effective_retention
+                    effectiveRetention: lifecycle?.effective_retention,
                   },
                 }
               )}
@@ -190,7 +189,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           )}
         </>
       </ConditionalWrap>
-    )
+    ),
   });
 
   columns.push({

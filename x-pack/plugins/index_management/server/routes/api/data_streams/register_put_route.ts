@@ -40,15 +40,20 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
           // Be aware that in serverless it could happen that the user defined
           // data retention wont be the effective retention as there might be a
           // global data retention limit set.
-          const { headers } = await client.asCurrentUser.indices.putDataLifecycle({
-            name,
-            data_retention: dataRetention,
-          }, { meta: true });
+          const { headers } = await client.asCurrentUser.indices.putDataLifecycle(
+            {
+              name,
+              data_retention: dataRetention,
+            },
+            { meta: true }
+          );
 
-          return response.ok({ body: {
-            success: true,
-            ...(headers.warning ? { warning: headers.warning } : {}),
-          }});
+          return response.ok({
+            body: {
+              success: true,
+              ...(headers.warning ? { warning: headers.warning } : {}),
+            },
+          });
         }
 
         return response.ok({ body: { success: true } });
