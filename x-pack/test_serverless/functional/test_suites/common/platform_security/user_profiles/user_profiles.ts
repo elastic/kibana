@@ -9,46 +9,23 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const VIEWER_ROLE = 'viewer';
-const DARK_MODE_TAG = 'v8dark';
-const LIGHT_MODE_TAG = 'v8light';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'svlUserProfile']);
   const svlUserManager = getService('svlUserManager');
+  const find = getService('find');
 
   describe('User Profile Page', async () => {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginWithRole(VIEWER_ROLE);
     });
 
     after(async () => {
       await pageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('Theme', async () => {
-      it('should change theme based on the User Profile Theme control', async () => {
-        await pageObjects.common.navigateToApp('security_account');
-
-        const changeTo = (currentMode: string): string => {
-          return currentMode === LIGHT_MODE_TAG ? DARK_MODE_TAG : LIGHT_MODE_TAG;
-        };
-
-        const modeTag = await pageObjects.svlUserProfile.getThemeTag();
-
-        const expectedModeFirst = changeTo(modeTag);
-        await pageObjects.svlUserProfile.changeUserProfileTheme();
-        const modeChangeFirst = await pageObjects.svlUserProfile.getThemeTag();
-        expect(modeChangeFirst).to.be(expectedModeFirst);
-
-        const expectedModeSecond = changeTo(modeChangeFirst);
-        await pageObjects.svlUserProfile.changeUserProfileTheme();
-        const modeChangeSecond = await pageObjects.svlUserProfile.getThemeTag();
-        expect(modeChangeSecond).to.be(expectedModeSecond);
-      });
-    });
-
     describe('User details', async () => {
-      it('should change theme based on the User Profile Theme control', async () => {
+      it('should display correct user deatils', async () => {
         await pageObjects.common.navigateToApp('security_account');
 
         const userData = await svlUserManager.getUserData(VIEWER_ROLE);
@@ -58,6 +35,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(actualFullname).to.be(userData.fullname);
         expect(actualEmail).to.be(userData.email);
+      });
+
+      it('should not have edit actions', async () => {
+        const fullNameInputField = await find.allByCssSelector(
+          '[data-test-subj="userProfileFullName"]'
+        );
+
+        const emailInputField = await find.allByCssSelector('[data-test-subj="userProfileEmail"]');
+        const changePasswordButton = await find.allByCssSelector(
+          '[data-test-subj="openChangePasswordForm"]'
+        );
+
+        expect(fullNameInputField).to.have.length(0);
+        expect(emailInputField).to.have.length(0);
+        expect(changePasswordButton).to.have.length(0);
       });
     });
   });
