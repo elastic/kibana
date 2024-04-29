@@ -82,7 +82,7 @@ export const getAlertById = async ({
     .set('kbn-xsrf', 'true')
     .expect(expectedHttpCode);
 
-  return alert;
+  return alert._source;
 };
 
 export type Alerts = Array<{ _id: string; _index: string }>;
