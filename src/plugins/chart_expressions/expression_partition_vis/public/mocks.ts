@@ -382,6 +382,6 @@ export const createMockWaffleParams = (): PartitionVisParams => {
         },
       ],
     },
-    legendStats: [LegendStats.values],
+    legendStats: [LegendStats.Value],
   };
 };

@@ -72,8 +72,8 @@ describe('render helpers', () => {
   describe('#getLegendStats', () => {
     it('should firstly read the state value', () => {
       expect(
-        getLegendStats({ legendStats: [LegendStats.values] } as PieLayerState, PieChartTypes.WAFFLE)
-      ).toEqual([LegendStats.values]);
+        getLegendStats({ legendStats: [LegendStats.Value] } as PieLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([LegendStats.Value]);
 
       expect(
         getLegendStats({ legendStats: [] as LegendStats[] } as PieLayerState, PieChartTypes.WAFFLE)
@@ -82,12 +82,12 @@ describe('render helpers', () => {
 
     it('should read value from meta in case of value in state is undefined', () => {
       expect(getLegendStats({} as PieLayerState, PieChartTypes.WAFFLE)).toEqual([
-        LegendStats.values,
+        LegendStats.Value,
       ]);
 
       expect(
         getLegendStats({ legendStats: undefined } as PieLayerState, PieChartTypes.WAFFLE)
-      ).toEqual([LegendStats.values]);
+      ).toEqual([LegendStats.Value]);
 
       expect(getLegendStats({} as PieLayerState, PieChartTypes.PIE)).toEqual(undefined);
     });

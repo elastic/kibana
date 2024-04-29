@@ -131,7 +131,7 @@ export const getXYVisualizationState = (
     isVisible: false,
     position: 'right',
     showSingleSeries: false,
-    legendStats: ['values' as LegendStats.values],
+    legendStats: ['value' as LegendStats.Value],
   },
   valueLabels: 'show',
   yLeftScale: 'linear',

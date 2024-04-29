@@ -53,5 +53,5 @@ export const SUPPORTED_AGGREGATIONS = [
 ] as const;
 
 export enum LegendStats {
-  values = 'values',
+  Value = 'value',
 }

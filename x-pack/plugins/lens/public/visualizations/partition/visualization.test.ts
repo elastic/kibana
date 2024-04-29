@@ -169,11 +169,11 @@ describe('pie_visualization', () => {
     describe('converting to legendStats', () => {
       it('loads a chart with `legendStats` property', () => {
         const persistedState = getExampleState();
-        persistedState.layers[0].legendStats = ['values' as LegendStats.values];
+        persistedState.layers[0].legendStats = ['value' as LegendStats.Value];
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
 
-        expect(runtimeState.layers[0].legendStats).toEqual(['values']);
+        expect(runtimeState.layers[0].legendStats).toEqual(['value']);
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
       it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
@@ -192,7 +192,7 @@ describe('pie_visualization', () => {
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
 
-        expect(runtimeState.layers[0].legendStats).toEqual(['values']);
+        expect(runtimeState.layers[0].legendStats).toEqual(['value']);
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
 
@@ -214,15 +214,15 @@ describe('pie_visualization', () => {
         expect('legendStats' in state.layers[0]).toBeFalsy();
         expect(state.layers[0].showValuesInLegend).toEqual(undefined);
 
-        // legend stats === ['values']
-        runtimeState.layers[0].legendStats = ['values' as LegendStats.values];
+        // legend stats === ['value']
+        runtimeState.layers[0].legendStats = ['value' as LegendStats.Value];
         const { state: stateWithShowValuesInLegendTrue } =
           pieVisualization.getPersistableState!(runtimeState);
 
         expect('legendStats' in stateWithShowValuesInLegendTrue.layers[0]).toBeFalsy();
         expect(stateWithShowValuesInLegendTrue.layers[0].showValuesInLegend).toEqual(true);
 
-        // legend stats === ['values']
+        // legend stats === ['value']
         runtimeState.layers[0].legendStats = [];
 
         const { state: stateWithShowValuesInLegendFalse } =
