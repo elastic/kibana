@@ -187,7 +187,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             <span>
               <EuiButtonEmpty
                 className={placeholderButtonClassName}
-                color={'text'}
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"

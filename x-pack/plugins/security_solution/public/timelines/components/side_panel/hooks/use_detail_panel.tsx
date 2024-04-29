@@ -22,7 +22,7 @@ import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;
