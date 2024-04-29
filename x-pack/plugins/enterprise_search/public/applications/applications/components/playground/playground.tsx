@@ -45,12 +45,10 @@ export const Playground: React.FC = () => {
           pageTitle: (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <span data-test-subj="chat-playground-home-page-title">
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.playground.headerTitle"
-                    defaultMessage="Playground"
-                  />
-                </span>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.playground.headerTitle"
+                  defaultMessage="Playground"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
