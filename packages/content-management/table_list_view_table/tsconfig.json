@@ -26,6 +26,8 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/test-jest-helpers",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/core",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

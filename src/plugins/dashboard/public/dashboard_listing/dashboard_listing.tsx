@@ -15,7 +15,7 @@ import {
   TableListViewKibanaProvider,
 } from '@kbn/content-management-table-list-view-table';
 
-import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { pluginServices } from '../services/plugin_services';
 
@@ -35,10 +35,12 @@ export const DashboardListing = ({
   useSessionStorageIntegration,
 }: DashboardListingProps) => {
   const {
+    analytics,
     application,
     notifications,
     overlays,
     http,
+    i18n,
     chrome: { theme },
     savedObjectsTagging,
     coreContext: { executionContext },
@@ -70,13 +72,14 @@ export const DashboardListing = ({
       <TableListViewKibanaProvider
         {...{
           core: {
+            analytics,
             application: application as TableListViewApplicationService,
             notifications,
             overlays,
             http,
+            i18n,
             theme,
           },
-          toMountPoint,
           savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
         }}

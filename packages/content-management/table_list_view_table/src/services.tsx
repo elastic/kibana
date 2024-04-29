@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren, useContext, useMemo, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import type { FormattedRelative } from '@kbn/i18n-react';
-import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+
 import {
   ContentEditorKibanaProvider,
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
+import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import type { FormattedRelative } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -73,11 +77,20 @@ export const TableListViewProvider: FC<PropsWithChildren<Services>> = ({
 };
 
 /**
+ * Specific services for mounting React
+ */
+interface TableListViewStartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+/**
  * Kibana-specific service types.
  */
 export interface TableListViewKibanaDependencies {
   /** CoreStart contract */
-  core: {
+  core: TableListViewStartServices & {
     application: {
       capabilities: {
         [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>;
@@ -99,23 +112,7 @@ export interface TableListViewKibanaDependencies {
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
-    theme: {
-      theme$: Observable<{
-        readonly darkMode: boolean;
-      }>;
-    };
   };
-  /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
-   *
-   * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-   * ```
-   */
-  toMountPoint: (
-    node: React.ReactNode,
-    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
-  ) => MountPoint;
   /**
    * The public API from the savedObjectsTaggingOss plugin.
    * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
@@ -157,6 +154,10 @@ export interface TableListViewKibanaDependencies {
   };
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
   FormattedRelative: typeof FormattedRelative;
+  /**
+   * @deprecated - unused
+   */
+  toMountPoint?: unknown;
 }
 
 /**
@@ -165,7 +166,8 @@ export interface TableListViewKibanaDependencies {
 export const TableListViewKibanaProvider: FC<
   PropsWithChildren<TableListViewKibanaDependencies>
 > = ({ children, ...services }) => {
-  const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
+  const { core, savedObjectsTagging, FormattedRelative } = services;
+  const { application, http, notifications, ...startServices } = core;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -220,30 +222,26 @@ export const TableListViewKibanaProvider: FC<
 
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <ContentEditorKibanaProvider
-        core={core}
-        toMountPoint={toMountPoint}
-        savedObjectsTagging={savedObjectsTagging}
-      >
+      <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
         <TableListViewProvider
-          canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
           getListingLimitSettingsUrl={() =>
-            core.application.getUrlForApp('management', {
+            application.getUrlForApp('management', {
               path: `/kibana/settings?query=savedObjects:listingLimit`,
             })
           }
           notifyError={(title, text) => {
-            core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+            notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
           }}
           searchQueryParser={searchQueryParser}
           DateFormatterComp={(props) => <FormattedRelative {...props} />}
-          currentAppId$={core.application.currentAppId$}
-          navigateToUrl={core.application.navigateToUrl}
+          currentAppId$={application.currentAppId$}
+          navigateToUrl={application.navigateToUrl}
           getTagList={getTagList}
           TagList={TagList}
           itemHasTags={itemHasTags}
           getTagIdsFromReferences={getTagIdsFromReferences}
-          getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+          getTagManagementUrl={() => http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
         >
           {children}
         </TableListViewProvider>
