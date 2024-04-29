@@ -67,7 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal();
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal();
+          }
           return await testSubjects.exists('shareTopNavButton');
         });
       });
@@ -273,7 +275,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        if (await testSubjects.exists('shareContextModal')) {
+          return await PageObjects.share.closeShareModal();
+        }
       });
 
       beforeEach(async () => {
@@ -318,7 +322,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await PageObjects.reporting.checkForReportingToasts();
-        await PageObjects.share.closeShareModal();
+        if (await testSubjects.exists('shareContextModal')) {
+          await PageObjects.share.closeShareModal();
+        }
       });
 
       it('generates a report with data', async () => {
