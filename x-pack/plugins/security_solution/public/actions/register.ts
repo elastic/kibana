@@ -8,6 +8,7 @@
 import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { History } from 'history';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '@kbn/discover-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { SecurityAppStore } from '../common/store/types';
 import type { StartServices } from '../types';
 import {
@@ -45,13 +46,14 @@ import { createFilterOutLensAction } from './filter/lens/filter_out';
 export const registerUIActions = (
   store: SecurityAppStore,
   history: History,
+  coreSetup: CoreSetup,
   services: StartServices
 ) => {
   registerLensEmbeddableActions(store, services);
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
   // TODO: Remove discover histogram actions when timeline esql tab is extracted from discover
-  registerDiscoverHistogramActions(store, history, services);
+  registerDiscoverHistogramActions(store, history, coreSetup, services);
 };
 
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
@@ -105,7 +107,7 @@ const registerDiscoverCellActions = (store: SecurityAppStore, services: StartSer
 
 const registerCellActions = (
   store: SecurityAppStore,
-  history: History,
+  _history: History,
   services: StartServices
 ) => {
   const { uiActions } = services;
