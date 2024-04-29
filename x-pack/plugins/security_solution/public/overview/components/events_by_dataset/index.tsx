@@ -44,7 +44,7 @@ const ID = 'eventsByDatasetOverview';
 const CHART_HEIGHT = 160;
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  combinedQueries?: string;
+  filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
   indexPattern: DataViewBase;
@@ -77,7 +77,7 @@ const StyledLinkButton = styled(EuiButton)`
 `;
 
 const EventsByDatasetComponent: React.FC<Props> = ({
-  combinedQueries,
+  filterQuery: filterQueryFromProps,
   deleteQuery,
   filters,
   from,
@@ -138,7 +138,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   );
 
   const [filterQuery, kqlError] = useMemo(() => {
-    if (combinedQueries == null) {
+    if (filterQueryFromProps == null) {
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
         indexPattern,
@@ -146,8 +146,8 @@ const EventsByDatasetComponent: React.FC<Props> = ({
         filters,
       });
     }
-    return [combinedQueries];
-  }, [combinedQueries, kibana, indexPattern, query, filters]);
+    return [filterQueryFromProps];
+  }, [filterQueryFromProps, kibana, indexPattern, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,

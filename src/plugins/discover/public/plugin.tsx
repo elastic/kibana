@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -66,11 +66,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
-import {
-  createRegisterCustomizationProfile,
-  createProfileRegistry,
-} from './customizations/profile_registry';
+import type { DiscoverCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -153,7 +149,6 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
-  readonly registerCustomizationProfile: RegisterCustomizationProfile;
 }
 
 /**
@@ -218,7 +213,6 @@ export class DiscoverPlugin
   private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
@@ -239,7 +233,6 @@ export class DiscoverPlugin
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
-      // Create locators for external use without profile-awareness
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
       );
@@ -290,23 +283,10 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
-    const appStateUpdater$ = combineLatest([
-      this.appStateUpdater,
-      this.profileRegistry.getContributedAppState$(),
-    ]).pipe(
-      map(
-        ([urlAppStateUpdater, profileAppStateUpdater]): AppUpdater =>
-          (app) => ({
-            ...urlAppStateUpdater(app),
-            ...profileAppStateUpdater(app),
-          })
-      )
-    );
-
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
-      updater$: appStateUpdater$,
+      updater$: this.appStateUpdater,
       order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -327,19 +307,13 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const { locator, contextLocator, singleDocLocator } = await this.getProfileAwareLocators({
-          locator: this.locator!,
-          contextLocator: this.contextLocator!,
-          singleDocLocator: this.singleDocLocator!,
-        });
-
         const services = buildServices({
           core: coreStart,
           plugins: discoverStartPlugins,
           context: this.initializerContext,
-          locator,
-          contextLocator,
-          singleDocLocator,
+          locator: this.locator!,
+          contextLocator: this.contextLocator!,
+          singleDocLocator: this.singleDocLocator!,
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
@@ -357,7 +331,6 @@ export class DiscoverPlugin
         const unmount = renderApp({
           element: params.element,
           services,
-          profileRegistry: this.profileRegistry,
           customizationContext: {
             displayMode: 'standalone',
             inlineTopNav: this.inlineTopNav,
@@ -422,10 +395,7 @@ export class DiscoverPlugin
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
-    const getDiscoverServicesInternal = () => {
-      return this.getDiscoverServices(core, plugins);
-    };
-
+    const getDiscoverServicesInternal = () => this.getDiscoverServices(core, plugins);
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
     if (plugins.share && this.locator && isEsqlEnabled) {
@@ -442,7 +412,6 @@ export class DiscoverPlugin
       DiscoverContainer: (props: DiscoverContainerProps) => (
         <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
       ),
-      registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
     };
   }
 
@@ -452,46 +421,18 @@ export class DiscoverPlugin
     }
   }
 
-  private getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
-    const { locator, contextLocator, singleDocLocator } = await this.getProfileAwareLocators({
-      locator: this.locator!,
-      contextLocator: this.contextLocator!,
-      singleDocLocator: this.singleDocLocator!,
-    });
-
+  private getDiscoverServices = (core: CoreStart, plugins: DiscoverStartPlugins) => {
     return buildServices({
       core,
       plugins,
       context: this.initializerContext,
-      locator,
-      contextLocator,
-      singleDocLocator,
+      locator: this.locator!,
+      contextLocator: this.contextLocator!,
+      singleDocLocator: this.singleDocLocator!,
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
     });
   };
-
-  /**
-   * Create profile-aware locators for internal use
-   */
-  private async getProfileAwareLocators({
-    locator,
-    contextLocator,
-    singleDocLocator,
-  }: {
-    locator: DiscoverAppLocator;
-    contextLocator: DiscoverContextAppLocator;
-    singleDocLocator: DiscoverSingleDocLocator;
-  }) {
-    const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
-    const history = this.historyService.getHistory();
-
-    return {
-      locator: new ProfileAwareLocator(locator, history),
-      contextLocator: new ProfileAwareLocator(contextLocator, history),
-      singleDocLocator: new ProfileAwareLocator(singleDocLocator, history),
-    };
-  }
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {

@@ -69,7 +69,8 @@ export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 type GenericActionRowCellRenderProps = Pick<
   EuiDataGridCellValueElementProps,
   'rowIndex' | 'columnId'
->;
+> &
+  Partial<EuiDataGridCellValueElementProps>;
 
 export type RowCellRender =
   | JSXElementConstructor<GenericActionRowCellRenderProps>

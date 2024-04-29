@@ -141,7 +141,7 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
 
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
-  const selectedOptions = options.filter((option) => option.checked).find((k) => k.label);
+  const selectedOptionLabel = options.find((option) => option.checked)?.label;
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
     undefined
@@ -180,11 +180,13 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
                       setIsInferencePopoverVisible(!isInferencePopoverVisible);
                     }}
                   >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.button"
-                      defaultMessage="{defaultValue}"
-                      values={{ defaultValue: selectedOptions?.label }}
-                    />
+                    {selectedOptionLabel ||
+                      i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
+                        {
+                          defaultMessage: 'No model selected',
+                        }
+                      )}
                   </EuiButton>
                 </>
               )}

@@ -22,6 +22,7 @@ export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedT
 export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
   const {
     header,
+    isSortEnabled,
     pageInfo,
     columns,
     rowRenderers,
@@ -72,6 +73,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
           <UnifiedTimeline
             columns={columnsHeader}
             rowRenderers={rowRenderers}
+            isSortEnabled={isSortEnabled}
             timelineId={timelineId}
             itemsPerPage={itemsPerPage}
             itemsPerPageOptions={itemsPerPageOptions}

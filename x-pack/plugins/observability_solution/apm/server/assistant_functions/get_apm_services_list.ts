@@ -22,7 +22,6 @@ export function registerGetApmServicesListFunction({
   registerFunction(
     {
       name: 'get_apm_services_list',
-      contexts: ['apm'],
       description: `Gets a list of services`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',

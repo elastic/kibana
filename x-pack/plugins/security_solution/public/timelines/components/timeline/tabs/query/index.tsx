@@ -5,29 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback } from 'react';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import { InPortal } from 'react-reverse-portal';
-
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
-import memoizeOne from 'memoize-one';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { QueryTabHeader } from './header';
@@ -39,44 +32,30 @@ import type {
   ToggleDetailPanel,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useTimelineEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
-import type { UnifiedActionProps } from '../../unified_components/data_table/control_column_cell_render';
-import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
-import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
-import { getDefaultControlColumn } from '../../body/control_columns';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
-import { getColumnHeaders } from '../../body/column_headers/helpers';
 import {
-  StyledEuiFlyoutHeader,
-  EventsCountBadge,
   FullWidthFlexGroup,
   ScrollableFlexItem,
   StyledEuiFlyoutBody,
   StyledEuiFlyoutFooter,
   VerticalRule,
-  TabHeaderContainer,
 } from '../shared/layout';
-import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
+import {
+  TIMELINE_EMPTY_EVENTS,
+  isTimerangeSame,
+  timelineEmptyTrailingControlColumns,
+} from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
-
-export const memoizedGetColumnHeaders: (
-  headers: ColumnHeaderOptions[],
-  browserFields: BrowserFields,
-  isEventRenderedView: boolean
-) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -84,8 +63,6 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   deepEqual(prevProps.filters, nextProps.filters);
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
-
-const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -115,8 +92,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
-  const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
     dataViewId,
@@ -129,9 +104,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings, timelineFilterManager } = useKibana().services;
-  const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
@@ -189,24 +161,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [combinedQueries, end, loadingSourcerer, start]
   );
 
-  const defaultColumns = useMemo(
-    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
-    [unifiedComponentsInTimelineEnabled]
-  );
-
-  const localColumns = useMemo(
-    () => (isEmpty(columns) ? defaultColumns : columns),
-    [columns, defaultColumns]
-  );
-
-  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
-
-  const getTimelineQueryFields = () => {
-    const columnFields = augumentedColumnHeaders.map((c) => c.id);
-
-    return [...columnFields, ...requiredFieldsForActions];
-  };
-
   const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
     direction: sortDirection as Direction,
@@ -214,14 +168,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     type: columnType,
   }));
 
-  useEffect(() => {
-    dispatch(
-      timelineActions.initializeTimelineSettings({
-        id: timelineId,
-        defaultColumns,
-      })
-    );
-  }, [dispatch, timelineId, defaultColumns]);
+  const { augmentedColumnHeaders, defaultColumns, timelineQueryFieldsFromColumns } =
+    useTimelineColumns(columns);
 
   const [
     dataLoadingState,
@@ -229,7 +177,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
-    fields: getTimelineQueryFields(),
+    fields: timelineQueryFieldsFromColumns,
     filterQuery: combinedQueries?.filterQuery,
     id: timelineId,
     indexNames: selectedPatterns,
@@ -241,6 +189,17 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     startDate: start,
     timerangeKind,
   });
+
+  const leadingControlColumns = useTimelineControlColumn(columns, sort, refetch);
+
+  useEffect(() => {
+    dispatch(
+      timelineActions.initializeTimelineSettings({
+        id: timelineId,
+        defaultColumns,
+      })
+    );
+  }, [dispatch, timelineId, defaultColumns]);
 
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(dataLoadingState),
@@ -260,98 +219,27 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const leadingControlColumns = useMemo(
-    () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
-        ...x,
-        headerCellRender: function HeaderCellRender(props: UnifiedActionProps) {
-          return (
-            <HeaderActions
-              width={x.width}
-              browserFields={browserFields}
-              columnHeaders={localColumns}
-              isEventViewer={false}
-              isSelectAllChecked={false}
-              onSelectAll={() => {}}
-              showEventsSelect={false}
-              showSelectAllCheckbox={false}
-              sort={sort}
-              tabType={TimelineTabs.pinned}
-              fieldBrowserOptions={{}}
-              {...props}
-              timelineId={timelineId}
-            />
-          );
-        },
-        rowCellRender: ControlColumnCellRender,
-      })),
-    [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, timelineId]
-  );
-
   // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
   // the previous page from the timeline), yet we still see total count. This is because the timeline
   // is not getting refreshed when using browser navigation.
   const showEventsCountBadge = !isBlankTimeline && totalCount >= 0;
 
-  const header = useMemo(
-    () => (
-      <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
-        <InPortal node={timelineEventsCountPortalNode}>
-          {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
-        </InPortal>
-        <EuiFlexGroup gutterSize="s" direction="column">
-          {!unifiedComponentsInTimelineEnabled &&
-            timelineFullScreen &&
-            setTimelineFullScreen != null && (
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <ExitFullScreen
-                    fullScreen={timelineFullScreen}
-                    setFullScreen={setTimelineFullScreen}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-          <EuiFlexItem data-test-subj="timeline-date-picker-container">
-            <TabHeaderContainer data-test-subj="timelineHeader">
-              <QueryTabHeader
-                filterManager={timelineFilterManager}
-                show={show && activeTab === TimelineTabs.query}
-                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                status={status}
-                timelineId={timelineId}
-              />
-            </TabHeaderContainer>
-          </EuiFlexItem>
-          {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
-          {/* https://github.com/elastic/kibana/issues/17156 */}
-          {/* <EuiFlexItem grow={false}> */}
-          {/*   <TimelineKpi timelineId={timelineId} /> */}
-          {/* </EuiFlexItem> */}
-        </EuiFlexGroup>
-      </StyledEuiFlyoutHeader>
-    ),
-    [
-      activeTab,
-      timelineFilterManager,
-      show,
-      showCallOutUnauthorizedMsg,
-      status,
-      timelineId,
-      setTimelineFullScreen,
-      timelineFullScreen,
-      unifiedComponentsInTimelineEnabled,
-      timelineEventsCountPortalNode,
-      showEventsCountBadge,
-      totalCount,
-    ]
-  );
-
   if (unifiedComponentsInTimelineEnabled) {
     return (
       <UnifiedTimelineBody
-        header={header}
-        columns={augumentedColumnHeaders}
+        header={
+          <QueryTabHeader
+            activeTab={activeTab}
+            filterManager={timelineFilterManager}
+            show={show && activeTab === TimelineTabs.query}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            status={status}
+            timelineId={timelineId}
+            showEventsCountBadge={showEventsCountBadge}
+            totalCount={totalCount}
+          />
+        }
+        columns={augmentedColumnHeaders}
         rowRenderers={rowRenderers}
         timelineId={timelineId}
         itemsPerPage={itemsPerPage}
@@ -388,7 +276,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
-          {header}
+          <QueryTabHeader
+            activeTab={activeTab}
+            filterManager={timelineFilterManager}
+            show={show && activeTab === TimelineTabs.query}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            status={status}
+            timelineId={timelineId}
+            showEventsCountBadge={showEventsCountBadge}
+            totalCount={totalCount}
+          />
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
@@ -397,7 +294,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
-                data={isBlankTimeline ? EMPTY_EVENTS : events}
+                data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
                 id={timelineId}
                 refetch={refetch}
                 renderCellValue={renderCellValue}
@@ -409,7 +306,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   itemsPerPage,
                 })}
                 leadingControlColumns={leadingControlColumns}
-                trailingControlColumns={trailingControlColumns}
+                trailingControlColumns={timelineEmptyTrailingControlColumns}
               />
             </StyledEuiFlyoutBody>
 

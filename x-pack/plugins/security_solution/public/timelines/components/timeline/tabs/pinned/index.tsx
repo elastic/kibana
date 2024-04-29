@@ -24,7 +24,6 @@ import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
-import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -38,12 +37,8 @@ import type { ToggleDetailPanel } from '../../../../../../common/types/timeline'
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DetailsPanel } from '../../../side_panel';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
-import { getDefaultControlColumn } from '../../body/control_columns';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { memoizedGetColumnHeaders } from '../query';
 import {
   FullWidthFlexGroup,
   ScrollableFlexItem,
@@ -52,6 +47,8 @@ import {
   VerticalRule,
 } from '../shared/layout';
 import type { TimelineTabCommonProps } from '../shared/types';
+import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
@@ -144,17 +141,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       return '';
     }
   }, [pinnedEventIds]);
-  const defaultColumns = useMemo(
-    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
-    [unifiedComponentsInTimelineEnabled]
-  );
 
-  const localColumns = useMemo(
-    () => (isEmpty(columns) ? defaultColumns : columns),
-    [columns, defaultColumns]
-  );
-
-  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
   const timelineQueryFields = useMemo(() => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     const columnFields = columnsHeader.map((c) => c.id);
@@ -172,6 +159,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       })),
     [sort]
   );
+  const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
   const [queryLoadingState, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
@@ -189,6 +177,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
+  const leadingControlColumns = useTimelineControlColumn(columns, sort, refetch);
+
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
     [queryLoadingState]
@@ -198,38 +188,11 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
   }, [timelineId, onEventClosed]);
 
-  const leadingControlColumns = useMemo(
-    () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
-        ...x,
-        headerCellRender: () => {
-          return (
-            <HeaderActions
-              width={x.width}
-              browserFields={browserFields}
-              columnHeaders={localColumns}
-              isEventViewer={false}
-              isSelectAllChecked={false}
-              onSelectAll={() => {}}
-              showEventsSelect={false}
-              showSelectAllCheckbox={false}
-              sort={sort}
-              tabType={TimelineTabs.pinned}
-              timelineId={timelineId}
-              fieldBrowserOptions={{}}
-            />
-          );
-        },
-        rowCellRender: ControlColumnCellRender,
-      })),
-    [ACTION_BUTTON_COUNT, browserFields, localColumns, sort, timelineId]
-  );
-
   if (unifiedComponentsInTimelineEnabled) {
     return (
       <UnifiedTimelineBody
         header={<></>}
-        columns={augumentedColumnHeaders}
+        columns={augmentedColumnHeaders}
         rowRenderers={rowRenderers}
         timelineId={timelineId}
         itemsPerPage={itemsPerPage}

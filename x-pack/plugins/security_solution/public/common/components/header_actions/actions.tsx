@@ -244,33 +244,35 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </EventsTdContent>
         </div>
       )}
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        onClick={onExpandEvent}
-        step={AlertsCasesTourSteps.expandEvent}
-        tourId={SecurityStepId.alertsCases}
-      >
-        <div key="expand-event">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-              <EuiButtonIcon
-                aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                data-test-subj="expand-event"
-                iconType="expand"
-                onClick={onExpandEvent}
-                size="s"
-              />
-            </EuiToolTip>
-          </EventsTdContent>
-        </div>
-      </GuidedOnboardingTourStep>
       <>
         {timelineId !== TimelineId.active && (
-          <InvestigateInTimelineAction
-            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
-            key="investigate-in-timeline"
-            ecsRowData={ecsData}
-          />
+          <>
+            <GuidedOnboardingTourStep
+              isTourAnchor={isTourAnchor}
+              onClick={onExpandEvent}
+              step={AlertsCasesTourSteps.expandEvent}
+              tourId={SecurityStepId.alertsCases}
+            >
+              <div key="expand-event">
+                <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+                  <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                    <EuiButtonIcon
+                      aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                      data-test-subj="expand-event"
+                      iconType="expand"
+                      onClick={onExpandEvent}
+                      size="s"
+                    />
+                  </EuiToolTip>
+                </EventsTdContent>
+              </div>
+            </GuidedOnboardingTourStep>
+            <InvestigateInTimelineAction
+              ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
+              key="investigate-in-timeline"
+              ecsRowData={ecsData}
+            />
+          </>
         )}
 
         {!isEventViewer && toggleShowNotes && (

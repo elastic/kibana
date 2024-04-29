@@ -22,6 +22,7 @@ import {
 } from '../common/locators';
 import { DataViewLocatorDefinition } from '../common/locators/data_view_locator';
 import { type ObservabilityLogsExplorerConfig } from '../common/plugin_config';
+import { DATA_RECEIVED_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { logsExplorerAppTitle } from '../common/translations';
 import type {
   ObservabilityLogsExplorerAppMountParameters,
@@ -85,6 +86,8 @@ export class ObservabilityLogsExplorerPlugin
         return renderObservabilityLogsExplorerRedirect(coreStart, appMountParams);
       },
     });
+
+    core.analytics.registerEventType(DATA_RECEIVED_TELEMETRY_EVENT);
 
     // Register Locators
     const allDatasetsLocator = share.url.locators.create(

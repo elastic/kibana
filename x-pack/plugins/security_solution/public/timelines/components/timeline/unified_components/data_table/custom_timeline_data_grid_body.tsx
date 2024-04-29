@@ -22,6 +22,7 @@ import { NoteCards } from '../../../notes/note_cards';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -138,12 +139,16 @@ const CustomGridRow = styled.div.attrs<{
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
 `;
 
-/**
- *
- * A Simple Wrapper component for displaying a custom data grid `cell`
- */
-const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper', role: 'row' })`
+/* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
+const CustomGridRowCellWrapper = styled.div.attrs<{
+  className?: string;
+}>((props) => ({
+  className: `rowCellWrapper ${props.className ?? ''}`,
+  role: 'row',
+}))`
   display: flex;
+  align-items: center;
+  height: 36px;
 `;
 
 type CustomTimelineDataGridSingleRowProps = {
@@ -196,6 +201,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         : {},
     [canShowRowRenderer]
   );
+  const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
 
   const associateNote = useCallback(
     (noteId: string) => {
@@ -215,7 +221,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
       key={rowIndex}
     >
-      <CustomGridRowCellWrapper>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName}>
         {visibleColumns.map((column, colIndex) => {
           // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {

@@ -67,7 +67,7 @@ export const AssetCriticalityResultStep: React.FC<{
           iconType="checkInCircleFilled"
         >
           <FormattedMessage
-            defaultMessage="Your asset criticality assignments have been successfully mapped."
+            defaultMessage="Your asset criticality levels have been assigned."
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
         </EuiCallOut>

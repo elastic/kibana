@@ -9,7 +9,12 @@ import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
-import { SERVICE_NAME, CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
+import {
+  SERVICE_NAME,
+  CONTAINER_ID,
+  HOST_NAME,
+  KUBERNETES_POD_NAME,
+} from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
 export type LogCategories =
@@ -33,6 +38,7 @@ export async function getLogCategories({
     'service.name'?: string;
     'host.name'?: string;
     'container.id'?: string;
+    'kubernetes.pod.name'?: string;
   };
 }): Promise<LogCategories> {
   const start = datemath.parse(args.start)?.valueOf()!;
@@ -42,10 +48,10 @@ export async function getLogCategories({
     { field: SERVICE_NAME, value: args[SERVICE_NAME] },
     { field: CONTAINER_ID, value: args[CONTAINER_ID] },
     { field: HOST_NAME, value: args[HOST_NAME] },
+    { field: KUBERNETES_POD_NAME, value: args[KUBERNETES_POD_NAME] },
   ]);
 
-  const index =
-    (await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern)) ?? 'logs-*';
+  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
 
   const search = getTypedSearch(esClient);
 

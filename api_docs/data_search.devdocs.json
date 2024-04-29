@@ -28313,6 +28313,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.retrieveResults",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retrieveResults",
+            "description": [
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.ISearchOptions.executionContext",
             "type": "Object",
             "tags": [],
@@ -34035,7 +34051,7 @@
             "section": "def-common.KibanaExecutionContext",
             "text": "KibanaExecutionContext"
           },
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
