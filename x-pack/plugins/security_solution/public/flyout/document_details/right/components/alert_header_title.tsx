@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, useEuiTheme, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -26,7 +25,7 @@ import { FlyoutTitle } from '../../../shared/components/flyout_title';
 /**
  * Alert details flyout right section header
  */
-export const AlertHeaderTitle: FC = memo(() => {
+export const AlertHeaderTitle = memo(() => {
   const {
     dataFormattedForFieldBrowser,
     eventId,

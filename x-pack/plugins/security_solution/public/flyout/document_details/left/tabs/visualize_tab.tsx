@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
@@ -51,7 +50,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
 /**
  * Visualize view displayed in the document details expandable flyout left section
  */
-export const VisualizeTab: FC = memo(() => {
+export const VisualizeTab = memo(() => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
