@@ -8,9 +8,9 @@
 import React, { Component, RefObject } from 'react';
 import { first } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import type { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '@kbn/es-query';
-import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../common/descriptor_types';
 import { MapEmbeddable } from './map_embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
@@ -20,6 +20,8 @@ export interface Props {
   query?: Query;
   timeRange?: TimeRange;
   layerList: LayerDescriptor[];
+  mapSettings?: Partial<MapSettings>;
+  hideFilterActions?: boolean,
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   /*
@@ -44,11 +46,21 @@ export class MapComponent extends Component<Props> {
         id: uuidv4(),
         attributes: {
           title: this.props.title ?? '',
-          layerListJSON: JSON.stringify([createBasemapLayerDescriptor(), ...this.props.layerList]),
+          layerListJSON: JSON.stringify(this.getLayerList()),
         },
+        hidePanelTitles: !Boolean(this.props.title),
+        viewMode: ViewMode.VIEW,
+        isLayerTOCOpen: false,
+        hideFilterActions: typeof this.props.hideFilterActions === 'boolean' ? this.props.hideFilterActions : false,
         mapCenter: this.props.mapCenter,
+        mapSettings: this.props.mapSettings ?? {},
       }
     );
+    this._mapEmbeddable.updateInput({
+      filters: this.props.filters,
+      query: this.props.query,
+      timeRange: this.props.timeRange,
+    });
 
     if (this.props.onInitialRenderComplete) {
       this._mapEmbeddable
@@ -84,9 +96,16 @@ export class MapComponent extends Component<Props> {
     });
 
     if (this._prevLayerList !== this.props.layerList) {
-      this._mapEmbeddable.setLayerList(this.props.layerList);
+      this._mapEmbeddable.setLayerList(this.getLayerList());
       this._prevLayerList = this.props.layerList;
     }
+  }
+
+  getLayerList(): LayerDescriptor[] {
+    const basemapLayer = createBasemapLayerDescriptor();
+    return basemapLayer
+      ? [basemapLayer, ...this.props.layerList]
+      : this.props.layerList;
   }
 
   render() {
