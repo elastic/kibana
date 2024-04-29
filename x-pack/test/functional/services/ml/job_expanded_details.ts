@@ -123,6 +123,8 @@ export function MachineLearningJobExpandedDetailsProvider(
 
     async openForecastTab(jobId: string) {
       await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
+      const innerHtml = await (await testSubjects.find('mlJobListTable')).getAttribute('innerHTML');
+      getService('log').debug(innerHtml);
       await retry.tryForTime(15_000, async function waitForRenderForecastTable() {
         await testSubjects.existOrFail('mlJobListForecastTable');
       });
