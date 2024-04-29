@@ -122,7 +122,6 @@ export function registerGetApmTimeseriesFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      contexts: ['core'],
       name: 'get_apm_timeseries',
       description: `Visualise and analyse different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions.`,
       parameters,

@@ -214,6 +214,8 @@ export class ProjectNavigationService {
       setAddSolutionIdToUrlPath: (handler: (solutionId: string, path: string) => string) => {
         this.addSolutionIdToUrlPath = handler;
       },
+      /** In stateful Kibana, get the id of the active solution navigation */
+      getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
     };
   }
 

@@ -13,6 +13,7 @@ import {
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
   enableAssetCriticalityAdvancedSetting,
+  disableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -23,11 +24,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @skipInQA asset_criticality Asset Criticality APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI asset_criticality Asset Criticality APIs', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await cleanAssetCriticality({ log, es });
-      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     afterEach(async () => {
@@ -36,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('initialisation of resources', () => {
-      it('should has index installed on status api call', async () => {
+      it('should have index installed on status api call', async () => {
         let assetCriticalityIndexExist;
 
         try {
@@ -127,6 +128,20 @@ export default ({ getService }: FtrProviderContext) => {
           expectStatusCode: 400,
         });
       });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        const validAssetCriticality = {
+          id_field: 'host.name',
+          id_value: 'host-01',
+          criticality_level: 'high_impact',
+        };
+
+        await assetCriticalityRoutes.upsert(validAssetCriticality, {
+          expectStatusCode: 403,
+        });
+      });
     });
 
     describe('read', () => {
@@ -150,6 +165,14 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return a 400 if id_field is invalid', async () => {
         await assetCriticalityRoutes.get('invalid', 'host-02', {
           expectStatusCode: 400,
+        });
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        await assetCriticalityRoutes.get('host.name', 'doesnt-matter', {
+          expectStatusCode: 403,
         });
       });
     });
@@ -201,6 +224,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(doc).to.eql(undefined);
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        await assetCriticalityRoutes.delete('host.name', 'doesnt-matter', {
+          expectStatusCode: 403,
+        });
       });
     });
   });

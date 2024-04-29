@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SingleMetricViewerEmbeddableFactory } from './single_metric_viewer_embeddable_factory';
+export { getSingleMetricViewerEmbeddableFactory } from './single_metric_viewer_embeddable_factory';
