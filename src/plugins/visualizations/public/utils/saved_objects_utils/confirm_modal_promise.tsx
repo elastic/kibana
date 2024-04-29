@@ -8,22 +8,22 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart } from '@kbn/core/public';
 import { EuiConfirmModal } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { StartServices } from '../../types';
 
 export function confirmModalPromise(
   message = '',
   title = '',
   confirmBtnText = '',
-  overlays: OverlayStart
+  startServices: StartServices
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate('visualizations.confirmModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     });
 
-    const modal = overlays.openModal(
+    const modal = startServices.overlays.openModal(
       toMountPoint(
         <EuiConfirmModal
           onCancel={() => {
@@ -39,7 +39,8 @@ export function confirmModalPromise(
           title={title}
         >
           {message}
-        </EuiConfirmModal>
+        </EuiConfirmModal>,
+        startServices
       )
     );
   });
