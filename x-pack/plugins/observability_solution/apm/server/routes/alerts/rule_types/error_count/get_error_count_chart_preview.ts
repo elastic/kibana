@@ -111,6 +111,12 @@ export async function getTransactionErrorCountChartPreview({
     return acc;
   }, {} as BarSeriesDataMap);
 
+  resp.aggregations.timeseries.buckets.forEach((bucket) => {
+    if (bucket.series.buckets.length === 0) {
+      Object.keys(seriesDataMap).forEach((key) => seriesDataMap[key].push({ x: bucket.key, y: 0 }));
+    }
+  });
+
   const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,
     data: seriesDataMap[key],
