@@ -258,6 +258,42 @@ function renderTestCases(
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       expect(data.logging).toEqual(loggingConfig);
     });
+
+    it('use the correct translation url when CDN is enabled', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+
+      const [render, deps] = await getRender();
+
+      (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
+      (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(true);
+
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.i18n.translationsUrl).toEqual('http://foo.bar:1773/translations/en.json');
+    });
+
+    it('use the correct translation url when CDN is disabled', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+
+      const [render, deps] = await getRender();
+
+      (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
+      (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(false);
+
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.i18n.translationsUrl).toEqual(
+        '/mock-server-basepath/translations/MOCK_HASH/en.json'
+      );
+    });
   });
 }
 

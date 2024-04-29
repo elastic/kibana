@@ -25,6 +25,7 @@ export enum APIRoutes {
   POST_API_KEY = '/internal/search_playground/api_key',
   POST_CHAT_MESSAGE = '/internal/search_playground/chat',
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
+  GET_INDICES = '/internal/search_playground/indices',
 }
 
 export enum LLMs {
@@ -42,4 +43,10 @@ export interface ChatRequestData {
   summarization_model?: string;
   source_fields: string;
   doc_size: number;
+}
+
+export interface SearchPlaygroundConfigType {
+  ui: {
+    enabled: boolean;
+  };
 }

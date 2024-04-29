@@ -12,8 +12,11 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { RightPanelContext } from '../context';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
+import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 
 jest.mock('../hooks/use_process_data');
+jest.mock('../../shared/hooks/use_rule_details_link');
 
 const panelContextValue = {
   eventId: 'event id',
@@ -48,6 +51,7 @@ describe('SessionPreview', () => {
       workdir: '/path/to/workdir',
       command: 'command1',
     });
+    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule1_link');
 
     renderSessionPreview();
 
@@ -57,6 +61,7 @@ describe('SessionPreview', () => {
     expect(screen.getByText('at')).toBeInTheDocument();
     expect(screen.getByText('Jan 1, 2022 @ 00:00:00.000')).toBeInTheDocument();
     expect(screen.getByText('with rule')).toBeInTheDocument();
+    expect(screen.getByTestId(SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('rule1')).toBeInTheDocument();
     expect(screen.getByText('by')).toBeInTheDocument();
     expect(screen.getByText('/path/to/workdir command1')).toBeInTheDocument();
@@ -72,6 +77,7 @@ describe('SessionPreview', () => {
       command: null,
       workdir: null,
     });
+    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
 
     renderSessionPreview();
 
@@ -80,6 +86,7 @@ describe('SessionPreview', () => {
     expect(screen.getByText('process1')).toBeInTheDocument();
     expect(screen.queryByText('at')).not.toBeInTheDocument();
     expect(screen.queryByText('with rule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByText('by')).not.toBeInTheDocument();
   });
 });

@@ -971,7 +971,7 @@
                     "section": "def-common.I18nStart",
                     "text": "I18nStart"
                   },
-                  "; analytics?: ",
+                  "; analytics?: Pick<",
                   {
                     "pluginId": "@kbn/core-analytics-browser",
                     "scope": "common",
@@ -979,7 +979,7 @@
                     "section": "def-common.AnalyticsServiceStart",
                     "text": "AnalyticsServiceStart"
                   },
-                  " | undefined; theme: ",
+                  ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
                     "scope": "common",
