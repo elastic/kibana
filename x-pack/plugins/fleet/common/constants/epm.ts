@@ -87,9 +87,11 @@ export const installationStatuses = {
   NotInstalled: 'not_installed',
 } as const;
 
+// These asset types are allowed to be shown on Integration details > Assets tab
+// This array also controls the order in which the asset types are displayed
 export const displayedAssetTypes: DisplayedAssetTypes = [
-  ...Object.values(ElasticsearchAssetType),
   ...Object.values(KibanaAssetType),
+  ...Object.values(ElasticsearchAssetType),
 ];
 
 export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);

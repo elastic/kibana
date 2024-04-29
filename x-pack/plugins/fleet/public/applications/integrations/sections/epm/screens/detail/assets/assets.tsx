@@ -111,6 +111,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
           const assetIds: AssetSOObject[] = [
             ...authorizedTransforms,
             ...(pkgInstallationInfo?.installed_kibana || []),
+            ...(pkgInstallationInfo?.installed_es || []),
           ].map(({ id, type }) => ({
             id,
             type,
