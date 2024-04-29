@@ -66,7 +66,7 @@ export const getFieldListFactory = (
   > = {
     type: FIELD_LIST_ID,
     deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState) as FieldListSerializedStateState;
+      const serializedState = cloneDeep(state.rawState);
       // inject the reference
       const dataViewIdRef = state.references?.find(
         (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
