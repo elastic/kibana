@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type { RouteDefinitionParams } from '..';
 import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function permissionsFactory(req: KibanaRequest, validResponse?: IKibanaResponse) {
-  const permissionsRequestCache = new WeakMap<KibanaRequest, IKibanaResponse>();
-  return {
-    permissionsRequestCache() {
-      if (!permissionsRequestCache.has(req) && validResponse) {
-        permissionsRequestCache.set(req, validResponse);
-      }
+interface ValidPermissionsResult {
+  apiKeys: ApiKey[];
+}
 
-      return permissionsRequestCache.get(req);
-    },
-  };
+export function ValidPermissionsFactory(req: KibanaRequest, keys?: ApiKey[]) {
+  const validPermissionsRequestCache = new WeakMap<KibanaRequest, ApiKey[]>();
+  if (validPermissionsRequestCache.has(req)) {
+    return validPermissionsRequestCache.get(req);
+  } else if (keys) {
+    validPermissionsRequestCache.set(req, keys);
+  }
 }
 
 /**
@@ -34,13 +34,13 @@ export function defineValidPermissionRoutes({
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/api_key',
+      path: '/internal/security/api_key/valid_permissions',
       validate: false,
       options: {
         access: 'internal',
       },
     },
-    // @ts-ignore response will be cached
+    // @ts-ignore undefined would return but is caught by the cache function
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;
@@ -53,6 +53,7 @@ export function defineValidPermissionRoutes({
             },
           }),
           authenticationService.apiKeys.areAPIKeysEnabled(),
+          authenticationService.apiKeys.areCrossClusterAPIKeysEnabled(),
         ]);
 
         if (!areApiKeysEnabled) {
@@ -64,7 +65,9 @@ export function defineValidPermissionRoutes({
           });
         }
 
-        if (permissionsFactory(request)) return permissionsFactory(request);
+        if (ValidPermissionsFactory(request)) {
+          return ValidPermissionsFactory(request);
+        }
 
         const apiResponse = await esClient.asCurrentUser.security.getApiKey({
           owner: !clusterPrivileges.manage_api_key && !clusterPrivileges.read_security,
@@ -76,21 +79,20 @@ export function defineValidPermissionRoutes({
             if (!key.name) {
               key.name = key.id;
             }
-
-            // only return the keys for user with manage own api key permission
-            if (clusterPrivileges.manage_own_api_key) return key;
+            if (clusterPrivileges.manage_own_api_key) {
+              return key;
+            }
           });
 
-        const validResponse = response.ok<{ apiKeys: ApiKey[] }>({
+        const validKeysResponse = response.ok<ValidPermissionsResult>({
           body: {
             // @ts-expect-error Elasticsearch client types do not know about cross-cluster API keys yet.
             apiKeys: validKeys,
           },
         });
 
-        // cache results
-        permissionsFactory(request, validResponse);
-        return validResponse;
+        ValidPermissionsFactory(request, validKeysResponse.payload?.apiKeys);
+        return validKeysResponse;
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
