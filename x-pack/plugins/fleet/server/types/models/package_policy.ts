@@ -122,7 +122,7 @@ const PackagePolicyBaseSchema = {
                   (key) => key.match(/^compiled_inputs(\.)?/) || key.match(/^compiled_stream(\.)?/)
                 )
               ) {
-                return 'compiled_inputs overrides not allowed';
+                return 'Overrides not allowed';
               }
             },
           })
