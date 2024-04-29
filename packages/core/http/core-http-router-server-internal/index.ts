@@ -11,6 +11,7 @@ export {
   versionHandlerResolvers,
   CoreVersionedRouter,
   ALLOWED_PUBLIC_VERSION,
+  unwrapVersionedResponseBodyValidation,
   type VersionedRouterRoute,
   type HandlerResolutionStrategy,
 } from './src/versioned_router';
