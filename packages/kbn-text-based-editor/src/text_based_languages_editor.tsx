@@ -967,6 +967,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         hideQueryHistory={hideHistoryComponent}
                         refetchHistoryItems={refetchHistoryItems}
                         isInCompactMode={true}
+                        queryHasChanged={code !== codeWhenSubmitted}
                       />
                     )}
                   </div>
@@ -1065,6 +1066,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           containerWidth={editorWidth}
           hideQueryHistory={hideHistoryComponent}
           refetchHistoryItems={refetchHistoryItems}
+          queryHasChanged={code !== codeWhenSubmitted}
         />
       )}
       {isCodeEditorExpanded && (

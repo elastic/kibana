@@ -34,9 +34,8 @@ export async function resolveJobSelection(
   const {
     http,
     uiSettings,
-    theme,
-    i18n,
     application: { currentAppId$ },
+    ...startServices
   } = coreStart;
 
   return new Promise(async (resolve, reject) => {
@@ -86,7 +85,7 @@ export async function resolveJobSelection(
               maps={maps}
             />
           </KibanaContextProvider>,
-          { theme, i18n }
+          startServices
         ),
         {
           'data-test-subj': 'mlFlyoutJobSelector',
