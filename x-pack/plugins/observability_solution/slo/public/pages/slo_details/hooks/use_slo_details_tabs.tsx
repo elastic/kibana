@@ -67,7 +67,7 @@ export const useSloDetailsTabs = ({
       label: i18n.translate('xpack.slo.sloDetails.tab.historyLabel', {
         defaultMessage: 'History',
       }),
-      'data-test-subj': 'overviewTab',
+      'data-test-subj': 'historyTab',
       isSelected: selectedTabId === HISTORY_TAB_ID,
       ...(setSelectedTabId
         ? {
