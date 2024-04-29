@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
@@ -23,9 +22,7 @@ export interface ServicesWrapperProps {
 const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
 );

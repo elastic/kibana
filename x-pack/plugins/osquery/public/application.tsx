@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -41,16 +39,12 @@ export const renderApp = (
           storage,
         }}
       >
-        <EuiErrorBoundary>
-          <Router history={history}>
-            <I18nProvider>
-              <QueryClientProvider client={queryClient}>
-                <OsqueryApp />
-                <ReactQueryDevtools initialIsOpen={false} />
-              </QueryClientProvider>
-            </I18nProvider>
-          </Router>
-        </EuiErrorBoundary>
+        <Router history={history}>
+          <QueryClientProvider client={queryClient}>
+            <OsqueryApp />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </Router>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element

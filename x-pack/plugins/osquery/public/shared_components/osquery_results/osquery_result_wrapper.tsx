@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComment, EuiErrorBoundary } from '@elastic/eui';
+import { EuiComment } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
@@ -75,11 +75,9 @@ const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperP
 }) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <OsqueryActionResult {...restProps} />
-        </QueryClientProvider>
-      </EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <OsqueryActionResult {...restProps} />
+      </QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
 );

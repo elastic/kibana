@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
@@ -63,11 +63,9 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
 }) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <OsqueryActionResults {...restProps} />
-        </QueryClientProvider>
-      </EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <OsqueryActionResults {...restProps} />
+      </QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
 );
