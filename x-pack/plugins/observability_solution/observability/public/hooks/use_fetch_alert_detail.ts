@@ -26,6 +26,11 @@ export interface AlertData {
   _index?: string;
 }
 
+export interface AlertResponse {
+  _index: string;
+  _source: EcsFieldsResponse;
+}
+
 export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => {
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const params = useMemo(
@@ -38,10 +43,7 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
     []
   );
 
-  const { loading, data: rawAlert } = useDataFetcher<
-    AlertDetailParams,
-    { _index: string; _source: EcsFieldsResponse | null } | null
-  >({
+  const { loading, data: rawAlert } = useDataFetcher<AlertDetailParams, AlertResponse | null>({
     paramsForApiCall: params,
     initialDataState: null,
     executeApiCall: fetchAlert,
@@ -67,7 +69,7 @@ const fetchAlert = async (
   http: HttpSetup
 ) => {
   return http
-    .get<{ _index: string; _source: EcsFieldsResponse }>(BASE_RAC_ALERTS_API_PATH, {
+    .get<AlertResponse>(BASE_RAC_ALERTS_API_PATH, {
       query: {
         id,
       },
