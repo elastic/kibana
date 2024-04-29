@@ -98,7 +98,7 @@ export function createMergeNonConflictingAllOfItemsProcessor(): DocumentNodeProc
 
 function canMergeObjectSchemas(schemas: OpenAPIV3.SchemaObject[]): boolean {
   const props = new Map<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>();
-  let objectSchemasCounter = 1;
+  let objectSchemasCounter = 0;
 
   for (let i = 0; i < schemas.length; ++i) {
     const node = schemas[i];
