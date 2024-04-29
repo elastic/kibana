@@ -19,6 +19,7 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 import type { Observable } from 'rxjs';
 import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
@@ -37,6 +38,7 @@ export type SolutionSideNavItem = ClassicSolutionSideNavItem<SolutionPageName>;
 export interface LinksPermissions {
   capabilities: Capabilities;
   experimentalFeatures: Readonly<ExperimentalFeatures>;
+  uiSettingsClient: IUiSettingsClient;
   upselling: UpsellingService;
   license?: ILicense;
 }
@@ -154,6 +156,13 @@ export interface LinkItem {
    * Locations where the link is visible in the UI
    */
   visibleIn?: AppDeepLinkLocations[];
+
+  /**
+   * Required UI setting to enable a link.
+   * To enable a link when a boolean UiSetting is true, pass the key as a string.
+   * To enable a link when a specific value is set for a UiSetting, pass an object with key and value.
+   */
+  uiSettingRequired?: string | { key: string; value: unknown };
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;

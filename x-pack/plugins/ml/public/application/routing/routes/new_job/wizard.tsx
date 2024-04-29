@@ -19,7 +19,7 @@ import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
-import { mlJobService } from '../../../services/job_service';
+import { mlJobServiceFactory } from '../../../services/job_service';
 import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
@@ -206,6 +206,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     services: {
       data: { dataViews: dataViewsService },
       savedSearch: savedSearchService,
+      mlServices: { mlApiServices },
     },
   } = useMlKibana();
 
@@ -221,7 +222,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
         savedSearchService,
         ANOMALY_DETECTOR
       ),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    existingJobsAndGroups: () => mlJobServiceFactory(undefined, mlApiServices).getJobAndGroupIds(),
   });
 
   return (

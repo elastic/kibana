@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import { once } from 'lodash';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
@@ -237,7 +238,14 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
-    this.handlers.set(options.version, { fn: handler, options });
+    this.handlers.set(options.version, {
+      fn: handler,
+      options: {
+        ...options,
+        validate:
+          typeof options.validate === 'function' ? once(options.validate) : options.validate,
+      },
+    });
     return this;
   }
 

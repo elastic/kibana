@@ -34,12 +34,14 @@ interface GetArtificialLogDataViewTestDataOptions {
   analysisType: LogRateAnalysisType;
   textField: boolean;
   zeroDocsFallback: boolean;
+  autoRun: boolean;
 }
 
 export const getArtificialLogDataViewTestData = ({
   analysisType,
   textField,
   zeroDocsFallback,
+  autoRun,
 }: GetArtificialLogDataViewTestDataOptions): TestData => {
   function getAnalysisGroupsTable() {
     if (zeroDocsFallback) {
@@ -133,6 +135,7 @@ export const getArtificialLogDataViewTestData = ({
   return {
     suiteTitle: getSuiteTitle(),
     analysisType,
+    autoRun,
     dataGenerator: getDataGenerator(),
     isSavedSearch: false,
     sourceIndexOrSavedSearch: getDataGenerator(),

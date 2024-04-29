@@ -231,7 +231,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; }"
+              ") => void; isNewVersion: () => boolean; }"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -433,6 +433,20 @@
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-public.SloPublicPluginsStart.aiops",
+            "type": "Object",
+            "tags": [],
+            "label": "aiops",
+            "description": [],
+            "signature": [
+              "AiopsPluginStart"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -1552,7 +1566,7 @@
         "label": "sloPaths",
         "description": [],
         "signature": [
-          "{ slos: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
+          "{ slos: string; slosSettings: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined, remoteName?: string | undefined) => string; }"
         ],
         "path": "x-pack/plugins/observability_solution/slo/common/index.ts",
         "deprecated": false,

@@ -19,8 +19,6 @@
       "usageCollection",
       "security"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

@@ -49,6 +49,9 @@ const policyDoc: SavedObject<PackagePolicy> = {
                   mode: 'detect',
                   blocklist: true,
                 },
+                antivirus_registration: {
+                  enabled: true,
+                },
               },
               mac: {
                 malware: {
@@ -218,6 +221,51 @@ describe('8.14.0 Endpoint Package Policy migration', () => {
 
       const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
       expect(migratedPolicyConfig).toStrictEqual(expectedPolicyConfig);
+    });
+  });
+
+  describe('backfilling `antivirus_registration.mode`', () => {
+    it('should backfill with `disabled` if antivirus registration was disabled', () => {
+      const originalPolicyConfigSO = cloneDeep(policyDoc);
+      const originalPolicyConfig = originalPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+      originalPolicyConfig.windows.antivirus_registration.enabled = false;
+
+      const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+        document: originalPolicyConfigSO,
+        fromVersion: 7,
+        toVersion: 8,
+      });
+
+      const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+      expect(migratedPolicyConfig.windows.antivirus_registration.mode).toBe('disabled');
+    });
+
+    it('should backfill with `enabled` if antivirus registration was enabled', () => {
+      const originalPolicyConfigSO = cloneDeep(policyDoc);
+
+      const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+        document: originalPolicyConfigSO,
+        fromVersion: 7,
+        toVersion: 8,
+      });
+
+      const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+      expect(migratedPolicyConfig.windows.antivirus_registration.mode).toBe('enabled');
+    });
+
+    it('should not backfill if already present due to user edit before migration is performed on serverless', () => {
+      const originalPolicyConfigSO = cloneDeep(policyDoc);
+      const originalPolicyConfig = originalPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+      originalPolicyConfig.windows.antivirus_registration.mode = 'present value';
+
+      const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
+        document: originalPolicyConfigSO,
+        fromVersion: 7,
+        toVersion: 8,
+      });
+
+      const migratedPolicyConfig = migratedPolicyConfigSO.attributes.inputs[0].config?.policy.value;
+      expect(migratedPolicyConfig.windows.antivirus_registration.mode).toBe('present value');
     });
   });
 });

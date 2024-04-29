@@ -101,7 +101,7 @@ export const EA_DOCS_ENTITY_RISK_SCORE = i18n.translate(
 export const PREVIEW_MISSING_PERMISSIONS_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.missingPermissionsCallout.title',
   {
-    defaultMessage: 'Insifficient index privileges to preview data',
+    defaultMessage: 'Insufficient index privileges to preview data',
   }
 );
 

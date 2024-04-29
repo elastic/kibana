@@ -5820,7 +5820,7 @@
               "\nList agents"
             ],
             "signature": [
-              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
               "AggregationsAggregationContainer",
               "> | undefined; searchAfter?: ",
               "SortResults",
@@ -5848,7 +5848,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
                   "AggregationsAggregationContainer",
                   "> | undefined; searchAfter?: ",
                   "SortResults",
@@ -6003,7 +6003,7 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
+              ", options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
                 "scope": "common",
@@ -6054,7 +6054,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; esClient?: ",
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
                     "scope": "common",
@@ -6420,7 +6420,7 @@
                     "section": "def-common.ListWithKuery",
                     "text": "ListWithKuery"
                   },
-                  ", \"perPage\" | \"kuery\" | \"sortField\" | \"sortOrder\"> & { fields?: string[] | undefined; }"
+                  ", \"perPage\" | \"sortField\" | \"sortOrder\" | \"kuery\"> & { fields?: string[] | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -9443,7 +9443,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              " & { withAgentCount?: boolean | undefined; }) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -9489,7 +9489,7 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackagePolicyClient.list.$2",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -9500,8 +9500,7 @@
                     "docId": "kibFleetPluginApi",
                     "section": "def-common.ListWithKuery",
                     "text": "ListWithKuery"
-                  },
-                  " & { withAgentCount?: boolean | undefined; }"
+                  }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -11466,7 +11465,7 @@
         "label": "ListArtifactsProps",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"perPage\" | \"kuery\" | \"sortOrder\"> & { sortField?: string | undefined; }"
+          "Pick<Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}>, \"page\" | \"perPage\" | \"sortOrder\" | \"kuery\"> & { sortField?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
         "deprecated": false,
@@ -19246,20 +19245,6 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.AgentPolicy.keep_monitoring_alive",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "keep_monitoring_alive",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -22695,6 +22680,20 @@
             "description": [],
             "signature": [
               "{ [key: string]: any; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.keep_monitoring_alive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "keep_monitoring_alive",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,

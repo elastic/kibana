@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useTabs } from './hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -16,12 +17,12 @@ import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
+import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
-export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
 
 export interface RightPanelProps extends FlyoutPanelProps {
   key: 'document-details-right';
@@ -64,7 +65,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
     storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
 
     telemetry.reportDetailsFlyoutTabClicked({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'right',
       tabId,
     });
@@ -85,6 +86,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
+      {flyoutIsExpandable && <RightPanelTour />}
       <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}

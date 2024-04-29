@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 
 interface InstructionsFieldProps {
   value?: string;
@@ -49,6 +50,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
         value={value}
         onChange={handlePromptChange}
         fullWidth
+        isInvalid={isEmpty(value)}
       />
     </EuiFormRow>
   );

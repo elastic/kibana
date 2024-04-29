@@ -39,7 +39,15 @@ import {
   type TopNFunctionsLocator,
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
+import {
+  type ServiceOverviewLocator,
+  ServiceOverviewLocatorDefinition,
+} from './locators/apm/service_overview_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
+import {
+  type TransactionDetailsByNameLocator,
+  TransactionDetailsByNameLocatorDefinition,
+} from './locators/apm/transaction_details_by_name_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -66,6 +74,10 @@ interface ObservabilitySharedLocators {
     flamegraphLocator: FlamegraphLocator;
     topNFunctionsLocator: TopNFunctionsLocator;
     stacktracesLocator: StacktracesLocator;
+  };
+  apm: {
+    serviceOverview: ServiceOverviewLocator;
+    transactionDetailsByName: TransactionDetailsByNameLocator;
   };
 }
 
@@ -130,6 +142,12 @@ export class ObservabilitySharedPlugin implements Plugin {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),
         topNFunctionsLocator: urlService.locators.create(new TopNFunctionsLocatorDefinition()),
         stacktracesLocator: urlService.locators.create(new StacktracesLocatorDefinition()),
+      },
+      apm: {
+        serviceOverview: urlService.locators.create(new ServiceOverviewLocatorDefinition()),
+        transactionDetailsByName: urlService.locators.create(
+          new TransactionDetailsByNameLocatorDefinition()
+        ),
       },
     };
   }

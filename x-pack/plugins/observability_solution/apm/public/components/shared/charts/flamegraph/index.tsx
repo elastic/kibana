@@ -20,8 +20,7 @@ interface Props {
 export function FlamegraphChart({ data, status }: Props) {
   return (
     <>
-      {status === FETCH_STATUS.SUCCESS &&
-      (isEmpty(data) || data?.TotalSamples === 0) ? (
+      {status === FETCH_STATUS.SUCCESS && (isEmpty(data) || data?.TotalSamples === 0) ? (
         <EuiEmptyPrompt
           titleSize="s"
           title={
@@ -33,11 +32,7 @@ export function FlamegraphChart({ data, status }: Props) {
           }
         />
       ) : (
-        <EmbeddableFlamegraph
-          data={data}
-          isLoading={isPending(status)}
-          height="35vh"
-        />
+        <EmbeddableFlamegraph data={data} isLoading={isPending(status)} height="35vh" />
       )}
     </>
   );

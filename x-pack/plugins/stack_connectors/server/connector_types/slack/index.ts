@@ -55,7 +55,7 @@ const SecretsSchema = schema.object(secretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const ParamsSchema = schema.object({
+export const ParamsSchema = schema.object({
   message: schema.string({ minLength: 1 }),
 });
 

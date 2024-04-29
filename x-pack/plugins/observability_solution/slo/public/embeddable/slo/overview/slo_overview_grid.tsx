@@ -96,12 +96,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
   });
 
   const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
-    list: [
-      {
-        sloId,
-        instanceId: ALL_VALUE,
-      },
-    ],
+    sloList: sloList?.results ?? [],
   });
 
   const { colors } = useSloCardColor();

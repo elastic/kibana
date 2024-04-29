@@ -17,20 +17,14 @@ function getNoDataConfigDetails({
   isServerless?: boolean;
   hasApmIntegrations?: boolean;
 }) {
-  const description = i18n.translate(
-    'xpack.apm.ux.overview.agent.description',
-    {
-      defaultMessage:
-        'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
-    }
-  );
+  const description = i18n.translate('xpack.apm.ux.overview.agent.description', {
+    defaultMessage:
+      'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
+  });
 
-  const addDataTitle = i18n.translate(
-    'xpack.apm.noDataConfig.addDataButtonLabel',
-    {
-      defaultMessage: 'Add data',
-    }
-  );
+  const addDataTitle = i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
+    defaultMessage: 'Add data',
+  });
 
   if (isServerless) {
     return {
@@ -49,10 +43,9 @@ function getNoDataConfigDetails({
   }
 
   return {
-    title: i18n.translate(
-      'xpack.apm.noDataConfig.addApmIntegrationButtonLabel',
-      { defaultMessage: 'Add the APM integration' }
-    ),
+    title: i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
+      defaultMessage: 'Add the APM integration',
+    }),
     href: `${basePath}/app/integrations/detail/apm/overview`,
     description,
   };

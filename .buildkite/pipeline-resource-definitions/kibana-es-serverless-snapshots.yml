@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ES_SERVERLESS_IMAGE: latest
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
-      allow_rebuilds: false
+      allow_rebuilds: true
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
@@ -35,7 +35,7 @@ spec:
         trigger_mode: none
         build_tags: false
         prefix_pull_request_fork_branch_names: false
-        skip_pull_request_builds_for_existing_commits: true
+        skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
           access_level: BUILD_AND_READ

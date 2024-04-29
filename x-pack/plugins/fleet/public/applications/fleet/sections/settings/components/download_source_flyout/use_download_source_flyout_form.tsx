@@ -34,7 +34,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const defaultDownloadSourceInput = useSwitchInput(
     downloadSource?.is_default ?? false,
-    downloadSource?.is_default
+    downloadSource?.is_default || isEditDisabled
   );
 
   const hostInput = useInput(downloadSource?.host ?? '', validateHost, isEditDisabled);
@@ -116,7 +116,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || (downloadSource && !hasChanged),
+    isDisabled: isLoading || (downloadSource && !hasChanged) || isEditDisabled,
   };
 }
 

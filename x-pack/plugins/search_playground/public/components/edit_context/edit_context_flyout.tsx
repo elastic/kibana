@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -35,11 +35,10 @@ interface EditContextFlyoutProps {
 }
 
 export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
-  const { watch } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = watch('indices');
-  const { fields } = useIndicesFields(selectedIndices || []);
-  const defaultFields = useMemo(() => getDefaultSourceFields(fields), [fields]);
-  const [sourceFields, setSourceFields] = useState(defaultFields);
+  const { getValues } = useFormContext<ChatForm>();
+  const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const { fields } = useIndicesFields(selectedIndices);
+  const defaultFields = getDefaultSourceFields(fields);
 
   const {
     field: { onChange: onChangeSize, value: docSizeInitialValue },
@@ -50,26 +49,23 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
   const [docSize, setDocSize] = useState(docSizeInitialValue);
 
   const {
-    field: { onChange: onChangeSourceFields },
+    field: { onChange: onChangeSourceFields, value: sourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
+    defaultValue: defaultFields,
   });
 
-  useEffect(() => {
-    if (selectedIndices?.length > 0) {
-      setSourceFields(defaultFields);
-    }
-  }, [selectedIndices, defaultFields]);
+  const [tempSourceFields, setTempSourceFields] = useState(sourceFields);
 
   const toggleSourceField = (index: string, f: EuiSelectableOption[]) => {
-    setSourceFields({
-      ...sourceFields,
+    setTempSourceFields({
+      ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
   };
 
   const saveSourceFields = () => {
-    onChangeSourceFields(sourceFields);
+    onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
@@ -148,9 +144,10 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                       <EuiSpacer size="s" />
                       <EuiSelectable
                         aria-label="Select context fields"
+                        data-test-subj="contextFieldsSelectable"
                         options={group.source_fields.map((field) => ({
                           label: field,
-                          checked: sourceFields[index]?.includes(field) ? 'on' : undefined,
+                          checked: tempSourceFields[index]?.includes(field) ? 'on' : undefined,
                         }))}
                         onChange={(newOptions) => toggleSourceField(index, newOptions)}
                         listProps={{ bordered: false }}

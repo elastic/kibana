@@ -20,7 +20,6 @@ import type {
 } from '../../../../common/components/matrix_histogram/types';
 import * as i18n from './translations';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
-import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { getDnsTopDomainsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/dns_top_domains';
@@ -42,8 +41,6 @@ const DEFAULT_STACK_BY = 'dns.question.registered_domain';
 export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   defaultStackByOption:
     dnsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
-  errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
-  histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
   getLensAttributes: getDnsTopDomainsLensAttributes,
@@ -109,9 +106,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         isPtrIncluded={isPtrIncluded}
         endDate={endDate}
         filterQuery={filterQuery}
-        indexNames={indexNames}
         setQuery={setQuery}
-        showLegend={true}
         startDate={startDate}
         {...dnsHistogramConfigs}
       />

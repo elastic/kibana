@@ -12,6 +12,7 @@ export interface AssistantAvatarProps {
   // Required for EuiAvatar `iconType` prop
   // eslint-disable-next-line react/no-unused-prop-types
   children?: ReactNode;
+  className?: string;
 }
 
 export const sizeMap = {
@@ -20,6 +21,7 @@ export const sizeMap = {
   m: 32,
   s: 24,
   xs: 16,
+  xxs: 12,
 };
 
 /**
@@ -27,8 +29,9 @@ export const sizeMap = {
  *
  * TODO: Can be removed once added to EUI
  */
-export const AssistantAvatar = ({ size = 's' }: AssistantAvatarProps) => (
+export const AssistantAvatar = ({ className, size = 's' }: AssistantAvatarProps) => (
   <svg
+    className={className}
     xmlns="http://www.w3.org/2000/svg"
     width={sizeMap[size]}
     height={sizeMap[size]}
