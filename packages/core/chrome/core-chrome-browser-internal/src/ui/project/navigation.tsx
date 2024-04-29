@@ -12,7 +12,9 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
 
-export const ProjectNavigation: FC<PropsWithChildren<{ toggleSideNav: (isVisible: boolean) => void }>> = ({ children, toggleSideNav }) => {
+export const ProjectNavigation: FC<
+  PropsWithChildren<{ toggleSideNav: (isVisible: boolean) => void }>
+> = ({ children, toggleSideNav }) => {
   const isMounted = useRef(false);
   const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
   const onCollapseToggle = (nextIsCollapsed: boolean) => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiSplitPanel,

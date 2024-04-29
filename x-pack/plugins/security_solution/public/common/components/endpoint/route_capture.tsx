@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { TimelineId } from '../../../../common/types';

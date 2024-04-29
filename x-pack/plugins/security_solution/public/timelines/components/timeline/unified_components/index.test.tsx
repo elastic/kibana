@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
-import React, { useEffect, FC, PropsWithChildren } from 'react';
+import type { ComponentProps, FC, PropsWithChildren } from 'react';
+import React, { useEffect } from 'react';
 import type QueryTabContent from '.';
 import { UnifiedTimeline } from '.';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -136,9 +136,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
 
 const customStore = createMockStore();
 
-const TestProviderWrapperWithCustomStore: FC<PropsWithChildren> = ({
-  children,
-}) => {
+const TestProviderWrapperWithCustomStore: FC<PropsWithChildren> = ({ children }) => {
   return <TestProviders store={customStore}>{children}</TestProviders>;
 };
 

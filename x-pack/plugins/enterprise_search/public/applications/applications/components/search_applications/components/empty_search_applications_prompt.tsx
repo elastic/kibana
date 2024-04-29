@@ -6,12 +6,11 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EmptySearchApplicationsPrompt: FC<PropsWithChildren> = ({
-  children,
-}) => {
+export const EmptySearchApplicationsPrompt: FC<PropsWithChildren> = ({ children }) => {
   return (
     <EuiEmptyPrompt
       iconType="aggregate"

@@ -50,7 +50,9 @@ const notifications: NotificationsStart = {
   showErrorDialog: () => {},
 };
 
-export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDecoratorProps>> = (props) => {
+export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDecoratorProps>> = (
+  props
+) => {
   const { children, context, servicesApplicationOverride, servicesOverride } = props;
   const { globals } = context;
   const { euiTheme } = globals;

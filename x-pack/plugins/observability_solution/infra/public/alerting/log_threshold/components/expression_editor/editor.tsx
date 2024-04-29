@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState, FC, PropsWithChildren  } from 'react';
+import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
 import useMount from 'react-use/lib/useMount';
 import {
   ForLastExpression,

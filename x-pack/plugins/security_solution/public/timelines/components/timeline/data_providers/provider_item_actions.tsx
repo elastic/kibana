@@ -54,9 +54,10 @@ interface OwnProps {
 }
 
 const MyEuiPopover = styled(EuiPopover as unknown as FC)<
-  EuiPopoverProps & PropsWithChildren<{
-    id?: string;
-  }>
+  EuiPopoverProps &
+    PropsWithChildren<{
+      id?: string;
+    }>
 >`
   height: 100%;
   user-select: none;

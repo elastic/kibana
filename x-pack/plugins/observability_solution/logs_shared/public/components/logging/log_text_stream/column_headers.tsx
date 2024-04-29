@@ -102,10 +102,12 @@ export const LogColumnHeaders: React.FunctionComponent<{
   );
 };
 
-export const LogColumnHeader: FC<PropsWithChildren<{
-  columnWidth: LogEntryColumnWidth;
-  'data-test-subj'?: string;
-}>> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
+export const LogColumnHeader: FC<
+  PropsWithChildren<{
+    columnWidth: LogEntryColumnWidth;
+    'data-test-subj'?: string;
+  }>
+> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
   <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
     <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
   </LogColumnHeaderWrapper>

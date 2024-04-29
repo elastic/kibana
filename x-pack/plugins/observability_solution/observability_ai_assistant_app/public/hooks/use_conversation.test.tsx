@@ -12,7 +12,7 @@ import {
   type WrapperComponent,
 } from '@testing-library/react-hooks';
 import { merge } from 'lodash';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,

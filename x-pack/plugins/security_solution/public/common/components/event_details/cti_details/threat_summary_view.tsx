@@ -6,7 +6,8 @@
  */
 
 import styled from 'styled-components';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { HostRisk, UserRisk } from '../../../../entity_analytics/api/types';
 import * as i18n from './translations';

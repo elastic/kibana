@@ -119,12 +119,14 @@ export interface AiopsAppDependencies {
       renderOption: EuiComboBoxProps<string>['renderOption'];
       closeFlyout: () => void;
     };
-    FieldStatsFlyoutProvider: FC<PropsWithChildren<{
-      dataView: DataView;
-      fieldStatsServices: FieldStatsServices;
-      timeRangeMs?: TimeRangeMs;
-      dslQuery?: FieldStatsProps['dslQuery'];
-    }>>;
+    FieldStatsFlyoutProvider: FC<
+      PropsWithChildren<{
+        dataView: DataView;
+        fieldStatsServices: FieldStatsServices;
+        timeRangeMs?: TimeRangeMs;
+        dslQuery?: FieldStatsProps['dslQuery'];
+      }>
+    >;
   };
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;

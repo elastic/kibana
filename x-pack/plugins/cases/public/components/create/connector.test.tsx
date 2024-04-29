@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';

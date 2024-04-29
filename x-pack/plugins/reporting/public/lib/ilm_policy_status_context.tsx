@@ -20,9 +20,7 @@ interface ContextValue {
 
 const IlmPolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const IlmPolicyStatusContextProvider: FC<PropsWithChildren> = ({
-  children,
-}) => {
+export const IlmPolicyStatusContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
   return (

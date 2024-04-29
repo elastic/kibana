@@ -27,7 +27,7 @@ import { letBrowserHandleEvent } from './link_events';
 
 type IEuiReactRouterProps = PropsWithChildren<{
   to: string;
-}>
+}>;
 
 export const ReactRouterHelperForEui: FC<IEuiReactRouterProps> = ({ to, children }) => {
   const history = useHistory();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, FC, PropsWithChildren  } from 'react';
+import React, { useEffect, FC, PropsWithChildren } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';

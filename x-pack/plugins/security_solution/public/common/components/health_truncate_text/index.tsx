@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import type { EuiHealthProps } from '@elastic/eui';
 import { EuiHealth, EuiToolTip } from '@elastic/eui';

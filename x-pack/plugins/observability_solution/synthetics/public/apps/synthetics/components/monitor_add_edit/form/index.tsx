@@ -14,12 +14,14 @@ import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: FC<PropsWithChildren<{
-  defaultValues?: SyntheticsMonitor;
-  space?: string;
-  readOnly?: boolean;
-  canUsePublicLocations?: boolean;
-}>> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
+export const MonitorForm: FC<
+  PropsWithChildren<{
+    defaultValues?: SyntheticsMonitor;
+    space?: string;
+    readOnly?: boolean;
+    canUsePublicLocations?: boolean;
+  }>
+> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',

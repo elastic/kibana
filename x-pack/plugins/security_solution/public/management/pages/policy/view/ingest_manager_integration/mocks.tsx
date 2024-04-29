@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useEffect } from 'react';
 import type { Action, Reducer } from 'redux';
 import type { RenderOptions } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies

@@ -23,9 +23,7 @@ const hideFullErrorMessage = i18n.translate(
   }
 );
 
-export const ToastWithCircuitBreakerContent: FC<PropsWithChildren> = ({
-  children,
-}) => {
+export const ToastWithCircuitBreakerContent: FC<PropsWithChildren> = ({ children }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const onToggleShowDetails = useCallback(() => {
