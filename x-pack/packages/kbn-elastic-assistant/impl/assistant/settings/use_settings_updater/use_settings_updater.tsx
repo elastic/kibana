@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Conversation, Prompt, QuickPrompt } from '../../../..';
@@ -170,6 +170,22 @@ export const useSettingsUpdater = (
     setKnowledgeBase,
     anonymizationFieldsBulkActions,
     assistantTelemetry,
+  ]);
+
+  useEffect(() => {
+    if (
+      !(
+        anonymizationFieldsBulkActions.create?.length ||
+        anonymizationFieldsBulkActions.update?.length ||
+        anonymizationFieldsBulkActions.delete?.ids?.length
+      )
+    )
+      setUpdatedAnonymizationData(anonymizationFields);
+  }, [
+    anonymizationFields,
+    anonymizationFieldsBulkActions.create?.length,
+    anonymizationFieldsBulkActions.delete?.ids?.length,
+    anonymizationFieldsBulkActions.update?.length,
   ]);
 
   return {

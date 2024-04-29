@@ -1278,7 +1278,16 @@
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": [],
+            "references": [
+              {
+                "plugin": "@kbn/reporting-csv-share-panel",
+                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx"
+              },
+              {
+                "plugin": "@kbn/reporting-csv-share-panel",
+                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/reporting-public",

@@ -35,7 +35,7 @@ export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
   if (cloud) {
     return `
 es_client = Elasticsearch(
-  ${cloud.elasticsearchUrl},
+  "${cloud.elasticsearchUrl}",
   api_key=os.environ["ES_API_KEY"]
 )
       `;
@@ -91,8 +91,8 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
               <EuiFlexItem>
                 <EuiSelect
                   options={[
-                    { value: 'py-es-client', text: 'Python Elasticsearch Client' },
-                    { value: 'lc-py', text: 'LangChain Python' },
+                    { value: 'py-es-client', text: 'Python Elasticsearch Client with OpenAI' },
+                    { value: 'lc-py', text: 'LangChain Python with OpenAI' },
                   ]}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
                   value={selectedLanguage}

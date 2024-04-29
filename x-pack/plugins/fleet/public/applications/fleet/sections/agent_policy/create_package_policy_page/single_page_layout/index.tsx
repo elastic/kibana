@@ -44,6 +44,7 @@ import {
   useGetPackageInfoByKeyQuery,
   useStartServices,
   useUIExtension,
+  useAuthz,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -99,6 +100,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
+  const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
@@ -167,6 +169,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     withSysMonitoring,
     queryParamsPolicyId,
     integrationToEnable: integrationInfo?.name,
+    hasFleetAddAgentsPrivileges,
   });
 
   const setPolicyValidation = useCallback(

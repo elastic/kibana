@@ -38,7 +38,7 @@ const WEEKLY: PartialWindowSchema[] = [
   {
     burnRateThreshold: 0.234,
     longWindow: { value: 72, unit: 'h' },
-    shortWindow: { value: 260, unit: 'm' },
+    shortWindow: { value: 360, unit: 'm' },
     actionGroup: LOW_PRIORITY_ACTION.id,
   },
 ];
@@ -65,7 +65,7 @@ const MONTHLY: PartialWindowSchema[] = [
   {
     burnRateThreshold: 1,
     longWindow: { value: 72, unit: 'h' },
-    shortWindow: { value: 260, unit: 'm' },
+    shortWindow: { value: 360, unit: 'm' },
     actionGroup: LOW_PRIORITY_ACTION.id,
   },
 ];
@@ -92,7 +92,7 @@ const QUARTERLY: PartialWindowSchema[] = [
   {
     burnRateThreshold: 3,
     longWindow: { value: 72, unit: 'h' },
-    shortWindow: { value: 260, unit: 'm' },
+    shortWindow: { value: 360, unit: 'm' },
     actionGroup: LOW_PRIORITY_ACTION.id,
   },
 ];

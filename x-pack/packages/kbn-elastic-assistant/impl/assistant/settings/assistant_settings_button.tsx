@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
@@ -18,14 +17,13 @@ import { useAssistantContext } from '../../assistant_context';
 interface Props {
   defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
-  selectedConversation: Conversation;
+  selectedConversationId?: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
+  isFlyoutMode: boolean;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
-  anonymizationFields: FindAnonymizationFieldsResponse;
-  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 /**
@@ -37,12 +35,11 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversation,
+    selectedConversationId,
+    isFlyoutMode,
     onConversationSelected,
     conversations,
     refetchConversationsState,
-    anonymizationFields,
-    refetchAnonymizationFieldsResults,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -84,19 +81,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             isDisabled={isDisabled}
             iconType="gear"
             size="xs"
+            {...(isFlyoutMode ? { color: 'text' } : {})}
           />
         </EuiToolTip>
 
         {isSettingsModalVisible && (
           <AssistantSettings
             defaultConnector={defaultConnector}
-            selectedConversation={selectedConversation}
+            selectedConversationId={selectedConversationId}
             onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
+            isFlyoutMode={isFlyoutMode}
             conversations={conversations}
-            anonymizationFields={anonymizationFields}
-            refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}
       </>

@@ -15,9 +15,11 @@ import { decode, encode } from 'gpt-tokenizer';
 import { findLastIndex, last, merge, noop, omit, pick, take } from 'lodash';
 import {
   filter,
+  identity,
   isObservable,
   last as lastOperator,
   lastValueFrom,
+  map,
   Observable,
   shareReplay,
   tap,
@@ -25,8 +27,6 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
-import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -62,9 +62,13 @@ import {
   RecalledEntry,
 } from '../knowledge_base_service';
 import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
+import { catchFunctionLimitExceededError } from '../util/catch_function_limit_exceeded_error';
 import { getAccessQuery } from '../util/get_access_query';
+import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { rejectTokenCountEvents } from '../util/reject_token_count_events';
+import { replaceSystemMessage } from '../util/replace_system_message';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
+import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 
@@ -79,7 +83,7 @@ export class ObservabilityAIAssistantClient {
       };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
-      user: {
+      user?: {
         id?: string;
         name: string;
       };
@@ -152,16 +156,49 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    isPublic?: boolean;
+    kibanaPublicUrl?: string;
     instructions?: Array<string | UserInstruction>;
+    simulateFunctionCalling?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist } = params;
+        const {
+          messages,
+          connectorId,
+          signal,
+          functionClient,
+          persist,
+          kibanaPublicUrl,
+          simulateFunctionCalling,
+          isPublic = false,
+          instructions: requestInstructions = [],
+        } = params;
 
-        const conversationId = params.conversationId || '';
+        const isConversationUpdate = persist && !!params.conversationId;
+        const conversationId = persist ? params.conversationId || v4() : '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
-        const requestInstructions = params.instructions || [];
+
+        const registeredInstructions = functionClient.getInstructions();
+
+        const knowledgeBaseInstructions: UserInstruction[] = [];
+
+        if (responseLanguage) {
+          requestInstructions.push(
+            `You MUST respond in the users preferred language which is: ${responseLanguage}.`
+          );
+        }
+
+        let storedSystemMessage: string = ''; // will be set as soon as kb instructions are loaded
+
+        if (persist && !isConversationUpdate && kibanaPublicUrl) {
+          registeredInstructions.push(
+            `This conversation will be persisted in Kibana and available at this url: ${
+              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+            }.`
+          );
+        }
 
         const tokenCountResult = {
           prompt: 0,
@@ -169,8 +206,11 @@ export class ObservabilityAIAssistantClient {
           total: 0,
         };
 
-        const chatWithTokenCountIncrement: ChatFn = async (...chatArgs) => {
-          const response$ = await this.chat(...chatArgs);
+        const chatWithTokenCountIncrement: ChatFn = async (name, options) => {
+          const response$ = await this.chat(name, {
+            ...options,
+            simulateFunctionCalling,
+          });
 
           const incrementTokenCount = () => {
             return <T extends ChatCompletionChunkEvent | TokenCountEvent>(
@@ -193,7 +233,7 @@ export class ObservabilityAIAssistantClient {
 
         let numFunctionsCalled: number = 0;
 
-        const MAX_FUNCTION_CALLS = 5;
+        const MAX_FUNCTION_CALLS = 8;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
         const allFunctions = functionClient
@@ -252,22 +292,33 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages.concat(contextFunctionRequest));
           } else if (isUserMessage) {
-            const functions =
-              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+            const functionCallsExceeded = numFunctionsCalled > MAX_FUNCTION_CALLS;
+            const functions = functionCallsExceeded ? [] : allFunctions.concat(allActions);
 
             const spanName =
               lastMessage.message.name && lastMessage.message.name !== 'context'
                 ? 'function_response'
                 : 'user_message';
 
+            const systemMessageForChatRequest = getSystemMessageFromInstructions({
+              registeredInstructions,
+              requestInstructions,
+              knowledgeBaseInstructions,
+              availableFunctionNames: functions.map((fn) => fn.name) || [],
+            });
+
             const response$ = (
               await chatWithTokenCountIncrement(spanName, {
-                messages: nextMessages,
+                messages: replaceSystemMessage(systemMessageForChatRequest, nextMessages),
                 connectorId,
                 signal,
                 functions,
               })
-            ).pipe(emitWithConcatenatedMessage(), shareReplay());
+            ).pipe(
+              emitWithConcatenatedMessage(),
+              shareReplay(),
+              Boolean(functions.length) ? identity : catchFunctionLimitExceededError()
+            );
 
             response$.subscribe({
               next: (val) => subscriber.next(val),
@@ -281,6 +332,18 @@ export class ObservabilityAIAssistantClient {
                   (event): event is MessageAddEvent =>
                     event.type === StreamingChatResponseEventType.MessageAdd
                 ),
+                // LLMs like to hallucinate parameters if the function does not define
+                // them, and it can lead to other hallicunations down the line
+                map((messageEvent) => {
+                  const fnName = messageEvent.message.message.function_call?.name;
+
+                  if (fnName && !functions.find((fn) => fn.name === fnName)?.parameters) {
+                    const clone = { ...messageEvent };
+                    clone.message.message.function_call!.arguments = '';
+                    return clone;
+                  }
+                  return messageEvent;
+                }),
                 toArray()
               )
             );
@@ -341,7 +404,7 @@ export class ObservabilityAIAssistantClient {
                       chat: chatWithTokenCountIncrement,
                       connectorId,
                       name: functionCallName,
-                      messages: nextMessages,
+                      messages: replaceSystemMessage(storedSystemMessage, nextMessages),
                       args: lastMessage.message.function_call!.arguments,
                       signal,
                     })
@@ -453,7 +516,7 @@ export class ObservabilityAIAssistantClient {
           });
 
           // store the updated conversation and close the stream
-          if (conversationId) {
+          if (isConversationUpdate) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
             if (!conversation) {
               throw createConversationNotFoundError();
@@ -475,7 +538,7 @@ export class ObservabilityAIAssistantClient {
                 omit(conversation._source, 'messages'),
 
                 // update messages
-                { messages: nextMessages },
+                { messages: replaceSystemMessage(storedSystemMessage, nextMessages) },
 
                 // update token count
                 {
@@ -490,6 +553,7 @@ export class ObservabilityAIAssistantClient {
                 }
               )
             );
+
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationUpdate,
               conversation: updatedConversation.conversation,
@@ -505,11 +569,12 @@ export class ObservabilityAIAssistantClient {
               conversation: {
                 title: generatedTitle || title || 'New conversation',
                 token_count: tokenCountResult,
+                id: conversationId,
               },
-              messages: nextMessages,
+              messages: replaceSystemMessage(storedSystemMessage, nextMessages),
               labels: {},
               numeric_labels: {},
-              public: false,
+              public: isPublic,
             });
 
             subscriber.next({
@@ -521,14 +586,18 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        this.resolveInstructions(requestInstructions)
-          .then((instructions) => {
-            return next(
-              extendSystemMessage(messages, [
-                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
-                instructions,
-              ])
-            );
+        this.fetchKnowledgeBaseInstructions()
+          .then((loadedKnowledgeBaseInstructions) => {
+            knowledgeBaseInstructions.push(...loadedKnowledgeBaseInstructions);
+
+            storedSystemMessage = getSystemMessageFromInstructions({
+              registeredInstructions,
+              requestInstructions,
+              knowledgeBaseInstructions,
+              availableFunctionNames: allFunctions.map((fn) => fn.name),
+            });
+
+            return next(messages);
           })
           .catch((error) => {
             if (!signal.aborted) {
@@ -538,7 +607,7 @@ export class ObservabilityAIAssistantClient {
           });
 
         const titlePromise =
-          !conversationId && !title && persist
+          !isConversationUpdate && !title && persist
             ? this.getGeneratedTitle({
                 chat: chatWithTokenCountIncrement,
                 messages,
@@ -565,12 +634,14 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
+      simulateFunctionCalling,
     }: {
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
+      simulateFunctionCalling?: boolean;
     }
   ): Promise<Observable<ChatCompletionChunkEvent | TokenCountEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
@@ -595,6 +666,7 @@ export class ObservabilityAIAssistantClient {
             functions,
             functionCall,
             logger: this.dependencies.logger,
+            simulateFunctionCalling,
           });
           break;
 
@@ -650,7 +722,19 @@ export class ObservabilityAIAssistantClient {
 
       signal.addEventListener('abort', () => response.destroy());
 
-      const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+      const response$ = adapter.streamIntoObservable(response).pipe(
+        shareReplay(),
+        failOnNonExistingFunctionCall({ functions }),
+        tap((event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        })
+      );
 
       response$
         .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
@@ -669,19 +753,6 @@ export class ObservabilityAIAssistantClient {
             span?.end();
           },
         });
-
-      response$.subscribe({
-        next: (event) => {
-          if (event.type === StreamingChatResponseEventType.TokenCount) {
-            span?.addLabels({
-              tokenCountPrompt: event.tokens.prompt,
-              tokenCountCompletion: event.tokens.completion,
-              tokenCountTotal: event.tokens.total,
-            });
-          }
-        },
-        error: () => {},
-      });
 
       return response$;
     } catch (error) {
@@ -852,7 +923,7 @@ export class ObservabilityAIAssistantClient {
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: conversation.conversation.id || v4() },
       },
       this.getConversationUpdateValues(now)
     );
@@ -931,28 +1002,12 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
+  fetchKnowledgeBaseInstructions = async () => {
     const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
-      this.dependencies.user,
-      this.dependencies.namespace
+      this.dependencies.namespace,
+      this.dependencies.user
     );
 
-    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
-      return '';
-    }
-
-    const priorityInstructions = requestInstructions.map((instruction) =>
-      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
-    );
-    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
-    const instructions = priorityInstructions.concat(
-      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
-    );
-
-    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
-
-    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
-
-    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
+    return knowledgeBaseInstructions;
   };
 }

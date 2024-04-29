@@ -7,22 +7,21 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../common/constants';
-import { MetricCustomIndicator, SLO } from '../../domain/models';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
+import { MetricCustomIndicator, SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class MetricCustomTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
     if (!metricCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -39,11 +38,11 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLO, indicator: MetricCustomIndicator) {
+  private buildSource(slo: SLODefinition, indicator: MetricCustomIndicator) {
     return {
       index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
@@ -71,7 +70,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: MetricCustomIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: MetricCustomIndicator) {
     if (indicator.params.good.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.good.equation}`);
     }

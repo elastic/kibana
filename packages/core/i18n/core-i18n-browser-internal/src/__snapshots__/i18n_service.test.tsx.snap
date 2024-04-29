@@ -14,7 +14,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiAutoRefresh.buttonLabelOn": [Function],
           "euiBasicTable.noItemsMessage": "No items found",
           "euiBasicTable.selectAllRows": "Select all rows",
-          "euiBasicTable.selectThisRow": "Select this row",
+          "euiBasicTable.selectThisRow": [Function],
           "euiBasicTable.tableAutoCaptionWithPagination": [Function],
           "euiBasicTable.tableAutoCaptionWithoutPagination": [Function],
           "euiBasicTable.tableCaptionWithPagination": [Function],

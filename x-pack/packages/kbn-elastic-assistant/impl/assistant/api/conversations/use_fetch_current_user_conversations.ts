@@ -38,42 +38,39 @@ export interface UseFetchCurrentUserConversationsParams {
  *
  * @returns {useQuery} hook for getting the status of the conversations
  */
+const query = {
+  page: 1,
+  perPage: 100,
+};
+
+export const CONVERSATIONS_QUERY_KEYS = [
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  query.page,
+  query.perPage,
+  API_VERSIONS.public.v1,
+];
+
 export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
   signal,
   refetchOnWindowFocus = true,
   isAssistantEnabled,
-}: UseFetchCurrentUserConversationsParams) => {
-  const query = {
-    page: 1,
-    perPage: 100,
-  };
-
-  const cachingKeys = [
-    ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-    query.page,
-    query.perPage,
-    API_VERSIONS.public.v1,
-  ];
-
-  return useQuery(
-    [cachingKeys, query],
-    async () => {
-      if (!isAssistantEnabled) {
-        return {};
-      }
-      const res = await http.fetch<FetchConversationsResponse>(
-        ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-        {
-          method: 'GET',
-          version: API_VERSIONS.public.v1,
-          query,
-          signal,
-        }
-      );
-      return onFetch(res);
-    },
-    { refetchOnWindowFocus }
+}: UseFetchCurrentUserConversationsParams) =>
+  useQuery(
+    CONVERSATIONS_QUERY_KEYS,
+    async () =>
+      http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query,
+        signal,
+      }),
+    {
+      select: (data) => onFetch(data),
+      keepPreviousData: true,
+      initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      refetchOnWindowFocus,
+      enabled: isAssistantEnabled,
+    }
   );
-};

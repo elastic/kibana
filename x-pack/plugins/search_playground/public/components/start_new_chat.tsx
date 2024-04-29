@@ -66,7 +66,9 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             iconType="arrowRight"
             iconSide="right"
             disabled={
-              !watch(ChatFormFields.indices, []).length || !Object.keys(connectors || {}).length
+              !watch(ChatFormFields.indices, []).length ||
+              !Object.keys(connectors || {}).length ||
+              !watch(ChatFormFields.elasticsearchQuery, '')
             }
             onClick={onStartClick}
           >

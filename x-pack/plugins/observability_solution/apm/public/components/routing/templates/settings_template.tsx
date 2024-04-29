@@ -46,12 +46,8 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const agentConfigurationAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.AgentConfigurationAvailable
   );
-  const migrationToFleetAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.MigrationToFleetAvailable
-  );
-  const indicesAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.ConfigurableIndicesAvailable
-  );
+  const migrationToFleetAvailable = useApmFeatureFlag(ApmFeatureFlagName.MigrationToFleetAvailable);
+  const indicesAvailable = useApmFeatureFlag(ApmFeatureFlagName.ConfigurableIndicesAvailable);
 
   const tabs = getTabs({
     core,
@@ -97,10 +93,7 @@ function getTabs({
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
-  const agentExplorerEnabled = core.uiSettings.get<boolean>(
-    enableAgentExplorerView,
-    true
-  );
+  const agentExplorerEnabled = core.uiSettings.get<boolean>(enableAgentExplorerView, true);
 
   const tabs: Tab[] = [
     {

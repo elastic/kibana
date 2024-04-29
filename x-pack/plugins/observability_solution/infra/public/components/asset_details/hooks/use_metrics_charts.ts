@@ -9,111 +9,69 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 
-export const useHostFlyoutViewMetricsCharts = ({
-  metricsDataViewId,
-  logsDataViewId,
+export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
+interface UseChartsOptions {
+  overview?: boolean;
+}
+
+export const useHostCharts = ({
+  metric,
+  dataViewId,
+  options,
 }: {
-  metricsDataViewId?: string;
-  logsDataViewId?: string;
+  metric: HostMetricTypes;
+  dataViewId?: string;
+  options?: UseChartsOptions;
 }) => {
-  const model = findInventoryModel('host');
+  const { value: charts = [], error } = useAsync(async () => {
+    const hostCharts = await getHostsCharts({ metric, options });
+    return hostCharts.map((chart) => ({
+      ...chart,
+      ...(dataViewId && {
+        dataset: {
+          index: dataViewId,
+        },
+      }),
+    }));
+  }, [dataViewId]);
 
-  const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
-
-    return [
-      cpu.xy.cpuUsage,
-      memory.xy.memoryUsage,
-      cpu.xy.normalizedLoad1m,
-      logs.xy.logRate,
-      disk.xy.diskUsageByMountPoint,
-      disk.xy.diskThroughputReadWrite,
-      disk.xy.diskIOReadWrite,
-      network.xy.rxTx,
-    ].map((chart) => {
-      const dataViewId = chart.id === 'logRate' ? logsDataViewId : metricsDataViewId;
-      return {
-        ...chart,
-        ...(dataViewId && {
-          dataset: {
-            index: dataViewId,
-          },
-        }),
-      };
-    });
-  }, [metricsDataViewId, logsDataViewId]);
-
-  return charts;
+  return { charts, error };
 };
 
-export const useHostPageViewMetricsCharts = ({
-  metricsDataViewId,
-  logsDataViewId,
+export const useKubernetesCharts = ({
+  dataViewId,
+  options,
 }: {
-  metricsDataViewId?: string;
-  logsDataViewId?: string;
+  dataViewId?: string;
+  options?: UseChartsOptions;
 }) => {
   const model = findInventoryModel('host');
 
-  const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
-
-    return [
-      cpu.xy.cpuUsage,
-      cpu.xy.cpuUsageBreakdown,
-      memory.xy.memoryUsage,
-      memory.xy.memoryUsageBreakdown,
-      cpu.xy.normalizedLoad1m,
-      cpu.xy.loadBreakdown,
-      logs.xy.logRate,
-      disk.xy.diskUsageByMountPoint,
-      disk.xy.diskThroughputReadWrite,
-      disk.xy.diskIOReadWrite,
-      network.xy.rxTx,
-    ].map((chart) => {
-      const dataViewId = chart.id === 'logRate' ? logsDataViewId : metricsDataViewId;
-      return {
-        ...chart,
-        ...(dataViewId && {
-          dataset: {
-            index: dataViewId,
-          },
-        }),
-      };
-    });
-  }, [metricsDataViewId, logsDataViewId]);
-
-  return charts;
-};
-
-export const useKubernetesSectionMetricsCharts = ({
-  metricsDataViewId,
-}: {
-  metricsDataViewId?: string;
-}) => {
-  const model = findInventoryModel('host');
-
-  const { value: charts = [] } = useAsync(async () => {
+  const { value: charts = [], error } = useAsync(async () => {
     const { kibernetesNode } = await model.metrics.getCharts();
 
-    return [
-      kibernetesNode.xy.nodeCpuCapacity,
-      kibernetesNode.xy.nodeMemoryCapacity,
-      kibernetesNode.xy.nodeDiskCapacity,
-      kibernetesNode.xy.nodePodCapacity,
-    ].map((chart) => {
+    const items = options?.overview
+      ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
+      : [
+          kibernetesNode.xy.nodeCpuCapacity,
+          kibernetesNode.xy.nodeMemoryCapacity,
+          kibernetesNode.xy.nodeDiskCapacity,
+          kibernetesNode.xy.nodePodCapacity,
+        ];
+
+    return items.map((chart) => {
       return {
         ...chart,
-        ...(metricsDataViewId && {
+        ...(dataViewId && {
           dataset: {
-            index: metricsDataViewId,
+            index: dataViewId,
           },
         }),
       };
     });
-  }, [metricsDataViewId]);
+  }, [dataViewId, options?.overview]);
 
-  return charts;
+  return { charts, error };
 };
 
 const getSubtitleFromFormula = (value: string) =>
@@ -132,7 +90,7 @@ export const useHostKpiCharts = ({
 }) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, disk, memory } = await model.metrics.getCharts();
+    const { cpu, memory, disk } = await model.metrics.getCharts();
 
     return [
       cpu.metric.cpuUsage,
@@ -155,4 +113,41 @@ export const useHostKpiCharts = ({
   }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
 
   return charts;
+};
+
+const getHostsCharts = async ({
+  metric,
+  options,
+}: {
+  metric: HostMetricTypes;
+  options?: UseChartsOptions;
+}) => {
+  const model = findInventoryModel('host');
+  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();
+
+  switch (metric) {
+    case 'cpu':
+      return options?.overview
+        ? [cpu.xy.cpuUsage, cpu.xy.normalizedLoad1m]
+        : [
+            cpu.xy.cpuUsage,
+            cpu.xy.cpuUsageBreakdown,
+            cpu.xy.normalizedLoad1m,
+            cpu.xy.loadBreakdown,
+          ];
+    case 'memory':
+      return options?.overview
+        ? [memory.xy.memoryUsage]
+        : [memory.xy.memoryUsage, memory.xy.memoryUsageBreakdown];
+    case 'network':
+      return [network.xy.rxTx];
+    case 'disk':
+      return options?.overview
+        ? [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite]
+        : [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite, disk.xy.diskThroughputReadWrite];
+    case 'log':
+      return [logs.xy.logRate];
+    default:
+      return [];
+  }
 };

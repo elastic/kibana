@@ -69,7 +69,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   updateAdvancedSettingsHasErrors,
 }) => {
   const authz = useAuthz();
-  const disabled = !authz.fleet.allAgents;
+  const hasFleetAllAgentPoliciesPrivileges = !authz.fleet.allAgentPolicies;
 
   const { advancedPolicySettings } = ExperimentalFeaturesService.get();
 
@@ -104,7 +104,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             agentPolicy={agentPolicy}
             updateAgentPolicy={updateAgentPolicy}
             validation={validation}
-            disabled={disabled}
+            disabled={hasFleetAllAgentPoliciesPrivileges}
           />
         ) : (
           generalSettingsWrapper([
@@ -112,7 +112,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
-              disabled={disabled}
+              disabled={hasFleetAllAgentPoliciesPrivileges}
             />,
           ])
         )}
@@ -167,7 +167,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
-              disabled={disabled}
+              disabled={hasFleetAllAgentPoliciesPrivileges}
             />
             {advancedPolicySettings ? (
               <>

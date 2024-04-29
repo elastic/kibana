@@ -21,7 +21,7 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
 }
 
 export interface ConversationTheme {
-  title?: JSX.Element | string;
+  title?: string;
   titleIcon?: string;
   user?: {
     name?: string;

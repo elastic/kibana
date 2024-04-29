@@ -34,6 +34,7 @@ export const CreateIndexCallout: React.FC = () => {
       })}
       color="primary"
       iconType="iInCircle"
+      data-test-subj="createIndexCallout"
     >
       <EuiText size="s">
         <p>

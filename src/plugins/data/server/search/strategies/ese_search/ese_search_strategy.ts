@@ -73,9 +73,11 @@ export const enhancedEsSearchStrategyProvider = (
     options: IAsyncSearchOptions,
     { esClient }: SearchStrategyDependencies
   ) {
-    // First, request the status of the async search, and return the status if incomplete
-    const status = await asyncSearchStatus({ id, ...request }, options, { esClient });
-    if (isRunningResponse(status)) return status;
+    if (!options.retrieveResults) {
+      // First, request the status of the async search, and return the status if incomplete
+      const status = await asyncSearchStatus({ id, ...request }, options, { esClient });
+      if (isRunningResponse(status)) return status;
+    }
 
     // Then, if the search is complete, request & return the final results
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;

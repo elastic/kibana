@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  CoreStart,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { Logger, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   FleetStartContract,
   PostPackagePolicyCreateCallback,
@@ -94,15 +90,9 @@ function onPackagePolicyDelete({
 
       const internalESClient = coreStart.elasticsearch.client.asInternalUser;
 
-      const [agentConfigApiKeyId] = get(
-        packagePolicy,
-        AGENT_CONFIG_API_KEY_PATH
-      ).split(':');
+      const [agentConfigApiKeyId] = get(packagePolicy, AGENT_CONFIG_API_KEY_PATH).split(':');
 
-      const [sourceMapApiKeyId] = get(
-        packagePolicy,
-        SOURCE_MAP_API_KEY_PATH
-      ).split(':');
+      const [sourceMapApiKeyId] = get(packagePolicy, SOURCE_MAP_API_KEY_PATH).split(':');
 
       logger.debug(
         `Deleting API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`

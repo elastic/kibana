@@ -14,7 +14,8 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('AddProjectMonitorsPrivateLocations', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/160277
+  describe.skip('AddProjectMonitorsPrivateLocations', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');

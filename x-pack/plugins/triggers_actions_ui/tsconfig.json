@@ -64,7 +64,8 @@
     "@kbn/lens-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/controls-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -15,6 +15,7 @@ import type {
 import { useDeleteCustomDashboard } from '../../../hooks/use_custom_dashboards';
 import { useFetchCustomDashboards } from '../../../hooks/use_fetch_custom_dashboards';
 import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
+import { useSavedObjectUserPermissions } from '../../../hooks/use_saved_objects_permissions';
 
 export function UnlinkDashboard({
   currentDashboard,
@@ -31,6 +32,7 @@ export function UnlinkDashboard({
   const [, setUrlState] = useAssetDetailsUrlState();
   const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
   const { dashboards, loading } = useFetchCustomDashboards({ assetType });
+  const { canDelete } = useSavedObjectUserPermissions();
 
   const onClick = useCallback(() => setIsModalVisible(true), []);
   const onCancel = useCallback(() => setIsModalVisible(false), []);
@@ -85,17 +87,33 @@ export function UnlinkDashboard({
 
   return (
     <>
-      <EuiButtonEmpty
-        color="danger"
-        size="s"
-        iconType="unlink"
-        data-test-subj="infraUnLinkCustomDashboardMenu"
-        onClick={onClick}
+      <EuiToolTip
+        position="top"
+        content={
+          !canDelete
+            ? i18n.translate(
+                'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
+                {
+                  defaultMessage:
+                    'You do not have permission to use this feature. Please ask your administrator for access.',
+                }
+              )
+            : undefined
+        }
       >
-        {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
-          defaultMessage: 'Unlink dashboard',
-        })}
-      </EuiButtonEmpty>
+        <EuiButtonEmpty
+          color="danger"
+          size="s"
+          iconType="unlink"
+          data-test-subj="infraUnLinkDashboardMenu"
+          onClick={onClick}
+          disabled={!canDelete}
+        >
+          {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
+            defaultMessage: 'Unlink dashboard',
+          })}
+        </EuiButtonEmpty>
+      </EuiToolTip>
       {isModalVisible && (
         <EuiConfirmModal
           title={i18n.translate(

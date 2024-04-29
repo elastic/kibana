@@ -22,4 +22,5 @@ export default createTestConfig('spaces_only', {
   testFiles: [require.resolve('.')],
   reportName: 'X-Pack Alerting API Integration Tests - Actions',
   enableFooterInEmail: false,
+  experimentalFeatures: ['crowdstrikeConnectorOn'],
 });

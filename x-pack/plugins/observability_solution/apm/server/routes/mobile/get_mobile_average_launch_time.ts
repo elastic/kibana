@@ -6,11 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APP_LAUNCH_TIME, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';

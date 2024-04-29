@@ -39,6 +39,12 @@ import type { RuleParams } from '../../application/rule/types';
 import { ruleDomainSchema } from '../../application/rule/schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
+/**
+ * Updating too many rules in parallel can cause the denial of service of the
+ * Elasticsearch cluster.
+ */
+const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+
 const getShouldScheduleTask = async (
   context: RulesClientContext,
   scheduledTaskId: string | null | undefined
@@ -183,114 +189,120 @@ const bulkEnableRulesWithOCC = async (
         });
       }
 
-      await pMap(rulesFinderRules, async (rule) => {
-        try {
-          if (scheduleValidationError) {
-            throw Error(scheduleValidationError);
-          }
-          if (rule.attributes.actions.length) {
-            try {
-              await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-            } catch (error) {
-              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+      await pMap(
+        rulesFinderRules,
+        async (rule) => {
+          try {
+            if (scheduleValidationError) {
+              throw Error(scheduleValidationError);
             }
-          }
-          if (rule.attributes.name) {
-            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-          }
+            if (rule.attributes.actions.length) {
+              try {
+                await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+              } catch (error) {
+                throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+              }
+            }
+            if (rule.attributes.name) {
+              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            }
 
-          const migratedActions = await migrateLegacyActions(context, {
-            ruleId: rule.id,
-            actions: rule.attributes.actions,
-            references: rule.references,
-            attributes: rule.attributes,
-          });
-
-          const updatedAttributes = updateMeta(context, {
-            ...rule.attributes,
-            ...(!rule.attributes.apiKey &&
-              (await createNewAPIKeySet(context, {
-                id: rule.attributes.alertTypeId,
-                ruleName: rule.attributes.name,
-                username,
-                shouldUpdateApiKey: true,
-              }))),
-            ...(migratedActions.hasLegacyActions
-              ? {
-                  actions: migratedActions.resultedActions,
-                  throttle: undefined,
-                  notifyWhen: undefined,
-                }
-              : {}),
-            enabled: true,
-            updatedBy: username,
-            updatedAt: new Date().toISOString(),
-            executionStatus: {
-              status: 'pending',
-              lastDuration: 0,
-              lastExecutionDate: new Date().toISOString(),
-              error: null,
-              warning: null,
-            },
-            scheduledTaskId: rule.id,
-          });
-
-          const shouldScheduleTask = await getShouldScheduleTask(
-            context,
-            rule.attributes.scheduledTaskId
-          );
-
-          if (shouldScheduleTask) {
-            tasksToSchedule.push({
-              id: rule.id,
-              taskType: `alerting:${rule.attributes.alertTypeId}`,
-              schedule: rule.attributes.schedule,
-              params: {
-                alertId: rule.id,
-                spaceId: context.spaceId,
-                consumer: rule.attributes.consumer,
-              },
-              state: {
-                previousStartedAt: null,
-                alertTypeState: {},
-                alertInstances: {},
-              },
-              scope: ['alerting'],
-              enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
+            const migratedActions = await migrateLegacyActions(context, {
+              ruleId: rule.id,
+              actions: rule.attributes.actions,
+              references: rule.references,
+              attributes: rule.attributes,
             });
+
+            const updatedAttributes = updateMeta(context, {
+              ...rule.attributes,
+              ...(!rule.attributes.apiKey &&
+                (await createNewAPIKeySet(context, {
+                  id: rule.attributes.alertTypeId,
+                  ruleName: rule.attributes.name,
+                  username,
+                  shouldUpdateApiKey: true,
+                }))),
+              ...(migratedActions.hasLegacyActions
+                ? {
+                    actions: migratedActions.resultedActions,
+                    throttle: undefined,
+                    notifyWhen: undefined,
+                  }
+                : {}),
+              enabled: true,
+              updatedBy: username,
+              updatedAt: new Date().toISOString(),
+              executionStatus: {
+                status: 'pending',
+                lastDuration: 0,
+                lastExecutionDate: new Date().toISOString(),
+                error: null,
+                warning: null,
+              },
+              scheduledTaskId: rule.id,
+            });
+
+            const shouldScheduleTask = await getShouldScheduleTask(
+              context,
+              rule.attributes.scheduledTaskId
+            );
+
+            if (shouldScheduleTask) {
+              tasksToSchedule.push({
+                id: rule.id,
+                taskType: `alerting:${rule.attributes.alertTypeId}`,
+                schedule: rule.attributes.schedule,
+                params: {
+                  alertId: rule.id,
+                  spaceId: context.spaceId,
+                  consumer: rule.attributes.consumer,
+                },
+                state: {
+                  previousStartedAt: null,
+                  alertTypeState: {},
+                  alertInstances: {},
+                },
+                scope: ['alerting'],
+                enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
+              });
+            }
+
+            rulesToEnable.push({
+              ...rule,
+              attributes: updatedAttributes,
+              ...(migratedActions.hasLegacyActions
+                ? { references: migratedActions.resultedReferences }
+                : {}),
+            });
+
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.ENABLE,
+                outcome: 'unknown',
+                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+              })
+            );
+          } catch (error) {
+            errors.push({
+              message: error.message,
+              rule: {
+                id: rule.id,
+                name: rule.attributes?.name,
+              },
+            });
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.ENABLE,
+                error,
+              })
+            );
           }
-
-          rulesToEnable.push({
-            ...rule,
-            attributes: updatedAttributes,
-            ...(migratedActions.hasLegacyActions
-              ? { references: migratedActions.resultedReferences }
-              : {}),
-          });
-
-          context.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.ENABLE,
-              outcome: 'unknown',
-              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
-            })
-          );
-        } catch (error) {
-          errors.push({
-            message: error.message,
-            rule: {
-              id: rule.id,
-              name: rule.attributes?.name,
-            },
-          });
-          context.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.ENABLE,
-              error,
-            })
-          );
+        },
+        {
+          concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
         }
-      });
+      );
     }
   );
 

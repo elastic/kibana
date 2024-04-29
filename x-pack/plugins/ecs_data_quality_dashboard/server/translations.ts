@@ -13,3 +13,10 @@ export const API_DEFAULT_ERROR_MESSAGE = i18n.translate(
     defaultMessage: 'Internal Server Error',
   }
 );
+
+export const API_CURRENT_USER_ERROR_MESSAGE = i18n.translate(
+  'xpack.ecsDataQualityDashboard.api.currentUserErrorMessage',
+  {
+    defaultMessage: 'Unable to retrieve current user',
+  }
+);

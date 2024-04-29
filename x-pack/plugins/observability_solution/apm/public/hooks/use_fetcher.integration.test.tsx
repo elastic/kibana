@@ -28,15 +28,7 @@ describe('when simulating race condition', () => {
     renderSpy = jest.fn();
     requestCallOrder = [];
 
-    function MyComponent({
-      name,
-      ms,
-      renderFn,
-    }: {
-      name: string;
-      ms: number;
-      renderFn: any;
-    }) {
+    function MyComponent({ name, ms, renderFn }: { name: string; ms: number; renderFn: any }) {
       const { data, status, error } = useFetcher(async () => {
         requestCallOrder.push(['request', name, ms]);
         const res = await asyncFn(name, ms);
@@ -47,10 +39,9 @@ describe('when simulating race condition', () => {
       return null;
     }
 
-    const { rerender } = render(
-      <MyComponent name="John" ms={500} renderFn={renderSpy} />,
-      { wrapper }
-    );
+    const { rerender } = render(<MyComponent name="John" ms={500} renderFn={renderSpy} />, {
+      wrapper,
+    });
 
     rerender(<MyComponent name="Peter" ms={100} renderFn={renderSpy} />);
   });

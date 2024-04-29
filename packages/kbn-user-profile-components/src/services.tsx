@@ -48,10 +48,10 @@ export interface UserProfilesKibanaDependencies {
     userProfiles: UserProfileAPIClient;
   };
   /**
-   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
+   * Handler from the '@kbn/react-kibana-mount' Package
    *
    * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+   * import { toMountPoint } from '@kbn/react-kibana-mount';
    * ```
    */
   toMountPoint: typeof toMountPoint;

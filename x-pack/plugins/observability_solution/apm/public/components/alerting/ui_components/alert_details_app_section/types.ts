@@ -6,10 +6,7 @@
  */
 
 import type { Rule } from '@kbn/alerting-plugin/common';
-import type {
-  TopAlert,
-  AlertSummaryField,
-} from '@kbn/observability-plugin/public';
+import type { TopAlert, AlertSummaryField } from '@kbn/observability-plugin/public';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   SERVICE_NAME,
@@ -31,7 +28,5 @@ export interface AlertDetailsAppSectionProps {
     [SERVICE_ENVIRONMENT]: string;
   }>;
   timeZone: string;
-  setAlertSummaryFields: React.Dispatch<
-    React.SetStateAction<AlertSummaryField[] | undefined>
-  >;
+  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }

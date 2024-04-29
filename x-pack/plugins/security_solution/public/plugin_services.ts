@@ -98,7 +98,7 @@ export class PluginServices {
   public async generateServices(
     coreStart: CoreStart,
     startPlugins: StartPluginsDependencies,
-    params: AppMountParameters<unknown>
+    params?: AppMountParameters<unknown>
   ): Promise<StartServices> {
     const { apm } = await import('@elastic/apm-rum');
     const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
@@ -119,11 +119,11 @@ export class PluginServices {
       apm,
       configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
-      setHeaderActionMenu: params.setHeaderActionMenu,
+      ...(params?.setHeaderActionMenu ? { setHeaderActionMenu: params.setHeaderActionMenu } : {}),
       storage: this.storage,
       sessionStorage: this.sessionStorage,
       security: startPlugins.security,
-      onAppLeave: params.onAppLeave,
+      ...(params?.onAppLeave ? { onAppLeave: params.onAppLeave } : {}),
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
       telemetry: this.telemetry.start(),
