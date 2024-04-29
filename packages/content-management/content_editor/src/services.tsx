@@ -104,10 +104,6 @@ export interface ContentEditorKibanaDependencies {
       };
     };
   };
-  /**
-   * @deprecated - unused
-   */
-  toMountPoint?: unknown;
 }
 
 /**

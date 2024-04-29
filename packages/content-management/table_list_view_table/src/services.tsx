@@ -154,10 +154,6 @@ export interface TableListViewKibanaDependencies {
   };
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
   FormattedRelative: typeof FormattedRelative;
-  /**
-   * @deprecated - unused
-   */
-  toMountPoint?: unknown;
 }
 
 /**
