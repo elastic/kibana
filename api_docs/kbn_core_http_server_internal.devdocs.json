@@ -902,6 +902,22 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.isUsingCdn",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingCdn",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.StaticAssets.getHrefBase",
             "type": "Function",
             "tags": [],
@@ -1226,6 +1242,24 @@
             "description": [],
             "signature": [
               "() => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.isUsingCdn",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsingCdn",
+            "description": [
+              "\nReturns true if a CDN has been configured and should be used to serve static assets.\nShould only be used in scenarios where different behavior has to be used when CDN is enabled or not."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,

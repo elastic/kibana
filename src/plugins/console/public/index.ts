@@ -17,7 +17,6 @@ export type {
   ConsoleUILocatorParams,
   ConsolePluginSetup,
   ConsolePluginStart,
-  EmbeddableConsoleProps,
   EmbeddedConsoleView,
   EmbeddedConsoleViewButtonProps,
 } from './types';
