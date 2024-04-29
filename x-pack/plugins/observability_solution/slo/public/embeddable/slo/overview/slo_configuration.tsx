@@ -24,18 +24,12 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
 
-import type {
-  SingleSloProps,
-  GroupSloProps,
-  SloEmbeddableInput,
-  GroupFilters,
-  OverviewMode,
-} from './types';
+import type { SingleSloProps, GroupSloProps, GroupFilters, OverviewMode } from './types';
 import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
-  initialInput?: Partial<SloEmbeddableInput> | undefined;
+  initialInput?: GroupSloProps | SingleSloProps;
   onCreate: (props: SingleSloProps | GroupSloProps) => void;
   onCancel: () => void;
 }

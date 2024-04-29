@@ -28,7 +28,13 @@ import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import { GroupSloView } from './group_view/group_view';
-import { SloOverviewEmbeddableState, SloEmbeddableDeps, OverviewApi } from './types';
+import {
+  SloOverviewEmbeddableState,
+  SloEmbeddableDeps,
+  OverviewApi,
+  GroupSloProps,
+  SingleSloProps,
+} from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
 import { PluginContext } from '../../../context/plugin_context';
 
@@ -54,7 +60,9 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       const remoteName$ = new BehaviorSubject(state.remoteName);
       const reload$ = new Subject<boolean>();
       const reloadGroupSubject$ = new Subject<SloOverviewEmbeddableState | undefined>();
-
+      const subscription = groupFilters$.subscribe((input) => {
+        reloadGroupSubject$.next({ groupFilters: input });
+      });
       const api = buildApi(
         {
           ...titlesApi,
@@ -72,10 +80,21 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               },
             };
           },
+          getSloOverviewConfig: () => {
+            return {
+              groupFilters: groupFilters$.getValue(),
+              overviewMode: overviewMode$.getValue(),
+            };
+            return state;
+          },
+          updateSloOverviewConfig: (update: GroupSloProps) => {
+            groupFilters$.next(update.groupFilters);
+          },
         },
         {
           sloId: [sloId$, (value) => sloId$.next(value)],
           sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
+          groupFilters: [groupFilters$, (value) => groupFilters$.next(value)],
           ...titleComparators,
         }
       );
@@ -117,7 +136,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               const groupBy = groupFilters?.groupBy ?? 'status';
               const kqlQuery = groupFilters?.kqlQuery ?? '';
               const groups = groupFilters?.groups ?? [];
-
               return (
                 <Wrapper>
                   <EuiFlexGroup
@@ -133,7 +151,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                           const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
                           deps.uiActions.getAction(EDIT_SLO_OVERVIEW_ACTION).execute({
                             trigger,
-                            embeddable: this,
+                            embeddable: api,
                           } as ActionExecutionContext);
                         }}
                         data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"

@@ -9,6 +9,7 @@ import {
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
@@ -31,16 +32,22 @@ export interface GroupFilters {
   kqlQuery?: string;
 }
 
+// rename SignleSloProps to SingleSloCustomInput
 export type SingleSloProps = EmbeddableSloProps & {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
   showAllGroupByInstances?: boolean;
 };
 
+// rename GroupSloProps to GroupSloCustomInput
 export type GroupSloProps = EmbeddableSloProps & {
   groupFilters: GroupFilters;
 };
 
+// TODO refactor this
+// keep overviewMode
+// delete sloId, sloInstanceId, renderComplete
+// keep remoteName and reloadSubject
 export interface EmbeddableSloProps {
   sloId?: string;
   sloInstanceId?: string;
@@ -57,11 +64,12 @@ export type SloOverviewEmbeddableState = SerializedTitles &
 
 export type OverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritablePanelTitle &
-  PublishesPanelTitle;
+  PublishesPanelTitle &
+  HasSloOverviewConfig;
 
 export interface HasSloOverviewConfig {
-  getSloOverviewConfig: () => SloEmbeddableInput;
-  updateSloOverviewConfig: (next: SloEmbeddableInput) => void;
+  getSloOverviewConfig: () => GroupSloProps | SingleSloProps;
+  updateSloOverviewConfig: (next: GroupSloProps | SingleSloProps) => void;
 }
 
 export const apiHasSloOverviewConfig = (api: unknown | null): api is HasSloOverviewConfig => {
@@ -82,3 +90,7 @@ export interface SloEmbeddableDeps {
   observability: ObservabilityPublicStart;
   uiActions: UiActionsStart;
 }
+
+export type SloOverviewEmbeddableActionContext = EmbeddableApiContext & {
+  embeddable: OverviewApi;
+};
