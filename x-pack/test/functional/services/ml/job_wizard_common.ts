@@ -620,15 +620,16 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout() {
-      await mlCommonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', false);
-      await testSubjects.existOrFail('mlJobWizardAlsoEnableAnnotationsRecommendationCallout', {
-        timeout: 3_000,
-      });
-      await mlCommonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', true);
-      await testSubjects.missingOrFail('mlJobWizardAlsoEnableAnnotationsRecommendationCallout', {
-        timeout: 3_000,
-      });
+    async assertAnnotationRecommendationCalloutVisible(expectVisible: boolean = true) {
+      const callOutTestSubj = 'mlJobWizardAlsoEnableAnnotationsRecommendationCallout';
+      if (expectVisible)
+        await testSubjects.existOrFail(callOutTestSubj, {
+          timeout: 3_000,
+        });
+      else
+        await testSubjects.missingOrFail(callOutTestSubj, {
+          timeout: 3_000,
+        });
     },
 
     async goToTimeRangeStep() {

@@ -439,7 +439,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation and toggling model change annotation triggers enable annotation recommendation callout', async () => {
       await ml.jobWizardCommon.goToJobDetailsStep();
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
-      await ml.jobWizardCommon.togglingModelChangeAnnotationsShowsCalloutAndRemovesCallout();
+
+      await ml.commonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', false);
+      await ml.jobWizardCommon.assertAnnotationRecommendationCalloutVisible();
+
+      await ml.commonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', true);
+      await ml.jobWizardCommon.assertAnnotationRecommendationCalloutVisible(false);
     });
 
     it('job creation memory limit too large results in validation callout', async () => {
