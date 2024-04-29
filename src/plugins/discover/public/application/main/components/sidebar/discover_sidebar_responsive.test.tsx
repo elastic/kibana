@@ -772,7 +772,7 @@ describe('discover responsive sidebar', function () {
 
       const smartFieldsCount = findTestSubject(comp, 'fieldListGroupedSmartFields-count');
 
-      expect(smartFieldsCount.text()).toBe('1');
+      expect(smartFieldsCount.text()).toBe('2');
     });
   });
 });
