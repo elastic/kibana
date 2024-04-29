@@ -120,6 +120,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -129,6 +130,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 2,
+                total_errors: 0,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -138,6 +140,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 3,
+                total_errors: 0,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -147,6 +150,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 4,
+                total_errors: 0,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -156,6 +160,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 5,
+                total_errors: 1,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -165,6 +170,7 @@ describe('createAggregator', () => {
               value: {
                 success: 5,
                 total: 6,
+                total_errors: 1,
                 duration: { counts: [5], values: [100] },
                 duration_values: [10, 10, 10, 10, 10],
               },
@@ -174,6 +180,7 @@ describe('createAggregator', () => {
               value: {
                 success: 6,
                 total: 7,
+                total_errors: 1,
                 duration: { counts: [6], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10],
               },
@@ -183,6 +190,7 @@ describe('createAggregator', () => {
               value: {
                 success: 7,
                 total: 8,
+                total_errors: 1,
                 duration: { counts: [7], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10],
               },
@@ -192,6 +200,7 @@ describe('createAggregator', () => {
               value: {
                 success: 8,
                 total: 9,
+                total_errors: 1,
                 duration: { counts: [8], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
               },
@@ -201,6 +210,7 @@ describe('createAggregator', () => {
               value: {
                 success: 8,
                 total: 10,
+                total_errors: 2,
                 duration: { counts: [8], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
               },
@@ -210,6 +220,7 @@ describe('createAggregator', () => {
               value: {
                 success: 9,
                 total: 11,
+                total_errors: 2,
                 duration: { counts: [9], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10, 10, 10],
               },
@@ -267,6 +278,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -276,6 +288,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 2,
+                total_errors: 0,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -285,6 +298,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 3,
+                total_errors: 0,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -294,6 +308,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 4,
+                total_errors: 0,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -303,6 +318,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 5,
+                total_errors: 1,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -312,6 +328,7 @@ describe('createAggregator', () => {
               value: {
                 success: 5,
                 total: 6,
+                total_errors: 1,
                 duration: { counts: [5], values: [100] },
                 duration_values: [10, 10, 10, 10, 10],
               },
@@ -322,6 +339,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -331,6 +349,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 2,
+                total_errors: 1,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -340,6 +359,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 3,
+                total_errors: 2,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -349,6 +369,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 4,
+                total_errors: 2,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -358,6 +379,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 5,
+                total_errors: 2,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -423,6 +445,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -432,6 +455,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 2,
+                total_errors: 0,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -441,6 +465,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 3,
+                total_errors: 0,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -450,6 +475,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 4,
+                total_errors: 0,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -459,6 +485,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 5,
+                total_errors: 1,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -468,6 +495,7 @@ describe('createAggregator', () => {
               value: {
                 success: 5,
                 total: 6,
+                total_errors: 1,
                 duration: { counts: [5], values: [100] },
                 duration_values: [10, 10, 10, 10, 10],
               },
@@ -478,6 +506,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -487,6 +516,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 2,
+                total_errors: 1,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -496,6 +526,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 3,
+                total_errors: 2,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -505,6 +536,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 4,
+                total_errors: 2,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -514,6 +546,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 5,
+                total_errors: 2,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
