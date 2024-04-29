@@ -14,7 +14,10 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
  * Response of Kibana to confirm users have permissions to generate API keys
  */
 
-export function hasPermissionRoutes({ router, getAuthenticationService }: RouteDefinitionParams) {
+export function defineValidPermissionRoutes({
+  router,
+  getAuthenticationService,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key',
