@@ -19,10 +19,12 @@ import React, { ComponentType } from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
 
@@ -32,11 +34,14 @@ export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
   PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
   Playground: React.FC<React.ComponentProps<typeof App>>;
+  PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
 }
 
 export interface AppPluginStartDependencies {
+  history: AppMountParameters['history'];
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export interface AppServicesContext {
