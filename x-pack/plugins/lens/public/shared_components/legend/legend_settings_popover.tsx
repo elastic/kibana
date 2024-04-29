@@ -19,7 +19,7 @@ import {
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { LegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
@@ -109,11 +109,11 @@ export interface LegendSettingsPopoverProps {
   /**
    * value in legend status
    */
-  legendStats?: LegendStats[];
+  legendStats?: LegendValue[];
   /**
    * Callback on value in legend status change
    */
-  onLegendStatsChange?: (legendStats?: LegendStats[]) => void;
+  onLegendStatsChange?: (legendStats?: LegendValue[]) => void;
   /**
    * If true, value in legend switch is rendered
    */
@@ -333,10 +333,10 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-show-value"
                 showLabel={false}
-                checked={legendStats?.[0] === LegendStats.Value}
+                checked={legendStats?.[0] === LegendValue.Value}
                 onChange={(ev) => {
                   if (ev.target.checked) {
-                    onLegendStatsChange([LegendStats.Value]);
+                    onLegendStatsChange([LegendValue.Value]);
                   } else {
                     onLegendStatsChange([]);
                   }

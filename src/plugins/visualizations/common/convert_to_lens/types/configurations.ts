@@ -10,7 +10,7 @@ import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } fro
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize, LegendStats } from '../../constants';
+import { LegendSize, LegendValue } from '../../constants';
 import {
   CategoryDisplayTypes,
   PartitionChartTypes,
@@ -142,7 +142,7 @@ export interface LegendConfig {
   maxLines?: number;
   shouldTruncate?: boolean;
   legendSize?: LegendSize;
-  legendStats?: LegendStats[];
+  legendStats?: LegendValue[];
 }
 
 export interface XYConfiguration {
@@ -238,7 +238,7 @@ export interface PartitionLayerState {
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
   legendPosition?: Position;
-  legendStats?: LegendStats[];
+  legendStats?: LegendValue[];
   nestedLegend?: boolean;
   percentDecimals?: number;
   emptySizeRatio?: number;

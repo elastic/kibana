@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { LegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PieLayerState, PieVisualizationState } from '../../../common/types';
 
 type PersistedPieLayerState = Omit<PieLayerState, 'legendStats'> & {
@@ -28,7 +28,7 @@ function convertToLegendStats(state: PieVisualizationState) {
     if ('showValuesInLegend' in l) {
       l.legendStats = [
         ...new Set([
-          ...(l.showValuesInLegend ? [LegendStats.Value] : []),
+          ...(l.showValuesInLegend ? [LegendValue.Value] : []),
           ...(l.legendStats || []),
         ]),
       ];
@@ -44,7 +44,7 @@ export function convertToPersistable(state: PieVisualizationState) {
 
   newState.layers.forEach((l) => {
     if ('legendStats' in l && Array.isArray(l.legendStats)) {
-      l.showValuesInLegend = l.legendStats.includes(LegendStats.Value);
+      l.showValuesInLegend = l.legendStats.includes(LegendValue.Value);
       delete l.legendStats;
     }
   });

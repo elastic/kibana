@@ -58,7 +58,7 @@ import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize, LegendStats } from '@kbn/visualizations-plugin/common';
+import { LegendSize, LegendValue } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
@@ -742,7 +742,7 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        args={{ ...args, legend: { ...args.legend, legendStats: [LegendStats.Value] } }}
+        args={{ ...args, legend: { ...args.legend, legendStats: [LegendValue.Value] } }}
       />
     );
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
@@ -757,7 +757,7 @@ describe('XYChart component', () => {
           ...args,
           legend: {
             ...args.legend,
-            legendStats: [LegendStats.Value],
+            legendStats: [LegendValue.Value],
           },
           layers: [dateHistogramLayer],
         }}
