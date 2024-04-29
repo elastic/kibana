@@ -12,12 +12,11 @@ import {
   HostsOverviewStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('Overview Host', () => {
     describe('With auditbeat', () => {
@@ -50,13 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewHost data', async () => {
-        const { overviewHost } = await secureBsearch.send<HostsOverviewStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const { overviewHost } = await bsearch.send<HostsOverviewStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['auditbeat-*'],
             factoryQueryType: HostsQueries.overview,

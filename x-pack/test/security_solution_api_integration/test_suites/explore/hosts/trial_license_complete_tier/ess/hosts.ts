@@ -17,7 +17,6 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -30,26 +29,19 @@ const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('hosts', () => {
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-    });
+    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
 
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-    });
+    after(
+      async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts')
+    );
 
     it('Make sure that we get Hosts Table data', async () => {
-      const hosts = await secureBsearch.send<HostsStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const hosts = await bsearch.send<HostsStrategyResponse>({
+        supertest,
         options: {
           factoryQueryType: HostsQueries.hosts,
           timerange: {
@@ -78,13 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that pagination is working in Hosts Table query', async () => {
-      const hosts = await secureBsearch.send<HostsStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const hosts = await bsearch.send<HostsStrategyResponse>({
+        supertest,
         options: {
           factoryQueryType: HostsQueries.hosts,
           timerange: {
@@ -113,13 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that we get Host details data', async () => {
-      const { hostDetails } = await secureBsearch.send<HostDetailsStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const { hostDetails } = await bsearch.send<HostDetailsStrategyResponse>({
+        supertest,
         options: {
           factoryQueryType: HostsQueries.details,
           hostName: 'zeek-sensor-san-francisco',
@@ -157,13 +139,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that we get First Seen for a Host', async () => {
-      const firstLastSeenHost = await secureBsearch.send<FirstLastSeenStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const firstLastSeenHost = await bsearch.send<FirstLastSeenStrategyResponse>({
+        supertest,
         options: {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*'],
@@ -177,13 +154,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that we get Last Seen for a Host', async () => {
-      const firstLastSeenHost = await secureBsearch.send<FirstLastSeenStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const firstLastSeenHost = await bsearch.send<FirstLastSeenStrategyResponse>({
+        supertest,
         options: {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*'],

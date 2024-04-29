@@ -14,7 +14,6 @@ import {
   NetworkTopTablesFields,
   NetworkTopNFlowStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
 
@@ -22,8 +21,8 @@ const EDGE_LENGTH = 10;
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('Network Top N Flow', () => {
     describe('With filebeat', () => {
@@ -38,13 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
       const TO = '2019-02-12T01:57:24.870Z';
 
       it('should get Source NetworkTopNFlow data with bytes_in descending sort', async () => {
-        const networkTopNFlow = await secureBsearch.send<NetworkTopNFlowStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlow,
@@ -78,13 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should get Source NetworkTopNFlow data with bytes_in ascending sort ', async () => {
-        const networkTopNFlow = await secureBsearch.send<NetworkTopNFlowStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlow,
@@ -120,13 +109,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should get Destination NetworkTopNFlow data', async () => {
-        const networkTopNFlow = await secureBsearch.send<NetworkTopNFlowStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
@@ -157,13 +141,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should paginate NetworkTopNFlow query', async () => {
-        const networkTopNFlow = await secureBsearch.send<NetworkTopNFlowStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',

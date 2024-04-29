@@ -12,12 +12,11 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('Network details', () => {
     describe('With filebeat', () => {
@@ -29,13 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('Make sure that we get Network details data', async () => {
-        const body = await secureBsearch.send<NetworkDetailsStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const body = await bsearch.send<NetworkDetailsStrategyResponse>({
+          supertest,
           options: {
             ip: '151.205.0.17',
             defaultIndex: ['filebeat-*'],
@@ -60,13 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('Make sure that we get Network details data', async () => {
-        const body = await secureBsearch.send<NetworkDetailsStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const body = await bsearch.send<NetworkDetailsStrategyResponse>({
+          supertest,
           options: {
             ip: '185.53.91.88',
             defaultIndex: ['packetbeat-*'],

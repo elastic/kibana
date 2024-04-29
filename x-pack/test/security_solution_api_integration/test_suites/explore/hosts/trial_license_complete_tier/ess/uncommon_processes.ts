@@ -12,7 +12,6 @@ import {
   HostsUncommonProcessesStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -22,8 +21,8 @@ const TOTAL_COUNT = 3;
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('hosts', () => {
     before(async () => {
@@ -34,13 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return an edge of length 1 when given a pagination of length 1', async () => {
-      const response = await secureBsearch.send<HostsUncommonProcessesStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
+        supertest,
         options: {
           factoryQueryType: HostsQueries.uncommonProcesses,
           sourceId: 'default',
@@ -66,13 +60,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('when given a pagination of length 2', () => {
       it('should return an edge of length 2 ', async () => {
-        const response = await secureBsearch.send<HostsUncommonProcessesStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
+          supertest,
           options: {
             factoryQueryType: HostsQueries.uncommonProcesses,
             sourceId: 'default',
@@ -99,13 +88,8 @@ export default function ({ getService }: FtrProviderContext) {
     describe('when given a pagination of length 1', () => {
       let response: HostsUncommonProcessesStrategyResponse | null = null;
       before(async () => {
-        response = await secureBsearch.send<HostsUncommonProcessesStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
+          supertest,
           options: {
             factoryQueryType: HostsQueries.uncommonProcesses,
             sourceId: 'default',

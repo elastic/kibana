@@ -15,7 +15,6 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -23,8 +22,8 @@ const IP = '0.0.0.0';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('Users', () => {
     describe('With auditbeat', () => {
@@ -36,13 +35,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('Ensure data is returned from auditbeat', async () => {
-        const users = await secureBsearch.send<NetworkUsersStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const users = await bsearch.send<NetworkUsersStrategyResponse>({
+          supertest,
           options: {
             factoryQueryType: NetworkQueries.users,
             sourceId: 'default',

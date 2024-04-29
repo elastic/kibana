@@ -6,21 +6,9 @@
  */
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  createSpacesAndUsers,
-  deleteSpacesAndUsers,
-} from '../../../../../common/lib/authentication';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('@ess SecuritySolution Explore Network', () => {
-    before(async () => {
-      await createSpacesAndUsers(getService);
-    });
-
-    after(async () => {
-      await deleteSpacesAndUsers(getService);
-    });
-
     loadTestFile(require.resolve('./network_details'));
     loadTestFile(require.resolve('./network_dns'));
     loadTestFile(require.resolve('./network_top_n_flow'));

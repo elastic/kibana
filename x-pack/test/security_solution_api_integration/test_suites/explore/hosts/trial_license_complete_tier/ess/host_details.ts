@@ -11,13 +11,12 @@ import {
   HostsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 import { hostDetailsFilebeatExpectedResult } from '../mocks/host_details';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('Host Details', () => {
     describe('With filebeat', () => {
@@ -32,13 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
       const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get HostDetails data', async () => {
-        const { hostDetails } = await secureBsearch.send<HostDetailsStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const { hostDetails } = await bsearch.send<HostDetailsStrategyResponse>({
+          supertest,
           options: {
             factoryQueryType: HostsQueries.details,
             timerange: {

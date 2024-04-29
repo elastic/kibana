@@ -11,12 +11,11 @@ import {
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('Overview Network', () => {
     describe('With filebeat', () => {
@@ -43,13 +42,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewNetwork data', async () => {
-        const { overviewNetwork } = await secureBsearch.send<NetworkOverviewStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const { overviewNetwork } = await bsearch.send<NetworkOverviewStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.overview,
@@ -90,13 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewNetwork data', async () => {
-        const { overviewNetwork } = await secureBsearch.send<NetworkOverviewStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const { overviewNetwork } = await bsearch.send<NetworkOverviewStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.overview,
@@ -136,13 +125,8 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewNetwork data', async () => {
-        const { overviewNetwork } = await secureBsearch.send<NetworkOverviewStrategyResponse>({
-          supertestWithoutAuth,
-          auth: {
-            username: secOnlySpacesAll.username,
-            password: secOnlySpacesAll.password,
-          },
-          internalOrigin: 'Kibana',
+        const { overviewNetwork } = await bsearch.send<NetworkOverviewStrategyResponse>({
+          supertest,
           options: {
             defaultIndex: ['auditbeat-*'],
             factoryQueryType: NetworkQueries.overview,

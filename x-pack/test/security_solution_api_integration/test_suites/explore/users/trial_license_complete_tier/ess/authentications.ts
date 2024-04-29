@@ -15,7 +15,6 @@ import {
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
-import { secOnlySpacesAll } from '../../../../../common/lib/authentication/users';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -28,8 +27,8 @@ const EDGE_LENGTH = 1;
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const secureBsearch = getService('secureBsearch');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const bsearch = getService('bsearch');
+  const supertest = getService('supertest');
 
   describe('authentications', () => {
     before(async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
@@ -58,13 +57,8 @@ export default function ({ getService }: FtrProviderContext) {
         filterQuery: '',
       };
 
-      const authentications = await secureBsearch.send<UserAuthenticationsStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const authentications = await bsearch.send<UserAuthenticationsStrategyResponse>({
+        supertest,
         options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',
       });
@@ -94,13 +88,8 @@ export default function ({ getService }: FtrProviderContext) {
         filterQuery: '',
       };
 
-      const authentications = await secureBsearch.send<UserAuthenticationsStrategyResponse>({
-        supertestWithoutAuth,
-        auth: {
-          username: secOnlySpacesAll.username,
-          password: secOnlySpacesAll.password,
-        },
-        internalOrigin: 'Kibana',
+      const authentications = await bsearch.send<UserAuthenticationsStrategyResponse>({
+        supertest,
         options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',
       });
