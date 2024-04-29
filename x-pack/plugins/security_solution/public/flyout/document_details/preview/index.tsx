@@ -13,7 +13,6 @@ import { panels } from './panels';
 export type PreviewPanelPaths = 'rule-preview' | 'alert-reason-preview';
 export const RulePreviewPanel: PreviewPanelPaths = 'rule-preview';
 export const AlertReasonPreviewPanel: PreviewPanelPaths = 'alert-reason-preview';
-export const DocumentDetailsPreviewPanelKey: PreviewPanelProps['key'] = 'document-details-preview';
 
 export interface PreviewPanelProps extends FlyoutPanelProps {
   key: 'document-details-preview';
