@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { coreMock } from '@kbn/core/public/mocks';
 import OverflowButton from './overflow';
+
+const coreStart = coreMock.createStart();
 
 describe('OverflowButton', () => {
   const props = {
@@ -20,17 +23,17 @@ describe('OverflowButton', () => {
     isOverflowPopoverOpen: false,
   };
   test('should render a popover', () => {
-    const wrapper = shallow(<OverflowButton {...props} />);
+    const wrapper = shallow(<OverflowButton {...props} startServices={coreStart} />);
     expect(wrapper.find('EuiPopover').exists()).toBeTruthy();
   });
 
   test('the popover always contains a class that hides it when an overlay (e.g. the inspect modal) is displayed', () => {
-    const wrapper = shallow(<OverflowButton {...props} />);
+    const wrapper = shallow(<OverflowButton {...props} startServices={coreStart} />);
     expect(wrapper.find('EuiPopover').prop('panelClassName')).toEqual('withHoverActions__popover');
   });
 
   test('should enable repositionOnScroll', () => {
-    const wrapper = shallow(<OverflowButton {...props} />);
+    const wrapper = shallow(<OverflowButton {...props} startServices={coreStart} />);
     expect(wrapper.find('EuiPopover').prop('repositionOnScroll')).toEqual(true);
   });
 
@@ -39,7 +42,7 @@ describe('OverflowButton', () => {
       ...props,
       showTooltip: true,
     };
-    const wrapper = shallow(<OverflowButton {...testProps} />);
+    const wrapper = shallow(<OverflowButton {...testProps} startServices={coreStart} />);
     expect(wrapper.find('EuiToolTip').exists()).toBeTruthy();
   });
 });
