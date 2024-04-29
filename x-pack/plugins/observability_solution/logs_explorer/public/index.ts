@@ -18,7 +18,6 @@ export type {
 export type {
   LogsExplorerCustomizations,
   LogsExplorerCustomizationEvents,
-  LogsExplorerFlyoutContentProps,
 } from './customizations/types';
 export type { LogsExplorerControllerContext } from './state_machines/logs_explorer_controller';
 export type { LogsExplorerPluginSetup, LogsExplorerPluginStart } from './types';
