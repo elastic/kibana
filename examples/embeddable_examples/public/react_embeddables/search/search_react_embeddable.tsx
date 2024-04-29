@@ -18,14 +18,12 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { Api, Services, State } from './types';
+import { SearchApi, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<State, Api> = {
+  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_ID,
-    deserializeState: (state) => {
-      return state.rawState as State;
-    },
+    deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const timeRange = initializeTimeRange(state);
       const defaultDataView = await services.dataViews.getDefaultDataView();
@@ -79,7 +77,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
                 fetchContext.filters ?? [],
                 fetchContext.query,
                 // timeRange and timeslice provided seperatly so consumers can decide
-                // whether to refetch data for just mask current data.
+                // whether to refetch data or just mask current data.
                 // In this example, we must refetch because we need a count within the time range.
                 fetchContext.timeslice
                   ? {
