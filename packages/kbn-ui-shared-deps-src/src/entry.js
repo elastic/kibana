@@ -42,6 +42,7 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
+export const ElasticEuiUseIsNestedEuiProvider = require('@elastic/eui/lib/components/provider/nested');
 export const KbnDatemath = require('@kbn/datemath');
 export const HelloPangeaDnd = require('@hello-pangea/dnd/dist/dnd');
 export const ReduxjsToolkit = require('@reduxjs/toolkit');

@@ -74,6 +74,7 @@ const externals = {
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
   '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
+  '@elastic/eui/lib/components/provider/nested': 'ElasticEuiUseIsNestedEuiProvider',
 
   // transient dep of eui
   '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
