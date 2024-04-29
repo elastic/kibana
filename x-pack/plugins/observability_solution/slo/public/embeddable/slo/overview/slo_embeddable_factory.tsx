@@ -32,8 +32,7 @@ import {
   SloOverviewEmbeddableState,
   SloEmbeddableDeps,
   OverviewApi,
-  GroupSloProps,
-  SingleSloProps,
+  GroupSloCustomInput,
 } from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
 import { PluginContext } from '../../../context/plugin_context';
@@ -85,9 +84,8 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               groupFilters: groupFilters$.getValue(),
               overviewMode: overviewMode$.getValue(),
             };
-            return state;
           },
-          updateSloOverviewConfig: (update: GroupSloProps) => {
+          updateSloOverviewConfig: (update: GroupSloCustomInput) => {
             groupFilters$.next(update.groupFilters);
           },
         },
@@ -129,6 +127,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              subscription.unsubscribe();
             };
           }, []);
           const renderOverview = () => {

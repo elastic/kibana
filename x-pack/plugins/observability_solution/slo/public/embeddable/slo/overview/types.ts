@@ -39,27 +39,21 @@ export type SingleSloProps = EmbeddableSloProps & {
   showAllGroupByInstances?: boolean;
 };
 
-// rename GroupSloProps to GroupSloCustomInput
-export type GroupSloProps = EmbeddableSloProps & {
-  groupFilters: GroupFilters;
+export type GroupSloCustomInput = EmbeddableSloProps & {
+  groupFilters: GroupFilters | undefined;
 };
 
-// TODO refactor this
-// keep overviewMode
-// delete sloId, sloInstanceId, renderComplete
-// keep remoteName and reloadSubject
 export interface EmbeddableSloProps {
-  sloId?: string;
-  sloInstanceId?: string;
   remoteName?: string;
   reloadSubject?: Subject<boolean>;
-  onRenderComplete?: () => void;
   overviewMode?: OverviewMode;
 }
 
-export type SloEmbeddableInput = EmbeddableInput & Partial<GroupSloProps> & Partial<SingleSloProps>;
+export type SloEmbeddableInput = EmbeddableInput &
+  Partial<GroupSloCustomInput> &
+  Partial<SingleSloProps>;
 export type SloOverviewEmbeddableState = SerializedTitles &
-  Partial<GroupSloProps> &
+  Partial<GroupSloCustomInput> &
   Partial<SingleSloProps>;
 
 export type OverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
@@ -68,8 +62,8 @@ export type OverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   HasSloOverviewConfig;
 
 export interface HasSloOverviewConfig {
-  getSloOverviewConfig: () => GroupSloProps | SingleSloProps;
-  updateSloOverviewConfig: (next: GroupSloProps | SingleSloProps) => void;
+  getSloOverviewConfig: () => GroupSloCustomInput;
+  updateSloOverviewConfig: (next: GroupSloCustomInput) => void;
 }
 
 export const apiHasSloOverviewConfig = (api: unknown | null): api is HasSloOverviewConfig => {

@@ -24,13 +24,13 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
 
-import type { SingleSloProps, GroupSloProps, GroupFilters, OverviewMode } from './types';
+import type { SingleSloProps, GroupSloCustomInput, GroupFilters, OverviewMode } from './types';
 import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
-  initialInput?: GroupSloProps | SingleSloProps;
-  onCreate: (props: SingleSloProps | GroupSloProps) => void;
+  initialInput?: GroupSloCustomInput;
+  onCreate: (props: SingleSloProps | GroupSloCustomInput) => void;
   onCancel: () => void;
 }
 
@@ -41,10 +41,10 @@ interface SingleConfigurationProps {
 }
 
 interface GroupConfigurationProps {
-  onCreate: (props: GroupSloProps) => void;
+  onCreate: (props: GroupSloCustomInput) => void;
   onCancel: () => void;
   overviewMode: OverviewMode;
-  initialInput?: GroupSloProps;
+  initialInput?: GroupSloCustomInput;
 }
 
 function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
@@ -138,10 +138,10 @@ function GroupSloConfiguration({
   initialInput,
 }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: initialInput?.groupFilters.groupBy ?? 'status',
-    filters: initialInput?.groupFilters.filters ?? [],
-    kqlQuery: initialInput?.groupFilters.kqlQuery ?? '',
-    groups: initialInput?.groupFilters.groups ?? [],
+    groupBy: initialInput?.groupFilters?.groupBy ?? 'status',
+    filters: initialInput?.groupFilters?.filters ?? [],
+    kqlQuery: initialInput?.groupFilters?.kqlQuery ?? '',
+    groups: initialInput?.groupFilters?.groups ?? [],
   });
 
   const onConfirmClick = () =>
@@ -220,7 +220,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       </EuiFlyoutHeader>
       {overviewMode === 'groups' ? (
         <GroupSloConfiguration
-          initialInput={initialInput as GroupSloProps}
+          initialInput={initialInput as GroupSloCustomInput}
           overviewMode={overviewMode}
           onCreate={onCreate}
           onCancel={onCancel}

@@ -22,6 +22,7 @@ import { type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { SLO_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 import {
+  GroupSloCustomInput,
   HasSloOverviewConfig,
   SloOverviewEmbeddableActionContext,
 } from '../embeddable/slo/overview/types';
@@ -67,7 +68,7 @@ export function createEditSloOverviewPanelAction(
           pluginStart,
           embeddable.getSloOverviewConfig()
         );
-        embeddable.updateSloOverviewConfig(result);
+        embeddable.updateSloOverviewConfig(result as GroupSloCustomInput);
       } catch (e) {
         return Promise.reject();
       }
