@@ -162,6 +162,12 @@ export const UserFilterPanel: FC<{}> = () => {
           nullOptionProps: {
             append: noUsersTip,
           },
+          clearButtonLabel: (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.userFilter.clearFilterButtonLabel"
+              defaultMessage="Clear filter"
+            />
+          ),
           selectedOptions: selectedUsers.map((uid) =>
             uid === NULL_USER ? null : usersMap[uid] ?? { uid, user: { username: uid } }
           ),
