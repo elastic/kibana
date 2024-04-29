@@ -141,6 +141,8 @@ export const getLinksEmbeddableFactory = () => {
               layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
             }`}
             paddingSize="xs"
+            data-shared-item
+            data-rendering-count={1}
             data-test-subj="links--component"
           >
             <EuiListGroup
