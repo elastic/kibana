@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { LogDocument } from '@kbn/discover-utils/src';
 import { LogsExplorerFlyoutContentProps } from './types';
 import { useLogsExplorerControllerContext } from '../controller';
-import { LogDocument } from '../../common/document';
 
 const CustomFlyoutContent = ({
   filter,

@@ -83,7 +83,9 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/elastic-agent-utils",
+    "@kbn/custom-icons"
   ],
   "exclude": ["target/**/*"]
 }

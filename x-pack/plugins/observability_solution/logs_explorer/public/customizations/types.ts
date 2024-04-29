@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import { LogDocument } from '../../common/document';
+import { LogDocument } from '@kbn/discover-utils/src';
 import { LogsExplorerControllerContext } from '../state_machines/logs_explorer_controller';
 
 export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
