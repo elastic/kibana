@@ -31,6 +31,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   const {
     application: { getUrlForApp },
+    ...startServices
   } = useKibanaContextForPlugin().services;
 
   const enableDeveloperRoutes = isDevMode();
@@ -72,7 +73,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
       {setHeaderActionMenu && theme$ && (
-        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} startServices={startServices}>
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem>
               <EuiHeaderLinks gutterSize="xs">

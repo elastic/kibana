@@ -43,6 +43,7 @@ const Application = (props: SyntheticsAppProps) => {
     setBadge,
     startPlugins,
     appMountParameters,
+    startServices,
   } = props;
 
   useEffect(() => {
@@ -113,7 +114,10 @@ const Application = (props: SyntheticsAppProps) => {
                             >
                               <InspectorContextProvider>
                                 <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
+                                <ActionMenu
+                                  appMountParameters={appMountParameters}
+                                  startServices={startServices}
+                                />
                                 <TestNowModeFlyoutContainer />
                               </InspectorContextProvider>
                             </RedirectAppLinks>

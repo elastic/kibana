@@ -10,12 +10,19 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionMenuContent } from './action_menu_content';
+import { SyntheticsStartServices } from '../../../contexts';
 
-export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => {
+export const ActionMenu = ({
+  appMountParameters,
+  startServices,
+}: {
+  appMountParameters: AppMountParameters;
+  startServices: SyntheticsStartServices;
+}) => {
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
-      theme$={appMountParameters.theme$}
+      startServices={startServices}
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>

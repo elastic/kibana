@@ -124,6 +124,7 @@ export type InfraClientPluginClass = PluginClass<
 >;
 export type InfraClientStartServicesAccessor = InfraClientCoreSetup['getStartServices'];
 export type InfraClientStartServices = UnwrapPromise<ReturnType<InfraClientStartServicesAccessor>>;
+export type InfraStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export interface InfraHttpError extends IHttpFetchError {
   readonly body?: {

@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 
 export interface ApmIndicesConfig {
@@ -32,7 +33,7 @@ export interface UXMetrics {
 export interface HeaderMenuPortalProps {
   children: ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
+  startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 }
 
 export interface TimePickerTimeDefaults {

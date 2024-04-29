@@ -68,6 +68,8 @@ import {
 } from './legacy_uptime/lib/alert_types';
 import { setStartServices } from './kibana_services';
 
+export type ClientStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
