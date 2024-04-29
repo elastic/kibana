@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,7 +27,7 @@ jest.mock('@kbn/content-management-table-list-view-table', () => {
   return {
     __esModule: true,
     ...originalModule,
-    TableListViewKibanaProvider: jest.fn().mockImplementation(({ children }) => {
+    TableListViewKibanaProvider: jest.fn().mockImplementation(({ children }: PropsWithChildren) => {
       return <>{children}</>;
     }),
   };

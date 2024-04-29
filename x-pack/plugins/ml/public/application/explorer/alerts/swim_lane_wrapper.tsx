@@ -49,6 +49,7 @@ import { statusNameMap } from './const';
 import { Y_AXIS_LABEL_WIDTH } from '../constants';
 
 export interface SwimLaneWrapperProps {
+  children: React.ReactNode;
   selection?: AppStateSelectedCells | null;
   swimlaneContainerWidth?: number;
   swimLaneData: SwimlaneData;
