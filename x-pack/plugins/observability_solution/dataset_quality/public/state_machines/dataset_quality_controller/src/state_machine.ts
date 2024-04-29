@@ -164,6 +164,10 @@ export const createPureDatasetQualityControllerStateMachine = (
               target: 'integrations.loaded',
               actions: ['storeNamespaces'],
             },
+            UPDATE_QUALITIES: {
+              target: 'integrations.loaded',
+              actions: ['storeQualities'],
+            },
             UPDATE_QUERY: {
               actions: ['storeQuery'],
             },
@@ -338,6 +342,16 @@ export const createPureDatasetQualityControllerStateMachine = (
                 filters: {
                   ...context.filters,
                   namespaces: event.namespaces,
+                },
+              }
+            : {};
+        }),
+        storeQualities: assign((context, event) => {
+          return 'qualities' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  qualities: event.qualities,
                 },
               }
             : {};

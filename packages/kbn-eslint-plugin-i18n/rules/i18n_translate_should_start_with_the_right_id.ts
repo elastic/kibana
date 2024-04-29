@@ -85,19 +85,9 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
               ? `${i18nAppId}.${oldI18nIdentifierArray.slice(2).join('.')}`
               : `${i18nAppId}.${oldI18nIdentifierArray.slice(1).join('.')}`;
 
-          let defaultMessage = '';
-
-          if (
-            node.arguments[1] &&
-            'properties' in node.arguments[1] &&
-            node.arguments[1].properties.length &&
-            'value' in node.arguments[1].properties[0] &&
-            node.arguments[1].properties[0].value &&
-            'value' in node.arguments[1].properties[0].value &&
-            typeof node.arguments[1].properties[0].value.value === 'string'
-          ) {
-            defaultMessage = node.arguments[1].properties[0].value.value;
-          }
+          const opts = node.arguments[1]
+            ? sourceCode.getText().slice(node.arguments[1].range[0], node.arguments[1].range[1])
+            : "{ defaultMessage: '' }";
 
           report({
             node: node as any,
@@ -105,7 +95,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
             fix(fixer) {
               return fixer.replaceTextRange(
                 node.range,
-                `i18n.translate('${newI18nIdentifier}', { defaultMessage: '${defaultMessage}' })`
+                `i18n.translate('${newI18nIdentifier}', ${opts})`
               );
             },
           });

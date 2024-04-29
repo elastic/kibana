@@ -252,7 +252,7 @@ export function EventsChartPanel({ slo, range, selectedTabId }: Props) {
                     yAccessors={['value']}
                     data={(data ?? []).map((datum) => ({
                       date: new Date(datum.date).getTime(),
-                      value: datum.sliValue >= 0 ? datum.sliValue : null,
+                      value: datum.sliValue,
                     }))}
                   />
                 </Chart>
