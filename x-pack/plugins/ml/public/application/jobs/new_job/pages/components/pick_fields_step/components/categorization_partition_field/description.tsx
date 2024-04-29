@@ -10,11 +10,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-
-interface Props {
-  children: React.ReactNode;
-}
-export const Description = memo<PropsWithChildren>(({ children }) => {
+export const Description = memo<PropsWithChildren<unknown>>(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.perPartitionCategorization.enable.title', {
     defaultMessage: 'Per-partition categorization',
   });

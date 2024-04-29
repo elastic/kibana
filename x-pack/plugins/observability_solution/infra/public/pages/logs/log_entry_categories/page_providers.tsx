@@ -16,7 +16,7 @@ import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
-export const LogEntryCategoriesPageProviders: FC<PropsWithChildren> = ({ children }) => {
+export const LogEntryCategoriesPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     hasFailedLoading,
     isLoading,

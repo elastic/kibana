@@ -7,7 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
@@ -24,7 +25,7 @@ const coreStart = coreMock.createStart();
 let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
 
-const wrapper: FC<PropsWithChildren> = ({ children }) => (
+const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <Providers
     services={coreStart}
     history={history}
