@@ -20,38 +20,39 @@ export function generateDatasets(
     return [];
   }
 
-  const datasetIntegrationMap: Record<string, { integration: Integration; title: string }> =
-    integrations.reduce((integrationMapAcc, integration) => {
+  const {
+    datasetIntegrationMap,
+    integrationsMap,
+  }: {
+    datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
+    integrationsMap: Record<string, Integration>;
+  } = integrations.reduce(
+    (acc, integration) => {
       return {
-        ...integrationMapAcc,
-        ...Object.keys(integration.datasets).reduce(
-          (datasetsAcc, dataset) =>
-            Object.assign(datasetsAcc, {
-              [dataset]: {
-                integration,
-                title: integration.datasets[dataset],
-              },
-            }),
-          {}
-        ),
+        datasetIntegrationMap: {
+          ...acc.datasetIntegrationMap,
+          ...Object.keys(integration.datasets).reduce(
+            (datasetsAcc, dataset) =>
+              Object.assign(datasetsAcc, {
+                [dataset]: {
+                  integration,
+                  title: integration.datasets[dataset],
+                },
+              }),
+            {}
+          ),
+        },
+        integrationsMap: { ...acc.integrationsMap, [integration.name]: integration },
       };
-    }, {});
+    },
+    { datasetIntegrationMap: {}, integrationsMap: {} }
+  );
 
   if (!dataStreamStats.length) {
     return degradedDocStats.map((degradedDocStat) =>
       DataStreamStat.fromDegradedDocStat({ degradedDocStat, datasetIntegrationMap })
     );
   }
-
-  const integrationsMap: Record<string, Integration> = integrations.reduce(
-    (integrationMapAcc, integration) => {
-      return {
-        ...integrationMapAcc,
-        [integration.name]: integration,
-      };
-    },
-    {}
-  );
 
   const degradedMap: Record<
     DegradedDocsStat['dataset'],

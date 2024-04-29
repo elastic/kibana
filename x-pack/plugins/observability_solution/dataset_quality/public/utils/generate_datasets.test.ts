@@ -81,7 +81,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
-          quality: 'good',
+          quality: degradedDocs[0].quality,
         },
       },
       {
@@ -94,6 +94,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+          quality: 'good',
         },
       },
     ]);
@@ -117,7 +118,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
-          quality: 'good',
+          quality: degradedDocs[0].quality,
         },
       },
       {
@@ -133,7 +134,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
-          quality: 'poor',
+          quality: degradedDocs[1].quality,
         },
       },
     ]);
@@ -155,7 +156,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
-          quality: 'good',
+          quality: degradedDocs[0].quality,
         },
       },
       {
@@ -168,7 +169,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
-          quality: 'poor',
+          quality: degradedDocs[1].quality,
         },
       },
     ]);
@@ -199,6 +200,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+          quality: 'good',
         },
       },
     ]);

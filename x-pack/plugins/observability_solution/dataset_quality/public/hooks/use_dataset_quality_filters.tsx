@@ -36,26 +36,22 @@ export const useDatasetQualityFilters = () => {
   interface Filters {
     namespaces: string[];
     qualities: QualityIndicators[];
-    integrations: Integration[];
-    hasNoneIntegration: boolean;
+    filteredIntegrations: string[];
   }
 
   const datasets = useSelector(service, (state) => state.context.datasets);
-  const { namespaces, qualities, integrations } = useMemo(
+  const integrations = useSelector(service, (state) => state.context.integrations);
+  const { namespaces, qualities, filteredIntegrations } = useMemo(
     () =>
       datasets.reduce(
-        (acc: Filters, dataset) => {
-          acc.namespaces.push(dataset.namespace);
-          acc.qualities.push(dataset.degradedDocs.quality);
-          if (dataset.integration) {
-            acc.integrations.push(dataset.integration);
-          } else if (!acc.hasNoneIntegration) {
-            acc.integrations.push(Integration.create({ name: 'none', title: 'None' }));
-            acc.hasNoneIntegration = true;
-          }
-          return acc;
-        },
-        { namespaces: [], qualities: [], integrations: [], hasNoneIntegration: false }
+        (acc: Filters, dataset) => ({
+          namespaces: [...new Set([...acc.namespaces, dataset.namespace])],
+          qualities: [...new Set([...acc.qualities, dataset.degradedDocs.quality])],
+          filteredIntegrations: [
+            ...new Set([...acc.filteredIntegrations, dataset.integration?.name ?? 'none']),
+          ],
+        }),
+        { namespaces: [], qualities: [], filteredIntegrations: [] }
       ),
     [datasets]
   );
@@ -100,39 +96,24 @@ export const useDatasetQualityFilters = () => {
     [service, timeRange]
   );
 
-/*  const integrationItems: IntegrationItem[] = useMemo(() => {
-     const integrationsMap = datasets.reduce(
-      (acc, dataset) => ({
-        ...acc,
-        ...(dataset.integration && !acc[dataset.integration.name]
-          ? { [dataset.integration.name]: dataset.integration }
-          : {}),
-      }),
-      {} as { [key: string]: Integration }
-    );
+  const integrationItems: IntegrationItem[] = useMemo(() => {
+    const integrationsMap =
+      integrations?.reduce(
+        (acc, integration) => ({
+          ...acc,
+          [integration.name]: integration,
+        }),
+        {} as { [key: string]: Integration }
+      ) ?? {};
 
-    const integrations = [
-      ...Object.values(integrationsMap),
-      ...(datasets.some((dataset) => !dataset.integration)
-        ? [Integration.create({ name: 'none', title: 'None' })]
-        : []),
-    ];
+    integrationsMap.none = Integration.create({ name: 'none', title: 'None' });
 
-    return integrations.map((integration) => ({
-      ...integration,
-      label: integration.title,
-      checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,
+    return filteredIntegrations.map((name) => ({
+      ...integrationsMap[name],
+      label: integrationsMap[name]?.title,
+      checked: selectedIntegrations.includes(name) ? 'on' : undefined,
     }));
-  }, [datasets, selectedIntegrations]); */
-  const integrationItems: IntegrationItem[] = useMemo(
-    () =>
-      integrations.map((integration) => ({
-        ...integration,
-        label: integration.title,
-        checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,
-      })),
-    [integrations, selectedIntegrations]
-  );
+  }, [integrations, filteredIntegrations, selectedIntegrations]);
 
   const onIntegrationsChange = useCallback(
     (newIntegrationItems: IntegrationItem[]) => {
