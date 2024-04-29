@@ -98,12 +98,22 @@ const baseDashboard = schema.object({
   // version: schema.maybe(schema.number()),
 });
 
-export const dashboardCreate = baseDashboard.extends({
-  id: schema.maybe(schema.string({ meta: { description: 'The ID of the dashboard' } })),
-});
+export const dashboardCreate = baseDashboard.extends(
+  {
+    id: schema.maybe(schema.string({ meta: { description: 'The ID of the dashboard' } })),
+  },
+  {
+    meta: { id: 'dashboard.create' },
+  }
+);
 
-export const dashboard = baseDashboard.extends({
-  id: schema.string({ meta: { description: 'The ID of the dashboard' } }),
-});
+export const dashboard = baseDashboard.extends(
+  {
+    id: schema.string({ meta: { description: 'The ID of the dashboard' } }),
+  },
+  {
+    meta: { id: 'dashboard' },
+  }
+);
 
 export type Dashboard = TypeOf<typeof dashboard>;
