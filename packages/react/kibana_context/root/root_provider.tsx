@@ -49,7 +49,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
 
   if (hasEuiProvider) {
     emitEuiProviderWarning(
-      'EuiProvider has already been included. Check your React tree and ensure that KibanaRenderContextProvider is not used more than once.'
+      'KibanaRootContextProvider has likely been nested in this React tree, either by direct reference or by KibanaRenderContextProvider.  The result of this nesting is a nesting of EuiProvider, which has negative effects.  Check your React tree for nested Kibana context providers.'
     );
     return <i18n.Context>{children}</i18n.Context>;
   } else {
