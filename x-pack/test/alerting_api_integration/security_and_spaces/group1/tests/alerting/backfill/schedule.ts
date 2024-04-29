@@ -27,7 +27,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('schedule backfill', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/181778
+  describe.skip('schedule backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
 
