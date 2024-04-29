@@ -340,7 +340,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate(
           'xpack.idxMgmt.dataStreamDetailPanel.customerDefinedDataRetentionTooltip',
           {
-            defaultMessage: `This is the data retention defined by you, but the effective retention is the one being enforced.`,
+            defaultMessage: "This is the data retention that you defined. Because of other system constraints or settings, the data retention that is effectively applied may be different from the value you set. You can find the value retained and applied by the system under 'Effective data retention'.",
           }
         ),
         content: (
