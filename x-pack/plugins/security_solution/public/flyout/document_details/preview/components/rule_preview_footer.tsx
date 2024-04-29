@@ -16,14 +16,9 @@ import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 /**
  * Footer in rule preview panel
  */
-<<<<<<< HEAD
 export const RulePreviewFooter = memo(() => {
-  const { scopeId, eventId, ruleId } = usePreviewPanelContext();
-=======
-export const RulePreviewFooter: React.FC = memo(() => {
   const { ruleId } = usePreviewPanelContext();
   const href = useRuleDetailsLink({ ruleId });
->>>>>>> 50f4911f497f6dbb9cc89ae7f2b8e729d0583142
 
   return href ? (
     <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
