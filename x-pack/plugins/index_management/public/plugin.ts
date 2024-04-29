@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
-import { BehaviorSubject } from 'rxjs';
 
 import {
   CoreSetup,
@@ -16,11 +15,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import {
-  IndexManagementPluginSetup,
-  IndexManagementPluginStart,
-  DSLConfigSubject,
-} from '@kbn/index-management';
+import { IndexManagementPluginSetup, IndexManagementPluginStart } from '@kbn/index-management';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -49,11 +44,8 @@ export class IndexMgmtUIPlugin
     editableIndexSettings: 'all' | 'limited';
     enableDataStreamsStorageColumn: boolean;
     isIndexManagementUiEnabled: boolean;
+    enableTogglingDataRetention: boolean;
   };
-
-  private dslConfig$ = new BehaviorSubject<DSLConfigSubject>({
-    canDisableDataRetention: true,
-  });
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -67,6 +59,7 @@ export class IndexMgmtUIPlugin
       enableIndexStats,
       editableIndexSettings,
       enableDataStreamsStorageColumn,
+      enableTogglingDataRetention,
     } = ctx.config.get<ClientConfigType>();
     this.config = {
       isIndexManagementUiEnabled,
@@ -75,6 +68,7 @@ export class IndexMgmtUIPlugin
       enableIndexStats: enableIndexStats ?? true,
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
+      enableTogglingDataRetention: enableTogglingDataRetention ?? true,
     };
   }
 
@@ -100,7 +94,6 @@ export class IndexMgmtUIPlugin
             kibanaVersion: this.kibanaVersion,
             config: this.config,
             cloud,
-            dslConfig$: this.dslConfig$,
           });
         },
       });
@@ -115,8 +108,6 @@ export class IndexMgmtUIPlugin
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
     const { fleet, usageCollection, cloud, share, console, ml } = plugins;
     return {
-      setDSLConfig: ({ canDisableDataRetention }) =>
-        this.dslConfig$.next({ canDisableDataRetention }),
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
         const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =

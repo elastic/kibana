@@ -62,7 +62,7 @@ export class SecuritySolutionServerlessPlugin
     core: CoreStart,
     startDeps: SecuritySolutionServerlessPluginStartDeps
   ): SecuritySolutionServerlessPluginStart {
-    const { securitySolution, indexManagement } = startDeps;
+    const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
     const services = createServices(core, startDeps, this.experimentalFeatures);
@@ -81,9 +81,6 @@ export class SecuritySolutionServerlessPlugin
     );
     setOnboardingSettings(services);
     startNavigation(services);
-
-    // User shouldnt be allowed to disable data retention for DS
-    indexManagement?.setDSLConfig({ canDisableDataRetention: false });
 
     return {};
   }

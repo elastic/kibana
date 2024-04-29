@@ -193,14 +193,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
-    dslConfig,
+    config: { enableTogglingDataRetention },
   } = useAppContext();
 
   const { form } = useForm({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      dataRetentionEnabled: !dslConfig?.canDisableDataRetention || lifecycle?.enabled,
+      dataRetentionEnabled: !enableTogglingDataRetention || lifecycle?.enabled,
       // When data retention is not set and lifecycle is enabled, is the only scenario in
       // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
       // dont have inifinite data retention.
@@ -282,7 +282,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             path="dataRetentionEnabled"
             component={ToggleField}
             data-test-subj="dataRetentionEnabledField"
-            css={!dslConfig?.canDisableDataRetention ? { display: 'none !important' } : {}}
+            css={!enableTogglingDataRetention ? { display: 'none !important' } : {}}
           />
 
           <UseField

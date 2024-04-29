@@ -15,7 +15,6 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicSetup {}
@@ -37,5 +36,4 @@ export interface ServerlessObservabilityPublicStartDependencies {
   management: ManagementStart;
   data: DataPublicPluginStart;
   security: SecurityPluginStart;
-  indexManagement?: IndexManagementPluginStart;
 }

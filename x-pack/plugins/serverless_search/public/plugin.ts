@@ -137,8 +137,6 @@ export class ServerlessSearchPlugin
       extendCardNavDefinitions,
     });
 
-    // User shouldnt be allowed to disable data retention for DS
-    indexManagement?.setDSLConfig({ canDisableDataRetention: false });
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
     indexManagement?.extensionsService.addIndexDetailsTab(
       createIndexDocumentsContent(core, services)

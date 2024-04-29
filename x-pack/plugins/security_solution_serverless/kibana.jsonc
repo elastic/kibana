@@ -24,8 +24,7 @@
       "discover"
     ],
     "optionalPlugins": [
-      "securitySolutionEss",
-      "indexManagement"
+      "securitySolutionEss"
     ],
   }
 }

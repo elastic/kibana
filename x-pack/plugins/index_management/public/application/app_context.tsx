@@ -21,14 +21,11 @@ import {
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-
-import { EuiBreadcrumb } from '@elastic/eui';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-
-import type { DSLConfigSubject } from '../types';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -65,6 +62,7 @@ export interface AppDependencies {
     enableIndexStats: boolean;
     editableIndexSettings: 'all' | 'limited';
     enableDataStreamsStorageColumn: boolean;
+    enableTogglingDataRetention: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
@@ -73,7 +71,6 @@ export interface AppDependencies {
   url: SharePluginStart['url'];
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
-  dslConfig?: DSLConfigSubject;
 }
 
 export const AppContextProvider = ({

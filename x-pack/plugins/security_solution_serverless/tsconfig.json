@@ -45,6 +45,5 @@
     "@kbn/discover-plugin",
     "@kbn/logging",
     "@kbn/analytics-client",
-    "@kbn/index-management-plugin",
   ]
 }

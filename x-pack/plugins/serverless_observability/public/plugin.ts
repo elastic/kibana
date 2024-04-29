@@ -49,7 +49,7 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security, indexManagement } = setupDeps;
+    const { serverless, management, security } = setupDeps;
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
@@ -73,15 +73,11 @@ export class ServerlessObservabilityPlugin
         },
       }
     );
-
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],
       extendCardNavDefinitions,
     });
-
-    // User shouldnt be allowed to disable data retention for DS
-    indexManagement?.setDSLConfig({ canDisableDataRetention: false });
 
     return {};
   }
