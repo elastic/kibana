@@ -50,7 +50,7 @@ import {
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-  LegendStats,
+  LegendValue,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -869,7 +869,7 @@ export function XYChart({
                   )
                 : undefined
             }
-            showLegendExtra={isHistogramViz && legend.legendStats?.[0] === LegendStats.Value}
+            showLegendExtra={isHistogramViz && legend.legendStats?.[0] === LegendValue.Value}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={

@@ -60,7 +60,7 @@ import {
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { LegendValue } from '@kbn/visualizations-plugin/common/constants';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -612,7 +612,7 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: ['value' as LegendStats.Value],
+            legendStats: ['value' as LegendValue.Value],
           },
         };
 
@@ -3844,7 +3844,7 @@ describe('xy_visualization', () => {
       expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
       expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
 
-      state.legend.legendStats = ['value' as LegendStats.Value];
+      state.legend.legendStats = ['value' as LegendValue.Value];
       const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
       expect(legendStatsState.legend.legendStats).not.toBeDefined();
       expect(legendStatsState.valuesInLegend).toEqual(true);

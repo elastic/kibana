@@ -52,6 +52,6 @@ export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(BUCKET_TYPES),
 ] as const;
 
-export enum LegendStats {
+export enum LegendValue {
   Value = 'value',
 }
