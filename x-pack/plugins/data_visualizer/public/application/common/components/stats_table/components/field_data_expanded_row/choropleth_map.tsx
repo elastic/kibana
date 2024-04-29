@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
@@ -30,7 +30,7 @@ export const getChoroplethTopValuesLayer = (
   { layerId, field }: EMSTermJoinConfig
 ): VectorLayerDescriptor => {
   return {
-    id: htmlIdGenerator()(),
+    id: 'choroplethLayer',
     label: i18n.translate('xpack.dataVisualizer.choroplethMap.topValuesCount', {
       defaultMessage: 'Top values count for {fieldName}',
       values: { fieldName },
@@ -40,7 +40,7 @@ export const getChoroplethTopValuesLayer = (
         // Left join is the id from the type of field (e.g. world_countries)
         leftField: field,
         right: {
-          id: 'anomaly_count',
+          id: 'doc_count',
           type: SOURCE_TYPES.TABLE_SOURCE,
           __rows: topValues,
           __columns: [
@@ -94,7 +94,7 @@ export const getChoroplethTopValuesLayer = (
 };
 
 interface Props {
-  stats: FieldVisStats | undefined;
+  stats: FieldVisStats;
   suggestion: EMSTermJoinConfig;
 }
 
@@ -106,16 +106,14 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
     },
   } = useDataVisualizerKibana();
 
-  if (!mapsService) return null;
-
-  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
+  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats;
 
   const choroplethLayer: VectorLayerDescriptor = useMemo(
     () => getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion),
     [suggestion, fieldName, topValues]
   );
 
-  if (!stats) return null;
+  if (!mapsService) return null;
 
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
 

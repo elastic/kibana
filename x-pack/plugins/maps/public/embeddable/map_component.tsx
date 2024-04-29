@@ -21,7 +21,7 @@ export interface Props {
   timeRange?: TimeRange;
   layerList: LayerDescriptor[];
   mapSettings?: Partial<MapSettings>;
-  hideFilterActions?: boolean,
+  hideFilterActions?: boolean;
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   /*
@@ -51,7 +51,8 @@ export class MapComponent extends Component<Props> {
         hidePanelTitles: !Boolean(this.props.title),
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
-        hideFilterActions: typeof this.props.hideFilterActions === 'boolean' ? this.props.hideFilterActions : false,
+        hideFilterActions:
+          typeof this.props.hideFilterActions === 'boolean' ? this.props.hideFilterActions : false,
         mapCenter: this.props.mapCenter,
         mapSettings: this.props.mapSettings ?? {},
       }
@@ -103,9 +104,7 @@ export class MapComponent extends Component<Props> {
 
   getLayerList(): LayerDescriptor[] {
     const basemapLayer = createBasemapLayerDescriptor();
-    return basemapLayer
-      ? [basemapLayer, ...this.props.layerList]
-      : this.props.layerList;
+    return basemapLayer ? [basemapLayer, ...this.props.layerList] : this.props.layerList;
   }
 
   render() {

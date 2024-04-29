@@ -1661,7 +1661,23 @@
           "label": "showInlineTopNav",
           "description": [],
           "signature": [
-            "(options?: Partial<Omit<{ enabled: boolean; showLogsExplorerTabs: boolean; }, \"enabled\">> | undefined) => void"
+            "() => void"
+          ],
+          "path": "src/plugins/discover/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "discover",
+          "id": "def-public.DiscoverSetup.configureInlineTopNav",
+          "type": "Function",
+          "tags": [],
+          "label": "configureInlineTopNav",
+          "description": [],
+          "signature": [
+            "(projectNavId: string, options: { enabled: boolean; showLogsExplorerTabs: boolean; }) => void"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false,
@@ -1669,18 +1685,33 @@
           "children": [
             {
               "parentPluginId": "discover",
-              "id": "def-public.DiscoverSetup.showInlineTopNav.$1",
+              "id": "def-public.DiscoverSetup.configureInlineTopNav.$1",
+              "type": "string",
+              "tags": [],
+              "label": "projectNavId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/discover/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "discover",
+              "id": "def-public.DiscoverSetup.configureInlineTopNav.$2",
               "type": "Object",
               "tags": [],
               "label": "options",
               "description": [],
               "signature": [
-                "Partial<Omit<{ enabled: boolean; showLogsExplorerTabs: boolean; }, \"enabled\">> | undefined"
+                "{ enabled: boolean; showLogsExplorerTabs: boolean; }"
               ],
               "path": "src/plugins/discover/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
-              "isRequired": false
+              "isRequired": true
             }
           ],
           "returnComment": []

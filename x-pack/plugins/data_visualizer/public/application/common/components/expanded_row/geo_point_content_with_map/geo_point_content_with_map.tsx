@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import { useMemo } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ES_GEO_FIELD_TYPE, INITIAL_LOCATION, LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -32,35 +34,38 @@ export const GeoPointContentWithMap: FC<{
 
   const query = useMemo(() => {
     return combinedQuery
-    ? {
-        query: combinedQuery.searchString,
-        language: combinedQuery.searchQueryLanguage,
-      }
-    : undefined;
+      ? {
+          query: combinedQuery.searchString,
+          language: combinedQuery.searchQueryLanguage,
+        }
+      : undefined;
   }, [combinedQuery]);
 
   useEffect(() => {
     if (!mapsPlugin) {
       return;
     }
-    
+
     if (
       !dataView?.id ||
       !config?.fieldName ||
-      !(config.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
-        config.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE)
+      !(
+        config.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
+        config.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE
+      )
     ) {
       setLayerList([]);
       return;
     }
 
     let ignore = false;
-    mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor({
-      indexPatternId: dataView.id,
-      geoFieldName: config.fieldName,
-      geoFieldType: config.type as ES_GEO_FIELD_TYPE,
-    })
-      .then(searchLayerDescriptor => {
+    mapsPlugin.createLayerDescriptors
+      .createESSearchSourceLayerDescriptor({
+        indexPatternId: dataView.id,
+        geoFieldName: config.fieldName,
+        geoFieldType: config.type as ES_GEO_FIELD_TYPE,
+      })
+      .then((searchLayerDescriptor) => {
         if (ignore) {
           return;
         }
@@ -102,10 +107,10 @@ export const GeoPointContentWithMap: FC<{
         }
       });
 
-      return () => {
-        ignore = true;
-      }
-  }, [dataView, combinedQuery, esql, config, mapsPlugin]);
+    return () => {
+      ignore = true;
+    };
+  }, [dataView, combinedQuery, esql, config, mapsPlugin, timeFieldName]);
 
   if (stats?.examples === undefined) return null;
   return (

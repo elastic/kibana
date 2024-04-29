@@ -43,7 +43,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 
-const getHeaderCss = ({ size }: EuiThemeComputed) => ({
+const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
     container: css`
       display: inline-block;
@@ -72,6 +72,23 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
   `,
   redirectAppLinksContainer: css`
     min-width: 0; // needed to enable breadcrumbs truncation
+  `,
+  leftNavcontrols: css`
+    .navcontrols__separator {
+      display: flex;
+      margin-right: ${size.xs};
+      &:after {
+        background: ${colors.lightShade};
+        content: '';
+        flex-shrink: 0;
+        margin-block-start: ${size.xs};
+        margin-block-end: 0;
+        margin-inline: ${size.s};
+        block-size: 16px;
+        inline-size: 1px;
+        transform: translateY(-1px) rotate(15deg);
+      }
+    }
   `,
 });
 
@@ -204,6 +221,14 @@ export const ProjectHeader = ({
                   homeHref$={observables.homeHref$}
                   loadingCount$={observables.loadingCount$}
                   logoCss={logoCss}
+                />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
+                <HeaderNavControls
+                  side="left"
+                  navControls$={observables.navControlsLeft$}
+                  append={<div className="navcontrols__separator" />}
                 />
               </EuiHeaderSectionItem>
 
