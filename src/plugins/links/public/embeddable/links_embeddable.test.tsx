@@ -138,14 +138,6 @@ const expectedRuntimeState = {
   },
 };
 
-jest.mock('../content_management', () => {
-  return {
-    linksClient: {
-      create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
-    },
-  };
-});
-
 jest.mock('./utils', () => {
   return {
     resolveLinks: jest.fn().mockResolvedValue(resolvedLinks),
@@ -172,6 +164,9 @@ jest.mock('../content_management', () => {
         },
       });
     }),
+    linksClient: {
+      create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
+    },
   };
 });
 
