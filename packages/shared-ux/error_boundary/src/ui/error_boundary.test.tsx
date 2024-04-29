@@ -22,7 +22,7 @@ describe('<KibanaErrorBoundary>', () => {
     services = getServicesMock();
   });
 
-  const Template: FC<PropsWithChildren<void>> = ({ children }) => {
+  const Template: FC<PropsWithChildren<any>> = ({ children }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>

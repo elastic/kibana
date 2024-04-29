@@ -92,7 +92,7 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC<PropsWithChildren<void>> = ({ children }) => {
+export const UrlStateProvider: FC<PropsWithChildren<any>> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 
