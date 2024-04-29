@@ -27,6 +27,8 @@ export const getAgentStatusClient = (
       return new EndpointAgentStatusClient(constructorOptions);
     case 'sentinel_one':
       return new SentinelOneAgentStatusClient(constructorOptions);
+    // case 'crowdstrike':
+    //   // TODO TC: Currently we do not support CrowdStrike agent status - will be done in a follow up PR
     default:
       throw new UnsupportedAgentTypeError(
         `Agent type [${agentType}] does not support agent status`
