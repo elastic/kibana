@@ -80,8 +80,14 @@ export const InfrastructurePage = () => {
                         {settingsTabTitle}
                       </EuiHeaderLink>
                       <Route path="/inventory" component={AnomalyDetectionFlyout} />
-                      <Route path="/hosts" component={AnomalyDetectionFlyout} />
-                      <Route path="/detail/host" component={AnomalyDetectionFlyout} />
+                      <Route
+                        path="/hosts"
+                        render={() => <AnomalyDetectionFlyout hideJobType hideSelectGroup />}
+                      />
+                      <Route
+                        path="/detail/host"
+                        render={() => <AnomalyDetectionFlyout hideJobType hideSelectGroup />}
+                      />
                       {config.featureFlags.alertsAndRulesDropdownEnabled && (
                         <MetricsAlertDropdown />
                       )}

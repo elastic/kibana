@@ -10,7 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@ela
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
 import { Popover } from '../../common/popover';
-import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source/metrics_view';
+import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
 import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 
 export const MetricsGrid = () => {

@@ -184,7 +184,7 @@ export const CustomEquationEditor = ({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('xpack.infra.customEquationEditor.euiFormRow.equationLabel', {
+            label={i18n.translate('xpack.infra.metrics.alertFlyout.customEquationEditor.equation', {
               defaultMessage: 'Equation',
             })}
             fullWidth

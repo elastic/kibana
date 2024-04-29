@@ -22,7 +22,6 @@ interface PersistedDataView {
 
 interface DataViewAttributes {
   timeFieldName: string;
-  indexPattern: string;
   name?: string;
 }
 
@@ -40,7 +39,6 @@ export async function resolveDataView({
       dataViewsService,
       dataViewId,
       attributes: {
-        indexPattern: dataViewId,
         timeFieldName: TIMESTAMP_FIELD,
       },
     });
@@ -66,12 +64,12 @@ export const resolveAdHocDataView = async ({
   dataViewId,
   attributes,
 }: PersistedDataView & { attributes: DataViewAttributes }): Promise<ResolvedDataView> => {
-  const { indexPattern, name, timeFieldName } = attributes;
+  const { name, timeFieldName } = attributes;
   const dataViewReference = await dataViewsService.create(
     {
       id: dataViewId,
       name,
-      title: indexPattern,
+      title: dataViewId,
       timeFieldName,
     },
     false,
@@ -79,7 +77,7 @@ export const resolveAdHocDataView = async ({
   );
 
   return {
-    indices: indexPattern,
+    indices: dataViewId,
     timeFieldName,
     fields: dataViewReference.fields,
     dataViewReference,

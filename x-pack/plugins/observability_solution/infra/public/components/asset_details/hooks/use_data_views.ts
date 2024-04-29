@@ -9,10 +9,7 @@ import useAsync from 'react-use/lib/useAsync';
 import createContainer from 'constate';
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import {
-  DEFAULT_METRICS_VIEW,
-  DEFAULT_METRICS_VIEW_ATTRIBUTES,
-} from '../../../../common/constants';
+import { DEFAULT_METRICS_VIEW_ATTRIBUTES } from '../../../../common/constants';
 import { resolveAdHocDataView } from '../../../utils/data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewReference } from '../../../hooks/use_log_view_reference';
@@ -28,9 +25,8 @@ const useDataViews = ({ metricsIndexPattern }: { metricsIndexPattern: string }) 
     () =>
       resolveAdHocDataView({
         dataViewsService: dataViews,
-        dataViewId: DEFAULT_METRICS_VIEW.metricsViewId,
+        dataViewId: metricsIndexPattern,
         attributes: {
-          indexPattern: metricsIndexPattern,
           name: DEFAULT_METRICS_VIEW_ATTRIBUTES.name,
           timeFieldName: DEFAULT_METRICS_VIEW_ATTRIBUTES.timeFieldName,
         },

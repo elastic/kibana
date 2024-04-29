@@ -14,7 +14,7 @@ import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
-import { useMetricsDataViewContext } from '../../../../../containers/metrics_source/metrics_view';
+import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { LimitOptions } from './limit_options';
 import { HostLimitOptions } from '../../types';
 

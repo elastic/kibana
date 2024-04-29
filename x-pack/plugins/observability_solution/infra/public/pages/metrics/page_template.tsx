@@ -107,7 +107,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
       messageOverride={i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
         defaultMessage:
           'There was an error trying to create a Data View: {metricAlias}. Try reloading the page.',
-        values: { metricAlias: source?.configuration.metricAlias },
+        values: { metricAlias: source?.configuration.metricAlias ?? '' },
       })}
       onTryAgainClick={loadDataView}
       hasTryAgainButton

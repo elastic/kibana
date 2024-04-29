@@ -17,8 +17,8 @@ import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
 export const AnomalyDetectionFlyout = ({
-  hideJobType = true,
-  hideSelectGroup = true,
+  hideJobType = false,
+  hideSelectGroup = false,
 }: {
   hideJobType?: boolean;
   hideSelectGroup?: boolean;

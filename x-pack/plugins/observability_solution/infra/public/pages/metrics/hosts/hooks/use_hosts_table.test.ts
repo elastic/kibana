@@ -11,13 +11,13 @@ import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
 import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
-import * as useMetricsDataViewHooks from '../../../../containers/metrics_source/metrics_view';
+import * as useMetricsDataViewHooks from '../../../../containers/metrics_source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
-jest.mock('../../../../containers/metrics_source/metrics_view');
+jest.mock('../../../../containers/metrics_source');
 jest.mock('../../../../hooks/use_kibana');
 
 const mockUseUnifiedSearchContext =

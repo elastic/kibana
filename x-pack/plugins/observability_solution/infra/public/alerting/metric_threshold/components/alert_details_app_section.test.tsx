@@ -18,20 +18,8 @@ import {
 } from '../mocks/metric_threshold_rule';
 import { AlertDetailsAppSection } from './alert_details_app_section';
 import { ExpressionChart } from './expression_chart';
-import { ResolvedDataView } from '../../../utils/data_view';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
-
-const mockDataView = {
-  id: 'mock-id',
-  title: 'mock-title',
-  timeFieldName: TIMESTAMP_FIELD,
-  isPersisted: () => false,
-  getName: () => 'mock-data-view',
-  toSpec: () => ({}),
-} as jest.Mocked<DataView>;
 
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
@@ -55,23 +43,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
     },
-  }),
-}));
-
-jest.mock('../../../containers/metrics_source/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: TIMESTAMP_FIELD,
-      fields: [],
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
   }),
 }));
 

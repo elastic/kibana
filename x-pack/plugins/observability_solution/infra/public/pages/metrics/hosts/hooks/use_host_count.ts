@@ -16,7 +16,7 @@ import type { ITelemetryClient } from '../../../../services/telemetry';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
-import { useMetricsDataViewContext } from '../../../../containers/metrics_source/metrics_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {

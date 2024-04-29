@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { DEFAULT_METRICS_VIEW, DEFAULT_METRICS_VIEW_ATTRIBUTES } from '../../../common/constants';
+import { DEFAULT_METRICS_VIEW_ATTRIBUTES } from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { resolveAdHocDataView } from '../../utils/data_view';
 import { useSourceContext } from './source';
@@ -28,9 +28,8 @@ export const useMetricsDataView = () => {
 
     return resolveAdHocDataView({
       dataViewsService: dataViews,
-      dataViewId: DEFAULT_METRICS_VIEW.metricsViewId,
+      dataViewId: indexPattern,
       attributes: {
-        indexPattern,
         name: DEFAULT_METRICS_VIEW_ATTRIBUTES.name,
         timeFieldName: DEFAULT_METRICS_VIEW_ATTRIBUTES.timeFieldName,
       },

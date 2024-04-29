@@ -26,7 +26,7 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
@@ -34,7 +34,7 @@ jest.mock('../../../containers/metrics_source/source', () => ({
   useMetricsDataViewContext: () => ({
     metricsView: {
       indices: 'metricbeat-*',
-      timeFieldName: TIMESTAMP_FIELD,
+      timeFieldName: mockDataView.timeFieldName,
       fields: mockDataView.fields,
       dataViewReference: mockDataView,
     } as ResolvedDataView,

@@ -15,7 +15,7 @@ import { parseDateRange } from '../../../../utils/datemath';
 import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
-import { useMetricsDataViewContext } from '../../../../containers/metrics_source/metrics_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import {
   HostsSearchPayload,
   useHostsUrlState,

@@ -38,11 +38,6 @@ export const LINK_TO_INVENTORY = '/app/metrics/link-to/inventory';
 export const METRICS_EXPLORER_URL = '/app/metrics/explorer';
 export const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
 
-export const DEFAULT_METRICS_VIEW_ID = 'infra-metrics-view';
-export const DEFAULT_METRICS_VIEW = {
-  metricsViewId: DEFAULT_METRICS_VIEW_ID,
-};
-
 export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {
   name: 'Metrics View',
   timeFieldName: TIMESTAMP_FIELD,

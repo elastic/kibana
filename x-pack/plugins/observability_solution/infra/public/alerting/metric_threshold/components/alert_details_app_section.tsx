@@ -27,7 +27,7 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../../common/components/threshold';
-import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
+import { withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -61,7 +61,6 @@ export function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
-  const { metricsView } = useMetricsDataViewContext();
   const { euiTheme } = useEuiTheme();
 
   const chartProps = {

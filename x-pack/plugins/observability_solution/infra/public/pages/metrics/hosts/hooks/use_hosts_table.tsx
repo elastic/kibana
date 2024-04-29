@@ -26,7 +26,7 @@ import type {
 } from '../../../../../common/http_api';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
-import { useMetricsDataViewContext } from '../../../../containers/metrics_source/metrics_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
