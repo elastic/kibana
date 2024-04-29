@@ -333,7 +333,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings baseTheme={chartTheme.baseTheme} locale={i18n.getLocale()} />
+          <Settings
+            baseTheme={chartTheme.baseTheme}
+            theme={{ chartMargins: { top: 35 } }}
+            locale={i18n.getLocale()}
+          />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

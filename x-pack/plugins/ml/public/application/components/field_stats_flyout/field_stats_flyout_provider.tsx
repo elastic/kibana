@@ -22,6 +22,7 @@ import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
 
 export const FieldStatsFlyoutProvider: FC<{
+  children: React.ReactNode;
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;

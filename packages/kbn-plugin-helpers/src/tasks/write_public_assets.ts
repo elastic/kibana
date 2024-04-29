@@ -28,6 +28,7 @@ export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: Ta
       base: sourceDir,
       buffer: true,
       allowEmpty: true,
+      encoding: false,
     }),
     vfs.dest(buildDir)
   );

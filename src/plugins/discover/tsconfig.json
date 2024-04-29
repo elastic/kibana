@@ -57,7 +57,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/ebt-tools",
     "@kbn/unified-field-list",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-saved-objects-server",
