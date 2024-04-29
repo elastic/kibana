@@ -27,6 +27,7 @@ import {
   GetIntegrationsParams,
   IntegrationsResponse,
 } from '../../../common/data_streams_stats';
+import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from './types';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
@@ -49,7 +50,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return dataStreamsStats;
+    return dataStreamsStats.map(DataStreamStat.create);
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {

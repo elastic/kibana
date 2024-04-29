@@ -5,52 +5,40 @@
  * 2.0.
  */
 
-import { DataStreamStatType } from '../../common/data_streams_stats/types';
 import { mapPercentageToQuality } from '../../common/utils';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
 
 export function generateDatasets(
-  dataStreamStats: DataStreamStatType[] = [],
+  dataStreamStats: DataStreamStat[] = [],
   degradedDocStats: DegradedDocsStat[] = [],
   integrations: Integration[]
-): DataStreamStat[] {
+) {
   if (!dataStreamStats.length && !integrations.length) {
     return [];
   }
 
-  const {
-    datasetIntegrationMap,
-    integrationsMap,
-  }: {
-    datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
-    integrationsMap: Record<string, Integration>;
-  } = integrations.reduce(
-    (acc, integration) => {
+  const integrationMap: Record<string, { integration: Integration; title: string }> =
+    integrations.reduce((integrationMapAcc, integration) => {
       return {
-        datasetIntegrationMap: {
-          ...acc.datasetIntegrationMap,
-          ...Object.keys(integration.datasets).reduce(
-            (datasetsAcc, dataset) =>
-              Object.assign(datasetsAcc, {
-                [dataset]: {
-                  integration,
-                  title: integration.datasets[dataset],
-                },
-              }),
-            {}
-          ),
-        },
-        integrationsMap: { ...acc.integrationsMap, [integration.name]: integration },
+        ...integrationMapAcc,
+        ...Object.keys(integration.datasets).reduce(
+          (datasetsAcc, dataset) =>
+            Object.assign(datasetsAcc, {
+              [dataset]: {
+                integration,
+                title: integration.datasets[dataset],
+              },
+            }),
+          {}
+        ),
       };
-    },
-    { datasetIntegrationMap: {}, integrationsMap: {} }
-  );
+    }, {});
 
   if (!dataStreamStats.length) {
     return degradedDocStats.map((degradedDocStat) =>
-      DataStreamStat.fromDegradedDocStat({ degradedDocStat, datasetIntegrationMap })
+      DataStreamStat.fromDegradedDocStat({ degradedDocStat, integrationMap })
     );
   }
 
@@ -73,16 +61,10 @@ export function generateDatasets(
     {}
   );
 
-  return dataStreamStats?.map((dataStream) => {
-    const dataset = DataStreamStat.create(dataStream);
-
-    return {
-      ...dataset,
-      title: datasetIntegrationMap[dataset.name]?.title || dataset.title,
-      integration:
-        datasetIntegrationMap[dataset.name]?.integration ??
-        integrationsMap[dataStream.integration ?? ''],
-      degradedDocs: degradedMap[dataset.rawName] || dataset.degradedDocs,
-    };
-  });
+  return dataStreamStats?.map((dataStream) => ({
+    ...dataStream,
+    title: integrationMap[dataStream.name]?.title || dataStream.title,
+    integration: integrationMap[dataStream.name]?.integration,
+    degradedDocs: degradedMap[dataStream.rawName] || dataStream.degradedDocs,
+  }));
 }
