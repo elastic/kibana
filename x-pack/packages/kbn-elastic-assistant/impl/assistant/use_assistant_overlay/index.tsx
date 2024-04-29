@@ -73,7 +73,7 @@ export const useAssistantOverlay = (
   tooltip: PromptContext['tooltip'],
 
   /**
-   * Optionally provide a map of replacements associated with the context, i.e. replacements for an insight that's provided as context
+   * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {

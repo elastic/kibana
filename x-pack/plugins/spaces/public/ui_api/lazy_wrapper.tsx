@@ -15,7 +15,7 @@ import type { PluginsStart } from '../plugin';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 
 interface InternalProps<T> {
-  fn: () => Promise<FC<T>>;
+  fn: () => Promise<FC<PropsWithChildren<T>>>;
   getStartServices: StartServicesAccessor<PluginsStart>;
   showLoadingSpinner?: boolean;
   props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>;
