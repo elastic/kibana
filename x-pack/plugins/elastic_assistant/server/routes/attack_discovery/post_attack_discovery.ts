@@ -44,7 +44,7 @@ export const postAttackDiscoveryRoute = (
           },
           response: {
             200: {
-              body: buildRouteValidationWithZod(AttackDiscoveryPostResponse),
+              body: { custom: buildRouteValidationWithZod(AttackDiscoveryPostResponse) },
             },
           },
         },
