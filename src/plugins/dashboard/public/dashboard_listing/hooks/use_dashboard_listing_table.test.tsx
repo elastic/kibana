@@ -155,7 +155,7 @@ describe('useDashboardListingTable', () => {
         isReadonly: false,
         customValidators: expect.any(Object),
       },
-      bulkGetUserProfiles: expect.any(Function),
+      createdByEnabled: true,
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

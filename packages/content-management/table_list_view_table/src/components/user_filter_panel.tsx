@@ -73,7 +73,8 @@ export const UserFilterPanel: FC<{}> = () => {
   const visibleOptions = React.useMemo(() => {
     if (!query.data || query.data.length === 0) return [];
     // attach null to the end of the list to represent the "no creator" option
-    const users = showNoUserOption ? [...query.data, null] : query.data;
+    const users =
+      showNoUserOption || selectedUsers.includes(NULL_USER) ? [...query.data, null] : query.data;
 
     if (!searchTerm) {
       return users;
