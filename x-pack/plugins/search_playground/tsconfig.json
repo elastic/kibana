@@ -34,7 +34,8 @@
     "@kbn/cases-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/elastic-assistant-common",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/doc-links"
   ],
   "exclude": [
     "target/**/*",
