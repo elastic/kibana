@@ -21,5 +21,8 @@
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
     "@kbn/esql-ast",
+    "@kbn/expressions-plugin",
+    "@kbn/field-types",
+    "@kbn/es-types",
   ]
 }
