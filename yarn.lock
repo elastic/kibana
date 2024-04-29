@@ -3242,7 +3242,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/assetManager-plugin@link:x-pack/plugins/asset_manager":
+"@kbn/assetManager-plugin@link:x-pack/plugins/observability_solution/asset_manager":
   version "0.0.0"
   uid ""
 
