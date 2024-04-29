@@ -14,9 +14,9 @@ import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { FetchStatus } from '../../types';
 import { DataDocuments$, RecordRawType } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { fetchDocuments } from '../utils/fetch_documents';
+import { fetchDocuments } from '../data_fetching/fetch_documents';
 
-jest.mock('../utils/fetch_documents', () => ({
+jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
 }));
 

@@ -25,9 +25,9 @@ import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
-import { fetchAll, fetchMoreDocuments } from '../utils/fetch_all';
+import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
-import { getFetch$ } from '../utils/get_fetch_observable';
+import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { InternalState } from './discover_internal_state_container';
 
 export interface SavedSearchData {

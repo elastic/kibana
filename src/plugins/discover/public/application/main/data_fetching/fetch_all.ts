@@ -12,7 +12,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
-import { getRawRecordType } from './get_raw_record_type';
+import { getRawRecordType } from '../utils/get_raw_record_type';
 import {
   checkHitCount,
   sendCompleteMsg,
