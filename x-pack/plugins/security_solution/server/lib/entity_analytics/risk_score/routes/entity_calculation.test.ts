@@ -92,7 +92,7 @@ describe('entity risk score calculation route', () => {
 
     expect(response.status).toEqual(200);
     expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
-      expect.objectContaining({ filter: { term: { 'host.name': 'test-host-name' } } })
+      expect.objectContaining({ filter: [{ term: { 'host.name': 'test-host-name' } }] })
     );
   });
 
@@ -101,18 +101,14 @@ describe('entity risk score calculation route', () => {
       const request = buildRequest({ identifier_type: undefined });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "identifier_type"'
-      );
+      expect(result.badRequest).toHaveBeenCalledWith('identifier_type: Required');
     });
 
     it('requires a parameter for the entity identifier', async () => {
       const request = buildRequest({ identifier: undefined });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "identifier"'
-      );
+      expect(result.badRequest).toHaveBeenCalledWith('identifier: Required');
     });
 
     it('returns an error if no entity analytics configuration is found', async () => {
@@ -140,6 +136,21 @@ describe('entity risk score calculation route', () => {
         status_code: 405,
       });
       expect(response.status).toEqual(405);
+    });
+
+    it('filter by user provided filter when it is defined', async () => {
+      const userFilter = { term: { 'test.filter': 'test-value' } };
+      mockRiskScoreService.getConfigurationWithDefaults.mockResolvedValue({
+        ...entityAnalyticsConfig,
+        filter: userFilter,
+      });
+      const request = buildRequest();
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: expect.arrayContaining([userFilter]) })
+      );
     });
   });
 });

@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { isEmpty } from 'lodash/fp';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import type { AfterKeys } from '../../../../../common/entity_analytics/risk_engine';
@@ -88,6 +89,7 @@ export const riskScoreEntityCalculationRoute = (
             range: configuredRange,
             pageSize,
             alertSampleSizePerShard,
+            filter: userFilter,
           } = entityAnalyticsConfig;
 
           if (!enabled) {
@@ -107,12 +109,17 @@ export const riskScoreEntityCalculationRoute = (
 
           const afterKeys: AfterKeys = {};
 
+          const identifierFilter = {
+            term: { [getFieldForIdentifier(identifierType)]: identifier },
+          };
+          const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
+
           const result: CalculateAndPersistScoresResponse =
             await riskScoreService.calculateAndPersistScores({
               pageSize,
               identifierType,
               index,
-              filter: { term: { [getFieldForIdentifier(identifierType)]: identifier } },
+              filter,
               range,
               runtimeMappings,
               weights: [],
