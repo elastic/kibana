@@ -213,6 +213,7 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
                 'azure-mysql-server-db',
                 'azure-postgresql-server-db',
                 'azure-sql-server',
+                'azure-storage-account',
                 'azure-vm',
                 'gcp-bigquery-dataset',
                 'gcp-bigquery-table',
