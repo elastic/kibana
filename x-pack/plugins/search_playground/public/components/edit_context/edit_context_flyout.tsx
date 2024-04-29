@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiPanel,
@@ -26,6 +27,7 @@ import {
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
@@ -88,6 +90,16 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
               id="xpack.searchPlayground.editContext.flyout.description"
               defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
+            <EuiLink
+              href={docLinks.chatPlayground}
+              target="_blank"
+              data-test-subj="context-optimization-documentation-link"
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.editContext.flyout.learnMoreLink"
+                defaultMessage=" Learn more."
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </EuiFlyoutHeader>
