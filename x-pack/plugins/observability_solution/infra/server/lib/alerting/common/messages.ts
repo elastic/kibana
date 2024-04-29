@@ -75,6 +75,35 @@ const recoveredComparatorToI18n = (
       return aboveText;
   }
 };
+const alertComparatorToI18n = (comparator: COMPARATORS) => {
+  switch (comparator) {
+    case COMPARATORS.BETWEEN:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.between', {
+        defaultMessage: 'between',
+      });
+    case COMPARATORS.NOT_BETWEEN:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.notBetween', {
+        defaultMessage: 'not between',
+      });
+    case COMPARATORS.GREATER_THAN:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.above', {
+        defaultMessage: 'above',
+      });
+    case COMPARATORS.GREATER_THAN_OR_EQUALS:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.aboveOrEqual', {
+        defaultMessage: 'above or equal',
+      });
+    case COMPARATORS.LESS_THAN:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.below', {
+        defaultMessage: 'below',
+      });
+
+    case COMPARATORS.LESS_THAN_OR_EQUALS:
+      return i18n.translate('xpack.infra.customThreshold.rule.threshold.belowOrEqual', {
+        defaultMessage: 'below or equal',
+      });
+  }
+};
 
 const thresholdToI18n = ([a, b]: Array<number | string>) => {
   if (typeof b === 'undefined') return a;
@@ -101,7 +130,7 @@ export const buildFiredAlertReason: (alertResult: {
     values: {
       group: formatGroup(group),
       metric,
-      comparator,
+      comparator: alertComparatorToI18n(comparator),
       threshold: thresholdToI18n(threshold),
       currentValue,
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),

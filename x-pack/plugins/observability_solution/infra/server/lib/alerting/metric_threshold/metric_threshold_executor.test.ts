@@ -267,7 +267,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when outside 0 and 0.75.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when not between 0 and 0.75.',
         tags: [],
       });
     });
