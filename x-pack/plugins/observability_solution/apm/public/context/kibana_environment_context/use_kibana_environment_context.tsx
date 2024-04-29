@@ -6,10 +6,7 @@
  */
 
 import React, { useMemo, createElement } from 'react';
-import {
-  KibanaEnvironmentContext,
-  type KibanaEnvContext,
-} from './kibana_environment_context';
+import { KibanaEnvironmentContext, type KibanaEnvContext } from './kibana_environment_context';
 
 export const useKibanaEnvironmentContextProvider = ({
   kibanaVersion,

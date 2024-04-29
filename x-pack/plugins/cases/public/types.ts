@@ -18,7 +18,10 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
+  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -64,6 +67,7 @@ export interface CasesPublicSetupDependencies {
   serverless?: ServerlessPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  triggersActionsUi: TriggersActionsSetup;
 }
 
 export interface CasesPublicStartDependencies {

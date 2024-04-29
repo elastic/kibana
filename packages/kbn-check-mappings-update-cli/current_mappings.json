@@ -19,6 +19,33 @@
     "dynamic": false,
     "properties": {}
   },
+  "ad_hoc_run_params": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "end": {
+        "type": "date"
+      },
+      "rule": {
+        "properties": {
+          "alertTypeId": {
+            "type": "keyword"
+          },
+          "consumer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "start": {
+        "type": "date"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -666,6 +693,27 @@
     "properties": {
       "owner": {
         "type": "keyword"
+      }
+    }
+  },
+  "cases-rules": {
+    "dynamic": false,
+    "properties": {
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -1568,11 +1616,11 @@
       "assetType": {
         "type": "keyword"
       },
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
       "dashboardFilterAssetIdEnabled": {
         "type": "boolean"
+      },
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
@@ -2975,6 +3023,10 @@
       }
     }
   },
+  "slo-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "space": {
     "dynamic": false,
     "properties": {
@@ -3013,6 +3065,9 @@
             }
           }
         }
+      },
+      "config_id": {
+        "type": "keyword"
       },
       "custom_heartbeat_id": {
         "type": "keyword"

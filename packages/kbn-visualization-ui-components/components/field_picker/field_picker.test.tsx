@@ -56,33 +56,28 @@ const generateProps = (customField = generateFieldWithLabelOfLength(20)) =>
   } as unknown as FieldPickerProps<FieldOptionValue>);
 
 describe('field picker', () => {
-  const renderFieldPicker = (customField = generateFieldWithLabelOfLength(20)) => {
+  const renderAndOpenFieldPicker = (customField = generateFieldWithLabelOfLength(20)) => {
     const props = generateProps(customField);
     const rtlRender = render(<FieldPicker {...props} />);
-    return {
-      openCombobox: () => userEvent.click(screen.getByLabelText(/open list of options/i)),
-      ...rtlRender,
-    };
+    const openCombobox = () => userEvent.click(screen.getByLabelText(/open list of options/i));
+    openCombobox();
+    return rtlRender;
   };
 
   it('should render minimum width dropdown list if all labels are short', async () => {
-    const { openCombobox } = renderFieldPicker();
-    openCombobox();
+    renderAndOpenFieldPicker();
     const popover = screen.getByRole('dialog');
     expect(popover).toHaveStyle('inline-size: 256px');
   });
 
   it('should render calculated width dropdown list if the longest label is longer than min width', async () => {
-    const { openCombobox } = renderFieldPicker(generateFieldWithLabelOfLength(50));
-    openCombobox();
-
+    renderAndOpenFieldPicker(generateFieldWithLabelOfLength(50));
     const popover = screen.getByRole('dialog');
     expect(popover).toHaveStyle('inline-size: 466px');
   });
 
   it('should render maximum width dropdown list if the longest label is longer than max width', async () => {
-    const { openCombobox } = renderFieldPicker(generateFieldWithLabelOfLength(80));
-    openCombobox();
+    renderAndOpenFieldPicker(generateFieldWithLabelOfLength(80));
     const popover = screen.getByRole('dialog');
     expect(popover).toHaveStyle('inline-size: 550px');
   });

@@ -17,14 +17,6 @@ import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiScreenReaderOnly: () => <></>,
-  };
-});
-
 jest.mock('../../hooks/use_get_field_spec');
 
 jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
@@ -129,8 +121,8 @@ describe('EventFieldsBrowser', () => {
 
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
+          .find('tr.euiTableRow')
+          .find('td.euiTableRowCell')
           .at(1)
           .find('[data-euiicon-type]')
           .exists()
@@ -168,8 +160,8 @@ describe('EventFieldsBrowser', () => {
       );
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
+          .find('tr.euiTableRow')
+          .find('td.euiTableRowCell')
           .at(1)
           .find('[data-euiicon-type]')
           .last()

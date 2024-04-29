@@ -54,11 +54,8 @@ export function ServiceDashboards() {
     '/mobile-services/{serviceName}/dashboards'
   );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
-  const [serviceDashboards, setServiceDashboards] = useState<
-    MergedServiceDashboard[]
-  >([]);
-  const [currentDashboard, setCurrentDashboard] =
-    useState<MergedServiceDashboard>();
+  const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
+  const [currentDashboard, setCurrentDashboard] = useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
@@ -67,16 +64,13 @@ export function ServiceDashboards() {
   const { data, status, refetch } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
-        return callApmApi(
-          `GET /internal/apm/services/{serviceName}/dashboards`,
-          {
-            isCachable: false,
-            params: {
-              path: { serviceName },
-              query: { start, end },
-            },
-          }
-        );
+        return callApmApi(`GET /internal/apm/services/{serviceName}/dashboards`, {
+          isCachable: false,
+          params: {
+            path: { serviceName },
+            query: { start, end },
+          },
+        });
       }
     },
     [serviceName, start, end]
@@ -84,10 +78,7 @@ export function ServiceDashboards() {
 
   useEffect(() => {
     const filteredServiceDashboards = (data?.serviceDashboards ?? []).reduce(
-      (
-        result: MergedServiceDashboard[],
-        serviceDashboard: SavedApmCustomDashboard
-      ) => {
+      (result: MergedServiceDashboard[], serviceDashboard: SavedApmCustomDashboard) => {
         const matchedDashboard = allAvailableDashboards.find(
           ({ id }) => id === serviceDashboard.dashboardSavedObjectId
         );
@@ -105,14 +96,16 @@ export function ServiceDashboards() {
     setServiceDashboards(filteredServiceDashboards);
   }, [allAvailableDashboards, data]);
 
-  const getCreationOptions =
-    useCallback((): Promise<DashboardCreationOptions> => {
-      const getInitialInput = () => ({
-        viewMode: ViewMode.VIEW,
-        timeRange: { from: rangeFrom, to: rangeTo },
-      });
-      return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
-    }, [rangeFrom, rangeTo]);
+  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
+    const getInitialInput = () => ({
+      viewMode: ViewMode.VIEW,
+      timeRange: { from: rangeFrom, to: rangeTo },
+    });
+    return Promise.resolve<DashboardCreationOptions>({
+      getInitialInput,
+      useControlGroupIntegration: true,
+    });
+  }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
     if (!dashboard) return;
@@ -127,16 +120,7 @@ export function ServiceDashboards() {
       timeRange: { from: rangeFrom, to: rangeTo },
       query: { query: kuery, language: 'kuery' },
     });
-  }, [
-    dataView,
-    serviceName,
-    environment,
-    kuery,
-    dashboard,
-    rangeFrom,
-    rangeTo,
-    currentDashboard,
-  ]);
+  }, [dataView, serviceName, environment, kuery, dashboard, rangeFrom, rangeTo, currentDashboard]);
 
   const getLocatorParams = useCallback(
     (params) => {
@@ -162,8 +146,7 @@ export function ServiceDashboards() {
       ...baseLocator,
       getRedirectUrl: (params: SerializableRecord) =>
         baseLocator.getRedirectUrl(getLocatorParams(params)),
-      navigate: (params: SerializableRecord) =>
-        baseLocator.navigate(getLocatorParams(params)),
+      navigate: (params: SerializableRecord) => baseLocator.navigate(getLocatorParams(params)),
     };
   }, [share, getLocatorParams]);
 
@@ -174,22 +157,15 @@ export function ServiceDashboards() {
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={
             <h4>
-              {i18n.translate(
-                'xpack.apm.serviceDashboards.loadingServiceDashboards',
-                {
-                  defaultMessage: 'Loading service dashboard',
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceDashboards.loadingServiceDashboards', {
+                defaultMessage: 'Loading service dashboard',
+              })}
             </h4>
           }
         />
       ) : status === FETCH_STATUS.SUCCESS && serviceDashboards?.length > 0 ? (
         <>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            gutterSize="xs"
-            alignItems="center"
-          >
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
                 <h3>{currentDashboard?.title}</h3>
@@ -244,9 +220,7 @@ export function ServiceDashboards() {
         </>
       ) : (
         <EmptyDashboards
-          actions={
-            <LinkDashboard onRefresh={refetch} serviceName={serviceName} />
-          }
+          actions={<LinkDashboard onRefresh={refetch} serviceName={serviceName} />}
         />
       )}
     </EuiPanel>

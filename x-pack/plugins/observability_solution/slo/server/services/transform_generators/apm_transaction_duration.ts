@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { estypes } from '@elastic/elasticsearch';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
@@ -20,12 +20,12 @@ import {
   SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { APMTransactionDurationIndicator, SLO } from '../../domain/models';
+import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -42,11 +42,11 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildGroupBy(slo: SLO, indicator: APMTransactionDurationIndicator) {
+  private buildGroupBy(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
     // These groupBy fields must match the fields from the source query, otherwise
     // the transform will create permutations for each value present in the source.
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
@@ -69,7 +69,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
+  private buildSource(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       {
         range: {
@@ -140,7 +140,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildAggregations(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: APMTransactionDurationIndicator
   ): Record<string, AggregationsAggregationContainer> {
     // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)

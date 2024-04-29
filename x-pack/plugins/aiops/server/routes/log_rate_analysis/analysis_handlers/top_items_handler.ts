@@ -39,7 +39,6 @@ export const topItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
     fieldCandidates,
@@ -55,21 +54,11 @@ export const topItemsHandlerFactory =
 
     const topCategories: SignificantItem[] = [];
 
-    if (version === '1') {
-      topCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      topCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
+    topCategories.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
+      ) ?? [])
+    );
 
     // Get categories of text fields
     if (textFieldCandidates.length > 0) {
@@ -86,27 +75,17 @@ export const topItemsHandlerFactory =
       );
 
       if (topCategories.length > 0) {
-        responseStream.push(addSignificantItemsAction(topCategories, version));
+        responseStream.push(addSignificantItemsAction(topCategories));
       }
     }
 
     const topTerms: SignificantItem[] = [];
 
-    if (version === '1') {
-      topTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      topTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
+    topTerms.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+      ) ?? [])
+    );
 
     const fieldsToSample = new Set<string>();
 
@@ -158,7 +137,7 @@ export const topItemsHandlerFactory =
         });
         topTerms.push(...fetchedTopTerms);
 
-        responseStream.push(addSignificantItemsAction(fetchedTopTerms, version));
+        responseStream.push(addSignificantItemsAction(fetchedTopTerms));
       }
 
       responseStream.push(

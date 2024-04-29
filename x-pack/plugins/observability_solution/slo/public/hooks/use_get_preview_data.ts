@@ -26,10 +26,12 @@ export function useGetPreviewData({
   groupBy,
   groupings,
   instanceId,
+  remoteName,
 }: {
   isValid: boolean;
   groupBy?: string;
   instanceId?: string;
+  remoteName?: string;
   groupings?: Record<string, unknown>;
   objective?: Objective;
   indicator: Indicator;
@@ -49,6 +51,7 @@ export function useGetPreviewData({
             groupBy,
             instanceId,
             groupings,
+            remoteName,
             ...(objective ? { objective } : null),
           }),
           signal,

@@ -94,7 +94,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   consumer: RuleDomainSchemaType['consumer'];
   schedule: RuleDomainSchemaType['schedule'];
   actions: RuleDomainSchemaType['actions'];
-  systemActions: RuleDomainSchemaType['systemActions'];
+  systemActions?: RuleDomainSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleDomainSchemaType['mapped_params'];
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];

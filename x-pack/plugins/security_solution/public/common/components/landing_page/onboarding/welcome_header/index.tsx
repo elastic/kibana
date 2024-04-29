@@ -22,6 +22,10 @@ import { CurrentPlan } from './current_plan';
 
 const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ productTier }) => {
   const userName = useCurrentUser();
+
+  // Full name could be null, user name should always exist
+  const name = userName?.fullName ?? userName?.username;
+
   const projectFeaturesUrl = useProjectFeaturesUrl();
 
   const {
@@ -38,9 +42,13 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
   return (
     <EuiFlexGroup className={headerStyles} data-test-subj="welcome-header">
       <EuiFlexItem grow={false} className={headerContentStyles}>
-        {userName?.username && (
-          <EuiTitle size="l" className={headerTitleStyles}>
-            <span>{GET_STARTED_PAGE_TITLE(userName.username)}</span>
+        {name && (
+          <EuiTitle
+            size="l"
+            className={headerTitleStyles}
+            data-test-subj="welcome-header-greetings"
+          >
+            <span>{GET_STARTED_PAGE_TITLE(name)}</span>
           </EuiTitle>
         )}
         <EuiSpacer size="s" />

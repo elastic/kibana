@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
-  getDocumentOverview,
+  getLogDocumentOverview,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
 } from '@kbn/discover-utils';
@@ -87,7 +87,7 @@ export const Content = ({
   columnId,
   closePopover,
 }: DataGridCellValueElementProps) => {
-  const documentOverview = getDocumentOverview(row, { dataView, fieldFormats });
+  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const renderLogMessage = field && value;
 

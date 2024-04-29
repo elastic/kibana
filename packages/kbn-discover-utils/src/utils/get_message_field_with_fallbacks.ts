@@ -7,9 +7,9 @@
  */
 
 import { fieldConstants } from '..';
-import { DocumentOverview } from '../types';
+import { LogDocumentOverview } from '../types';
 
-export const getMessageFieldWithFallbacks = (doc: DocumentOverview) => {
+export const getMessageFieldWithFallbacks = (doc: LogDocumentOverview) => {
   const rankingOrder = [
     fieldConstants.MESSAGE_FIELD,
     fieldConstants.ERROR_MESSAGE_FIELD,

@@ -18,4 +18,5 @@ export interface SettingsConfig {
   api_field: {
     name: string;
   };
+  hidden?: boolean;
 }

@@ -20,7 +20,7 @@ export const patchCaseRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const cases = request.body as caseApiV1.CasesPatchRequest;
 
-      const res: caseDomainV1.Cases = await casesClient.cases.update(cases);
+      const res: caseDomainV1.Cases = await casesClient.cases.bulkUpdate(cases);
 
       return response.ok({
         body: res,

@@ -19,10 +19,12 @@ import React, { ComponentType } from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
 
@@ -32,11 +34,14 @@ export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
   PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
   Playground: React.FC<React.ComponentProps<typeof App>>;
+  PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
 }
 
 export interface AppPluginStartDependencies {
+  history: AppMountParameters['history'];
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export interface AppServicesContext {
@@ -56,6 +61,7 @@ export enum ChatFormFields {
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
+  queryFields = 'query_fields',
 }
 
 export interface ChatForm {
@@ -67,6 +73,7 @@ export interface ChatForm {
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
+  [ChatFormFields.queryFields]: { [index: string]: string[] };
 }
 
 export enum MessageRole {
@@ -84,7 +91,7 @@ export interface Message {
 }
 
 export interface DocAnnotation {
-  metadata: { id: string; score: number };
+  metadata: { _id: string; _score: number; _index: string };
   pageContent: string;
 }
 
@@ -94,22 +101,14 @@ export interface Annotation {
 }
 
 export interface Doc {
-  id: string;
   content: string;
+  metadata: { _id: string; _score: number; _index: string };
 }
 
 export interface AIMessage extends Message {
   role: MessageRole.assistant;
   citations: Doc[];
   retrievalDocs: Doc[];
-}
-
-export enum SummarizationModelName {
-  gpt3_5_turbo = 'gpt-3.5-turbo',
-  gpt3_5_turbo_1106 = 'gpt-3.5-turbo-1106',
-  gpt3_5_turbo_16k = 'gpt-3.5-turbo-16k',
-  gpt3_5_turbo_16k_0613 = 'gpt-3.5-turbo-16k-0613',
-  gpt3_5_turbo_instruct = 'gpt-3.5-turbo-instruct',
 }
 
 export interface ElasticsearchIndex {
@@ -197,7 +196,9 @@ export interface UseChatHelpers {
 export interface LLMModel {
   name: string;
   value?: string;
+  showConnectorName?: boolean;
+  connectorId: string;
+  connectorName: string;
   icon: ComponentType;
   disabled: boolean;
-  connectorId?: string;
 }

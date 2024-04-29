@@ -20,6 +20,7 @@ import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 // @ts-expect-error
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -92,6 +93,12 @@ export function getWebpackConfig(
               saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
             }),
             new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
+            new BundleAnalyzerPlugin({
+              analyzerMode: 'static',
+              reportFilename: `${bundle.id}.analyzer.html`,
+              openAnalyzer: false,
+              logLevel: 'silent',
+            }),
           ]
         : []),
       // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.

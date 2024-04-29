@@ -32,6 +32,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   onAddFilter,
   esql,
   totalDocuments,
+  timeFieldName,
   typeAccessor = 'type',
 }: {
   item: FieldVisConfig;
@@ -44,6 +45,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  timeFieldName?: string;
 }) => {
   const config = { ...item, stats: { ...item.stats, totalDocuments } };
   const { loading, existsInDocs, fieldName } = config;
@@ -77,6 +79,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
             dataView={dataView}
             combinedQuery={combinedQuery}
             esql={esql}
+            timeFieldName={timeFieldName}
           />
         );
 

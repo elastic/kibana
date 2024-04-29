@@ -73,13 +73,13 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
       {
         id: 'addFilterInAction',
         iconType: 'plusInCircle',
-        label: actionFilterForText(value as string),
+        label: filterForValueLabel,
         onClick: () => actions.addFilterIn({ field, value }),
       },
       {
         id: 'addFilterOutremoveFromFilterAction',
         iconType: 'minusInCircle',
-        label: actionFilterOutText(value as string),
+        label: filterOutValueLabel,
         onClick: () => actions.addFilterOut({ field, value }),
       },
       {
@@ -105,17 +105,13 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
   );
 };
 
-const actionFilterForText = (value: string) =>
-  i18n.translate('unifiedDocViewer.fieldActions.filterIn', {
-    defaultMessage: 'Filter for this {value}',
-    values: { value },
-  });
+const filterForValueLabel = i18n.translate('unifiedDocViewer.fieldActions.filterForValue', {
+  defaultMessage: 'Filter for value',
+});
 
-const actionFilterOutText = (value: string) =>
-  i18n.translate('unifiedDocViewer.fieldActions.filterOut', {
-    defaultMessage: 'Filter out this {value}',
-    values: { value },
-  });
+const filterOutValueLabel = i18n.translate('unifiedDocViewer.fieldActions.filterOutValue', {
+  defaultMessage: 'Filter out value',
+});
 
 const filterForFieldPresentLabel = i18n.translate(
   'unifiedDocViewer.fieldActions.filterForFieldPresent',

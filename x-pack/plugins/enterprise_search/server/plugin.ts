@@ -81,6 +81,7 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
+import { getConnectorsSearchResultProvider } from './utils/connectors_search_result_provider';
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
@@ -163,7 +164,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
-    const isCloud = !!cloud.cloudId;
+    const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(
@@ -360,6 +361,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         )
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
+      globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
     }
   }
 

@@ -50,7 +50,7 @@ export interface BulkCreateSuppressedAlertsParams
   > {
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures?: ExperimentalFeatures;
+  experimentalFeatures: ExperimentalFeatures;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -119,7 +119,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
   unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures?: ExperimentalFeatures;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**

@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 import type { AIMessage as AIMessageType } from '../../types';
 
@@ -30,6 +31,10 @@ type AssistantMessageProps = Pick<
   AIMessageType,
   'content' | 'createdAt' | 'citations' | 'retrievalDocs'
 >;
+
+const AIMessageCSS = css`
+  white-space: break-spaces;
+`;
 
 export const AssistantMessage: React.FC<AssistantMessageProps> = ({
   content,
@@ -54,7 +59,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
-                    defaultMessage="retrieved"
+                    defaultMessage="Grounding answer based on"
                   />
                 </p>
               </EuiText>
@@ -65,7 +70,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
               >
                 <FormattedMessage
                   id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
-                  defaultMessage="{count} {count, plural, one {document} other {documents}} sources"
+                  defaultMessage="{count} document sources"
                   values={{ count: retrievalDocs.length }}
                 />
               </EuiButtonEmpty>
@@ -121,7 +126,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
           </EuiTitle>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiText size="s">
+        <EuiText size="s" css={AIMessageCSS}>
           <p>{content}</p>
         </EuiText>
         {!!citations?.length && (

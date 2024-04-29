@@ -26,6 +26,10 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/track_contentful_render';
+export {
   apiHasSerializableState,
   type HasSerializableState,
   type SerializedPanelState,

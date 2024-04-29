@@ -72,8 +72,10 @@ import {
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
 import {
+  migratePackagePolicyAddAntivirusRegistrationModeToV8140,
   migratePackagePolicyToV8100,
   migratePackagePolicyToV8140,
+  migratePackagePolicyEnableCapsToV8140,
   migratePackagePolicyToV870,
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
@@ -492,6 +494,22 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           {
             type: 'data_backfill',
             backfillFn: migratePackagePolicyToV8140,
+          },
+        ],
+      },
+      '7': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyEnableCapsToV8140,
+          },
+        ],
+      },
+      '8': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyAddAntivirusRegistrationModeToV8140,
           },
         ],
       },

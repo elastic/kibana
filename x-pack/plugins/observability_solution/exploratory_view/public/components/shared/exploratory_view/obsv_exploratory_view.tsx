@@ -36,6 +36,7 @@ import { getMobileDeviceDistributionConfig } from './configurations/mobile/devic
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
+import { StartServices } from '../../../application';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
@@ -108,7 +109,7 @@ export const obsvReportConfigMap = {
   [DataTypes.ALERTS]: [getAlertsKPIConfig, getAlertsSingleMetricConfig],
 };
 
-export function ObservabilityExploratoryView() {
+export function ObservabilityExploratoryView(props: { startServices: StartServices }) {
   const { appMountParameters } = usePluginContext();
 
   return (
@@ -119,6 +120,7 @@ export function ObservabilityExploratoryView() {
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
         theme$={appMountParameters.theme$}
+        {...props.startServices}
       >
         <ExploratoryViewPage />
       </ExploratoryViewContextProvider>

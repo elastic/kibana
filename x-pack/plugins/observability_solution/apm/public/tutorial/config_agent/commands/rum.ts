@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  serviceNameHint,
-  serverUrlHint,
-  serviceEnvironmentHint,
-} from './shared_hints';
+import { serviceNameHint, serverUrlHint, serviceEnvironmentHint } from './shared_hints';
 
 export const rumVariables = {
   apmServiceName: 'serviceName',

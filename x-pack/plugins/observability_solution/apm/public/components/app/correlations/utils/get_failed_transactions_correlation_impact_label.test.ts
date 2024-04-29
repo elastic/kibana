@@ -35,32 +35,18 @@ describe('getFailedTransactionsCorrelationImpactLabel', () => {
   });
 
   it('returns High if value is within [0, 1e-6) ', () => {
-    expect(getFailedTransactionsCorrelationImpactLabel(0)).toStrictEqual(
-      EXPECTED_RESULT.HIGH
-    );
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-7)).toStrictEqual(
-      EXPECTED_RESULT.HIGH
-    );
+    expect(getFailedTransactionsCorrelationImpactLabel(0)).toStrictEqual(EXPECTED_RESULT.HIGH);
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-7)).toStrictEqual(EXPECTED_RESULT.HIGH);
   });
 
   it('returns Medium if value is within [1e-6, 1e-3) ', () => {
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-6)).toStrictEqual(
-      EXPECTED_RESULT.MEDIUM
-    );
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-5)).toStrictEqual(
-      EXPECTED_RESULT.MEDIUM
-    );
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-4)).toStrictEqual(
-      EXPECTED_RESULT.MEDIUM
-    );
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-6)).toStrictEqual(EXPECTED_RESULT.MEDIUM);
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-5)).toStrictEqual(EXPECTED_RESULT.MEDIUM);
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-4)).toStrictEqual(EXPECTED_RESULT.MEDIUM);
   });
 
   it('returns Low if value is within [1e-3, 0.02) ', () => {
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-3)).toStrictEqual(
-      EXPECTED_RESULT.LOW
-    );
-    expect(getFailedTransactionsCorrelationImpactLabel(0.009)).toStrictEqual(
-      EXPECTED_RESULT.LOW
-    );
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-3)).toStrictEqual(EXPECTED_RESULT.LOW);
+    expect(getFailedTransactionsCorrelationImpactLabel(0.009)).toStrictEqual(EXPECTED_RESULT.LOW);
   });
 });

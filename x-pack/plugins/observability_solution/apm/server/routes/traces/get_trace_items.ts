@@ -7,10 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import {
-  QueryDslQueryContainer,
-  Sort,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last } from 'lodash';
@@ -112,10 +109,7 @@ export async function getTraceItems({
       ],
       query: {
         bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
-          ],
+          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },

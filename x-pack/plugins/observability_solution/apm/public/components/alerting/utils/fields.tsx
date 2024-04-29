@@ -40,15 +40,10 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        customOptions={
-          allowAll ? [{ label: allOptionText, value: undefined }] : undefined
-        }
-        customOptionText={i18n.translate(
-          'xpack.apm.serviceNamesSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new service name',
-          }
-        )}
+        customOptions={allowAll ? [{ label: allOptionText, value: undefined }] : undefined}
+        customOptionText={i18n.translate('xpack.apm.serviceNamesSelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new service name',
+        })}
         defaultValue={currentValue}
         fieldName={SERVICE_NAME}
         onChange={onChange}
@@ -80,12 +75,9 @@ export function EnvironmentField({
     >
       <SuggestionsSelect
         customOptions={[ENVIRONMENT_ALL]}
-        customOptionText={i18n.translate(
-          'xpack.apm.environmentsSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new environment',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.environmentsSelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new environment',
+        })}
         defaultValue={getEnvironmentLabel(currentValue)}
         fieldName={SERVICE_ENVIRONMENT}
         onChange={onChange}
@@ -117,21 +109,15 @@ export function TransactionNameField({
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
-        customOptionText={i18n.translate(
-          'xpack.apm.alerting.transaction.name.custom.text',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.alerting.transaction.name.custom.text', {
+          defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
+        })}
         defaultValue={currentValue}
         fieldName={TRANSACTION_NAME}
         onChange={onChange}
-        placeholder={i18n.translate(
-          'xpack.apm.transactionNamesSelectPlaceholder',
-          {
-            defaultMessage: 'Select transaction name',
-          }
-        )}
+        placeholder={i18n.translate('xpack.apm.transactionNamesSelectPlaceholder', {
+          defaultMessage: 'Select transaction name',
+        })}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
         serviceName={serviceName}
@@ -156,21 +142,15 @@ export function TransactionTypeField({
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
-        customOptionText={i18n.translate(
-          'xpack.apm.transactionTypesSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.transactionTypesSelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+        })}
         defaultValue={currentValue}
         fieldName={TRANSACTION_TYPE}
         onChange={onChange}
-        placeholder={i18n.translate(
-          'xpack.apm.transactionTypesSelectPlaceholder',
-          {
-            defaultMessage: 'Select transaction type',
-          }
-        )}
+        placeholder={i18n.translate('xpack.apm.transactionTypesSelectPlaceholder', {
+          defaultMessage: 'Select transaction type',
+        })}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
         serviceName={serviceName}
@@ -195,21 +175,15 @@ export function ErrorGroupingKeyField({
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
-        customOptionText={i18n.translate(
-          'xpack.apm.errorKeySelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.errorKeySelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
+        })}
         defaultValue={currentValue}
         fieldName={ERROR_GROUP_ID}
         onChange={onChange}
-        placeholder={i18n.translate(
-          'xpack.apm.errorGroupingKeySelectPlaceholder',
-          {
-            defaultMessage: 'Select error grouping key',
-          }
-        )}
+        placeholder={i18n.translate('xpack.apm.errorGroupingKeySelectPlaceholder', {
+          defaultMessage: 'Select error grouping key',
+        })}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
         serviceName={serviceName}

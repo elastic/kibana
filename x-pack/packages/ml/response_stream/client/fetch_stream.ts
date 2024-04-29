@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import startsWith from 'lodash/startsWith';
+import { startsWith } from 'lodash';
 import type { Reducer, ReducerAction } from 'react';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';

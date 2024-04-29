@@ -44,7 +44,7 @@ import {
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -74,7 +74,6 @@ import type {
   IBasePath,
   IUiSettingsClient,
   KibanaExecutionContext,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
@@ -83,8 +82,9 @@ import {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -235,7 +235,6 @@ export interface LensEmbeddableDeps {
   coreStart: CoreStart;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
-  theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -494,7 +493,7 @@ export class Embeddable
           distinctUntilChanged((a, b) => fastIsEqual(a, b)),
           skip(1)
         )
-        .subscribe((input) => {
+        .subscribe((_input) => {
           this.reload();
         })
     );
@@ -511,7 +510,7 @@ export class Embeddable
           distinctUntilChanged(),
           skip(1)
         )
-        .subscribe((input) => {
+        .subscribe((_input) => {
           // only reload if drilldowns are set
           if (this.getInput().enhancements?.dynamicActions) {
             this.reload();
@@ -1042,6 +1041,7 @@ export class Embeddable
     });
 
     trackUiCounterEvents(events, executionContext);
+    this.trackContentfulRender();
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -1127,7 +1127,7 @@ export class Embeddable
     if (this.expression && !blockingErrors.length) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
             <ExpressionWrapper
               ExpressionRenderer={this.expressionRenderer}
               expression={this.expression || null}
@@ -1161,7 +1161,7 @@ export class Embeddable
               }}
               noPadding={this.visDisplayOptions.noPadding}
             />
-          </KibanaThemeProvider>
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1176,6 +1176,25 @@ export class Embeddable
     this.renderUserMessages();
   }
 
+  private trackContentfulRender() {
+    if (!this.activeData || !canTrackContentfulRender(this.parent)) {
+      return;
+    }
+
+    const hasData = Object.values(this.activeData).some((table) => {
+      if (table.meta?.statistics?.totalCount != null) {
+        // if totalCount is set, refer to total count
+        return table.meta.statistics.totalCount > 0;
+      }
+      // if not, fall back to check the rows of the table
+      return table.rows.length > 0;
+    });
+
+    if (hasData) {
+      this.parent.trackContentfulRender();
+    }
+  }
+
   private renderUserMessages() {
     const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
       severity: 'error',
@@ -1184,14 +1203,12 @@ export class Embeddable
     if (errors.length && this.domNode) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-            <I18nProvider>
-              <VisualizationErrorPanel
-                errors={errors}
-                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
-              />
-            </I18nProvider>
-          </KibanaThemeProvider>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
+            <VisualizationErrorPanel
+              errors={errors}
+              canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+            />
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1223,10 +1240,10 @@ export class Embeddable
 
     if (this.badgeDomNode) {
       render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <KibanaRenderContextProvider {...this.deps.coreStart}>
           <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
           <EmbeddableFeatureBadge messages={infoMessages} />
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         this.badgeDomNode
       );
     }

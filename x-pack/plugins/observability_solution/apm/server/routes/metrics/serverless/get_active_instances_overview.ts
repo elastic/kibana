@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_DURATION,
@@ -127,64 +123,57 @@ export async function getServerlessActiveInstancesOverview({
     },
   };
 
-  const response = await apmEventClient.search(
-    'ger_serverless_active_instances_overview',
-    params
-  );
+  const response = await apmEventClient.search('ger_serverless_active_instances_overview', params);
 
   return (
     response.aggregations?.activeInstances?.buckets?.flatMap((bucket) => {
       const activeInstanceName = bucket.key as string;
-      const serverlessFunctionsDetails =
-        bucket.serverlessFunctions.buckets.reduce<ActiveInstanceOverview[]>(
-          (acc, curr) => {
-            const currentServerlessId = curr.key as string;
+      const serverlessFunctionsDetails = bucket.serverlessFunctions.buckets.reduce<
+        ActiveInstanceOverview[]
+      >((acc, curr) => {
+        const currentServerlessId = curr.key as string;
 
-            const timeseries =
-              curr.timeseries.buckets.reduce<ActiveInstanceTimeseries>(
-                (timeseriesAcc, timeseriesCurr) => {
-                  return {
-                    serverlessDuration: [
-                      ...timeseriesAcc.serverlessDuration,
-                      {
-                        x: timeseriesCurr.key,
-                        y: timeseriesCurr.faasDurationAvg.value,
-                      },
-                    ],
-                    billedDuration: [
-                      ...timeseriesAcc.billedDuration,
-                      {
-                        x: timeseriesCurr.key,
-                        y: timeseriesCurr.faasBilledDurationAvg.value,
-                      },
-                    ],
-                  };
-                },
+        const timeseries = curr.timeseries.buckets.reduce<ActiveInstanceTimeseries>(
+          (timeseriesAcc, timeseriesCurr) => {
+            return {
+              serverlessDuration: [
+                ...timeseriesAcc.serverlessDuration,
                 {
-                  serverlessDuration: [],
-                  billedDuration: [],
-                }
-              );
-            return [
-              ...acc,
-              {
-                activeInstanceName,
-                serverlessId: currentServerlessId,
-                serverlessFunctionName:
-                  getServerlessFunctionNameFromId(currentServerlessId),
-                timeseries,
-                serverlessDurationAvg: curr.faasDurationAvg.value,
-                billedDurationAvg: curr.faasBilledDurationAvg.value,
-                avgMemoryUsed: calcMemoryUsed({
-                  memoryFree: curr.avgFreeMemory.value,
-                  memoryTotal: curr.avgTotalMemory.value,
-                }),
-                memorySize: curr.avgTotalMemory.value,
-              },
-            ];
+                  x: timeseriesCurr.key,
+                  y: timeseriesCurr.faasDurationAvg.value,
+                },
+              ],
+              billedDuration: [
+                ...timeseriesAcc.billedDuration,
+                {
+                  x: timeseriesCurr.key,
+                  y: timeseriesCurr.faasBilledDurationAvg.value,
+                },
+              ],
+            };
           },
-          []
+          {
+            serverlessDuration: [],
+            billedDuration: [],
+          }
         );
+        return [
+          ...acc,
+          {
+            activeInstanceName,
+            serverlessId: currentServerlessId,
+            serverlessFunctionName: getServerlessFunctionNameFromId(currentServerlessId),
+            timeseries,
+            serverlessDurationAvg: curr.faasDurationAvg.value,
+            billedDurationAvg: curr.faasBilledDurationAvg.value,
+            avgMemoryUsed: calcMemoryUsed({
+              memoryFree: curr.avgFreeMemory.value,
+              memoryTotal: curr.avgTotalMemory.value,
+            }),
+            memorySize: curr.avgTotalMemory.value,
+          },
+        ];
+      }, []);
       return serverlessFunctionsDetails;
     }) || []
   );

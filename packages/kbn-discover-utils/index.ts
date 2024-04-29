@@ -35,11 +35,12 @@ export {
   formatFieldValue,
   formatHit,
   getDocId,
-  getDocumentOverview,
+  getLogDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
+  isLegacyTableEnabled,
   usePager,
 } from './src';
 

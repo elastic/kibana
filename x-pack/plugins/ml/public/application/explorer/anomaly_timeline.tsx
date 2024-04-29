@@ -44,7 +44,7 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import type { AnomalySwimlaneEmbeddableInput } from '../..';
+import type { AnomalySwimLaneEmbeddableState } from '../..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import type { SwimlaneType } from './explorer_constants';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
@@ -61,11 +61,12 @@ import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { MlTooltipComponent } from '../components/chart_tooltip';
-import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
+import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
+import { Y_AXIS_LABEL_WIDTH } from './constants';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -362,7 +363,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
         const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
 
-        const embeddableInput: Partial<AnomalySwimlaneEmbeddableInput> = {
+        const embeddableInput: Partial<AnomalySwimLaneEmbeddableState> = {
           id: config.id,
           title: newTitle,
           description: newDescription,

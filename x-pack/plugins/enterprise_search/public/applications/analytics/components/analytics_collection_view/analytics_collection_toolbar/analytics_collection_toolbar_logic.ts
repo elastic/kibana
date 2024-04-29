@@ -44,7 +44,7 @@ export const AnalyticsCollectionToolbarLogic = kea<
   },
   listeners: ({ actions }) => ({
     onTimeRefresh() {
-      actions.setSearchSessionId(KibanaLogic.values.data.search.session.start());
+      actions.setSearchSessionId(KibanaLogic.values.data?.search.session.start() || '');
     },
     setRefreshInterval(refreshInterval) {
       if (refreshInterval.pause) {

@@ -15,15 +15,9 @@ import { EmptyMessage } from '../empty_message';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import {
-  getSpanMetricColumns,
-  SpanMetricGroup,
-} from './get_span_metric_columns';
+import { getSpanMetricColumns, SpanMetricGroup } from './get_span_metric_columns';
 
-export type DependenciesItem = Omit<
-  ConnectionStatsItemWithComparisonData,
-  'location'
-> & {
+export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'location'> & {
   name: string;
   link: React.ReactElement;
 };
@@ -115,11 +109,7 @@ export function DependenciesTable(props: Props) {
   );
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      data-test-subj="dependenciesTable"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="dependenciesTable">
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -133,9 +123,7 @@ export function DependenciesTable(props: Props) {
       <EuiFlexItem>
         <OverviewTableContainer
           fixedHeight={fixedHeight}
-          isEmptyAndNotInitiated={
-            items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
-          }
+          isEmptyAndNotInitiated={items.length === 0 && status === FETCH_STATUS.NOT_INITIATED}
         >
           <ManagedTable
             isLoading={status === FETCH_STATUS.LOADING}

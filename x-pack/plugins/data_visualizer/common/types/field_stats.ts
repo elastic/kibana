@@ -93,6 +93,7 @@ export interface StringFieldStats {
   fieldName: string;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
+  sampledValues?: Bucket[];
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
 }

@@ -12,6 +12,8 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { groupBy } from 'lodash';
+
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
@@ -488,21 +490,22 @@ export async function getAgentsById(
 // this is used to get all fleet server versions
 export async function getAgentVersionsForAgentPolicyIds(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentPolicyIds: string[]
-): Promise<Record<string, number>> {
-  const versionCount: Record<string, number> = {};
+): Promise<Array<{ policyId: string; versionCounts: Record<string, number> }>> {
+  const result: Array<{ policyId: string; versionCounts: Record<string, number> }> = [];
 
   if (!agentPolicyIds.length) {
-    return versionCount;
+    return result;
   }
 
   try {
-    const res = esClient.search<
+    const {
+      hits: { hits },
+    } = await esClient.search<
       FleetServerAgent,
       Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
     >({
-      size: 0,
-      track_total_hits: false,
       body: {
         query: {
           bool: {
@@ -515,25 +518,27 @@ export async function getAgentVersionsForAgentPolicyIds(
             ],
           },
         },
-        aggs: {
-          agent_versions: {
-            terms: {
-              field: 'local_metadata.elastic.agent.version.keyword',
-              size: 1000,
-            },
-          },
-        },
       },
       index: AGENTS_INDEX,
       ignore_unavailable: true,
     });
 
-    const { aggregations } = await res;
+    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
 
-    if (aggregations && aggregations.agent_versions) {
-      aggregations.agent_versions.buckets.forEach((bucket) => {
-        versionCount[bucket.key] = bucket.doc_count;
-      });
+    for (const [policyId, policyHits] of Object.entries(groupedHits)) {
+      const versionCounts: Record<string, number> = {};
+
+      for (const hit of policyHits) {
+        const agentVersion = hit._source?.local_metadata?.elastic?.agent?.version;
+
+        if (!agentVersion) {
+          continue;
+        }
+
+        versionCounts[agentVersion] = (versionCounts[agentVersion] || 0) + 1;
+      }
+
+      result.push({ policyId, versionCounts });
     }
   } catch (error) {
     if (error.statusCode !== 404) {
@@ -541,7 +546,7 @@ export async function getAgentVersionsForAgentPolicyIds(
     }
   }
 
-  return versionCount;
+  return result;
 }
 
 export async function getAgentByAccessAPIKeyId(

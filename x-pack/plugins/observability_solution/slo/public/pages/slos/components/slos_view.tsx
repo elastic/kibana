@@ -26,20 +26,30 @@ export function SlosView({ sloList, loading, error, sloView }: Props) {
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
+
   if (!loading && error) {
     return <SloListError />;
   }
 
-  return sloView === 'cardView' ? (
-    <EuiFlexItem>
-      <SloListCardView sloList={sloList} loading={loading} error={error} />
-    </EuiFlexItem>
-  ) : (
-    <EuiFlexItem>
-      {sloView === 'compactView' && (
+  if (sloView === 'cardView') {
+    return (
+      <EuiFlexItem>
+        <SloListCardView sloList={sloList} loading={loading} error={error} />
+      </EuiFlexItem>
+    );
+  }
+
+  if (sloView === 'compactView') {
+    return (
+      <EuiFlexItem>
         <SloListCompactView sloList={sloList} loading={loading} error={error} />
-      )}
-      {sloView === 'listView' && <SloListView sloList={sloList} loading={loading} error={error} />}
+      </EuiFlexItem>
+    );
+  }
+
+  return (
+    <EuiFlexItem>
+      <SloListView sloList={sloList} loading={loading} error={error} />
     </EuiFlexItem>
   );
 }

@@ -5,29 +5,44 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { AddAndValidateYourDataCardsId, AddIntegrationsSteps } from '../types';
+import {
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  EnablePrebuiltRulesSteps,
+} from '../types';
 import { useStepContext } from '../context/step_context';
 import { AddIntegrationCallout } from './add_integration_callout';
 import { ADD_ELASTIC_RULES, ADD_ELASTIC_RULES_CALLOUT_TITLE } from './translations';
 
 const AddElasticRulesButtonComponent = () => {
-  const { finishedSteps } = useStepContext();
+  const { finishedSteps, onStepLinkClicked } = useStepContext();
   const isIntegrationsStepComplete = finishedSteps[
     AddAndValidateYourDataCardsId.addIntegrations
   ]?.has(AddIntegrationsSteps.connectToDataSources);
+
+  const onClick = useCallback(() => {
+    onStepLinkClicked({
+      originStepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      stepLinkId: SecurityPageName.rules,
+    });
+  }, [onStepLinkClicked]);
   return (
     <>
       {!isIntegrationsStepComplete && (
-        <AddIntegrationCallout stepName={ADD_ELASTIC_RULES_CALLOUT_TITLE} />
+        <AddIntegrationCallout
+          stepName={ADD_ELASTIC_RULES_CALLOUT_TITLE}
+          stepId={EnablePrebuiltRulesSteps.enablePrebuiltRules}
+        />
       )}
       <LinkButton
         id={SecurityPageName.rules}
         fill
         className="step-paragraph"
         disabled={!isIntegrationsStepComplete}
+        onClick={onClick}
       >
         {ADD_ELASTIC_RULES}
       </LinkButton>

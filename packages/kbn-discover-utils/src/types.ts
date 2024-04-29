@@ -47,7 +47,10 @@ type FormattedHitPair = readonly [
  */
 export type FormattedHit = FormattedHitPair[];
 
-export interface DocumentOverview extends ResourceFields, StackTraceFields, CloudFields {
+export interface LogDocumentOverview
+  extends LogResourceFields,
+    LogStackTraceFields,
+    LogCloudFields {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
@@ -59,7 +62,7 @@ export interface DocumentOverview extends ResourceFields, StackTraceFields, Clou
   'data_stream.dataset': string;
 }
 
-export interface ResourceFields {
+export interface LogResourceFields {
   'host.name'?: string;
   'service.name'?: string;
   'agent.name'?: string;
@@ -71,13 +74,13 @@ export interface ResourceFields {
   'container.id'?: string;
 }
 
-export interface StackTraceFields {
+export interface LogStackTraceFields {
   'error.stack_trace'?: string;
   'error.exception.stacktrace'?: string;
   'error.log.stacktrace'?: string;
 }
 
-export interface CloudFields {
+export interface LogCloudFields {
   'cloud.provider'?: string;
   'cloud.region'?: string;
   'cloud.availability_zone'?: string;
