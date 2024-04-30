@@ -198,7 +198,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           isValid: isFormValid && areConditionsValid,
           confirmModalLabels: hasWildcardWithWrongOperator
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.eventFilter.flyoutForm.confirmModal.name', {
+                i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
                   defaultMessage: 'event filter',
                 })
               )

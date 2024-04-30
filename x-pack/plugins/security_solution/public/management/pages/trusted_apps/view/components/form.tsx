@@ -297,7 +297,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isValid: updatedValidationResult.isValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.trustedApps.flyoutForm.confirmModal.name', {
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
                   defaultMessage: 'trusted application',
                 })
               )
