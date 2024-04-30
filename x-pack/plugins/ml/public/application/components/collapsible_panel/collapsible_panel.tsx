@@ -21,7 +21,7 @@ import { useCurrentThemeVars } from '../../contexts/kibana';
 export interface CollapsiblePanelProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-
+  children: React.ReactNode;
   header: React.ReactElement;
   headerItems?: React.ReactElement[];
 }

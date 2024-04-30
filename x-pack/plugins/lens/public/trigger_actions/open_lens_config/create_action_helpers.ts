@@ -98,7 +98,7 @@ export async function executeCreateAction({
     dataView,
   });
 
-  const embeddable = await api.addNewPanel<Embeddable>({
+  const embeddable = await api.addNewPanel<object, Embeddable>({
     panelType: 'lens',
     initialState: {
       attributes: attrs,
@@ -114,10 +114,9 @@ export async function executeCreateAction({
     executeEditAction({
       embeddable,
       startDependencies: deps,
-      overlays: core.overlays,
-      theme: core.theme,
       isNewPanel: true,
       deletePanel,
+      ...core,
     });
   }
 }
