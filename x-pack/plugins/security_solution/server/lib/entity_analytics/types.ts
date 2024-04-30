@@ -51,12 +51,17 @@ export interface CalculateAndPersistScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
   alertSampleSizePerShard?: number;
+  returnScores?: boolean;
 }
 
 export interface CalculateAndPersistScoresResponse {
   after_keys: AfterKeys;
   errors: string[];
   scores_written: number;
+  scores?: {
+    host?: RiskScore[];
+    user?: RiskScore[];
+  };
 }
 
 export interface CalculateScoresResponse {
