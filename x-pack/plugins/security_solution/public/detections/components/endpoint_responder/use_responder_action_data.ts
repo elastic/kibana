@@ -79,7 +79,6 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const isEndpointHost = agentType === 'endpoint';
-  const isSentinelOneHost = agentType === 'sentinel_one';
   const showResponseActionsConsole = useWithShowResponder();
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
