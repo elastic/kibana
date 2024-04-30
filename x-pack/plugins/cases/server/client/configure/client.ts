@@ -7,7 +7,6 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -48,8 +47,12 @@ import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './typ
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
-import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
-import { validateCustomFieldTypesInRequest } from './validators';
+import { validateDuplicatedKeysInRequest } from '../validators';
+import {
+  validateCustomFieldTypesInRequest,
+  validateTemplatesCustomFieldsInRequest,
+} from './validators';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
  * Defines the internal helper functions.
@@ -136,7 +139,7 @@ export async function get(
 ): Promise<Configurations> {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService },
+    services: { caseConfigureService, licensingService },
     logger,
     authorization,
   } = clientArgs;
@@ -242,7 +245,7 @@ export async function update(
   casesClientInternal: CasesClientInternal
 ): Promise<Configuration> {
   const {
-    services: { caseConfigureService },
+    services: { caseConfigureService, licensingService },
     logger,
     unsecuredSavedObjectsClient,
     user,
@@ -252,9 +255,17 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
-    validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
+    validateDuplicatedKeysInRequest({
+      requestFields: request.customFields,
+      fieldName: 'customFields',
+    });
 
-    const { version, ...queryWithoutVersion } = request;
+    validateDuplicatedKeysInRequest({
+      requestFields: request.templates,
+      fieldName: 'templates',
+    });
+
+    const { version, templates, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
@@ -265,6 +276,31 @@ export async function update(
       requestCustomFields: request.customFields,
       originalCustomFields: configuration.attributes.customFields,
     });
+
+    validateTemplatesCustomFieldsInRequest({
+      templates: templates,
+      customFieldsConfiguration: configuration.attributes.customFields,
+    });
+
+    /**
+     * Assign users to a template is only available to Platinum+
+     */
+
+    if (templates && templates.length) {
+      const hasAssigneesInTemplate = templates.find(
+        (template) => template.caseFields?.assignees && template.caseFields?.assignees.length > 0
+      );
+
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
 
     await authorization.ensureAuthorized({
       operation: Operations.updateConfiguration,
@@ -316,21 +352,12 @@ export async function update(
           }`;
     }
 
-    const templatesWithIds =
-      request.templates?.map((template) => {
-        return {
-          ...template,
-          id: uuidv4(),
-        };
-      }) ?? [];
-
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
         ...(connector != null && { connector }),
-        templates: templatesWithIds,
         updated_at: updateDate,
         updated_by: user,
       },
@@ -374,8 +401,14 @@ export async function create(
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
 
-    validateDuplicatedCustomFieldKeysInRequest({
-      requestCustomFields: validatedConfigurationRequest.customFields,
+    validateDuplicatedKeysInRequest({
+      requestFields: validatedConfigurationRequest.customFields,
+      fieldName: 'customFields',
+    });
+
+    validateDuplicatedKeysInRequest({
+      requestFields: validatedConfigurationRequest.templates,
+      fieldName: 'templates',
     });
 
     let error = null;
@@ -446,20 +479,12 @@ export async function create(
         : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
 
-    const templatesWithIds =
-      validatedConfigurationRequest.templates?.map((template) => {
-        return {
-          ...template,
-          id: uuidv4(),
-        };
-      }) ?? [];
-
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
-        templates: templatesWithIds,
+        templates: validatedConfigurationRequest.templates ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,
