@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   EuiFlexGroup,
@@ -51,6 +51,11 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
     };
   }, [start, end]);
 
+  const onBrushed = useCallback(({ fromUtc, toUtc }) => {
+    setStart(fromUtc);
+    setEnd(toUtc);
+  }, []);
+
   return (
     <>
       <EuiFlexGroup>
@@ -88,6 +93,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
               from: absRange.from,
               to: absRange.to,
             }}
+            onBrushed={onBrushed}
           />
         </EuiFlexItem>
         <HistoricalDataCharts
@@ -98,6 +104,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
             from: start,
             to: end,
           }}
+          onBrushed={onBrushed}
         />
         <EuiFlexItem>
           <EventsChartPanel
@@ -107,6 +114,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
               end: absRange.absoluteTo,
             }}
             selectedTabId={selectedTabId}
+            onBrushed={onBrushed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
 import { useKibana } from '../../../utils/kibana_react';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
@@ -35,9 +36,10 @@ export interface Props {
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
   selectedTabId?: SloTabId;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChart({ data, isLoading, slo, selectedTabId }: Props) {
+export function ErrorBudgetChart({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
@@ -96,6 +98,7 @@ export function ErrorBudgetChart({ data, isLoading, slo, selectedTabId }: Props)
           state={isSloFailed ? 'error' : 'success'}
           data={data}
           isLoading={isLoading}
+          onBrushed={onBrushed}
         />
       </EuiFlexItem>
     </>

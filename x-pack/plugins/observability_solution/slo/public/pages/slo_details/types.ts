@@ -9,3 +9,10 @@ export interface SloDetailsPathParams {
   sloId: string;
   tabId?: string;
 }
+
+export interface TimeBounds {
+  from: number;
+  to: number;
+  fromUtc: string;
+  toUtc: string;
+}

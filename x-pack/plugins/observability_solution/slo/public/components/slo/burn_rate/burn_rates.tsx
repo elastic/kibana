@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { TimeBounds } from '../../../pages/slo_details/types';
 import { TimeRange } from '../error_rate_chart/use_lens_definition';
 import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 import { BurnRateHeader } from './burn_rate_header';
@@ -22,6 +23,7 @@ interface Props {
   burnRateOptions: BurnRateOption[];
   selectedTabId: SloTabId;
   range?: TimeRange;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
 export interface BurnRateOption {
@@ -36,7 +38,14 @@ function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; du
   return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
 }
 
-export function BurnRates({ slo, isAutoRefreshing, burnRateOptions, selectedTabId, range }: Props) {
+export function BurnRates({
+  slo,
+  isAutoRefreshing,
+  burnRateOptions,
+  selectedTabId,
+  range,
+  onBrushed,
+}: Props) {
   const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
@@ -76,7 +85,12 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions, selectedTabI
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
+            <ErrorRateChart
+              slo={slo}
+              dataTimeRange={dataTimeRange}
+              threshold={threshold}
+              onBrushed={onBrushed}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

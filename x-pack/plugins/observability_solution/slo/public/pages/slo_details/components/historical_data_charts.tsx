@@ -7,6 +7,7 @@
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { TimeBounds } from '../types';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloTabId } from './slo_details';
@@ -21,8 +22,15 @@ export interface Props {
     from: string;
     to: string;
   };
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
-export function HistoricalDataCharts({ slo, range, isAutoRefreshing, selectedTabId }: Props) {
+export function HistoricalDataCharts({
+  slo,
+  range,
+  isAutoRefreshing,
+  selectedTabId,
+  onBrushed,
+}: Props) {
   const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
     useFetchHistoricalSummary({
       sloList: [slo],
@@ -50,6 +58,7 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, selectedTab
           isLoading={historicalSummaryLoading}
           slo={slo}
           selectedTabId={selectedTabId}
+          onBrushed={onBrushed}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -58,6 +67,7 @@ export function HistoricalDataCharts({ slo, range, isAutoRefreshing, selectedTab
           isLoading={historicalSummaryLoading}
           slo={slo}
           selectedTabId={selectedTabId}
+          onBrushed={onBrushed}
         />
       </EuiFlexItem>
     </>

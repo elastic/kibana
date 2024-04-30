@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
 import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings/slo';
@@ -21,9 +22,10 @@ export interface Props {
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
   selectedTabId: SloTabId;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function SliChartPanel({ data, isLoading, slo, selectedTabId }: Props) {
+export function SliChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
@@ -92,6 +94,7 @@ export function SliChartPanel({ data, isLoading, slo, selectedTabId }: Props) {
             state={isSloFailed ? 'error' : 'success'}
             data={data}
             isLoading={isLoading}
+            onBrushed={onBrushed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
