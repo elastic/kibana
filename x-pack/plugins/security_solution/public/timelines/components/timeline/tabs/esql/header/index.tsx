@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { APP_ID } from '@kbn/security-solution-features/src/constants';
 import React from 'react';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
+import { APP_ID } from '../../../../../../../common';
 import { useGetStatefulQueryBar } from '../use_get_stateful_query_bar';
 
-interface Props {}
+type ESQLTabHeaderProps = SearchBarProps<AggregateQuery>;
 
-export const ESQLTabHeader = (props: Props) => {
-  const { CustomStatefulTopNavKqlQueryBar, CustomSearchBar } = useGetStatefulQueryBar();
+export const ESQLTabHeader = (props: ESQLTabHeaderProps) => {
+  const { CustomSearchBar } = useGetStatefulQueryBar();
 
   // const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
   //   const supportedTextBasedLanguages: DataViewPickerProps['textBasedLanguages'] = [
@@ -38,20 +40,5 @@ export const ESQLTabHeader = (props: Props) => {
   //   };
   // }, []);
 
-  return (
-    <CustomSearchBar
-      appName={APP_ID}
-      useDefaultBehaviors={true}
-      onQuerySubmit={(args) => {
-        console.log({ args });
-      }}
-      onCancel={() => {}}
-      isLoading={false}
-      query={{
-        esql: 'from logs-endpoint.alerts-default | limit 10',
-      }}
-      dateRangeFrom={'now-5d'}
-      dateRangeto={'now'}
-    />
-  );
+  return <CustomSearchBar useDefaultBehaviors={false} appName={APP_ID} {...props} />;
 };

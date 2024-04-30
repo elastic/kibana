@@ -219,12 +219,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const customColumnRenderers = useMemo(
       () =>
-        getFormattedFields({
-          dataTableRows: tableRows,
-          scopeId: 'timeline',
-          headers: columns,
-        }),
-      [columns, tableRows]
+        isTextBasedQuery
+          ? undefined
+          : getFormattedFields({
+              dataTableRows: tableRows,
+              scopeId: 'timeline',
+              headers: columns,
+            }),
+      [columns, tableRows, isTextBasedQuery]
     );
 
     const handleFetchMoreRecords = useCallback(() => {
@@ -390,8 +392,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            trailingControlColumns={trailingControlColumns}
-            renderCustomGridBody={renderCustomBodyCallback}
+            trailingControlColumns={isTextBasedQuery ? undefined : trailingControlColumns}
+            renderCustomGridBody={isTextBasedQuery ? undefined : renderCustomBodyCallback}
           />
           {showExpandedDetails && (
             <DetailsPanel
