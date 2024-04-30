@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext } from '@kbn/test';
-import { services as commonServices } from '../../../../../test/common/services';
-import { BsearchSecureService } from '../../../common/services/bsearch_secure';
+import { GenericFtrProviderContext } from '@kbn/test';
+import type { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
+import { services } from './services';
+import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+
+export type FtrProviderContextWithSpaces = GenericFtrProviderContext<typeof services, {}>;
 
 export interface CreateTestConfigOptions {
   testFiles: string[];
@@ -14,12 +17,9 @@ export interface CreateTestConfigOptions {
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from '../../../../test_serverless/api_integration/services';
-import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
-import { SpacesServiceProvider } from '../../../common/services/spaces';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
-  return async ({ readConfigFile }: FtrConfigProviderContext) => {
+  return async ({ readConfigFile }: FtrProviderContextWithSpaces) => {
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../../../test_serverless/shared/config.base.ts')
     );
@@ -27,9 +27,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       ...svlSharedConfig.getAll(),
       services: {
         ...services,
-        spaces: SpacesServiceProvider,
-        bsearch: commonServices.bsearch,
-        secureBsearch: BsearchSecureService,
       },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),

@@ -6,21 +6,9 @@
  */
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  createSpacesAndUsers,
-  deleteSpacesAndUsers,
-} from '../../../../../common/lib/authentication';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('@ess SecuritySolution Timeline', () => {
-    before(async () => {
-      await createSpacesAndUsers(getService);
-    });
-
-    after(async () => {
-      await deleteSpacesAndUsers(getService);
-    });
-
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./timeline'));

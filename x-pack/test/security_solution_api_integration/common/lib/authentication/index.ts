@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext as CommonFtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContextWithSpaces } from '../../../ftr_provider_context';
 import { Role, User, UserInfo } from './types';
 import { allUsers } from './users';
 import { allRoles } from './roles';
@@ -17,7 +17,7 @@ export const getUserInfo = (user: User): UserInfo => ({
   email: `${user.username}@elastic.co`,
 });
 
-export const createSpaces = async (getService: CommonFtrProviderContext['getService']) => {
+export const createSpaces = async (getService: FtrProviderContextWithSpaces) => {
   const spacesService = getService('spaces');
   for (const space of spaces) {
     await spacesService.create(space);
@@ -59,7 +59,7 @@ export const createUsersAndRoles = async (
   }
 };
 
-export const deleteSpaces = async (getService: CommonFtrProviderContext['getService']) => {
+export const deleteSpaces = async (getService: FtrProviderContextWithSpaces) => {
   const spacesService = getService('spaces');
   for (const space of spaces) {
     try {
@@ -71,7 +71,7 @@ export const deleteSpaces = async (getService: CommonFtrProviderContext['getServ
 };
 
 export const deleteUsersAndRoles = async (
-  getService: CommonFtrProviderContext['getService'],
+  getService: FtrProviderContextWithSpaces,
   usersToDelete: User[] = allUsers,
   rolesToDelete: Role[] = allRoles
 ) => {
@@ -94,12 +94,12 @@ export const deleteUsersAndRoles = async (
   }
 };
 
-export const createSpacesAndUsers = async (getService: CommonFtrProviderContext['getService']) => {
+export const createSpacesAndUsers = async (getService: FtrProviderContextWithSpaces) => {
   await createSpaces(getService);
   await createUsersAndRoles(getService);
 };
 
-export const deleteSpacesAndUsers = async (getService: CommonFtrProviderContext['getService']) => {
+export const deleteSpacesAndUsers = async (getService: FtrProviderContextWithSpaces) => {
   await deleteSpaces(getService);
   await deleteUsersAndRoles(getService);
 };
