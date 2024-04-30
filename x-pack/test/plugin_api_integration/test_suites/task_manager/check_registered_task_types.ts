@@ -78,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.webhook',
         'actions:.xmatters',
         'actions_telemetry',
+        'ad_hoc_run-backfill',
         'alerting:.es-query',
         'alerting:.geo-containment',
         'alerting:.index-threshold',

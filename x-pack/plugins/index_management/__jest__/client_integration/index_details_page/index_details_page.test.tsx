@@ -497,6 +497,10 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
     });
 
+    it('semantic text banner is not visible', async () => {
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
+    });
+
     it('sets the docs link href from the documentation service', async () => {
       const docsLinkHref = testBed.actions.mappings.getDocsLinkHref();
       // the url from the mocked docs mock
