@@ -29,6 +29,8 @@ export enum OpenAiProviderType {
   AzureAi = 'Azure OpenAI',
 }
 
+export const DEFAULT_TIMEOUT_MS = 120000;
+
 export const DEFAULT_OPENAI_MODEL = 'gpt-4';
 
 export const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions' as const;

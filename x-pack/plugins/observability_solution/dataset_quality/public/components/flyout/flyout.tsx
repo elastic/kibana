@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -13,26 +15,27 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
-import { DegradedDocs } from './degraded_docs_trend/degraded_docs';
+import { FlyoutSummary } from './flyout_summary/flyout_summary';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
   const {
     dataStreamStat,
+    dataStreamSettings,
     dataStreamDetails,
-    dataStreamDetailsLoading,
     fieldFormats,
     timeRange,
-    breakdownField,
+    loadingState,
   } = useDatasetQualityFlyout();
 
   return (
@@ -45,26 +48,44 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     >
       <>
         <Header dataStreamStat={dataset} />
-        <EuiFlyoutBody data-test-subj="datasetQualityFlyoutBody">
-          <DegradedDocs
-            dataStream={dataStreamStat?.rawName}
-            timeRange={timeRange}
-            breakdownField={breakdownField}
-          />
+        <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+            <FlyoutSummary
+              dataStream={dataset.rawName}
+              dataStreamStat={dataStreamStat}
+              dataStreamDetails={dataStreamDetails}
+              dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
+              timeRange={timeRange}
+            />
+          </EuiPanel>
 
-          <EuiSpacer />
+          <EuiHorizontalRule margin="none" />
 
-          {dataStreamDetailsLoading ? (
-            <DatasetSummaryLoading />
-          ) : dataStreamStat ? (
-            <Fragment>
-              <DatasetSummary dataStreamDetails={dataStreamDetails} fieldFormats={fieldFormats} />
-              <EuiSpacer />
-              {dataStreamStat.integration && (
-                <IntegrationSummary integration={dataStreamStat.integration} />
-              )}
-            </Fragment>
-          ) : null}
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+            {loadingState.dataStreamDetailsLoading && loadingState.dataStreamSettingsLoading ? (
+              <DatasetSummaryLoading />
+            ) : dataStreamStat ? (
+              <Fragment>
+                <DatasetSummary
+                  dataStreamSettings={dataStreamSettings}
+                  dataStreamSettingsLoading={loadingState.dataStreamSettingsLoading}
+                  dataStreamDetails={dataStreamDetails}
+                  dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
+                  fieldFormats={fieldFormats}
+                />
+
+                {dataStreamStat.integration && (
+                  <>
+                    <EuiSpacer />
+                    <IntegrationSummary
+                      integration={dataStreamStat.integration}
+                      dashboardsLoading={loadingState.datasetIntegrationsLoading}
+                    />
+                  </>
+                )}
+              </Fragment>
+            ) : null}
+          </EuiPanel>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
@@ -85,3 +106,9 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     </EuiFlyout>
   );
 }
+
+const flyoutBodyStyles = css`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;

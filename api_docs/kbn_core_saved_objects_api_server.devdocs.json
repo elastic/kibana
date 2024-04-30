@@ -8230,7 +8230,9 @@
         "signature": [
           "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+          "SortOrder",
+          " | undefined; fields?: string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -8246,9 +8248,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; sortField?: string | undefined; preference?: string | undefined; sortOrder?: ",
-          "SortOrder",
-          " | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
