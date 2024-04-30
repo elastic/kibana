@@ -31,10 +31,6 @@ export class APIKeysAPIClient {
     return await this.http.get<GetAPIKeysResult>(apiKeysUrl);
   }
 
-  public async getValidPermissionsApiKeys() {
-    return await this.http.get(`${apiKeysUrl}/valid_permissions`);
-  }
-
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
     return await this.http.post<InvalidateApiKeysResponse>(`${apiKeysUrl}/invalidate`, {
       body: JSON.stringify({ apiKeys, isAdmin }),

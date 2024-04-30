@@ -83,4 +83,8 @@ export class ConnectionDetailsService {
       this.apiKeyError$.next(error);
     });
   };
+
+  public async getValidPermissionsApiKeys() {
+    return await this.opts.apiKeys?.hasPermission;
+  }
 }

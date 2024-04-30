@@ -12,7 +12,7 @@ import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-interface ValidPermissionsResult {
+export interface ValidPermissionsResult {
   apiKeys: ApiKey[];
 }
 

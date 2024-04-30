@@ -22,6 +22,7 @@ export type {
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './update';
 export type { GetAPIKeysResult } from './get';
+export type { ValidPermissionsResult } from './check_permissions';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);

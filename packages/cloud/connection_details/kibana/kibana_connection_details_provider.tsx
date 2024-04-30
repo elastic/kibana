@@ -10,10 +10,22 @@ import * as React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
+import type {
+  CreateAPIKeyParams,
+  APIKeys,
+  CreateAPIKeyResult,
+} from '@kbn/security-plugin-types-server';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
+
+export interface ValidPermissionsResult {
+  id: string;
+  name: string;
+  api_key: string;
+  encoded: string;
+  apiKeys: APIKeys[];
+}
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
@@ -64,7 +76,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: async () => true, // async () => await http?.get<ValidPermissionsResult>('/internal/security/valid_permissions'),
       ...options?.apiKeys,
     },
   };
