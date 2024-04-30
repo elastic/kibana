@@ -546,6 +546,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('TextBasedLangEditor-expand');
         await dataGrid.clickCellFilterForButton(0, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`=="BT"`
@@ -553,6 +557,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // negate
         await dataGrid.clickCellFilterOutButton(0, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
         const newValue = await monacoEditor.getCodeEditorValue();
         expect(newValue).to.eql(
           `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`!="BT"`
@@ -571,6 +579,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('TextBasedLangEditor-expand');
         await dataGrid.clickCellFilterForButton(0, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
           `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nand \`geo.dest\`=="BT"`
