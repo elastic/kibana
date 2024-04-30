@@ -61,7 +61,13 @@
     "@kbn/features-plugin",
     "@kbn/serverless",
     "@kbn/task-manager-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
+    "@kbn/babel-register",
+    "@kbn/expect",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace"
   ],
   "exclude": ["target/**/*"]
 }
