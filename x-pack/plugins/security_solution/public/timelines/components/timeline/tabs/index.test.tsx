@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { createMockStore, mockGlobalState } from '../../../../common/mock';
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { TabsContent } from '.';
