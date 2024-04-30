@@ -765,6 +765,7 @@ describe('<EditRolePage />', () => {
 
     expect(wrapper.find('[data-test-subj="privilegeEditAction-0"]')).toHaveLength(0);
     expect(wrapper.find('[data-test-subj="privilegeDeleteAction-0"]')).toHaveLength(0);
+    expectReadOnlyFormButtons(wrapper);
   });
 
   describe('in create mode', () => {
