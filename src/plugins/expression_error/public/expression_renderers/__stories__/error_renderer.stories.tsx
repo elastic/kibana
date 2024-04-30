@@ -9,15 +9,12 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { coreMock } from '@kbn/core/public/mocks';
 import { getErrorRenderer } from '../error_renderer';
-
-const { theme } = coreMock.createStart();
 
 storiesOf('renderers/error', module).add('default', () => {
   const thrownError = new Error('There was an error');
   const config = {
     error: thrownError,
   };
-  return <Render renderer={getErrorRenderer(theme)} config={config} />;
+  return <Render renderer={getErrorRenderer()} config={config} />;
 });

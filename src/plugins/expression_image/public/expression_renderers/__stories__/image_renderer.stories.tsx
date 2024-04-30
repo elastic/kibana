@@ -9,12 +9,9 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { coreMock } from '@kbn/core/public/mocks';
 import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
-
-const { theme } = coreMock.createStart();
 
 const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   const config = {
@@ -22,7 +19,7 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
     mode: ImageMode.COVER,
   };
 
-  return <Render renderer={getImageRenderer(theme)} config={config} width="500px" height="500px" />;
+  return <Render renderer={getImageRenderer()} config={config} width="500px" height="500px" />;
 };
 
 storiesOf('renderers/image', module).add(

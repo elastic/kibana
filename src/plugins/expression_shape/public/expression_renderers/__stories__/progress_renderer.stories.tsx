@@ -9,11 +9,8 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { coreMock } from '@kbn/core/public/mocks';
 import { getProgressRenderer } from '../progress_renderer';
 import { Progress } from '../../../common';
-
-const { theme } = coreMock.createStart();
 
 storiesOf('renderers/progress', module).add('default', () => {
   const config = {
@@ -32,5 +29,5 @@ storiesOf('renderers/progress', module).add('default', () => {
     valueWeight: 15,
   };
 
-  return <Render renderer={getProgressRenderer(theme)} config={config} />;
+  return <Render renderer={getProgressRenderer()} config={config} />;
 });
