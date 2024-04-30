@@ -52,7 +52,10 @@ export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(BUCKET_TYPES),
 ] as const;
 
-export enum LegendValue {
+export enum XYLegendValue {
   CurrentAndLastValue = 'currentAndLastValue',
+}
+
+export enum PartitionLegendValue {
   Value = 'value',
 }

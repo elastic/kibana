@@ -19,7 +19,7 @@ import {
 import type { Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { LegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
@@ -137,7 +137,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const onLegendStatsChange = useCallback(
     (checked) => {
       onStateChange({
-        legendStats: checked ? [LegendValue.Value] : [],
+        legendStats: checked ? [PartitionLegendValue.Value] : [],
       });
     },
     [onStateChange]
@@ -245,7 +245,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           </EuiFormRow>
         </ToolbarPopover>
       ) : null}
-      <LegendSettingsPopover
+      <LegendSettingsPopover<PartitionLegendValue>
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
         onDisplayChange={onLegendDisplayChange}

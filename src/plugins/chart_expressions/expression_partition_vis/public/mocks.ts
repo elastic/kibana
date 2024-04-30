@@ -7,7 +7,7 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { LegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   BucketColumns,
   PartitionVisParams,
@@ -382,6 +382,6 @@ export const createMockWaffleParams = (): PartitionVisParams => {
         },
       ],
     },
-    legendStats: [LegendValue.Value],
+    legendStats: [PartitionLegendValue.Value],
   };
 };
