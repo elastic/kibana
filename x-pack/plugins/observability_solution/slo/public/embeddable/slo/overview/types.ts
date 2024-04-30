@@ -11,8 +11,6 @@ import {
 } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { Subject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import {
   type CoreStart,
@@ -32,26 +30,21 @@ export interface GroupFilters {
   kqlQuery?: string;
 }
 
-// rename SignleSloProps to SingleSloCustomInput
-export type SingleSloCustomInput = EmbeddableSloProps & {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
-  showAllGroupByInstances?: boolean;
-};
-
-export type GroupSloCustomInput = EmbeddableSloProps & {
-  groupFilters: GroupFilters | undefined;
-};
-
-export interface EmbeddableSloProps {
-  remoteName?: string;
-  reloadSubject?: Subject<boolean>;
+export interface SloConfigurationProps {
   overviewMode?: OverviewMode;
 }
 
-export type SloEmbeddableInput = EmbeddableInput &
-  Partial<GroupSloCustomInput> &
-  Partial<SingleSloCustomInput>;
+export type SingleSloCustomInput = SloConfigurationProps & {
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
+  remoteName?: string;
+  showAllGroupByInstances?: boolean;
+};
+
+export type GroupSloCustomInput = SloConfigurationProps & {
+  groupFilters: GroupFilters | undefined;
+};
+
 export type SloOverviewEmbeddableState = SerializedTitles &
   Partial<GroupSloCustomInput> &
   Partial<SingleSloCustomInput>;
@@ -59,18 +52,20 @@ export type SloOverviewEmbeddableState = SerializedTitles &
 export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
-  HasSloOverviewConfig;
+  HasSloGroupOverviewConfig;
 
-export interface HasSloOverviewConfig {
+export interface HasSloGroupOverviewConfig {
   getSloGroupOverviewConfig: () => GroupSloCustomInput;
   updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
 }
 
-export const apiHasSloOverviewConfig = (api: unknown | null): api is HasSloOverviewConfig => {
+export const apiHasSloGroupOverviewConfig = (
+  api: unknown | null
+): api is HasSloGroupOverviewConfig => {
   return Boolean(
     api &&
-      typeof (api as HasSloOverviewConfig).getSloGroupOverviewConfig === 'function' &&
-      typeof (api as HasSloOverviewConfig).updateSloGroupOverviewConfig === 'function'
+      typeof (api as HasSloGroupOverviewConfig).getSloGroupOverviewConfig === 'function' &&
+      typeof (api as HasSloGroupOverviewConfig).updateSloGroupOverviewConfig === 'function'
   );
 };
 

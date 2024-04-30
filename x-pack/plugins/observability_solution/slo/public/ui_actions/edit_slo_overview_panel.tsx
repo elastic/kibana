@@ -21,18 +21,17 @@ import {
   type UiActionsActionDefinition,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
-// import type { SLOEmbeddable } from '../embeddable/slo/overview/slo_embeddable';
 import { SLO_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 import {
   GroupSloCustomInput,
-  HasSloOverviewConfig,
+  HasSloGroupOverviewConfig,
   SloOverviewEmbeddableActionContext,
-  apiHasSloOverviewConfig,
+  apiHasSloGroupOverviewConfig,
 } from '../embeddable/slo/overview/types';
 
 export const EDIT_SLO_OVERVIEW_ACTION = 'editSloOverviewPanelAction';
-type EditSloOverviewPanelApi = CanAccessViewMode & HasType & HasSloOverviewConfig;
+type EditSloOverviewPanelApi = CanAccessViewMode & HasType & HasSloGroupOverviewConfig;
 const isEditSloOverviewPanelApi = (api: unknown): api is EditSloOverviewPanelApi =>
   Boolean(
     apiHasType(api) &&
@@ -56,7 +55,7 @@ export function createEditSloOverviewPanelAction(
       }),
     async execute(context) {
       const { embeddable } = context;
-      if (!apiHasSloOverviewConfig(embeddable)) {
+      if (!apiHasSloGroupOverviewConfig(embeddable)) {
         throw new IncompatibleActionError();
       }
 

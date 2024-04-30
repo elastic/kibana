@@ -89,6 +89,12 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
           sloId: [sloId$, (value) => sloId$.next(value)],
           sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
           groupFilters: [groupFilters$, (value) => groupFilters$.next(value)],
+          showAllGroupByInstances: [
+            showAllGroupByInstances$,
+            (value) => showAllGroupByInstances$.next(value),
+          ],
+          remoteName: [remoteName$, (value) => remoteName$.next(value)],
+          overviewMode: [overviewMode$, (value) => overviewMode$.next(value)],
           ...titleComparators,
         }
       );
