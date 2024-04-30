@@ -54,7 +54,7 @@ describe('AppContextService', () => {
       appContextService.start(mockAppContext);
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: true,
+        attackDiscoveryEnabled: false,
       });
       appContextService.stop();
 
@@ -104,7 +104,7 @@ describe('AppContextService', () => {
       const pluginName = 'pluginName';
       const features: AssistantFeatures = {
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: true,
+        attackDiscoveryEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -119,12 +119,12 @@ describe('AppContextService', () => {
       const pluginOne = 'plugin1';
       const featuresOne: AssistantFeatures = {
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: false,
+        attackDiscoveryEnabled: false,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
         assistantModelEvaluation: false,
-        assistantStreamingEnabled: true,
+        attackDiscoveryEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -139,11 +139,11 @@ describe('AppContextService', () => {
       const pluginName = 'pluginName';
       const featuresOne: AssistantFeatures = {
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: false,
+        attackDiscoveryEnabled: false,
       };
       const featuresTwo: AssistantFeatures = {
         assistantModelEvaluation: false,
-        assistantStreamingEnabled: true,
+        attackDiscoveryEnabled: false,
       };
 
       appContextService.start(mockAppContext);

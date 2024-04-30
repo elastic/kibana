@@ -13,7 +13,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { StoredSLO } from '../../domain/models';
+import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SloConfig } from '../..';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
@@ -201,7 +201,7 @@ export class SloOrphanSummaryCleanupTask {
   };
 
   findSloDefinitions = async (ids: string[]) => {
-    const sloDefinitions = await this.soClient?.find<Pick<StoredSLO, 'id' | 'revision'>>({
+    const sloDefinitions = await this.soClient?.find<Pick<StoredSLODefinition, 'id' | 'revision'>>({
       type: SO_SLO_TYPE,
       page: 1,
       perPage: ids.length,

@@ -21,15 +21,12 @@ export function JobsListStatus({
   datafeedState?: DATAFEED_STATE;
   version: number;
 }) {
-  const jobIsOk =
-    jobState === JOB_STATE.OPENED || jobState === JOB_STATE.OPENING;
+  const jobIsOk = jobState === JOB_STATE.OPENED || jobState === JOB_STATE.OPENING;
 
   const datafeedIsOk =
-    datafeedState === DATAFEED_STATE.STARTED ||
-    datafeedState === DATAFEED_STATE.STARTING;
+    datafeedState === DATAFEED_STATE.STARTED || datafeedState === DATAFEED_STATE.STARTING;
 
-  const isClosed =
-    jobState === JOB_STATE.CLOSED || jobState === JOB_STATE.CLOSING;
+  const isClosed = jobState === JOB_STATE.CLOSED || jobState === JOB_STATE.CLOSING;
 
   const isLegacy = version < 3;
 
@@ -38,29 +35,24 @@ export function JobsListStatus({
   if (jobIsOk && datafeedIsOk) {
     statuses.push(
       <EuiBadge color="success">
-        {i18n.translate(
-          'xpack.apm.settings.anomalyDetection.jobList.okStatusLabel',
-          { defaultMessage: 'OK' }
-        )}
+        {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.okStatusLabel', {
+          defaultMessage: 'OK',
+        })}
       </EuiBadge>
     );
   } else if (!isClosed) {
     statuses.push(
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.apm.settings.anomalyDetection.jobList.warningStatusLabel',
-          {
-            defaultMessage:
-              'Job might be experiencing problems. Click the Manage Jobs link to learn more.',
-          }
-        )}
+        content={i18n.translate('xpack.apm.settings.anomalyDetection.jobList.warningStatusLabel', {
+          defaultMessage:
+            'Job might be experiencing problems. Click the Manage Jobs link to learn more.',
+        })}
       >
         <MLManageJobsLink jobId={jobId}>
           <EuiBadge color="warning">
-            {i18n.translate(
-              'xpack.apm.settings.anomalyDetection.jobList.warningStatusBadgeLabel',
-              { defaultMessage: 'Warning' }
-            )}
+            {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.warningStatusBadgeLabel', {
+              defaultMessage: 'Warning',
+            })}
           </EuiBadge>
         </MLManageJobsLink>
       </EuiToolTip>
@@ -70,10 +62,9 @@ export function JobsListStatus({
   if (isClosed) {
     statuses.push(
       <EuiBadge color="hollow">
-        {i18n.translate(
-          'xpack.apm.settings.anomalyDetection.jobList.closedStatusLabel',
-          { defaultMessage: 'Closed' }
-        )}
+        {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.closedStatusLabel', {
+          defaultMessage: 'Closed',
+        })}
       </EuiBadge>
     );
   }
@@ -82,10 +73,9 @@ export function JobsListStatus({
     statuses.push(
       <EuiBadge color="default">
         {' '}
-        {i18n.translate(
-          'xpack.apm.settings.anomalyDetection.jobList.legacyStatusLabel',
-          { defaultMessage: 'Legacy' }
-        )}
+        {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.legacyStatusLabel', {
+          defaultMessage: 'Legacy',
+        })}
       </EuiBadge>
     );
   }

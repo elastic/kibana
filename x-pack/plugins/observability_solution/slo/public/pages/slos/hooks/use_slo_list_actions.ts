@@ -17,13 +17,11 @@ export function useSloListActions({
   setIsAddRuleFlyoutOpen,
   setIsActionsPopoverOpen,
   setDeleteConfirmationModalOpen,
-  setDashboardAttachmentReady,
 }: {
   slo: SLOWithSummaryResponse;
   setIsActionsPopoverOpen: (val: boolean) => void;
   setIsAddRuleFlyoutOpen: (val: boolean) => void;
   setDeleteConfirmationModalOpen: (val: boolean) => void;
-  setDashboardAttachmentReady?: (val: boolean) => void;
 }) {
   const { embeddable } = useKibana().services;
   const { mutate: deleteSlo } = useDeleteSlo();
@@ -49,6 +47,7 @@ export function useSloListActions({
         description: newDescription,
         sloId: slo.id,
         sloInstanceId: slo.instanceId,
+        remoteName: slo.remote?.remoteName,
       };
 
       const state = {
@@ -63,7 +62,7 @@ export function useSloListActions({
         path,
       });
     },
-    [embeddable, slo.id, slo.instanceId]
+    [embeddable, slo.id, slo.instanceId, slo.remote?.remoteName]
   );
 
   return {

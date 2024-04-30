@@ -1,8 +1,8 @@
-title: Custom KQL
+title: Custom Query
 required:
   - type
   - params
-description: Defines properties for a custom KQL indicator type
+description: Defines properties for a custom query indicator type
 type: object
 properties:
   params:

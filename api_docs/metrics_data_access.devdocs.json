@@ -670,7 +670,7 @@
         "label": "awsEC2SnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"rx\" | \"tx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
+          "(\"tx\" | \"rx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/aws_ec2/metrics/index.ts",
         "deprecated": false,
@@ -730,7 +730,7 @@
         "label": "containerSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
+          "(\"memory\" | \"tx\" | \"rx\" | \"cpu\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/container/metrics/index.ts",
         "deprecated": false,
@@ -745,7 +745,7 @@
         "label": "hostSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\")[]"
+          "(\"memory\" | \"tx\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"logRate\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/host/metrics/index.ts",
         "deprecated": false,
@@ -838,6 +838,8 @@
           "; readonly diskSpaceAvailable: ",
           "LensBaseLayer",
           "; readonly diskUsage: ",
+          "LensBaseLayer",
+          "; readonly diskUsageAverage: ",
           "LensBaseLayer",
           "; readonly hostCount: ",
           "LensBaseLayer",
@@ -945,25 +947,7 @@
           "LensDataset",
           " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"h\" | \"s\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           "LensBreakdownConfig",
-          " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly disk: { readonly xy: { readonly diskSpaceUsageAvailable: { title: string; dataset?: ",
-          "LensDataset",
-          " | undefined; chartType: \"xy\"; layers: ({ dataset?: ",
-          "LensDataset",
-          " | undefined; yAxis: ",
-          "LensBaseLayer",
-          "[]; type: \"series\"; breakdown?: ",
-          "LensBreakdownConfig",
-          " | undefined; xAxis: ",
-          "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
-          "LensDataset",
-          " | undefined; yAxis: ",
-          "LensBaseLayer",
-          "[]; type: \"annotation\"; events: ({ name: string; color?: string | undefined; icon?: string | undefined; datetime: string; } | { name: string; color?: string | undefined; icon?: string | undefined; field: string; filter: string; })[]; } | ",
-          "LensReferenceLineLayer",
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"left\" | \"top\" | \"bottom\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; } & { id: string; }; readonly diskThroughputReadWrite: { title: string; dataset?: ",
+          " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; } & { id: string; }; }; }; readonly disk: { readonly xy: { readonly diskThroughputReadWrite: { title: string; dataset?: ",
           "LensDataset",
           " | undefined; chartType: \"xy\"; layers: ({ dataset?: ",
           "LensDataset",
@@ -1090,24 +1074,6 @@
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"left\" | \"top\" | \"bottom\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; } & { id: string; }; readonly diskWriteThroughput: { title: string; dataset?: ",
-          "LensDataset",
-          " | undefined; chartType: \"xy\"; layers: ({ dataset?: ",
-          "LensDataset",
-          " | undefined; yAxis: ",
-          "LensBaseLayer",
-          "[]; type: \"series\"; breakdown?: ",
-          "LensBreakdownConfig",
-          " | undefined; xAxis: ",
-          "LensBreakdownConfig",
-          "; seriesType: \"area\" | \"line\" | \"bar\"; } | { dataset?: ",
-          "LensDataset",
-          " | undefined; yAxis: ",
-          "LensBaseLayer",
-          "[]; type: \"annotation\"; events: ({ name: string; color?: string | undefined; icon?: string | undefined; datetime: string; } | { name: string; color?: string | undefined; icon?: string | undefined; field: string; filter: string; })[]; } | ",
-          "LensReferenceLineLayer",
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"left\" | \"top\" | \"bottom\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; } & { id: string; }; readonly diskUsage: { title: string; dataset?: ",
           "LensDataset",
           " | undefined; chartType: \"xy\"; layers: ({ dataset?: ",
           "LensDataset",
@@ -1382,7 +1348,7 @@
         "label": "podSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
+          "(\"memory\" | \"tx\" | \"rx\" | \"cpu\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/kubernetes/pod/metrics/index.ts",
         "deprecated": false,
@@ -1397,7 +1363,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"memory\" | \"custom\" | \"tx\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

@@ -20,10 +20,12 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { PluginContext } from './context/plugin_context';
 
 import { SloPublicPluginsStart } from './types';
 import { routes } from './routes/routes';
+import { ExperimentalFeatures } from '../common/config';
 
 function App() {
   return (
@@ -52,6 +54,7 @@ export const renderApp = ({
   kibanaVersion,
   isServerless,
   observabilityRuleTypeRegistry,
+  experimentalFeatures,
 }: {
   core: CoreStart;
   plugins: SloPublicPluginsStart;
@@ -62,6 +65,7 @@ export const renderApp = ({
   isDev?: boolean;
   kibanaVersion: string;
   isServerless?: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -77,6 +81,29 @@ export const renderApp = ({
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
 
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
+
+  const unregisterPrompts = plugins.observabilityAIAssistant?.service.setScreenContext({
+    starterPrompts: [
+      {
+        title: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.title', {
+          defaultMessage: 'Getting started',
+        }),
+        prompt: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.prompt', {
+          defaultMessage: 'What are SLOs?',
+        }),
+        icon: 'bullseye',
+      },
+      {
+        title: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.title', {
+          defaultMessage: 'Getting started',
+        }),
+        prompt: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.prompt', {
+          defaultMessage: 'Can you create an SLO?',
+        }),
+        icon: 'questionInCircle',
+      },
+    ],
+  });
 
   ReactDOM.render(
     <PresentationContextProvider>
@@ -100,6 +127,7 @@ export const renderApp = ({
                     appMountParameters,
                     ObservabilityPageTemplate,
                     observabilityRuleTypeRegistry,
+                    experimentalFeatures,
                   }}
                 >
                   <Router history={history}>
@@ -132,6 +160,7 @@ export const renderApp = ({
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
     plugins.data.search.session.clear();
+    unregisterPrompts?.();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

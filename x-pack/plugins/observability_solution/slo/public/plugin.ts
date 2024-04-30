@@ -15,6 +15,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
@@ -24,13 +25,19 @@ import { SloListLocatorDefinition } from './locators/slo_list';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
+import { ExperimentalFeatures, SloConfig } from '../common/config';
+import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext<SloConfig>) {
+    this.experimentalFeatures =
+      this.initContext.config.get().experimental ?? this.experimentalFeatures;
+  }
 
   public setup(
     coreSetup: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
@@ -60,6 +67,7 @@ export class SloPlugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         isServerless: !!pluginsStart.serverless,
+        experimentalFeatures: this.experimentalFeatures,
       });
     };
     const appUpdater$ = this.appUpdater$;
@@ -105,22 +113,24 @@ export class SloPlugin
         };
         registerSloAlertsEmbeddableFactory();
 
-        const registerSloErrorBudgetEmbeddableFactory = async () => {
-          const { SloErrorBudgetEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/error_budget/slo_error_budget_embeddable_factory'
-          );
-          const factory = new SloErrorBudgetEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloErrorBudgetEmbeddableFactory();
+        registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
+          const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-        const registerAsyncSloAlertsUiActions = async () => {
+          const deps = { ...coreStart, ...pluginsStart };
+
+          const { getErrorBudgetEmbeddableFactory } = await import(
+            './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
+          );
+          return getErrorBudgetEmbeddableFactory(deps);
+        });
+
+        const registerAsyncSloUiActions = async () => {
           if (pluginsSetup.uiActions) {
-            const { registerSloAlertsUiActions } = await import('./ui_actions');
-            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+            const { registerSloUiActions } = await import('./ui_actions');
+            registerSloUiActions(pluginsSetup.uiActions, coreSetup);
           }
         };
-        registerAsyncSloAlertsUiActions();
+        registerAsyncSloUiActions();
       }
     };
     assertPlatinumLicense();
@@ -145,6 +155,7 @@ export class SloPlugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         isServerless: !!pluginsStart.serverless,
+        experimentalFeatures: this.experimentalFeatures,
       }),
     };
   }

@@ -147,6 +147,10 @@ export function ChatFlyout({
       }}
     >
       <EuiFlyoutResizable
+        aria-label={i18n.translate(
+          'xpack.observabilityAiAssistant.chatFlyout.euiFlyoutResizable.aiAssistantForObservabilityLabel',
+          { defaultMessage: 'AI Assistant for Observability Chat Flyout' }
+        )}
         className={flyoutClassName}
         closeButtonProps={{
           css: {

@@ -1111,6 +1111,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.fanotify.seccomp_restricted',
+    first_supported_version: '8.13.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.seccomp_restricted',
+      {
+        defaultMessage:
+          'Prevent the Defend permission checking thread from calling the open/openat syscalls when running on kernels which require FAN_OPEN_PERM (older than 5.0). Will avoid potential deadlocks with other anti-virus vendors at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.context_manipulation_detection',
     first_supported_version: '8.4',
     documentation: i18n.translate(
@@ -1162,6 +1173,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'When only process events are being collected, this option will disable file descriptor tracking probes. This can be used to reduce Endpoint processing at the expense of missing fchdir based working directory changes. This only applies if the capture_mode is kprobe or if auto resolves tracefs (kprobe) probes. ebpf based event collection ignores this setting. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.enable_caps',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.enable_caps',
+      {
+        defaultMessage:
+          'This setting ensures thread capability arrays are not pruned from Linux process events before being sent to Elasticsearch. At the expense of higher Endpoint data volumes, a true value will ensure capability matching detection rules running within the Elastic stack can match. Detection rules running within Elastic Defend are unaffected because capabilities are conditionally pruned after rule processing. Default is false.',
       }
     ),
   },
@@ -1630,6 +1652,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.memory_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.memory_scan',
+      {
+        defaultMessage:
+          'On behavior alerts, this feature enables an additional scan of identified memory regions against well-known malware signatures. Default: true',
       }
     ),
   },

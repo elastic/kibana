@@ -61,7 +61,6 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     style={
       Object {
         "maxWidth": "400px",
@@ -169,7 +168,6 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     style={
       Object {
         "maxWidth": "400px",

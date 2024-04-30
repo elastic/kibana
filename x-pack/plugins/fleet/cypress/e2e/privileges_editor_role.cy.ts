@@ -11,11 +11,7 @@ import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { getIntegrationCard } from '../screens/integrations';
 
-import {
-  FLEET_SERVER_MISSING_PRIVILEGES,
-  ADD_AGENT_BUTTON_TOP,
-  AGENT_FLYOUT,
-} from '../screens/fleet';
+import { LANDING_PAGE_ADD_FLEET_SERVER_BUTTON } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';
 
@@ -44,18 +40,9 @@ describe('When the user has Editor built-in role', () => {
       navigateTo(FLEET);
     });
 
-    describe('When there are no agent policies', () => {
-      it('If fleet server is not set up, Fleet shows a callout', () => {
-        loginWithUserAndWaitForPage(FLEET, BuiltInEditorUser);
-        cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.MESSAGE).should(
-          'contain',
-          'Fleet Server needs to be set up.'
-        );
-
-        cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
-        cy.getBySel(AGENT_FLYOUT.MANAGED_TAB).click();
-        cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.PROMPT).should('exist');
-      });
+    it('It should not show a callout', () => {
+      loginWithUserAndWaitForPage(FLEET, BuiltInEditorUser);
+      cy.getBySel(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).should('exist');
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/common';

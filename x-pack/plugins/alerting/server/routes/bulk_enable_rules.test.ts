@@ -6,13 +6,15 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { RuleAction, RuleSystemAction } from '../types';
+import { Rule } from '../application/rule/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -122,5 +124,122 @@ describe('bulkEnableRulesRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('actions', () => {
+    const mockedRule: Rule<{}> = {
+      id: '1',
+      alertTypeId: '1',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      actions: [
+        {
+          group: 'default',
+          id: '2',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+      ],
+      consumer: 'bar',
+      name: 'abc',
+      tags: ['foo'],
+      enabled: true,
+      muteAll: false,
+      notifyWhen: 'onActionGroupChange',
+      createdBy: '',
+      updatedBy: '',
+      apiKeyOwner: '',
+      throttle: '30s',
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'unknown',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      },
+      revision: 0,
+    };
+
+    const action: RuleAction = {
+      actionTypeId: 'test',
+      group: 'default',
+      id: '2',
+      params: {
+        foo: true,
+      },
+      uuid: '123-456',
+    };
+
+    const systemAction: RuleSystemAction = {
+      actionTypeId: 'test-2',
+      id: 'system_action-id',
+      params: {
+        foo: true,
+      },
+      uuid: '123-456',
+    };
+
+    const mockedRules: Array<Rule<{}>> = [
+      {
+        ...mockedRule,
+        actions: [action],
+        systemActions: [systemAction],
+      },
+    ];
+
+    const bulkEnableActionsResult = {
+      rules: mockedRules,
+      errors: [],
+      total: 1,
+      taskIdsFailedToBeEnabled: [],
+    };
+
+    it('should merge actions and systemActions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      bulkEnableRulesRoute({ router, licenseState });
+      const [_, handler] = router.patch.mock.calls[0];
+
+      rulesClient.bulkEnableRules.mockResolvedValueOnce(bulkEnableActionsResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: bulkEnableRequest,
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.rules[0].actions).toEqual([
+        {
+          actionTypeId: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+        {
+          actionTypeId: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+      ]);
+    });
   });
 });

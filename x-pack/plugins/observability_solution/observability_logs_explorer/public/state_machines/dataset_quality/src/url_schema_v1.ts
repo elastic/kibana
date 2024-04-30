@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller';
+import {
+  DatasetQualityFlyoutOptions,
+  DatasetQualityPublicStateUpdate,
+} from '@kbn/dataset-quality-plugin/public/controller';
 import * as rt from 'io-ts';
 import { datasetQualityUrlSchemaV1, deepCompactObject } from '../../../../common';
 
@@ -14,7 +17,7 @@ export const getStateFromUrlValue = (
 ): DatasetQualityPublicStateUpdate =>
   deepCompactObject<DatasetQualityPublicStateUpdate>({
     table: urlValue.table,
-    flyout: urlValue.flyout,
+    flyout: getFlyoutFromUrlValue(urlValue.flyout),
     filters: urlValue.filters,
   });
 
@@ -41,3 +44,25 @@ const stateFromUrlSchemaRT = new rt.Type<
 
 export const stateFromUntrustedUrlRT =
   datasetQualityUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);
+
+const getFlyoutFromUrlValue = (
+  flyout?: datasetQualityUrlSchemaV1.UrlSchema['flyout']
+): DatasetQualityFlyoutOptions =>
+  deepCompactObject<DatasetQualityFlyoutOptions>({
+    ...(flyout
+      ? {
+          ...flyout,
+          dataset: flyout.dataset
+            ? {
+                ...flyout.dataset,
+                integration: flyout.dataset.integration
+                  ? {
+                      ...flyout.dataset.integration,
+                      datasets: {},
+                    }
+                  : undefined,
+              }
+            : undefined,
+        }
+      : {}),
+  });

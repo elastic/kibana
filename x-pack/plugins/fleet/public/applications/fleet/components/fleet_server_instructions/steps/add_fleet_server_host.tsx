@@ -15,7 +15,7 @@ import {
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiButtonEmpty,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -202,7 +202,6 @@ export const AddFleetServerHostStepContent = ({
           <EuiSpacer size="m" />
           <EuiCallOut
             iconType="check"
-            size="s"
             color="success"
             title={
               <FormattedMessage
@@ -218,12 +217,12 @@ export const AddFleetServerHostStepContent = ({
                 host: submittedFleetServerHost.host_urls[0],
                 fleetSettingsLink: (
                   // eslint-disable-next-line @elastic/eui/href-or-on-click
-                  <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
+                  <EuiLink href={getHref('settings')} onClick={onClose}>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
                     />
-                  </EuiButtonEmpty>
+                  </EuiLink>
                 ),
               }}
             />

@@ -1159,7 +1159,7 @@
           "\nCreates an index with the given mappings\n"
         ],
         "signature": [
-          "({ client, indexName, mappings, esCapabilities, aliases, timeout, }: ",
+          "({ client, indexName, mappings, esCapabilities, aliases, timeout, waitForIndexStatusTimeout, }: ",
           "CreateIndexParams",
           ") => ",
           "TaskEither",
@@ -1182,7 +1182,7 @@
             "id": "def-common.createIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  indexName,\n  mappings,\n  esCapabilities,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n}",
+            "label": "{\n  client,\n  indexName,\n  mappings,\n  esCapabilities,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n  waitForIndexStatusTimeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
             "signature": [
               "CreateIndexParams"
@@ -3877,45 +3877,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-common.MIGRATION_CLIENT_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "MIGRATION_CLIENT_OPTIONS",
-        "description": [
-          "\nTo avoid the Elasticsearch-js client aborting our requests before we\nreceive a response from Elasticsearch we choose a requestTimeout that's\nlonger than the DEFAULT_TIMEOUT.\n\nThis timeout is only really valuable for preventing migrations from being\nstuck waiting forever for a response when the underlying socket is broken.\n\nWe also set maxRetries to 0 so that the state action machine can handle all\nretries. This way we get exponential back-off and logging for failed\nactions."
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.MIGRATION_CLIENT_OPTIONS.maxRetries",
-            "type": "number",
-            "tags": [],
-            "label": "maxRetries",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.MIGRATION_CLIENT_OPTIONS.requestTimeout",
-            "type": "number",
-            "tags": [],
-            "label": "requestTimeout",
-            "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

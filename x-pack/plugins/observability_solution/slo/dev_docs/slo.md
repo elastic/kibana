@@ -36,7 +36,7 @@ Get help with the data forge tool: `node x-pack/scripts/data_forge.js --help`
 2. Create SLOs
 
 > [!TIP]
-> Using the API is possible, but to prevent this document of becoming out of date, we refer to the [openAPI](../docs/openapi/slo/bundled.yaml) specification instead. 
+> Using the API is possible, but to prevent this document of becoming out of date, we refer to the [openAPI](../docs/openapi/slo/bundled.yaml) specification instead.
 > Using the UI for developping/testing is the simpler approach.
 
 
@@ -51,7 +51,7 @@ On this page, you'll be able to create SLOs.
 
 With the data generated from the above section, the easiest SLO you can setup would be:
 
-> **Type**: Custom KQL
+> **Type**: Custom Query
 >
 > **Index**: Admin Console
 >
@@ -71,14 +71,14 @@ We currently support the following SLI:
 
 - APM Transaction Error Rate, known as APM Availability
 - APM Transaction Duration, known as APM Latency
-- Custom KQL
+- Custom Query
 - Custom Metric
 - Histogram Metric
 - Timeslice Metric
 
 For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
-The **Custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom `timestampField` can be provided to override the default @timestamp field.
+The **Custom Query** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom `timestampField` can be provided to override the default @timestamp field.
 
 The **Custom Metric** SLI requires an index pattern, an optional filter query, a set of metrics for the numerator, and a set of metrics for the denominator. A custom `timestampField` can be provided to override the default @timestamp field.
 
@@ -347,7 +347,7 @@ curl --request POST \
 
 </details>
 
-### Custom KQL
+### Custom Query
 
 <details>
 <summary>98.5% of 'logs lantency < 300ms' for 'groupId: group-0' over the last 7 days</summary>

@@ -19,7 +19,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
-import { getAgentsByKuery } from '../../services/agents';
+import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -466,13 +466,12 @@ export const getK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
-
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+
+    const agentVersion = await getLatestAvailableAgentVersion();
+
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,
@@ -500,13 +499,10 @@ export const downloadK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
-
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const agentVersion = await getLatestAvailableAgentVersion();
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,

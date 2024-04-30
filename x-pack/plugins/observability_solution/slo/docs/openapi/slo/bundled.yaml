@@ -687,11 +687,11 @@ components:
               items:
                 $ref: '#/components/schemas/filter'
     indicator_properties_custom_kql:
-      title: Custom KQL
+      title: Custom Query
       required:
         - type
         - params
-      description: Defines properties for a custom KQL indicator type
+      description: Defines properties for a custom query indicator type
       type: object
       properties:
         params:
@@ -1187,10 +1187,16 @@ components:
         target:
           description: the target objective between 0 and 1 excluded
           type: number
+          minimum: 0
+          maximum: 100
+          exclusiveMinimum: true
+          exclusiveMaximum: true
           example: 0.99
         timesliceTarget:
           description: the target objective for each slice when using a timeslices budgeting method
           type: number
+          minimum: 0
+          maximum: 100
           example: 0.995
         timesliceWindow:
           description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}

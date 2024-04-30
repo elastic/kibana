@@ -23,6 +23,8 @@ export const getUseCellActionsHook = (tableId: TableId) => {
     columns,
     data,
     dataGridRef,
+    pageSize,
+    pageIndex,
   }) => {
     const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
     const dataViewId = useDataViewId(SourcererScopeName.detections);
@@ -79,10 +81,10 @@ export const getUseCellActionsHook = (tableId: TableId) => {
 
     const getCellValue = useCallback<UseDataGridColumnsSecurityCellActionsProps['getCellValue']>(
       (fieldName, rowIndex) => {
-        const pageRowIndex = rowIndex % finalData.length;
-        return finalData[pageRowIndex].find((rowData) => rowData.field === fieldName)?.value ?? [];
+        const pageRowIndex = rowIndex - pageSize * pageIndex;
+        return finalData[pageRowIndex]?.find((rowData) => rowData.field === fieldName)?.value ?? [];
       },
-      [finalData]
+      [finalData, pageIndex, pageSize]
     );
 
     const disabledActionTypes =
@@ -105,10 +107,12 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       [cellActions]
     );
 
-    return {
-      getCellActions,
-      visibleCellActions: 3,
-    };
+    return useMemo(() => {
+      return {
+        getCellActions,
+        visibleCellActions: 3,
+      };
+    }, [getCellActions]);
   };
 
   return useCellActions;

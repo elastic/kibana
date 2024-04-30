@@ -12,6 +12,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
+import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { get, GetParams } from './methods/get';
@@ -39,7 +40,6 @@ import { find, FindParams } from './methods/find';
 import { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
-import { update, UpdateOptions } from './methods/update';
 import {
   bulkDeleteRules,
   BulkDeleteRulesRequestBody,
@@ -69,6 +69,12 @@ import {
   bulkUntrackAlerts,
   BulkUntrackBody,
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
+import { scheduleBackfill } from '../application/backfill/methods/schedule';
+import { getBackfill } from '../application/backfill/methods/get';
+import { findBackfill } from '../application/backfill/methods/find';
+import { deleteBackfill } from '../application/backfill/methods/delete';
+import { FindBackfillParams } from '../application/backfill/methods/find/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -103,6 +109,7 @@ export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParam
   'revision',
   'running',
   'snoozeSchedule',
+  'systemActions',
   'updatedBy',
   'updatedAt',
 ]);
@@ -131,8 +138,8 @@ export class RulesClient {
     get<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
     resolveRule<Params>(this.context, params);
-  public update = <Params extends RuleTypeParams = never>(params: UpdateOptions<Params>) =>
-    update<Params>(this.context, params);
+  public update = <Params extends RuleTypeParams = never>(params: UpdateRuleParams<Params>) =>
+    updateRule<Params>(this.context, params);
 
   public getAlertState = (params: GetAlertStateParams) => getAlertState(this.context, params);
   public getAlertSummary = (params: GetAlertSummaryParams) => getAlertSummary(this.context, params);
@@ -180,6 +187,15 @@ export class RulesClient {
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
+
+  public scheduleBackfill = (params: ScheduleBackfillParams) =>
+    scheduleBackfill(this.context, params);
+
+  public getBackfill = (id: string) => getBackfill(this.context, id);
+
+  public findBackfill = (params: FindBackfillParams) => findBackfill(this.context, params);
+
+  public deleteBackfill = (id: string) => deleteBackfill(this.context, id);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;

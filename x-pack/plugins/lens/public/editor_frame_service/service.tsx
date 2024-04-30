@@ -18,7 +18,6 @@ import {
 } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   DataViewsPublicPluginSetup,
@@ -47,7 +46,6 @@ export interface EditorFrameStartPlugins {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
-  dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;

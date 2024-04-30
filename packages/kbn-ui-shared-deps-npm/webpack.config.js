@@ -94,7 +94,6 @@ module.exports = (_, argv) => {
         'react',
         'reselect',
         'rxjs',
-        'rxjs/operators',
         'styled-components',
         'tslib',
         'uuid',

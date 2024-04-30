@@ -9,10 +9,7 @@ import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import {
-  SERVICE_NAME,
-  SERVICE_VERSION,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, SERVICE_VERSION } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -45,9 +42,7 @@ export async function getDerivedServiceAnnotations({
     (
       await apmEventClient.search('get_derived_service_annotations', {
         apm: {
-          events: [
-            getProcessorEventForTransactions(searchAggregatedTransactions),
-          ],
+          events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
         },
         body: {
           track_total_hits: false,
@@ -73,37 +68,28 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await apmEventClient.search(
-        'get_first_seen_of_version',
-        {
-          apm: {
-            events: [
-              getProcessorEventForTransactions(searchAggregatedTransactions),
-            ],
-          },
-          body: {
-            track_total_hits: false,
-            size: 1,
-            query: {
-              bool: {
-                filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
-              },
-            },
-            sort: {
-              '@timestamp': 'asc',
+      const response = await apmEventClient.search('get_first_seen_of_version', {
+        apm: {
+          events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+        },
+        body: {
+          track_total_hits: false,
+          size: 1,
+          query: {
+            bool: {
+              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
             },
           },
-        }
-      );
+          sort: {
+            '@timestamp': 'asc',
+          },
+        },
+      });
 
-      const firstSeen = new Date(
-        response.hits.hits[0]._source['@timestamp']
-      ).getTime();
+      const firstSeen = new Date(response.hits.hits[0]._source['@timestamp']).getTime();
 
       if (!isFiniteNumber(firstSeen)) {
-        throw new Error(
-          'First seen for version was unexpectedly undefined or null.'
-        );
+        throw new Error('First seen for version was unexpectedly undefined or null.');
       }
 
       if (firstSeen < start || firstSeen > end) {

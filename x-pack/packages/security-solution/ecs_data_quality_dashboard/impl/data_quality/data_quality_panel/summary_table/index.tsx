@@ -108,7 +108,6 @@ const SummaryTableComponent: React.FC<Props> = ({
       compressed={true}
       columns={columns}
       data-test-subj="summaryTable"
-      isExpandable={true}
       itemId={getItemId}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       items={items}

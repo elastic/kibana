@@ -32,12 +32,9 @@ export function updateLayer(
   layer: UnwrapArray<State['layers']>,
   index: number
 ): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
   return {
     ...state,
-    layers: newLayers,
+    layers: state.layers.map((l, i) => (i === index ? layer : l)),
   };
 }
 
@@ -431,12 +428,15 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
-            renderValueInLegendSwitch={nonOrdinalXAxis}
-            valueInLegend={state?.valuesInLegend}
-            onValueInLegendChange={() => {
+            allowLegendStats={nonOrdinalXAxis}
+            legendStats={state?.legend.legendStats}
+            onLegendStatsChange={(newLegendStats) => {
               setState({
                 ...state,
-                valuesInLegend: !state.valuesInLegend,
+                legend: {
+                  ...state.legend,
+                  legendStats: newLegendStats,
+                },
               });
             }}
             legendSize={legendSize}

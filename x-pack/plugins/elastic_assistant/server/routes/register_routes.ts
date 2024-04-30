@@ -6,8 +6,9 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-
 import { once } from 'lodash/fp';
+
+import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
 import {
   ElasticAssistantPluginRouter,
   ElasticAssistantPluginSetupDependencies,
@@ -78,4 +79,7 @@ export const registerRoutes = (
   // Anonymization Fields
   bulkActionAnonymizationFieldsRoute(router, logger);
   findAnonymizationFieldsRoute(router, logger);
+
+  // Attack Discovery
+  postAttackDiscoveryRoute(router);
 };

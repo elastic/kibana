@@ -80,7 +80,8 @@ export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
 /* Insights section */
 
 export const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
-export const INSIGHTS_HEADER_TEST_ID = `${INSIGHTS_TEST_ID}Header` as const;
+export const INSIGHTS_HEADER_TEST_ID = INSIGHTS_TEST_ID + HEADER_TEST_ID;
+export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
 
 /* Summary row */
 
@@ -140,11 +141,14 @@ export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
 /* Visualizations section */
 
 export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
-export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = `${VISUALIZATIONS_TEST_ID}Header` as const;
+export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = VISUALIZATIONS_TEST_ID + HEADER_TEST_ID;
+export const VISUALIZATIONS_SECTION_CONTENT_TEST_ID = VISUALIZATIONS_TEST_ID + CONTENT_TEST_ID;
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
 
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
+export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
+  `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
 
 /* Response section */
 

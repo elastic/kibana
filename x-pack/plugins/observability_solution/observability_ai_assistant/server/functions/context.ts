@@ -19,6 +19,7 @@ import { FunctionVisibility } from '../../common/functions/types';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
+import { RecallRanking, RecallRankingEventType } from '../analytics/recall_ranking';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 import { ChatFn } from '../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
@@ -34,18 +35,14 @@ export function registerContextFunction({
   functions.registerFunction(
     {
       name: 'context',
-      contexts: ['core'],
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           queries: {
             type: 'array',
-            additionalItems: false,
-            additionalProperties: false,
             description: 'The query for the semantic search',
             items: {
               type: 'string',
@@ -53,8 +50,6 @@ export function registerContextFunction({
           },
           categories: {
             type: 'array',
-            additionalItems: false,
-            additionalProperties: false,
             description:
               'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
@@ -67,13 +62,11 @@ export function registerContextFunction({
       } as const,
     },
     async ({ arguments: args, messages, connectorId, screenContexts, chat }, signal) => {
+      const { analytics } = (await resources.context.core).coreStart;
+
       const { queries, categories } = args;
 
       async function getContext() {
-        const systemMessage = messages.find(
-          (message) => message.message.role === MessageRole.System
-        );
-
         const screenDescription = compact(
           screenContexts.map((context) => context.screenDescription)
         ).join('\n\n');
@@ -95,10 +88,6 @@ export function registerContextFunction({
           return { content };
         }
 
-        if (!systemMessage) {
-          throw new Error('No system message found');
-        }
-
         const userMessage = last(
           messages.filter((message) => message.message.role === MessageRole.User)
         );
@@ -112,7 +101,6 @@ export function registerContextFunction({
         queriesOrUserPrompt.push(screenDescription);
 
         const suggestions = await retrieveSuggestions({
-          userMessage,
           client,
           categories,
           queries: queriesOrUserPrompt,
@@ -124,23 +112,45 @@ export function registerContextFunction({
           };
         }
 
-        const { relevantDocuments, scores } = await scoreSuggestions({
-          suggestions,
-          queries: queriesOrUserPrompt,
-          messages,
-          chat,
-          connectorId,
-          signal,
-          logger: resources.logger,
-        });
-
-        return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
-          data: {
-            scores,
+        try {
+          const { relevantDocuments, scores } = await scoreSuggestions({
             suggestions,
-          },
-        };
+            queries: queriesOrUserPrompt,
+            messages,
+            chat,
+            connectorId,
+            signal,
+            logger: resources.logger,
+          });
+
+          analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
+            prompt: queriesOrUserPrompt.join('|'),
+            scoredDocuments: suggestions.map((suggestion) => {
+              const llmScore = scores.find((score) => score.id === suggestion.id);
+              return {
+                content: suggestion.text,
+                elserScore: suggestion.score ?? -1,
+                llmScore: llmScore ? llmScore.score : -1,
+              };
+            }),
+          });
+
+          return {
+            content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+            data: {
+              scores,
+              suggestions,
+            },
+          };
+        } catch (error) {
+          return {
+            content: { ...content, learnings: suggestions.slice(0, 5) },
+            data: {
+              error,
+              suggestions,
+            },
+          };
+        }
       }
 
       return new Observable<MessageAddEvent>((subscriber) => {
@@ -169,7 +179,6 @@ async function retrieveSuggestions({
   client,
   categories,
 }: {
-  userMessage?: Message;
   queries: string[];
   client: ObservabilityAIAssistantClient;
   categories: Array<'apm' | 'lens'>;
@@ -179,7 +188,7 @@ async function retrieveSuggestions({
     categories,
   });
 
-  return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
+  return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction'));
 }
 
 const scoreFunctionRequestRt = t.type({
@@ -212,7 +221,10 @@ async function scoreSuggestions({
   signal: AbortSignal;
   logger: Logger;
 }) {
-  const indexedSuggestions = suggestions.map((suggestion, index) => ({ ...suggestion, id: index }));
+  const indexedSuggestions = suggestions.map((suggestion, index) => ({
+    ...omit(suggestion, 'score'), // To not bias the LLM
+    id: index,
+  }));
 
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
@@ -245,7 +257,6 @@ async function scoreSuggestions({
       'Use this function to score documents based on how relevant they are to the conversation.',
     parameters: {
       type: 'object',
-      additionalProperties: false,
       properties: {
         scores: {
           description: `The document IDs and their scores, as CSV. Example:
@@ -266,7 +277,7 @@ async function scoreSuggestions({
     (
       await chat('score_suggestions', {
         connectorId,
-        messages: [...messages.slice(0, -1), newUserMessage],
+        messages: [...messages.slice(0, -2), newUserMessage],
         functions: [scoreFunction],
         functionCall: 'score',
         signal,

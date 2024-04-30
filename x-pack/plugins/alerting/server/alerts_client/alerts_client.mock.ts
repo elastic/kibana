@@ -35,6 +35,7 @@ const createPublicAlertsClientMock = () => {
     return {
       create: jest.fn(),
       report: jest.fn(),
+      isTrackedAlert: jest.fn(),
       getAlertLimitValue: jest.fn().mockReturnValue(1000),
       setAlertLimitReached: jest.fn(),
       getRecoveredAlerts: jest.fn().mockReturnValue([]),

@@ -17,7 +17,7 @@ import {
   takeUntil,
   finalize,
   startWith,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
 

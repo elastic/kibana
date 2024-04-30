@@ -9,6 +9,14 @@
   font-family: $euiCodeFontFamily;
 }
 
+.unifiedDataTable__cell--expanded {
+  background-color: $euiColorHighlight;
+}
+
+.unifiedDataTable__cell--selected {
+  background-color: $euiColorHighlight;
+}
+
 .unifiedDataTable__cellPopover {
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
   .lines-content.monaco-editor-background {
@@ -32,10 +40,6 @@
     background: transparent;
   }
 
-  .euiDataGrid__controls {
-    border-top: $euiBorderThin;
-  }
-
   .euiDataGridHeaderCell {
     align-items: start;
 
@@ -47,12 +51,6 @@
 
   .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
     border-bottom: $euiBorderThin;
-  }
-
-  .euiDataGridRowCell--controlColumn:hover::after,
-  .euiDataGridRowCell--controlColumn:focus::after,
-  .euiDataGridRowCell--controlColumn.euiDataGridRowCell--open::after {
-    border-color: transparent;
   }
 
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,

@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, defer, of, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { groupBy, flatten, pick, map as _map, uniqWith } from 'lodash';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';

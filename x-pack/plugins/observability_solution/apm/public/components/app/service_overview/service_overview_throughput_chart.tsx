@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiIconTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
@@ -26,10 +20,7 @@ import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferr
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../shared/charts/helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -51,10 +42,7 @@ export function ServiceOverviewThroughputChart({
 }) {
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
 
@@ -74,8 +62,7 @@ export function ServiceOverviewThroughputChart({
       : ApmDocumentType.ServiceTransactionMetric,
   });
 
-  const { transactionType, serviceName, transactionTypeStatus } =
-    useApmServiceContext();
+  const { transactionType, serviceName, transactionTypeStatus } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
 
@@ -86,31 +73,25 @@ export function ServiceOverviewThroughputChart({
       }
 
       if (serviceName && transactionType && start && end && preferred) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/throughput',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                transactionType,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-                transactionName,
-                documentType: preferred.source.documentType,
-                rollupInterval: preferred.source.rollupInterval,
-                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
+          params: {
+            path: {
+              serviceName,
             },
-          }
-        );
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+              transactionName,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+            },
+          },
+        });
       }
     },
     [
@@ -128,9 +109,7 @@ export function ServiceOverviewThroughputChart({
     ]
   );
 
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
-  );
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
 
   const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
@@ -154,19 +133,16 @@ export function ServiceOverviewThroughputChart({
       : []),
   ];
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
-    return setScreenContext(
+    return setScreenContext?.(
       getThroughputScreenContext({
         serviceName,
         transactionName,
         transactionType,
         environment,
         preferred,
-        start,
-        end,
       })
     );
   }, [
@@ -186,10 +162,9 @@ export function ServiceOverviewThroughputChart({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.serviceOverview.throughtputChartTitle',
-                { defaultMessage: 'Throughput' }
-              )}
+              {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+                defaultMessage: 'Throughput',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
@@ -197,8 +172,7 @@ export function ServiceOverviewThroughputChart({
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-              defaultMessage:
-                'Throughput is measured in transactions per minute (tpm).',
+              defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
             })}
             position="right"
           />

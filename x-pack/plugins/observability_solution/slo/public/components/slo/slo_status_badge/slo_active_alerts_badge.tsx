@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
@@ -43,22 +43,36 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiBadge
-        iconType="warning"
-        color="danger"
-        onClick={handleActiveAlertsClick}
-        onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
-          defaultMessage: 'active alerts badge',
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.slo.slo.activeAlertsBadge.tooltip', {
+          defaultMessage:
+            '{count, plural, one {# burn rate alert} other {# burn rate alerts}}, click to view.',
+          values: { count: activeAlerts },
         })}
-        data-test-subj="o11ySloActiveAlertsBadge"
+        display="block"
       >
-        {viewMode !== 'default'
-          ? activeAlerts
-          : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
-              defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
-              values: { count: activeAlerts },
-            })}
-      </EuiBadge>
+        <EuiBadge
+          iconType="warning"
+          color="danger"
+          onClick={handleActiveAlertsClick}
+          onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
+            defaultMessage: 'active alerts badge',
+          })}
+          data-test-subj="o11ySloActiveAlertsBadge"
+          onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation(); // stops propagation of metric onElementClick
+          }}
+          css={{ cursor: 'pointer' }}
+        >
+          {viewMode !== 'default'
+            ? activeAlerts
+            : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
+                defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+                values: { count: activeAlerts },
+              })}
+        </EuiBadge>
+      </EuiToolTip>
     </EuiFlexItem>
   );
 }

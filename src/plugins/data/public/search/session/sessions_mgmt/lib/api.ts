@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
-import { mapTo, tap } from 'rxjs/operators';
+import { mapTo, tap } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import { ACTION } from '../components/actions';

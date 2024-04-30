@@ -42,8 +42,6 @@ export class ServerlessObservabilityPlugin
       })
     );
 
-    setupDeps.discover.showInlineTopNav({ showLogsExplorerTabs: true });
-
     return {};
   }
 
@@ -55,7 +53,7 @@ export class ServerlessObservabilityPlugin
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
-    serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),

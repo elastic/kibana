@@ -10,17 +10,19 @@ import { transformRawData } from '.';
 
 describe('transformRawData', () => {
   it('returns non-anonymized data when rawData is a string', () => {
+    const anonymizationFields = [
+      { id: 'field1', field: 'field1', allowed: true, anonymized: true },
+      { id: 'field2', field: 'field2', allowed: false, anonymized: true },
+    ];
     const inputRawData = {
-      allow: ['field1'],
-      allowReplacement: ['field1', 'field2'],
+      anonymizationFields,
       promptContextId: 'abcd',
       rawData: 'this will not be anonymized',
     };
 
     const result = transformRawData({
-      allow: inputRawData.allow,
-      allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      anonymizationFields: inputRawData.anonymizationFields,
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
       rawData: inputRawData.rawData,
@@ -30,9 +32,14 @@ describe('transformRawData', () => {
   });
 
   it('calls onNewReplacements with the expected replacements', () => {
+    const anonymizationFields = {
+      total: 2,
+      page: 1,
+      perPage: 1000,
+      data: [{ id: 'field1', field: 'field1', allowed: true, anonymized: true }],
+    };
     const inputRawData = {
-      allow: ['field1'],
-      allowReplacement: ['field1'],
+      anonymizationFields,
       promptContextId: 'abcd',
       rawData: { field1: ['value1'] },
     };
@@ -40,29 +47,35 @@ describe('transformRawData', () => {
     const onNewReplacements = jest.fn();
 
     transformRawData({
-      allow: inputRawData.allow,
-      allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      anonymizationFields: inputRawData.anonymizationFields.data,
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements,
       rawData: inputRawData.rawData,
     });
 
-    expect(onNewReplacements).toHaveBeenCalledWith([{ uuid: '1eulav', value: 'value1' }]);
+    expect(onNewReplacements).toHaveBeenCalledWith({ '1eulav': 'value1' });
   });
 
   it('returns the expected mix of anonymized and non-anonymized data as a CSV string', () => {
+    const anonymizationFields = {
+      total: 2,
+      page: 1,
+      perPage: 1000,
+      data: [
+        { id: 'field1', field: 'field1', allowed: true, anonymized: true },
+        { id: 'field2', field: 'field2', allowed: true, anonymized: false },
+      ],
+    };
     const inputRawData = {
-      allow: ['field1', 'field2'],
-      allowReplacement: ['field1'], // only field 1 will be anonymized
+      anonymizationFields, // only field 1 will be anonymized
       promptContextId: 'abcd',
       rawData: { field1: ['value1', 'value2'], field2: ['value3', 'value4'] },
     };
 
     const result = transformRawData({
-      allow: inputRawData.allow,
-      allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      anonymizationFields: inputRawData.anonymizationFields.data,
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
       rawData: inputRawData.rawData,
@@ -72,9 +85,18 @@ describe('transformRawData', () => {
   });
 
   it('omits fields that are not included in the `allow` list, even if they are members of `allowReplacement`', () => {
+    const anonymizationFields = {
+      total: 2,
+      page: 1,
+      perPage: 1000,
+      data: [
+        { id: 'field1', field: 'field1', allowed: true, anonymized: true },
+        { id: 'field2', field: 'field2', allowed: true, anonymized: false },
+        { id: 'field3', field: 'field3', allowed: false, anonymized: true },
+      ],
+    };
     const inputRawData = {
-      allow: ['field1', 'field2'], // field3 is NOT allowed
-      allowReplacement: ['field1', 'field3'], // field3 is requested to be anonymized
+      anonymizationFields, // field3 is requested to be anonymized
       promptContextId: 'abcd',
       rawData: {
         field1: ['value1', 'value2'],
@@ -84,9 +106,8 @@ describe('transformRawData', () => {
     };
 
     const result = transformRawData({
-      allow: inputRawData.allow,
-      allowReplacement: inputRawData.allowReplacement,
-      currentReplacements: [],
+      anonymizationFields: inputRawData.anonymizationFields.data,
+      currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
       rawData: inputRawData.rawData,

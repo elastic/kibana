@@ -24,76 +24,79 @@ export const EmptyPage: VFC = () => {
   const documentationLink = useTIDocumentationLink();
 
   return (
-    <SecuritySolutionPluginTemplateWrapper isEmptyState>
-      <EuiEmptyPrompt
-        icon={<EuiImage size="fullWidth" alt={IMAGE} src={illustration} />}
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.threatIntelligence.common.emptyPage.title"
-              defaultMessage="Get started with Elastic Threat Intelligence"
-            />
-          </h3>
-        }
-        titleSize="s"
-        layout="horizontal"
-        color="transparent"
-        body={
-          <>
-            <p>
+    <SecuritySolutionPluginTemplateWrapper
+      isEmptyState
+      emptyPageBody={
+        <EuiEmptyPrompt
+          icon={<EuiImage size="fullWidth" alt={IMAGE} src={illustration} />}
+          title={
+            <h3>
               <FormattedMessage
-                id="xpack.threatIntelligence.common.emptyPage.body1"
-                defaultMessage="Elastic Threat Intelligence makes it easy to analyze and investigate potential security
+                id="xpack.threatIntelligence.common.emptyPage.title"
+                defaultMessage="Get started with Elastic Threat Intelligence"
+              />
+            </h3>
+          }
+          titleSize="s"
+          layout="horizontal"
+          color="transparent"
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.threatIntelligence.common.emptyPage.body1"
+                  defaultMessage="Elastic Threat Intelligence makes it easy to analyze and investigate potential security
             threats by aggregating data from multiple sources in one place."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.threatIntelligence.common.emptyPage.body2"
-                defaultMessage="You’ll be able to view data from all activated threat intelligence feeds and take action
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.threatIntelligence.common.emptyPage.body2"
+                  defaultMessage="You’ll be able to view data from all activated threat intelligence feeds and take action
             from this page."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.threatIntelligence.common.emptyPage.body3"
-                defaultMessage="To get started with Elastic Threat Intelligence, enable one or more Threat Intelligence
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.threatIntelligence.common.emptyPage.body3"
+                  defaultMessage="To get started with Elastic Threat Intelligence, enable one or more Threat Intelligence
             Integrations from the Integrations page or ingest data using filebeat. For more
             information, view the {docsLink}."
-                values={{
-                  docsLink: (
-                    <EuiLink
-                      href={documentationLink}
-                      target="_blank"
-                      data-test-subj={DOCS_LINK_TEST_ID}
-                    >
-                      <FormattedMessage
-                        id="xpack.threatIntelligence.common.emptyPage.docsLinkText"
-                        defaultMessage="Security app documentation"
-                      />
-                    </EuiLink>
-                  ),
-                }}
+                  values={{
+                    docsLink: (
+                      <EuiLink
+                        href={documentationLink}
+                        target="_blank"
+                        data-test-subj={DOCS_LINK_TEST_ID}
+                      >
+                        <FormattedMessage
+                          id="xpack.threatIntelligence.common.emptyPage.docsLinkText"
+                          defaultMessage="Security app documentation"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </>
+          }
+          actions={
+            <EuiButton
+              data-test-subj={INTEGRATION_LINK_ID}
+              href={integrationsPageLink}
+              color="primary"
+              iconType="plusInCircle"
+              fill
+            >
+              <FormattedMessage
+                id="xpack.threatIntelligence.common.emptyPage.buttonText"
+                defaultMessage="Add Integrations"
               />
-            </p>
-          </>
-        }
-        actions={
-          <EuiButton
-            data-test-subj={INTEGRATION_LINK_ID}
-            href={integrationsPageLink}
-            color="primary"
-            iconType="plusInCircle"
-            fill
-          >
-            <FormattedMessage
-              id="xpack.threatIntelligence.common.emptyPage.buttonText"
-              defaultMessage="Add Integrations"
-            />
-          </EuiButton>
-        }
-        data-test-subj={EMPTY_PROMPT_TEST_ID}
-      />
-    </SecuritySolutionPluginTemplateWrapper>
+            </EuiButton>
+          }
+          data-test-subj={EMPTY_PROMPT_TEST_ID}
+        />
+      }
+    />
   );
 };

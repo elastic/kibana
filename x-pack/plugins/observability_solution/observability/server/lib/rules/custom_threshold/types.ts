@@ -46,7 +46,7 @@ export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
 
 export type CustomThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
-  missingGroups?: Array<string | MissingGroupsRecord>;
+  missingGroups?: MissingGroupsRecord[];
   groupBy?: string | string[];
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
 };

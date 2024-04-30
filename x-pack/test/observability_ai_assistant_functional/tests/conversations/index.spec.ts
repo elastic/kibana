@@ -152,7 +152,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   (body) =>
                     (
                       JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
+                    ).tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined
                 );
 
                 const conversationInterceptor = proxy.intercept(
@@ -160,7 +160,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   (body) =>
                     (
                       JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).functions?.find((fn) => fn.name === 'title_conversation') === undefined
+                    ).tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
                 );
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');

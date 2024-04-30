@@ -22,11 +22,13 @@ import {
   switchMap,
   timestamp,
 } from 'rxjs';
+import { Message, MessageRole } from '../../common';
 import {
   type BufferFlushEvent,
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
+  TokenCountEvent,
 } from '../../common/conversation_complete';
 import {
   FunctionRegistry,
@@ -45,7 +47,7 @@ import type {
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 import { complete } from './complete';
 
-const MIN_DELAY = 35;
+const MIN_DELAY = 10;
 
 function toObservable(response: HttpResponse<IncomingMessage>) {
   const status = response.response?.status;
@@ -105,7 +107,7 @@ export async function createChatService({
 
   const renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>> = new Map();
 
-  const [{ functionDefinitions, contextDefinitions }] = await Promise.all([
+  const [{ functionDefinitions, systemMessage }] = await Promise.all([
     apiClient('GET /internal/observability_ai_assistant/functions', {
       signal: setupAbortSignal,
     }),
@@ -132,9 +134,7 @@ export async function createChatService({
   const client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'> = {
     chat(name: string, { connectorId, messages, function: callFunctions = 'auto', signal }) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
-        const contexts = ['core', 'apm'];
-
-        const functions = getFunctions({ contexts }).filter((fn) => {
+        const functions = getFunctions().filter((fn) => {
           const visibility = fn.visibility ?? FunctionVisibility.All;
 
           return (
@@ -163,10 +163,17 @@ export async function createChatService({
 
             const subscription = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                map(
+                  (line) =>
+                    JSON.parse(line) as
+                      | StreamingChatResponseEvent
+                      | BufferFlushEvent
+                      | TokenCountEvent
+                ),
                 filter(
                   (line): line is StreamingChatResponseEvent =>
-                    line.type !== StreamingChatResponseEventType.BufferFlush
+                    line.type !== StreamingChatResponseEventType.BufferFlush &&
+                    line.type !== StreamingChatResponseEventType.TokenCount
                 ),
                 throwSerializedChatCompletionErrors()
               )
@@ -262,13 +269,21 @@ export async function createChatService({
         onActionClick,
       });
     },
-    getContexts: () => contextDefinitions,
     getFunctions,
     hasFunction: (name: string) => {
       return functionRegistry.has(name);
     },
     hasRenderFunction: (name: string) => {
       return renderFunctionRegistry.has(name);
+    },
+    getSystemMessage: (): Message => {
+      return {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.System,
+          content: systemMessage,
+        },
+      };
     },
     ...client,
   };

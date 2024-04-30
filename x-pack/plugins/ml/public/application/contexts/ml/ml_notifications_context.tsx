@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useState, useEffect } from 'react';
 import { combineLatest, timer } from 'rxjs';
-import { switchMap, map, tap, retry } from 'rxjs/operators';
+import { switchMap, map, tap, retry } from 'rxjs';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -39,7 +39,9 @@ export const MlNotificationsContext = React.createContext<{
   setLastCheckedAt: () => {},
 });
 
-export const MlNotificationsContextProvider: FC = ({ children }) => {
+export const MlNotificationsContextProvider: FC<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
   const {
     services: {
       mlServices: { mlApiServices },

@@ -56,7 +56,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'true');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware enabled'));
+    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
   });
 
   it('should render expected output when disabled', () => {
@@ -64,7 +64,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'false');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware disabled'));
+    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
   });
 
   it('should be able to disable it', () => {
@@ -162,25 +162,25 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       formProps.mode = 'view';
     });
 
-    it('should not include any form elements', () => {
+    it('should not include any enabled form elements', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId('test'));
     });
 
-    it('should show option enabled', () => {
+    it('should show option when checked', () => {
       render();
 
-      expect(renderResult.getByTestId('test')).toHaveTextContent(exactMatchText('Malware enabled'));
+      expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+      expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('true');
     });
 
-    it('should show option disabled', () => {
+    it('should show option when unchecked', () => {
       setMalwareMode(formProps.policy, true, true, false);
       render();
 
-      expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('Malware disabled')
-      );
+      expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
+      expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('false');
     });
   });
 });

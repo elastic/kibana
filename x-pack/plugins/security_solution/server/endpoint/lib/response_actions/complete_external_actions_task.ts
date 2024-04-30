@@ -98,10 +98,14 @@ export class CompleteExternalResponseActionsTask {
             );
           }
 
+          const { id: taskId, taskType } = taskInstance;
+
           return new CompleteExternalActionsTaskRunner(
             this.options.endpointAppContext.service,
             this.esClient,
-            this.taskInterval
+            this.taskInterval,
+            taskId,
+            taskType
           );
         },
       },

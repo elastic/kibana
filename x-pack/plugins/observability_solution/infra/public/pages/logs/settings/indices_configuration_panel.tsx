@@ -7,7 +7,7 @@
 
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   logIndexNameReferenceRT,
@@ -15,6 +15,14 @@ import {
   logDataViewReferenceRT,
   LogIndexReference,
 } from '@kbn/logs-shared-plugin/common';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
+
+import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
+import { EuiLink } from '@elastic/eui';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
@@ -25,6 +33,19 @@ export const IndicesConfigurationPanel = React.memo<{
   isReadOnly: boolean;
   indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
 }>(({ isLoading, isReadOnly, indicesFormElement }) => {
+  const {
+    services: {
+      http,
+      share: {
+        url: { locators },
+      },
+    },
+  } = useKibanaContextForPlugin();
+  const [numberOfLogsRules, setNumberOfLogsRules] = useState(0);
+
+  const rulesLocator = locators.get<RulesParams>(rulesLocatorID);
+  const viewAffectedRulesLink = rulesLocator?.useUrl({ type: [LOG_THRESHOLD_ALERT_TYPE_ID] });
+
   const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
 
   const changeToIndexPatternType = useCallback(() => {
@@ -53,6 +74,23 @@ export const IndicesConfigurationPanel = React.memo<{
       metric: 'configuration_switch_to_index_names_reference',
     });
   }, [indicesFormElement, trackChangeIndexSourceType]);
+
+  useEffect(() => {
+    const getNumberOfInfraRules = async () => {
+      if (http) {
+        const { ruleExecutionStatus } = await loadRuleAggregations({
+          http,
+          typesFilter: [LOG_THRESHOLD_ALERT_TYPE_ID],
+        });
+        const numberOfRules = Object.values(ruleExecutionStatus).reduce(
+          (acc, value) => acc + value,
+          0
+        );
+        setNumberOfLogsRules(numberOfRules);
+      }
+    };
+    getNumberOfInfraRules();
+  }, [http]);
 
   return (
     <EuiFormFieldset
@@ -123,6 +161,36 @@ export const IndicesConfigurationPanel = React.memo<{
           />
         )}
       </EuiCheckableCard>
+      {numberOfLogsRules > 0 && indicesFormElement.isDirty && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            data-test-subj="infraIndicesPanelSettingsWarningCallout"
+            size="m"
+            title={i18n.translate('xpack.infra.sourceConfiguration.logsIndicesUsedByRulesTitle', {
+              defaultMessage: 'Alerting rules use this data source setting',
+            })}
+            color="warning"
+            iconType="warning"
+          >
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logsIndicesUsedByRulesMessage"
+              defaultMessage="One or more alerting rules rely on this data source setting. Changing this setting will change which data is used to generate alerts."
+            />
+            <EuiSpacer size="s" />
+            <EuiLink
+              data-test-subj="logIndicesViewAffectedRulesLink"
+              href={viewAffectedRulesLink}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.logIndices.viewAffectedRulesLink"
+                defaultMessage="View affected rules"
+              />
+            </EuiLink>
+          </EuiCallOut>
+        </>
+      )}
     </EuiFormFieldset>
   );
 });

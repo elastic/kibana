@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
+import { getSettingsAPISchema } from '../../services/form_settings';
 
 import { PackagePolicySchema } from './package_policy';
 
@@ -81,6 +82,7 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
+  ...getSettingsAPISchema('AGENT_POLICY_ADVANCED_SETTINGS'),
 };
 
 export const NewAgentPolicySchema = schema.object({

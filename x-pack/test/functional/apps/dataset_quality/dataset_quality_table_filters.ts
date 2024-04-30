@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const testSubjects = getService('testSubjects');
   const to = '2024-01-01T12:00:00.000Z';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179092
-  describe.skip('Dataset quality table filters', () => {
+  describe('Dataset quality table filters', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();
@@ -152,6 +151,41 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const namespaceColCellTextsAfterFilter = await namespaceColAfterFilter.getCellTexts();
 
       expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
+    });
+
+    it('filters for quality', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const expectedQuality = 'Poor';
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          isMalformed: true,
+        })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      // Get default quality
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetQuality = cols['Dataset Quality'];
+      const datasetQualityCellTexts = await datasetQuality.getCellTexts();
+      expect(datasetQualityCellTexts).to.contain(expectedQuality);
+
+      // Filter for Poor quality
+      await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
+
+      const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
+      const datasetQualityAfterFilter = colsAfterFilter['Dataset Quality'];
+      const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
+
+      expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);
     });
   });
 }

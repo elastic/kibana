@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
-import { timeout } from 'rxjs/operators';
+import { timeout } from 'rxjs';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';

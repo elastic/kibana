@@ -44,26 +44,23 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
       if (!start || !end || !preferred) {
         return undefined;
       }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              kuery,
-              environment,
-              start,
-              end,
-              serverlessId,
-              documentType: preferred.source.documentType,
-              rollupInterval: preferred.source.rollupInterval,
-              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/metrics/serverless/charts', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      ).then((resp) => {
+          query: {
+            kuery,
+            environment,
+            start,
+            end,
+            serverlessId,
+            documentType: preferred.source.documentType,
+            rollupInterval: preferred.source.rollupInterval,
+            bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+          },
+        },
+      }).then((resp) => {
         const chartsByKey = keyBy(resp.charts, 'key');
         if (isEmpty(chartsByKey)) {
           return { firstLineCharts: [], secondLineCharts: [] };
@@ -75,10 +72,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
             chartsByKey.cold_start_duration,
             chartsByKey.cold_start_count,
           ],
-          secondLineCharts: [
-            chartsByKey.compute_usage,
-            chartsByKey.memory_usage_chart,
-          ],
+          secondLineCharts: [chartsByKey.compute_usage, chartsByKey.memory_usage_chart],
         };
       });
     },
@@ -92,12 +86,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
           {data.firstLineCharts.map((chart) => (
             <EuiFlexItem key={chart.key}>
               <EuiPanel hasBorder={true}>
-                <MetricsChart
-                  start={start}
-                  end={end}
-                  chart={chart}
-                  fetchStatus={status}
-                />
+                <MetricsChart start={start} end={end} chart={chart} fetchStatus={status} />
               </EuiPanel>
             </EuiFlexItem>
           ))}
@@ -108,12 +97,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
           {data.secondLineCharts.map((chart) => (
             <EuiFlexItem key={chart.key}>
               <EuiPanel hasBorder={true}>
-                <MetricsChart
-                  start={start}
-                  end={end}
-                  chart={chart}
-                  fetchStatus={status}
-                />
+                <MetricsChart start={start} end={end} chart={chart} fetchStatus={status} />
               </EuiPanel>
             </EuiFlexItem>
           ))}

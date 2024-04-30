@@ -94,6 +94,7 @@ describe('getUseCellActionsHook', () => {
           dataGridRef: mockDataGridRef,
           ecsData: [],
           pageSize: 10,
+          pageIndex: 0,
         }),
       {
         wrapper: TestProviderWithActions,
@@ -118,6 +119,7 @@ describe('getUseCellActionsHook', () => {
           dataGridRef: mockDataGridRef,
           ecsData: [],
           pageSize: 10,
+          pageIndex: 0,
         }),
       {
         wrapper: TestProviderWithCustomStateAndActions,

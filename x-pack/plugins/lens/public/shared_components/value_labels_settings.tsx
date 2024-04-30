@@ -78,7 +78,6 @@ export const ValueLabelsSettings: FC<VisualOptionsProps> = ({
         isFullWidth
         legend={label}
         data-test-subj="lens-value-labels-visibility-btn"
-        name="valueLabelsDisplay"
         buttonSize="compressed"
         options={valueLabelsOptions}
         idSelected={isSelected}

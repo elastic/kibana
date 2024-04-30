@@ -18,7 +18,7 @@ import {
   RULE_NAME_OVERRIDE_DETAILS,
 } from '../../../../screens/rule_details';
 
-import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
+import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
 import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
@@ -71,9 +71,6 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
-
-      // ensures ES|QL rule in technical preview on create page
-      cy.get(ESQL_TYPE).contains('Technical Preview');
 
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);

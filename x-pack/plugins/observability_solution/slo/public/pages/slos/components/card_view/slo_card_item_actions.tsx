@@ -8,6 +8,8 @@ import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
 import { useEuiShadow } from '@elastic/eui';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { BurnRateRuleParams } from '../../../../typings';
 import { SloItemActions } from '../slo_item_actions';
 
 type PopoverPosition = 'relative' | 'default';
@@ -41,7 +43,9 @@ interface Props {
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
+  setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady: (value: boolean) => void;
+  rules?: Array<Rule<BurnRateRuleParams>>;
 }
 
 export function SloCardItemActions(props: Props) {

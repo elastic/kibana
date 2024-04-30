@@ -12,14 +12,29 @@ import { RowHeightSettings } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
+import { RowHeightMode } from '../../../../common/types';
 import { DEFAULT_PAGE_SIZE } from './table_basic';
+import {
+  DEFAULT_HEADER_ROW_HEIGHT,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  DEFAULT_ROW_HEIGHT_LINES,
+} from './constants';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
   const onChangeHeight = useCallback(
-    (newHeightMode, heightProperty, heightLinesProperty) => {
+    (
+      newHeightMode,
+      heightProperty,
+      heightLinesProperty,
+      defaultRowHeight = DEFAULT_ROW_HEIGHT_LINES
+    ) => {
       const rowHeightLines =
-        newHeightMode === 'single' ? 1 : newHeightMode !== 'auto' ? 2 : undefined;
+        newHeightMode === RowHeightMode.single
+          ? 1
+          : newHeightMode !== RowHeightMode.auto
+          ? defaultRowHeight
+          : undefined;
       setState({
         ...state,
         [heightProperty]: newHeightMode,
@@ -59,13 +74,18 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         buttonDataTestSubj="lnsVisualOptionsButton"
       >
         <RowHeightSettings
-          rowHeight={state.headerRowHeight}
-          rowHeightLines={state.headerRowHeightLines}
+          rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
+          rowHeightLines={state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
             defaultMessage: 'Header row height',
           })}
           onChangeRowHeight={(mode) =>
-            onChangeHeight(mode, 'headerRowHeight', 'headerRowHeightLines')
+            onChangeHeight(
+              mode,
+              'headerRowHeight',
+              'headerRowHeightLines',
+              DEFAULT_HEADER_ROW_HEIGHT_LINES
+            )
           }
           onChangeRowHeightLines={(lines) => {
             onChangeHeightLines(lines, 'headerRowHeightLines');

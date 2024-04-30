@@ -52,6 +52,9 @@ const configSchema = schema.object({
         traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
+    ruleFormV2: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
   customThresholdRule: schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),

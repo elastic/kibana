@@ -181,7 +181,7 @@
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
           "ComponentTypes",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          " | undefined; } & { isEmptyState?: boolean | undefined; emptyPageBody?: React.ReactNode; solutionNav?: ",
           {
             "pluginId": "@kbn/shared-ux-page-solution-nav",
             "scope": "common",

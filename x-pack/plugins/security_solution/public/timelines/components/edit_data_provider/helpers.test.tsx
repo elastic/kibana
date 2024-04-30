@@ -98,6 +98,7 @@ describe('helpers', () => {
             { label: 'event.action' },
             { label: 'event.category' },
             { label: 'event.severity' },
+            { label: 'event.kind' },
           ],
         },
         {
@@ -118,6 +119,7 @@ describe('helpers', () => {
             },
           ],
         },
+        { label: 'process', options: [{ label: 'process.args' }] },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
         {
           label: 'user',

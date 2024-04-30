@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import {
-  getParsedFilterQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import {
-  ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-} from '../../../../../common/es_fields/apm';
+import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { AlertParams, PreviewChartResponse } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -45,10 +37,7 @@ export async function getTransactionErrorCountChartPreview({
     searchConfiguration,
   } = alertParams;
 
-  const allGroupByFields = getAllGroupByFields(
-    ApmRuleType.ErrorCount,
-    groupByFields
-  );
+  const allGroupByFields = getAllGroupByFields(ApmRuleType.ErrorCount, groupByFields);
 
   const termFilterQuery = !searchConfiguration
     ? [
@@ -100,33 +89,27 @@ export async function getTransactionErrorCountChartPreview({
     body: { size: 0, track_total_hits: false, query, aggs },
   };
 
-  const resp = await apmEventClient.search(
-    'get_error_count_chart_preview',
-    params
-  );
+  const resp = await apmEventClient.search('get_error_count_chart_preview', params);
 
   if (!resp.aggregations) {
     return { series: [], totalGroups: 0 };
   }
 
-  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
-    (acc, bucket) => {
-      const x = bucket.key;
-      bucket.series.buckets.forEach((seriesBucket) => {
-        const bucketKey = seriesBucket.key.join('_');
-        const y = seriesBucket.doc_count;
+  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce((acc, bucket) => {
+    const x = bucket.key;
+    bucket.series.buckets.forEach((seriesBucket) => {
+      const bucketKey = seriesBucket.key.join('_');
+      const y = seriesBucket.doc_count;
 
-        if (acc[bucketKey]) {
-          acc[bucketKey].push({ x, y });
-        } else {
-          acc[bucketKey] = [{ x, y }];
-        }
-      });
+      if (acc[bucketKey]) {
+        acc[bucketKey].push({ x, y });
+      } else {
+        acc[bucketKey] = [{ x, y }];
+      }
+    });
 
-      return acc;
-    },
-    {} as BarSeriesDataMap
-  );
+    return acc;
+  }, {} as BarSeriesDataMap);
 
   const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,

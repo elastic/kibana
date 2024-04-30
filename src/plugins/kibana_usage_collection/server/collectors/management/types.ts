@@ -50,7 +50,11 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
+  'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
+  'observability:aiAssistantLogsIndexPattern': string;
+  'observability:aiAssistantResponseLanguage': string;
+  'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -171,4 +175,6 @@ export interface UsageStats {
   'data_views:fields_excluded_data_tiers': string;
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
+  'aiAssistant:preferredAIAssistantType': string;
+  'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
 }

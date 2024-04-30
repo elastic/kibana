@@ -10,7 +10,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
@@ -134,6 +134,7 @@ export abstract class Embeddable<
       timeRange$: this.timeRange$,
       isEditingEnabled: this.isEditingEnabled,
       panelDescription: this.panelDescription,
+      defaultPanelDescription: this.defaultPanelDescription,
       canLinkToLibrary: this.canLinkToLibrary,
       disabledActionIds: this.disabledActionIds,
       unlinkFromLibrary: this.unlinkFromLibrary,
@@ -176,6 +177,7 @@ export abstract class Embeddable<
   public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
   public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
   public panelDescription: LegacyEmbeddableAPI['panelDescription'];
+  public defaultPanelDescription: LegacyEmbeddableAPI['defaultPanelDescription'];
   public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
   public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
   public setTimeRange: LegacyEmbeddableAPI['setTimeRange'];

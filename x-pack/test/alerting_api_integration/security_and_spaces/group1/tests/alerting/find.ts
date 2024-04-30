@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -572,6 +572,71 @@ const findTestUtils = (
         });
       });
     }
+  });
+
+  describe('Actions', () => {
+    const { user, space } = SuperuserAtSpace1;
+
+    it('should return the actions correctly', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const { body: createdRule1 } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+
+      const response = await supertestWithoutAuth
+        .get(`${getUrlPrefix(space.id)}/api/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .auth(user.username, user.password);
+
+      const action = response.body.data[0].actions[0];
+      const systemAction = response.body.data[0].actions[1];
+      const { uuid, ...restAction } = action;
+      const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+      expect([restAction, restSystemAction]).to.eql([
+        {
+          id: createdAction.id,
+          connector_type_id: 'test.noop',
+          group: 'default',
+          params: {},
+        },
+        {
+          id: 'system-connector-test.system-action',
+          connector_type_id: 'test.system-action',
+          params: {},
+        },
+        ,
+      ]);
+    });
   });
 };
 

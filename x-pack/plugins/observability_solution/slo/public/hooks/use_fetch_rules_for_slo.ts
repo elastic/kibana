@@ -5,42 +5,33 @@
  * 2.0.
  */
 
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule, AsApiContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { BurnRateRuleParams } from '../typings';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-type SloId = string;
-
 interface Params {
-  sloIds?: SloId[];
+  sloIds?: string[];
 }
 
 interface RuleApiResponse {
   page: number;
   total: number;
   per_page: number;
-  data: Array<Rule<BurnRateRuleParams>>;
+  data: Array<AsApiContract<Rule<BurnRateRuleParams>>>;
 }
 
-export interface UseFetchRulesForSloResponse {
-  isLoading: boolean;
-  isSuccess: boolean;
-  isError: boolean;
-  data: Record<string, Array<Rule<BurnRateRuleParams>>> | undefined;
-}
-
-export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSloResponse {
+export function useFetchRulesForSlo({ sloIds = [] }: Params) {
   const { http } = useKibana().services;
 
-  const { isLoading, isError, isSuccess, data } = useQuery({
+  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.rule(sloIds),
     queryFn: async () => {
       try {
         const body = JSON.stringify({
           filter: sloIds.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or '),
-          fields: ['params', 'name'],
           per_page: 1000,
         });
 
@@ -48,9 +39,13 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
           body,
         });
 
+        const rules = response.data.map((rule) => transformRule(rule)) as Array<
+          Rule<BurnRateRuleParams>
+        >;
+
         const init = sloIds.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
 
-        return response.data.reduce(
+        return rules.reduce(
           (acc, rule) => ({
             ...acc,
             [rule.params.sloId]: acc[rule.params.sloId].concat(rule),
@@ -66,10 +61,13 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
     keepPreviousData: true,
   });
 
+  const refetchRules = refetch as () => void;
+
   return {
     data,
     isLoading,
     isSuccess,
     isError,
+    refetchRules,
   };
 }

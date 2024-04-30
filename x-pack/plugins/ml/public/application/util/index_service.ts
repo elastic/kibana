@@ -11,7 +11,6 @@ import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
 import { useMlKibana } from '../contexts/kibana';
 
-// TODO Consolidate with legacy code in `ml/public/application/util/index_utils.ts`.
 export function indexServiceFactory(dataViewsService: DataViewsContract) {
   /**
    * Retrieves the data view ID from the given name.

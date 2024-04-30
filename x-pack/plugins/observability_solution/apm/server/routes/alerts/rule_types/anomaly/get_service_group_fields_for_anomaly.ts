@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
@@ -18,9 +15,9 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFields,
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 
 export async function getServiceGroupFieldsForAnomaly({
   apmIndices,
@@ -64,7 +61,7 @@ export async function getServiceGroupFieldsForAnomaly({
         },
       },
       aggs: {
-        ...getServiceGroupFieldsAgg({
+        ...getApmAlertSourceFieldsAgg({
           sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
         }),
       },
@@ -75,8 +72,9 @@ export async function getServiceGroupFieldsForAnomaly({
     scopedClusterClient,
     params,
   });
+
   if (!response.aggregations) {
     return {};
   }
-  return getServiceGroupFields(response.aggregations);
+  return getApmAlertSourceFields(response.aggregations);
 }

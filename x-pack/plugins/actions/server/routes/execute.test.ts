@@ -24,6 +24,10 @@ beforeEach(() => {
 });
 
 describe('executeActionRoute', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('executes an action with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -166,5 +170,36 @@ describe('executeActionRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
+  });
+
+  it('returns a bad request for system connectors', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockReturnValue(true);
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          params: {},
+        },
+        params: {
+          id: 'system-connector-.test-connector',
+        },
+      },
+      ['ok']
+    );
+
+    executeActionRoute(router, licenseState);
+
+    const [_, handler] = router.post.mock.calls[0];
+
+    await handler(context, req, res);
+
+    expect(actionsClient.execute).not.toHaveBeenCalled();
+    expect(res.ok).not.toHaveBeenCalled();
+    expect(res.badRequest).toHaveBeenCalled();
   });
 });

@@ -9,16 +9,21 @@ import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
+import { createEditSloOverviewPanelAction } from './edit_slo_overview_panel';
+import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 
-export function registerSloAlertsUiActions(
+export function registerSloUiActions(
   uiActions: UiActionsSetup,
   core: CoreSetup<SloPublicPluginsStart, SloPublicStart>
 ) {
   // Initialize actions
   const editSloAlertsPanelAction = createEditSloAlertsPanelAction(core.getStartServices);
-  // Register actions
-  uiActions.registerAction(editSloAlertsPanelAction);
-  // Assign and register triggers
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction.id);
+  const editSloOverviewPanelAction = createEditSloOverviewPanelAction(core.getStartServices);
+  const addErrorBudgetPanelAction = createAddErrorBudgetPanelAction(core.getStartServices);
+
+  // Assign triggers
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloOverviewPanelAction);
+  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addErrorBudgetPanelAction);
 }
