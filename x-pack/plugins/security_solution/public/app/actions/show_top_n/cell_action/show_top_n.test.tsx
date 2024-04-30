@@ -12,7 +12,7 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { StartServices } from '../../../../types';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 const mockServices = {
   ...createStartServicesMock(),

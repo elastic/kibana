@@ -17,7 +17,7 @@ import { TimelineId, EXISTS_OPERATOR } from '../../../../../common/types';
 import { addProvider } from '../../../../timelines/store/actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
 const mockWarningToast = jest.fn();

@@ -14,7 +14,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { Subject } from 'rxjs';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
 const mockSuccessToast = jest.fn();

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions';
+import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions/actions';
 import { of } from 'rxjs';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { CreateFilterLensActionParams } from './create_action';
 import { createFilterLensAction } from './create_action';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
-jest.mock('@kbn/cell-actions', () => ({
+jest.mock('@kbn/cell-actions/actions', () => ({
   addFilterIn: jest.fn(),
   addFilterOut: jest.fn(),
   addExistsFilter: jest.fn(),
 }));
 
-jest.mock('../../../timelines/store', () => ({
+jest.mock('../../../../timelines/store', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: jest.fn().mockReturnValue(() => ({})),
   },
