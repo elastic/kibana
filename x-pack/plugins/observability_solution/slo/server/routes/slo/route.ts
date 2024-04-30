@@ -596,7 +596,8 @@ const getSloBurnRates = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
-    const burnRates = await getBurnRates({
+
+    return await getBurnRates({
       instanceId,
       spaceId,
       windows,
@@ -608,7 +609,6 @@ const getSloBurnRates = createSloServerRoute({
         logger,
       },
     });
-    return { burnRates };
   },
 });
 
