@@ -63,7 +63,6 @@ export const BILLABLE_ASSETS_CONFIG = {
       'azure-storage-account',
       'azure-vm',
       'gcp-bigquery-dataset',
-      'gcp-bigquery-table',
       'gcp-compute-disk',
       'gcp-compute-instance',
       'gcp-sqladmin-instance',
