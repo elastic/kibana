@@ -1367,7 +1367,7 @@ describe('The metric threshold rule type', () => {
           conditions: [{ metric: 'count', threshold: [0], value: '0', evaluation_value: 0 }],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
-          reason: 'count is 0 in the last 1 min for a. Alert when below or equal   0.',
+          reason: 'count is 0 in the last 1 min for a. Alert when below or equal 0.',
           tags: [],
           groupByKeys: { something: alertIdA },
         });
