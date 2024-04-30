@@ -35,16 +35,20 @@ export const defaultValueFormatter = (value: unknown) => {
   return renderToString(<>{content}</>);
 };
 
-interface PreviewControllerDependencies {
+interface PreviewControllerArgs {
   dataView: DataView;
+  onSave: (field: DataViewField[]) => void;
+  fieldToEdit?: Field;
+  fieldTypeToProcess: InternalFieldType;
+  deps: PreviewControllerDependencies;
+}
+
+interface PreviewControllerDependencies {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   usageCollection: UsageCollectionStart;
   notifications: NotificationsStart;
   dataViews: DataViewsPublicPluginStart;
-  onSave: (field: DataViewField[]) => void;
-  fieldToEdit?: Field;
-  fieldTypeToProcess: InternalFieldType;
 }
 
 const previewStateDefault: PreviewState = {
@@ -78,23 +82,10 @@ const previewStateDefault: PreviewState = {
 };
 
 export class PreviewController {
-  constructor({
-    dataView,
-    dataViews,
-    search,
-    fieldFormats,
-    notifications,
-    onSave,
-    usageCollection,
-    fieldToEdit,
-    fieldTypeToProcess,
-  }: PreviewControllerDependencies) {
+  constructor({ deps, dataView, onSave, fieldToEdit, fieldTypeToProcess }: PreviewControllerArgs) {
+    this.deps = deps;
+
     this.dataView = dataView;
-    this.search = search;
-    this.fieldFormats = fieldFormats;
-    this.usageCollection = usageCollection;
-    this.notifications = notifications;
-    this.dataViews = dataViews;
     this.onSave = onSave;
 
     this.fieldToEdit = fieldToEdit;
@@ -111,11 +102,15 @@ export class PreviewController {
 
   // dependencies
   private dataView: DataView;
-  private search: ISearchStart;
-  private fieldFormats: FieldFormatsStart;
-  private usageCollection: UsageCollectionStart;
-  private notifications: NotificationsStart;
-  private dataViews: DataViewsPublicPluginStart;
+
+  private deps: {
+    search: ISearchStart;
+    fieldFormats: FieldFormatsStart;
+    usageCollection: UsageCollectionStart;
+    notifications: NotificationsStart;
+    dataViews: DataViewsPublicPluginStart;
+  };
+
   private onSave: (field: DataViewField[]) => void;
   private fieldToEdit?: Field;
   private fieldTypeToProcess: InternalFieldType;
@@ -215,7 +210,7 @@ export class PreviewController {
 
     if (this.fieldTypeToProcess === 'runtime') {
       try {
-        this.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
+        this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
         // eslint-disable-next-line no-empty
       } catch {}
       // rename an existing runtime field
@@ -230,7 +225,7 @@ export class PreviewController {
       });
     } else {
       try {
-        this.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
+        this.deps.usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
         // eslint-disable-next-line no-empty
       } catch {}
     }
@@ -240,7 +235,7 @@ export class PreviewController {
 
   saveField = async (updatedField: Field) => {
     try {
-      this.usageCollection.reportUiCounter(
+      this.deps.usageCollection.reportUiCounter(
         pluginName,
         METRIC_TYPE.COUNT,
         this.fieldTypeToProcess === 'runtime' ? 'save_runtime' : 'save_concrete'
@@ -261,13 +256,13 @@ export class PreviewController {
           defaultMessage: "Saved '{fieldName}'",
           values: { fieldName: updatedField.name },
         });
-        this.notifications.toasts.addSuccess(message);
+        this.deps.notifications.toasts.addSuccess(message);
         this.setIsSaving(false);
         this.onSave(editedFields);
       };
 
       if (this.dataView.isPersisted()) {
-        await this.dataViews.updateSavedObject(this.dataView);
+        await this.deps.dataViews.updateSavedObject(this.dataView);
       }
       afterSave();
 
@@ -276,7 +271,7 @@ export class PreviewController {
       const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
         defaultMessage: 'Failed to save field changes',
       });
-      this.notifications.toasts.addError(e, { title });
+      this.deps.notifications.toasts.addError(e, { title });
       this.setIsSaving(false);
     }
   };
@@ -460,7 +455,7 @@ export class PreviewController {
     type: Params['type'];
   }) => {
     if (format?.id) {
-      const formatter = this.fieldFormats.getInstance(format.id, format.params);
+      const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
       if (formatter) {
         return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
       }
@@ -468,7 +463,7 @@ export class PreviewController {
 
     if (type) {
       const fieldType = castEsToKbnFieldTypeName(type);
-      const defaultFormatterForType = this.fieldFormats.getDefaultInstance(fieldType);
+      const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
       if (defaultFormatterForType) {
         return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
       }
@@ -487,7 +482,7 @@ export class PreviewController {
     this.setIsFetchingDocument(true);
     this.setPreviewResponse({ fields: [], error: null });
 
-    const [response, searchError] = await this.search
+    const [response, searchError] = await this.deps.search
       .search({
         params: {
           index: this.dataView.getIndexPattern(),
@@ -534,7 +529,7 @@ export class PreviewController {
     this.setLastExecutePainlessRequestParams({ documentId: undefined });
     this.setIsFetchingDocument(true);
 
-    const [response, searchError] = await this.search
+    const [response, searchError] = await this.deps.search
       .search({
         params: {
           index: this.dataView.getIndexPattern(),

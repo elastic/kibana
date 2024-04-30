@@ -152,14 +152,16 @@ export const WithFieldEditorDependencies =
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
     const previewController = new PreviewController({
+      deps: {
+        dataViews: dataViewPluginMocks.createStartContract(),
+        search,
+        fieldFormats,
+        usageCollection: {
+          reportUiCounter: jest.fn(),
+        } as UsageCollectionStart,
+        notifications: notificationServiceMock.createStartContract(),
+      },
       dataView,
-      dataViews: dataViewPluginMocks.createStartContract(),
-      search,
-      fieldFormats,
-      usageCollection: {
-        reportUiCounter: jest.fn(),
-      } as UsageCollectionStart,
-      notifications: notificationServiceMock.createStartContract(),
       onSave: jest.fn(),
       fieldTypeToProcess: 'runtime',
     });

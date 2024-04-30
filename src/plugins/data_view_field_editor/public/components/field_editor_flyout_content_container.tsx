@@ -84,12 +84,14 @@ export const FieldEditorFlyoutContentContainer = ({
   const [controller] = useState(
     () =>
       new PreviewController({
+        deps: {
+          dataViews,
+          search,
+          fieldFormats,
+          usageCollection,
+          notifications,
+        },
         dataView,
-        dataViews,
-        search,
-        fieldFormats,
-        usageCollection,
-        notifications,
         onSave,
         fieldToEdit,
         fieldTypeToProcess,
