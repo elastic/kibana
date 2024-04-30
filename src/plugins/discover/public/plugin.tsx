@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -46,6 +46,10 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -66,7 +70,7 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverCustomizationContext } from './customizations';
+import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -111,8 +115,10 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showInlineTopNav: (
-    options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
+  readonly showInlineTopNav: () => void;
+  readonly configureInlineTopNav: (
+    projectNavId: string,
+    options: DiscoverCustomizationContext['inlineTopNav']
   ) => void;
 }
 
@@ -164,6 +170,7 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 /**
@@ -194,7 +201,10 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
+
+export type StartRenderServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -216,10 +226,9 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  };
+  private inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> = new Map([
+    [null, defaultCustomizationContext.inlineTopNav],
+  ]);
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2Enabled: false,
   };
@@ -327,14 +336,23 @@ export class DiscoverPlugin
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
 
+        const customizationContext$: Observable<DiscoverCustomizationContext> = services.chrome
+          .getActiveSolutionNavId$()
+          .pipe(
+            map((navId) => ({
+              ...defaultCustomizationContext,
+              inlineTopNav:
+                this.inlineTopNav.get(navId) ??
+                this.inlineTopNav.get(null) ??
+                defaultCustomizationContext.inlineTopNav,
+            }))
+          );
+
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
           services,
-          customizationContext: {
-            displayMode: 'standalone',
-            inlineTopNav: this.inlineTopNav,
-          },
+          customizationContext$,
           experimentalFeatures: this.experimentalFeatures,
         });
 
@@ -376,9 +394,14 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
-        this.inlineTopNav.enabled = true;
-        this.inlineTopNav.showLogsExplorerTabs = showLogsExplorerTabs ?? false;
+      showInlineTopNav: () => {
+        this.inlineTopNav.set(null, {
+          enabled: true,
+          showLogsExplorerTabs: false,
+        });
+      },
+      configureInlineTopNav: (projectNavId, options) => {
+        this.inlineTopNav.set(projectNavId, options);
       },
     };
   }
