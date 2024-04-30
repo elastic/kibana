@@ -14,7 +14,8 @@ import {
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { RightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
