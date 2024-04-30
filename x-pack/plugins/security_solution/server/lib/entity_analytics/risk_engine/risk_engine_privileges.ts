@@ -82,17 +82,17 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
  * @param getStartServices - Kibana's start services accessor
  * @param handler - The route handler to wrap
  **/
-export const withRiskEnginePrivilegeCheck = (
+export const withRiskEnginePrivilegeCheck = <P, Q, B>(
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
   handler: (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
+    request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => Promise<IKibanaResponse>
 ) => {
   return async (
     context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
+    request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => {
     const [_, { security }] = await getStartServices();

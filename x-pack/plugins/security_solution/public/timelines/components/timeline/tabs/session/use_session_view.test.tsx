@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 
 import { render } from '@testing-library/react';
@@ -84,7 +85,7 @@ describe('useSessionView with active timeline and a session id and graph event i
   let setTimelineFullScreen: jest.Mock;
   let setGlobalFullScreen: jest.Mock;
   let kibana: ReturnType<typeof useKibana>;
-  const Wrapper = memo(({ children }) => {
+  const Wrapper = memo<PropsWithChildren<unknown>>(({ children }) => {
     kibana = useKibana();
     return <TestProviders>{children}</TestProviders>;
   });
