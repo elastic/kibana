@@ -328,7 +328,6 @@ export const getUiSettings: (
       },
     }),
     requiresPageReload: true,
-    category: ['discover'],
     schema: schema.boolean(),
   },
 });
