@@ -35,12 +35,11 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { RiskScoreDocTooltip } from '../common';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
-  sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
   data: UserItem;
   id: string;
   isDraggable?: boolean;
@@ -65,7 +64,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
   ({
     anomaliesData,
     contextID,
-    sourcererScopeId,
+    scopeId,
     data,
     id,
     isDraggable = false,
@@ -100,10 +99,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           isDraggable={isDraggable}
-          sourcererScopeId={sourcererScopeId}
+          scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, sourcererScopeId]
+      [contextID, isDraggable, scopeId]
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
@@ -245,7 +244,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
-                sourcererScopeId={sourcererScopeId}
+                scopeId={scopeId}
                 isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
@@ -258,7 +257,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         indexPatterns,
         getDefaultRenderer,
         contextID,
-        sourcererScopeId,
+        scopeId,
         isDraggable,
         userName,
         firstColumn,

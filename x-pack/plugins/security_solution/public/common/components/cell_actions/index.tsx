@@ -21,6 +21,8 @@ import { useDataViewId } from '../../hooks/use_data_view_id';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';
+export * from '@kbn/cell-actions/constants';
+
 export { SecurityCellActionsTrigger, SecurityCellActionType };
 
 export interface SecurityCellActionsData {
