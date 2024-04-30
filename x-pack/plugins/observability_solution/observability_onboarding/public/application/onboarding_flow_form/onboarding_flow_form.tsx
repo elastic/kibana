@@ -158,10 +158,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
         {options.map((option) => (
-          <EuiFlexItem key={option.id}>
+          <EuiFlexItem
+            key={option.id}
+            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
+          >
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
-              data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
               name={radioGroupId}
               label={
                 <>

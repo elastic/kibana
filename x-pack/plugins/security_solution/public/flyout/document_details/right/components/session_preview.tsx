@@ -7,7 +7,7 @@
 
 import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { ReactElement } from 'react';
-import React, { useMemo, type FC } from 'react';
+import React, { useMemo, type FC, type PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -19,7 +19,7 @@ import { useProcessData } from '../hooks/use_process_data';
 /**
  * One-off helper to make sure that inline values are rendered consistently
  */
-const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
+const ValueContainer: FC<PropsWithChildren<{ text?: ReactElement }>> = ({ text, children }) => (
   <>
     {text && (
       <>
