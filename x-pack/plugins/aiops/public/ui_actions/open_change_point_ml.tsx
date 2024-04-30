@@ -6,13 +6,20 @@
  */
 
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
-import type { AiopsPluginStartDeps } from '../types';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { AnomalySwimLaneEmbeddableApi } from '@kbn/ml-plugin/public';
 import type { EditChangePointChartsPanelContext } from '../embeddable/types';
+import type { AiopsPluginStartDeps } from '../types';
+import { isChangePointChartEmbeddableContext } from './change_point_action_context';
 
 export const OPEN_CHANGE_POINT_IN_ML_APP_ACTION = 'openChangePointInMlAppAction';
+
+export interface OpenInMLUIActionContext extends EmbeddableApiContext {
+  embeddable: AnomalySwimLaneEmbeddableApi;
+}
 
 export function createOpenChangePointInMlAppAction(
   coreStart: CoreStart,
@@ -43,16 +50,16 @@ export function createOpenChangePointInMlAppAction(
       });
     },
     async execute(context) {
-      if (!context.embeddable) {
-        throw new Error('Not possible to execute an action without the embeddable context');
+      if (!isChangePointChartEmbeddableContext(context)) {
+        throw new IncompatibleActionError();
       }
       const aiopsChangePointUrl = await this.getHref!(context);
       if (aiopsChangePointUrl) {
         await coreStart.application.navigateToUrl(aiopsChangePointUrl!);
       }
     },
-    async isCompatible({ embeddable }) {
-      return embeddable.type === EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+    async isCompatible(context) {
+      return isChangePointChartEmbeddableContext(context);
     },
   };
 }

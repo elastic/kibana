@@ -6,7 +6,10 @@
  */
 
 import type { FC } from 'react';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
+import type { TimeRange } from '@kbn/es-query';
 import type { SelectedChangePoint } from '../components/change_point_detection/change_point_detection_context';
 import type {
   EmbeddableChangePointChartInput,
@@ -27,3 +30,18 @@ export type ViewComponent = FC<{
   interval: string;
   onRenderComplete?: () => void;
 }>;
+
+export interface ChangePointComponentApi {
+  viewType?: PublishingSubject<ChangePointDetectionViewType>;
+  dataViewId: PublishingSubject<string>;
+  timeRange: TimeRange;
+  fn: 'avg' | 'sum' | 'min' | 'max' | string;
+  metricField: string;
+  splitField?: string;
+  partitions?: string[];
+  maxSeriesToPlot?: number;
+}
+
+export type ChangePointEmbeddableApi = DefaultEmbeddableApi &
+  PublishesDataViews &
+  ChangePointComponentApi;

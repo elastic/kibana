@@ -43,6 +43,7 @@ export interface EmbeddableChangePointChartProps {
   /** Origin of the embeddable instance */
   embeddingOrigin?: string;
 }
+
 export function getEmbeddableChangePointChart(
   visType: EmbeddableChangePointType,
   core: CoreStart,
