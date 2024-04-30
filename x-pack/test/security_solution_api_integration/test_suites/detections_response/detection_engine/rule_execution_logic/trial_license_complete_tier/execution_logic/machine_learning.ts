@@ -86,15 +86,32 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
+  const logAnomalyDebugData = async (index = '.ml-anomalies-custom-v3*') => {
+    const indexMappings = await es.indices.getMapping({ index });
+    console.log('ML Anomaly Index Mappings:', JSON.stringify(indexMappings, null, 2));
+    const anomalyData = await es.search({
+      index,
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    });
+
+    console.log('ML Anomaly Data:', JSON.stringify(anomalyData, null, 2));
+  };
+
   // FLAKY: https://github.com/elastic/kibana/issues/171426
   describe.only('@ess @serverless @serverlessQA Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
+      logAnomalyDebugData();
       await esArchiver.load(auditPath);
       await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      logAnomalyDebugData();
     });
 
     after(async () => {
