@@ -24,6 +24,48 @@ import {
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 
+// Function to execute a command and return a Promise with the status code
+function executeCommand(command: string, envVars: any, workDir: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const log = new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    });
+    const childProcess = exec(command, { env: envVars, cwd: workDir });
+
+    // Listen for stdout data
+    childProcess.stdout?.on('data', (data) => {
+      log.info(data);
+    });
+
+    // Listen for stderr data
+    childProcess.stderr?.on('data', (data) => {
+      log.error(data);
+    });
+
+    // Listen for process exit
+    childProcess.on('exit', (code) => {
+      log.info(`Child process exits with code : ${code}`);
+      if (code !== 0) {
+        reject(code);
+        return;
+      }
+      resolve(code);
+    });
+
+    // exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
+    //   console.log(`stdout: ${stdout}`);
+    //   console.error(`stderr: ${stderr}`);
+    //   if (error) {
+    //     console.error(`exec error: ${error}`);
+    //     reject(error.code); // Reject with the exit code
+    //     return;
+    //   }
+    //   resolve(0); // Resolve with exit code 0 if command succeeds
+    // });
+  });
+}
+
 export const cli = () => {
   run(
     async (context) => {
@@ -59,7 +101,7 @@ export const cli = () => {
       const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
 
       // Creating project for the test to run
-      const project = await cloudHandler.createSecurityProject(PROJECT_NAME, [], '');
+      const project = await cloudHandler.createSecurityProject(PROJECT_NAME);
       log.info(project);
 
       if (!project) {
@@ -92,6 +134,7 @@ export const cli = () => {
       // Wait for Elasticsearch to be accessible
       await waitForEsAccess(project.es_url, auth, id);
 
+      let statusCode: number | undefined;
       try {
         log.info('test');
         const FORMATTED_ES_URL = project.es_url.replace('https://', '');
@@ -99,8 +142,8 @@ export const cli = () => {
 
         const command = `yarn run ${process.env.TARGET_SCRIPT}`;
         const testCloud = 1;
-        const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}:443`;
-        const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}:443`;
+        const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
+        const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
         const workDir = 'x-pack/test/security_solution_api_integration';
         const envVars = {
           ...process.env,
@@ -108,26 +151,15 @@ export const cli = () => {
           TEST_ES_URL: testEsUrl,
           TEST_KIBANA_URL: testKibanaUrl,
         };
-        const childProcess = exec(command, { env: envVars, cwd: workDir });
-
-        childProcess.stdout?.on('data', (data) => {
-          log.info(data);
-        });
-        childProcess.stderr?.on('data', (data) => {
-          console.error(data);
-        });
-
-        childProcess.on('exit', (code) => {
-          console.log(`Exit code with status: ${code}`);
-        });
+        log.info(envVars);
+        statusCode = await executeCommand(command, envVars, workDir);
       } catch (ex) {
         console.error('PR pipeline error', ex.message);
-        process.exit(1);
       }
-
       // Delete serverless project
       log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
       await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
+      process.exit(statusCode);
     },
     {
       flags: {
