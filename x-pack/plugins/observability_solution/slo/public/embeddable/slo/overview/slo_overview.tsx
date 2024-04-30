@@ -19,15 +19,14 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
-import { SingleSloProps } from './types';
+import { SingleSloCustomInput } from './types';
 
 export function SloOverview({
   sloId,
   sloInstanceId,
   remoteName,
-  onRenderComplete,
   reloadSubject,
-}: SingleSloProps) {
+}: SingleSloCustomInput) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -67,13 +66,6 @@ export function SloOverview({
   useEffect(() => {
     refetch();
   }, [lastRefreshTime, refetch]);
-  useEffect(() => {
-    if (!onRenderComplete) return;
-
-    if (!isLoading) {
-      onRenderComplete();
-    }
-  }, [isLoading, onRenderComplete]);
 
   const isSloNotFound = !isLoading && slo === undefined;
 

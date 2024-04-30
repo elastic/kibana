@@ -31,7 +31,7 @@ import { GroupSloView } from './group_view/group_view';
 import {
   SloOverviewEmbeddableState,
   SloEmbeddableDeps,
-  OverviewApi,
+  SloOverviewApi,
   GroupSloCustomInput,
 } from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
@@ -43,7 +43,7 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'SLO Overview',
   });
 export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<SloOverviewEmbeddableState, OverviewApi> = {
+  const factory: ReactEmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> = {
     type: SLO_OVERVIEW_EMBEDDABLE_ID,
     deserializeState: (state) => {
       return state.rawState as SloOverviewEmbeddableState;
@@ -58,10 +58,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       const groupFilters$ = new BehaviorSubject(state.groupFilters);
       const remoteName$ = new BehaviorSubject(state.remoteName);
       const reload$ = new Subject<boolean>();
-      const reloadGroupSubject$ = new Subject<SloOverviewEmbeddableState | undefined>();
-      const subscription = groupFilters$.subscribe((input) => {
-        reloadGroupSubject$.next({ groupFilters: input });
-      });
       const api = buildApi(
         {
           ...titlesApi,
@@ -79,13 +75,13 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               },
             };
           },
-          getSloOverviewConfig: () => {
+          getSloGroupOverviewConfig: () => {
             return {
               groupFilters: groupFilters$.getValue(),
               overviewMode: overviewMode$.getValue(),
             };
           },
-          updateSloOverviewConfig: (update: GroupSloCustomInput) => {
+          updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
             groupFilters$.next(update.groupFilters);
           },
         },
@@ -127,7 +123,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
-              subscription.unsubscribe();
             };
           }, []);
           const renderOverview = () => {
@@ -168,7 +163,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                       groups={groups}
                       kqlQuery={kqlQuery}
                       filters={groupFilters?.filters}
-                      reloadGroupSubject={reloadGroupSubject$}
+                      reloadSubject={reload$}
                     />
                   </EuiFlexItem>
                 </Wrapper>

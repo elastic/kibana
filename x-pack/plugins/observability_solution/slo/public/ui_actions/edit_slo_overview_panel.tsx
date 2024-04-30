@@ -17,7 +17,10 @@ import {
   CanAccessViewMode,
   HasType,
 } from '@kbn/presentation-publishing';
-import { type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import {
+  type UiActionsActionDefinition,
+  IncompatibleActionError,
+} from '@kbn/ui-actions-plugin/public';
 // import type { SLOEmbeddable } from '../embeddable/slo/overview/slo_embeddable';
 import { SLO_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
@@ -25,6 +28,7 @@ import {
   GroupSloCustomInput,
   HasSloOverviewConfig,
   SloOverviewEmbeddableActionContext,
+  apiHasSloOverviewConfig,
 } from '../embeddable/slo/overview/types';
 
 export const EDIT_SLO_OVERVIEW_ACTION = 'editSloOverviewPanelAction';
@@ -52,8 +56,8 @@ export function createEditSloOverviewPanelAction(
       }),
     async execute(context) {
       const { embeddable } = context;
-      if (!embeddable) {
-        throw new Error('Not possible to execute an action without the embeddable context');
+      if (!apiHasSloOverviewConfig(embeddable)) {
+        throw new IncompatibleActionError();
       }
 
       const [coreStart, pluginStart] = await getStartServices();
@@ -66,9 +70,9 @@ export function createEditSloOverviewPanelAction(
         const result = await openSloConfiguration(
           coreStart,
           pluginStart,
-          embeddable.getSloOverviewConfig()
+          embeddable.getSloGroupOverviewConfig()
         );
-        embeddable.updateSloOverviewConfig(result as GroupSloCustomInput);
+        embeddable.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
       } catch (e) {
         return Promise.reject();
       }
@@ -76,7 +80,7 @@ export function createEditSloOverviewPanelAction(
     isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
       return (
         isEditSloOverviewPanelApi(embeddable) &&
-        embeddable.getSloOverviewConfig().overviewMode === 'groups'
+        embeddable.getSloGroupOverviewConfig().overviewMode === 'groups'
       );
     },
   };

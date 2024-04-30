@@ -24,18 +24,23 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
 
-import type { SingleSloProps, GroupSloCustomInput, GroupFilters, OverviewMode } from './types';
+import type {
+  SingleSloCustomInput,
+  GroupSloCustomInput,
+  GroupFilters,
+  OverviewMode,
+} from './types';
 import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
   initialInput?: GroupSloCustomInput;
-  onCreate: (props: SingleSloProps | GroupSloCustomInput) => void;
+  onCreate: (props: SingleSloCustomInput | GroupSloCustomInput) => void;
   onCancel: () => void;
 }
 
 interface SingleConfigurationProps {
-  onCreate: (props: SingleSloProps) => void;
+  onCreate: (props: SingleSloCustomInput) => void;
   onCancel: () => void;
   overviewMode: OverviewMode;
 }
@@ -48,7 +53,7 @@ interface GroupConfigurationProps {
 }
 
 function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<SingleSloProps>();
+  const [selectedSlo, setSelectedSlo] = useState<SingleSloCustomInput>();
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
   const [hasError, setHasError] = useState(false);
   const hasGroupBy = selectedSlo && selectedSlo.sloInstanceId !== ALL_VALUE;

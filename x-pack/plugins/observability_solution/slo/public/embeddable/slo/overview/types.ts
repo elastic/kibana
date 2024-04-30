@@ -33,7 +33,7 @@ export interface GroupFilters {
 }
 
 // rename SignleSloProps to SingleSloCustomInput
-export type SingleSloProps = EmbeddableSloProps & {
+export type SingleSloCustomInput = EmbeddableSloProps & {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
   showAllGroupByInstances?: boolean;
@@ -51,26 +51,26 @@ export interface EmbeddableSloProps {
 
 export type SloEmbeddableInput = EmbeddableInput &
   Partial<GroupSloCustomInput> &
-  Partial<SingleSloProps>;
+  Partial<SingleSloCustomInput>;
 export type SloOverviewEmbeddableState = SerializedTitles &
   Partial<GroupSloCustomInput> &
-  Partial<SingleSloProps>;
+  Partial<SingleSloCustomInput>;
 
-export type OverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
+export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
   HasSloOverviewConfig;
 
 export interface HasSloOverviewConfig {
-  getSloOverviewConfig: () => GroupSloCustomInput;
-  updateSloOverviewConfig: (next: GroupSloCustomInput) => void;
+  getSloGroupOverviewConfig: () => GroupSloCustomInput;
+  updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
 }
 
 export const apiHasSloOverviewConfig = (api: unknown | null): api is HasSloOverviewConfig => {
   return Boolean(
     api &&
-      typeof (api as HasSloOverviewConfig).getSloOverviewConfig === 'function' &&
-      typeof (api as HasSloOverviewConfig).updateSloOverviewConfig === 'function'
+      typeof (api as HasSloOverviewConfig).getSloGroupOverviewConfig === 'function' &&
+      typeof (api as HasSloOverviewConfig).updateSloGroupOverviewConfig === 'function'
   );
 };
 
@@ -86,5 +86,5 @@ export interface SloEmbeddableDeps {
 }
 
 export type SloOverviewEmbeddableActionContext = EmbeddableApiContext & {
-  embeddable: OverviewApi;
+  embeddable: SloOverviewApi;
 };
