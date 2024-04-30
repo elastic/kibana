@@ -24,14 +24,14 @@ import {
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
-import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { BurnRateRuleParams } from '../../../../typings';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
+import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
@@ -79,13 +79,15 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm, handleAttachToDashboardSave } =
-    useSloListActions({
-      slo,
-      setDeleteConfirmationModalOpen,
-      setIsActionsPopoverOpen,
-      setIsAddRuleFlyoutOpen,
-    });
+  const { handleCreateRule, handleAttachToDashboardSave } = useSloListActions({
+    slo,
+    setIsActionsPopoverOpen,
+    setIsAddRuleFlyoutOpen,
+  });
+
+  const closeDeleteModal = () => {
+    setDeleteConfirmationModalOpen(false);
+  };
 
   return (
     <>
@@ -150,11 +152,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-        />
+        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
       ) : null}
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard

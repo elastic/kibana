@@ -9,16 +9,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
-import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
-import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
-import { useSloListActions } from '../../hooks/use_slo_list_actions';
-import { SloItemActions } from '../slo_item_actions';
-import { SloBadges } from '../badges/slo_badges';
-import { SloSummary } from '../slo_summary';
+import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { BurnRateRuleParams } from '../../../../typings';
+import { useSloListActions } from '../../hooks/use_slo_list_actions';
+import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
+import { SloBadges } from '../badges/slo_badges';
+import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
+import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SLOGroupings } from '../common/slo_groupings';
+import { SloItemActions } from '../slo_item_actions';
+import { SloSummary } from '../slo_summary';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
@@ -44,12 +44,15 @@ export function SloListItem({
 
   const { sloDetailsUrl } = useSloFormattedSummary(slo);
 
-  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
+  const { handleCreateRule } = useSloListActions({
     slo,
-    setDeleteConfirmationModalOpen,
     setIsActionsPopoverOpen,
     setIsAddRuleFlyoutOpen,
   });
+
+  const closeDeleteModal = () => {
+    setDeleteConfirmationModalOpen(false);
+  };
 
   return (
     <EuiPanel data-test-subj="sloItem" hasBorder hasShadow={false}>
@@ -116,11 +119,7 @@ export function SloListItem({
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-        />
+        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
       ) : null}
     </EuiPanel>
   );
