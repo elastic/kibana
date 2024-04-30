@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TestQueryRowTable } from './test_query_row_table';
 
-const AppWrapper = React.memo<PropsWithChildren>(({ children }) => (
+const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
   <I18nProvider>{children}</I18nProvider>
 ));
 
