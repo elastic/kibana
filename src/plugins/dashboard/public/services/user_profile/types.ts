@@ -6,17 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { CoreStart } from '@kbn/core/public';
 
-export interface UserContentCommonSchema {
-  id: string;
-  updatedAt: string;
-  createdBy?: string;
-  managed?: boolean;
-  references: SavedObjectsReference[];
-  type: string;
-  attributes: {
-    title: string;
-    description?: string;
-  };
+export interface DashboardUserProfileService {
+  bulkGet: CoreStart['userProfile']['bulkGet'];
 }
