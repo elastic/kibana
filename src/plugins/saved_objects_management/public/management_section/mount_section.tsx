@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +43,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
   coreStart.chrome.docTitle.change(title);
 
-  const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
+  const RedirectToHomeIfUnauthorized: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
 
     if (!allowed) {
