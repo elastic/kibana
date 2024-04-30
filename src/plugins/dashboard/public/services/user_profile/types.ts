@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../monaco_imports';
-import { buildConsoleSharedTheme } from './shared';
+import type { CoreStart } from '@kbn/core/public';
 
-export const buildConsoleOutputTheme = (): monaco.editor.IStandaloneThemeData => {
-  const sharedTheme = buildConsoleSharedTheme();
-  return {
-    ...sharedTheme,
-  };
-};
+export interface DashboardUserProfileService {
+  bulkGet: CoreStart['userProfile']['bulkGet'];
+}
