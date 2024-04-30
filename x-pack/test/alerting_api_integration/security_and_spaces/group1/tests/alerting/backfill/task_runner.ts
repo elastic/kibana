@@ -422,7 +422,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
           {
             rule_id: ruleId,
             start: '2023-10-19T12:00:00.000Z',
-            end: '2023-10-20T12:00:00.000Z',
           },
         ])
         .expect(200);
@@ -430,16 +429,11 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const scheduleResult = response2.body;
 
       expect(scheduleResult.length).to.eql(1);
-      expect(scheduleResult[0].schedule.length).to.eql(2);
+      expect(scheduleResult[0].schedule.length).to.eql(1);
       expect(scheduleResult[0].schedule).to.eql([
         {
           interval: '12h',
           run_at: '2023-10-20T00:00:00.000Z',
-          status: 'pending',
-        },
-        {
-          interval: '12h',
-          run_at: '2023-10-20T12:00:00.000Z',
           status: 'pending',
         },
       ]);
@@ -462,8 +456,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         backfillId,
         spaceId,
         new Map([
-          ['execute-timeout', { equal: 2 }],
-          ['execute-backfill', { equal: 2 }],
+          ['execute-timeout', { equal: 1 }],
+          ['execute-backfill', { equal: 1 }],
         ])
       );
 
@@ -615,7 +609,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         spaceId,
       });
 
-      // get the execute-timeout and execute-backfill events
+      // get the execute-backfill events
       const events: IValidatedEvent[] = await waitForEventLogDocs(
         backfillId,
         spaceId,

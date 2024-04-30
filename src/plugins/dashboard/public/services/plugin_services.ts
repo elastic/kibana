@@ -25,6 +25,7 @@ import { dataViewEditorServiceFactory } from './data_view_editor/data_view_edito
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
+import { i18nServiceFactory } from './i18n/i18n_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
 import { notificationsServiceFactory } from './notifications/notifications_service';
@@ -73,6 +74,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  i18n: new PluginServiceProvider(i18nServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
