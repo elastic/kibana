@@ -11,16 +11,37 @@ import type {
   SavedObjectsType,
 } from '@kbn/core/server';
 
-import type {
-  AssetSOObject,
-  ElasticsearchAssetType,
-  KibanaSavedObjectType,
-  SimpleSOAssetType,
-} from '../../../../common';
+import type { AssetSOObject, KibanaSavedObjectType, SimpleSOAssetType } from '../../../../common';
+import { ElasticsearchAssetType } from '../../../../common';
 
 import { displayedAssetTypesLookup } from '../../../../common/constants';
 
 import type { SimpleSOAssetAttributes } from '../../../types';
+
+const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): string => {
+  switch (type) {
+    case 'index':
+      return `/app/management/data/index_management/indices/index_details?indexName=${id}`;
+    case 'index_template':
+      return `/app/management/data/index_management/templates/${id}`;
+    case 'component_template':
+      return `/app/management/data/index_management/component_templates/${id}`;
+    case 'ingest_pipeline':
+      return `/app/management/ingest/ingest_pipelines/?pipeline=${id}`;
+    case 'ilm_policy':
+      return `/app/management/data/index_lifecycle_management/policies/edit/${id}`;
+    case 'data_stream_ilm_policy':
+      return `/app/management/data/index_lifecycle_management/policies/edit/${id}`;
+    case 'transform':
+      // TODO: Confirm link for transforms
+      return '';
+    case 'ml_model':
+      // TODO: Confirm link for ml models
+      return '';
+    default:
+      return '';
+  }
+};
 
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
@@ -46,7 +67,19 @@ export async function getBulkAssets(
         appLink = types[obj.type]!.management!.getInAppUrl!(obj)?.path || '';
       }
 
-      // If we still don't have an app link at this point, manually map them
+      // TODO: Ask for Kibana SOs to have `getInAppUrl()` registered so that the above works safely:
+      //  ml-module
+      //  security-rule
+      //  csp-rule-template
+      //  osquery-pack-asset
+      //  osquery-saved-query
+
+      // If we still don't have an app link at this point, manually map them (only ES types)
+      if (!appLink) {
+        if (Object.values(ElasticsearchAssetType).includes(obj.type as ElasticsearchAssetType)) {
+          appLink = getKibanaLinkForESAsset(obj.type as ElasticsearchAssetType, obj.id);
+        }
+      }
 
       return {
         id: obj.id,
