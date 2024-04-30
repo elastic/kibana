@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import { OpenAPIV3 } from 'openapi-types';
+import { logger } from '../../logger';
 import { BundledDocument } from '../bundle_document';
 import { mergePaths } from './merge_paths';
 import { mergeSharedComponents } from './merge_shared_components';
@@ -15,7 +17,7 @@ export async function mergeDocuments(
   bundledDocuments: BundledDocument[],
   blankOasFactory: (version: string) => OpenAPIV3.Document
 ): Promise<Map<string, OpenAPIV3.Document>> {
-  const bundledDocumentsByVersion = splitByVersions(bundledDocuments);
+  const bundledDocumentsByVersion = splitByVersion(bundledDocuments);
   const mergedByVersion = new Map<string, OpenAPIV3.Document>();
 
   for (const [version, singleVersionBundledDocuments] of bundledDocumentsByVersion.entries()) {
@@ -23,6 +25,7 @@ export async function mergeDocuments(
 
     mergedDocument.paths = mergePaths(singleVersionBundledDocuments);
     mergedDocument.components = {
+      // Copy components defined in the blank OpenAPI document
       ...mergedDocument.components,
       ...mergeSharedComponents(singleVersionBundledDocuments),
     };
@@ -33,15 +36,22 @@ export async function mergeDocuments(
   return mergedByVersion;
 }
 
-function splitByVersions(bundledDocuments: BundledDocument[]): Map<string, BundledDocument[]> {
+function splitByVersion(bundledDocuments: BundledDocument[]): Map<string, BundledDocument[]> {
   const splitBundledDocuments = new Map<string, BundledDocument[]>();
 
   for (const bundledDocument of bundledDocuments) {
-    const version = (bundledDocument.document.info as OpenAPIV3.InfoObject).version;
-    const versionBundledDocuments = splitBundledDocuments.get(version);
+    const documentInfo = bundledDocument.document.info as OpenAPIV3.InfoObject;
+
+    if (!documentInfo.version) {
+      logger.warning(`OpenAPI version is missing in ${chalk.bold(bundledDocument.absolutePath)}`);
+
+      continue;
+    }
+
+    const versionBundledDocuments = splitBundledDocuments.get(documentInfo.version);
 
     if (!versionBundledDocuments) {
-      splitBundledDocuments.set(version, [bundledDocument]);
+      splitBundledDocuments.set(documentInfo.version, [bundledDocument]);
     } else {
       versionBundledDocuments.push(bundledDocument);
     }

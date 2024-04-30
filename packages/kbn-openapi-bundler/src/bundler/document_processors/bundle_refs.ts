@@ -108,8 +108,6 @@ export class BundleRefProcessor {
   }
 
   private extractRootDocument(context: TraverseDocumentContext): Document {
-    const parentContext = this.extractParentContext(context);
-
-    return parentContext.resolvedDocument.document;
+    return this.extractParentContext(context).resolvedDocument.document;
   }
 }
