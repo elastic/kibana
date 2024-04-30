@@ -8,6 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { DEFAULT_TIME_RANGE } from '../../../../common/constants';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
@@ -228,7 +229,9 @@ export const createDatasetsSummaryPanelStateMachine = ({
       },
       loadDatasetsActivity: async (_context) => {
         const dataStreamStats = await dataStreamStatsClient.getDataStreamsStats();
-        const activeDataStreams = filterInactiveDatasets({ datasets: dataStreamStats });
+        const activeDataStreams = filterInactiveDatasets({
+          datasets: dataStreamStats.map(DataStreamStat.create),
+        });
         return {
           total: dataStreamStats.length,
           active: activeDataStreams.length,
