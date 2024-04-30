@@ -170,10 +170,8 @@ export interface RouteValidatorFullConfigResponse {
   [statusCode: number]: {
     /**
      * A string representing the mime type of the response body.
-     * @public
      */
     bodyContentType?: string;
-    /** @public */
     body: LazyValidator;
   };
   unsafe?: {

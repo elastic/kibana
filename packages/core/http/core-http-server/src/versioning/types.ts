@@ -252,7 +252,6 @@ export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
     /**
      * A string representing the mime type of the response body.
-     * @public
      */
     bodyContentType?: string;
     body: VersionedResponseBodyValidation;
