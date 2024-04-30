@@ -15,6 +15,7 @@ import {
   EuiPageTemplate,
   EuiPanel,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -53,6 +54,7 @@ import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineButtonOverview } from './pipeline_button_overview';
 import { SelectClientCallouts } from './select_client_callouts';
 import { PipelineManageButton } from './pipeline_manage_button';
+import { OPTIONAL_LABEL } from '../../../common/i18n_string';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -243,10 +245,21 @@ export const ElasticsearchOverview = () => {
         data-test-subj="preprocess-data-section"
       >
         <OverviewPanel
-          description={i18n.translate('xpack.serverlessSearch.preprocessData.description', {
-            defaultMessage:
-              "Use ingest pipelines to preprocess your data before it's indexed into Elasticsearch, which is often much easier and cheaper than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.",
-          })}
+          description={
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiBadge>{OPTIONAL_LABEL}</EuiBadge>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {i18n.translate('xpack.serverlessSearch.preprocessData.description', {
+                  defaultMessage:
+                    "Use ingest pipelines to preprocess your data before it's indexed into Elasticsearch, which is often much easier and cheaper than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.",
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           leftPanelContent={<PreprocessDataPanel />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.preprocessData.title', {
