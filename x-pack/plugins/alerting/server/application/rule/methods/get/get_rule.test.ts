@@ -6,7 +6,7 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -14,21 +14,21 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { RecoveredActionGroup } from '../../../common';
-import { formatLegacyActions } from '../lib';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { RecoveredActionGroup } from '../../../../../common';
+import { formatLegacyActions } from '../../../../rules_client/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
-jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
     formatLegacyActions: jest.fn(),
   };
@@ -91,6 +91,10 @@ describe('get()', () => {
         params: {
           bar: true,
         },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [
@@ -128,6 +132,10 @@ describe('get()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+          "status": "unknown",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -143,11 +151,12 @@ describe('get()', () => {
     `);
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('gets rule with actions using preconfigured connectors', async () => {
@@ -160,6 +169,10 @@ describe('get()', () => {
         schedule: { interval: '10s' },
         params: {
           bar: true,
+        },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -214,6 +227,10 @@ describe('get()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+          "status": "unknown",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -229,11 +246,12 @@ describe('get()', () => {
     `);
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('gets rule with actions using system connectors', async () => {
@@ -246,6 +264,10 @@ describe('get()', () => {
         schedule: { interval: '10s' },
         params: {
           bar: true,
+        },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -289,6 +311,10 @@ describe('get()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+          "status": "unknown",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -311,11 +337,12 @@ describe('get()', () => {
     `);
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
@@ -355,6 +382,10 @@ describe('get()', () => {
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
+        },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -406,6 +437,10 @@ describe('get()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+          "status": "unknown",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
@@ -487,6 +522,10 @@ describe('get()', () => {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
         },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         actions: [
@@ -529,6 +568,10 @@ describe('get()', () => {
           schedule: { interval: '10s' },
           params: {
             bar: true,
+          },
+          executionStatus: {
+            status: 'unknown',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
           },
           actions: [
             {
@@ -592,6 +635,10 @@ describe('get()', () => {
           params: {
             bar: true,
           },
+          executionStatus: {
+            status: 'unknown',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          },
           actions: [],
         },
         references: [],
@@ -647,6 +694,10 @@ describe('get()', () => {
         schedule: { interval: '10s' },
         params: {
           bar: true,
+        },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

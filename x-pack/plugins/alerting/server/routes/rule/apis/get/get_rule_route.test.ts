@@ -6,16 +6,16 @@
  */
 
 import { pick } from 'lodash';
-import { getRuleRoute } from './get_rule';
+import { getRuleRoute } from './get_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../types';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -64,8 +64,8 @@ describe('getRuleRoute', () => {
     params: {
       bar: true,
     },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date('2020-08-20T19:23:38Z'),
+    updatedAt: new Date('2020-08-20T19:23:38Z'),
     actions: [action],
     consumer: 'bar',
     name: 'abc',
@@ -95,13 +95,13 @@ describe('getRuleRoute', () => {
     updated_by: mockedAlert.updatedBy,
     api_key_owner: mockedAlert.apiKeyOwner,
     muted_alert_ids: mockedAlert.mutedInstanceIds,
-    created_at: mockedAlert.createdAt,
-    updated_at: mockedAlert.updatedAt,
+    created_at: mockedAlert.createdAt.toISOString(),
+    updated_at: mockedAlert.updatedAt.toISOString(),
     id: mockedAlert.id,
     revision: mockedAlert.revision,
     execution_status: {
       status: mockedAlert.executionStatus.status,
-      last_execution_date: mockedAlert.executionStatus.lastExecutionDate,
+      last_execution_date: mockedAlert.executionStatus.lastExecutionDate.toISOString(),
     },
     actions: [
       {
