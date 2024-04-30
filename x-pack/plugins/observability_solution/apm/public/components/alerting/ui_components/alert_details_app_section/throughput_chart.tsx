@@ -32,6 +32,7 @@ const INITIAL_STATE = {
 };
 function ThroughputChart({
   transactionType,
+  transactionTypes,
   setTransactionType,
   transactionName,
   serviceName,
@@ -46,6 +47,7 @@ function ThroughputChart({
   filters,
 }: {
   transactionType: string;
+  transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
@@ -127,6 +129,8 @@ function ThroughputChart({
       : []),
   ];
 
+  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -149,10 +153,11 @@ function ThroughputChart({
               position="right"
             />
           </EuiFlexItem>
-          {setTransactionType && (
+          {showTransactionTypeSelect && (
             <EuiFlexItem grow={false}>
               <TransactionTypeSelect
                 transactionType={transactionType}
+                transactionTypes={transactionTypes}
                 setTransactionType={setTransactionType}
               />
             </EuiFlexItem>

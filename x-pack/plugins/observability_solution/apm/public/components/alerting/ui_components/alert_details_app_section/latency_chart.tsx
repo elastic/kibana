@@ -42,6 +42,7 @@ import { TransactionTypeSelect } from './transaction_type_select';
 function LatencyChart({
   alert,
   transactionType,
+  transactionTypes,
   transactionName,
   serviceName,
   environment,
@@ -60,6 +61,7 @@ function LatencyChart({
 }: {
   alert: TopAlert;
   transactionType: string;
+  transactionTypes?: string[];
   transactionName?: string;
   serviceName: string;
   environment: string;
@@ -191,6 +193,7 @@ function LatencyChart({
   ].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
+  const showTransactionTypeSelect = transactionTypes && setTransactionType;
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -212,10 +215,11 @@ function LatencyChart({
               />
             </EuiFlexItem>
           )}
-          {setTransactionType && (
+          {showTransactionTypeSelect && (
             <EuiFlexItem grow={false}>
               <TransactionTypeSelect
                 transactionType={transactionType}
+                transactionTypes={transactionTypes}
                 setTransactionType={setTransactionType}
               />
             </EuiFlexItem>

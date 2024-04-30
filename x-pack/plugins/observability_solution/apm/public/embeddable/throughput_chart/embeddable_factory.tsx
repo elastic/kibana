@@ -13,15 +13,8 @@ import {
   EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import {
-  APMThroughputChartEmbeddable,
-  APM_THROUGHPUT_CHART_EMBEDDABLE,
-} from './embeddable';
-import type {
-  ApmPluginStartDeps,
-  ApmPluginStart,
-  ApmPluginSetupDeps,
-} from '../../plugin';
+import { APMThroughputChartEmbeddable, APM_THROUGHPUT_CHART_EMBEDDABLE } from './embeddable';
+import type { ApmPluginStartDeps, ApmPluginStart, ApmPluginSetupDeps } from '../../plugin';
 import type { APMThroughputChartEmbeddableInput } from './types';
 import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../../context/kibana_environment_context/kibana_environment_context';
@@ -41,28 +34,15 @@ export class APMThroughputChartEmbeddableFactoryDefinition
     kibanaEnvironment: KibanaEnvContext,
     observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
   ) {
-    super(
-      coreSetup,
-      pluginsSetup,
-      config,
-      kibanaEnvironment,
-      observabilityRuleTypeRegistry
-    );
+    super(coreSetup, pluginsSetup, config, kibanaEnvironment, observabilityRuleTypeRegistry);
   }
 
   public async isEditable() {
     return true;
   }
 
-  public async create(
-    initialInput: APMThroughputChartEmbeddableInput,
-    parent?: IContainer
-  ) {
-    return this.createInstance(
-      APMThroughputChartEmbeddable,
-      initialInput,
-      parent
-    );
+  public async create(initialInput: APMThroughputChartEmbeddableInput, parent?: IContainer) {
+    return this.createInstance(APMThroughputChartEmbeddable, initialInput, parent);
   }
 
   public getDescription() {

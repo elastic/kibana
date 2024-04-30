@@ -7,40 +7,49 @@
 
 import React from 'react';
 import FailedTransactionChart from '../../../components/alerting/ui_components/alert_details_app_section/failed_transaction_chart';
-import { EmbeddableAPMAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import type { EmbeddableAPMAlertingVizProps } from '../types';
 
 export function APMAlertingFailedTransactionsChart({
   rule,
+  serviceName,
+  environment = ENVIRONMENT_ALL.value,
   timeZone,
-  rangeFrom,
-  rangeTo,
+  rangeFrom = 'now-15m',
+  rangeTo = 'now',
+  transactionType,
   transactionName,
+  kuery = '',
   filters,
 }: EmbeddableAPMAlertingVizProps) {
   const {
-    environment,
-    serviceName,
-    transactionType,
-    comparisonChartTheme,
+    transactionType: currentTransactionType,
+    transactionTypes,
     setTransactionType,
-    kuery,
+    comparisonChartTheme,
   } = useAlertingProps({
     rule,
+    serviceName,
+    rangeFrom,
+    rangeTo,
+    kuery,
+    defaultTransactionType: transactionType,
   });
 
   if (!rangeFrom || !rangeTo) {
     return <TimeRangeCallout />;
   }
 
-  if (!serviceName || !transactionType) {
+  if (!serviceName || !currentTransactionType) {
     return null;
   }
 
   return (
     <FailedTransactionChart
-      transactionType={transactionType}
+      transactionType={currentTransactionType}
+      transactionTypes={transactionTypes}
       setTransactionType={setTransactionType}
       transactionName={transactionName}
       serviceName={serviceName}

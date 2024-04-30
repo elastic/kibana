@@ -7,17 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
 export function TransactionTypeSelect({
   transactionType,
+  transactionTypes,
   setTransactionType,
 }: {
   transactionType: string;
+  transactionTypes: string[];
   setTransactionType: (transactionType: string) => void;
 }) {
-  const { transactionTypes } = useApmServiceContext();
-
   const options = transactionTypes.map((t) => ({ text: t, value: t }));
 
   return (
@@ -25,10 +24,9 @@ export function TransactionTypeSelect({
       style={{ minWidth: 160 }}
       compressed
       data-test-subj="alertingFilterTransactionType"
-      prepend={i18n.translate(
-        'xpack.apm.alertingVisualizations.transactionType.prepend',
-        { defaultMessage: 'Transaction Type' }
-      )}
+      prepend={i18n.translate('xpack.apm.alertingVisualizations.transactionType.prepend', {
+        defaultMessage: 'Transaction Type',
+      })}
       onChange={(event) => setTransactionType(event.target.value)}
       options={options}
       value={transactionType}

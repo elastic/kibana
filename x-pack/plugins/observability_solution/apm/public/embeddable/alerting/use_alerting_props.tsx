@@ -6,24 +6,56 @@
  */
 import { useState, useEffect } from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
-import { useEnvironmentsContext } from '../../context/environments_context/use_environments_context';
-import { useApmParams } from '../../hooks/use_apm_params';
+import { getTransactionType } from '../../context/apm_service/apm_service_context';
+import { useServiceTransactionTypesFetcher } from '../../context/apm_service/use_service_transaction_types_fetcher';
+import { useServiceAgentFetcher } from '../../context/apm_service/use_service_agent_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { getComparisonChartTheme } from '../../components/shared/time_comparison/get_comparison_chart_theme';
 import { getAggsTypeFromRule } from '../../components/alerting/ui_components/alert_details_app_section/helpers';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { ApmDocumentType } from '../../../common/document_type';
 
 export function useAlertingProps({
   rule,
+  serviceName,
+  kuery = '',
+  rangeFrom,
+  rangeTo,
+  defaultTransactionType,
 }: {
   rule: Rule<{ aggregationType: LatencyAggregationType }>;
+  serviceName: string;
+  kuery?: string;
+  rangeFrom: string;
+  rangeTo: string;
+  defaultTransactionType?: string;
 }) {
-  const { transactionType: defaultTransactionType, serviceName } = useApmServiceContext();
-
-  const { environment } = useEnvironmentsContext();
-  const {
-    query: { kuery },
-  } = useApmParams('/services/{serviceName}/overview');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.TransactionMetric,
+    numBuckets: 100,
+  });
+  const { transactionTypes } = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+    documentType: preferred?.source.documentType,
+    rollupInterval: preferred?.source.rollupInterval,
+  });
+  const { agentName } = useServiceAgentFetcher({
+    serviceName,
+    start,
+    end,
+  });
+  const currentTransactionType = getTransactionType({
+    transactionTypes,
+    transactionType: defaultTransactionType,
+    agentName,
+  });
 
   const params = rule.params;
   const comparisonChartTheme = getComparisonChartTheme();
@@ -31,7 +63,11 @@ export function useAlertingProps({
   const [latencyAggregationType, setLatencyAggregationType] = useState(
     getAggsTypeFromRule(params.aggregationType)
   );
-  const [transactionType, setTransactionType] = useState(defaultTransactionType);
+  const [transactionType, setTransactionType] = useState(currentTransactionType);
+
+  useEffect(() => {
+    setTransactionType(currentTransactionType);
+  }, [currentTransactionType]);
 
   useEffect(() => {
     setTransactionType(defaultTransactionType);
@@ -39,12 +75,10 @@ export function useAlertingProps({
 
   return {
     transactionType,
+    transactionTypes,
     setTransactionType,
-    serviceName,
-    environment,
     latencyAggregationType,
     setLatencyAggregationType,
     comparisonChartTheme,
-    kuery,
   };
 }

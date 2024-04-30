@@ -7,47 +7,56 @@
 
 import React from 'react';
 import LatencyChart from '../../../components/alerting/ui_components/alert_details_app_section/latency_chart';
-import { EmbeddableAPMAlertingVizProps } from '../types';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
+import type { EmbeddableAPMAlertingVizProps } from '../types';
 
 export function APMAlertingLatencyChart({
   rule,
   alert,
-  timeZone,
-  rangeFrom,
-  rangeTo,
-  latencyThresholdInMicroseconds,
+  serviceName,
+  environment = ENVIRONMENT_ALL.value,
+  transactionType,
   transactionName,
+  timeZone,
+  rangeFrom = 'now-15m',
+  rangeTo = 'now',
+  latencyThresholdInMicroseconds,
+  kuery = '',
   filters,
 }: EmbeddableAPMAlertingVizProps & {
   latencyThresholdInMicroseconds?: number;
 }) {
   const {
-    environment,
-    serviceName,
-    transactionType,
+    transactionType: currentTransactionType,
+    transactionTypes,
     setTransactionType,
     comparisonChartTheme,
     latencyAggregationType,
     setLatencyAggregationType,
-    kuery,
   } = useAlertingProps({
     rule,
+    rangeFrom,
+    rangeTo,
+    kuery,
+    serviceName,
+    defaultTransactionType: transactionType,
   });
 
   if (!rangeFrom || !rangeTo) {
     return <TimeRangeCallout />;
   }
 
-  if (!serviceName || !transactionType) {
+  if (!serviceName || !currentTransactionType) {
     return null;
   }
 
   return (
     <LatencyChart
       alert={alert}
-      transactionType={transactionType}
+      transactionType={currentTransactionType}
+      transactionTypes={transactionTypes}
       transactionName={transactionName}
       serviceName={serviceName}
       environment={environment}

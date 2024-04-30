@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import ThroughputChart from '../../../components/alerting/ui_components/alert_details_app_section/throughput_chart';
 import { EmbeddableAPMAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
@@ -14,20 +15,26 @@ import { TimeRangeCallout } from '../time_range_callout';
 export function APMAlertingThroughputChart({
   rule,
   timeZone,
-  rangeFrom,
-  rangeTo,
+  rangeFrom = 'now-15m',
+  rangeTo = 'now',
   transactionName,
+  kuery,
   filters,
+  serviceName,
+  transactionType,
+  environment = ENVIRONMENT_ALL.value,
 }: EmbeddableAPMAlertingVizProps) {
   const {
-    kuery,
-    environment,
-    serviceName,
-    transactionType,
     comparisonChartTheme,
     setTransactionType,
+    transactionType: currentTransactionType,
+    transactionTypes,
   } = useAlertingProps({
     rule,
+    rangeTo,
+    rangeFrom,
+    defaultTransactionType: transactionType,
+    serviceName,
   });
 
   if (!rangeFrom || !rangeTo) {
@@ -35,13 +42,14 @@ export function APMAlertingThroughputChart({
   }
 
   // Todo: Add error state
-  if (!serviceName || !transactionType) {
+  if (!serviceName || !currentTransactionType) {
     return null;
   }
 
   return (
     <ThroughputChart
-      transactionType={transactionType}
+      transactionType={currentTransactionType}
+      transactionTypes={transactionTypes}
       setTransactionType={setTransactionType}
       transactionName={transactionName}
       serviceName={serviceName}

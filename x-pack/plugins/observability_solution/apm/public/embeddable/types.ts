@@ -33,9 +33,6 @@ export interface EmbeddableDeps {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
 export interface APMEmbeddableProps {
-  serviceName: string;
-  environment?: string;
-  transactionType?: string;
   transactionName?: string;
   rangeFrom?: string;
   rangeTo?: string;

@@ -5,52 +5,30 @@
  * 2.0.
  */
 import React from 'react';
-import { createMemoryHistory } from 'history';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ApmPluginContext, ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { ApmServiceContextProvider } from '../context/apm_service/apm_service_context';
-import { ApmTimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
-import { apmRouter } from '../components/routing/apm_route_config';
 import { ApmThemeProvider } from '../components/routing/app_root';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
-import { APMEmbeddableInput } from './types';
-import { ENVIRONMENT_ALL_VALUE } from '../../common/environment_filter_values';
 import { EmbeddableDeps } from './types';
+import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 
-type APMEmbeddableContextProps = Omit<APMEmbeddableInput, 'id'> & {
+interface APMEmbeddableContextProps {
   deps: EmbeddableDeps;
   children: React.ReactNode;
-};
+  rangeFrom?: string;
+  rangeTo?: string;
+  kuery?: string;
+}
 
 export function APMEmbeddableContext({
-  serviceName,
-  transactionType,
-  environment = ENVIRONMENT_ALL_VALUE,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
-  kuery,
+  kuery = '',
   deps,
   children,
 }: APMEmbeddableContextProps) {
-  const params = getQueryParams({
-    transactionType,
-    environment,
-    rangeFrom,
-    rangeTo,
-    kuery,
-  });
-  /* Many APM components rely on URL state. To account for this,
-   * we create history with a spoofed initial URL to match
-   * the data type for the embeddable input. */
-  const routeContext = `/services/${serviceName}/overview`;
-  const history = createMemoryHistory({
-    initialEntries: [
-      `${routeContext}?comparisonEnabled=true&latencyAggregationType=avg&offset=1d&${params}`,
-    ],
-  });
   const services: ApmPluginContextValue = {
     config: deps.config,
     core: deps.coreStart,
@@ -76,48 +54,22 @@ export function APMEmbeddableContext({
   return (
     <I18nContext>
       <ApmPluginContext.Provider value={services}>
-        <RouterProvider history={history} router={apmRouter as any}>
-          <KibanaThemeProvider theme={deps.coreStart.theme}>
-            <ApmThemeProvider>
-              <KibanaContextProvider services={deps.coreStart}>
-                <ApmTimeRangeMetadataContextProvider>
-                  <ApmServiceContextProvider>
-                    <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-                  </ApmServiceContextProvider>
-                </ApmTimeRangeMetadataContextProvider>
-              </KibanaContextProvider>
-            </ApmThemeProvider>
-          </KibanaThemeProvider>
-        </RouterProvider>
+        <KibanaThemeProvider theme={deps.coreStart.theme}>
+          <ApmThemeProvider>
+            <KibanaContextProvider services={deps.coreStart}>
+              <TimeRangeMetadataContextProvider
+                uiSettings={services.core.uiSettings}
+                start={rangeFrom}
+                end={rangeTo}
+                kuery={kuery}
+                useSpanName={false}
+              >
+                <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+              </TimeRangeMetadataContextProvider>
+            </KibanaContextProvider>
+          </ApmThemeProvider>
+        </KibanaThemeProvider>
       </ApmPluginContext.Provider>
     </I18nContext>
   );
 }
-
-const getQueryParams = ({
-  transactionName,
-  transactionType,
-  environment = ENVIRONMENT_ALL_VALUE,
-  rangeTo = 'now',
-  rangeFrom = 'now-15m',
-  kuery,
-}: Omit<APMEmbeddableInput, 'serviceName' | 'id'>) => {
-  const transactionNameParam = transactionName
-    ? `transactionName=${encodeURIComponent(transactionName)}`
-    : null;
-  const transactionTypeParam = transactionType
-    ? `transactionType=${encodeURIComponent(transactionType)}`
-    : null;
-  const environmentParam = environment ? `environment=${encodeURIComponent(environment)}` : null;
-  const params = [
-    transactionNameParam,
-    transactionTypeParam,
-    environmentParam,
-    `rangeFrom=${encodeURIComponent(rangeFrom)}`,
-    `rangeTo=${encodeURIComponent(rangeTo)}`,
-    kuery ? `kuery=${encodeURIComponent(kuery)}` : null,
-  ]
-    .filter(Boolean)
-    .join('&');
-  return params;
-};

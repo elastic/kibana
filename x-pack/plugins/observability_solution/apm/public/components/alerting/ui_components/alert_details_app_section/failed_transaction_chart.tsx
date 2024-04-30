@@ -39,6 +39,7 @@ const INITIAL_STATE_ERROR_RATE: ErrorRate = {
 
 function FailedTransactionChart({
   transactionType,
+  transactionTypes,
   setTransactionType,
   transactionName,
   serviceName,
@@ -51,6 +52,7 @@ function FailedTransactionChart({
   filters,
 }: {
   transactionType: string;
+  transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
@@ -124,6 +126,7 @@ function FailedTransactionChart({
       }),
     },
   ];
+  const showTransactionTypeSelect = setTransactionType && transactionTypes;
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -141,10 +144,11 @@ function FailedTransactionChart({
           <EuiFlexItem grow={false}>
             <EuiIconTip content={errorRateI18n} position="right" />
           </EuiFlexItem>
-          {setTransactionType && (
+          {showTransactionTypeSelect && (
             <EuiFlexItem grow={false}>
               <TransactionTypeSelect
                 transactionType={transactionType}
+                transactionTypes={transactionTypes}
                 setTransactionType={setTransactionType}
               />
             </EuiFlexItem>
