@@ -25,7 +25,7 @@ export function createOverviewPanelAction(
   return {
     id: ADD_SLO_OVERVIEW_ACTION_ID,
     grouping: COMMON_SLO_GROUPING,
-    getIconType: () => 'visLine',
+    getIconType: () => 'visGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
