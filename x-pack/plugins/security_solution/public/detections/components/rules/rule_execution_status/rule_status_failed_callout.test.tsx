@@ -48,7 +48,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper: FC<PropsWithChildren> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}

@@ -17,7 +17,7 @@ import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prom
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
-export const ConnectorSyncRulesForm: FC<PropsWithChildren> = ({ children }) => {
+export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { saveDraftFilteringRules, setIsEditing } = useActions(ConnectorFilteringLogic);
   const { hasJsonValidationError, isEditing, isLoading } = useValues(ConnectorFilteringLogic);
 
