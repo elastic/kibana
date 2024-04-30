@@ -21,13 +21,8 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
-const EmbeddableESQLFieldStatsTableWrapper = ({
-  onTableUpdate,
-  ...props
-}: {
-  props: ESQLDataVisualizerGridEmbeddableState;
-  onTableUpdate?: (ouput: any) => void;
-}) => {
+const EmbeddableESQLFieldStatsTableWrapper = (props: ESQLDataVisualizerGridEmbeddableState) => {
+  const { onTableUpdate, ...state } = props;
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 
@@ -48,11 +43,11 @@ const EmbeddableESQLFieldStatsTableWrapper = ({
     overallStatsProgress,
     setLastRefresh,
     getItemIdToExpandedRowMap,
-  } = useESQLDataVisualizerData(props, dataVisualizerListState);
+  } = useESQLDataVisualizerData(state, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
-  }, [props?.lastReloadRequestTime, setLastRefresh]);
+  }, [state?.lastReloadRequestTime, setLastRefresh]);
 
   if (progress === 100 && configs.length === 0) {
     return <EmbeddableNoResultsEmptyPrompt />;
@@ -64,7 +59,7 @@ const EmbeddableESQLFieldStatsTableWrapper = ({
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
-      showPreviewByDefault={props?.showPreviewByDefault}
+      showPreviewByDefault={state?.showPreviewByDefault}
       onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}

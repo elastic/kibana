@@ -18,7 +18,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
-  FieldStatisticsTableEmbeddableState,
+  FieldStatisticTableEmbeddableProps,
   ESQLDataVisualizerGridEmbeddableState,
 } from './types';
 
@@ -35,27 +35,19 @@ function isESQLFieldStatisticTableEmbeddableState(
 
 function isFieldStatisticTableEmbeddableState(
   input: unknown
-): input is Required<FieldStatisticsTableEmbeddableState, 'dataView'> {
+): input is Required<FieldStatisticTableEmbeddableProps, 'dataView'> {
   return (
     isPopulatedObject(input, ['dataView']) &&
     (!isPopulatedObject(input, ['esql']) || input.esql === false)
   );
 }
 
-const FieldStatisticsWrapperContent = (props: FieldStatisticsTableEmbeddableState) => {
-  const { onTableUpdate, onAddFilter } = props;
-
+const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    return <EmbeddableESQLFieldStatsTableWrapper input={props} onTableUpdate={onTableUpdate} />;
+    return <EmbeddableESQLFieldStatsTableWrapper {...props} />;
   }
   if (isFieldStatisticTableEmbeddableState(props)) {
-    return (
-      <EmbeddableFieldStatsTableWrapper
-        input={props}
-        onTableUpdate={onTableUpdate}
-        onAddFilter={onAddFilter}
-      />
-    );
+    return <EmbeddableFieldStatsTableWrapper {...props} />;
   } else {
     return (
       <EuiEmptyPrompt
@@ -82,7 +74,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticsTableEmbeddableStat
   }
 };
 
-const FieldStatisticsWrapper = (props) => {
+const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
   const coreStart = getCoreStart();
   const {
     data,

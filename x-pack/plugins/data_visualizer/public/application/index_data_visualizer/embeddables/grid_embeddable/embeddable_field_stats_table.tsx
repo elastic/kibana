@@ -20,13 +20,11 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultDataVisualizerListState();
 
-const EmbeddableFieldStatsTableWrapper = ({
-  input,
-  onTableUpdate,
-}: {
-  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>;
-  onTableUpdate?: (ouput: DataVisualizerTableState) => void;
-}) => {
+const EmbeddableFieldStatsTableWrapper = (
+  props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
+) => {
+  const { onTableUpdate, onAddFilter, ...state } = props;
+
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
 
@@ -48,11 +46,11 @@ const EmbeddableFieldStatsTableWrapper = ({
     progress,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(input, dataVisualizerListState);
+  } = useDataVisualizerGridData(state, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
-  }, [input?.lastReloadRequestTime, setLastRefresh]);
+  }, [state?.lastReloadRequestTime, setLastRefresh]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -62,17 +60,17 @@ const EmbeddableFieldStatsTableWrapper = ({
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              dataView={input.dataView}
+              dataView={state.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={input.onAddFilter}
-              totalDocuments={input.totalDocuments}
+              onAddFilter={onAddFilter}
+              totalDocuments={state.totalDocuments}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [input.dataView, searchQueryLanguage, searchString, input.totalDocuments, input.onAddFilter]
+    [state.dataView, searchQueryLanguage, searchString, state.totalDocuments, onAddFilter]
   );
 
   if (progress === 100 && configs.length === 0) {
@@ -85,7 +83,7 @@ const EmbeddableFieldStatsTableWrapper = ({
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
-      showPreviewByDefault={input?.showPreviewByDefault}
+      showPreviewByDefault={state?.showPreviewByDefault}
       onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
