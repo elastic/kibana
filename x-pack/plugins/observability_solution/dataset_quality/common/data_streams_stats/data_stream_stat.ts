@@ -65,10 +65,10 @@ export class DataStreamStat {
 
   public static fromDegradedDocStat({
     degradedDocStat,
-    integrationMap,
+    datasetIntegrationMap,
   }: {
     degradedDocStat: DegradedDocsStat;
-    integrationMap: Record<string, { integration: Integration; title: string }>;
+    datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
   }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
 
@@ -76,9 +76,9 @@ export class DataStreamStat {
       rawName: degradedDocStat.dataset,
       type,
       name: dataset,
-      title: integrationMap[dataset]?.title || dataset,
+      title: datasetIntegrationMap[dataset]?.title || dataset,
       namespace,
-      integration: integrationMap[dataset]?.integration,
+      integration: datasetIntegrationMap[dataset]?.integration,
       degradedDocs: {
         percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,

@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
+import { has } from 'lodash';
 import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -193,6 +194,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
+    config: { enableTogglingDataRetention },
   } = useAppContext();
 
   const { form } = useForm({
@@ -216,6 +218,16 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
     if (!isValid) {
       return;
+    }
+
+    // When enableTogglingDataRetention is disabled (ie: serverless) we don't mount
+    // the dataRetentionEnabled field in the UI, which means that the form state for
+    // this field regardless if it has defaultValue or if its set with form.setValue.
+    // This seems to be a design decision from the formlib and there doesnt seem to
+    // be a way around it AFAICT.
+    // So when that happens we want to make sure that the dataRetention is always enabled.
+    if (!has(data, 'dataRetentionEnabled')) {
+      data.dataRetentionEnabled = true;
     }
 
     return updateDataRetention(dataStreamName, data).then(({ data: responseData, error }) => {
@@ -273,11 +285,13 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
-          <UseField
-            path="dataRetentionEnabled"
-            component={ToggleField}
-            data-test-subj="dataRetentionEnabledField"
-          />
+          {enableTogglingDataRetention && (
+            <UseField
+              path="dataRetentionEnabled"
+              component={ToggleField}
+              data-test-subj="dataRetentionEnabledField"
+            />
+          )}
 
           <UseField
             path="dataRetention"
@@ -297,14 +311,19 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             componentProps={{
               fullWidth: false,
               euiFieldProps: {
-                disabled: formData.infiniteRetentionPeriod || !formData.dataRetentionEnabled,
+                disabled:
+                  formData.infiniteRetentionPeriod ||
+                  (!formData.dataRetentionEnabled && enableTogglingDataRetention),
                 'data-test-subj': `dataRetentionValue`,
                 min: 1,
                 append: (
                   <UnitField
                     path="timeUnit"
                     options={timeUnits}
-                    disabled={formData.infiniteRetentionPeriod || !formData.dataRetentionEnabled}
+                    disabled={
+                      formData.infiniteRetentionPeriod ||
+                      (!formData.dataRetentionEnabled && enableTogglingDataRetention)
+                    }
                     euiFieldProps={{
                       'data-test-subj': 'timeUnit',
                       'aria-label': i18n.translate(
@@ -326,7 +345,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             data-test-subj="infiniteRetentionPeriod"
             componentProps={{
               euiFieldProps: {
-                disabled: !formData.dataRetentionEnabled,
+                disabled: !formData.dataRetentionEnabled && enableTogglingDataRetention,
               },
             }}
           />
