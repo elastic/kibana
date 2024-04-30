@@ -8,8 +8,13 @@
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { getTopLevelUrlCompleteComponents } from '../../../../lib/kb';
-import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+import {
+  getEndpointBodyCompleteComponents,
+  getGlobalAutocompleteComponents,
+  getTopLevelUrlCompleteComponents,
+  getUnmatchedEndpointComponents,
+} from '../../../../lib/kb';
+import { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import { constructUrl } from '../../../../lib/es';
 import type { DevToolsVariable } from '../../../components';
 import { EditorRequest } from './monaco_editor_actions_provider';
@@ -392,4 +397,482 @@ const parseUrlTokens = (
     });
   }
   return { urlPathTokens, urlParamsTokens };
+};
+
+/*
+ * This function returns an array of completion items for the request body params
+ */
+export const getBodyCompletionItems = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  requestStartLineNumber: number
+): monaco.languages.CompletionItem[] => {
+  const { lineNumber, column } = position;
+
+  // get the content on the method+url line
+  const lineContent = model.getLineContent(requestStartLineNumber);
+  // get the method and previous url parts for context
+  const { method, urlPathTokens } = parseLineContent(lineContent);
+  urlPathTokens.push(endOfUrlToken);
+  const context = populateContextForMethodAndUrl(method, urlPathTokens);
+
+  // get the content of the request body up until this position
+  const bodyRange: monaco.IRange = {
+    startLineNumber: requestStartLineNumber + 1,
+    startColumn: 1,
+    endLineNumber: lineNumber,
+    endColumn: column,
+  };
+  const bodyContent = model.getValueInRange(bodyRange);
+
+  const bodyTokenPath = getBodyTokenPath(bodyContent);
+  // needed for scope linking + global term resolving
+  context.endpointComponentResolver = getEndpointBodyCompleteComponents;
+  context.globalComponentResolver = getGlobalAutocompleteComponents;
+  let components: unknown;
+  if (context.endpoint) {
+    components = context.endpoint.bodyAutocompleteRootComponents;
+  } else {
+    components = getUnmatchedEndpointComponents();
+  }
+  populateContext(bodyTokenPath, context, undefined, true, components);
+
+  if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
+    const wordUntilPosition = model.getWordUntilPosition(position);
+    const range = {
+      startLineNumber: position.lineNumber,
+      // replace the whole word with the suggestion
+      startColumn: wordUntilPosition.startColumn,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    };
+    return (
+      context.autoCompleteSet
+        // filter autocomplete items without a name
+        .filter(({ name }) => Boolean(name))
+        // map autocomplete items to completion items
+        .map((item) => {
+          return {
+            label: item.name!,
+            insertText: getInsertText(item),
+            detail: item.meta ?? paramDetailLabel,
+            // the kind is only used to configure the icon
+            kind: monaco.languages.CompletionItemKind.Constant,
+            range,
+          };
+        })
+    );
+  }
+  return [];
+};
+
+const getInsertText = (item: ResultTerm): string => {
+  return `${item.name}`;
+};
+
+const isNewLine = (char: string): boolean => {
+  return char === '\n';
+};
+const isDoubleQuote = (char: string): boolean => {
+  return char === '"';
+};
+const isColon = (char: string): boolean => {
+  return char === ':';
+};
+const isComma = (char: string): boolean => {
+  return char === ',';
+};
+const isHashChar = (char: string): boolean => {
+  return char === '#';
+};
+const isSlash = (char: string): boolean => {
+  return char === '/';
+};
+const isStar = (char: string): boolean => {
+  return char === '*';
+};
+const isPropertyName = (token: string): boolean => {
+  // we only have {, [ or property name in tokens
+  return token !== '{' && token !== '[';
+};
+const isTripleQuote = (char1: string, char2: string, char3: string): boolean => {
+  return isDoubleQuote(char1) && isDoubleQuote(char2) && isDoubleQuote(char3);
+};
+const numberStartRegex = /[-\d]/;
+const digitRegex = /[\d]/;
+const isNumberStartChar = (char: string): boolean => {
+  return numberStartRegex.test(char);
+};
+const isMinusSign = (char: string): boolean => {
+  return char === '-';
+};
+const isDigit = (char: string): boolean => {
+  return digitRegex.test(char);
+};
+const isDot = (char: string): boolean => {
+  return char === '.';
+};
+const isENotation = (char: string): boolean => {
+  return char === 'e' || char === 'E';
+};
+const isKeywordChar = (char: string): boolean => {
+  // null, true or false
+  return char === 'n' || char === 't' || char === 'f';
+};
+export const getBodyTokenPath = (value: string): string[] => {
+  let currentToken = '';
+  const tokens = [];
+  let index = 0;
+  let char = value.charAt(index);
+  const next = () => {
+    index++;
+    char = value.charAt(index);
+  };
+  const peek = (offset: number): string => {
+    return value.charAt(index + offset);
+  };
+  const skipWhitespace = () => {
+    while (whitespacesRegex.test(char)) {
+      next();
+    }
+  };
+  const skipUntilAfterNewLine = () => {
+    while (char && !isNewLine(char)) {
+      next();
+    }
+    // skip the new line
+    if (isNewLine(char)) {
+      next();
+    }
+  };
+  const skipComments = () => {
+    // # comment
+    if (isHashChar(char)) {
+      // first skip #
+      next();
+      skipUntilAfterNewLine();
+    } else if (
+      // // comment
+      isSlash(char) &&
+      isSlash(peek(1))
+    ) {
+      // first skip //
+      next();
+      next();
+      skipUntilAfterNewLine();
+    } else if (
+      // multi line comment starting with /*
+      isSlash(char) &&
+      isStar(peek(1))
+    ) {
+      next();
+      next();
+      // skip until closing */ is found
+      while (char && !(isStar(char) && isSlash(peek(1)))) {
+        next();
+      }
+      if (isStar(char) && isSlash(peek(1))) {
+        next();
+        next();
+      } else {
+        throw new Error('Not able to parse multi-line comment');
+      }
+    }
+  };
+  const parseString = () => {
+    // first check if it's a triple quote
+    if (isTripleQuote(char, peek(1), peek(2))) {
+      // skip the opening triple quote
+      next();
+      next();
+      next();
+      // skip to the next triple quote
+      while (char && !isTripleQuote(char, peek(1), peek(2))) {
+        next();
+      }
+      if (isTripleQuote(char, peek(1), peek(2))) {
+        // skip the closing triple quote
+        next();
+        next();
+        next();
+      } else {
+        throw new Error('Missing closing triple quote');
+      }
+    } else if (isDoubleQuote(char)) {
+      // skip the opening double quote
+      next();
+      while (char && !isDoubleQuote(char)) {
+        next();
+      }
+      if (isDoubleQuote(char)) {
+        // skip the closing double quote
+        next();
+      } else {
+        throw new Error('Missing closing double quote');
+      }
+    } else {
+      throw new Error('Not able to parse as string');
+    }
+  };
+  const parseNumber = () => {
+    // check the first char
+    if (!isNumberStartChar(char)) {
+      throw new Error('Not able to parse as number');
+    }
+    if (isMinusSign(char)) {
+      next();
+    }
+    // check that there is at least 1 digit
+    if (!isDigit(char)) {
+      throw new Error('Not able to parse as number');
+    }
+    // skip digits
+    while (isDigit(char)) {
+      next();
+    }
+    // optionally there is a dot
+    if (isDot(char)) {
+      next();
+      // needs at least 1 digit after the dot
+      if (!isDigit(char)) {
+        throw new Error('Missing digits after a dot');
+      }
+      while (isDigit(char)) {
+        next();
+      }
+    }
+    // optionally there is E notation
+    if (isENotation(char)) {
+      next();
+      // needs at least 1 digit after e or E
+      if (!isDigit(char)) {
+        throw new Error('Missing digits after E notation');
+      }
+      while (isDigit(char)) {
+        next();
+      }
+    }
+    // number parsing is complete
+  };
+  const parseKeyword = () => {
+    switch (char) {
+      case 'n': {
+        if (peek(1) === 'u' && peek(2) === 'l' && peek(3) === 'l') {
+          next();
+          next();
+          next();
+          next();
+        } else {
+          throw new Error('Not able to parse as null');
+        }
+        break;
+      }
+      case 't': {
+        if (peek(1) === 'r' && peek(2) === 'u' && peek(3) === 'e') {
+          next();
+          next();
+          next();
+          next();
+        } else {
+          throw new Error('Not able to parse as true');
+        }
+        break;
+      }
+      case 'f': {
+        if (peek(1) === 'a' && peek(2) === 'l' && peek(3) === 's' && peek(3) === 'e') {
+          next();
+          next();
+          next();
+          next();
+          next();
+        } else {
+          throw new Error('Not able to parse as false');
+        }
+        break;
+      }
+      default: {
+        throw new Error('Not able to parse as null, true or false');
+      }
+    }
+  };
+  const parsePropertyName = () => {
+    if (!isDoubleQuote(char)) {
+      throw new Error('Missing " at the start of string');
+    }
+    next();
+    let propertyName = '';
+    while (char && !isDoubleQuote(char)) {
+      propertyName = propertyName + char;
+      next();
+    }
+    if (!isDoubleQuote(char)) {
+      throw new Error('Missing " at the end of string');
+    }
+    next();
+    if (!propertyName) {
+      throw new Error('Empty string used as property name');
+    }
+    return propertyName;
+  };
+
+  try {
+    while (char) {
+      // the value in currentToken determines the state of the parser
+      if (!currentToken) {
+        // the start of the object
+        skipWhitespace();
+        skipComments();
+        // look for opening curly bracket
+        if (char === '{') {
+          tokens.push(char);
+          currentToken = char;
+          next();
+        } else {
+          throw new Error('Missing { at object start');
+        }
+      } else if (
+        // inside an object
+        currentToken === '{'
+      ) {
+        skipWhitespace();
+        skipComments();
+        // inspect the current char: expecting a property name or a closing }
+        if (isDoubleQuote(char)) {
+          // property name: parse the string and add to tokens
+          const propertyName = parsePropertyName();
+          console.log(`token: ${currentToken} char: ${char} name: ${propertyName}`);
+          // allow whitespace
+          skipWhitespace();
+          // expecting a colon, otherwise the parser fails
+          if (!isColon(char)) {
+            throw new Error('Not able to parse');
+          }
+          // add the property name to the tokens
+          tokens.push(propertyName);
+          currentToken = propertyName;
+          next();
+        } else if (char === '}') {
+          // empty object: remove the corresponding opening { from tokens
+          tokens.pop();
+          currentToken = tokens[tokens.length - 1];
+          next();
+          skipWhitespace();
+          // check if the empty object was used as a property value
+          if (isPropertyName(currentToken)) {
+            // expecting a comma, otherwise the parser fails
+            if (!isComma(char)) {
+              throw new Error('Not able to parse');
+            }
+            // after finding the comma, the property value is parsed, the property name can be removed from scope
+            tokens.pop();
+            currentToken = tokens[tokens.length - 1];
+            next();
+          }
+        } else {
+          throw new Error('Not able to parse');
+        }
+      } else if (
+        // inside an array
+        currentToken === '['
+      ) {
+        skipWhitespace();
+        skipComments();
+
+        // inspect the current char: expect a closing ] or a valid value
+        if (char === ']') {
+          // an empty array
+          tokens.pop();
+          currentToken = tokens[tokens.length - 1];
+          next();
+          skipWhitespace();
+          // check if empty array was used as a property value
+          if (isPropertyName(currentToken)) {
+            // expecting a comma, otherwise the parser fails
+            if (!isComma(char)) {
+              throw new Error('Not able to parse');
+            }
+            // after finding the comma, the property value is parsed, the property name can be removed from scope
+            tokens.pop();
+            currentToken = tokens[tokens.length - 1];
+            next();
+          }
+        } else {
+          // parsing array items
+
+          // object or array: add to tokens
+          if (char === '{' || char === '[') {
+            tokens.push(char);
+            currentToken = char;
+            next();
+          } else {
+            // simple values
+            if (isDoubleQuote(char)) {
+              parseString();
+            } else if (isNumberStartChar(char)) {
+              parseNumber();
+            } else if (isKeywordChar(char)) {
+              parseKeyword();
+            } else {
+              throw new Error('Not able to parse');
+            }
+            // after parsing a simple value, expect a comma or a closing ]
+            if (isComma(char)) {
+              next();
+            } else if (char === ']') {
+              tokens.pop();
+              currentToken = tokens[tokens.length - 1];
+              next();
+              skipWhitespace();
+              // check if empty array was used as a property value
+              if (isPropertyName(currentToken)) {
+                // expecting a comma, otherwise the parser fails
+                if (!isComma(char)) {
+                  throw new Error('Not able to parse');
+                }
+                // after finding the comma, the property value is parsed, the property name can be removed from scope
+                tokens.pop();
+                currentToken = tokens[tokens.length - 1];
+                next();
+              }
+            }
+          }
+        }
+      } else if (
+        // parsing property value
+        isPropertyName(currentToken)
+      ) {
+        skipWhitespace();
+        skipComments();
+        if (char === '{' || char === '[') {
+          tokens.push(char);
+          currentToken = char;
+          next();
+        } else {
+          // simple values
+          if (isDoubleQuote(char)) {
+            parseString();
+          } else if (isNumberStartChar(char)) {
+            parseNumber();
+          } else if (isKeywordChar(char)) {
+            parseKeyword();
+          } else {
+            throw new Error('Not able to parse');
+          }
+          // after parsing a simple value, expect a comma
+          if (!isComma(char)) {
+            throw new Error('Not able to parse');
+          }
+          // after comma, this property name is parsed and can be removed from tokens
+          tokens.pop();
+          currentToken = tokens[tokens.length - 1];
+          next();
+        }
+      } else {
+        throw new Error('Not able to parse');
+      }
+    }
+    return tokens;
+  } catch (e) {
+    return tokens;
+  }
 };
