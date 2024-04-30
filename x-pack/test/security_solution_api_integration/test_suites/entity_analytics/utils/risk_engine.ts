@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -531,7 +531,7 @@ export const riskEngineRouteHelpersFactory = (
       console.log('res.body', res.body);
     }
 
-    expect(res.status).toBe(expectStatusCode);
+    expect(res.status).equal(expectStatusCode);
 
     return res;
   },
