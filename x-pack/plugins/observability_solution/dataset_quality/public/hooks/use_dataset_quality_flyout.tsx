@@ -6,7 +6,6 @@
  */
 
 import { useSelector } from '@xstate/react';
-import { useState, useEffect } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -17,23 +16,13 @@ export const useDatasetQualityFlyout = () => {
 
   const { service } = useDatasetQualityContext();
 
-  const flyoutState = useSelector(service, (state) => state.context.flyout);
-  const [
-    {
-      dataset: dataStreamStat,
-      datasetSettings: dataStreamSettings,
-      datasetDetails: dataStreamDetails,
-      insightsTimeRange,
-      breakdownField,
-    },
-    setFlyoutState,
-  ] = useState(flyoutState);
-
-  useEffect(() => {
-    if (flyoutState) {
-      setFlyoutState(flyoutState);
-    }
-  }, [flyoutState]);
+  const {
+    dataset: dataStreamStat,
+    datasetSettings: dataStreamSettings,
+    datasetDetails: dataStreamDetails,
+    insightsTimeRange,
+    breakdownField,
+  } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
@@ -51,5 +40,6 @@ export const useDatasetQualityFlyout = () => {
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,
     loadingState,
+    flyoutLoading: !dataStreamStat,
   };
 };
