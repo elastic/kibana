@@ -42,27 +42,6 @@ export function GroupSloView({
     };
   }, [reloadSubject]);
 
-  // useEffect(() => {
-  //   const subs = reloadGroupSubject?.subscribe((input) => {
-  //     if (input) {
-  //       const nGroupBy = input?.groupFilters?.groupBy ?? groupBy;
-  //       setGroupBy(nGroupBy);
-
-  //       const nKqlInput = input?.groupFilters?.kqlQuery ?? kqlQuery;
-  //       setKqlQuery(nKqlInput);
-
-  //       const nFilters = input?.groupFilters?.filters ?? filters;
-  //       setFilters(nFilters);
-
-  //       const nGroups = input?.groupFilters?.groups ?? groups;
-  //       setGroups(nGroups);
-  //     }
-  //     setLastRefreshTime(Date.now());
-  //   });
-  //   return () => {
-  //     subs?.unsubscribe();
-  //   };
-  // }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject]);
   return (
     <GroupView
       sloView={sloView}

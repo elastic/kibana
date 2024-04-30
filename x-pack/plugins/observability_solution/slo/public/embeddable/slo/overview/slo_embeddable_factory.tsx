@@ -133,6 +133,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               return (
                 <Wrapper>
                   <EuiFlexGroup
+                    data-shared-item=""
                     justifyContent="flexEnd"
                     wrap
                     css={`
