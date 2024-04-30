@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -16,6 +18,7 @@ import { getDeferredPromise, prefixedOutputLogger } from '../../common/utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 
 interface EmulatorServerOptions {
+  services?: Record<string, any>;
   logger?: ToolingLog;
   logPrefix?: string;
   port?: number;
@@ -36,6 +39,7 @@ export class EmulatorServer {
     this.server = Hapi.server({
       port: this.options.port ?? 0,
     });
+    this.server.app.services = this.options.services ?? {};
     this.stoppedDeferred = getDeferredPromise();
     this.stoppedDeferred.resolve();
 
@@ -53,7 +57,12 @@ export class EmulatorServer {
     this.server.route({
       method: 'GET',
       path: '/_status',
-      handler: async () => ({ status: 'ok' }),
+      handler: async (req) => ({
+        status: 'ok',
+        started: new Date(req.server.info.started).toISOString(),
+        uri: req.server.info.uri,
+        plugins: Object.keys(req.server.registrations),
+      }),
     });
   }
 
@@ -87,6 +96,7 @@ export class EmulatorServer {
       },
       {
         routes: {
+          // All plugin routes are namespaced by `prefix` or the plugin name if `prefix` not defined
           prefix: prefix || `/${options.name}`,
         },
       }

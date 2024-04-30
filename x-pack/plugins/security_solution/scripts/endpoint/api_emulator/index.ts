@@ -7,6 +7,7 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { createRuntimeServices } from '../common/stack_services';
 import { getSentinelOneEmulator } from './emulators/sentinelone';
 import { handleProcessInterruptions } from '../common/nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -20,13 +21,14 @@ export const cli = () => {
     {
       description: `Start external API emulator`,
       flags: {
-        string: ['kibana', 'elastic', 'username', 'password'],
+        string: ['kibana', 'elastic', 'username', 'password', 'apiKey'],
         boolean: ['asSuperuser'],
         default: {
           kibana: 'http://127.0.0.1:5601',
           elasticsearch: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
+          apiKey: '',
           asSuperuser: false,
           port: 0,
         },
@@ -38,6 +40,8 @@ export const cli = () => {
                             **IMPORTANT:** if 'asSuperuser' option is not used, then the
                             user defined here MUST have 'superuser' AND 'kibana_system' roles
         --password          User name Password (Default: changeme)
+        --apiKey            An API key to use for communication with Kibana/Elastisearch. Would be
+                            used instead of username/password
         --asSuperuser       If defined, then a Security super user will be created using the
                             the credentials defined via 'username' and 'password' options. This
                             new user will then be used to run this utility.
@@ -50,22 +54,40 @@ export const cli = () => {
 };
 
 const cliRunner: RunFn = async (cliContext) => {
-  // TODO:PT remove options if we are not going to need/use them
-
-  const cliOptions = {
-    username: cliContext.flags.username as string,
-    password: cliContext.flags.password as string,
-    kibanaUrl: cliContext.flags.kibana as string,
-    elasticsearchUrl: cliContext.flags.elasticsearch as string,
-    fleetServerUrl: cliContext.flags.fleetServer as string | undefined,
-    asSuperuser: cliContext.flags.asSuperuser as boolean,
-    log: cliContext.log,
-    port: Number(cliContext.flags.port as string),
-  };
+  const username = cliContext.flags.username as string;
+  const password = cliContext.flags.password as string;
+  const apiKey = cliContext.flags.apiKey as string;
+  const kibanaUrl = cliContext.flags.kibana as string;
+  const elasticsearchUrl = cliContext.flags.elasticsearch as string;
+  const asSuperuser = cliContext.flags.asSuperuser as boolean;
+  const log = cliContext.log;
+  const port = Number(cliContext.flags.port as string);
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
 
-  const emulator = new EmulatorServer({ logger: cliOptions.log, port: cliOptions.port });
+  const { kbnClient, esClient } = await createRuntimeServices({
+    username,
+    password,
+    apiKey,
+    kibanaUrl,
+    elasticsearchUrl,
+    asSuperuser,
+    log,
+    noCertForSsl: true,
+  });
+
+  const appServices = {
+    get kbnClient() {
+      return kbnClient;
+    },
+    get esClient() {
+      return esClient;
+    },
+    get logger() {
+      return log;
+    },
+  };
+  const emulator = new EmulatorServer({ logger: log, port, services: appServices });
   let stopping: Promise<void> | undefined;
 
   await handleProcessInterruptions(

@@ -14,8 +14,12 @@ export const getSentinelOneEmulator = (): EmulatorServerPlugin => {
       router.route({
         path: '/activities',
         method: 'GET',
-        handler: async () => {
-          return 'test: activities from S1';
+        handler: async (req) => {
+          return {
+            message: `test: activities from S1. req.app: ${Object.keys(
+              req.server.app.services ?? {}
+            ).join(' | ')}`,
+          };
         },
       });
     },
