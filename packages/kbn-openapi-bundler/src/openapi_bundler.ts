@@ -53,9 +53,9 @@ export const bundle = async ({
 
   logger.success(`Processed ${resolvedDocuments.length} schemas`);
 
-  const blankOasFactory = (version: string) =>
-    createBlankOpenApiDocument({
-      version,
+  const blankOasFactory = (oasVersion: string, apiVersion: string) =>
+    createBlankOpenApiDocument(oasVersion, {
+      version: apiVersion,
       title: specInfo?.title ?? 'Bundled OpenAPI specs',
       ...omitBy(
         {

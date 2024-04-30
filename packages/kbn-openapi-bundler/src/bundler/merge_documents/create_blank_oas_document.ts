@@ -8,9 +8,12 @@
 
 import { OpenAPIV3 } from 'openapi-types';
 
-export function createBlankOpenApiDocument(info: OpenAPIV3.InfoObject): OpenAPIV3.Document {
+export function createBlankOpenApiDocument(
+  oasVersion: string,
+  info: OpenAPIV3.InfoObject
+): OpenAPIV3.Document {
   return {
-    openapi: '3.0.3',
+    openapi: oasVersion,
     info,
     servers: [
       {

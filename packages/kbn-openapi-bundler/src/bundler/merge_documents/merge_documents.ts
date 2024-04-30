@@ -15,13 +15,14 @@ import { mergeSharedComponents } from './merge_shared_components';
 
 export async function mergeDocuments(
   bundledDocuments: BundledDocument[],
-  blankOasFactory: (version: string) => OpenAPIV3.Document
+  blankOasFactory: (oasVersion: string, apiVersion: string) => OpenAPIV3.Document
 ): Promise<Map<string, OpenAPIV3.Document>> {
   const bundledDocumentsByVersion = splitByVersion(bundledDocuments);
   const mergedByVersion = new Map<string, OpenAPIV3.Document>();
 
-  for (const [version, singleVersionBundledDocuments] of bundledDocumentsByVersion.entries()) {
-    const mergedDocument = blankOasFactory(version);
+  for (const [apiVersion, singleVersionBundledDocuments] of bundledDocumentsByVersion.entries()) {
+    const oasVersion = extractOasVersion(singleVersionBundledDocuments);
+    const mergedDocument = blankOasFactory(oasVersion, apiVersion);
 
     mergedDocument.paths = mergePaths(singleVersionBundledDocuments);
     mergedDocument.components = {
@@ -58,4 +59,37 @@ function splitByVersion(bundledDocuments: BundledDocument[]): Map<string, Bundle
   }
 
   return splitBundledDocuments;
+}
+
+function extractOasVersion(bundledDocuments: BundledDocument[]): string {
+  if (bundledDocuments.length === 0) {
+    throw new Error('Empty bundled document list');
+  }
+
+  let version = bundledDocuments[0].document.openapi as string;
+
+  // Automatically promote to the recent OAS 3.0 version which is 3.0.3
+  // 3.0.3 is the version used in the specification https://swagger.io/specification/v3/
+  if (version < '3.0.3') {
+    version = '3.0.3';
+  }
+
+  for (let i = 1; i < bundledDocuments.length; ++i) {
+    if (!areOasVersionsEqual(bundledDocuments[i].document.openapi as string, version)) {
+      throw new Error(
+        `OpenAPI specs must have the same OpenAPI versions, conflicting versions are ${chalk.blue(
+          bundledDocuments[i].document.openapi
+        )} and ${chalk.blue(version)}`
+      );
+    }
+  }
+
+  return version;
+}
+
+/**
+ * Tells if versions are equal by comparing only major and minor OAS version parts
+ */
+function areOasVersionsEqual(versionA: string, versionB: string): boolean {
+  return versionA.substring(0, 3) === versionB.substring(0, 3);
 }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { bundle } from './openapi_bundler';
@@ -36,11 +37,12 @@ describe('OpenAPI Bundler', () => {
     );
   });
 
-  it('bundles spec with different OpenAPI versions', async () => {
-    await bundleFolder('different_openapi_versions');
-    await expectBundleToMatchFile(
-      DEFAULT_BUNDLED_FILE_PATH,
-      join('different_openapi_versions', 'expected.yaml')
+  it('DOES NOT bundle spec with different OpenAPI versions', async () => {
+    await expectBundlingError(
+      'different_openapi_versions',
+      `OpenAPI specs must have the same OpenAPI versions, conflicting versions are ${chalk.blue(
+        '3.1.0'
+      )} and ${chalk.blue('3.0.3')}`
     );
   });
 
@@ -73,13 +75,13 @@ describe('OpenAPI Bundler', () => {
       await expectBundleToMatchFile(DEFAULT_BUNDLED_FILE_PATH, join(folder, 'expected.yaml'));
     });
 
-    it('fails to bundle external conflicting references encountered in on spec file', async () => {
+    it('DOES NOT bundle external conflicting references encountered in on spec file', async () => {
       const folder = join('bundle_refs', 'conflicting_refs');
 
       await expectBundlingError(folder, /\/components\/schemas\/ConflictTestSchema/);
     });
 
-    it('fails to bundle conflicting references encountered in separate specs', async () => {
+    it('DOES NOT bundle conflicting references encountered in separate specs', async () => {
       const folder = join('bundle_refs', 'conflicting_refs_in_different_specs');
 
       await expectBundlingError(folder, /\/components\/schemas\/ConflictTestSchema/);
