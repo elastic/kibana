@@ -183,7 +183,9 @@ export function RuleDetailsPage() {
     rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
-      ? [rule.consumer as AlertConsumers]
+      ? Array.isArray(rule.consumer)
+        ? (rule.consumer as AlertConsumers)
+        : [rule.consumer as AlertConsumers]
       : [];
 
   const ruleStatusMessage =

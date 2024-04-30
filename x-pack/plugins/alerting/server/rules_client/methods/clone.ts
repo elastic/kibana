@@ -61,7 +61,7 @@ export async function clone<Params extends RuleTypeParams = never>(
    */
   if (
     isDetectionEngineAADRuleType(ruleSavedObject) ||
-    ruleSavedObject.attributes.consumer === AlertConsumers.SIEM
+    ruleSavedObject.attributes.consumer.includes(AlertConsumers.SIEM)
   ) {
     throw Boom.badRequest(
       'The clone functionality is not enable for rule who belongs to security solution'

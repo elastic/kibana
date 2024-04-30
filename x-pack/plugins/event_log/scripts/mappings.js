@@ -306,4 +306,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'rule.author',
   'kibana.space_ids',
   'kibana.alert.maintenance_window_ids',
+  'kibana.alert.rule.consumer',
 ];

@@ -1019,7 +1019,7 @@ export const RulesList = ({
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd
-              consumer={ALERTING_FEATURE_ID}
+              consumer={[ALERTING_FEATURE_ID]}
               onClose={() => {
                 setRuleFlyoutVisibility(false);
               }}

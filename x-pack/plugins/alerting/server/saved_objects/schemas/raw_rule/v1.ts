@@ -220,7 +220,7 @@ export const alertDelaySchema = schema.object({
 export const rawRuleSchema = schema.object({
   name: schema.string(),
   enabled: schema.boolean(),
-  consumer: schema.string(),
+  consumer: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   tags: schema.arrayOf(schema.string()),
   alertTypeId: schema.string(),
   apiKeyOwner: schema.nullable(schema.string()),

@@ -170,7 +170,7 @@ export async function find<Params extends RuleTypeParams = never>(
     );
 
     // collect SIEM rule for further formatting legacy actions
-    if (attributes.consumer === AlertConsumers.SIEM) {
+    if (attributes.consumer.includes(AlertConsumers.SIEM)) {
       siemRules.push(rule);
     }
 

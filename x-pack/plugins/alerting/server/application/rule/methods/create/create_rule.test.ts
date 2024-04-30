@@ -113,7 +113,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateRuleParams
     name: 'abc',
     tags: ['foo'],
     alertTypeId: '123',
-    consumer: 'bar',
+    consumer: ['bar'],
     schedule: { interval: '1m' },
     throttle: null,
     notifyWhen: null,

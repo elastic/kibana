@@ -323,7 +323,10 @@
                             "properties": {
                                 "consumer": {
                                     "type": "keyword",
-                                    "ignore_above": 1024
+                                    "ignore_above": 1024,
+                                    "meta": {
+                                        "isArray": "true"
+                                    }
                                 },
                                 "execution": {
                                     "properties": {

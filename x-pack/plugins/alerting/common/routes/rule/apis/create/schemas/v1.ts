@@ -59,7 +59,7 @@ export const createBodySchema = schema.object({
   name: schema.string(),
   rule_type_id: schema.string(),
   enabled: schema.boolean({ defaultValue: true }),
-  consumer: schema.string(),
+  consumer: schema.arrayOf(schema.string()),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationV1 }))),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),

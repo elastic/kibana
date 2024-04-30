@@ -861,7 +861,7 @@ describe('AlertingAuthorization', () => {
             consumer: 'consumer',
           },
         });
-      expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
+      expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', ['myApp'], 'rule')).not.toThrow();
       expect(filter).toEqual(undefined);
     });
     test('ensureRuleTypeIsAuthorized is no-op when there is no authorization api', async () => {
@@ -882,7 +882,7 @@ describe('AlertingAuthorization', () => {
           },
         }
       );
-      ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
+      ensureRuleTypeIsAuthorized('someMadeUpType', ['myApp'], 'rule');
     });
     test('creates a filter based on the privileged types', async () => {
       features.getKibanaFeatures.mockReturnValue([
@@ -1028,7 +1028,7 @@ describe('AlertingAuthorization', () => {
         }
       );
       expect(() => {
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'alert');
+        ensureRuleTypeIsAuthorized('myAppAlertType', ['myOtherApp'], 'alert');
       }).toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized by \\"myOtherApp\\" to find \\"myAppAlertType\\" alert"`
       );
@@ -1092,7 +1092,7 @@ describe('AlertingAuthorization', () => {
         }
       );
       expect(() => {
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
+        ensureRuleTypeIsAuthorized('myAppAlertType', ['myOtherApp'], 'rule');
       }).not.toThrow();
     });
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
@@ -1167,9 +1167,9 @@ describe('AlertingAuthorization', () => {
         }
       );
       expect(() => {
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
-        ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');
-        ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
+        ensureRuleTypeIsAuthorized('myAppAlertType', ['myOtherApp'], 'rule');
+        ensureRuleTypeIsAuthorized('mySecondAppAlertType', ['myOtherApp'], 'rule');
+        ensureRuleTypeIsAuthorized('myAppAlertType', ['myOtherApp'], 'rule');
       }).not.toThrow();
     });
 
@@ -1951,6 +1951,7 @@ describe('AlertingAuthorization', () => {
     });
   });
 
+  // Check these tests
   describe('8.11+', () => {
     let alertAuthorization: AlertingAuthorization;
 
@@ -2410,7 +2411,8 @@ describe('AlertingAuthorization', () => {
                   consumer: 'consumer-field',
                 },
               },
-              new Set(['infrastructure', 'logs'])
+              // Changed in Xavier's PR.
+              { featureIds: new Set(['infrastructure', 'logs']) }
             )
           ).filter
         ).toEqual(
