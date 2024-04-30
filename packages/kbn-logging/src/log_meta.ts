@@ -40,7 +40,7 @@ import {
   EcsUserAgent,
   EcsVulnerability,
   EcsAgent,
-} from '@kbn/ecs';
+} from '@elastic/ecs';
 
 /**
  * Represents the ECS schema with the following reserved keys excluded:

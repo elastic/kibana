@@ -7,25 +7,23 @@
 
 import { EuiPageSectionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ObservabilityLogsExplorerPageTemplate = ({
-  children,
-  pageProps,
-}: React.PropsWithChildren<{
-  pageProps?: EuiPageSectionProps;
-}>) => {
+  pageSectionProps,
+  ...props
+}: LazyObservabilityPageTemplateProps) => {
   const {
     services: { observabilityShared },
   } = useKibanaContextForPlugin();
 
   return (
     <observabilityShared.navigation.PageTemplate
-      pageSectionProps={{ ...pageSectionProps, ...pageProps }}
-    >
-      {children}
-    </observabilityShared.navigation.PageTemplate>
+      pageSectionProps={{ ...defaultPageSectionProps, ...pageSectionProps }}
+      {...props}
+    />
   );
 };
 
@@ -37,7 +35,7 @@ const fullHeightContentStyles = css`
   height: 100%;
 `;
 
-const pageSectionProps: EuiPageSectionProps = {
+const defaultPageSectionProps: EuiPageSectionProps = {
   grow: true,
   paddingSize: 'none',
   contentProps: { css: fullHeightContentStyles },

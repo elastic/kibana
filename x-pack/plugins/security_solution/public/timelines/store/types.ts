@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types';
 import type { RowRendererId } from '../../../common/api/timeline';
 
@@ -37,7 +36,6 @@ export interface TimelineModelSettings {
   defaultColumns: ColumnHeaderOptions[];
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  filterManager?: FilterManager;
   footerText?: string | React.ReactNode;
   loadingText?: string | React.ReactNode;
   queryFields: string[];

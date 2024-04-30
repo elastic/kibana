@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'maintenanceWindows', 'header']);
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   let objectRemover: ObjectRemover;
   const browser = getService('browser');
@@ -52,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Cancelled running maintenance window '${name}'`);
       });
 
@@ -85,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Archived maintenance window '${name}'`);
       });
 
@@ -116,7 +117,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Cancelled and archived running maintenance window '${name}'`);
       });
 
@@ -149,7 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Archived maintenance window '${name}'`);
       });
 
@@ -164,7 +165,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Unarchived maintenance window '${name}'`);
       });
 

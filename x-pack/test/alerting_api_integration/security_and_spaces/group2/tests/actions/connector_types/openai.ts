@@ -267,7 +267,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${genAiActionId}. Connector name: OpenAI. Connector type: .gen-ai`,
           });
         });
@@ -487,7 +487,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               connector_id: genAiActionId,
               message: 'an error occurred while running the action',
               retry: true,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });

@@ -29,6 +29,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 type Handler = RequestHandler<
   unknown,
@@ -106,6 +107,9 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
       tags: ['access:securitySolution'],
+      timeout: {
+        idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
+      },
     },
   };
   const versionConfig = {

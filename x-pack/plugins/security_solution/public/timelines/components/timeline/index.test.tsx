@@ -10,7 +10,6 @@ import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import '../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
@@ -34,7 +33,7 @@ jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content', () => ({
+jest.mock('./tabs', () => ({
   TabsContent: () => <div data-test-subj="tabs-content" />,
 }));
 
@@ -70,6 +69,9 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockDispatch = jest.fn();
+const mockRef = {
+  current: null,
+};
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -95,6 +97,7 @@ describe('StatefulTimeline', () => {
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     timelineId: TimelineId.test,
+    openToggleRef: mockRef,
   };
 
   beforeEach(() => {

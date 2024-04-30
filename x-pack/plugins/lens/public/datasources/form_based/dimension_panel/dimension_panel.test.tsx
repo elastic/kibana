@@ -7,7 +7,8 @@
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React, { ChangeEvent } from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen, act, render, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   EuiComboBox,
@@ -282,6 +283,30 @@ describe('FormBasedDimensionEditor', () => {
     jest.clearAllMocks();
   });
 
+  const renderDimensionPanel = (propsOverrides = {}) => {
+    const Wrapper: React.FC<{
+      children: React.ReactNode;
+    }> = ({ children }) => {
+      return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+    };
+
+    const rtlRender = render(
+      <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    const getVisibleFieldSelectOptions = () => {
+      const optionsList = screen.getByRole('dialog');
+      return within(optionsList)
+        .getAllByRole('option')
+        .map((option) => option.textContent);
+    };
+
+    return { ...rtlRender, getVisibleFieldSelectOptions };
+  };
+
   let wrapper: ReactWrapper | ShallowWrapper;
 
   afterEach(() => {
@@ -293,71 +318,67 @@ describe('FormBasedDimensionEditor', () => {
   it('should call the filterOperations function', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
-    wrapper = mountWithServices(
-      <FormBasedDimensionEditorComponent {...defaultProps} filterOperations={filterOperations} />
-    );
-
+    renderDimensionPanel({ filterOperations });
     expect(filterOperations).toBeCalled();
   });
 
   it('should show field select', () => {
-    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
-
-    expect(getFieldSelectComboBox(wrapper)).toHaveLength(1);
+    renderDimensionPanel();
+    expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
   it('should not show field select on fieldless operation', () => {
-    wrapper = mountWithServices(
-      <FormBasedDimensionEditorComponent
-        {...defaultProps}
-        state={getStateWithColumns({
-          col1: {
-            label: 'Filters',
-            dataType: 'string',
-            isBucketed: false,
+    renderDimensionPanel({
+      state: getStateWithColumns({
+        col1: {
+          label: 'Filters',
+          dataType: 'string',
+          isBucketed: false,
 
-            // Private
-            operationType: 'filters',
-            params: { filters: [] },
-          } as FiltersIndexPatternColumn,
-        })}
-      />
-    );
-
-    expect(getFieldSelectComboBox(wrapper)).toHaveLength(0);
+          // Private
+          operationType: 'filters',
+          params: { filters: [] },
+        } as FiltersIndexPatternColumn,
+      }),
+    });
+    expect(screen.queryByTestId('indexPattern-dimension-field')).not.toBeInTheDocument();
   });
 
   it('should not show any choices if the filter returns false', () => {
-    wrapper = mountWithServices(
-      <FormBasedDimensionEditorComponent
-        {...defaultProps}
-        columnId={'col2'}
-        filterOperations={() => false}
-      />
-    );
-
-    expect(getFieldSelectComboBox(wrapper).prop('options')!).toHaveLength(0);
+    renderDimensionPanel({
+      columnId: 'col2',
+      filterOperations: () => false,
+    });
+    userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
+    expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
 
   it('should list all field names and document as a whole in prioritized order', () => {
-    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
-    const options = getFieldSelectComboBox(wrapper).prop('options');
+    const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
+    const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
+    userEvent.click(comboBoxButton);
 
-    expect(options).toHaveLength(3);
-
-    expect(options![0].label).toEqual('Records');
-    expect(options![1].options!.map(({ label }) => label)).toEqual([
+    const allOptions = [
+      'Records',
       'timestampLabel',
       'bytes',
       'memory',
       'source',
-    ]);
+      // these fields are generated to test the issue #148062 about fields that are using JS Object method names
+      ...Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort(),
+    ];
+    expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // these fields are generated to test the issue #148062 about fields that are using JS Object method names
-    expect(options![2].options!.map(({ label }) => label)).toEqual(
-      Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort()
-    );
+    // keep hitting arrow down to scroll to the next options (react-window only renders visible options)
+    userEvent.type(comboBoxInput, '{ArrowDown}'.repeat(12));
+
+    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(5, 16));
+
+    // press again to go back to the beginning
+    userEvent.type(comboBoxInput, '{ArrowDown}');
+    expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(0, 9));
   });
 
   it('should hide fields that have no data', () => {
@@ -1783,7 +1804,11 @@ describe('FormBasedDimensionEditor', () => {
       });
 
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-      expect(setState.mock.calls[0][0](props.state)).toEqual({
+      let newState = props.state;
+      act(() => {
+        newState = setState.mock.calls[0][0](props.state);
+      });
+      expect(newState).toEqual({
         ...props.state,
         layers: {
           first: {

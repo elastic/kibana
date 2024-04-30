@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash/fp';
 
 import { getDocsCount } from '../../../../helpers';
-import type { IndexToCheck, PatternRollup } from '../../../../types';
+import type { IndexToCheck, MeteringStatsIndex, PatternRollup } from '../../../../types';
 
 export const getIndexToCheck = ({
   indexName,
@@ -54,7 +53,7 @@ export const getIndexDocsCountFromRollup = ({
   indexName: string;
   patternRollup: PatternRollup;
 }): number => {
-  const stats: Record<string, IndicesStatsIndicesStats> | null = patternRollup?.stats ?? null;
+  const stats: Record<string, MeteringStatsIndex> | null = patternRollup?.stats ?? null;
 
   return getDocsCount({
     indexName,

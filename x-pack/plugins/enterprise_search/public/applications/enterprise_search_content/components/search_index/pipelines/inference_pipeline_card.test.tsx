@@ -25,6 +25,7 @@ export const DEFAULT_VALUES: InferencePipeline = {
   pipelineName: 'Sample Processor',
   pipelineReferences: [],
   types: ['pytorch', 'ner'],
+  sourceFields: ['title', 'body'],
 };
 
 const mockValues = { ...DEFAULT_VALUES };
@@ -52,13 +53,13 @@ describe('InferencePipelineCard', () => {
     const wrapper = shallow(<InferencePipelineCard {...values} />);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     // does not render subtitle
-    expect(wrapper.find(EuiText)).toHaveLength(0);
+    expect(wrapper.find(EuiText)).toHaveLength(1);
     const title = wrapper.find(EuiTitle).at(0).children();
     expect(title.text()).toBe(DEFAULT_VALUES.pipelineName);
   });
   it('renders model ID as subtitle', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
-    expect(wrapper.find(EuiText)).toHaveLength(1);
+    expect(wrapper.find(EuiText)).toHaveLength(2);
     const subtitle = wrapper.find(EuiText).at(0).children();
     expect(subtitle.text()).toBe(DEFAULT_VALUES.modelId);
   });
@@ -68,7 +69,7 @@ describe('InferencePipelineCard', () => {
       modelId: '',
     };
     const wrapper = shallow(<InferencePipelineCard {...values} />);
-    expect(wrapper.find(EuiText)).toHaveLength(1);
+    expect(wrapper.find(EuiText)).toHaveLength(2);
     const subtitle = wrapper.find(EuiText).at(0).children();
     expect(subtitle.text()).toBe(MODEL_REDACTED_VALUE);
   });
@@ -85,6 +86,20 @@ describe('InferencePipelineCard', () => {
     };
     const wrapper = shallow(<InferencePipelineCard {...values} />);
     expect(wrapper.find(MLModelTypeBadge)).toHaveLength(0);
+  });
+  it('renders source fields', () => {
+    const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
+    expect(wrapper.find(EuiText)).toHaveLength(2);
+    const sourceFields = wrapper.find(EuiText).at(1).children();
+    expect(sourceFields.text()).toBe('title, body');
+  });
+  it('does not render source fields if there are none', () => {
+    const values = {
+      ...DEFAULT_VALUES,
+      sourceFields: undefined,
+    };
+    const wrapper = shallow(<InferencePipelineCard {...values} />);
+    expect(wrapper.find(EuiText)).toHaveLength(1); // Model ID only
   });
 });
 

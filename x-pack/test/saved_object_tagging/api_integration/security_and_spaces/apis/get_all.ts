@@ -42,12 +42,14 @@ export default function (ftrContext: FtrProviderContext) {
                 name: 'tag-1',
                 description: 'Tag 1 in default space',
                 color: '#FF00FF',
+                managed: false,
               },
               {
                 id: 'default-space-tag-2',
                 name: 'tag-2',
                 description: 'Tag 2 in default space',
                 color: '#77CC11',
+                managed: false,
               },
             ],
           });

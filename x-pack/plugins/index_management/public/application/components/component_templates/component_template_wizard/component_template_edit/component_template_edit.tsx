@@ -125,7 +125,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <EuiSpacer size="l" />
 
-      {componentTemplate?.isDeprecated && (
+      {componentTemplate?.deprecated && (
         <>
           <EuiCallOut
             title={

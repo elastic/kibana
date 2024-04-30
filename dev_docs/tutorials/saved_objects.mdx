@@ -19,6 +19,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', [1]
   hidden: true,
+  switchToModelVersionAt: '8.10.0', // this is the default, feel free to omit it unless you intend to switch to using model versions before 8.10.0
   namespaceType: 'multiple-isolated', [2]
   mappings: {
     dynamic: false,
@@ -31,9 +32,9 @@ export const dashboardVisualization: SavedObjectsType = {
       },
     },
   },
-  migrations: {
-    '1.0.0': migratedashboardVisualizationToV1,
-    '2.0.0': migratedashboardVisualizationToV2,
+  modelVersions: {
+    1: dashboardVisualizationModelVersionV1,
+    2: dashboardVisualizationModelVersionV2,
   },
 };
 ```
@@ -91,7 +92,7 @@ export const dashboardVisualization: SavedObjectsType = {
       },
     },
   },
-  migrations: { ... },
+  modelVersions: { ... },
 };
 ```
 
@@ -118,11 +119,11 @@ Will result in the following mappings being applied to the .kibana index:
   }
 }
 ```
-Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a 
+Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a
 SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false`
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
 
-Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the 
+Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the
 fields they add to the mappings. Similarly, Saved Object types should never use `dynamic: true` as this can cause an arbitrary
  amount of fields to be added to the .kibana index.
 
@@ -154,146 +155,134 @@ router.get(
   }
 );
 ```
-[1] Note how `dashboard.panels[0].visualization` stores the name property of the reference (not the id directly) to be able to uniquely 
+[1] Note how `dashboard.panels[0].visualization` stores the name property of the reference (not the id directly) to be able to uniquely
 identify this reference. This guarantees that the id the reference points to always remains up to date. If a
- visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without 
+ visualization id was directly stored in `dashboard.panels[0].visualization` there is a risk that this id gets updated without
  updating the reference in the references array.
 
 ## Migrations
 
-Saved Objects support schema changes between Kibana versions, which we call migrations. Migrations are
- applied when a Kibana installation is upgraded from one version to a newer version, when exports are imported via
+Saved Objects support schema changes between Kibana versions, which we call migrations, implemented with model versions.
+Model version transitions are applied when a Kibana installation is upgraded from one version to a newer version, when exports are imported via
   the Saved Objects Management UI, or when a new object is created via the HTTP API.
 
-### Writing migrations
+### Defining model versions
 
-Each Saved Object type may define migrations for its schema. Migrations are specified by the Kibana version number, receive an input document,
- and must return the fully migrated document to be persisted to Elasticsearch.
+Model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L22-L27)
 
-Let’s say we want to define two migrations: - In version 1.1.0, we want to drop the subtitle field and append it to the title - In version
- 1.4.0, we want to add a new id field to every panel with a newly generated UUID.
+When registering a SO type, a [modelVersions](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L138-L177)
+property is available. This attribute is a map of version numbers to [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L12-L20)
+which is the top-level type/container to define model versions.
 
-First, the current mappings should always reflect the latest or "target" schema. Next, we should define a migration function for each step in the schema evolution:
+The modelVersion map is of the form `{ [version: number] => versionDefinition }`, using single integer to identify a version definition.
 
-**src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts**
+The first version must be numbered as version 1, incrementing by one for each new version.
 
 ```ts
-import { SavedObjectsType, SavedObjectMigrationFn } from 'src/core/server';
-import uuid from 'uuid';
+import { schema } from '@kbn/config-schema';
+import { SavedObjectsType } from 'src/core/server';
 
-interface DashboardVisualizationPre110 {
-  title: string;
-  subtitle: string;
-  panels: Array<{}>;
-}
-interface DashboardVisualization110 {
-  title: string;
-  panels: Array<{}>;
-}
 
-interface DashboardVisualization140 {
-  title: string;
-  panels: Array<{ id: string }>;
-}
-
-const migrateDashboardVisualization110: SavedObjectMigrationFn<
-  DashboardVisualizationPre110, [1]
-  DashboardVisualization110
-> = (doc) => {
-  const { subtitle, ...attributesWithoutSubtitle } = doc.attributes;
-  return {
-    ...doc, [2]
-    attributes: {
-      ...attributesWithoutSubtitle,
-      title: `${doc.attributes.title} - ${doc.attributes.subtitle}`,
-    },
-  };
-};
-
-const migrateDashboardVisualization140: SavedObjectMigrationFn<
-  DashboardVisualization110,
-  DashboardVisualization140
-> = (doc) => {
-  const outPanels = doc.attributes.panels?.map((panel) => {
-    return { ...panel, id: uuid.v4() };
-  });
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      panels: outPanels,
-    },
-  };
-};
+const schemaV1 = schema.object({ title: schema.string({ maxLength: 50, minLength: 1 }) });
+const schemaV2 = schemaV1.extends({
+  description: schema.maybe(schema.string({ maxLength: 200, minLength: 1 })),
+});
 
 export const dashboardVisualization: SavedObjectsType = {
-  name: 'dashboard_visualization', [1]
-  /** ... */
-  migrations: {
-    // Takes a pre 1.1.0 doc, and converts it to 1.1.0
-    '1.1.0': migrateDashboardVisualization110,
-
-    // Takes a 1.1.0 doc, and converts it to 1.4.0
-    '1.4.0': migrateDashboardVisualization140, [3]
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: { type: 'text' }, // This mapping was added before model versions
+      description: { type: 'text' }, // mappings introduced in v2
+    },
   },
-};
-```
-[1] It is useful to define an interface for each version of the schema. This allows TypeScript to ensure that you are properly handling the input and output 
- types correctly as the schema evolves.
-
-[2] Returning a shallow copy is necessary to avoid type errors when using different types for the input and output shape.
-
-[3] Migrations do not have to be defined for every version. The version number of a migration must always be the earliest Kibana version
- in which this migration was released. So if you are creating a migration which will
- be part of the v7.10.0 release, but will also be backported and released as v7.9.3, the migration version should be: 7.9.3.
-
-Migrations should be written defensively, an exception in a migration function will prevent a Kibana upgrade from succeeding and will cause downtime for our users. 
-Having said that, if a document is encountered that is not in the expected shape, migrations are encouraged to throw an exception to abort the upgrade. In most scenarios, it is better to
-fail an upgrade than to silently ignore a corrupt document which can cause unexpected behaviour at some future point in time. When such a scenario is encountered,
-the error should be verbose and informative so that the corrupt document can be corrected, if possible.
-
-**WARNING:** Do not attempt to change the `typeMigrationVersion`, `id`, or `type` fields within a migration function, this is not supported.
-
-### Deferred Migrations
-Usually, migrations run during the upgrade process, and sometimes that may block it if there is a huge amount of outdated objects.
-In this case, it is recommended to mark some of the migrations to defer their execution.
-
-```ts
-export const dashboardVisualization: SavedObjectsType = {
-  name: 'dashboard_visualization', [1]
-  /** ... */
-  migrations: {
-    // Takes a pre 1.1.0 doc, and converts it to 1.1.0
-    '1.1.0': {
-      deferred: true,
-      transform: migrateDashboardVisualization110,
+  modelVersions: {
+    1: {
+      // Sometimes no changes are needed in the initial version, but you may have
+      // pre-existing mappings or data that must be transformed in some way
+      // In this case, title already has mappings defined.
+      changes: [],
+      schemas: {
+        // The forward compatible schema should allow any future versions of
+        // this SO to be converted to this version, since we are using
+        // @kbn/config-schema we opt-in to unknowns to allow the schema to
+        // successfully "downgrade" future SOs to this version.
+        forwardCompatibility: schemaV1.extends({}, { unknowns: 'ignore' }),
+        create: schemaV1,
+      },
+    },
+    2: {
+      changes: [
+          // In this second version we added new mappings for the description field.
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              description: { type: 'keyword' },
+            },
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
+              return {
+                attributes: {
+                  description: 'my default description',
+                },
+              };
+            },
+          },
+      ],
+      schemas: {
+        forwardCompatibility: schemaV2.extends({}, { unknowns: 'ignore' }),
+        create: schemaV2,
+      },
     },
   },
 };
 ```
 
-By default, all the migrations are not deferred, and in order to make them so, the `deferred` flag should be explicitly set to `true`.
-In this case, the documents with only pending deferred migrations will not be migrated during the upgrade process.
+That way:
+- SO type versions are decoupled from stack versioning
+- SO type versions are independent between types
 
-But whenever they are accessed via Saved Object API or repository, all the migrations will be applied to them on the fly:
-- On read operations, the stored objects remain untouched and only transformed before returning the result.
-  If there are some failures during the migration, an exception or 500 server error will be thrown,
-  so that it is guaranteed that all the returned objects will be up to date.
-- On write operations, the objects will be migrated to the latest version before writing them.
+### Saved object migrations on serverless
 
-In other words, this flag postpones the write operation until the objects are explicitly modified.
+On serverless, Kibana cannot have any downtime &mdash; even during data migrations. In order to accomplish this we rollout new versions while old versions are still running. As soon as new versions are ready to start serving, requests will be directed to them.
 
-One important notice: if there is a few pending migrations for a document and not all of them can be deferred,
-the document will be migrated during the upgrade process, and all pending migrations will be applied.
+<DocCallOut title="Only once a new version is done being rolled out will data migrations be run.">
+</DocCallOut>
 
-### Testing Migrations
 
-Bugs in a migration function cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-migrations" text="Saved Object migrations section in the plugin testing guide"/>.
+
+This has a few implications:
+
+1. A _new version_ of application code should **never** introduce a new Saved Object field and treat it as a **required** field
+2. A _new version_ of application code must be **fully backward compatible** with the **previous version's (n-1) Saved Object fields**
+
+In order to introduce a new, required Saved Object field the following algorithm _must_ be followed:
+
+1. Introduce a new model version field, consider this field _optional_ in any application code that uses it
+2. Provide a `data_backfill` function for the new field
+3. Merge to `main`
+4. Wait for the next serverless release containing your data migration changes to complete
+5. Update your code marking the new field as required in interfaces
+6. Merge to `main`
+
+At step 6 your code that was just merged to `main` will be guaranteed to find a value for the new field in Saved Objects.
+
+<DocCallOut color="warning" title="What happens when you skip step 4?">
+  Not waiting until your `data_backfill` has been released means that none of your SO documents will have the field populated with the value you provided in the `data_backfill` function. The new field value will be `undefined` until migrations have run which only happens _after_ application code has already started running!
+</DocCallOut>
+
+
+### Testing model versions
+Bugs in model version transitions cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-model-versions" text="Saved Objects model versions"/> section in the plugin testing guide.
 
 ### How to opt-out of the global savedObjects APIs?
 
 There are 2 options, depending on the amount of flexibility you need:
-For complete control over your HTTP APIs and custom handling, declare your type as `hidden`, as shown in the example. 
+For complete control over your HTTP APIs and custom handling, declare your type as `hidden`, as shown in the example.
 The other option that allows you to build your own HTTP APIs and still use the client as-is is to declare your type as hidden from the global saved objects HTTP APIs as `hiddenFromHttpApis: true`
 
 ```ts
@@ -304,21 +293,9 @@ export const foo: SavedObjectsType = {
   hidden: false, [1]
   hiddenFromHttpApis: true, [2]
   namespaceType: 'multiple-isolated',
-  mappings: {
-    dynamic: false,
-    properties: {
-      description: {
-        type: 'text',
-      },
-      hits: {
-        type: 'integer',
-      },
-    },
-  },
-  migrations: {
-    '1.0.0': migratedashboardVisualizationToV1,
-    '2.0.0': migratedashboardVisualizationToV2,
-  },
+  mappings: { ... },
+  modelVersions: { ... },
+  ...
 };
 ```
 

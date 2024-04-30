@@ -12,6 +12,8 @@ import {
   assetCriticalityRouteHelpersFactory,
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
+  enableAssetCriticalityAdvancedSetting,
+  disableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -22,10 +24,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @skipInQA asset_criticality Asset Criticality APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI asset_criticality Asset Criticality APIs', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await cleanAssetCriticality({ log, es });
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     afterEach(async () => {
@@ -34,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('initialisation of resources', () => {
-      it('should has index installed on status api call', async () => {
+      it('should have index installed on status api call', async () => {
         let assetCriticalityIndexExist;
 
         try {
@@ -87,14 +90,14 @@ export default ({ getService }: FtrProviderContext) => {
         const assetCriticality = {
           id_field: 'host.name',
           id_value: 'host-01',
-          criticality_level: 'important',
+          criticality_level: 'high_impact',
         };
 
         const { body: result } = await assetCriticalityRoutes.upsert(assetCriticality);
 
         expect(result.id_field).to.eql('host.name');
         expect(result.id_value).to.eql('host-01');
-        expect(result.criticality_level).to.eql('important');
+        expect(result.criticality_level).to.eql('high_impact');
         expect(result['@timestamp']).to.be.a('string');
 
         const doc = await getAssetCriticalityDoc({ idField: 'host.name', idValue: 'host-01', es });
@@ -118,11 +121,25 @@ export default ({ getService }: FtrProviderContext) => {
         const assetCriticality = {
           id_field: 'invalid',
           id_value: 'host-01',
-          criticality_level: 'important',
+          criticality_level: 'high_impact',
         };
 
         await assetCriticalityRoutes.upsert(assetCriticality, {
           expectStatusCode: 400,
+        });
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        const validAssetCriticality = {
+          id_field: 'host.name',
+          id_value: 'host-01',
+          criticality_level: 'high_impact',
+        };
+
+        await assetCriticalityRoutes.upsert(validAssetCriticality, {
+          expectStatusCode: 403,
         });
       });
     });
@@ -132,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         const assetCriticality = {
           id_field: 'host.name',
           id_value: 'host-02',
-          criticality_level: 'important',
+          criticality_level: 'high_impact',
         };
 
         await assetCriticalityRoutes.upsert(assetCriticality);
@@ -141,13 +158,21 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result.id_field).to.eql('host.name');
         expect(result.id_value).to.eql('host-02');
-        expect(result.criticality_level).to.eql('important');
+        expect(result.criticality_level).to.eql('high_impact');
         expect(result['@timestamp']).to.be.a('string');
       });
 
       it('should return a 400 if id_field is invalid', async () => {
         await assetCriticalityRoutes.get('invalid', 'host-02', {
           expectStatusCode: 400,
+        });
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        await assetCriticalityRoutes.get('host.name', 'doesnt-matter', {
+          expectStatusCode: 403,
         });
       });
     });
@@ -157,21 +182,21 @@ export default ({ getService }: FtrProviderContext) => {
         const assetCriticality = {
           id_field: 'host.name',
           id_value: 'host-01',
-          criticality_level: 'important',
+          criticality_level: 'high_impact',
         };
 
         const { body: createdDoc } = await assetCriticalityRoutes.upsert(assetCriticality);
         const updatedAssetCriticality = {
           id_field: 'host.name',
           id_value: 'host-01',
-          criticality_level: 'very_important',
+          criticality_level: 'extreme_impact',
         };
 
         const { body: updatedDoc } = await assetCriticalityRoutes.upsert(updatedAssetCriticality);
 
         expect(updatedDoc.id_field).to.eql('host.name');
         expect(updatedDoc.id_value).to.eql('host-01');
-        expect(updatedDoc.criticality_level).to.eql('very_important');
+        expect(updatedDoc.criticality_level).to.eql('extreme_impact');
         expect(updatedDoc['@timestamp']).to.be.a('string');
         expect(updatedDoc['@timestamp']).to.not.eql(createdDoc['@timestamp']);
 
@@ -186,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
         const assetCriticality = {
           id_field: 'host.name',
           id_value: 'delete-me',
-          criticality_level: 'important',
+          criticality_level: 'high_impact',
         };
 
         await assetCriticalityRoutes.upsert(assetCriticality);
@@ -199,6 +224,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(doc).to.eql(undefined);
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        await assetCriticalityRoutes.delete('host.name', 'doesnt-matter', {
+          expectStatusCode: 403,
+        });
       });
     });
   });

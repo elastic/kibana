@@ -63,8 +63,8 @@ describe('filters notification popover', () => {
         getAllDataViews: jest.fn(),
         getDashboardPanelFromId: jest.fn(),
       },
-      localFilters: filtersSubject,
-      localQuery: querySubject,
+      filters$: filtersSubject,
+      query$: querySubject,
     };
   });
 

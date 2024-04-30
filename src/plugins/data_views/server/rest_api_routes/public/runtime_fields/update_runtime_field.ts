@@ -48,7 +48,7 @@ export const updateRuntimeField = async ({
   runtimeField,
 }: UpdateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
   const existingRuntimeField = dataView.getRuntimeField(name);
 
   if (!existingRuntimeField) {
@@ -56,7 +56,7 @@ export const updateRuntimeField = async ({
   }
 
   dataView.removeRuntimeField(name);
-  const fields = dataView.addRuntimeField(name, {
+  const fields = await dataView.addRuntimeField(name, {
     ...existingRuntimeField,
     ...runtimeField,
   });
@@ -126,7 +126,11 @@ const updateRuntimeFieldRouteFactory =
           runtimeField,
         });
 
-        const response: RuntimeResponseType = responseFormatter({ serviceKey, dataView, fields });
+        const response: RuntimeResponseType = await responseFormatter({
+          serviceKey,
+          dataView,
+          fields,
+        });
 
         return res.ok(response);
       })

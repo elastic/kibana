@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
   IndexConnectorTypeId,
   SlackWebhookConnectorTypeId,
   EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
-import type { AppFeatureKeys } from '@kbn/security-solution-features/src/types';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
@@ -22,16 +22,16 @@ const INTERNAL_RULE_ACTIONS = [
 ];
 
 /**
- * enable rule actions based on AppFeature Config
+ * enable rule actions based on ProductFeature Config
  */
 export const enableRuleActions = ({
   actions,
-  appFeatureKeys,
+  productFeatureKeys,
 }: {
   actions: ActionsPluginSetupContract;
-  appFeatureKeys: AppFeatureKeys;
+  productFeatureKeys: ProductFeatureKeys;
 }) => {
-  if (appFeatureKeys.includes(AppFeatureSecurityKey.externalRuleActions)) {
+  if (productFeatureKeys.includes(ProductFeatureSecurityKey.externalRuleActions)) {
     // enables all rule actions
     actions.setEnabledConnectorTypes([EnabledActionTypes.Any]);
   } else {

@@ -31,7 +31,7 @@ import {
   GetConfigurationFindRequestRt,
   FindActionConnectorResponseRt,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import {
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
@@ -46,13 +46,9 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
-import {
-  validateCustomFieldTypesInRequest,
-  validateOptionalCustomFieldsInRequest,
-} from './validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
  * Defines the internal helper functions.
@@ -256,7 +252,6 @@ export async function update(
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
     validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
-    validateOptionalCustomFieldsInRequest({ requestCustomFields: request.customFields });
 
     const { version, ...queryWithoutVersion } = request;
 
@@ -370,9 +365,6 @@ export async function create(
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
 
     validateDuplicatedCustomFieldKeysInRequest({
-      requestCustomFields: validatedConfigurationRequest.customFields,
-    });
-    validateOptionalCustomFieldsInRequest({
       requestCustomFields: validatedConfigurationRequest.customFields,
     });
 

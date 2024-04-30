@@ -33,6 +33,7 @@ export {
 export { applicationServiceMock, scopedHistoryMock } from '@kbn/core-application-browser-mocks';
 export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
+export { securityServiceMock } from '@kbn/core-security-browser-mocks';
 
 function createStorageMock() {
   const storageMock: jest.Mocked<Storage> = {

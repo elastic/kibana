@@ -37,11 +37,10 @@ export const updateFiltering = async (
     created_at: filteringRule.created_at ? filteringRule.created_at : now,
     updated_at: now,
   }));
-  const connectorResult = await fetchConnectorById(client, connectorId);
-  if (!connectorResult) {
+  const connector = await fetchConnectorById(client, connectorId);
+  if (!connector) {
     throw new Error(`Could not find connector with id ${connectorId}`);
   }
-  const { value: connector, seqNo, primaryTerm } = connectorResult;
   const active: FilteringRules = {
     advanced_snippet: {
       created_at: connector.filtering[0].active.advanced_snippet.created_at || now,
@@ -58,8 +57,6 @@ export const updateFiltering = async (
   const result = await client.update<Connector>({
     doc: { ...connector, filtering: [{ ...connector.filtering[0], active, draft: active }] },
     id: connectorId,
-    if_primary_term: primaryTerm,
-    if_seq_no: seqNo,
     index: CONNECTORS_INDEX,
   });
 

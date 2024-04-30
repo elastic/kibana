@@ -10,6 +10,8 @@ import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { sortBy, uniqBy } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
@@ -29,6 +31,9 @@ interface FleetTransformMetadata {
   run_as_kibana_system?: boolean;
   transformId: string;
 }
+
+const isErrorResponse = (arg: unknown): arg is ErrorResponseBase =>
+  isPopulatedObject(arg, ['error']);
 
 async function reauthorizeAndStartTransform({
   esClient,
@@ -68,6 +73,19 @@ async function reauthorizeAndStartTransform({
       () => esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
       { logger, additionalResponseStatuses: [400] }
     );
+
+    // Transform can already be started even without sufficient permission if 'unattended: true'
+    // So we are just catching that special case to showcase in the UI
+    // If unattended, calling _start will return a successful response, but with the error message in the body
+    if (
+      isErrorResponse(startedTransform) &&
+      startedTransform.status === 409 &&
+      Array.isArray(startedTransform.error?.root_cause) &&
+      startedTransform.error.root_cause[0]?.reason?.includes('already started')
+    ) {
+      return { transformId, success: true, error: null };
+    }
+
     logger.debug(`Started transform: ${transformId}`);
     return { transformId, success: startedTransform.acknowledged, error: null };
   } catch (err) {
@@ -109,7 +127,7 @@ export async function handleTransformReauthorizeAndStart({
             {
               transform_id: transformId,
             },
-            { ...(secondaryAuth ? secondaryAuth : {}) }
+            { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
           ),
         { logger, additionalResponseStatuses: [400] }
       )
@@ -118,6 +136,7 @@ export async function handleTransformReauthorizeAndStart({
 
   const transformsMetadata: FleetTransformMetadata[] = transformInfos
     .flat()
+    .filter((t) => t.transforms !== undefined)
     .map<FleetTransformMetadata>((t) => {
       const transform = t.transforms?.[0];
       return { ...transform._meta, transformId: transform?.id };

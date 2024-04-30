@@ -27,5 +27,6 @@
     "@kbn/reporting-mocks-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/field-formats-plugin",
+    "@kbn/core-http-server-mocks",
   ]
 }

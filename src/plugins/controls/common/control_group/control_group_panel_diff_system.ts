@@ -16,7 +16,11 @@ import { TimeSliderControlEmbeddableInput, TIME_SLIDER_CONTROL } from '../time_s
 import { ControlPanelState } from './types';
 
 interface DiffSystem {
-  getPanelIsEqual: (initialInput: ControlPanelState, newInput: ControlPanelState) => boolean;
+  getPanelIsEqual: (
+    initialInput: ControlPanelState,
+    newInput: ControlPanelState,
+    compareSelections?: boolean
+  ) => boolean;
 }
 
 export const genericControlPanelDiffSystem: DiffSystem = {
@@ -29,7 +33,7 @@ export const ControlPanelDiffSystems: {
   [key: string]: DiffSystem;
 } = {
   [RANGE_SLIDER_CONTROL]: {
-    getPanelIsEqual: (initialInput, newInput) => {
+    getPanelIsEqual: (initialInput, newInput, compareSelections) => {
       if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput'))) {
         return false;
       }
@@ -38,11 +42,11 @@ export const ControlPanelDiffSystems: {
         initialInput.explicitInput;
       const { value: valueB = ['', ''], ...inputB }: Partial<RangeSliderEmbeddableInput> =
         newInput.explicitInput;
-      return isEqual(valueA, valueB) && deepEqual(inputA, inputB);
+      return (compareSelections ? isEqual(valueA, valueB) : true) && deepEqual(inputA, inputB);
     },
   },
   [OPTIONS_LIST_CONTROL]: {
-    getPanelIsEqual: (initialInput, newInput) => {
+    getPanelIsEqual: (initialInput, newInput, compareSelections) => {
       if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput'))) {
         return false;
       }
@@ -75,22 +79,24 @@ export const ControlPanelDiffSystems: {
       }: Partial<OptionsListEmbeddableInput> = newInput.explicitInput;
 
       return (
-        Boolean(excludeA) === Boolean(excludeB) &&
         Boolean(hideSortA) === Boolean(hideSortB) &&
         Boolean(hideExistsA) === Boolean(hideExistsB) &&
         Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
         Boolean(singleSelectA) === Boolean(singleSelectB) &&
-        Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
         isEqual(searchTechniqueA ?? 'prefix', searchTechniqueB ?? 'prefix') &&
         deepEqual(sortA ?? OPTIONS_LIST_DEFAULT_SORT, sortB ?? OPTIONS_LIST_DEFAULT_SORT) &&
-        isEqual(selectedA ?? [], selectedB ?? []) &&
+        (compareSelections
+          ? Boolean(excludeA) === Boolean(excludeB) &&
+            Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
+            isEqual(selectedA ?? [], selectedB ?? [])
+          : true) &&
         deepEqual(inputA, inputB)
       );
     },
   },
   [TIME_SLIDER_CONTROL]: {
-    getPanelIsEqual: (initialInput, newInput) => {
+    getPanelIsEqual: (initialInput, newInput, compareSelections) => {
       if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput'))) {
         return false;
       }
@@ -107,10 +113,12 @@ export const ControlPanelDiffSystems: {
       }: Partial<TimeSliderControlEmbeddableInput> = newInput.explicitInput;
       return (
         Boolean(isAnchoredA) === Boolean(isAnchoredB) &&
-        Boolean(startA) === Boolean(startB) &&
-        startA === startB &&
-        Boolean(endA) === Boolean(endB) &&
-        endA === endB
+        (compareSelections
+          ? Boolean(startA) === Boolean(startB) &&
+            startA === startB &&
+            Boolean(endA) === Boolean(endB) &&
+            endA === endB
+          : true)
       );
     },
   },

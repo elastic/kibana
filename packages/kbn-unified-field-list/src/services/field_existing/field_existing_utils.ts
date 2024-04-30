@@ -53,6 +53,7 @@ export async function fetchFieldExistence({
     // filled in by data views service
     pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+    includeEmptyFields: false,
   });
 
   // take care of fields of existingFieldList, that are not yet available

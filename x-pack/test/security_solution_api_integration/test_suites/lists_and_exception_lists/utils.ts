@@ -33,7 +33,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { countDownTest } from '../detections_response/utils';
+import { countDownTest } from '../../../common/utils/security_solution';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests

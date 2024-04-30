@@ -34,10 +34,6 @@ import {
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
-const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
-  defaultMessage: 'technical preview',
-});
-
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
   enableValidations: boolean
@@ -321,15 +317,14 @@ export const getUiSettings: (
     value: true,
     description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
+        'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL saved searches, visualizations, etc. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
-          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
+          `<a href="https://ela.st/esql-feedback" target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
+            defaultMessage: 'https://ela.st/esql-feedback',
           }) +
           '</a>',
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },
     }),
     requiresPageReload: true,

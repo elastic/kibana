@@ -8,26 +8,21 @@
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import {
-  Axis,
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
-  HistogramBarSeries,
-  Position,
-  ScaleType,
-  Settings,
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import {
+import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { type LogRateHistogramItem } from '@kbn/aiops-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { type LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -388,7 +383,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
         <div className="dataDriftSingleBrush" data-test-subj={`dataDriftSingleBrush-${id}`}>
           <div
             css={{
-              'margin-bottom': '-4px',
+              marginBottom: '-4px',
             }}
           >
             <SingleBrush

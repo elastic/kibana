@@ -14,7 +14,7 @@ import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -71,7 +71,7 @@ const EntityAnalyticsComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalytics} />

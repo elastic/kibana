@@ -7,7 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { combineLatest, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs';
 import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -23,8 +23,9 @@ import type {
   Field,
   FieldExamples,
   FieldStatsCommonRequestParams,
+  FieldStatsError,
 } from '../../../../../common/types/field_stats';
-import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {

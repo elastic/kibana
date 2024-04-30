@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { DataVisualizerGridEmbeddableFactory } from './grid_embeddable/grid_embeddable_factory';
-import { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../plugin';
+import type { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../plugin';
 
 export function registerEmbeddables(
   embeddable: EmbeddableSetup,

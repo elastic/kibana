@@ -10,7 +10,10 @@ import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 import { isIndexPatternsBulkEditAction } from './utils';
@@ -52,9 +55,7 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (!rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -62,9 +63,7 @@ export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValid
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -99,11 +98,11 @@ export const validateBulkEditRule = async ({
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
 const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
-  return edit.every(({ type }) =>
-    [BulkActionEditTypeEnum.set_rule_actions, BulkActionEditTypeEnum.add_rule_actions].includes(
-      type
-    )
-  );
+  const applicableActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.set_rule_actions,
+    BulkActionEditTypeEnum.add_rule_actions,
+  ];
+  return edit.every(({ type }) => applicableActions.includes(type));
 };
 
 /**

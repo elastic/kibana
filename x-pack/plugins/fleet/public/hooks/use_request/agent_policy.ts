@@ -37,15 +37,21 @@ export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =>
   });
 };
 
-export const useGetAgentPoliciesQuery = (query?: GetAgentPoliciesRequest['query']) => {
-  return useQuery<GetAgentPoliciesResponse, RequestError>(['agentPolicies', query], () =>
-    sendRequestForRq<GetAgentPoliciesResponse>({
-      path: agentPolicyRouteService.getListPath(),
-      method: 'get',
-      query,
-      version: API_VERSIONS.public.v1,
-    })
-  );
+export const useGetAgentPoliciesQuery = (
+  query?: GetAgentPoliciesRequest['query'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetAgentPoliciesResponse, RequestError>({
+    queryKey: ['agentPolicies', query],
+    queryFn: () =>
+      sendRequestForRq<GetAgentPoliciesResponse>({
+        path: agentPolicyRouteService.getListPath(),
+        method: 'get',
+        query,
+        version: API_VERSIONS.public.v1,
+      }),
+    enabled: options?.enabled,
+  });
 };
 
 export const useBulkGetAgentPoliciesQuery = (ids: string[], options?: { full?: boolean }) => {

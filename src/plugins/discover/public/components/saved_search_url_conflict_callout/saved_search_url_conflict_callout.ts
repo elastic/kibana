@@ -14,7 +14,7 @@ import { getSavedSearchUrl, SavedSearch } from '@kbn/saved-search-plugin/public'
 interface SavedSearchURLConflictCalloutProps {
   savedSearch?: SavedSearch;
   spaces?: SpacesApi;
-  history: () => History;
+  history: History;
 }
 
 export const SavedSearchURLConflictCallout = ({
@@ -34,7 +34,7 @@ export const SavedSearchURLConflictCallout = ({
           },
         }),
         currentObjectId: savedSearch.id,
-        otherObjectPath: `${getSavedSearchUrl(otherObjectId)}${history().location.search}`,
+        otherObjectPath: `${getSavedSearchUrl(otherObjectId)}${history.location.search}`,
         otherObjectId,
       });
     }

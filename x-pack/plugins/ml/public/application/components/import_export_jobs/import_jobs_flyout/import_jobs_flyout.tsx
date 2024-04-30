@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import {
@@ -42,9 +43,10 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
-interface Props {
+export interface Props {
   isDisabled: boolean;
 }
+
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     services: {

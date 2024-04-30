@@ -119,7 +119,7 @@ describe('useTotalHits', () => {
     });
   });
 
-  it('should fetch total hits if isPlainRecord is true', async () => {
+  it('should not fetch total hits if isPlainRecord is true', async () => {
     const onTotalHitsChange = jest.fn();
     const deps = {
       ...getDeps(),
@@ -130,11 +130,7 @@ describe('useTotalHits', () => {
     const { rerender } = renderHook(() => useTotalHits(deps));
     refetch$.next({ type: 'refetch' });
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(1);
-    await waitFor(() => {
-      expect(deps.services.expressions.run).toBeCalledTimes(1);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.complete, 3);
-    });
+    expect(onTotalHitsChange).not.toHaveBeenCalled();
   });
 
   it('should not fetch total hits if chartVisible is true', async () => {

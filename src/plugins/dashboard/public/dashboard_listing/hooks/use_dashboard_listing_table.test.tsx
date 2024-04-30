@@ -147,7 +147,6 @@ describe('useDashboardListingTable', () => {
       initialPageSize: 5,
       listingLimit: 20,
       onFetchSuccess: expect.any(Function),
-      itemIsEditable: expect.any(Function),
       setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,
@@ -156,6 +155,7 @@ describe('useDashboardListingTable', () => {
         isReadonly: false,
         customValidators: expect.any(Object),
       },
+      createdByEnabled: true,
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

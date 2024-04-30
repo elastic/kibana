@@ -6,6 +6,8 @@
  */
 
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
@@ -14,6 +16,8 @@ import { EuiBasicTable, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+
+import { EmptyPolicyNameHint } from '../../../../../components/uninstall_command_flyout/empty_policy_name_hint';
 
 import { ApiKeyField } from '../../../../../components/api_key_field';
 import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
@@ -31,18 +35,15 @@ import {
   CREATED_AT_TITLE,
   VIEW_UNINSTALL_COMMAND_LABEL,
   POLICY_ID_TITLE,
-  SEARCH_BY_POLICY_ID_PLACEHOLDER,
+  SEARCH_BY_POLICY_ID_OR_NAME_PLACEHOLDER,
   TOKEN_TITLE,
+  POLICY_NAME_TITLE,
+  SEARCH_BY_POLICY_ID_OR_NAME_HINT,
 } from './translations';
 
-const PolicyIdField = ({ policyId }: { policyId: string }) => (
-  <EuiText
-    size="s"
-    className="eui-textTruncate"
-    title={policyId}
-    data-test-subj="uninstallTokensPolicyIdField"
-  >
-    {policyId}
+const TextField = ({ text, dataTestSubj }: { text: string; dataTestSubj?: string }) => (
+  <EuiText size="s" className="eui-textTruncate" title={text} data-test-subj={dataTestSubj}>
+    {text}
   </EuiText>
 );
 
@@ -74,7 +75,7 @@ const NoItemsMessage = ({ isLoading }: { isLoading: boolean }) =>
 export const UninstallTokenListPage = () => {
   useBreadcrumbs('uninstall_tokens');
 
-  const [policyIdSearch, setPolicyIdSearch] = useState<string>('');
+  const [policyIdOrNameSearch, setPolicyIdOrNameSearch] = useState<string>('');
   const [tokenIdForFlyout, setTokenIdForFlyout] = useState<string | null>(null);
 
   const { pagination, setPagination, pageSizeOptions } = usePagination();
@@ -82,7 +83,7 @@ export const UninstallTokenListPage = () => {
   const { isLoading, data } = useGetUninstallTokens({
     perPage: pagination.pageSize,
     page: pagination.currentPage,
-    policyId: policyIdSearch,
+    search: policyIdOrNameSearch,
   });
 
   const tokens = data?.items ?? [];
@@ -91,9 +92,22 @@ export const UninstallTokenListPage = () => {
   const columns: Array<EuiBasicTableColumn<UninstallTokenMetadata>> = useMemo(
     () => [
       {
+        field: 'policy_name',
+        name: POLICY_NAME_TITLE,
+        render: (policyName: string | null) => {
+          if (policyName === null) {
+            return <EmptyPolicyNameHint />;
+          } else {
+            return <TextField text={policyName} />;
+          }
+        },
+      },
+      {
         field: 'policy_id',
         name: POLICY_ID_TITLE,
-        render: (policyId: string) => <PolicyIdField policyId={policyId} />,
+        render: (policyId: string) => (
+          <TextField text={policyId} dataTestSubj="uninstallTokensPolicyIdField" />
+        ),
       },
       {
         field: 'created_at',
@@ -145,7 +159,7 @@ export const UninstallTokenListPage = () => {
 
   const handleSearch = useCallback(
     (searchString: string): void => {
-      setPolicyIdSearch(searchString);
+      setPolicyIdOrNameSearch(searchString);
       setPagination((prevPagination) => ({ ...prevPagination, currentPage: 1 }));
     },
     [setPagination]
@@ -164,19 +178,26 @@ export const UninstallTokenListPage = () => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.uninstallTokenList.pageDescription"
-          defaultMessage="Uninstall token allows you to get the uninstall command if you need to uninstall the Agent/Endpoint on the Host."
+          defaultMessage="An uninstall token allows you to use the uninstall command to remove Elastic Agent from a host."
         />
       </EuiText>
 
       <EuiSpacer size="m" />
 
-      <EuiFieldSearch
-        onSearch={handleSearch}
-        incremental
-        fullWidth
-        placeholder={SEARCH_BY_POLICY_ID_PLACEHOLDER}
-        data-test-subj="uninstallTokensPolicyIdSearchInput"
-      />
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFieldSearch
+          onSearch={handleSearch}
+          incremental
+          fullWidth
+          maxLength={50}
+          placeholder={SEARCH_BY_POLICY_ID_OR_NAME_PLACEHOLDER}
+          data-test-subj="uninstallTokensPolicyIdSearchInput"
+        />
+
+        <EuiToolTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT}>
+          <EuiIcon type="iInCircle" />
+        </EuiToolTip>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
@@ -194,7 +215,6 @@ export const UninstallTokenListPage = () => {
         }}
         onChange={handleTablePagination}
         noItemsMessage={<NoItemsMessage isLoading={isLoading} />}
-        hasActions={true}
       />
 
       <EuiSpacer size="xl" />

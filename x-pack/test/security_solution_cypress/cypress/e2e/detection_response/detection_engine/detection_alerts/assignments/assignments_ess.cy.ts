@@ -24,7 +24,7 @@ describe('Alert user assignment - ESS', { tags: ['@ess'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   beforeEach(() => {

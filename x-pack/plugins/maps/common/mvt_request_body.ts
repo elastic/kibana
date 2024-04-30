@@ -53,7 +53,6 @@ export function getAggsTileRequest({
       grid_agg: renderAs === RENDER_AS.HEX ? 'geohex' : 'geotile',
       grid_type: renderAs === RENDER_AS.GRID || renderAs === RENDER_AS.HEX ? 'grid' : 'centroid',
       aggs: requestBody.aggs,
-      fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
     } as SearchMvtRequest['body'],

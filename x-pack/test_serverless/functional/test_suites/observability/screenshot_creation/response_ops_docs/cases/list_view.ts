@@ -11,7 +11,7 @@ import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
   const cases = getService('cases');
-  const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage']);
+  const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage', 'svlCommonNavigation']);
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'observability_cases'];
@@ -78,8 +78,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('case-view-title');
-      const collapseNav = await testSubjects.find('euiCollapsibleNavButton');
-      await collapseNav.click();
+      await pageObjects.svlCommonNavigation.sidenav.toggle(true);
       const filesTab = await testSubjects.find('case-view-tab-title-files');
       await filesTab.click();
       await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));

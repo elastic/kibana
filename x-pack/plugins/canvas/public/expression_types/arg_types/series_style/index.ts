@@ -6,7 +6,7 @@
  */
 
 import PropTypes from 'prop-types';
-import { lifecycle, compose } from 'recompose';
+import { lifecycle, compose } from 'react-recompose';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';

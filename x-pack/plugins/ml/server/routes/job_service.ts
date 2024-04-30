@@ -19,7 +19,6 @@ import {
   forceStartDatafeedSchema,
   jobIdsSchema,
   optionalJobIdsSchema,
-  jobsWithTimerangeSchema,
   lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
@@ -390,13 +389,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .addVersion(
       {
         version: '1',
-        validate: {
-          request: {
-            body: jobsWithTimerangeSchema,
-          },
-        },
+        validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { jobsWithTimerange } = jobServiceProvider(client, mlClient);
           const resp = await jobsWithTimerange();
@@ -707,7 +702,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     })
     .addVersion(
@@ -773,7 +768,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     })
     .addVersion(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '../../../../../../../common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { filterRuntimeMappings } from './filter_runtime_mappings';
 
 function getJob(): Job {

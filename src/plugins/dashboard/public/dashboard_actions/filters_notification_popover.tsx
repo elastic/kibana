@@ -34,23 +34,23 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
 
   const editPanelAction = getEditPanelAction();
 
-  const filters = useMemo(() => api.localFilters?.value, [api]);
+  const filters = useMemo(() => api.filters$?.value, [api]);
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
 
   const { queryString, queryLanguage } = useMemo(() => {
-    const localQuery = api.localQuery?.value;
-    if (!localQuery) return {};
-    if (isOfQueryType(localQuery)) {
-      if (typeof localQuery.query === 'string') {
-        return { queryString: localQuery.query };
+    const query = api.query$?.value;
+    if (!query) return {};
+    if (isOfQueryType(query)) {
+      if (typeof query.query === 'string') {
+        return { queryString: query.query };
       } else {
-        return { queryString: JSON.stringify(localQuery.query, null, 2) };
+        return { queryString: JSON.stringify(query.query, null, 2) };
       }
     } else {
       setDisableEditButton(true);
-      const language: 'sql' | 'esql' | undefined = getAggregateQueryMode(localQuery);
+      const language: 'sql' | 'esql' | undefined = getAggregateQueryMode(query);
       return {
-        queryString: localQuery[language as keyof AggregateQuery],
+        queryString: query[language as keyof AggregateQuery],
         queryLanguage: language,
       };
     }

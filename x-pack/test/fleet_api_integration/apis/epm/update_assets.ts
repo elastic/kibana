@@ -223,11 +223,8 @@ export default function (providerContext: FtrProviderContext) {
           },
           mapping: {
             total_fields: {
-              limit: '10000',
+              limit: '1000',
             },
-          },
-          query: {
-            default_field: ['logs_test_name', 'new_field_name'],
           },
         },
       });

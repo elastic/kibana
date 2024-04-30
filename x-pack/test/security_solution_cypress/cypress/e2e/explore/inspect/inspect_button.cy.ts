@@ -24,64 +24,69 @@ import { postDataView } from '../../../tasks/api_calls/common';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
-    // illegal_argument_exception: unknown setting [index.lifecycle.name]
-    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
-    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
+// FLAKY: https://github.com/elastic/kibana/issues/178367
+describe.skip(
+  'Inspect Explore pages',
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  () => {
+    before(() => {
+      // illegal_argument_exception: unknown setting [index.lifecycle.name]
+      cy.task('esArchiverLoad', { archiveName: 'risk_users' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
 
-    login();
-    // Create and select data view
-    postDataView(DATA_VIEW);
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', 'risk_users');
-    cy.task('esArchiverUnload', 'risk_hosts');
-  });
-
-  INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {
-    /**
-     * Group all tests of a page into one "it" call to improve speed
-     */
-    it(`inspect ${pageName} page`, () => {
       login();
+      // Create and select data view
+      postDataView(DATA_VIEW);
+    });
 
-      visitWithTimeRange(url, {
-        visitOptions: {
-          onLoad: () => {
-            waitForWelcomePanelToBeLoaded();
-            selectDataView(DATA_VIEW);
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+    });
+
+    INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {
+      /**
+       * Group all tests of a page into one "it" call to improve speed
+       */
+      it(`inspect ${pageName} page`, () => {
+        login();
+
+        visitWithTimeRange(url, {
+          visitOptions: {
+            onLoad: () => {
+              waitForWelcomePanelToBeLoaded();
+              selectDataView(DATA_VIEW);
+            },
           },
-        },
-      });
+        });
 
-      lensVisualizations.forEach((lens) => {
-        cy.log(`inspects the ${lens.title} visualization`);
-        openTab(lens.tab);
+        lensVisualizations.forEach((lens) => {
+          cy.log(`inspects the ${lens.title} visualization`);
+          openTab(lens.tab);
 
-        openLensVisualizationsInspectModal(lens, () => {
+          openLensVisualizationsInspectModal(lens, () => {
+            cy.get(INSPECT_MODAL).should('be.visible');
+            cy.get(INSPECT_MODAL_INDEX_PATTERN).should(
+              'contain.text',
+              lens.customIndexPattern ? lens.customIndexPattern : DATA_VIEW
+            );
+          });
+        });
+
+        tables.forEach((table) => {
+          cy.log(`inspects the ${table.title}`);
+          openTab(table.tab);
+
+          openTableInspectModal(table);
           cy.get(INSPECT_MODAL).should('be.visible');
           cy.get(INSPECT_MODAL_INDEX_PATTERN).should(
             'contain.text',
-            lens.customIndexPattern ? lens.customIndexPattern : DATA_VIEW
+            table.customIndexPattern ? table.customIndexPattern : DATA_VIEW
           );
+
+          closesModal();
         });
       });
-
-      tables.forEach((table) => {
-        cy.log(`inspects the ${table.title}`);
-        openTab(table.tab);
-
-        openTableInspectModal(table);
-        cy.get(INSPECT_MODAL).should('be.visible');
-        cy.get(INSPECT_MODAL_INDEX_PATTERN).should(
-          'contain.text',
-          table.customIndexPattern ? table.customIndexPattern : DATA_VIEW
-        );
-
-        closesModal();
-      });
     });
-  });
-});
+  }
+);

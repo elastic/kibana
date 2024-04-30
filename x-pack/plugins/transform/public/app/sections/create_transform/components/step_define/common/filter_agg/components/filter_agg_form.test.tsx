@@ -12,7 +12,7 @@ import { FilterAggForm } from './filter_agg_form';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
 
 describe('FilterAggForm', () => {

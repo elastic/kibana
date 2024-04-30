@@ -17,16 +17,12 @@ import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleMlRuleOutput,
-  createRule,
   getSimpleMlRule,
   getSimpleRuleWithoutRuleId,
   removeUUIDFromActions,
@@ -35,6 +31,12 @@ import {
   getSomeActionsWithFrequencies,
   updateUsername,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -45,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@ess @serverless @skipInQA patch_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI patch_rules', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -420,7 +422,7 @@ export default ({ getService }: FtrProviderContext) => {
         describe('actions without frequencies', () => {
           [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
             (throttle) => {
-              it(`@brokenInServerless it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
+              it(`@skipInServerless it sets each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
                 const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
 
                 // create simple rule
@@ -450,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // Action throttle cannot be shorter than the schedule interval which is by default is 5m
           ['300s', '5m', '3h', '4d'].forEach((throttle) => {
-            it(`@brokenInServerless it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
+            it(`@skipInServerless it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
               const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
 
               // create simple rule
@@ -488,7 +490,7 @@ export default ({ getService }: FtrProviderContext) => {
             '10h',
             '2d',
           ].forEach((throttle) => {
-            it(`@brokenInServerless it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
+            it(`@skipInServerless it does not change actions frequency attributes when 'throttle' is '${throttle}'`, async () => {
               const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
 
               // create simple rule
@@ -514,7 +516,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@brokenInServerless some actions with frequencies', () => {
+        describe('@skipInServerless some actions with frequencies', () => {
           [undefined, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE].forEach(
             (throttle) => {
               it(`it overrides each action's frequency attribute to default value when 'throttle' is ${throttle}`, async () => {
@@ -652,6 +654,38 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.investigation_fields.field_names).to.eql(['blob', 'boop']);
         });
+      });
+    });
+
+    describe('setup guide', () => {
+      beforeEach(async () => {
+        await createAlertsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should overwrite setup field on patch', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          setup: 'A setup guide',
+        });
+
+        const rulePatch = {
+          rule_id: 'rule-1',
+          setup: 'A different setup guide',
+        };
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(rulePatch)
+          .expect(200);
+
+        expect(body.setup).to.eql('A different setup guide');
       });
     });
   });

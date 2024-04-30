@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -20,19 +18,12 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import { DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
-
-interface EmbeddableQueryInput extends EmbeddableInput {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
+import { LensApi } from '../embeddable';
 
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
-
-/** @internal */
-export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
   locator: () => DiscoverAppLocator | undefined;
@@ -41,7 +32,9 @@ interface UrlDrilldownDeps {
   application: () => ApplicationStart;
 }
 
-export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: IEmbeddable };
+export type ActionContext = ApplyGlobalFilterActionContext & {
+  embeddable: LensApi;
+};
 
 export interface Config extends SerializableRecord {
   openInNewTab: boolean;
@@ -49,9 +42,7 @@ export interface Config extends SerializableRecord {
 
 export type OpenInDiscoverTrigger = typeof APPLY_FILTER_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext {
-  embeddable?: EmbeddableWithQueryInput;
-}
+export type ActionFactoryContext = BaseActionFactoryContext & ActionContext;
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 export class OpenInDiscoverDrilldown
@@ -109,13 +100,13 @@ export class OpenInDiscoverDrilldown
       dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
-      embeddable: context.embeddable as IEmbeddable,
+      embeddable: context.embeddable,
       ...config,
     });
   };
 
   public readonly isConfigurable = (context: ActionFactoryContext) =>
-    this.deps.hasDiscoverAccess() && context.embeddable?.type === DOC_TYPE;
+    this.deps.hasDiscoverAccess() && apiIsOfType(context.embeddable, DOC_TYPE);
 
   public readonly getHref = async (config: Config, context: ActionContext) => {
     const { getHref } = await getDiscoverHelpersAsync();
@@ -125,7 +116,7 @@ export class OpenInDiscoverDrilldown
       dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
-      embeddable: context.embeddable as IEmbeddable,
+      embeddable: context.embeddable,
     });
   };
 
@@ -140,7 +131,7 @@ export class OpenInDiscoverDrilldown
         dataViews: this.deps.dataViews(),
         hasDiscoverAccess: this.deps.hasDiscoverAccess(),
         ...context,
-        embeddable: context.embeddable as IEmbeddable,
+        embeddable: context.embeddable,
       });
       await this.deps.application().navigateToApp(app, { path, state });
     }

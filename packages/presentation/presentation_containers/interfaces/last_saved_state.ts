@@ -8,12 +8,14 @@
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { SerializedPanelState } from './serialized_state';
 
 export interface PublishesLastSavedState {
   lastSavedState: Subject<void>; // a notification that the last saved state has changed
-  getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined;
+  getLastSavedStateForChild: <SerializedState extends object = object>(
+    childId: string
+  ) => SerializedPanelState<SerializedState> | undefined;
 }
 
 export const apiPublishesLastSavedState = (api: unknown): api is PublishesLastSavedState => {
@@ -24,26 +26,29 @@ export const apiPublishesLastSavedState = (api: unknown): api is PublishesLastSa
   );
 };
 
-export const getLastSavedStateSubjectForChild = <StateType extends unknown = unknown>(
+export const getLastSavedStateSubjectForChild = <
+  SerializedState extends object = object,
+  RuntimeState extends object = object
+>(
   parentApi: unknown,
   childId: string,
-  deserializer?: (state: SerializedPanelState) => StateType
-): PublishingSubject<StateType | undefined> | undefined => {
+  deserializer: (state: SerializedPanelState<SerializedState>) => RuntimeState
+): PublishingSubject<RuntimeState | undefined> | undefined => {
   if (!parentApi) return;
-  const fetchUnsavedChanges = (): StateType | undefined => {
+  const fetchLastSavedState = (): RuntimeState | undefined => {
     if (!apiPublishesLastSavedState(parentApi)) return;
-    const rawLastSavedState = parentApi.getLastSavedStateForChild(childId);
+    const rawLastSavedState = parentApi.getLastSavedStateForChild<SerializedState>(childId);
     if (rawLastSavedState === undefined) return;
-    return deserializer
-      ? deserializer(rawLastSavedState)
-      : (rawLastSavedState.rawState as StateType);
+    return deserializer(rawLastSavedState);
   };
 
-  const lastSavedStateForChild = new BehaviorSubject<StateType | undefined>(fetchUnsavedChanges());
+  const lastSavedStateForChild = new BehaviorSubject<RuntimeState | undefined>(
+    fetchLastSavedState()
+  );
   if (!apiPublishesLastSavedState(parentApi)) return;
   parentApi.lastSavedState
     .pipe(
-      map(() => fetchUnsavedChanges()),
+      map(() => fetchLastSavedState()),
       filter((rawLastSavedState) => rawLastSavedState !== undefined)
     )
     .subscribe(lastSavedStateForChild);

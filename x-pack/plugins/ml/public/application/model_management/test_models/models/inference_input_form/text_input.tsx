@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
+import type { FC, FormEventHandler } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { EuiFlexGroup, EuiSpacer, EuiTabs, EuiTab, EuiForm } from '@elastic/eui';

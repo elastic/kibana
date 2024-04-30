@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -14,19 +15,30 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { AlertsClientError, DEFAULT_AAD_CONFIG, RuleType } from '@kbn/alerting-plugin/server';
-import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type {
+  PluginSetupContract as AlertingSetup,
+  IRuleTypeAlerts,
+  RuleType,
+} from '@kbn/alerting-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
-import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  PLUGIN,
+  type TransformHealthStatus,
+  TRANSFORM_RULE_TYPE,
+  TRANSFORM_HEALTH_RESULTS,
+} from '../../../../common/constants';
+import type { TransformHealthRuleParams } from './schema';
+import { transformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
 
 export interface BaseTransformAlertResponse {
   transform_id: string;
   description?: string;
-  health_status: TransformHealth;
+  health_status: TransformHealthStatus;
   issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: string }>;
 }
 
@@ -35,6 +47,9 @@ export interface TransformStateReportResponse extends BaseTransformAlertResponse
   node_name?: string;
 }
 
+/**
+ * @deprecated This health check is no longer in use
+ */
 export interface ErrorMessagesTransformResponse extends BaseTransformAlertResponse {
   error_messages: Array<{ message: string; timestamp: number; node_name?: string }>;
 }
@@ -63,6 +78,31 @@ interface RegisterParams {
   getFieldFormatsStart: () => FieldFormatsStart;
 }
 
+export const TRANSFORM_HEALTH_AAD_INDEX_NAME = 'transform.health';
+
+export const TRANSFORM_HEALTH_AAD_CONFIG: IRuleTypeAlerts<TransformHealthAlert> = {
+  context: TRANSFORM_HEALTH_AAD_INDEX_NAME,
+  mappings: {
+    fieldMap: {
+      [TRANSFORM_HEALTH_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          transform_id: { type: ES_FIELD_TYPES.KEYWORD },
+          description: { type: ES_FIELD_TYPES.TEXT },
+          health_status: { type: ES_FIELD_TYPES.KEYWORD },
+          issues: { type: ES_FIELD_TYPES.OBJECT },
+          transform_state: { type: ES_FIELD_TYPES.KEYWORD },
+          node_name: { type: ES_FIELD_TYPES.KEYWORD },
+        },
+      },
+    },
+  },
+  shouldWrite: true,
+};
+
 export function registerTransformHealthRuleType(params: RegisterParams) {
   const { alerting } = params;
   alerting.registerType(getTransformHealthRuleType(params.getFieldFormatsStart));
@@ -78,7 +118,7 @@ export function getTransformHealthRuleType(
   TransformHealthAlertContext,
   TransformIssue,
   RecoveredActionGroupId,
-  DefaultAlert
+  TransformHealthAlert
 > {
   return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
@@ -121,7 +161,7 @@ export function getTransformHealthRuleType(
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
     doesSetRecoveryContext: true,
-    alerts: DEFAULT_AAD_CONFIG,
+    alerts: TRANSFORM_HEALTH_AAD_CONFIG,
     async executor(options) {
       const {
         services: { scopedClusterClient, alertsClient, uiSettingsClient },
@@ -153,6 +193,7 @@ export function getTransformHealthRuleType(
             context,
             payload: {
               [ALERT_REASON]: context.message,
+              [TRANSFORM_HEALTH_RESULTS]: context.results,
             },
           });
         });
@@ -168,6 +209,7 @@ export function getTransformHealthRuleType(
             context: testResult.context,
             payload: {
               [ALERT_REASON]: testResult.context.message,
+              [TRANSFORM_HEALTH_RESULTS]: testResult.context.results,
             },
           });
         }

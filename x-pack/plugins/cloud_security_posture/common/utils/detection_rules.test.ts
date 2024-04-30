@@ -7,25 +7,45 @@
 
 import { CspBenchmarkRuleMetadata } from '../types';
 import {
-  convertRuleTagsToKQL,
+  convertRuleTagsToMatchAllKQL,
+  convertRuleTagsToMatchAnyKQL,
   generateBenchmarkRuleTags,
   getFindingsDetectionRuleSearchTags,
+  getFindingsDetectionRuleSearchTagsFromArrayOfRules,
 } from './detection_rules';
 
 describe('Detection rules utils', () => {
-  it('should convert tags to KQL format', () => {
+  it('should convert tags to KQL format with AND operator', () => {
     const inputTags = ['tag1', 'tag2', 'tag3'];
 
-    const result = convertRuleTagsToKQL(inputTags);
+    const result = convertRuleTagsToMatchAllKQL(inputTags);
 
     const expectedKQL = 'alert.attributes.tags:("tag1" AND "tag2" AND "tag3")';
     expect(result).toBe(expectedKQL);
   });
 
-  it('Should convert tags to KQL format', () => {
+  it('Should convert tags to KQL format with AND Operator (empty array)', () => {
     const inputTags = [] as string[];
 
-    const result = convertRuleTagsToKQL(inputTags);
+    const result = convertRuleTagsToMatchAllKQL(inputTags);
+
+    const expectedKQL = 'alert.attributes.tags:()';
+    expect(result).toBe(expectedKQL);
+  });
+
+  it('should convert tags to KQL format with OR Operator', () => {
+    const inputTags = ['tag1', 'tag2', 'tag3'];
+
+    const result = convertRuleTagsToMatchAnyKQL(inputTags);
+
+    const expectedKQL = 'alert.attributes.tags:("tag1" OR "tag2" OR "tag3")';
+    expect(result).toBe(expectedKQL);
+  });
+
+  it('Should convert tags to KQL format with OR Operator  (empty array)', () => {
+    const inputTags = [] as string[];
+
+    const result = convertRuleTagsToMatchAnyKQL(inputTags);
 
     const expectedKQL = 'alert.attributes.tags:()';
     expect(result).toBe(expectedKQL);
@@ -60,6 +80,35 @@ describe('Detection rules utils', () => {
     } as unknown as CspBenchmarkRuleMetadata;
     const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
     const expectedTags = ['CIS', 'GCP', 'CIS GCP'];
+    expect(result).toEqual(expectedTags);
+  });
+
+  it('Should generate search tags for a CSP benchmark rule given an array of Benchmarks', () => {
+    const cspBenchmarkRule = [
+      {
+        benchmark: {
+          id: 'cis_gcp',
+          rule_number: '1.1',
+        },
+      },
+      {
+        benchmark: {
+          id: 'cis_gcp',
+          rule_number: '1.2',
+        },
+      },
+    ] as unknown as CspBenchmarkRuleMetadata[];
+
+    const result = getFindingsDetectionRuleSearchTagsFromArrayOfRules(cspBenchmarkRule);
+
+    const expectedTags = ['CIS GCP 1.1', 'CIS GCP 1.2'];
+    expect(result).toEqual(expectedTags);
+  });
+
+  it('Should handle undefined benchmark object gracefully given an array of empty benchmark', () => {
+    const cspBenchmarkRule = [{ benchmark: {} }] as any;
+    const expectedTags: string[] = [];
+    const result = getFindingsDetectionRuleSearchTagsFromArrayOfRules(cspBenchmarkRule);
     expect(result).toEqual(expectedTags);
   });
 

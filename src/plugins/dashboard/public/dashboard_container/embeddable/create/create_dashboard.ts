@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import deepEqual from 'fast-deep-equal';
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -17,17 +18,21 @@ import {
   type ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  EmbeddableFactory,
-  isErrorEmbeddable,
-  reactEmbeddableRegistryHasKey,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { map, distinctUntilChanged, startWith } from 'rxjs';
 import { v4 } from 'uuid';
+import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -238,6 +243,13 @@ export const initializeDashboard = async ({
   };
 
   // --------------------------------------------------------------------------------------
+  // Track references
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboard) => {
+    dashboard.savedObjectReferences = loadDashboardReturn?.references;
+  });
+
+  // --------------------------------------------------------------------------------------
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
   if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
@@ -331,10 +343,10 @@ export const initializeDashboard = async ({
         const createdEmbeddable = await (async () => {
           // if there is no width or height we can add the panel using the default behaviour.
           if (!incomingEmbeddable.size) {
-            return await container.addNewEmbeddable(
-              incomingEmbeddable.type,
-              incomingEmbeddable.input
-            );
+            return await container.addNewPanel<{ uuid: string }>({
+              panelType: incomingEmbeddable.type,
+              initialState: incomingEmbeddable.input,
+            });
           }
 
           // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
@@ -361,42 +373,14 @@ export const initializeDashboard = async ({
               [newPanelState.explicitInput.id]: newPanelState,
             },
           });
-          if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
-            return { id: embeddableId };
-          }
 
           return await container.untilEmbeddableLoaded(embeddableId);
         })();
-        scrolltoIncomingEmbeddable(container, createdEmbeddable.id);
+        if (createdEmbeddable) {
+          scrolltoIncomingEmbeddable(container, createdEmbeddable.uuid);
+        }
       });
     }
-  }
-
-  // --------------------------------------------------------------------------------------
-  // Set up search sessions integration.
-  // --------------------------------------------------------------------------------------
-  let initialSearchSessionId;
-  if (searchSessionSettings) {
-    const { sessionIdToRestore } = searchSessionSettings;
-
-    // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      session.continue(incomingEmbeddable.searchSessionId);
-    }
-    if (sessionIdToRestore) {
-      session.restore(sessionIdToRestore);
-    }
-    const existingSession = session.getSessionId();
-
-    initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddable ? existingSession : session.start());
-
-    untilDashboardReady().then((container) => {
-      startDashboardSearchSessionIntegration.bind(container)(
-        creationOptions?.searchSessionSettings
-      );
-    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -461,6 +445,90 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) =>
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
+
+  // --------------------------------------------------------------------------------------
+  // Set parentApi.filters$ to include dashboardContainer filters and control group filters
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    if (!dashboardContainer.controlGroup) {
+      return;
+    }
+
+    function getCombinedFilters() {
+      return combineDashboardFiltersWithControlGroupFilters(
+        dashboardContainer.getInput().filters ?? [],
+        dashboardContainer.controlGroup!
+      );
+    }
+
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+    dashboardContainer.filters$ = filters$;
+
+    const inputFilters$ = dashboardContainer.getInput$().pipe(
+      startWith(dashboardContainer.getInput()),
+      map((input) => input.filters),
+      distinctUntilChanged((previous, current) => {
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
+      })
+    );
+
+    // Can not use onFiltersPublished$ directly since it does not have an intial value and
+    // combineLatest will not emit until each observable emits at least one value
+    const controlGroupFilters$ = dashboardContainer.controlGroup.onFiltersPublished$.pipe(
+      startWith(dashboardContainer.controlGroup.getOutput().filters)
+    );
+
+    dashboardContainer.integrationSubscriptions.add(
+      combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
+        filters$.next(getCombinedFilters());
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up parentApi.query$
+  // Can not use legacyEmbeddableToApi since query$ setting is delayed
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      dashboardContainer.getInput().query
+    );
+    dashboardContainer.query$ = query$;
+    dashboardContainer.integrationSubscriptions.add(
+      dashboardContainer.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up search sessions integration.
+  // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
+  if (searchSessionSettings) {
+    const { sessionIdToRestore } = searchSessionSettings;
+
+    // if this incoming embeddable has a session, continue it.
+    if (incomingEmbeddable?.searchSessionId) {
+      session.continue(incomingEmbeddable.searchSessionId);
+    }
+    if (sessionIdToRestore) {
+      session.restore(sessionIdToRestore);
+    }
+    const existingSession = session.getSessionId();
+
+    initialSearchSessionId =
+      sessionIdToRestore ??
+      (existingSession && incomingEmbeddable ? existingSession : session.start());
+
+    untilDashboardReady().then((container) => {
+      startDashboardSearchSessionIntegration.bind(container)(
+        creationOptions?.searchSessionSettings
+      );
+    });
+  }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

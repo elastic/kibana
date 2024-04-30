@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
-import React, { FC, useMemo } from 'react';
+import type { EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 

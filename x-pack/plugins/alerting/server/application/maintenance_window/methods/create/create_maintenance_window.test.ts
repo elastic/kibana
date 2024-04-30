@@ -16,6 +16,7 @@ import {
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
+import { FilterStateStore } from '@kbn/es-query';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -168,7 +169,7 @@ describe('MaintenanceWindowClient - create', () => {
                 type: 'phrase',
               },
               $state: {
-                store: 'appState',
+                store: FilterStateStore.APP_STATE,
               },
               query: {
                 match_phrase: {
@@ -281,7 +282,7 @@ describe('MaintenanceWindowClient - create', () => {
                   type: 'phrase',
                 },
                 $state: {
-                  store: 'appState',
+                  store: FilterStateStore.APP_STATE,
                 },
                 query: {
                   match_phrase: {

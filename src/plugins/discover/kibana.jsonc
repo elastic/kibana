@@ -38,7 +38,7 @@
       "lens",
       "noDataPage",
       "globalSearch",
-      "serverless"
+      "observabilityAIAssistant"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]

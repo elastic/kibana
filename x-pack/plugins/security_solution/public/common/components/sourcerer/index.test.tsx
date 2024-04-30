@@ -37,8 +37,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
 
   return {
     ...original,
@@ -658,5 +658,14 @@ describe('Sourcerer component', () => {
       </TestProviders>
     );
     expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders without a popover when analyzer is the scope', () => {
+    mount(
+      <TestProviders>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.analyzer} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).exists()).toBeFalsy();
   });
 });

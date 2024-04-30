@@ -6,11 +6,13 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { DatasetQualityRoute, ObservabilityLogsExplorerMainRoute } from '../routes/main';
+import { NotFoundPage } from '../routes/not_found';
 import {
   ObservabilityLogsExplorerAppMountParameters,
   ObservabilityLogsExplorerPluginStart,
@@ -57,6 +59,7 @@ export const ObservabilityLogsExplorerApp = ({
   plugins,
   pluginStart,
 }: ObservabilityLogsExplorerAppProps) => {
+  const isDarkMode = core.theme.getTheme().darkMode;
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -69,10 +72,21 @@ export const ObservabilityLogsExplorerApp = ({
       <KibanaContextProviderForPlugin>
         <KbnUrlStateStorageFromRouterProvider>
           <Router history={appParams.history}>
-            <Routes>
-              <Route path="/" exact={true} render={() => <ObservabilityLogsExplorerMainRoute />} />
-              <Route path="/dataset-quality" exact={true} render={() => <DatasetQualityRoute />} />
-            </Routes>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <Routes>
+                <Route
+                  path="/"
+                  exact={true}
+                  render={() => <ObservabilityLogsExplorerMainRoute />}
+                />
+                <Route
+                  path="/dataset-quality"
+                  exact={true}
+                  render={() => <DatasetQualityRoute />}
+                />
+                <Route render={() => <NotFoundPage />} />
+              </Routes>
+            </EuiThemeProvider>
           </Router>
         </KbnUrlStateStorageFromRouterProvider>
       </KibanaContextProviderForPlugin>

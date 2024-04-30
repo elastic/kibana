@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
 import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
@@ -32,7 +31,7 @@ export class FilesExamplePlugin
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

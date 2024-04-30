@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  reactEmbeddableRegistryHasKey,
-  shouldRefreshFilterCompareOptions,
-} from '@kbn/embeddable-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  isFilterPinned,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
+import { reactEmbeddableRegistryHasKey } from '@kbn/embeddable-plugin/public';
+import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
 import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../../embeddable/dashboard_container';
@@ -137,14 +129,4 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   },
 
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
-};
-
-export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
-  filters: ({ currentValue, lastValue }) =>
-    onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
-
-  // fire on all time range changes, regardless of timeRestore
-  timeRange: ({ currentValue, lastValue }) =>
-    areTimesEqual(currentValue?.from, lastValue?.from) &&
-    areTimesEqual(currentValue?.to, lastValue?.to),
 };

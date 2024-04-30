@@ -11,7 +11,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
@@ -19,8 +18,6 @@ import type { SearchBarCustomization, TopNavCustomization } from '../../../../cu
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-setHeaderActionMenuMounter(jest.fn());
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -282,8 +279,8 @@ describe('Discover topnav component', () => {
     });
   });
 
-  describe('serverless', () => {
-    it('should render top nav when serverless plugin is not defined', () => {
+  describe('inline top nav', () => {
+    it('should render top nav when inline top nav is not enabled', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
@@ -296,14 +293,9 @@ describe('Discover topnav component', () => {
       expect(searchBar.prop('setMenuMountPoint')).toBeDefined();
     });
 
-    it('should not render top nav when serverless plugin is defined', () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...mockDiscoverService,
-          serverless: true,
-        },
-      });
+    it('should not render top nav when inline top nav is enabled', () => {
       const props = getProps();
+      props.stateContainer.customizationContext.inlineTopNav.enabled = true;
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
           <DiscoverTopNav {...props} />

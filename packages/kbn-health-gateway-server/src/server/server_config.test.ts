@@ -19,6 +19,7 @@ describe('server config', () => {
         "maxPayload": ByteSizeValue {
           "valueInBytes": 1048576,
         },
+        "payloadTimeout": 20000,
         "port": 3000,
         "restrictInternalApis": false,
         "shutdownTimeout": "PT30S",

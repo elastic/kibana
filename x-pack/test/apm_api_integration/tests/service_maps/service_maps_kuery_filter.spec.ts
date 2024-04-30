@@ -41,6 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Service Map', { config: 'trial', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176982
     describe('optional kuery param', () => {
       before(async () => {
         const events = timerange(start, end)

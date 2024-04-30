@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiColorPaletteDisplay,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { CustomizablePalette, FIXED_PROGRESSION, PaletteRegistry } from '@kbn/coloring';
+import { EuiFormRow } from '@elastic/eui';
+import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { PalettePanelContainer } from '../../shared_components';
 import './dimension_editor.scss';
@@ -27,7 +21,6 @@ export function HeatmapDimensionEditor(
   }
 ) {
   const { state, setState, frame, accessor, isInlineEditing } = props;
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   if (state?.valueAccessor !== accessor) return null;
 
@@ -51,69 +44,30 @@ export function HeatmapDimensionEditor(
           defaultMessage: 'Color',
         })}
       >
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          className="lnsDynamicColoringClickable"
+        <PalettePanelContainer
+          palette={displayStops.map(({ color }) => color)}
+          siblingRef={props.panelRef}
+          isInlineEditing={isInlineEditing}
         >
-          <EuiFlexItem>
-            <EuiColorPaletteDisplay
-              data-test-subj="lnsHeatmap_dynamicColoring_palette"
-              palette={displayStops.map(({ color }) => color)}
-              type={FIXED_PROGRESSION}
-              onClick={() => {
-                setIsPaletteOpen(!isPaletteOpen);
+          {activePalette && (
+            <CustomizablePalette
+              palettes={props.paletteService}
+              activePalette={activePalette}
+              dataBounds={currentMinMax}
+              setPalette={(newPalette) => {
+                // make sure to always have a list of stops
+                if (newPalette.params && !newPalette.params.stops) {
+                  newPalette.params.stops = displayStops;
+                }
+                (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
+                setState({
+                  ...state,
+                  palette: newPalette as HeatmapVisualizationState['palette'],
+                });
               }}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="lnsHeatmap_dynamicColoring_trigger"
-              aria-label={i18n.translate('xpack.lens.paletteHeatmapGradient.customizeLong', {
-                defaultMessage: 'Edit palette',
-              })}
-              iconType="controlsHorizontal"
-              onClick={() => {
-                setIsPaletteOpen(!isPaletteOpen);
-              }}
-              size="xs"
-              flush="both"
-            >
-              {i18n.translate('xpack.lens.paletteHeatmapGradient.customize', {
-                defaultMessage: 'Edit',
-              })}
-            </EuiButtonEmpty>
-            <PalettePanelContainer
-              siblingRef={props.panelRef}
-              isOpen={isPaletteOpen}
-              handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-              title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
-                defaultMessage: 'Color',
-              })}
-              isInlineEditing={isInlineEditing}
-            >
-              {activePalette && (
-                <CustomizablePalette
-                  palettes={props.paletteService}
-                  activePalette={activePalette}
-                  dataBounds={currentMinMax}
-                  setPalette={(newPalette) => {
-                    // make sure to always have a list of stops
-                    if (newPalette.params && !newPalette.params.stops) {
-                      newPalette.params.stops = displayStops;
-                    }
-                    (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
-                    setState({
-                      ...state,
-                      palette: newPalette as HeatmapVisualizationState['palette'],
-                    });
-                  }}
-                />
-              )}
-            </PalettePanelContainer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          )}
+        </PalettePanelContainer>
       </EuiFormRow>
     </>
   );

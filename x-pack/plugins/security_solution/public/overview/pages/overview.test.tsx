@@ -10,7 +10,6 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
 
-import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
@@ -28,7 +27,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 
 const mockNavigateToApp = jest.fn();
-jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -308,7 +307,7 @@ describe('Overview', () => {
           </TestProviders>
         );
 
-        expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
+        expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
       });
     });
   });

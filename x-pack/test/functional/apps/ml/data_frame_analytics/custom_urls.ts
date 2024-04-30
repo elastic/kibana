@@ -38,8 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/164224
-  describe.skip('custom urls', function () {
+  describe('custom urls', function () {
     const dfaJobId = `fq_regression_${Date.now()}`;
     const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
     let testDashboardId: string | null = null;
@@ -74,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.api.createAndRunDFAJob(dfaJobConfig);
+      await ml.api.createAndRunDFAJob(dfaJobConfig, 3 * 60 * 1000);
     });
 
     after(async () => {

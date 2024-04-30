@@ -6,9 +6,9 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
 
 export interface MlUsageData {

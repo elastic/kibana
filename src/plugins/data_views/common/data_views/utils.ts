@@ -7,7 +7,7 @@
  */
 
 import { catchError, from, Observable, of } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import { mergeMap, last, map, toArray } from 'rxjs';
 import type { RuntimeField, RuntimeFieldSpec, RuntimePrimitiveTypes } from '../types';
 
 export const removeFieldAttrs = (runtimeField: RuntimeField): RuntimeFieldSpec => {

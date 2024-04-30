@@ -125,7 +125,9 @@
             "signature": [
               "{ getBasePath: jest.MockInstance<string, [], unknown>; getServerBasePath: jest.MockInstance<string, [], unknown>; getPublicBaseUrl: jest.MockInstance<string | undefined, [], unknown>; getAssetsHrefBase: jest.MockInstance<string, [], unknown>; getKibanaBuildNumber: jest.MockInstance<number, [], unknown>; getKibanaBranch: jest.MockInstance<string, [], unknown>; getKibanaVersion: jest.MockInstance<string, [], unknown>; getCspConfig: jest.MockInstance<{ warnLegacyBrowsers: boolean; }, [], unknown>; getExternalUrlConfig: jest.MockInstance<{ policy: ",
               "InjectedMetadataExternalUrlPolicy",
-              "[]; }, [], unknown>; getTheme: jest.MockInstance<{ darkMode: boolean; version: \"v8\"; }, [], unknown>; getElasticsearchInfo: jest.MockInstance<",
+              "[]; }, [], unknown>; getTheme: jest.MockInstance<",
+              "InjectedMetadataTheme",
+              ", [], unknown>; getElasticsearchInfo: jest.MockInstance<",
               "InjectedMetadataClusterInfo",
               ", [], unknown>; getPlugins: jest.MockInstance<",
               "InjectedMetadataPlugin",

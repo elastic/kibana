@@ -10,8 +10,9 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { CompatibleModule } from '../../../common/constants/app';
 import type { GetGuards } from '../shared_services';
-import { DataRecognizer, dataRecognizerFactory } from '../../models/data_recognizer';
-import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
+import type { DataRecognizer } from '../../models/data_recognizer';
+import { dataRecognizerFactory } from '../../models/data_recognizer';
+import type { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
 
 export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
   TypeOf<typeof setupModuleBodySchema>;

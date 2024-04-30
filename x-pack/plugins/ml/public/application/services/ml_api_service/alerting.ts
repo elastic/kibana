@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {

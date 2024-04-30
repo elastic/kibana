@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
@@ -29,7 +30,7 @@ export const fetchDocuments = (
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
-  if (searchSource.getField('index')?.type === 'rollup') {
+  if (searchSource.getField('index')?.type === DataViewType.ROLLUP) {
     // We treat that data view as "normal" even if it was a rollup data view,
     // since the rollup endpoint does not support querying individual documents, but we
     // can get them from the regular _search API that will be used if the data view

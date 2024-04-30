@@ -13,6 +13,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const retryService = getService('retry');
+  const toasts = getService('toasts');
   const formTestSubj = getPolicySettingsFormTestSubjects();
 
   return {
@@ -111,7 +112,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       // which are displayed using one or more Toast messages. This in turn prevents the user from
       // actually clicking the Save button. Because those errors are not associated with Policy details,
       // we'll first check that all toasts are cleared
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
 
       await testSubjects.click('policyDetailsSaveButton');
       await testSubjects.existOrFail('policyDetailsConfirmModal');

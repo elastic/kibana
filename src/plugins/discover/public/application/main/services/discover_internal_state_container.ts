@@ -11,20 +11,24 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 
 export interface InternalState {
   dataView: DataView | undefined;
+  isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
 }
 
-interface InternalStateTransitions {
+export interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
@@ -38,6 +42,12 @@ interface InternalStateTransitions {
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
   setCustomFilters: (state: InternalState) => (customFilters: Filter[]) => InternalState;
+  setOverriddenVisContextAfterInvalidation: (
+    state: InternalState
+  ) => (
+    overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined
+  ) => InternalState;
+  resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -52,15 +62,21 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
+      isDataViewLoading: false,
       adHocDataViews: [],
       savedDataViews: [],
       expandedDoc: undefined,
       customFilters: [],
+      overriddenVisContextAfterInvalidation: undefined,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
+      }),
+      setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
+        ...prevState,
+        isDataViewLoading: loading,
       }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
@@ -104,6 +120,16 @@ export function getInternalStateContainer() {
       setCustomFilters: (prevState: InternalState) => (customFilters: Filter[]) => ({
         ...prevState,
         customFilters,
+      }),
+      setOverriddenVisContextAfterInvalidation:
+        (prevState: InternalState) =>
+        (overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined) => ({
+          ...prevState,
+          overriddenVisContextAfterInvalidation,
+        }),
+      resetOnSavedSearchChange: (prevState: InternalState) => () => ({
+        ...prevState,
+        overriddenVisContextAfterInvalidation: undefined,
       }),
     },
     {},

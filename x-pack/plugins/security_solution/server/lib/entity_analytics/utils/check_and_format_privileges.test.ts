@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { _formatPrivileges } from './check_and_format_privileges';
+import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality/constants';
+import { _formatPrivileges, hasReadWritePermissions } from './check_and_format_privileges';
 
 describe('_formatPrivileges', () => {
   it('should correctly format elasticsearch index privileges', () => {
@@ -144,6 +145,62 @@ describe('_formatPrivileges', () => {
           },
         },
       },
+    });
+  });
+
+  it('should correctly extract read and write permissions from elasticsearch cluster privileges', () => {
+    const privileges = {
+      elasticsearch: {
+        cluster: [
+          {
+            privilege: 'read',
+            authorized: true,
+          },
+          {
+            privilege: 'write',
+            authorized: false,
+          },
+        ],
+        index: {},
+      },
+      kibana: [],
+    };
+
+    const result = hasReadWritePermissions(privileges.elasticsearch);
+
+    expect(result).toEqual({
+      has_read_permissions: true,
+      has_write_permissions: false,
+    });
+  });
+  it('should correctly extract read and write permissions from elasticsearch index privileges', () => {
+    const privileges = {
+      elasticsearch: {
+        cluster: [],
+        index: {
+          [ASSET_CRITICALITY_INDEX_PATTERN]: [
+            {
+              privilege: 'read',
+              authorized: true,
+            },
+            {
+              privilege: 'write',
+              authorized: false,
+            },
+          ],
+        },
+      },
+      kibana: [],
+    };
+
+    const result = hasReadWritePermissions(
+      privileges.elasticsearch,
+      ASSET_CRITICALITY_INDEX_PATTERN
+    );
+
+    expect(result).toEqual({
+      has_read_permissions: true,
+      has_write_permissions: false,
     });
   });
 });

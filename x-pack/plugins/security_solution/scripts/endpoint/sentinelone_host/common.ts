@@ -10,8 +10,8 @@ import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { dump } from '../common/utils';
 import { type RuleResponse } from '../../../common/api/detection_engine';
-import { dump } from '../endpoint_agent_runner/utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,
@@ -209,7 +209,10 @@ export const installSentinelOneAgent = async ({
 
     try {
       // Generate an alert in SentinelOne
-      await hostVm.exec('nslookup amazon.com');
+      const command = 'nslookup elastic.co';
+
+      log?.info(`Triggering alert using command: ${command}`);
+      await hostVm.exec(command);
     } catch (e) {
       log?.warning(`Attempted to generate an alert on SentinelOne host failed: ${e.message}`);
     }

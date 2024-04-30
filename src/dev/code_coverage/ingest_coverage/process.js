@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromEventPattern, fromEvent } from 'rxjs';
-import { map, mergeMap, takeUntil, bufferCount } from 'rxjs/operators';
+import { fromEventPattern, fromEvent, map, mergeMap, takeUntil, bufferCount } from 'rxjs';
 import jsonStream from './json_stream';
 import { pipe, noop } from './utils';
 import { ingestList } from './ingest';

@@ -6,37 +6,53 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { TASK_METRICS_CHANNEL } from '../constants';
 import type { ITelemetryEventsSender } from '../sender';
-import type { TelemetryConfiguration } from '../types';
+import { TelemetryChannel, type TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
-import { createTaskMetric, tlog } from '../helpers';
+import { newTelemetryLogger } from '../helpers';
 
 export function createTelemetryConfigurationTaskConfig() {
+  const taskName = 'Security Solution Telemetry Configuration Task';
+  const taskType = 'security:telemetry-configuration';
   return {
-    type: 'security:telemetry-configuration',
-    title: 'Security Solution Telemetry Configuration Task',
+    type: taskType,
+    title: taskName,
     interval: '1h',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: ITelemetryReceiver,
+      _receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
-      const taskName = 'Security Solution Telemetry Configuration Task';
+      const log = newTelemetryLogger(logger.get('configuration'));
+      const trace = taskMetricsService.start(taskType);
+
+      log.l(
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
-        const configArtifact = (await artifactService.getArtifact(
-          artifactName
-        )) as unknown as TelemetryConfiguration;
-        tlog(logger, `New telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
+        const manifest = await artifactService.getArtifact(artifactName);
+
+        if (manifest.notModified) {
+          log.l('No new configuration artifact found, skipping...');
+          taskMetricsService.end(trace);
+          return 0;
+        }
+
+        const configArtifact = manifest.data as unknown as TelemetryConfiguration;
+
+        log.l(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
+
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
         telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
@@ -46,16 +62,58 @@ export function createTelemetryConfigurationTaskConfig() {
           configArtifact.max_endpoint_telemetry_batch;
         telemetryConfiguration.max_security_list_telemetry_batch =
           configArtifact.max_security_list_telemetry_batch;
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
+
+        if (configArtifact.use_async_sender) {
+          telemetryConfiguration.use_async_sender = configArtifact.use_async_sender;
+        }
+
+        if (configArtifact.sender_channels) {
+          log.l('Updating sender channels configuration');
+          telemetryConfiguration.sender_channels = configArtifact.sender_channels;
+          const channelsDict = Object.values(TelemetryChannel).reduce(
+            (acc, channel) => acc.set(channel as string, channel),
+            new Map<string, TelemetryChannel>()
+          );
+
+          Object.entries(configArtifact.sender_channels).forEach(([channelName, config]) => {
+            if (channelName === 'default') {
+              log.l('Updating default configuration');
+              sender.updateDefaultQueueConfig({
+                bufferTimeSpanMillis: config.buffer_time_span_millis,
+                inflightEventsThreshold: config.inflight_events_threshold,
+                maxPayloadSizeBytes: config.max_payload_size_bytes,
+              });
+            } else {
+              const channel = channelsDict.get(channelName);
+              if (!channel) {
+                log.l(`Ignoring unknown channel "${channelName}"`);
+              } else {
+                log.l(`Updating configuration for channel "${channelName}`);
+                sender.updateQueueConfig(channel, {
+                  bufferTimeSpanMillis: config.buffer_time_span_millis,
+                  inflightEventsThreshold: config.inflight_events_threshold,
+                  maxPayloadSizeBytes: config.max_payload_size_bytes,
+                });
+              }
+            }
+          });
+        }
+
+        if (configArtifact.pagination_config) {
+          log.l('Updating pagination configuration');
+          telemetryConfiguration.pagination_config = configArtifact.pagination_config;
+          _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
+          _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
+        }
+
+        taskMetricsService.end(trace);
+
+        log.l(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);
         return 0;
       } catch (err) {
-        tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
+        log.l(`Failed to set telemetry configuration due to ${err.message}`);
         telemetryConfiguration.resetAllToDefault();
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

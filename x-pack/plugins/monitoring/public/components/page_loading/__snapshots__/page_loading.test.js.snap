@@ -15,13 +15,13 @@ exports[`PageLoading should show a simple page loading component 1`] = `
         class="emotion-euiPageSection__content-l-center"
       >
         <div
-          class="euiPanel euiPanel--plain euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
         >
           <div
-            class="euiEmptyPrompt__main"
+            class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
           >
             <div
-              class="euiEmptyPrompt__icon"
+              class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
                 aria-label="Loading"
@@ -30,16 +30,12 @@ exports[`PageLoading should show a simple page loading component 1`] = `
               />
             </div>
             <div
-              class="euiEmptyPrompt__content"
+              class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
             >
               <div
-                class="euiEmptyPrompt__contentInner"
+                class="euiText emotion-euiText-m-euiTextColor-subdued"
               >
-                <div
-                  class="euiText emotion-euiText-m-euiTextColor-subdued"
-                >
-                  Loading…
-                </div>
+                Loading…
               </div>
             </div>
           </div>

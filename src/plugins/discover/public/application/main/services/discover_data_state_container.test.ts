@@ -12,8 +12,6 @@ import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mock
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { FetchStatus } from '../../types';
-import { setUrlTracker } from '../../../kibana_services';
-import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { DataDocuments$, RecordRawType } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../utils/fetch_documents';
@@ -28,7 +26,6 @@ jest.mock('@kbn/ebt-tools', () => ({
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 
-setUrlTracker(urlTrackerMock);
 describe('test getDataStateContainer', () => {
   test('return is valid', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });

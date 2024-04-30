@@ -8,6 +8,7 @@
 
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
@@ -45,7 +46,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes = unknown
+  TSavedObjectAttributes extends FinderAttributes = FinderAttributes
 > extends PersistableState<EmbeddableStateWithType> {
   /**
    * The version of this Embeddable factory. This will be used in the client side migration system

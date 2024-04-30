@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { NetworkTopNFlowStrategyResponse } from '../../../../../common/search_strategy';
+import type {
+  NetworkTopNFlowCountStrategyResponse,
+  NetworkTopNFlowStrategyResponse,
+} from '../../../../../common/search_strategy';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-export const mockData: NetworkTopNFlowStrategyResponse = {
+export const mockCount: NetworkTopNFlowCountStrategyResponse = {
   totalCount: 524,
+  rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
+};
+
+export const mockData: NetworkTopNFlowStrategyResponse = {
   edges: [
     {
       node: {
@@ -74,10 +81,5 @@ export const mockData: NetworkTopNFlowStrategyResponse = {
       },
     },
   ],
-  pageInfo: {
-    activePage: 1,
-    fakeTotalCount: 50,
-    showMorePagesIndicator: true,
-  },
   rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
 };

@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import { coreMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
@@ -46,6 +47,7 @@ function getProps() {
     indicesAPIClient: indicesAPIClientMock.create(),
     docLinks,
     license,
+    buildFlavor: 'traditional' as BuildFlavor,
   };
 }
 
@@ -80,4 +82,13 @@ test('it renders fields as disabled when not editable', () => {
   expect(
     wrapper.find('IndexPrivileges').everyWhere((component) => component.prop('editable'))
   ).toBe(false);
+});
+
+test('it renders correctly in serverless mode', () => {
+  expect(
+    shallowWithIntl(
+      // Enabled remote indices privilege to make sure remote indices is still not rendered due to build flavor
+      <ElasticsearchPrivileges {...getProps()} buildFlavor={'serverless'} canUseRemoteIndices />
+    )
+  ).toMatchSnapshot();
 });

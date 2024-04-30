@@ -21,11 +21,11 @@ paths:
                 properties:
                   assistantModelEvaluation:
                     type: boolean
-                  assistantStreamingEnabled:
+                  attackDiscoveryEnabled:
                     type: boolean
                 required:
                   - assistantModelEvaluation
-                  - assistantStreamingEnabled
+                  - attackDiscoveryEnabled
         '400':
           description: Generic Error
           content:

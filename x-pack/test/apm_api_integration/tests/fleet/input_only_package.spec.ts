@@ -84,16 +84,17 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177384
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
       const res = await bettertest<{
-        item: { output_permissions: { default: Record<string, SecurityRoleDescriptor> } };
+        item: { output_permissions: { [key: string]: Record<string, SecurityRoleDescriptor> } };
       }>({
         pathname: `/api/fleet/agent_policies/${agentPolicyId}/full`,
         method: 'get',
       });
 
-      return res.body.item.output_permissions.default[packagePolicyId];
+      return Object.values(res.body.item.output_permissions)[0][packagePolicyId];
     }
 
     describe('input only package', () => {

@@ -13,6 +13,22 @@ import { appActions } from '../store/app';
 import { useAppToasts } from './use_app_toasts';
 import { useDeepEqualSelector } from './use_selector';
 
+export const genHash = (message: string) =>
+  message
+    .split('')
+    // eslint-disable-next-line no-bitwise
+    .reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
+    .toString();
+
+interface UseInvalidFilterQueryProps {
+  id: string;
+  filterQuery?: string;
+  kqlError?: Error;
+  query?: Query;
+  startDate?: string;
+  endDate?: string;
+}
+
 /**
  * Adds a toast error message whenever invalid KQL is submitted through the search bar
  */
@@ -20,17 +36,12 @@ export const useInvalidFilterQuery = ({
   id,
   filterQuery,
   kqlError,
+  // TODO: Review and remove these (query, startDate, endDate) props.
+  // Change of any of these props will not trigger new error toast.
   query,
   startDate,
   endDate,
-}: {
-  id: string;
-  filterQuery?: string;
-  kqlError?: Error;
-  query: Query;
-  startDate: string;
-  endDate: string;
-}) => {
+}: UseInvalidFilterQueryProps): void => {
   const { addError } = useAppToasts();
   const dispatch = useDispatch();
   const getErrorsSelector = useMemo(() => appSelectors.errorsSelector(), []);
@@ -41,16 +52,10 @@ export const useInvalidFilterQuery = ({
 
   useEffect(() => {
     if (!filterQuery && message && name) {
-      // Local util for creating an replicatable error hash
-      const hashCode = message
-        .split('')
-        // eslint-disable-next-line no-bitwise
-        .reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
-        .toString();
       dispatch(
         appActions.addErrorHash({
           id,
-          hash: hashCode,
+          hash: genHash(message),
           title: name,
           message: [message],
         })

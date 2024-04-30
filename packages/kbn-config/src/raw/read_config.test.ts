@@ -41,6 +41,18 @@ test('should inject an environment variable value when setting a value with ${EN
   expect(config).toMatchSnapshot();
 });
 
+test('should inject an environment variable in a nested list of objects', () => {
+  process.env.KBN_ENV_VAR1 = 'val1';
+  process.env.KBN_ENV_VAR2 = 'val2';
+
+  const config = getConfigFromFiles([fixtureFile('/en_var_ref_config_nested.yml')]);
+
+  delete process.env.KBN_ENV_VAR1;
+  delete process.env.KBN_ENV_VAR2;
+
+  expect(config).toMatchSnapshot();
+});
+
 test('should throw an exception when referenced environment variable in a config value does not exist', () => {
   expect(() =>
     getConfigFromFiles([fixtureFile('/en_var_ref_config.yml')])
@@ -50,13 +62,13 @@ test('should throw an exception when referenced environment variable in a config
 test('throws parsing a config with forbidden paths', () => {
   expect(() =>
     getConfigFromFiles([fixtureFile('forbidden_1.yml')])
-  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.aaa.__proto__.hello"`);
+  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.aaa['__proto__.hello']"`);
 });
 
 test('throws parsing another config with forbidden paths', () => {
   expect(() =>
     getConfigFromFiles([fixtureFile('forbidden_2.yml')])
-  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.hello.__proto__"`);
+  ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.hello.__proto__.dolly"`);
 });
 
 test('merging two configs', () => {
@@ -82,4 +94,39 @@ describe('different cwd()', () => {
     const relativePath = relative(resolve(__dirname, '../../'), fixtureFile('/one.yml'));
     expect(() => getConfigFromFiles([relativePath])).toThrowError(/ENOENT/);
   });
+});
+
+test('supports unsplittable key syntax', () => {
+  const config = getConfigFromFiles([fixtureFile('/unsplittable_1.yml')]);
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "bar": 3,
+      "foo": 1,
+      "foo.bar": "foobar",
+      "nested": Object {
+        "a.b": "ab",
+        "str1": "foo",
+      },
+    }
+  `);
+});
+
+test('supports unsplittable key syntax on nested list', () => {
+  const config = getConfigFromFiles([fixtureFile('/unsplittable_2.yml')]);
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "foo.bar": "foobar",
+      "list": Array [
+        Object {
+          "a.b": Array [
+            "foo",
+            "bar",
+          ],
+          "id": "id1",
+        },
+      ],
+    }
+  `);
 });

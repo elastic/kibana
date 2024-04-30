@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/actions'],
 };

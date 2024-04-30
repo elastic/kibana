@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
-import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
+import type { DropDownLabel, DropDownProps } from '../agg_select';
+import { AggSelect } from '../agg_select';
 
 interface Props {
   fields: Field[];

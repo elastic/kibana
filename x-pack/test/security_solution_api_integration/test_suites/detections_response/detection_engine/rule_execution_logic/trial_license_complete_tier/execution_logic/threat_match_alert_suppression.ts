@@ -20,13 +20,14 @@ import {
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  createRule,
   getOpenAlerts,
   getPreviewAlerts,
   getThreatMatchRuleForAlertTesting,
@@ -42,6 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const {
     indexListOfDocuments: indexListOfSourceDocuments,
@@ -155,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
+  describe('@ess @serverless @serverlessQA Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -334,8 +336,8 @@ export default ({ getService }: FtrProviderContext) => {
           const secondDocument = {
             id,
             '@timestamp': secondTimestamp,
-            agent: {
-              name: 'agent-1',
+            host: {
+              name: 'host-a',
             },
           };
           // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
@@ -1123,6 +1125,133 @@ export default ({ getService }: FtrProviderContext) => {
             expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
             expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
             expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+          });
+        });
+
+        // large number of documents gets processed in batches of 9,000
+        // rule should correctly go through them and suppress
+        // that can be an issue when search results returning in desc order
+        // this test is added to verify suppression works fine for this cases
+        it('should suppress alerts on large number of documents, more than 9,000', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+          await eventsFiller({
+            id,
+            count: 10000 * eventsCount,
+            timestamp: [firstTimestamp, secondTimestamp],
+          });
+          await threatsFiller({ id, count: 10000 * threatsCount, timestamp: firstTimestamp });
+
+          await indexGeneratedSourceDocuments({
+            docsCount: 60000,
+            interval: [firstTimestamp, '2020-10-28T05:35:50.000Z'],
+            seed: (index, _, timestamp) => ({
+              id,
+              '@timestamp': timestamp,
+              host: {
+                name: `host-${index}`,
+              },
+              agent: { name: 'agent-a' },
+            }),
+          });
+
+          await indexGeneratedSourceDocuments({
+            docsCount: 60000,
+            interval: [secondTimestamp, '2020-10-28T06:20:50.000Z'],
+            seed: (index, _, timestamp) => ({
+              id,
+              '@timestamp': timestamp,
+              host: {
+                name: `host-${index}`,
+              },
+              agent: { name: 'agent-a' },
+            }),
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-80',
+              },
+            },
+            count: 1,
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-14000',
+              },
+            },
+            count: 1,
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-36000',
+              },
+            },
+            count: 1,
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-5700',
+              },
+            },
+            count: 1,
+          });
+
+          const rule: ThreatMatchRuleCreateProps = {
+            ...indicatorMatchRule(id),
+            alert_suppression: {
+              group_by: ['agent.name'],
+              missing_fields_strategy: 'suppress',
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: ['agent-a'],
+              },
+            ],
+            // There 4 documents in threats index, each matches one document in source index on each of 2 rule executions
+            // In total it gives 8 potential alerts. With suppression enabled 1 is created, the rest 7 are suppressed
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 7,
           });
         });
 
@@ -2064,6 +2193,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+              [ALERT_SUPPRESSION_START]: '2020-10-28T06:50:00.000Z',
             });
           });
 
@@ -2258,6 +2388,145 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
+          });
+        });
+
+        describe('alerts should be enriched', () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+          });
+
+          it('should be enriched with host risk score', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const laterTimestamp = '2020-10-28T06:50:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'zeek-sensor-amsterdam' },
+              user: { name: 'root' },
+            };
+            const doc1WithLaterTimestamp = {
+              ...doc1,
+              '@timestamp': laterTimestamp,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'zeek-sensor-amsterdam',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+            expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(70);
+            expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
+            expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
+          });
+        });
+
+        describe('with asset criticality', async () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+            await kibanaServer.uiSettings.update({
+              [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+            });
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+          });
+
+          it('should be enriched alert with criticality_level', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const laterTimestamp = '2020-10-28T06:50:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'zeek-sensor-amsterdam' },
+              user: { name: 'root' },
+            };
+            const doc1WithLaterTimestamp = {
+              ...doc1,
+              '@timestamp': laterTimestamp,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'zeek-sensor-amsterdam',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('low_impact');
+            expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
           });
         });
       });

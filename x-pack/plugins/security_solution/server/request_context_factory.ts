@@ -77,6 +77,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       kibanaBranch: options.kibanaBranch,
     });
 
+    const getAuditLogger = () => security?.audit.asScoped(request);
+
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
@@ -106,6 +108,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
       getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
+
+      getAuditLogger,
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
@@ -141,6 +145,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             soClient: coreContext.savedObjects.client,
             namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
           })
       ),
       getRiskScoreDataClient: memoize(
@@ -159,6 +164,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
           })
       ),
     };

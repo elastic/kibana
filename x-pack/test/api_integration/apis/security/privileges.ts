@@ -70,7 +70,13 @@ export default function ({ getService }: FtrProviderContext) {
         'execute_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
-      securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionAssistant: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'update_anonymization',
+      ],
       securitySolutionCases: [
         'all',
         'read',

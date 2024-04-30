@@ -6,22 +6,18 @@
  * Side Public License, v 1.
  */
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
-import {
-  isKeyEqual,
-  isKeyEqualAsync,
-  shouldRefreshDiffingFunctions,
-  unsavedChangesDiffingFunctions,
-} from './dashboard_diffing_functions';
+import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -61,23 +57,6 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInpu
 ];
 
 /**
- * input keys that will cause a new session to be created.
- */
-const sessionChangeKeys: Array<keyof Omit<DashboardContainerInput, 'panels'>> = [
-  'query',
-  'filters',
-  'timeRange',
-  'timeslice',
-  'timeRestore',
-  'lastReloadRequestTime',
-
-  // also refetch when chart settings change
-  'syncColors',
-  'syncCursor',
-  'syncTooltips',
-];
-
-/**
  * build middleware that fires an event any time a reducer that could cause unsaved changes is run
  */
 export function getDiffingMiddleware(this: DashboardContainer) {
@@ -107,7 +86,7 @@ export function startDiffingDashboardState(
   /**
    *  Create an observable stream of unsaved changes from all react embeddable children
    */
-  const reactEmbeddableUnsavedChanges = this.reactEmbeddableChildren.pipe(
+  const reactEmbeddableUnsavedChanges = this.children$.pipe(
     map((children) => Object.keys(children)),
     distinctUntilChanged(deepEqual),
     debounceTime(CHANGE_CHECK_DEBOUNCE),
@@ -115,13 +94,15 @@ export function startDiffingDashboardState(
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);
+      const childrenThatPublishUnsavedChanges = Object.entries(this.children$.value).filter(
+        ([childId, child]) => apiPublishesUnsavedChanges(child)
+      ) as Array<[string, PublishesUnsavedChanges]>;
+
+      if (childrenThatPublishUnsavedChanges.length === 0) return of([]);
+
       return combineLatest(
-        newChildIds.map((childId) =>
-          this.reactEmbeddableChildren.value[childId].unsavedChanges.pipe(
-            map((unsavedChanges) => {
-              return { childId, unsavedChanges };
-            })
-          )
+        childrenThatPublishUnsavedChanges.map(([childId, child]) =>
+          child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
         )
       );
     }),
@@ -223,34 +204,6 @@ export async function getDashboardUnsavedChanges(
     return changes;
   }, {} as Partial<DashboardContainerInput>);
   return inputChanges;
-}
-
-export function getShouldRefresh(
-  this: DashboardContainer,
-  lastInput: DashboardContainerInput,
-  input: DashboardContainerInput
-): boolean {
-  for (const key of sessionChangeKeys) {
-    if (input[key] === undefined && lastInput[key] === undefined) {
-      continue;
-    }
-    if (
-      !isKeyEqual(
-        key,
-        {
-          container: this,
-          currentValue: input[key],
-          currentInput: input,
-          lastValue: lastInput[key],
-          lastInput,
-        },
-        shouldRefreshDiffingFunctions
-      )
-    ) {
-      return true;
-    }
-  }
-  return false;
 }
 
 function backupUnsavedChanges(

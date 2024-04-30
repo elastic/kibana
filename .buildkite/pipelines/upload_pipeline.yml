@@ -1,0 +1,11 @@
+# This pipeline can be used to upload any tested pipeline in the Elastic-wide buildkite infrastructure to be tested
+
+steps:
+  - label: Upload tested pipeline
+    command: |
+      if [[ $TESTED_PIPELINE_PATH == *.yml ]]; then
+        echo "Uploading pipeline $TESTED_PIPELINE_PATH"
+        buildkite-agent pipeline upload $TESTED_PIPELINE_PATH
+      else
+        $TESTED_PIPELINE_PATH | buildkite-agent pipeline upload
+      fi

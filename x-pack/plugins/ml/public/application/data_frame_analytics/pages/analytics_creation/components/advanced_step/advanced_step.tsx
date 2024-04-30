@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiForm } from '@elastic/eui';
 
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { AdvancedStepForm } from './advanced_step_form';
 import { AdvancedStepDetails } from './advanced_step_details';
 import { ANALYTICS_STEPS } from '../../page';

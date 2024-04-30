@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONNECTOR_DEFINITIONS,
   createConnector,
   deleteConnectorById,
   fetchConnectorById,
@@ -17,6 +16,7 @@ import {
   updateConnectorConfiguration,
   updateConnectorIndexName,
   updateConnectorNameAndDescription,
+  updateConnectorScheduling,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
 import { RouteDependencies } from '../plugin';
@@ -51,40 +51,16 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchConnectorById(client.asCurrentUser, request.params.connectorId);
+      const connector = await fetchConnectorById(client.asCurrentUser, request.params.connectorId);
 
-      return result
+      return connector
         ? response.ok({
             body: {
-              connector: result.value,
+              connector,
             },
             headers: { 'content-type': 'application/json' },
           })
         : response.notFound();
-    }
-  );
-
-  router.get(
-    {
-      path: '/internal/serverless_search/connector_types',
-      validate: {},
-    },
-    async (context, request, response) => {
-      const connectors = CONNECTOR_DEFINITIONS.map((connector) => ({
-        ...connector,
-        iconPath: connector.iconPath
-          ? http.basePath.prepend(
-              `/plugins/enterpriseSearch/assets/source_icons/${connector.iconPath}`
-            )
-          : 'logoEnterpriseSearch',
-      }));
-
-      return response.ok({
-        body: {
-          connectors,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
     }
   );
 
@@ -335,6 +311,30 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         body: result,
         headers: { 'content-type': 'application/json' },
       });
+    }
+  );
+  router.post(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/scheduling',
+      validate: {
+        body: schema.object({
+          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await updateConnectorScheduling(
+        client.asCurrentUser,
+        request.params.connectorId,
+        request.body
+      );
+      return response.ok();
     }
   );
 };

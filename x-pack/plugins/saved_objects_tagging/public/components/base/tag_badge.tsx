@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TagWithOptionalId } from '../../../common/types';
+import { TagAttributes } from '../../../common/types';
 
-export interface TagBadgeProps {
-  tag: TagWithOptionalId;
-  onClick?: (tag: TagWithOptionalId) => void;
+export interface TagBadgeProps<T> {
+  tag: T;
+  onClick?: (tag: T) => void;
 }
 
 /**
  * The badge representation of a Tag, which is the default display to be used for them.
  */
-export const TagBadge: FC<TagBadgeProps> = ({ tag, onClick }) => {
+export const TagBadge: <T extends TagAttributes>(props: TagBadgeProps<T>) => ReactElement = ({
+  tag,
+  onClick,
+}) => {
   const onClickProps = onClick
     ? {
         onClick: () => {

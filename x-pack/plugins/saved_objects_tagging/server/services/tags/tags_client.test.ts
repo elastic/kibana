@@ -27,6 +27,7 @@ const createTagSavedObject = (
   id,
   attributes,
   type: 'tag',
+  managed: true,
   references: [],
 });
 
@@ -82,6 +83,7 @@ describe('TagsClient', () => {
       const tag = await tagsClient.create(attributes);
       expect(tag).toEqual({
         id,
+        managed: true,
         ...attributes,
       });
     });
@@ -134,6 +136,7 @@ describe('TagsClient', () => {
       const tag = await tagsClient.update(tagId, attributes);
       expect(tag).toEqual({
         id: tagId,
+        managed: true,
         ...attributes,
       });
     });
@@ -184,6 +187,7 @@ describe('TagsClient', () => {
       const tag = await tagsClient.get(tagId);
       expect(tag).toEqual({
         id: tagId,
+        managed: tag.managed,
         ...tagObject.attributes,
       });
     });
@@ -225,7 +229,9 @@ describe('TagsClient', () => {
 
     it('converts the objects returned from the soClient to tags', async () => {
       const returnedTags = await tagsClient.getAll();
-      expect(returnedTags).toEqual(tags.map((tag) => ({ id: tag.id, ...tag.attributes })));
+      expect(returnedTags).toEqual(
+        tags.map((tag) => ({ id: tag.id, managed: tag.managed, ...tag.attributes }))
+      );
     });
   });
   describe('#delete', () => {

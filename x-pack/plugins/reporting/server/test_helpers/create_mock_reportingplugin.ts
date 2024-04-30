@@ -50,12 +50,13 @@ export const createMockPluginSetup = (
   };
 };
 
+const coreSetupMock = coreMock.createSetup();
 const logger = loggingSystemMock.createLogger();
 
 const createMockReportingStore = async (config: ReportingConfigType) => {
   const mockConfigSchema = createMockConfigSchema(config);
   const mockContext = coreMock.createPluginInitializerContext(mockConfigSchema);
-  const mockCore = new ReportingCore(coreMock.createSetup(), logger, mockContext);
+  const mockCore = new ReportingCore(coreSetupMock, logger, mockContext);
   return new ReportingStore(mockCore, logger);
 };
 
@@ -64,6 +65,7 @@ export const createMockPluginStart = async (
   config: ReportingConfigType
 ): Promise<ReportingInternalStart> => {
   return {
+    analytics: coreSetupMock.analytics,
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: { getScopedClient: jest.fn() },
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },

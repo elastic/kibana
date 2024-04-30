@@ -9,9 +9,10 @@ import { useMemo } from 'react';
 
 import type { AgentPolicy } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
-import { policyHasFleetServer } from '../services';
 
-import { useGetAgentPolicies } from './use_request';
+import { useAuthz } from './use_authz';
+
+import { useGetAgentPolicies, useGetEnrollmentSettings } from './use_request';
 
 interface AgentEnrollmentFlyoutData {
   agentPolicies: AgentPolicy[];
@@ -21,28 +22,52 @@ interface AgentEnrollmentFlyoutData {
 }
 
 export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
+  const authz = useAuthz();
   const {
     data: agentPoliciesData,
-    isInitialRequest,
+    isInitialRequest: isInitialAgentPolicyRequest,
     isLoading: isLoadingAgentPolicies,
     resendRequest: refreshAgentPolicies,
   } = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    full: true,
+    full: authz.fleet.readAgentPolicies,
   });
 
+  const {
+    data: fleetServerPolicyStatus,
+    isInitialRequest: isInitialFleetServerPolicyStatusRequest,
+    isLoading: isLoadingFleetServerPolicyStatus,
+    resendRequest: refreshFleetServerPolicyStatus,
+  } = useGetEnrollmentSettings();
+
   const agentPolicies = useMemo(() => {
-    if (!isLoadingAgentPolicies) {
-      return (agentPoliciesData?.items ?? []).filter((policy) => !policyHasFleetServer(policy));
+    if (!isLoadingAgentPolicies || !isLoadingFleetServerPolicyStatus) {
+      const fleetServerPolicyIds = fleetServerPolicyStatus?.fleet_server?.policies.map(
+        (policy) => policy.id
+      );
+      return (agentPoliciesData?.items ?? []).filter(
+        (policy) => !fleetServerPolicyIds?.includes(policy.id)
+      );
     }
     return [];
-  }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
+  }, [
+    isLoadingAgentPolicies,
+    isLoadingFleetServerPolicyStatus,
+    fleetServerPolicyStatus?.fleet_server?.policies,
+    agentPoliciesData?.items,
+  ]);
+
+  const refreshData = () => {
+    refreshAgentPolicies();
+    refreshFleetServerPolicyStatus();
+  };
 
   return {
     agentPolicies,
-    refreshAgentPolicies,
-    isLoadingInitialAgentPolicies: isInitialRequest && isLoadingAgentPolicies,
-    isLoadingAgentPolicies,
+    refreshAgentPolicies: refreshData,
+    isLoadingInitialAgentPolicies:
+      isInitialAgentPolicyRequest || isInitialFleetServerPolicyStatusRequest,
+    isLoadingAgentPolicies: isLoadingAgentPolicies || isLoadingFleetServerPolicyStatus,
   };
 }

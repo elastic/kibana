@@ -22,7 +22,7 @@ import {
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
@@ -131,6 +131,10 @@ export interface DiscoverAppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
   /**
    * Number of rows in the grid per page
    */
@@ -346,13 +350,19 @@ export function isEqualFilters(
  * Helper function to compare 2 different state, is needed since comparing filters
  * works differently
  */
-export function isEqualState(stateA: DiscoverAppState, stateB: DiscoverAppState) {
+export function isEqualState(
+  stateA: DiscoverAppState,
+  stateB: DiscoverAppState,
+  exclude: string[] = []
+) {
   if (!stateA && !stateB) {
     return true;
   } else if (!stateA || !stateB) {
     return false;
   }
-  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
-  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+
+  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude);
+  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude);
+
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }

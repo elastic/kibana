@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 
 import { isEmpty } from 'lodash/fp';
 import {
@@ -185,10 +185,8 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         const indexId = getIndexId({ indexName, stats });
 
         if (
-          indexId != null &&
           stats &&
           results &&
-          ilmExplain &&
           requestTime != null &&
           requestTime > 0 &&
           partitionedFieldMetadata
@@ -197,7 +195,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             batchId,
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
-            ilmPhase: getIlmPhase(ilmExplain[indexName], isILMAvailable),
+            ilmPhase: getIlmPhase(ilmExplain?.[indexName], isILMAvailable),
             indexId,
             indexName,
             isCheckAll: true,

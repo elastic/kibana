@@ -112,6 +112,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const canAddAgents = useAuthz().fleet.addAgents;
 
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicy?: GetAgentPoliciesResponseItem;
@@ -268,6 +269,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               agentPolicy={agentPolicy}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
+              canAddAgents={canAddAgents}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
@@ -299,7 +301,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, showAddAgentHelpForPackagePolicyId, canWriteIntegrationPolicies]
+    [getHref, canWriteIntegrationPolicies, canAddAgents, showAddAgentHelpForPackagePolicyId]
   );
 
   const noItemsMessage = useMemo(() => {

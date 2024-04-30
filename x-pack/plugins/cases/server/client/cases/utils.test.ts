@@ -1418,7 +1418,7 @@ describe('utils', () => {
       ).toEqual(customFields);
     });
 
-    it('does not use default value for optional custom fields', () => {
+    it('uses the default value for optional custom fields', () => {
       expect(
         fillMissingCustomFields({
           customFields: [],
@@ -1430,8 +1430,8 @@ describe('utils', () => {
           ],
         })
       ).toEqual([
-        { ...customFields[0], value: null },
-        { ...customFields[1], value: null },
+        { ...customFields[0], value: 'default value' },
+        { ...customFields[1], value: true },
       ]);
     });
 

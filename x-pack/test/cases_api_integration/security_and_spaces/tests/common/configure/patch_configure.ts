@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
           required: true,
         },
         {
-          key: 'toggle_field',
+          key: 'toggle_field_1',
           label: '#2',
           type: CustomFieldTypes.TOGGLE,
           required: false,
@@ -75,6 +75,13 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CustomFieldTypes.TEXT,
           required: true,
           defaultValue: 'foobar',
+        },
+        {
+          key: 'toggle_field_2',
+          label: '#4',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+          defaultValue: true,
         },
       ] as ConfigurationPatchRequest['customFields'];
       const configuration = await createConfiguration(supertest);

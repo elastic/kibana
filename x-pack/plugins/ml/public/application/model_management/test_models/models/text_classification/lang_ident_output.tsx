@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
@@ -13,7 +14,7 @@ import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { LangIdentInference } from './lang_ident_inference';
 import { getLanguage } from './lang_codes';
 import { PredictionProbabilityList } from './text_classification_output';
-import { FormattedTextClassificationResponse } from './common';
+import type { FormattedTextClassificationResponse } from './common';
 
 export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
   <LangIdentOutput inferrer={inferrer} />

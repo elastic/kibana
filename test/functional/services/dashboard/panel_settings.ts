@@ -64,6 +64,10 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
           );
         }
       });
+
+      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
+        return Boolean(await this.findDatePickerQuickMenuButton());
+      });
     }
 
     public async disableCustomTimeRange() {
@@ -147,7 +151,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async clickSaveButton() {
       log.debug('clickSaveButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('saveCustomizePanelButton');
         await testSubjects.waitForDeleted('saveCustomizePanelButton');
       });

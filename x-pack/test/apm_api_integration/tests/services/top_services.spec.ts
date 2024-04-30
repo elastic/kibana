@@ -62,6 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177509
   registry.when(
     'APM Services Overview with a basic license when data is generated',
     { config: 'basic', archives: [] },

@@ -72,7 +72,7 @@ describe('File kind HTTP API', () => {
       .expect(200);
 
     expect(header['content-type']).toEqual('image/png');
-    expect(header['content-disposition']).toEqual('attachment; filename="test.png"');
+    expect(header['content-disposition']).toEqual('attachment; filename=test.png');
     expect(buffer.toString('utf8')).toEqual('what have you');
   });
 

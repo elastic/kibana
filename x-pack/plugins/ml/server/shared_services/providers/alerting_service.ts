@@ -7,7 +7,8 @@
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { GetGuards } from '../shared_services';
-import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
+import type { MlAlertingService } from '../../lib/alerts/alerting_service';
+import { alertingServiceProvider } from '../../lib/alerts/alerting_service';
 import { datafeedsProvider } from '../../models/job_service/datafeeds';
 
 export function getAlertingServiceProvider(getGuards: GetGuards) {

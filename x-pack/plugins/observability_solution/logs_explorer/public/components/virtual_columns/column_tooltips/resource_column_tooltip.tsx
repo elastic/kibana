@@ -42,7 +42,7 @@ export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridCol
           constants.HOST_NAME_FIELD,
           constants.CLOUD_INSTANCE_ID_FIELD,
         ].map((field) => (
-          <FieldWithToken field={field} />
+          <FieldWithToken field={field} key={field} />
         ))}
       </div>
     </HoverPopover>

@@ -126,6 +126,7 @@ export function isNonAggregatableSampledDocs(
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'],
+  populatedFieldsInIndex: Set<string> | null | undefined,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
@@ -135,11 +136,22 @@ export const processAggregatableFieldsExistResponse = (
 
   if (!responses || aggregatableFields.length === 0) return stats;
 
+  if (populatedFieldsInIndex) {
+    aggregatableFields.forEach((field) => {
+      if (!populatedFieldsInIndex.has(field.name)) {
+        stats.aggregatableNotExistsFields.push({
+          fieldName: field.name,
+          existsInDocs: false,
+          stats: {},
+        });
+      }
+    });
+  }
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
 
     const aggsPath = ['sample'];
-    const sampleCount = aggregations.sample.doc_count;
+    const sampleCount = get(aggregations, [...aggsPath, 'doc_count']);
     aggregatableFieldsChunk.forEach(({ name: field, supportedAggs }, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       // Sampler agg will yield doc_count that's bigger than the actual # of sampled records
@@ -255,6 +267,7 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
     index,
     body: {
       fields: nonAggregatableFields.map((fieldName) => fieldName),
+      _source: false,
       query: {
         bool: {
           filter: filterCriteria,
@@ -270,7 +283,8 @@ export const processNonAggregatableFieldsExistResponse = (
   results: IKibanaSearchResponse[] | undefined,
   nonAggregatableFields: string[],
   nonAggregatableFieldsCount: number[],
-  nonAggregatableFieldsUniqueCount: Array<Set<string>>
+  nonAggregatableFieldsUniqueCount: Array<Set<string>>,
+  populatedNonAggregatableFields: string[]
 ) => {
   const stats = {
     nonAggregatableExistsFields: [] as NonAggregatableField[],
@@ -280,22 +294,29 @@ export const processNonAggregatableFieldsExistResponse = (
   if (!results || nonAggregatableFields.length === 0) return stats;
 
   nonAggregatableFields.forEach((fieldName, fieldIdx) => {
+    const idx = populatedNonAggregatableFields.indexOf(fieldName);
+
+    if (idx === -1) {
+      stats.nonAggregatableNotExistsFields.push({
+        fieldName,
+        existsInDocs: false,
+        stats: {},
+      });
+      return;
+    }
     const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
     const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
+
     const fieldData: NonAggregatableField = {
       fieldName,
       existsInDocs,
       stats: {
-        count: nonAggregatableFieldsCount[fieldIdx],
-        cardinality: nonAggregatableFieldsUniqueCount[fieldIdx].size,
+        count: nonAggregatableFieldsCount[idx] ?? 0,
+        cardinality: nonAggregatableFieldsUniqueCount[idx]?.size ?? 0,
         sampleCount: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
       },
     };
-    if (existsInDocs === true) {
-      stats.nonAggregatableExistsFields.push(fieldData);
-    } else {
-      stats.nonAggregatableNotExistsFields.push(fieldData);
-    }
+    stats.nonAggregatableExistsFields.push(fieldData);
   });
   return stats;
 };

@@ -8,44 +8,55 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  DataType,
-  Fields,
-  Field,
-  NormalizedFields,
-  NormalizedField,
-  FieldMeta,
-  MainType,
-  SubType,
   ChildFieldName,
-  ParameterName,
   ComboBoxOption,
+  DataType,
+  Field,
+  FieldMeta,
+  Fields,
   GenericObject,
-  RuntimeFields,
+  MainType,
+  NormalizedField,
+  NormalizedFields,
   NormalizedRuntimeFields,
+  ParameterName,
+  RuntimeFields,
+  SubType,
 } from '../types';
 
 import {
-  SUB_TYPE_MAP_TO_MAIN,
+  MAIN_DATA_TYPE_DEFINITION,
   MAX_DEPTH_DEFAULT_EDITOR,
   PARAMETERS_DEFINITION,
+  SUB_TYPE_MAP_TO_MAIN,
+  TYPE_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
-  TYPE_DEFINITION,
-  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
+import { FieldConfig } from '../shared_imports';
 
 export const getUniqueId = () => uuidv4();
 
+const fieldsWithoutMultiFields: DataType[] = [
+  // @ts-expect-error aggregate_metric_double is not yet supported by the editor
+  'aggregate_metric_double',
+  'constant_keyword',
+  'flattened',
+  'geo_shape',
+  'join',
+  'percolator',
+  'point',
+  'shape',
+];
 export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
-  if (dataType === 'text' || dataType === 'keyword' || dataType === 'ip') {
-    return 'fields';
+  if (fieldsWithoutMultiFields.includes(dataType)) {
+    return undefined;
   } else if (dataType === 'object' || dataType === 'nested') {
     return 'properties';
   }
-  return undefined;
+  return 'fields';
 };
 
 export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta => {

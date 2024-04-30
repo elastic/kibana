@@ -186,6 +186,7 @@ describe('getSavedSearchAttributeService', () => {
           ],
           "description": "",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
           "id": "saved-object-id",
@@ -241,6 +242,7 @@ describe('getSavedSearchAttributeService', () => {
           "title": "saved-search-title",
           "usesAdHocDataView": undefined,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });

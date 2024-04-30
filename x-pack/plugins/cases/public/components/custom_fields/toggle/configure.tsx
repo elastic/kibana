@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField, ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldToggle>['Configure'] = () => {
-  const [{ required }] = useFormData<{ required: boolean }>();
-
   return (
     <>
       <UseField
@@ -29,19 +27,17 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldToggle>['Configure'] = 
           },
         }}
       />
-      {required && (
-        <UseField
-          path="defaultValue"
-          component={ToggleField}
-          config={{ defaultValue: false }}
-          componentProps={{
-            label: i18n.DEFAULT_VALUE,
-            euiFieldProps: {
-              'data-test-subj': 'toggle-custom-field-default-value',
-            },
-          }}
-        />
-      )}
+      <UseField
+        path="defaultValue"
+        component={ToggleField}
+        config={{ defaultValue: false }}
+        componentProps={{
+          label: i18n.DEFAULT_VALUE,
+          euiFieldProps: {
+            'data-test-subj': 'toggle-custom-field-default-value',
+          },
+        }}
+      />
     </>
   );
 };

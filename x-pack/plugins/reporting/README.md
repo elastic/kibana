@@ -5,7 +5,7 @@ An awesome Kibana reporting plugin
 ## csv_searchsource. 
 This is the endpoint used in the Discover UI. It must be replaced by csv_v2 at some point, when we have more capacity in reporting. https://github.com/elastic/kibana/issues/151190
 ## csv_searchsource_immediate. 
-This should be deprecated. It is historically a customer driven endpoint.  This will be replaced in the UI with an async export option in the future. 
+This is deprecated. This export type provides users with the means to download a CSV export of a saved search without creating a report. It is only available to users when `xpack.reporting.csv.enablePanelActionDownload` is set to `true` in kibana.yml. The default is `false`, which provides users with the means to generate a normal CSV report.
 ## csv_v2. 
 This new endpoint is designed to have a more automation-friendly signature. It will replace csv_searchsource in the UI at some point, when there is more capacity in reporting. It will need a little more work to have parity: it needs to be able to export "unsaved" searches.
 

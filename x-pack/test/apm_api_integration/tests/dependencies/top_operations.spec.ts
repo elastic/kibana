@@ -70,6 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177128
   registry.when('Top operations when data is generated', { config: 'basic', archives: [] }, () => {
     before(() =>
       generateOperationData({

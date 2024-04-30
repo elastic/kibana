@@ -121,3 +121,7 @@ export const useCapabilities = jest.fn((featureId?: string) =>
     ? mockStartServicesMock.application.capabilities[featureId]
     : mockStartServicesMock.application.capabilities
 );
+
+export const useNavigation = jest
+  .fn()
+  .mockReturnValue({ getAppUrl: jest.fn(), navigateTo: jest.fn() });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
@@ -30,8 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  const retryService = getService('retry');
 
-  describe('Custom  Threshold rule - GROUP_BY - FIRED', () => {
+  describe('Custom Threshold rule - GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
@@ -41,15 +41,14 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
       dataForgeConfig = {
         schedule: [
           {
             template: 'good',
-            start: 'now-15m',
-            end: 'now',
+            start: 'now-10m',
+            end: 'now+5m',
             metrics: [
               { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
               { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
@@ -69,12 +68,15 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: dataForgeIndices.join(','),
         docCountTarget: 270,
+        retryService,
+        logger,
       });
       await createDataView({
         supertest,
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
+        logger,
       });
     });
 
@@ -92,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
@@ -103,10 +106,13 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -167,6 +173,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -176,13 +184,14 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -230,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
               value: 'container-0',
             },
           ]);
-
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -251,18 +260,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.total.norm.pct is 80%, above the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0)`
+          `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0)`
         );
         expect(resp.hits.hits[0]._source?.value).eql('80%');
         expect(resp.hits.hits[0]._source?.host).eql(

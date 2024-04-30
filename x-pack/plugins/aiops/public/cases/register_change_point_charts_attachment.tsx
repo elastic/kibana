@@ -8,17 +8,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import {
   CASES_ATTACHMENT_CHANGE_POINT_CHART,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '../../common/constants';
+} from '@kbn/aiops-change-point-detection/constants';
 import { getEmbeddableChangePointChart } from '../embeddable/embeddable_change_point_chart_component';
-import { AiopsPluginStartDeps } from '../types';
+import type { AiopsPluginStartDeps } from '../types';
 
 export function registerChangePointChartsAttachment(
-  cases: CasesUiSetup,
+  cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
 ) {

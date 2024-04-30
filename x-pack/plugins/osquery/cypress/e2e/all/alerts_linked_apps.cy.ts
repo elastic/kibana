@@ -15,7 +15,11 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
+import {
+  closeAlertsStepTourIfVisible,
+  closeModalIfVisible,
+  closeToastIfVisible,
+} from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
 describe(
@@ -69,6 +73,7 @@ describe(
     it('should be able to run live query and add to timeline', () => {
       const TIMELINE_NAME = 'Untitled timeline';
       cy.getBySel('expand-event').first().click();
+      closeAlertsStepTourIfVisible();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');

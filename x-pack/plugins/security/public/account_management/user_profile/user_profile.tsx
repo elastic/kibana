@@ -34,7 +34,7 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -656,7 +656,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const isCloudUser = user.elastic_cloud_user;
 
   const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
-    services.settings.client
+    services.settings.client,
+    services.theme
   );
 
   const rightSideItems = [
@@ -998,12 +999,15 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   );
 };
 
-function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
+function determineIfThemeOverridden(
+  settingsClient: IUiSettingsClient,
+  theme: ThemeServiceStart
+): {
   isThemeOverridden: boolean;
   isOverriddenThemeDarkMode: boolean;
 } {
   return {
     isThemeOverridden: settingsClient.isOverridden('theme:darkMode'),
-    isOverriddenThemeDarkMode: settingsClient.get<boolean>('theme:darkMode'),
+    isOverriddenThemeDarkMode: theme.getTheme().darkMode,
   };
 }

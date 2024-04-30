@@ -9,15 +9,29 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
+# Welcome to the Dev Tools Console!
+#
+# You can use Console to explore the Elasticsearch API. See the \n  Elasticsearch API reference to learn more:
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/rest\n  -apis.html
+#
+# Here are a few examples to get you started.
 
-# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
+
+# Create an index
+PUT /my-index
+
+
+# Add a document to my-index
+POST /my-index/_doc
 {
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
+    "id": "park_rocky-mountain",
+    "title": "Rocky Mountain",
+    "description": "Bisected north to south by the Continental Divide, \n      this portion of the Rockies has ecosystems varying from over 150 \n      riparian lakes to montane and subalpine forests to treeless \n      alpine tundra."
 }
 
+
+# Perform a search in my-index
+GET /my-index/_search?q="rocky mountain"
 `.trim();
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,19 +40,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
 
   describe('console app', function describeIndexTests() {
-    this.tags('includeFirefox');
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      // TODO: https://github.com/elastic/kibana/issues/176582
+      // this test scenario requires roles definition check:
+      // Search & Oblt projects 'viewer' role has access to Console, but for
+      // Security project only 'admin' role has access
+      await PageObjects.svlCommonPage.loginWithRole('admin');
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
     });
 
     beforeEach(async () => {
       await PageObjects.console.closeHelpIfExists();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should show the default request', async () => {

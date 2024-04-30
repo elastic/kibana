@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +23,7 @@ interface DetectorTitleProps {
   deleteDetector?: (dtrIds: number) => void;
 }
 
-export const DetectorTitle: FC<DetectorTitleProps> = ({
+export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
   index,
   agg,
   field,

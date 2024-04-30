@@ -9,14 +9,12 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
+import { removeServerGeneratedProperties, getSimpleMlRule, updateUsername } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
-  removeServerGeneratedProperties,
-  getSimpleMlRule,
   deleteAllAlerts,
-  updateUsername,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 

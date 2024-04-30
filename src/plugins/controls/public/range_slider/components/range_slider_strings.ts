@@ -9,6 +9,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
+  control: {
+    getInvalidSelectionWarningLabel: () =>
+      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {
+        defaultMessage: 'Selected range returns no results.',
+      }),
+  },
   editor: {
     getStepTitle: () =>
       i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {

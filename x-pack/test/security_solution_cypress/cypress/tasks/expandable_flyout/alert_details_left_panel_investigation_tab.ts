@@ -11,6 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB } from '../../screens/expanda
  * Open the Investigations tab in the document details expandable flyout left section
  */
 export const openInvestigationTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB).click();
 };

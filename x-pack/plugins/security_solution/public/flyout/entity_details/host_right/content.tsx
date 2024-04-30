@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { RiskScoreEntity, HostItem } from '../../../../common/search_strategy';
@@ -51,7 +51,7 @@ export const HostPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalitySelector entity={{ name: hostName, type: 'host' }} />
+      <AssetCriticalityAccordion entity={{ name: hostName, type: 'host' }} />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}

@@ -9,12 +9,12 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { ANNOTATION_TYPE } from '../../../../../common/constants/annotations';
-import { Annotation, Annotations } from '../../../../../common/types/annotations';
-import { Dictionary } from '../../../../../common/types/common';
+import type { Annotation, Annotations } from '../../../../../common/types/annotations';
+import type { Dictionary } from '../../../../../common/types/common';
 
-import { TimeseriesChart } from './timeseries_chart';
+import type { TimeseriesChart } from './timeseries_chart';
 
-import { AnnotationUpdatesService } from '../../../services/annotations_service';
+import type { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
 

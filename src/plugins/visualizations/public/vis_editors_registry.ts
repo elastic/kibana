@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { VisParams } from '../common';
 import { VisEditorConstructor } from './visualize_app/types';
 
 const DEFAULT_NAME = 'default';
@@ -17,7 +18,10 @@ export const createVisEditorsRegistry = () => {
     registerDefault: (editor: VisEditorConstructor) => {
       map.set(DEFAULT_NAME, editor);
     },
-    register: <TVisParams>(name: string, editor: VisEditorConstructor<TVisParams>) => {
+    register: <TVisParams extends VisParams>(
+      name: string,
+      editor: VisEditorConstructor<TVisParams>
+    ) => {
       if (name) {
         map.set(name, editor);
       }

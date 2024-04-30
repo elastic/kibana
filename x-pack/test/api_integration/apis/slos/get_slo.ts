@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { cleanup } from '@kbn/infra-forge';
-import expect from '@kbn/expect';
+import expect from 'expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -14,7 +14,8 @@ import { SloEsClient } from './helper/es';
 import { sloData } from './fixtures/create_slo';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('Get SLOs', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/177806
+  describe.skip('Get SLOs', function () {
     this.tags('skipCloud');
 
     const supertestAPI = getService('supertest');
@@ -44,7 +45,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await slo.deleteAllSLOs();
+      await retry.tryForTime(60 * 1000, async () => {
+        await slo.deleteAllSLOs();
+      });
     });
 
     after(async () => {
@@ -64,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        expect(getResponse.body).eql({
+        expect(getResponse.body).toEqual({
           name: 'Test SLO for api integration',
           description: 'Fixture for api integration tests',
           indicator: {
@@ -82,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
           objective: { target: 0.99 },
           tags: ['test'],
           groupBy: '*',
+          groupings: {},
           id,
           settings: { syncDelay: '1m', frequency: '1m' },
           revision: 1,
@@ -90,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -121,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // expect summary transform to be created
-        expect(getResponse.body).eql({
+        expect(getResponse.body).toEqual({
           name: 'Test SLO for api integration',
           description: 'Fixture for api integration tests',
           indicator: {
@@ -139,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
           objective: { target: 0.99 },
           tags: ['test'],
           groupBy: '*',
+          groupings: {},
           id,
           settings: { syncDelay: '1m', frequency: '1m' },
           revision: 1,
@@ -147,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -184,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // expect summary transform to be created
-        expect(getResponse.body).eql({
+        expect(getResponse.body).toEqual({
           name: 'Test SLO for api integration',
           description: 'Fixture for api integration tests',
           indicator: {
@@ -206,6 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           tags: ['test'],
           groupBy: '*',
+          groupings: {},
           id,
           settings: { syncDelay: '1m', frequency: '1m' },
           revision: 1,
@@ -214,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0.5,
             errorBudget: {
@@ -250,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        expect(getResponse.body).eql({
+        expect(getResponse.body).toEqual({
           name: 'Test SLO for api integration',
           description: 'Fixture for api integration tests',
           indicator: {
@@ -272,6 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           tags: ['test'],
           groupBy: '*',
+          groupings: {},
           id,
           settings: { syncDelay: '1m', frequency: '1m' },
           revision: 1,
@@ -280,6 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
           updatedAt: getResponse.body.updatedAt,
           version: 2,
           instanceId: '*',
+          meta: {},
           summary: {
             sliValue: 0,
             errorBudget: {
@@ -295,17 +306,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('gets slos by query', async () => {
-      const id = await createSLO();
+      await createSLO();
       await createSLO({ name: 'test int' });
 
-      await retry.tryForTime(300 * 1000, async () => {
+      await retry.tryForTime(360 * 1000, async () => {
         const response = await supertestAPI
           .get(`/api/observability/slos`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
 
-        expect(response.body.results.length).eql(2);
+        expect(response.body.results.length).toEqual(2);
 
         const searchResponse = await supertestAPI
           .get(`/api/observability/slos?kqlQuery=slo.name%3Aapi*`)
@@ -313,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        expect(searchResponse.body.results.length).eql(1);
+        expect(searchResponse.body.results.length).toEqual(1);
 
         const searchResponse2 = await supertestAPI
           .get(`/api/observability/slos?kqlQuery=slo.name%3Aint`)
@@ -321,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        expect(searchResponse2.body.results.length).eql(1);
+        expect(searchResponse2.body.results.length).toEqual(1);
 
         const searchResponse3 = await supertestAPI
           .get(`/api/observability/slos?kqlQuery=slo.name%3Aint*`)
@@ -329,7 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        expect(searchResponse3.body.results.length).eql(2);
+        expect(searchResponse3.body.results.length).toEqual(2);
 
         const searchResponse4 = await supertestAPI
           .get(`/api/observability/slos?kqlQuery=int*`)
@@ -337,7 +348,25 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        expect(searchResponse4.body.results.length).eql(2);
+        expect(searchResponse4.body.results.length).toEqual(2);
+      });
+    });
+
+    it('gets slos instances', async () => {
+      const id = await createSLO();
+
+      await retry.tryForTime(400 * 1000, async () => {
+        const response = await supertestAPI
+          .get(`/api/observability/slos`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(response.body.results.length).toEqual(3);
+
+        response.body.results.forEach((result: Record<string, unknown>, i: number) => {
+          expect(result.groupings).toEqual(expect.objectContaining({ tags: `${i + 1}` }));
+        });
 
         const instanceResponse = await supertestAPI
           .get(`/internal/observability/slos/${id}/_instances`)
@@ -346,8 +375,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // expect 3 instances to be created
-        expect(instanceResponse.body.groupBy).eql('tags');
-        expect(instanceResponse.body.instances.sort()).eql(['1', '2', '3']);
+        expect(instanceResponse.body.groupBy).toEqual('tags');
+        expect(instanceResponse.body.instances.sort()).toEqual(['tags:1', 'tags:2', 'tags:3']);
       });
     });
 
@@ -360,7 +389,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(response.body).eql({
+      expect(response.body).toEqual({
         page: 1,
         perPage: 100,
         results: [
@@ -443,7 +472,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(searchResponse.body.total).eql(1);
+      expect(searchResponse.body.total).toEqual(1);
 
       const searchResponse2 = await supertestAPI
         .get(`/api/observability/slos/_definitions?search=int`)
@@ -451,7 +480,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(searchResponse2.body.total).eql(1);
+      expect(searchResponse2.body.total).toEqual(1);
 
       const searchResponse3 = await supertestAPI
         .get(`/api/observability/slos/_definitions?search=int*`)
@@ -459,7 +488,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(searchResponse3.body.total).eql(2);
+      expect(searchResponse3.body.total).toEqual(2);
     });
   });
 }

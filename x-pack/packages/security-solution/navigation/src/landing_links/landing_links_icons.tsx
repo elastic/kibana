@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,57 +37,46 @@ const useLinkIconStyles = () => {
   };
 };
 
-export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(function LandingLinkIcon({
-  item,
-  urlState,
-  onLinkClick,
-  children,
-}) {
-  const styles = useLinkIconStyles();
-  const { title, description, landingIcon, isBeta, betaOptions } = item;
+export const LandingLinkIcon: FC<PropsWithChildren<LandingLinkIconProps>> = React.memo(
+  function LandingLinkIcon({ item, urlState, onLinkClick, children }) {
+    const styles = useLinkIconStyles();
+    const { title, description, landingIcon, isBeta, betaOptions } = item;
 
-  return (
-    <EuiFlexGroup
-      direction="column"
-      alignItems="flexStart"
-      gutterSize="none"
-      responsive={false}
-      data-test-subj="LandingItem"
-    >
-      <EuiFlexItem grow={false}>
-        <LandingLink
-          tabIndex={-1} // Prevents the icon from being tabbable
-          item={item}
-          urlState={urlState}
-          onLinkClick={onLinkClick}
-          external={false} // Never show the external icon
-        >
+    return (
+      <EuiFlexGroup
+        direction="column"
+        alignItems="flexStart"
+        gutterSize="none"
+        responsive={false}
+        data-test-subj="LandingItem"
+      >
+        <EuiFlexItem grow={false}>
           <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />
-        </LandingLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs" css={styles.title}>
-          <EuiFlexGroup gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <LandingLink item={item} urlState={urlState} onLinkClick={onLinkClick}>
-                {title}
-              </LandingLink>
-            </EuiFlexItem>
-            {isBeta && (
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs" css={styles.title}>
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
-                <BetaBadge text={betaOptions?.text} />
+                <LandingLink item={item} urlState={urlState} onLinkClick={onLinkClick}>
+                  {title}
+                </LandingLink>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={styles.description}>
-        <EuiText size="s">{description}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+              {isBeta && (
+                <EuiFlexItem grow={false}>
+                  <BetaBadge text={betaOptions?.text} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={styles.description}>
+          <EuiText size="s">{description}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 const linkIconContainerStyles = css`
   min-width: 22em;

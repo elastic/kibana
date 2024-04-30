@@ -185,6 +185,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177498
   registry.when('Mobile terms', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({

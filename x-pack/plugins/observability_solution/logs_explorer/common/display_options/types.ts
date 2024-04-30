@@ -11,10 +11,20 @@ export interface ChartDisplayOptions {
 
 export type PartialChartDisplayOptions = Partial<ChartDisplayOptions>;
 
-export interface GridColumnDisplayOptions {
+export interface DocumentFieldGridColumnOptions {
+  type: 'document-field';
   field: string;
   width?: number;
 }
+
+export interface SmartFieldGridColumnOptions {
+  type: 'smart-field';
+  smartField: 'content' | 'resource';
+  fallbackFields: string[];
+  width?: number;
+}
+
+export type GridColumnDisplayOptions = DocumentFieldGridColumnOptions | SmartFieldGridColumnOptions;
 
 export interface GridRowsDisplayOptions {
   rowHeight: number;

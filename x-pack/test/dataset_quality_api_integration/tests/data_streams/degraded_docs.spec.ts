@@ -70,16 +70,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const stats = await callApiAs('datasetQualityLogsUser');
         expect(stats.body.degradedDocs.length).to.be(2);
 
-        const percentages = stats.body.degradedDocs.reduce(
+        const degradedDocsStats = stats.body.degradedDocs.reduce(
           (acc, curr) => ({
             ...acc,
-            [curr.dataset]: curr.percentage,
+            [curr.dataset]: {
+              percentage: curr.percentage,
+              count: curr.count,
+            },
           }),
-          {} as Record<string, number>
+          {} as Record<string, { percentage: number; count: number }>
         );
 
-        expect(percentages['logs-synth.1-default']).to.be(0);
-        expect(percentages['logs-synth.2-default']).to.be(100);
+        expect(degradedDocsStats['logs-synth.1-default']).to.eql({
+          percentage: 0,
+          count: 0,
+        });
+        expect(degradedDocsStats['logs-synth.2-default']).to.eql({
+          percentage: 100,
+          count: 1,
+        });
       });
 
       after(async () => {

@@ -4,6 +4,7 @@
       "charset": "",
       "column_names": "",
       "delimiter": "",
+      "ecs_compatibility": "",
       "explain": "__flag__",
       "format": "",
       "grok_pattern": "",

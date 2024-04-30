@@ -8,8 +8,8 @@
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import { EmbeddableChangePointChartExplicitInput } from './types';
-import { AiopsAppDependencies } from '..';
+import type { EmbeddableChangePointChartExplicitInput } from './types';
+import type { AiopsAppDependencies } from '..';
 import { AiopsAppContext } from '../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
@@ -46,7 +46,7 @@ export async function resolveEmbeddableChangePointUserInput(
               }}
             />
           </AiopsAppContext.Provider>,
-          { theme: coreStart.theme, i18n: coreStart.i18n }
+          coreStart
         )
       );
     } catch (error) {

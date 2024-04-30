@@ -6,10 +6,10 @@
  */
 
 import { type FrozenTierPreference } from '@kbn/ml-date-picker';
-import type { ESQLDefaultLimitSizeOption } from '../components/search_panel/esql/limit_size';
 
 import { type RandomSamplerOption } from '../constants/random_sampler';
-import { DATA_DRIFT_COMPARISON_CHART_TYPE } from './data_drift';
+import type { ESQLDefaultLimitSizeOption } from '../embeddables/grid_embeddable/types';
+import type { DATA_DRIFT_COMPARISON_CHART_TYPE } from './data_drift';
 
 export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreference';
 export const DV_RANDOM_SAMPLER_PREFERENCE = 'dataVisualizer.randomSamplerPreference';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   AppLeaveAction,
@@ -492,8 +492,7 @@ export class MapApp extends React.Component<Props, State> {
             ? [
                 getManagedContentBadge(
                   i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
-                    defaultMessage:
-                      'This map is managed by Elastic. Changes here must be saved to a new map.',
+                    defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
                   })
                 ),
               ]

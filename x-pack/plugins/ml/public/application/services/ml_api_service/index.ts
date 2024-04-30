@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -52,6 +52,7 @@ import { jobsApiProvider } from './jobs';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
+import { inferenceModelsApiProvider } from './inference_models';
 
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
@@ -117,8 +118,6 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     }
   },
 });
-
-export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
@@ -816,7 +815,10 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    inferenceModels: inferenceModelsApiProvider(httpService),
     notifications: notificationsProvider(httpService),
     jsonSchema: jsonSchemaProvider(httpService),
   };
 }
+
+export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;

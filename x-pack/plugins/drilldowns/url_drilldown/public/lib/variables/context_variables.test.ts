@@ -19,7 +19,7 @@ describe('getContextScopeValues()', () => {
   test('returns values when provided', () => {
     const embeddableApi = {
       parentApi: {
-        localFilters: new BehaviorSubject([
+        filters$: new BehaviorSubject([
           {
             meta: {
               alias: 'asdf',
@@ -28,11 +28,11 @@ describe('getContextScopeValues()', () => {
             },
           },
         ]),
-        localQuery: new BehaviorSubject({
+        query$: new BehaviorSubject({
           language: 'C++',
           query: 'std::cout << 123;',
         }),
-        localTimeRange: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
+        timeRange$: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
       },
       panelTitle: new BehaviorSubject('title1'),
       savedObjectId: new BehaviorSubject('1234'),

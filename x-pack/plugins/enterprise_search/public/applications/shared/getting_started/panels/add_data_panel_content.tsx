@@ -43,6 +43,7 @@ export const AddDataPanelContent: React.FC<AddDataPanelContentProps> = ({
       setSelectedLanguage={setSelectedLanguage}
       assetBasePath={assetBasePath}
       application={services.application}
+      consolePlugin={services.console}
       sharePlugin={services.share}
     />
   );

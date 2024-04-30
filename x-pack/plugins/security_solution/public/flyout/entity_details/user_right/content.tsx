@@ -9,7 +9,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -60,7 +60,7 @@ export const UserPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalitySelector entity={{ name: userName, type: 'user' }} />
+      <AssetCriticalityAccordion entity={{ name: userName, type: 'user' }} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

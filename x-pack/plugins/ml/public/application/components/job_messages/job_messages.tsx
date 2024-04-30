@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
-import {
-  EuiBasicTableColumn,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import { JobMessage } from '../../../../common/types/audit_message';
+import type { JobMessage } from '../../../../common/types/audit_message';
 
 import { blurButtonOnClick } from '../../util/component_utils';
 

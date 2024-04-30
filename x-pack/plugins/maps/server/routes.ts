@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
-import { CoreSetup, CoreStart, IRouter, Logger } from '@kbn/core/server';
+import { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
@@ -16,10 +16,8 @@ import { initMVTRoutes } from './mvt/mvt_routes';
 import { initIndexingRoutes } from './data_indexing/indexing_routes';
 import { StartDeps } from './types';
 
-export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<void> {
+export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
   const router: IRouter<DataRequestHandlerContext> = coreSetup.http.createRouter();
-  const [coreStart, { data: dataPlugin }]: [CoreStart, StartDeps] =
-    (await coreSetup.getStartServices()) as unknown as [CoreStart, StartDeps];
 
   router.versioned
     .get({
@@ -109,6 +107,20 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
       }
     );
 
-  initMVTRoutes({ router, logger, core: coreStart });
-  initIndexingRoutes({ router, logger, dataPlugin });
+  initMVTRoutes({
+    router,
+    logger,
+    getCore: async () => {
+      const [core] = await coreSetup.getStartServices();
+      return core;
+    },
+  });
+  initIndexingRoutes({
+    router,
+    logger,
+    getDataPlugin: async () => {
+      const [, { data }] = await coreSetup.getStartServices();
+      return data;
+    },
+  });
 }

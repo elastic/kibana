@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/css';
@@ -27,13 +27,24 @@ const TogglePanelComponent: React.FC<{
     useStepContext();
 
   const { setUpSections } = useSetUpSections({ euiTheme });
-  const sectionNodes = setUpSections({
-    activeSections,
-    expandedCardSteps,
-    finishedSteps,
-    toggleTaskCompleteStatus,
-    onStepClicked,
-  });
+  const sectionNodes = useMemo(
+    () =>
+      setUpSections({
+        activeSections,
+        expandedCardSteps,
+        finishedSteps,
+        toggleTaskCompleteStatus,
+        onStepClicked,
+      }),
+    [
+      activeSections,
+      expandedCardSteps,
+      finishedSteps,
+      onStepClicked,
+      setUpSections,
+      toggleTaskCompleteStatus,
+    ]
+  );
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
@@ -47,7 +58,7 @@ const TogglePanelComponent: React.FC<{
             body={<p>{i18n.TOGGLE_PANEL_EMPTY_DESCRIPTION}</p>}
             css={css`
               padding: ${euiTheme.base * 5}px 0;
-              .euiEmptyPrompt__contentInner {
+              .euiEmptyPrompt__content {
                 max-width: none;
               }
             `}

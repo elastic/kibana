@@ -18,7 +18,7 @@ import {
   switchMap,
   takeUntil,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import {
   BehaviorSubject,
   combineLatest,

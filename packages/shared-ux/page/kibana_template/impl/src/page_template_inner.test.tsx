@@ -48,6 +48,17 @@ describe('KibanaPageTemplateInner', () => {
       );
       expect(component).toMatchSnapshot();
     });
+
+    test('no pageHeader, isEmptyState, emptyPageBody', () => {
+      const component = shallow(
+        <KibanaPageTemplateInner
+          isEmptyState={true}
+          pageHeader={undefined}
+          emptyPageBody={<div>{'custom empty page body'}</div>}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 
   test('page sidebar', () => {

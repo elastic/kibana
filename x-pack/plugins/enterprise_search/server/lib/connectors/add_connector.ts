@@ -9,11 +9,9 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import {
   createConnector,
-  createConnectorSecret,
   Connector,
   ConnectorStatus,
   deleteConnectorById,
-  updateConnectorApiKeyId,
 } from '@kbn/search-connectors';
 
 import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
@@ -34,6 +32,7 @@ export const addConnector = async (
     indexName: string | null;
     isNative: boolean;
     language: string | null;
+    name: string | null;
     serviceType?: string | null;
   }
 ): Promise<Connector> => {
@@ -86,7 +85,7 @@ export const addConnector = async (
 
   const connector = await createConnector(client.asCurrentUser, {
     ...input,
-    name: input.indexName || '',
+    name: input.name || '',
     ...nativeFields,
     pipeline: await getDefaultPipeline(client),
   });
@@ -97,14 +96,7 @@ export const addConnector = async (
     input.isNative &&
     input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
   ) {
-    const apiKey = await generateApiKey(client, index);
-    const connectorSecret = await createConnectorSecret(client.asCurrentUser, apiKey.encoded);
-    await updateConnectorApiKeyId(
-      client.asCurrentUser,
-      connector.id,
-      apiKey.id,
-      connectorSecret.id
-    );
+    await generateApiKey(client, index, true);
   }
 
   return connector;

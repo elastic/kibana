@@ -73,7 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays relevant alert in list drawer', async () => {
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
 
       await testSubjects.click(`xpack.synthetics.monitorList.${monitorId}.expandMonitorDetail`);
       await pageObjects.header.waitUntilLoadingHasFinished();

@@ -25,6 +25,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
   buildNum: 42,
   buildSha: 'buildSha',
+  buildShaShort: 'buildShaShort',
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
   dist: false,
   version: '8.0.0',
@@ -62,7 +63,7 @@ describe('bootstrapRenderer', () => {
       auth,
       packageInfo,
       uiPlugins,
-      baseHref: '/base-path',
+      baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
     });
   });
 
@@ -128,7 +129,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values (true/dark) from the UserSettingsService when provided', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(true);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(true);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -154,7 +155,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values (false/light) from the UserSettingsService when provided', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(false);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(false);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -180,7 +181,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values from the UiSettingsClient when values (false/light) from UserSettingsService are `undefined`', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -206,7 +207,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with values from the UiSettingsClient when values (true/dark) from UserSettingsService are `undefined`', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -268,6 +269,23 @@ describe('bootstrapRenderer', () => {
         darkMode: true,
       });
     });
+
+    it('calls getThemeTag with the correct parameters when darkMode is `system`', async () => {
+      uiSettingsClient.get.mockResolvedValue('system');
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        themeVersion: 'v8',
+        darkMode: false,
+      });
+    });
   });
 
   describe('when the auth status is `unauthenticated`', () => {
@@ -319,7 +337,7 @@ describe('bootstrapRenderer', () => {
       expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
         isAnonymousPage,
         uiPlugins,
-        bundlesHref: '/base-path/42/bundles',
+        bundlesHref: '/base-path/buildShaShort/bundles',
       });
     });
   });
@@ -338,7 +356,7 @@ describe('bootstrapRenderer', () => {
 
     expect(getJsDependencyPathsMock).toHaveBeenCalledTimes(1);
     expect(getJsDependencyPathsMock).toHaveBeenCalledWith(
-      '/base-path/42/bundles',
+      '/base-path/buildShaShort/bundles',
       pluginsBundlePaths
     );
   });

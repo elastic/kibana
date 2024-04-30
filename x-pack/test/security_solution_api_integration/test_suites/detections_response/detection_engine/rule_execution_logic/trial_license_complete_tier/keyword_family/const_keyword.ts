@@ -12,18 +12,17 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
+import { getEqlRuleForAlertTesting, getThresholdRuleForAlertTesting } from '../../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getRuleForAlertTesting,
   getAlertsById,
-  getThresholdRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -32,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless Rule detects against a keyword of event.dataset', () => {
+  describe('@ess @serverless @serverlessQA Rule detects against a keyword of event.dataset', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/const_keyword');
     });

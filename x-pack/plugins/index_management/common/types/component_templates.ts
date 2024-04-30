@@ -25,7 +25,6 @@ export interface ComponentTemplateSerialized {
 
 export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
   name: string;
-  isDeprecated?: boolean;
   _kbnMeta: {
     usedBy: string[];
     isManaged: boolean;

@@ -99,7 +99,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
           return;
         }
 
-        const response = result.data.persistTimeline;
+        const response = result?.data?.persistTimeline;
         if (response == null) {
           kibana.notifications.toasts.addDanger({
             title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
@@ -273,7 +273,7 @@ const convertToString = (obj: unknown) => {
 type PossibleResponse = TimelineResponse | TimelineErrorResponse;
 
 function isTimelineErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
-  return 'status_code' in response || 'statusCode' in response;
+  return response && ('status_code' in response || 'statusCode' in response);
 }
 
 function getErrorFromResponse(response: TimelineErrorResponse) {

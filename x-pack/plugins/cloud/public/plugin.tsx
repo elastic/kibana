@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -22,6 +22,7 @@ export interface CloudConfigType {
   cname?: string;
   base_url?: string;
   profile_url?: string;
+  deployments_url?: string;
   deployment_url?: string;
   projects_url?: string;
   billing_url?: string;
@@ -38,6 +39,9 @@ export interface CloudConfigType {
 }
 
 interface CloudUrls {
+  /** Link to all deployments page on cloud */
+  deploymentsUrl?: string;
+  /** Link to the current deployment on cloud */
   deploymentUrl?: string;
   profileUrl?: string;
   billingUrl?: string;
@@ -52,7 +56,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
-  private readonly contextProviders: FC[] = [];
+  private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -108,7 +112,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
-    const CloudContextProvider: FC = ({ children }) => {
+    const CloudContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       return (
         <>
           {this.contextProviders.reduce(
@@ -122,6 +126,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
 
     const {
+      deploymentsUrl,
       deploymentUrl,
       profileUrl,
       billingUrl,
@@ -141,6 +146,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       isCloudEnabled: this.isCloudEnabled,
       cloudId: this.config.id,
       billingUrl,
+      deploymentsUrl,
       deploymentUrl,
       profileUrl,
       organizationUrl,
@@ -165,6 +171,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       profile_url: profileUrl,
       billing_url: billingUrl,
       organization_url: organizationUrl,
+      deployments_url: deploymentsUrl,
       deployment_url: deploymentUrl,
       base_url: baseUrl,
       performance_url: performanceUrl,
@@ -172,6 +179,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       projects_url: projectsUrl,
     } = this.config;
 
+    const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
     const fullCloudBillingUrl = getFullCloudUrl(baseUrl, billingUrl);
@@ -182,6 +190,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
+      deploymentsUrl: fullCloudDeploymentsUrl,
       deploymentUrl: fullCloudDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
       billingUrl: fullCloudBillingUrl,

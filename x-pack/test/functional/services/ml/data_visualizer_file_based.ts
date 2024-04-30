@@ -49,6 +49,32 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       await testSubjects.existOrFail('dataVisualizerFileFileContentPanel');
     },
 
+    async assertFileContentHighlightingSwitchExists(exist: boolean) {
+      const tabs = await testSubjects.findAll('dataVisualizerFileContentsHighlightingSwitch');
+      expect(tabs.length).to.eql(
+        exist ? 1 : 0,
+        `Expected file content highlighting switch to ${exist ? 'exist' : 'not exist'}, but found ${
+          tabs.length
+        }`
+      );
+    },
+
+    async assertFileContentHighlighting(highlighted: boolean, numberOfFields: number) {
+      const lines = await testSubjects.findAll('dataVisualizerHighlightedLine', 1000);
+      const linesExist = lines.length > 0;
+      expect(linesExist).to.eql(
+        highlighted,
+        `Expected file content highlighting to be '${highlighted ? 'enabled' : 'disabled'}'`
+      );
+      const expectedNumberOfFields = highlighted ? numberOfFields : 0;
+      const foundFields = (await lines[0]?.findAllByTestSubject('dataVisualizerFieldBadge')) ?? [];
+
+      expect(foundFields.length).to.eql(
+        expectedNumberOfFields,
+        `Expected ${expectedNumberOfFields} fields to be highlighted, but found ${foundFields.length}`
+      );
+    },
+
     async assertSummaryPanelExists() {
       await testSubjects.existOrFail('dataVisualizerFileSummaryPanel');
     },

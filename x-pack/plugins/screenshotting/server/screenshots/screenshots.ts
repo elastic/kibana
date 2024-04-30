@@ -9,17 +9,7 @@ import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
 import moment from 'moment';
 import { Observable, from, of, throwError } from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  first,
-  map,
-  mergeMap,
-  take,
-  takeUntil,
-  tap,
-  toArray,
-} from 'rxjs/operators';
+import { catchError, concatMap, first, map, mergeMap, take, takeUntil, tap, toArray } from 'rxjs';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, Logger, PackageInfo } from '@kbn/core/server';

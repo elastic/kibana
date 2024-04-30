@@ -35,8 +35,12 @@ export const ObservabilityLogsExplorerMainRoute = () => {
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const createLogsExplorerController = useMemo(
-    () => createLogsExplorerControllerWithCustomizations(logsExplorer.createLogsExplorerController),
-    [logsExplorer.createLogsExplorerController]
+    () =>
+      createLogsExplorerControllerWithCustomizations(
+        logsExplorer.createLogsExplorerController,
+        services
+      ),
+    [logsExplorer.createLogsExplorerController, services]
   );
 
   return (
@@ -45,6 +49,7 @@ export const ObservabilityLogsExplorerMainRoute = () => {
       toasts={notifications.toasts}
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
+      analytics={services.analytics}
     >
       <LogsExplorerTopNavMenu />
       <LazyOriginInterpreter history={history} toasts={notifications.toasts} />

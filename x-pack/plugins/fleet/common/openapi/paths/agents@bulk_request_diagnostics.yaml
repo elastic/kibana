@@ -33,6 +33,13 @@ post:
                   items:
                     type: string
                   description: list of agent IDs
+            additional_metrics:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                    enum:
+                      - "CPU"
           required:
             - agents
         example:

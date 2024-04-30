@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const toasts = getService('toasts');
 
   let resilientSimulatorUrl: string = '<could not determine kibana url>';
   let smallUrl: string;
@@ -47,9 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('resilient-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
       // Close all toasts since it is unable to get incident types from example site
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
       await commonScreenshots.takeScreenshot('resilient-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });

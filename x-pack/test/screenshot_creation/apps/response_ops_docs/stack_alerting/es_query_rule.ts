@@ -101,10 +101,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Edit the rule that was created as part of startup
       await testSubjects.setValue('ruleSearchField', esQueryRuleName);
       await browser.pressKeys(browser.keys.ENTER);
-      const actionPanel = await testSubjects.find('collapsedItemActions');
-      await actionPanel.click();
-      const editRuleMenu = await testSubjects.find('editRule');
-      await editRuleMenu.click();
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${esQueryRuleName}"]`);
+      await alertRule.click();
+      const editRule = await testSubjects.find('openEditRuleFlyoutButton');
+      await editRule.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
         'es-query-rule-conditions',

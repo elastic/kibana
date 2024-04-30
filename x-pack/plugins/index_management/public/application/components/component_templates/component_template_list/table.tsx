@@ -51,6 +51,7 @@ const deprecatedFilterLabel = i18n.translate(
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
+  defaultFilter: string;
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
   onEditClick: (componentTemplateName: string) => void;
@@ -60,6 +61,7 @@ export interface Props {
 
 export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
+  defaultFilter,
   onReloadClick,
   onDeleteClick,
   onEditClick,
@@ -129,7 +131,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
     itemId: 'name',
-    isSelectable: true,
     'data-test-subj': 'componentTemplatesTable',
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {
@@ -188,6 +189,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
       ],
       box: {
         incremental: true,
+        'data-test-subj': 'componentTemplatesSearch',
       },
       filters: [
         {
@@ -220,6 +222,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           },
         },
       ],
+      defaultQuery: defaultFilter,
     },
     pagination: {
       initialPageSize: 10,

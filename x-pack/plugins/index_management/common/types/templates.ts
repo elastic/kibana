@@ -23,6 +23,7 @@ export interface TemplateSerialized {
   };
   deprecated?: boolean;
   composed_of?: string[];
+  ignore_missing_component_templates?: string[];
   version?: number;
   priority?: number;
   _meta?: { [key: string]: any };
@@ -45,9 +46,10 @@ export interface TemplateDeserialized {
   };
   lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only
+  ignoreMissingComponentTemplates?: string[];
   version?: number;
   priority?: number; // Composable template only
-  allowAutoCreate?: boolean;
+  allowAutoCreate: string;
   order?: number; // Legacy template only
   ilmPolicy?: {
     name: string;
@@ -91,6 +93,7 @@ export interface TemplateListItem {
   ilmPolicy?: {
     name: string;
   };
+  composedOf?: string[];
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;

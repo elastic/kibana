@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
 import {
   Chart,
   Settings,
@@ -15,10 +17,6 @@ import {
   ScaleType,
   Position,
   BarSeries,
-  RecursivePartial,
-  AxisStyle,
-  PartialTheme,
-  BarSeriesProps,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 

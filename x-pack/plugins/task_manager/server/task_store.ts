@@ -24,6 +24,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
+import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
 import {
@@ -48,6 +49,7 @@ export interface StoreOpts {
   adHocTaskCounter: AdHocTaskCounter;
   allowReadingInvalidState: boolean;
   logger: Logger;
+  requestTimeouts: RequestTimeoutsConfig;
 }
 
 export interface SearchOpts {
@@ -108,6 +110,7 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
+  private requestTimeouts: RequestTimeoutsConfig;
 
   /**
    * Constructs a new TaskStore.
@@ -136,6 +139,7 @@ export class TaskStore {
       // The poller doesn't need retry logic because it will try again at the next polling cycle
       maxRetries: 0,
     });
+    this.requestTimeouts = opts.requestTimeouts;
   }
 
   /**
@@ -492,17 +496,20 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
       const // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery({
-          index: this.index,
-          ignore_unavailable: true,
-          refresh: true,
-          conflicts: 'proceed',
-          body: {
-            ...opts,
-            max_docs,
-            query,
+        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+          {
+            index: this.index,
+            ignore_unavailable: true,
+            refresh: true,
+            conflicts: 'proceed',
+            body: {
+              ...opts,
+              max_docs,
+              query,
+            },
           },
-        });
+          { requestTimeout: this.requestTimeouts.update_by_query }
+        );
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
         updated,

@@ -340,7 +340,7 @@ For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string f
 The default model to use for requests, which varies by connector:
 +
 --
-* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-v2`.
+* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-sonnet-20240229-v1:0`.
 * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 --
 

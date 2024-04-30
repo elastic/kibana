@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,6 +39,7 @@ export const LogRateAnalysisPage: FC = () => {
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',

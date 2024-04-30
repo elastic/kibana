@@ -30,8 +30,11 @@ const DEFAULT_VALUES: CachedFetchModelsApiLogicValues = {
 const FETCH_MODELS_API_DATA_RESPONSE: MlModel[] = [
   {
     modelId: 'model_1',
-    title: 'Model 1',
     type: 'ner',
+    title: 'Model 1',
+    description: 'Model 1 description',
+    licenseType: 'elastic',
+    modelDetailsPageUrl: 'https://my-model.ai',
     deploymentState: MlModelDeploymentState.NotDeployed,
     startTime: 0,
     targetAllocationCount: 0,
@@ -39,6 +42,9 @@ const FETCH_MODELS_API_DATA_RESPONSE: MlModel[] = [
     threadsPerAllocation: 0,
     isPlaceholder: false,
     hasStats: false,
+    types: ['pytorch', 'ner'],
+    inputFieldNames: ['title'],
+    version: '1',
   },
 ];
 const FETCH_MODELS_API_ERROR_RESPONSE = {

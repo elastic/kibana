@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { TableId } from '@kbn/securitysolution-data-table';
+
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createFilterInCellActionFactory } from './filter_in';
 import type { SecurityCellActionExecutionContext } from '../../types';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../common/types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 const services = createStartServicesMock();
 const mockGlobalFilterManager = services.data.query.filterManager;
-const mockTimelineFilterManager = createFilterManagerMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
 
 const mockState = {
@@ -27,7 +26,6 @@ const mockState = {
       ...mockGlobalState.timeline.timelineById,
       [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById[TimelineId.active],
-        filterManager: mockTimelineFilterManager,
       },
     },
   },
@@ -110,7 +108,7 @@ describe('createFilterInCellActionFactory', () => {
       it('should execute using generic filterManager', async () => {
         await filterInAction.execute(dataTableContext);
         expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
-        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(services.timelineFilterManager.addFilters).not.toHaveBeenCalled();
       });
 
       it('should show warning if value type is unsupported', async () => {
@@ -124,7 +122,7 @@ describe('createFilterInCellActionFactory', () => {
           ],
         });
         expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
-        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(services.timelineFilterManager.addFilters).not.toHaveBeenCalled();
         expect(mockWarningToast).toHaveBeenCalled();
       });
     });
@@ -137,7 +135,7 @@ describe('createFilterInCellActionFactory', () => {
 
       it('should execute using timeline filterManager', async () => {
         await filterInAction.execute(timelineContext);
-        expect(mockTimelineFilterManager.addFilters).toHaveBeenCalled();
+        expect(services.timelineFilterManager.addFilters).toHaveBeenCalled();
         expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
       });
     });

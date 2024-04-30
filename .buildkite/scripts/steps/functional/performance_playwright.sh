@@ -3,10 +3,30 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/setup_bazel.sh
 
 is_test_execution_step
 
-.buildkite/scripts/bootstrap.sh
+run_bootstrap() {
+    echo "Running yarn kbn bootstrap --force-install"
+    yarn kbn bootstrap --force-install
+}
+
+echo "--- yarn install and boostrap"
+if ! run_bootstrap; then
+  echo "--- bootstrap failed, trying again in 15 seconds"
+  sleep 15
+
+  # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
+  # So, we should just delete node_modules in between attempts
+  rm -rf node_modules
+
+  run_bootstrap
+fi
+
+if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
+  check_for_changed_files 'yarn kbn bootstrap'
+fi
 
 # These tests are running on static workers so we have to make sure we delete previous build of Kibana
 rm -rf "$KIBANA_BUILD_LOCATION"
@@ -29,4 +49,13 @@ if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
   cd "$JOURNEY_SCREENSHOTS_DIR"
   buildkite-agent artifact upload "**/*fullscreen*.png"
   cd "$KIBANA_DIR"
+fi
+
+echo "--- Upload server logs"
+JOURNEY_SERVER_LOGS_REL_PATH=".ftr/journey_server_logs"
+JOURNEY_SERVER_LOGS_DIR="${KIBANA_DIR}/${JOURNEY_SERVER_LOGS_REL_PATH}"
+if [ -d "$JOURNEY_SERVER_LOGS_DIR" ]; then
+  cd "$KIBANA_DIR"
+  tar -czf server-logs.tar.gz $JOURNEY_SERVER_LOGS_REL_PATH/**/*
+  buildkite-agent artifact upload server-logs.tar.gz
 fi

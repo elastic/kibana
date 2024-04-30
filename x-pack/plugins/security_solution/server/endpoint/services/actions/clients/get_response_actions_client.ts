@@ -8,13 +8,16 @@
 import type { SentinelOneActionsClientOptions } from './sentinelone/sentinel_one_actions_client';
 import type { ResponseActionsClient } from './lib/types';
 import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
-import { EndpointActionsClient } from './endpoint_actions_client';
+import { EndpointActionsClient } from './endpoint/endpoint_actions_client';
 import { SentinelOneActionsClient } from './sentinelone/sentinel_one_actions_client';
 import { UnsupportedResponseActionsAgentTypeError } from './errors';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { CrowdstrikeActionsClientOptions } from './crowdstrike/crowdstrike_actions_client';
+import { CrowdstrikeActionsClient } from './crowdstrike/crowdstrike_actions_client';
 
 export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOptions &
-  SentinelOneActionsClientOptions;
+  SentinelOneActionsClientOptions &
+  CrowdstrikeActionsClientOptions;
 
 /**
  * Retrieve a response actions client for an agent type
@@ -24,7 +27,7 @@ export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOp
  * @throws UnsupportedResponseActionsAgentTypeError
  */
 export const getResponseActionsClient = (
-  agentType: string | ResponseActionAgentType,
+  agentType: ResponseActionAgentType,
   constructorOptions: GetResponseActionsClientConstructorOptions
 ): ResponseActionsClient => {
   switch (agentType) {
@@ -32,9 +35,11 @@ export const getResponseActionsClient = (
       return new EndpointActionsClient(constructorOptions);
     case 'sentinel_one':
       return new SentinelOneActionsClient(constructorOptions);
+    case 'crowdstrike':
+      return new CrowdstrikeActionsClient(constructorOptions);
+    default:
+      throw new UnsupportedResponseActionsAgentTypeError(
+        `Agent type [${agentType}] does not support response actions`
+      );
   }
-
-  throw new UnsupportedResponseActionsAgentTypeError(
-    `Agent type [${agentType}] does not support response actions`
-  );
 };

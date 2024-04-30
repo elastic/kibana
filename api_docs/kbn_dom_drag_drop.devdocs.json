@@ -58,33 +58,33 @@
       },
       {
         "parentPluginId": "@kbn/dom-drag-drop",
-        "id": "def-common.DragDrop",
+        "id": "def-common.Draggable",
         "type": "Function",
         "tags": [
           "constructor"
         ],
-        "label": "DragDrop",
+        "label": "Draggable",
         "description": [
-          "\nDragDrop component"
+          "\nDraggable component"
         ],
         "signature": [
-          "(props: BaseProps) => JSX.Element"
+          "({ reorderableGroup, ...props }: DraggableProps) => JSX.Element"
         ],
-        "path": "packages/kbn-dom-drag-drop/src/drag_drop.tsx",
+        "path": "packages/kbn-dom-drag-drop/src/draggable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dom-drag-drop",
-            "id": "def-common.DragDrop.$1",
+            "id": "def-common.Draggable.$1",
             "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{ reorderableGroup, ...props }",
             "description": [],
             "signature": [
-              "BaseProps"
+              "DraggableProps"
             ],
-            "path": "packages/kbn-dom-drag-drop/src/drag_drop.tsx",
+            "path": "packages/kbn-dom-drag-drop/src/draggable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,6 +138,45 @@
               ">"
             ],
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-common.Droppable",
+        "type": "Function",
+        "tags": [
+          "constructor"
+        ],
+        "label": "Droppable",
+        "description": [
+          "\nDroppable component"
+        ],
+        "signature": [
+          "(props: ",
+          "DroppableProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.Droppable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "DroppableProps"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -227,9 +266,17 @@
         "label": "RootDragDropProvider",
         "description": [],
         "signature": [
-          "({\n  children,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n  customMiddleware,\n}: { children: React.ReactNode; dataTestSubj?: string | undefined; customMiddleware?: ",
+          "({\n  children,\n  customMiddleware,\n  initialState = {},\n}: { children: React.ReactNode; customMiddleware?: ",
           "CustomMiddleware",
-          " | undefined; }) => JSX.Element"
+          " | undefined; initialState?: Partial<",
+          {
+            "pluginId": "@kbn/dom-drag-drop",
+            "scope": "common",
+            "docId": "kibKbnDomDragDropPluginApi",
+            "section": "def-common.DragContextState",
+            "text": "DragContextState"
+          },
+          "> | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
         "deprecated": false,
@@ -240,7 +287,7 @@
             "id": "def-common.RootDragDropProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  children,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n  customMiddleware,\n}",
+            "label": "{\n  children,\n  customMiddleware,\n  initialState = {},\n}",
             "description": [],
             "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
             "deprecated": false,
@@ -262,20 +309,6 @@
               },
               {
                 "parentPluginId": "@kbn/dom-drag-drop",
-                "id": "def-common.RootDragDropProvider.$1.dataTestSubj",
-                "type": "string",
-                "tags": [],
-                "label": "dataTestSubj",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/dom-drag-drop",
                 "id": "def-common.RootDragDropProvider.$1.customMiddleware",
                 "type": "Function",
                 "tags": [],
@@ -284,6 +317,28 @@
                 "signature": [
                   "CustomMiddleware",
                   " | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-common.RootDragDropProvider.$1.initialState",
+                "type": "Object",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/dom-drag-drop",
+                    "scope": "common",
+                    "docId": "kibKbnDomDragDropPluginApi",
+                    "section": "def-common.DragContextState",
+                    "text": "DragContextState"
+                  },
+                  "> | undefined"
                 ],
                 "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
                 "deprecated": false,
@@ -370,10 +425,10 @@
           },
           {
             "parentPluginId": "@kbn/dom-drag-drop",
-            "id": "def-common.DragContextState.activeDropTarget",
+            "id": "def-common.DragContextState.hoveredDropTarget",
             "type": "CompoundType",
             "tags": [],
-            "label": "activeDropTarget",
+            "label": "hoveredDropTarget",
             "description": [
               "\ncurrently selected drop target"
             ],
@@ -397,7 +452,7 @@
             "signature": [
               "Record<string, ",
               "DropIdentifier",
-              " | undefined> | undefined"
+              "> | undefined"
             ],
             "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
             "deprecated": false,
@@ -644,7 +699,7 @@
             "label": "getAdditionalClassesOnDroppable",
             "description": [],
             "signature": [
-              "(dropType?: string | undefined) => \"domDragDrop-notCompatible\" | undefined"
+              "(dropType?: string | undefined) => \"domDroppable--incompatible\" | undefined"
             ],
             "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
             "deprecated": false,
@@ -675,7 +730,7 @@
             "label": "getAdditionalClassesOnEnter",
             "description": [],
             "signature": [
-              "(dropType?: string | undefined) => \"domDragDrop-isReplacing\" | undefined"
+              "(dropType?: string | undefined) => \"domDroppable--replacing\" | undefined"
             ],
             "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
             "deprecated": false,

@@ -1,0 +1,122 @@
+[
+  {
+    "field": "process.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.entry_leader.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.entry_leader.parent.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.entry_leader.parent.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.entry_leader.parent.session_leader.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.entry_leader.parent.session_leader.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.entry_leader.parent.session_leader.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.entry_leader.parent.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.entry_leader.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.entry_leader.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.group_leader.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.group_leader.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.group_leader.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.parent.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.parent.group_leader.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.parent.group_leader.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.parent.group_leader.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.parent.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.parent.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.session_leader.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.session_leader.parent.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.session_leader.parent.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.session_leader.parent.session_leader.entity_id",
+    "description": "Unique identifier for the process."
+  },
+  {
+    "field": "process.session_leader.parent.session_leader.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.session_leader.parent.session_leader.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.session_leader.parent.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.session_leader.pid",
+    "description": "Process id."
+  },
+  {
+    "field": "process.session_leader.vpid",
+    "description": "Virtual process id."
+  },
+  {
+    "field": "process.vpid",
+    "description": "Virtual process id."
+  }
+]

@@ -344,6 +344,11 @@ describe('parseAndVerifyArchive', () => {
       owner: {
         github: 'elastic/integrations',
       },
+      agent: {
+        privileges: {
+          root: true,
+        },
+      },
       policy_templates: [
         {
           description: 'Collect your custom log files.',
@@ -408,7 +413,7 @@ describe('parseAndVerifyArchive', () => {
   it('should throw on missing manifest file', () => {
     expect(() => parseAndVerifyArchive(['input_only-0.1.0/test/manifest.yml'], {})).toThrowError(
       new PackageInvalidArchiveError(
-        'Package at top-level directory input_only-0.1.0 must contain a top-level manifest.yml file.'
+        'Manifest file input_only-0.1.0/manifest.yml not found in paths.'
       )
     );
   });

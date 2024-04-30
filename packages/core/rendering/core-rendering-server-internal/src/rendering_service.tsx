@@ -9,16 +9,20 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { firstValueFrom, of } from 'rxjs';
-import { catchError, take, timeout } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
+import { catchError, take, timeout } from 'rxjs';
+import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import {
+  type UserProvidedValues,
+  type DarkModeValue,
+  parseDarkModeValue,
+} from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -29,7 +33,13 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getStylesheetPaths } from './render_utils';
+import {
+  getSettingValue,
+  getCommonStylesheetPaths,
+  getThemeStylesheetPaths,
+  getScriptPaths,
+  getBrowserLoggingConfig,
+} from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
@@ -42,6 +52,8 @@ type RenderOptions =
       userSettings?: never;
     });
 
+const themeVersion: ThemeVersion = 'v8';
+
 /** @internal */
 export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
@@ -49,6 +61,7 @@ export class RenderingService {
   public async preboot({
     http,
     uiPlugins,
+    i18n,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
       registerBootstrapRoute({
@@ -63,7 +76,7 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { http, uiPlugins }),
+      render: this.render.bind(this, { http, uiPlugins, i18n }),
     };
   }
 
@@ -74,6 +87,7 @@ export class RenderingService {
     uiPlugins,
     customBranding,
     userSettings,
+    i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -94,6 +108,7 @@ export class RenderingService {
         status,
         customBranding,
         userSettings,
+        i18n,
       }),
     };
   }
@@ -107,14 +122,15 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
+    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
+      renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
     };
-    const buildNum = env.packageInfo.buildNum;
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
+    const usingCdn = http.staticAssets.isUsingCdn();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
@@ -160,30 +176,44 @@ export class RenderingService {
       // swallow error
     }
 
-    let userSettingDarkMode: boolean | undefined;
-
-    if (!isAnonymousPage) {
-      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
-    }
-
-    let darkMode: boolean;
+    // dark mode
+    const userSettingDarkMode = isAnonymousPage
+      ? undefined
+      : await userSettings?.getUserSettingDarkMode(request);
 
     const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
 
+    let darkMode: DarkModeValue;
     if (userSettingDarkMode !== undefined && !isThemeOverridden) {
       darkMode = userSettingDarkMode;
     } else {
-      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+      darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeVersion: ThemeVersion = 'v8';
-
-    const stylesheetPaths = getStylesheetPaths({
-      darkMode,
-      themeVersion,
+    const themeStylesheetPaths = (mode: boolean) =>
+      getThemeStylesheetPaths({
+        darkMode: mode,
+        themeVersion,
+        baseHref: staticAssetsHrefBase,
+      });
+    const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
-      buildNum,
     });
+    const scriptPaths = getScriptPaths({
+      darkMode,
+      baseHref: staticAssetsHrefBase,
+    });
+
+    const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
+
+    const locale = i18nLib.getLocale();
+    let translationsUrl: string;
+    if (usingCdn) {
+      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+    } else {
+      const translationHash = i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+    }
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
@@ -191,11 +221,12 @@ export class RenderingService {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      i18n: i18n.translate,
-      locale: i18n.getLocale(),
-      darkMode,
+      i18n: i18nLib.translate,
+      locale,
       themeVersion,
-      stylesheetPaths,
+      darkMode,
+      stylesheetPaths: commonStylesheetPaths,
+      scriptPaths,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -210,16 +241,20 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
+        logging: loggingConfig,
         env,
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          // TODO: Make this load as part of static assets!
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl,
         },
         theme: {
           darkMode,
           version: themeVersion,
+          stylesheetPaths: {
+            default: themeStylesheetPaths(false),
+            dark: themeStylesheetPaths(true),
+          },
         },
         customBranding: {
           logo: branding?.logo,

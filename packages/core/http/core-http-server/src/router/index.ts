@@ -57,8 +57,12 @@ export type {
   RouteValidationResultFactory,
   RouteValidationSpec,
   RouteValidatorConfig,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
   RouteValidatorOptions,
+  RouteValidator,
+  RouteValidatorRequestAndResponses,
+  LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';
@@ -72,3 +76,4 @@ export type {
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
+export { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';

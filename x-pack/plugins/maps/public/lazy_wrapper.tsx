@@ -16,7 +16,7 @@ const Fallback = () => (
 
 interface Props<T> {
   getLazyComponent: () => FC<T>;
-  lazyComponentProps: T;
+  lazyComponentProps: JSX.IntrinsicAttributes & T;
 }
 
 export function LazyWrapper<T>({ getLazyComponent, lazyComponentProps }: Props<T>) {

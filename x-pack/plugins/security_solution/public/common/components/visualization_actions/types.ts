@@ -28,6 +28,7 @@ export type GetLensAttributes = (
 
 export interface UseLensAttributesProps {
   applyGlobalQueriesAndFilters?: boolean;
+  applyPageAndTabsFilters?: boolean;
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
@@ -83,6 +84,7 @@ export enum VisualizationContextMenuDefaultActionName {
 
 export interface LensEmbeddableComponentProps {
   applyGlobalQueriesAndFilters?: boolean;
+  applyPageAndTabsFilters?: boolean;
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;

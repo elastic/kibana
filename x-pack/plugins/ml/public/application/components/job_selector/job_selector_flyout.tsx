@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -28,9 +29,9 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
-import { JobSelectionMaps } from './job_selector';
+import type { JobSelectionMaps } from './job_selector';
 
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels

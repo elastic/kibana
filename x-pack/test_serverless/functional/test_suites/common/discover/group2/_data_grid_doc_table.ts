@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'header',
     'timePicker',
@@ -32,7 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
-  describe('discover data grid doc table', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/182125
+  describe.skip('discover data grid doc table', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
@@ -41,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     beforeEach(async () => {

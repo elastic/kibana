@@ -6,28 +6,29 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-
 import {
-  createAlertsIndex,
-  deleteAllRules,
   getSimpleRule,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  deleteAllAlerts,
   updateUsername,
+  getSimpleRuleOutput,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
@@ -57,15 +58,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .send(getSimpleRule())
+        const { body } = await securitySolutionApi
+          .createRule({ body: getSimpleRule() })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(bodyToCompare, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
@@ -82,25 +80,52 @@ export default ({ getService }: FtrProviderContext) => {
           query: 'user.name: root or user.name: admin',
         };
 
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .send(rule)
-          .expect(200);
+        const { body } = await securitySolutionApi.createRule({ body: rule }).expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(bodyToCompare, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(
+          {
+            actions: [],
+            author: [],
+            created_by: 'elastic',
+            description: 'Simple Rule Query',
+            enabled: true,
+            false_positives: [],
+            from: 'now-6m',
+            immutable: false,
+            interval: '5m',
+            rule_id: 'rule-1',
+            language: 'kuery',
+            output_index: '',
+            max_signals: 100,
+            risk_score: 1,
+            risk_score_mapping: [],
+            name: 'Simple Rule Query',
+            query: 'user.name: root or user.name: admin',
+            references: [],
+            related_integrations: [],
+            required_fields: [],
+            setup: '',
+            severity: 'high',
+            severity_mapping: [],
+            updated_by: 'elastic',
+            tags: [],
+            to: 'now',
+            type: 'query',
+            threat: [],
+            exceptions_list: [],
+            version: 1,
+            revision: 0,
+          },
+          ELASTICSEARCH_USERNAME
+        );
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should create a single rule without a rule_id', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .send(getSimpleRuleWithoutRuleId())
+        const { body } = await securitySolutionApi
+          .createRule({ body: getSimpleRuleWithoutRuleId() })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -113,18 +138,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .send(getSimpleRule())
-          .expect(200);
+        await securitySolutionApi.createRule({ body: getSimpleRule() }).expect(200);
 
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .send(getSimpleRule())
+        const { body } = await securitySolutionApi
+          .createRule({ body: getSimpleRule() })
           .expect(409);
 
         expect(body).to.eql({

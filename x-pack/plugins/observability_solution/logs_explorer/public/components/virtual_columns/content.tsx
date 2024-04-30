@@ -6,17 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  getLogDocumentOverview,
+  getMessageFieldWithFallbacks,
+  getShouldShowFieldHandler,
+} from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
-import { LogDocument } from '../../../common/document';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
-import './virtual_column.scss';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_document')
@@ -25,6 +28,11 @@ const SourceDocument = dynamic(
 const DiscoverSourcePopoverContent = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_popover_content')
 );
+
+const sourceDocumentClassName = css`
+  display: inline !important;
+  margin-left: ${euiThemeVars.euiSizeXS};
+`;
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
@@ -79,8 +87,8 @@ export const Content = ({
   columnId,
   closePopover,
 }: DataGridCellValueElementProps) => {
-  const parsedDoc = useDocDetail(row as LogDocument, { dataView });
-  const { field, value } = getMessageWithFallbacks(parsedDoc);
+  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
+  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const renderLogMessage = field && value;
 
   const shouldShowFieldHandler = useMemo(() => {
@@ -88,30 +96,70 @@ export const Content = ({
     return getShouldShowFieldHandler(dataViewFields, dataView, true);
   }, [dataView]);
 
+  const formattedRow = useMemo(() => {
+    return formatJsonDocumentForContent(row);
+  }, [row]);
+
   if (isDetails && !renderLogMessage) {
-    return <SourcePopoverContent row={row} columnId={columnId} closePopover={closePopover} />;
+    return (
+      <SourcePopoverContent row={formattedRow} columnId={columnId} closePopover={closePopover} />
+    );
   }
 
   return (
     <span>
-      {parsedDoc[constants.LOG_LEVEL_FIELD] && (
-        <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
+      {documentOverview[constants.LOG_LEVEL_FIELD] && (
+        <LogLevel level={documentOverview[constants.LOG_LEVEL_FIELD]} />
       )}
       {renderLogMessage ? (
         <LogMessage field={field} value={value} />
       ) : (
         <SourceDocument
           useTopLevelObjectColumns={false}
-          row={row}
+          row={formattedRow}
           dataView={dataView}
           columnId={columnId}
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
           dataTestSubj="logsExplorerCellDescriptionList"
-          className="logsExplorerVirtualColumn__sourceDocument"
+          className={sourceDocumentClassName}
         />
       )}
     </span>
   );
+};
+
+const formatJsonDocumentForContent = (row: DataTableRecord) => {
+  const flattenedResult: DataTableRecord['flattened'] = {};
+  const rawFieldResult: DataTableRecord['raw']['fields'] = {};
+  const { raw, flattened } = row;
+  const { fields } = raw;
+
+  // We need 2 loops here for flattened and raw.fields. Flattened contains all fields,
+  // whereas raw.fields only contains certain fields excluding _ignored
+  for (const key in flattened) {
+    if (
+      !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => key.startsWith(prefix))
+    ) {
+      flattenedResult[key] = flattened[key];
+    }
+  }
+
+  for (const key in fields) {
+    if (
+      !constants.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => key.startsWith(prefix))
+    ) {
+      rawFieldResult[key] = fields[key];
+    }
+  }
+
+  return {
+    ...row,
+    flattened: flattenedResult,
+    raw: {
+      ...raw,
+      fields: rawFieldResult,
+    },
+  };
 };

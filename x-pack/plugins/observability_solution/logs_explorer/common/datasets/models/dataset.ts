@@ -8,7 +8,7 @@
 import { IconType } from '@elastic/eui';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { TIMESTAMP_FIELD } from '../../constants';
-import { DataViewSpecWithId } from '../../dataset_selection';
+import { DataViewSpecWithId } from '../../data_source_selection';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Partial<Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>>;

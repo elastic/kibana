@@ -38,6 +38,8 @@ export const createUpstreamTimeout = (
       )}, server: ${domain}, request: "${method} ${path} HTTP/1.1", upstream: "http://${hostWithPort}${path}", host: "${domain}"`,
       log: { level: 'ERROR', logger: NGINX_PROXY },
       host: { name: host },
+      http: { response: { status_code: 502, bytes: 0 } },
+      url: { domain },
     },
   ];
 };

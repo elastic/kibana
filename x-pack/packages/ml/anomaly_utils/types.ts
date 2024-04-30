@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
+import type { ML_PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
 import type { MlKibanaUrlConfig } from './custom_urls';
 
 /**

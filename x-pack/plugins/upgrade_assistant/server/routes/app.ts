@@ -5,16 +5,31 @@
  * 2.0.
  */
 
-import { API_BASE_PATH, DEPRECATION_LOGS_INDEX } from '../../common/constants';
+import {
+  API_BASE_PATH,
+  DEPRECATION_LOGS_INDEX,
+  APP_LOGS_COUNT_INDEX_PRIVILEGES,
+  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+} from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { Privileges } from '../shared_imports';
 import { RouteDependencies } from '../types';
 
-const extractMissingPrivileges = (
+const extractMissingIndexPrivileges = (
   privilegesObject: { [key: string]: Record<string, boolean> } = {}
 ): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
     if (Object.values(privilegesObject[privilegeName]).some((e) => !e)) {
+      privileges.push(privilegeName);
+    }
+    return privileges;
+  }, []);
+
+const extractMissingClusterPrivileges = (
+  privilegesObject: { [key: string]: boolean } = {}
+): string[] =>
+  Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
+    if (!privilegesObject[privilegeName]) {
       privileges.push(privilegeName);
     }
     return privileges;
@@ -38,6 +53,7 @@ export function registerAppRoutes({
         hasAllPrivileges: true,
         missingPrivileges: {
           index: [],
+          cluster: [],
         },
       };
 
@@ -46,20 +62,25 @@ export function registerAppRoutes({
       }
 
       try {
-        const { has_all_requested: hasAllPrivileges, index } =
-          await client.asCurrentUser.security.hasPrivileges({
-            body: {
-              index: [
-                {
-                  names: [DEPRECATION_LOGS_INDEX],
-                  privileges: ['read'],
-                },
-              ],
-            },
-          });
+        const {
+          has_all_requested: hasAllPrivileges,
+          index,
+          cluster,
+        } = await client.asCurrentUser.security.hasPrivileges({
+          body: {
+            cluster: APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+            index: [
+              {
+                names: [DEPRECATION_LOGS_INDEX],
+                privileges: APP_LOGS_COUNT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        });
 
         if (!hasAllPrivileges) {
-          privilegesResult.missingPrivileges.index = extractMissingPrivileges(index);
+          privilegesResult.missingPrivileges.index = extractMissingIndexPrivileges(index);
+          privilegesResult.missingPrivileges.cluster = extractMissingClusterPrivileges(cluster);
         }
 
         privilegesResult.hasAllPrivileges = hasAllPrivileges;

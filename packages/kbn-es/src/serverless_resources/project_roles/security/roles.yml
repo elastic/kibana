@@ -1,5 +1,5 @@
 # -----
-# Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+# Source: project-controller/blob/main/internal/project/security/config/roles.yml
 # -----
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
@@ -723,6 +723,18 @@ endpoint_policy_manager:
         - feature_maps.all
         - feature_visualize.all
       resources: '*'
+
+# admin role defined in elasticsearch controller
+admin:
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: false
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
 
 # temporarily added for testing purpose
 system_indices_superuser:

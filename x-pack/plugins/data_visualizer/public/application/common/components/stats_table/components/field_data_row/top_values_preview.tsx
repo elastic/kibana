@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { ChartData, OrdinalDataItem } from '@kbn/ml-data-grid';
 import { ColumnChart } from './column_chart';

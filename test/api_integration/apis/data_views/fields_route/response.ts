@@ -15,6 +15,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const esClient = getService('es');
 
   const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
@@ -98,6 +99,20 @@ export default function ({ getService }: FtrProviderContext) {
         .get(FIELDS_PATH)
         .query({
           pattern: 'basic_index',
+          fields: ['bar'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
+    it('returns a single field as requested with json encoding', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
           fields: JSON.stringify(['bar']),
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
@@ -112,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(FIELDS_PATH)
         .query({
           pattern: 'basic_index',
-          meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
+          meta_fields: ['_id', '_source', 'crazy_meta_field'],
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(200, {
@@ -200,6 +215,34 @@ export default function ({ getService }: FtrProviderContext) {
         .then(ensureFieldsAreSorted);
     });
 
+    it('can request fields by type', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
+          field_types: 'boolean',
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
+    it('can request fields by multiple types', async () => {
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'basic_index',
+          field_types: ['boolean', 'text'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [testFields[0], testFields[1]],
+          indices: ['basic_index'],
+        });
+    });
+
     it('returns fields when one pattern exists and the other does not', async () => {
       await supertest
         .get(FIELDS_PATH)
@@ -225,6 +268,24 @@ export default function ({ getService }: FtrProviderContext) {
           apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(404);
+    });
+
+    it('returns empty set when no fields even if meta fields are supplied', async () => {
+      await esClient.indices.create({ index: 'fields-route-000001' });
+
+      await supertest
+        .get(FIELDS_PATH)
+        .query({
+          pattern: 'fields-route-000001',
+          meta_fields: ['_id', '_index'],
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
+        .expect(200, {
+          fields: [],
+          indices: ['fields-route-000001'],
+        });
+
+      await esClient.indices.delete({ index: 'fields-route-000001' });
     });
   });
 }

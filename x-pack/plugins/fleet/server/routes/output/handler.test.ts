@@ -144,11 +144,19 @@ describe('output handler', () => {
 
   it('should return error on put elasticsearch output in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    // The original output should provide the output type
+    jest.spyOn(outputService, 'get').mockImplementation((_, id: string) => {
+      if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+        return { hosts: ['http://elasticsearch:9200'] } as any;
+      } else {
+        return { id: 'output1', type: 'elasticsearch' } as any;
+      }
+    });
 
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', hosts: ['http://localhost:8080'] },
+        body: { hosts: ['http://localhost:8080'] },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any
@@ -169,7 +177,22 @@ describe('output handler', () => {
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', hosts: ['http://elasticsearch:9200'] },
+        body: { hosts: ['http://elasticsearch:9200'] },
+        params: { outputId: 'output1' },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return ok on put elasticsearch output in serverless if host url is not passed', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+
+    const res = await putOutputHandler(
+      mockContext,
+      {
+        body: { name: 'Renamed output' },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any
@@ -186,7 +209,7 @@ describe('output handler', () => {
     const res = await putOutputHandler(
       mockContext,
       {
-        body: { type: 'elasticsearch', hosts: ['http://localhost:8080'] },
+        body: { hosts: ['http://localhost:8080'] },
         params: { outputId: 'output1' },
       } as any,
       mockResponse as any

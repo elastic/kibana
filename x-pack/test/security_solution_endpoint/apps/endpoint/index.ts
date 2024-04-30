@@ -16,7 +16,8 @@ import {
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;
 
-  describe('endpoint', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/180401
+  describe.skip('endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');
@@ -45,7 +46,6 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./endpoint_permissions'));
-    loadTestFile(require.resolve('./responder'));
     loadTestFile(require.resolve('./endpoint_solution_integrations'));
   });
 }

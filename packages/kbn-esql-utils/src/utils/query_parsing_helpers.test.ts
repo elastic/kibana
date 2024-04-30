@@ -43,6 +43,11 @@ describe('sql/esql query helpers', () => {
         'SELECT * FROM (SELECT woof, miaou FROM "logstash-1234!" GROUP BY woof)'
       );
       expect(idxPattern8).toBe('logstash-1234!');
+
+      const idxPattern9 = getIndexPatternFromSQLQuery(
+        'SELECT * FROM remote_cluster:logs-* WHERE field > 20'
+      );
+      expect(idxPattern9).toBe('remote_cluster:logs-*');
     });
   });
 
@@ -64,13 +69,27 @@ describe('sql/esql query helpers', () => {
       expect(idxPattern6).toBe('foo-1,foo-2');
 
       const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
-      expect(idxPattern7).toBe('foo-1, foo-2');
+      expect(idxPattern7).toBe('foo-1,foo-2');
 
       const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
-      expect(idxPattern8).toBe('foo-1,  foo-2');
+      expect(idxPattern8).toBe('foo-1,foo-2');
 
       const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
-      expect(idxPattern9).toBe('foo-1, foo-2');
+      expect(idxPattern9).toBe('foo-1,foo-2');
+
+      const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
+      expect(idxPattern10).toBe('foo-1,remote_cluster:foo-2,foo-3');
+
+      const idxPattern11 = getIndexPatternFromESQLQuery(
+        'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
+      );
+      expect(idxPattern11).toBe('foo-1,foo-2');
+
+      const idxPattern12 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 // from command used');
+      expect(idxPattern12).toBe('foo-1,foo-2');
+
+      const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
+      expect(idxPattern13).toBe('');
     });
   });
 

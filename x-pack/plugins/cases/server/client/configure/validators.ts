@@ -38,37 +38,3 @@ export const validateCustomFieldTypesInRequest = ({
     );
   }
 };
-
-/**
- * Throws an error if any optional custom field defines a default value.
- */
-export const validateOptionalCustomFieldsInRequest = ({
-  requestCustomFields,
-}: {
-  requestCustomFields?: Array<{
-    key: string;
-    required: boolean;
-    defaultValue?: unknown;
-    label: string;
-  }>;
-}) => {
-  if (!Array.isArray(requestCustomFields)) {
-    return;
-  }
-
-  const invalidFields: string[] = [];
-
-  requestCustomFields.forEach((requestField) => {
-    if (!requestField.required && requestField.defaultValue !== undefined) {
-      invalidFields.push(`"${requestField.label}"`);
-    }
-  });
-
-  if (invalidFields.length > 0) {
-    throw Boom.badRequest(
-      `The following optional custom fields try to define a default value: ${invalidFields.join(
-        ', '
-      )}`
-    );
-  }
-};

@@ -50,13 +50,10 @@ import {
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  XYLegendValue,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import {
-  useSizeTransitionVeil,
-  getOverridesFor,
-  ChartSizeSpec,
-} from '@kbn/chart-expressions-common';
+import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -148,7 +145,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
-  shouldUseVeil: boolean;
   uiState?: PersistedState;
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
@@ -211,11 +207,8 @@ export function XYChart({
   syncColors,
   syncTooltips,
   syncCursor,
-  shouldUseVeil,
-
   useLegacyTimeAxis,
   renderComplete,
-
   uiState,
   timeFormat,
   overrides,
@@ -228,7 +221,6 @@ export function XYChart({
     emphasizeFitting,
     valueLabels,
     hideEndzones,
-    valuesInLegend,
     yAxisConfigs,
     xAxisConfig,
     splitColumnAccessor,
@@ -307,30 +299,28 @@ export function XYChart({
 
   const isTimeViz = isTimeChart(dataLayers);
 
-  const chartSizeSpec: ChartSizeSpec =
-    isTimeViz && !isHorizontalChart(dataLayers)
-      ? {
-          aspectRatio: {
-            x: 16,
-            y: 9,
-          },
-          minDimensions: {
-            y: { value: 300, unit: 'pixels' },
-            x: { value: 100, unit: 'percentage' },
-          },
-        }
-      : {
-          maxDimensions: {
-            x: { value: 100, unit: 'percentage' },
-            y: { value: 100, unit: 'percentage' },
-          },
-        };
+  useEffect(() => {
+    const chartSizeSpec: ChartSizeSpec =
+      isTimeViz && !isHorizontalChart(dataLayers)
+        ? {
+            aspectRatio: {
+              x: 16,
+              y: 9,
+            },
+            minDimensions: {
+              y: { value: 300, unit: 'pixels' },
+              x: { value: 100, unit: 'percentage' },
+            },
+          }
+        : {
+            maxDimensions: {
+              x: { value: 100, unit: 'percentage' },
+              y: { value: 100, unit: 'percentage' },
+            },
+          };
 
-  const { veil, onResize, containerRef } = useSizeTransitionVeil(
-    chartSizeSpec,
-    setChartSize,
-    shouldUseVeil
-  );
+    setChartSize(chartSizeSpec);
+  }, [dataLayers, isTimeViz, setChartSize]);
 
   const formattedDatatables = useMemo(
     () =>
@@ -748,8 +738,7 @@ export function XYChart({
   );
 
   return (
-    <div ref={containerRef} css={chartContainerStyle}>
-      {veil}
+    <div css={chartContainerStyle}>
       {showLegend !== undefined && uiState && (
         <LegendToggle
           onClick={toggleLegend}
@@ -823,7 +812,6 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onResize={onResize}
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
@@ -881,7 +869,9 @@ export function XYChart({
                   )
                 : undefined
             }
-            showLegendExtra={isHistogramViz && valuesInLegend}
+            showLegendExtra={
+              isHistogramViz && legend.legendStats?.[0] === XYLegendValue.CurrentAndLastValue
+            }
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={
@@ -1021,7 +1011,7 @@ export function XYChart({
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}
-              formatter={xAxisFormatter}
+              timeFormat={timeFormat}
               isHorizontal={shouldRotate}
               paddingMap={linesPaddings}
               isBarChart={filteredBarLayers.length > 0}

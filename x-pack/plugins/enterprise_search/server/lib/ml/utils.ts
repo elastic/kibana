@@ -60,6 +60,8 @@ export const BASE_MODEL = {
   threadsPerAllocation: 0,
   isPlaceholder: false,
   hasStats: false,
+  types: [],
+  inputFieldNames: [],
 };
 
 export const ELSER_MODEL_PLACEHOLDER: MlModel = {

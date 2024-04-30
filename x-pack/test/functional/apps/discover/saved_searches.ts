@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -45,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/104578
-    describe.skip('Customize time range', () => {
+    describe('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -56,7 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await panelActions.customizePanel();
         await dashboardCustomizePanel.enableCustomTimeRange();
-        await dashboardCustomizePanel.openDatePickerQuickMenu();
+        await retry.waitFor('quick menu', async () => {
+          await dashboardCustomizePanel.openDatePickerQuickMenu();
+          return await testSubjects.exists('superDatePickerCommonlyUsed_Last_90 days');
+        });
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
 

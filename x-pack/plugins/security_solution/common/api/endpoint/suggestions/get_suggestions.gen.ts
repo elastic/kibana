@@ -22,9 +22,7 @@ export type GetEndpointSuggestionsRequestParams = z.infer<
   typeof GetEndpointSuggestionsRequestParams
 >;
 export const GetEndpointSuggestionsRequestParams = z.object({
-  query: z.object({
-    suggestion_type: z.literal('eventFilters').optional(),
-  }),
+  suggestion_type: z.literal('eventFilters'),
 });
 export type GetEndpointSuggestionsRequestParamsInput = z.input<
   typeof GetEndpointSuggestionsRequestParams

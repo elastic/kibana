@@ -9,7 +9,6 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointList } from '.';
-import '../../../../common/mock/match_media';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 import {
@@ -748,6 +747,8 @@ describe('when on the endpoint list page', () => {
           });
 
           const renderResult = await render();
+          await middlewareSpy.waitForAction('serverFinishedInitialization');
+
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.queryByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -846,6 +847,8 @@ describe('when on the endpoint list page', () => {
           history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=isolate`);
         });
         renderResult = render();
+        await middlewareSpy.waitForAction('serverFinishedInitialization');
+
         // Need to reset `http.post` and adjust it so that the mock for http host
         // isolation api does not output error noise to the console
         coreStart.http.post.mockReset();

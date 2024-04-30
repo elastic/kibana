@@ -8,10 +8,8 @@
     "@kbn/i18n",
     "@kbn/inspector-plugin",
     "@kbn/core",
-    "@kbn/es-types",
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
-    "@kbn/core-notifications-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

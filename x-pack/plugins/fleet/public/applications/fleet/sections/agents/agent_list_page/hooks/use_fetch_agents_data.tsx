@@ -7,6 +7,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
 
@@ -20,6 +21,8 @@ import {
   useStartServices,
   sendGetAgentTags,
   sendGetAgentPolicies,
+  useAuthz,
+  sendGetActionStatus,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
@@ -27,20 +30,24 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../con
 import { getKuery } from '../utils/get_kuery';
 
 const REFRESH_INTERVAL_MS = 30000;
+const MAX_AGENT_ACTIONS = 100;
 
 export function useFetchAgentsData() {
+  const authz = useAuthz();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications } = useStartServices();
-  // useBreadcrumbs('agent_list');
-  const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
+
+  const history = useHistory();
+  const { urlParams, toUrlParams } = useUrlParams();
+  const defaultKuery: string = (urlParams.kuery as string) || '';
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
 
   // Table and search states
   const [draftKuery, setDraftKuery] = useState<string>(defaultKuery);
-  const [search, setSearch] = useState<string>(defaultKuery);
+  const [search, setSearchState] = useState<string>(defaultKuery);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -65,6 +72,22 @@ export function useFetchAgentsData() {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
+  const setSearch = useCallback(
+    (newVal: string) => {
+      setSearchState(newVal);
+      if (newVal.trim() === '' && !urlParams.kuery) {
+        return;
+      }
+
+      if (urlParams.kuery !== newVal) {
+        history.replace({
+          search: toUrlParams({ ...urlParams, kuery: newVal === '' ? undefined : newVal }),
+        });
+      }
+    },
+    [urlParams, history, toUrlParams]
+  );
+
   // filters kuery
   const kuery = useMemo(() => {
     return getKuery({
@@ -81,12 +104,12 @@ export function useFetchAgentsData() {
   >();
   const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
-  const [shownAgents, setShownAgents] = useState(0);
-  const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
+  const [nAgentsInTable, setNAgentsInTable] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
-  const [inactiveManagedAgentIds, setinactiveManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
+
+  const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -117,6 +140,7 @@ export function useFetchAgentsData() {
             totalInactiveAgentsResponse,
             managedAgentPoliciesResponse,
             agentTagsResponse,
+            actionStatusResponse,
           ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
@@ -141,7 +165,12 @@ export function useFetchAgentsData() {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               showInactive,
             }),
+            sendGetActionStatus({
+              latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
+              perPage: MAX_AGENT_ACTIONS,
+            }),
           ]);
+
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
@@ -165,6 +194,9 @@ export function useFetchAgentsData() {
           if (!agentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
+          if (actionStatusResponse.error) {
+            throw new Error('Invalid GET /agents/action_status response');
+          }
 
           const statusSummary = agentsResponse.data.statusSummary;
           if (!statusSummary) {
@@ -182,11 +214,8 @@ export function useFetchAgentsData() {
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
-          setShownAgents(agentsResponse.data.total);
+          setNAgentsInTable(agentsResponse.data.total);
           setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
-          setInactiveShownAgents(
-            showInactive ? totalInactiveAgentsResponse.data.results.inactive || 0 : 0
-          );
 
           const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
 
@@ -208,17 +237,22 @@ export function useFetchAgentsData() {
             }
             const allManagedAgents = response.data?.items ?? [];
             const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
-            const inactiveManagedIds = allManagedAgents
-              ?.filter((agent) => agent.status === 'inactive')
-              .map((agent) => agent.id);
             setTotalManagedAgentIds(allManagedAgentIds);
-            setinactiveManagedAgentIds(inactiveManagedIds);
 
             setManagedAgentsOnCurrentPage(
               agentsResponse.data.items
                 .map((agent) => agent.id)
                 .filter((agentId) => allManagedAgentIds.includes(agentId)).length
             );
+          }
+
+          const actionErrors =
+            actionStatusResponse.data?.items
+              .filter((action) => action.latestErrors?.length ?? 0 > 1)
+              .map((action) => action.actionId) || [];
+          const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...actionErrors])];
+          if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
+            setLatestAgentActionErrors(allRecentActionErrors);
           }
         } catch (error) {
           notifications.toasts.addError(error, {
@@ -241,6 +275,7 @@ export function useFetchAgentsData() {
       showUpgradeable,
       displayAgentMetrics,
       allTags,
+      latestAgentActionErrors,
       notifications.toasts,
     ]
   );
@@ -258,7 +293,7 @@ export function useFetchAgentsData() {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    full: true,
+    full: authz.fleet.readAgentPolicies,
   });
 
   const agentPolicies = useMemo(
@@ -279,11 +314,9 @@ export function useFetchAgentsData() {
     agentsOnCurrentPage,
     agentsStatus,
     isLoading,
-    shownAgents,
-    inactiveShownAgents,
+    nAgentsInTable,
     totalInactiveAgents,
     totalManagedAgentIds,
-    inactiveManagedAgentIds,
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
@@ -310,5 +343,7 @@ export function useFetchAgentsData() {
     setDraftKuery,
     fetchData,
     currentRequestRef,
+    latestAgentActionErrors,
+    setLatestAgentActionErrors,
   };
 }

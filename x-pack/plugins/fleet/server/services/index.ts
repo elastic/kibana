@@ -19,13 +19,15 @@ export interface AgentPolicyServiceInterface {
   list: typeof agentPolicyService['list'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
-  bumpRevision: typeof agentPolicyService['bumpRevision'];
+  turnOffAgentTamperProtections: typeof agentPolicyService['turnOffAgentTamperProtections'];
+  fetchAllAgentPolicyIds: typeof agentPolicyService['fetchAllAgentPolicyIds'];
+  fetchAllAgentPolicies: typeof agentPolicyService['fetchAllAgentPolicies'];
 }
 
 // Agent services
 export { AgentServiceImpl } from './agents';
 export type { AgentClient, AgentService } from './agents';
-export { getAvailableVersions, getLatestAvailableVersion } from './agents';
+export { getAvailableVersions, getLatestAvailableAgentVersion } from './agents';
 
 // Saved object services
 export { agentPolicyService } from './agent_policy';

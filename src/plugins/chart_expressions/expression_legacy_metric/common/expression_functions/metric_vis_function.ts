@@ -143,10 +143,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       if (args.bucket) {
         throw new Error(errors.splitByBucketAndColorFullBackgroundSpecifiedError());
       }
-
-      if (args.metric.length > 1 || input.rows.length > 1) {
-        throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
-      }
     }
 
     args.metric.forEach((metric) => validateAccessor(metric, input.columns));
@@ -197,7 +193,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
                 ...args.labelFont,
               },
             },
-            colorFullBackground: args.colorFullBackground,
+            colorFullBackground:
+              args.metric.length > 1 || input.rows.length > 1 ? false : args.colorFullBackground,
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,

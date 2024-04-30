@@ -22,7 +22,8 @@ export const getComposableTemplate = ({
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
-  allowAutoCreate = false,
+  allowAutoCreate = 'NO_OVERWRITE',
+  composedOf = [],
 }: Partial<
   TemplateDeserialized & {
     isLegacy?: boolean;
@@ -53,6 +54,7 @@ export const getComposableTemplate = ({
       hasDatastream,
       isLegacy,
     },
+    composedOf,
   };
 
   return indexTemplate;
@@ -68,7 +70,7 @@ export const getTemplate = ({
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
-  allowAutoCreate = false,
+  allowAutoCreate = 'NO_OVERWRITE',
 }: Partial<
   TemplateDeserialized & {
     isLegacy?: boolean;

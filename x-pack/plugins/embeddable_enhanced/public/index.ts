@@ -11,7 +11,7 @@ import { EmbeddableEnhancedPlugin } from './plugin';
 export type {
   SetupContract as EmbeddableEnhancedSetupContract,
   SetupDependencies as EmbeddableEnhancedSetupDependencies,
-  StartContract as EmbeddableEnhancedStartContract,
+  StartContract as EmbeddableEnhancedPluginStart,
   StartDependencies as EmbeddableEnhancedStartDependencies,
 } from './plugin';
 
@@ -20,5 +20,8 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export type { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
-export { isEnhancedEmbeddable } from './embeddables';
+export {
+  type HasDynamicActions,
+  apiHasDynamicActions,
+} from './embeddables/interfaces/has_dynamic_actions';
 export { drilldownGrouping as embeddableEnhancedDrilldownGrouping } from './actions';

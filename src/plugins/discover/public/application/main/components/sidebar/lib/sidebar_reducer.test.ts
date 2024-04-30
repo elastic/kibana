@@ -115,7 +115,8 @@ describe('sidebar reducer', function () {
             id: '2',
             name: 'text2',
             meta: {
-              type: 'keyword',
+              type: 'string',
+              esType: 'keyword',
             },
           },
         ] as DatatableColumn[],
@@ -127,13 +128,15 @@ describe('sidebar reducer', function () {
         new DataViewField({
           name: 'text1',
           type: 'number',
+          esTypes: undefined,
           aggregatable: false,
           isNull: true,
           searchable: false,
         }),
         new DataViewField({
           name: 'text2',
-          type: 'keyword',
+          type: 'string',
+          esTypes: ['keyword'],
           aggregatable: false,
           isNull: false,
           searchable: false,

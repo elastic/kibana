@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'userProfiles', 'settings']);
+  const toasts = getService('toasts');
 
   describe('User Profile Page', async () => {
     before(async () => {});
@@ -24,7 +25,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        let toast = await pageObjects.common.closeToast();
+        let toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
 
@@ -32,7 +33,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        toast = await pageObjects.common.closeToast();
+        toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
       });
@@ -42,7 +43,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        let toast = await pageObjects.common.closeToast();
+        let toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
 
@@ -50,7 +51,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        toast = await pageObjects.common.closeToast();
+        toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
       });
@@ -72,7 +73,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
         const submitButton = await pageObjects.userProfiles.getChangePasswordFormSubmitButton();
         await submitButton.click();
 
-        const initialToast = await pageObjects.common.closeToast();
+        const initialToast = await toasts.getTitleAndDismiss();
 
         expect(initialToast).to.be('Password successfully changed');
 
@@ -84,7 +85,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
         await submitButton.click();
 
-        const resetToast = await pageObjects.common.closeToast();
+        const resetToast = await toasts.getTitleAndDismiss();
 
         expect(resetToast).to.be('Password successfully changed');
       });
@@ -118,14 +119,12 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        let advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox(
-          'theme:darkMode'
-        );
-        expect(advancedSetting).to.be(null);
+        let advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('disabled');
 
-        await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', true);
-        advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
-        expect(advancedSetting).to.be('true');
+        await pageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'enabled');
+        advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('enabled');
 
         await pageObjects.common.navigateToApp('security_account');
 
@@ -151,9 +150,9 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', false);
-        advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
-        expect(advancedSetting).to.be(null);
+        await pageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'disabled');
+        advancedSetting = await pageObjects.settings.getAdvancedSettings('theme:darkMode');
+        expect(advancedSetting).to.be('disabled');
       });
     });
   });

@@ -43,7 +43,6 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
-    "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",

@@ -57,6 +57,8 @@ describe('useKnowledgeBaseStatus', () => {
         '/internal/elastic_assistant/knowledge_base/',
         {
           method: 'GET',
+          signal: undefined,
+          version: '1',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -73,6 +75,8 @@ describe('useKnowledgeBaseStatus', () => {
         '/internal/elastic_assistant/knowledge_base/something',
         {
           method: 'GET',
+          signal: undefined,
+          version: '1',
         }
       );
     });

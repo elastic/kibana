@@ -482,48 +482,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                   "/app/integrations/browse",
                 ],
                 Array [
-                  "kibana_landing_page",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                ],
-                Array [
-                  "path-to-solution-two",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                ],
-                Array [
-                  "path-to-solution-three",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                ],
-                Array [
-                  "path-to-solution-four",
-                ],
-                Array [
-                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
-                  "/app/integrations/browse",
-                ],
-                Array [
                   "/app/integrations/browse",
                 ],
                 Array [
@@ -552,6 +510,69 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                 ],
                 Array [
                   "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "kibana_landing_page",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                ],
+                Array [
+                  "path-to-solution-two",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                ],
+                Array [
+                  "path-to-solution-three",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                ],
+                Array [
+                  "path-to-solution-four",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
                 ],
                 Array [
                   "/app/integrations/browse",
@@ -588,62 +609,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                 },
                 Object {
                   "type": "return",
-                  "value": "kibana_landing_page",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "path-to-solution-two",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "path-to-solution-three",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "path-to-solution-four",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
-                  "value": "/app/integrations/browse",
-                },
-                Object {
-                  "type": "return",
                   "value": "/app/integrations/browse",
                 },
                 Object {
@@ -681,6 +646,90 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                 Object {
                   "type": "return",
                   "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "kibana_landing_page",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-two",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-three",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-four",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
                 },
                 Object {
                   "type": "return",
@@ -792,48 +841,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                             "/app/integrations/browse",
                           ],
                           Array [
-                            "kibana_landing_page",
-                          ],
-                          Array [
-                            "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                          ],
-                          Array [
-                            "path-to-solution-two",
-                          ],
-                          Array [
-                            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                          ],
-                          Array [
-                            "path-to-solution-three",
-                          ],
-                          Array [
-                            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                          ],
-                          Array [
-                            "path-to-solution-four",
-                          ],
-                          Array [
-                            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                          ],
-                          Array [
-                            "/app/integrations/browse",
-                          ],
-                          Array [
-                            "/app/integrations/browse",
-                          ],
-                          Array [
-                            "/app/integrations/browse",
-                          ],
-                          Array [
-                            "/app/integrations/browse",
-                          ],
-                          Array [
-                            "/app/integrations/browse",
-                          ],
-                          Array [
-                            "/app/integrations/browse",
-                          ],
-                          Array [
                             "/app/integrations/browse",
                           ],
                           Array [
@@ -862,6 +869,69 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                           ],
                           Array [
                             "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
+                          ],
+                          Array [
+                            "kibana_landing_page",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                          ],
+                          Array [
+                            "path-to-solution-two",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                          ],
+                          Array [
+                            "path-to-solution-three",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                          ],
+                          Array [
+                            "path-to-solution-four",
+                          ],
+                          Array [
+                            "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          ],
+                          Array [
+                            "/app/integrations/browse",
                           ],
                           Array [
                             "/app/integrations/browse",
@@ -898,62 +968,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                           },
                           Object {
                             "type": "return",
-                            "value": "kibana_landing_page",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "path-to-solution-two",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "path-to-solution-three",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "path-to-solution-four",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/app/integrations/browse",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/app/integrations/browse",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/app/integrations/browse",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/app/integrations/browse",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/app/integrations/browse",
-                          },
-                          Object {
-                            "type": "return",
-                            "value": "/app/integrations/browse",
-                          },
-                          Object {
-                            "type": "return",
                             "value": "/app/integrations/browse",
                           },
                           Object {
@@ -991,6 +1005,90 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
                           Object {
                             "type": "return",
                             "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "kibana_landing_page",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-two",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-three",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "path-to-solution-four",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "/app/integrations/browse",
                           },
                           Object {
                             "type": "return",

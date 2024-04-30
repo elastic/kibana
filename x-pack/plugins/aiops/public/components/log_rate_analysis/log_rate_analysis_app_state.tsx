@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -16,12 +17,11 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
+import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
-
-import { LogRateAnalysisResultsTableRowStateProvider } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
@@ -69,13 +69,13 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <LogRateAnalysisResultsTableRowStateProvider>
+          <LogRateAnalysisStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisPage stickyHistogram={stickyHistogram} />
               </DatePickerContextProvider>
             </StorageContextProvider>
-          </LogRateAnalysisResultsTableRowStateProvider>
+          </LogRateAnalysisStateProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>

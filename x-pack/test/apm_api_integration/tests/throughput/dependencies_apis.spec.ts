@@ -93,7 +93,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  registry.when('Dependencies throughput value', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177536
+  registry.when.skip('Dependencies throughput value', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       const GO_PROD_RATE = 75;
       const JAVA_PROD_RATE = 25;
