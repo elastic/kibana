@@ -99,19 +99,9 @@ gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMM
 gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
 echo "--- Validate CDN assets"
-(
-  shopt -s globstar
-  THREADS=$(grep -c ^processor /proc/cpuinfo)
-  i=0
-  cd $CDN_ASSETS_FOLDER
-  for CDN_ASSET in **/*; do
-    ((i=(i+1)%THREADS)) || wait
-    if [[ -f "$CDN_ASSET" ]]; then
-      echo -n "Testing $CDN_ASSET..."
-      curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_URL/$CDN_ASSET"
-    fi
-  done
-)
+ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  "$GCS_SA_CDN_URL" \
+  "$CDN_ASSETS_FOLDER"
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"

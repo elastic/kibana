@@ -7,7 +7,6 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { ContainerAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 
@@ -24,15 +23,6 @@ class K8sContainer extends Entity<K8sContainerDocument> {
       ...this.fields,
       'kubernetes.container.cpu.usage.limit.pct': 46,
       'kubernetes.container.memory.usage.limit.pct': 30,
-    });
-  }
-
-  asset() {
-    return new ContainerAsset({
-      'asset.kind': 'container',
-      'asset.id': this.fields['container.id'],
-      'asset.name': this.fields['container.id'],
-      'asset.ean': `container:${this.fields['container.id']}`,
     });
   }
 }

@@ -7981,6 +7981,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchOptions.retrieveResults",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retrieveResults",
+            "description": [
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchOptions.executionContext",
             "type": "Object",
             "tags": [],
@@ -17962,6 +17978,22 @@
             "label": "isRestore",
             "description": [
               "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.ISearchOptions.retrieveResults",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retrieveResults",
+            "description": [
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
             ],
             "signature": [
               "boolean | undefined"

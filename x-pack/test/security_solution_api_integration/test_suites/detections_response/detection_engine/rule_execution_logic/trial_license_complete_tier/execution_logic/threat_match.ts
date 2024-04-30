@@ -136,6 +136,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
       'kibana.alert.rule.updated_at',
       'kibana.alert.rule.uuid',
       'kibana.alert.rule.execution.uuid',
+      'kibana.alert.rule.execution.timestamp',
       'kibana.alert.start',
       'kibana.alert.reason',
       'kibana.alert.uuid',
@@ -171,7 +172,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('@ess @serverless Threat match type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/155304
+  describe('@ess @serverless @serverlessQA Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
     });

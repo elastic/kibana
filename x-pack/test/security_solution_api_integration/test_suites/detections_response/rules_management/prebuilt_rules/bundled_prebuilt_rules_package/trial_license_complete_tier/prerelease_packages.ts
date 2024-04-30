@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
   /* (We use high mock version numbers to prevent clashes with real packages downloaded in other tests.)
   /* To do assertions on which packages have been installed, 99.0.0 has a single rule to install,
   /* while 99.0.1-beta.1 has 2 rules to install. Also, both packages have the version as part of the rule names. */
-  describe('@ess @serverless @skipInQA prerelease_packages', () => {
+  describe('@ess @serverless @skipInServerlessMKI prerelease_packages', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);

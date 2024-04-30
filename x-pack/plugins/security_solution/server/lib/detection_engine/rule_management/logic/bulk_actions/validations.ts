@@ -55,9 +55,7 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (!rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -65,9 +63,7 @@ export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValid
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
