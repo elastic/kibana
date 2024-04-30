@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
 
-import { DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
 import {
   flyoutDegradedDocsPercentageText,
   flyoutDegradedDocsTrendText,
 } from '../../../../common/translations';
-
-const defaultDataView = {
-  id: `${DEFAULT_LOGS_DATA_VIEW}-id`,
-  title: DEFAULT_LOGS_DATA_VIEW,
-  timeFieldName: '@timestamp',
-} as DataView;
 
 enum DatasetQualityLensColumn {
   Date = 'date_column',
@@ -32,11 +25,21 @@ enum DatasetQualityLensColumn {
 
 const MAX_BREAKDOWN_SERIES = 5;
 
-export function getLensAttributes(
-  color: string,
-  dataView: DataView = defaultDataView,
-  breakdownFieldName?: string
-) {
+interface GetLensAttributesParams {
+  color: string;
+  dataStream: string;
+  datasetTitle: string;
+  breakdownFieldName?: string;
+}
+
+export function getLensAttributes({
+  color,
+  dataStream,
+  datasetTitle,
+  breakdownFieldName,
+}: GetLensAttributesParams) {
+  const dataViewId = uuidv4();
+
   const columnOrder = [
     DatasetQualityLensColumn.Date,
     DatasetQualityLensColumn.CountIgnored,
@@ -50,30 +53,19 @@ export function getLensAttributes(
   }
 
   const columns = getChartColumns(breakdownFieldName);
-
   return {
     visualizationType: 'lnsXY',
     title: flyoutDegradedDocsTrendText,
-    references: [
-      {
-        id: dataView.id!,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: dataView.id!,
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     state: {
+      ...getAdHocDataViewState(dataViewId, dataStream, datasetTitle),
       datasourceStates: {
         formBased: {
           layers: {
             layer1: {
               columnOrder,
               columns,
-              indexPatternId: dataView.id!,
+              indexPatternId: dataViewId,
             },
           },
         },
@@ -135,6 +127,36 @@ export function getLensAttributes(
       },
     },
   } as TypedLensByValueInput['attributes'];
+}
+
+function getAdHocDataViewState(id: string, dataStream: string, title: string) {
+  return {
+    internalReferences: [
+      {
+        id,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id,
+        name: 'indexpattern-datasource-layer-layer1',
+        type: 'index-pattern',
+      },
+    ],
+    adHocDataViews: {
+      [id]: {
+        id,
+        title: dataStream,
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        fieldAttrs: {},
+        allowNoIndex: false,
+        name: title,
+      },
+    },
+  };
 }
 
 function getChartColumns(breakdownField?: string): Record<string, GenericIndexPatternColumn> {
@@ -229,12 +251,12 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
             params: {
               size: MAX_BREAKDOWN_SERIES,
               orderBy: {
-                type: 'significant',
+                type: 'alphabetical',
                 fallback: true,
               },
               orderDirection: 'desc',
               otherBucket: true,
-              missingBucket: false,
+              missingBucket: true,
               parentFormat: {
                 id: 'terms',
               },
@@ -245,7 +267,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
   };
 }
 
-export const getFlyoutDegradedDocsTopNText = (count: number, fieldName: string) =>
+const getFlyoutDegradedDocsTopNText = (count: number, fieldName: string) =>
   i18n.translate('xpack.datasetQuality.flyoutDegradedDocsTopNValues', {
     defaultMessage: 'Top {count} values of {fieldName}',
     values: { count, fieldName },

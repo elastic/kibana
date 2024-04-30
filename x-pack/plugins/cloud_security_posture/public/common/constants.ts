@@ -137,6 +137,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS Kubernetes',
         }),
         icon: 'logoKubernetes',
+        testId: 'cisK8sTestId',
       },
       {
         type: CLOUDBEAT_EKS,
@@ -150,6 +151,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
           defaultMessage: 'Elastic Kubernetes Service',
         }),
+        testId: 'cisEksTestId',
       },
       {
         type: CLOUDBEAT_AKS,

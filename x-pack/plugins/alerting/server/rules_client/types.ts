@@ -38,6 +38,7 @@ import { AlertingRulesConfig } from '../config';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { GetAlertIndicesAlias } from '../lib';
 import { AlertsService } from '../alerts_service';
+import { BackfillClient } from '../backfill_client/backfill_client';
 
 export type {
   BulkEditOperation,
@@ -82,6 +83,7 @@ export interface RulesClientContext {
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
+  readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
 }

@@ -623,36 +623,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-              },
-              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/public/management/mount_management_section.tsx"
               }
             ]
           }

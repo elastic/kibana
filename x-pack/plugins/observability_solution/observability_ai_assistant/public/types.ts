@@ -6,7 +6,6 @@
  */
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Observable } from 'rxjs';
@@ -14,11 +13,7 @@ import type {
   MessageAddEvent,
   StreamingChatResponseEventWithoutError,
 } from '../common/conversation_complete';
-import type {
-  ContextDefinition,
-  FunctionDefinition,
-  FunctionResponse,
-} from '../common/functions/types';
+import type { FunctionDefinition, FunctionResponse } from '../common/functions/types';
 import type {
   Message,
   ObservabilityAIAssistantScreenContext,
@@ -60,9 +55,9 @@ export interface ObservabilityAIAssistantChatService {
     signal: AbortSignal;
     responseLanguage: string;
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
+  getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,
@@ -108,13 +103,11 @@ export interface ConfigSchema {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};
   security: SecurityPluginSetup;
-  ml: MlPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
-  ml: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 

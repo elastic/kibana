@@ -11,6 +11,7 @@ import { getResponseValidation } from '@kbn/core-http-server';
 import {
   versionHandlerResolvers,
   ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION,
+  unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
 import type {
   CoreVersionedRouter,
@@ -68,15 +69,21 @@ export const generateOpenApiDocument = (
       },
     ],
     paths,
-    components: converter.getSchemaComponents(),
-    security: [
-      {
-        basicAuth: [],
+    components: {
+      ...converter.getSchemaComponents(),
+      securitySchemes: {
+        basicAuth: {
+          type: 'http',
+          scheme: 'basic',
+        },
+        apiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'Authorization',
+        },
       },
-      {
-        apiKeyAuth: [],
-      },
-    ],
+    },
+    security: [{ basicAuth: [] }],
     tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
@@ -108,7 +115,9 @@ const extractVersionedResponses = (
     if (!schemas?.response) return acc;
     const statusCodes = Object.keys(schemas.response);
     for (const statusCode of statusCodes) {
-      const maybeSchema = schemas.response[statusCode as unknown as number].body;
+      const maybeSchema = unwrapVersionedResponseBodyValidation(
+        schemas.response[statusCode as unknown as number].body
+      );
       const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
@@ -210,7 +219,7 @@ const extractResponses = (route: InternalRouterRoute, converter: OasConverter) =
   return !!validationSchemas
     ? Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
         (acc, [statusCode, schema]) => {
-          const oasSchema = converter.convert(schema.body);
+          const oasSchema = converter.convert(schema.body());
           acc[statusCode] = {
             ...acc[statusCode],
             description: route.options.description ?? 'No description',

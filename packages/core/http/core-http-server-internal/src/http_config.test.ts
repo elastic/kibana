@@ -494,6 +494,11 @@ describe('cors', () => {
   });
 });
 
+test('oas is disabled by default', () => {
+  const { oas } = config.schema.validate({});
+  expect(oas.enabled).toBe(false);
+});
+
 describe('versioned', () => {
   it('defaults version resolution "oldest" not in dev', () => {
     expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
