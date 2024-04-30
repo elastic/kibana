@@ -8,7 +8,7 @@ pageLoadAssetSize:
   assetManager: 25000
   banners: 17946
   bfetch: 22837
-  canvas: 1066647
+  canvas: 29355
   cases: 180037
   charts: 55000
   cloud: 21076
@@ -25,7 +25,7 @@ pageLoadAssetSize:
   core: 435325
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 82025
+  dashboard: 52967
   dashboardEnhanced: 65646
   data: 454087
   datasetQuality: 50624

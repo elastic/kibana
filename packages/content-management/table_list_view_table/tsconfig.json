@@ -8,7 +8,9 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
@@ -26,6 +28,9 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/test-jest-helpers",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-common",
   ],
   "exclude": [
     "target/**/*",
