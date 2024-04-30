@@ -16,7 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('main', () => {
+  describe('main', function () {
+    // see https://github.com/elastic/kibana/issues/182117
+    this.tags(['failsOnMKI']);
     before(async () => {
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
