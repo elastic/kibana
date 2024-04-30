@@ -41,7 +41,6 @@
     "@kbn/babel-register",
     "@kbn/dev-cli-runner",
     "@kbn/core-analytics-browser",
-    "@kbn/ml-plugin",
     "@kbn/expect",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
