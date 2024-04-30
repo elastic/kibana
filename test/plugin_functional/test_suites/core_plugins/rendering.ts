@@ -277,6 +277,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.editableIndexSettings (any)',
         'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
+        'xpack.index_management.enableTogglingDataRetention (any)', // It's a boolean (any because schema.conditional)
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          * and will all resolve to xpack.infra.featureFlags.* (boolean)

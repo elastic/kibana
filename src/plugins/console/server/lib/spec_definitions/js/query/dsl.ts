@@ -519,9 +519,7 @@ export const query = (specService: SpecDefinitionsService) => {
     },
     rule_query: {
       __template: {
-        organic: {
-          query: {},
-        },
+        organic: {},
         ruleset_id: '',
         match_criteria: {
           FIELD: 'VALUE',
