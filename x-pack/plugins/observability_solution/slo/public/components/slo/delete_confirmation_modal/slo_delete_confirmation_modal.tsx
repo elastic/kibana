@@ -34,7 +34,8 @@ export interface Props {
 
 export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
   const { name, groupBy } = slo;
-  const instanceId = 'instanceId' in slo ? slo.instanceId : undefined;
+  const instanceId =
+    'instanceId' in slo && slo.instanceId !== ALL_VALUE ? slo.instanceId : undefined;
   const hasGroupBy = [groupBy].flat().some((group) => group !== ALL_VALUE);
 
   const modalTitleId = useGeneratedHtmlId();
@@ -43,34 +44,30 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
     useDeleteSloInstance();
   const { mutateAsync: deleteSlo, isLoading: isDeleteLoading } = useDeleteSlo();
 
-  const [isDeleteAllInstancesChecked, toggleDeleteAllInstancesSwitch] = useState<boolean>(false);
-  const onDeleteAllInstancesSwitchChange = () =>
-    toggleDeleteAllInstancesSwitch(!isDeleteAllInstancesChecked);
-
   const [isDeleteRollupDataChecked, toggleDeleteRollupDataSwitch] = useState<boolean>(false);
   const onDeleteRollupDataSwitchChange = () =>
     toggleDeleteRollupDataSwitch(!isDeleteRollupDataChecked);
 
-  const handleConfirm = async () => {
-    if (hasGroupBy && isDeleteAllInstancesChecked === false) {
-      // @ts-ignore
-      await deleteSloInstance({ slo, excludeRollup: isDeleteRollupDataChecked === false });
-      onSuccess();
-    } else {
-      await deleteSlo({ id: slo.id, name: slo.name });
-      onSuccess();
-    }
+  const handleDeleteInstance = async () => {
+    // @ts-ignore
+    await deleteSloInstance({ slo, excludeRollup: isDeleteRollupDataChecked === false });
+    onSuccess();
+  };
+
+  const handleDeleteAll = async () => {
+    await deleteSlo({ id: slo.id, name: slo.name });
+    onSuccess();
   };
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {hasGroupBy ? getInstanceTitleLabel(name, instanceId) : getTitleLabel(name)}
+          {hasGroupBy && instanceId ? getInstanceTitleLabel(name, instanceId) : getTitleLabel(name)}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {hasGroupBy ? (
+        {hasGroupBy && instanceId ? (
           <EuiForm component="form">
             <EuiFlexItem grow style={{ marginBottom: '2rem' }}>
               <FormattedMessage
@@ -81,22 +78,10 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
             <EuiFormRow>
               <EuiSwitch
                 name="popswitch"
-                label={i18n.translate(
-                  'xpack.slo.deleteConfirmationModal.switchDeleteAllInstances',
-                  { defaultMessage: 'Delete all instances' }
-                )}
-                checked={isDeleteAllInstancesChecked}
-                onChange={onDeleteAllInstancesSwitchChange}
-              />
-            </EuiFormRow>
-            <EuiFormRow>
-              <EuiSwitch
-                disabled={isDeleteAllInstancesChecked}
-                name="popswitch"
                 label={i18n.translate('xpack.slo.deleteConfirmationModal.switchDeleteRollupData', {
                   defaultMessage: 'Delete rollup data for this instance',
                 })}
-                checked={!isDeleteAllInstancesChecked && isDeleteRollupDataChecked}
+                checked={isDeleteRollupDataChecked}
                 onChange={onDeleteRollupDataSwitchChange}
               />
             </EuiFormRow>
@@ -120,17 +105,42 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
           />
         </EuiButtonEmpty>
 
+        {hasGroupBy && instanceId && (
+          <EuiButton
+            data-test-subj="observabilitySolutionSloDeleteModalConfirmButton"
+            type="submit"
+            color="danger"
+            onClick={handleDeleteInstance}
+            disabled={isDeleteLoading || isDeleteInstanceLoading}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.slo.deleteConfirmationModal.deleteButtonLabel"
+              defaultMessage="Delete {instanceId}"
+              values={{ instanceId }}
+            />
+          </EuiButton>
+        )}
+
         <EuiButton
           data-test-subj="observabilitySolutionSloDeleteModalConfirmButton"
           type="submit"
-          onClick={handleConfirm}
+          color="danger"
+          onClick={handleDeleteAll}
           disabled={isDeleteLoading || isDeleteInstanceLoading}
           fill
         >
-          <FormattedMessage
-            id="xpack.slo.deleteConfirmationModal.deleteButtonLabel"
-            defaultMessage="Delete"
-          />
+          {hasGroupBy && instanceId ? (
+            <FormattedMessage
+              id="xpack.slo.deleteConfirmationModal.deleteAllButtonLabel"
+              defaultMessage="Delete SLO and all Instances"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.slo.deleteConfirmationModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
