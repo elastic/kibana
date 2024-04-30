@@ -3242,7 +3242,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/assetManager-plugin@link:x-pack/plugins/asset_manager":
+"@kbn/assetManager-plugin@link:x-pack/plugins/observability_solution/asset_manager":
   version "0.0.0"
   uid ""
 
@@ -5258,7 +5258,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-data-access-plugin@link:x-pack/plugins/metrics_data_access":
+"@kbn/metrics-data-access-plugin@link:x-pack/plugins/observability_solution/metrics_data_access":
   version "0.0.0"
   uid ""
 
