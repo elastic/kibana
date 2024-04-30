@@ -43,7 +43,7 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
         {
           field: 'metadata._id',
           name: i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.idField', {
-            defaultMessage: 'Index ID',
+            defaultMessage: 'ID',
           }),
           truncateText: true,
         },
