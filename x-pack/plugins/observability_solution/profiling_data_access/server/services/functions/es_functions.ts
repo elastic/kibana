@@ -33,6 +33,7 @@ export interface FetchFunctionsParams {
   query: QueryDslQueryContainer;
   aggregationField?: AggregationField;
   limit?: number;
+  totalSeconds: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -46,6 +47,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     query,
     aggregationField,
     limit,
+    totalSeconds,
   }: FetchFunctionsParams) => {
     const [
       co2PerKWH,
@@ -82,6 +84,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
       awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
       costPervCPUPerHour,
       azureCostDiscountRate: percentToFactor(azureCostDiscountRate),
+      durationSeconds: totalSeconds,
     });
 
     return transformToKibanaTopNFunction(esTopNFunctions);

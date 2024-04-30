@@ -138,7 +138,7 @@ export const mockedServices = {
   },
 };
 
-export const TestProvidersComponent: FC<PropsWithChildren> = ({ children }) => (
+export const TestProvidersComponent: FC<PropsWithChildren<any>> = ({ children }) => (
   <MemoryRouter>
     <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
       <QueryClientProvider client={new QueryClient()}>
