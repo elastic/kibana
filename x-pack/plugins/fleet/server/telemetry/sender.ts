@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 
 import axios from 'axios';
 
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { TelemetryQueue } from './queue';
 
@@ -35,6 +35,7 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
   private clusterInfo?: InfoResponse;
+  private licenseInfo?: LicenseGetResponse;
 
   constructor(logger: Logger) {
     this.logger = logger;
@@ -48,6 +49,7 @@ export class TelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.clusterInfo = await this.fetchClusterInfo();
+    this.licenseInfo = await this.fetchLicenseInfo();
 
     this.logger.debug(`Starting local task`);
     setTimeout(() => {
@@ -116,6 +118,17 @@ export class TelemetryEventsSender {
     }
   }
 
+  private async fetchLicenseInfo() {
+    try {
+      if (this.esClient === undefined || this.esClient === null) {
+        throw Error('elasticsearch client is unavailable: cannot retrieve license infomation');
+      }
+      return await this.esClient.license.get();
+    } catch (e) {
+      this.logger.debug(`Error fetching license information: ${e}`);
+    }
+  }
+
   public async sendEvents(
     telemetryUrl: string,
     clusterInfo: InfoResponse | undefined,
@@ -131,10 +144,15 @@ export class TelemetryEventsSender {
 
       queue.clearEvents();
 
-      this.logger.debug(JSON.stringify(events));
+      const eventsWithLicenseInfo = events.map((event) => ({
+        ...event,
+        license: this.licenseInfo?.license,
+      }));
+
+      this.logger.debug(JSON.stringify(eventsWithLicenseInfo));
 
       await this.send(
-        events,
+        eventsWithLicenseInfo,
         telemetryUrl,
         clusterInfo?.cluster_uuid,
         clusterInfo?.version?.number
