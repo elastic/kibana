@@ -23,7 +23,7 @@ const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTyp
 
 describe('use cases add to new case flyout hook', () => {
   const dispatch = jest.fn();
-  let wrapper: FC<PropsWithChildren>;
+  let wrapper: FC<PropsWithChildren<unknown>>;
   beforeEach(() => {
     dispatch.mockReset();
     wrapper = ({ children }) => {
