@@ -7,42 +7,47 @@
  */
 
 import fs from 'fs';
-import globby from 'globby';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { Jsonc } from '@kbn/repo-packages';
-import Fsp from 'fs/promises';
+import FastGlob from 'fast-glob';
 
 interface KibanaJsonC {
+  type: string;
+  id: string; // the @kbn notation, used for both plugins and bundles
   plugin?: {
-    id: string;
+    id: string; // the plugin id
     requiredPlugins?: string[];
     optionalPlugins?: string[];
     requiredBundles?: string[];
   };
 }
 
-interface Graph {
-  nodes: Array<{ data: { id: string } }>;
-  edges: Array<{ data: { id: string; source: string; target: string } }>;
-}
-
 export async function generateGraph() {
   try {
     // Use globby to search for the filename within the specified directory and its subdirectories
-    const files = await globby([`${REPO_ROOT}/**/kibana.jsonc`]);
+    const files = await FastGlob(
+      [
+        'examples/**/kibana.jsonc',
+        'packages/**/kibana.jsonc',
+        'x-pack/**/kibana.jsonc',
+        'src/**/kibana.jsonc',
+      ],
+      { unique: true }
+    );
 
-    const elements: Graph = {
+    const elements: cytoscape.ElementsDefinition = {
       nodes: [],
       edges: [],
     };
 
     for (const file of files) {
-      const contents = await Fsp.readFile(file, 'utf8');
+      const contents = fs.readFileSync(file, 'utf8');
 
       const json = (await Jsonc.parse(contents)) as KibanaJsonC;
 
       if (json.plugin?.id) {
-        elements.nodes.push({ data: { id: json.plugin.id } });
+        elements.nodes.push({ data: { id: json.plugin.id, type: 'plugin' } });
+      } else {
+        elements.nodes.push({ data: { id: json.id, type: 'package' } });
       }
 
       if (json.plugin?.requiredPlugins) {
@@ -52,37 +57,25 @@ export async function generateGraph() {
               id: `${json.plugin.id}-${requiredPlugin}`,
               source: json.plugin.id,
               target: requiredPlugin,
+              type: 'plugin',
             },
           });
         }
+
+        if (json.plugin?.requiredBundles) {
+          for (const requiredBundle of json.plugin.requiredBundles) {
+            elements.edges.push({
+              data: {
+                id: `${json.plugin.id}-${requiredBundle}`,
+                source: json.plugin.id,
+                target: requiredBundle,
+                type: 'bundle',
+              },
+            });
+          }
+        }
       }
     }
-
-    // const foo = await Promise.all(
-    //   files.map(async (file) => {
-    //     const contents = await Fsp.readFile(file, 'utf8');
-
-    //     const json = (await Jsonc.parse(contents)) as KibanaJsonC;
-
-    //     if (json.plugin?.id) {
-    //       elements.nodes.push({ data: { id: json.plugin.id } });
-    //     }
-
-    //     if (json.plugin?.requiredPlugins) {
-    //       for (const requiredPlugin of json.plugin.requiredPlugins) {
-    //         elements.edges.push({
-    //           data: {
-    //             id: `${json.plugin.id}-${requiredPlugin}`,
-    //             source: json.plugin.id,
-    //             target: requiredPlugin,
-    //           },
-    //         });
-    //       }
-    //     }
-    //   })
-    // );
-
-    console.log('elements', elements);
 
     fs.writeFileSync('kbn-dependency-graph.json', JSON.stringify(elements, null, 2));
   } catch (error) {
@@ -90,43 +83,3 @@ export async function generateGraph() {
     return [];
   }
 }
-
-/*
-
-cytoscape({
-  container: document.getElementById('cy'),
-
-  elements: {
-    nodes: [
-      {
-        data: { id: 'a' }
-      },
-
-      {
-        data: { id: 'b' }
-      }
-    ],
-    edges: [
-      {
-        data: { id: 'ab', source: 'a', target: 'b' }
-      }
-    ]
-  },
-
-  layout: {
-    name: 'grid',
-    rows: 1
-  },
-
-  // so we can see the ids
-  style: [
-    {
-      selector: 'node',
-      style: {
-        'label': 'data(id)'
-      }
-    }
-  ]
-});
-
-*/
