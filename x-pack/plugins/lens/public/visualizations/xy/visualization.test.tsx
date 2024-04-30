@@ -60,7 +60,7 @@ import {
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
-import { LegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -612,13 +612,13 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: ['currentAndLastValue' as LegendValue.CurrentAndLastValue],
+            legendStats: ['currentAndLastValue' as XYLegendValue.CurrentAndLastValue],
           },
         };
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['value']);
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
       it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
@@ -641,7 +641,7 @@ describe('xy_visualization', () => {
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['value']);
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
 
@@ -3844,7 +3844,7 @@ describe('xy_visualization', () => {
       expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
       expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
 
-      state.legend.legendStats = ['currentAndLastValue' as LegendValue.CurrentAndLastValue];
+      state.legend.legendStats = ['currentAndLastValue' as XYLegendValue.CurrentAndLastValue];
       const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
       expect(legendStatsState.legend.legendStats).not.toBeDefined();
       expect(legendStatsState.valuesInLegend).toEqual(true);
