@@ -135,10 +135,7 @@ export function getSearchMode(query?: Query | AggregateQuery): SearchMode | unde
     return undefined;
   }
 
-  if (
-    isOfAggregateQueryType(query) &&
-    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
-  ) {
+  if (isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'esql') {
     return 'text-based';
   }
 

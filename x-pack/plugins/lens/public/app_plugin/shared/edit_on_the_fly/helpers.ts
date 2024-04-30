@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
@@ -25,9 +25,7 @@ export const getQueryColumns = async (
   // I am skipping them in favor of performance now
   // but we should think another way to get them (from Lens embeddable or store)
   const performantQuery = { ...query };
-  if ('esql' in performantQuery && performantQuery.esql) {
-    performantQuery.esql = `${performantQuery.esql} | limit 0`;
-  }
+  performantQuery.esql = `${performantQuery.esql} | limit 0`;
   const table = await fetchFieldsFromESQL(
     performantQuery,
     deps.expressions,
@@ -47,13 +45,7 @@ export const getSuggestions = async (
   abortController?: AbortController
 ) => {
   try {
-    let indexPattern = '';
-    if ('sql' in query) {
-      indexPattern = getIndexPatternFromSQLQuery(query.sql);
-    }
-    if ('esql' in query) {
-      indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    }
+    const indexPattern = getIndexPatternFromESQLQuery(query.esql);
     const dataViewSpec = adHocDataViews.find((adHoc) => {
       return adHoc.name === indexPattern;
     });

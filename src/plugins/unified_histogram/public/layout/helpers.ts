@@ -12,14 +12,12 @@ const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
 
 export const shouldDisplayHistogram = (query: AggregateQuery) => {
   let queryHasTransformationalCommands = false;
-  if ('esql' in query) {
-    TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-      if (query.esql.toLowerCase().includes(command)) {
-        queryHasTransformationalCommands = true;
-        return;
-      }
-    });
-  }
+  TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
+    if (query.esql.toLowerCase().includes(command)) {
+      queryHasTransformationalCommands = true;
+      return;
+    }
+  });
 
   return !queryHasTransformationalCommands;
 };

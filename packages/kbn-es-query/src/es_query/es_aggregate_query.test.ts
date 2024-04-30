@@ -16,7 +16,7 @@ describe('sql query helpers', () => {
     });
 
     it('should return false for an Aggregate type query', () => {
-      const flag = isOfQueryType({ sql: 'SELECT * FROM foo' });
+      const flag = isOfQueryType({ esql: 'FROM foo' });
       expect(flag).toBe(false);
     });
   });
@@ -39,11 +39,6 @@ describe('sql query helpers', () => {
   });
 
   describe('getAggregateQueryMode', () => {
-    it('should return sql for an SQL AggregateQuery type', () => {
-      const mode = getAggregateQueryMode({ sql: 'SELECT * FROM foo' });
-      expect(mode).toBe('sql');
-    });
-
     it('should return esql for an ESQL AggregateQuery type', () => {
       const mode = getAggregateQueryMode({ esql: 'foo | where field > 100' });
       expect(mode).toBe('esql');

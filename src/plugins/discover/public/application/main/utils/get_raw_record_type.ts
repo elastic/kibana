@@ -15,11 +15,7 @@ import {
 import { RecordRawType } from '../services/discover_data_state_container';
 
 export function getRawRecordType(query?: Query | AggregateQuery) {
-  if (
-    query &&
-    isOfAggregateQueryType(query) &&
-    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
-  ) {
+  if (query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'esql') {
     return RecordRawType.PLAIN;
   }
 

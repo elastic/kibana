@@ -56,11 +56,7 @@ export const useStateProps = ({
    */
 
   const isPlainRecord = useMemo(() => {
-    return (
-      query &&
-      isOfAggregateQueryType(query) &&
-      ['sql', 'esql'].some((mode) => mode === getAggregateQueryMode(query))
-    );
+    return query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'esql';
   }, [query]);
 
   const isTimeBased = useMemo(() => {
