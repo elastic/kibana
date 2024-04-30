@@ -19,7 +19,7 @@ jest.mock('../../hooks/use_query_indices', () => ({
   useQueryIndices: jest.fn(),
 }));
 
-const Wrapper: FC<PropsWithChildren> = ({ children }) => {
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <IntlProvider locale="en">{children}</IntlProvider>

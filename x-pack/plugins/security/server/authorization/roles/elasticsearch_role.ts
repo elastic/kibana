@@ -321,3 +321,15 @@ const extractUnrecognizedApplicationNames = (
 function getUniqueList<T>(list: T[]) {
   return Array.from(new Set<T>(list));
 }
+
+export const compareRolesByName = (roleA: Role, roleB: Role) => {
+  if (roleA.name < roleB.name) {
+    return -1;
+  }
+
+  if (roleA.name > roleB.name) {
+    return 1;
+  }
+
+  return 0;
+};

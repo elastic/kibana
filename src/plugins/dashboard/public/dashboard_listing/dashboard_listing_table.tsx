@@ -46,6 +46,7 @@ export const DashboardListingTable = ({
     savedObjectsTagging,
     coreContext: { executionContext },
     chrome: { theme },
+    userProfile,
   } = pluginServices.getServices();
 
   useExecutionContext(executionContext, {
@@ -86,8 +87,9 @@ export const DashboardListingTable = ({
       http,
       i18n,
       theme,
+      userProfile,
     }),
-    [application, notifications, overlays, http, analytics, i18n, theme]
+    [application, notifications, overlays, http, analytics, i18n, theme, userProfile]
   );
 
   return (
