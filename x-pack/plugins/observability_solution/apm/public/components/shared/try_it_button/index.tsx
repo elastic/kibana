@@ -21,6 +21,7 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   isFeatureEnabled: boolean;
@@ -28,7 +29,6 @@ interface Props {
   linkLabel: string;
   onClick: () => void;
   popoverContent?: React.ReactElement;
-  icon?: 'beta' | 'beaker';
   isLoading: boolean;
 }
 
@@ -38,7 +38,6 @@ export function TryItButton({
   onClick,
   popoverContent,
   promoLabel,
-  icon,
   isLoading,
 }: Props) {
   const [showFastFilterTryCallout, setShowFastFilterTryCallout] = useLocalStorage(
@@ -61,29 +60,6 @@ export function TryItButton({
           label={i18n.translate('xpack.apm.tryIt.betaBadgeLabel', {
             defaultMessage: 'Try it',
           })}
-        />
-      </EuiFlexItem>
-    );
-  }
-
-  function Icon() {
-    if (!icon) {
-      return null;
-    }
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          color="hollow"
-          iconType={icon}
-          label={
-            icon === 'beaker'
-              ? i18n.translate('xpack.apm.tryIt.techPreview', {
-                  defaultMessage: 'Technical preview',
-                })
-              : i18n.translate('xpack.apm.tryIt.beta', {
-                  defaultMessage: 'Beta',
-                })
-          }
         />
       </EuiFlexItem>
     );
@@ -223,7 +199,7 @@ export function TryItButton({
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {isFeatureEnabled ? null : <TryItBadge />}
-      <Icon />
+      <TechnicalPreviewBadge icon="beaker" />
       {isFeatureEnabled ? null : <PromoLabel />}
       <Link />
       <Popover />

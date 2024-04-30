@@ -149,8 +149,7 @@ describe('Service inventory', () => {
     it('Should not be able to turn it on', () => {
       cy.visitKibana(serviceInventoryHref);
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.get('[data-test-subj="apmPopoverButton"]').click();
-      cy.contains('Please ask your administrator to turn it on by enabling it in within settings.');
+      cy.get('[data-test-subj="apmLink"]').should('be.disabled');
     });
   });
 

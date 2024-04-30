@@ -391,7 +391,6 @@ export function ServiceList({
                   defaultMessage: 'Enable fast filter',
                 })
           }
-          icon="beaker"
           onClick={onChangeTableSearchBarVisibility}
           isLoading={isSavingSetting}
           popoverContent={
