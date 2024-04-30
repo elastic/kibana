@@ -15,12 +15,7 @@ export {
   OfExpression,
   ThresholdExpression,
 } from './expression_items';
-export {
-  COMPARATORS,
-  builtInComparators,
-  builtInAggregationTypes,
-  builtInGroupByTypes,
-} from './constants';
+export { builtInComparators, builtInAggregationTypes, builtInGroupByTypes } from './constants';
 export { connectorDeprecatedMessage, deprecatedMessage } from './connectors_selection';
 export type { IOption } from './index_controls';
 export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
