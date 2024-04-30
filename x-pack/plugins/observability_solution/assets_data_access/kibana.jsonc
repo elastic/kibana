@@ -1,14 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/assets-data-access-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": "@elastic/obs-knowledge-team",
   "plugin": {
     "id": "assetsDataAccess",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "data", 
-    ],
+    "requiredPlugins": [],
     "optionalPlugins": [],
     "requiredBundles": []
   }
