@@ -9,6 +9,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
+import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 import { TimeBounds } from '../../../pages/slo_details/types';
 import { useKibana } from '../../../utils/kibana_react';
 import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
@@ -21,6 +22,7 @@ interface Props {
   alertTimeRange?: TimeRange;
   showErrorRateAsLine?: boolean;
   annotations?: AlertAnnotation[];
+  selectedTabId: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
@@ -32,17 +34,19 @@ export function ErrorRateChart({
   showErrorRateAsLine,
   annotations,
   onBrushed,
+  selectedTabId,
 }: Props) {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
-  const lensDef = useLensDefinition(
+  const lensDef = useLensDefinition({
     slo,
     threshold,
     alertTimeRange,
     annotations,
-    showErrorRateAsLine
-  );
+    showErrorRateAsLine,
+    selectedTabId,
+  });
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 
   const from = moment(dataTimeRange.from).subtract(delayInSeconds, 'seconds').toISOString();

@@ -90,6 +90,7 @@ export function BurnRates({
               dataTimeRange={dataTimeRange}
               threshold={threshold}
               onBrushed={onBrushed}
+              selectedTabId={selectedTabId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
