@@ -6,11 +6,7 @@
  */
 import { useCallback } from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import {
-  isEqlRule,
-  isNewTermsRule,
-  isSuppressibleAlertRule,
-} from '../../../../common/detection_engine/utils';
+import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface UseAlertSuppressionReturn {
@@ -22,14 +18,6 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
     'alertSuppressionForEsqlRuleEnabled'
   );
 
-  const isAlertSuppressionForNonSequenceEQLRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForNonSequenceEqlRuleEnabled'
-  );
-
-  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForNewTermsRuleEnabled'
-  );
-
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) {
       return false;
@@ -39,23 +27,8 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
       return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForEsqlRuleEnabled;
     }
 
-    // Remove this condition when the Feature Flag for enabling Suppression in the New terms rule is removed.
-    if (isNewTermsRule(ruleType)) {
-      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForNewTermsRuleEnabled;
-    }
-
-    // Remove this condition when the Feature Flag for enabling Suppression in the EQL rule is removed.
-    if (isEqlRule(ruleType)) {
-      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForNonSequenceEQLRuleEnabled;
-    }
-
     return isSuppressibleAlertRule(ruleType);
-  }, [
-    ruleType,
-    isAlertSuppressionForNewTermsRuleEnabled,
-    isAlertSuppressionForNonSequenceEQLRuleEnabled,
-    isAlertSuppressionForEsqlRuleEnabled,
-  ]);
+  }, [ruleType, isAlertSuppressionForEsqlRuleEnabled]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),

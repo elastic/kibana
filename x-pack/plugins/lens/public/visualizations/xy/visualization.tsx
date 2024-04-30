@@ -328,7 +328,7 @@ export const getXyVisualization = ({
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
-          kibanaTheme,
+          startServices: core,
         })
       );
     }
@@ -744,7 +744,7 @@ export const getXyVisualization = ({
       />
     );
   },
-  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+  toExpression: (state, layers, _attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
       layers,

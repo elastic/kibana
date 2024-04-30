@@ -516,7 +516,7 @@ export class DashboardContainer
       };
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
-      return;
+      return await this.untilReactEmbeddableLoaded<ApiType>(newId);
     }
 
     const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
@@ -566,7 +566,6 @@ export class DashboardContainer
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
-        version: serialized.version,
       };
     }
     return panel;
