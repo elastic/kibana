@@ -63,6 +63,7 @@ export const getSearchEmbeddableFactory = ({
       return deserializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
+      console.log('initialState', initialState);
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -119,10 +120,10 @@ export const getSearchEmbeddableFactory = ({
           canLinkToLibrary: async () => {
             return (
               discoverServices.capabilities.discover.save &&
-              !Boolean(fetchContext$.getValue()?.searchSessionId)
+              !Boolean(searchEmbeddableApi.savedObjectId.getValue())
             );
           },
-          canUnlinkFromLibrary: async () => Boolean(fetchContext$.getValue()?.searchSessionId),
+          canUnlinkFromLibrary: async () => Boolean(searchEmbeddableApi.savedObjectId.getValue()),
           saveToLibrary: async (title: string) => {
             const savedObjectId = await attributeService.saveMethod({
               ...searchEmbeddableApi.attributes$.getValue(),
