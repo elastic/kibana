@@ -27,7 +27,7 @@ const cleanKibana = () => {
   deleteAlertsAndRules();
 };
 
-describe('Alerts timeline', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alerts timeline', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
