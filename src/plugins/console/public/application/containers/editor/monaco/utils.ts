@@ -7,6 +7,7 @@
  */
 
 import { ParsedRequest } from '@kbn/monaco';
+import { formatRequestBodyDoc, hasComments } from '../../../../lib/utils';
 import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import { constructUrl } from '../../../../lib/es';
 import type { DevToolsVariable } from '../../../components';
@@ -104,4 +105,47 @@ export const getDocumentationLinkFromAutocompleteContext = (
       .replace('/{branch}/', `/${docLinkVersion}/`);
   }
   return null;
+};
+
+export const getAutoIndentedRequestData = (data: string[]): string[] => {
+  const autoIndentedData: string[] = [];
+  if (data.some((doc) => hasComments(doc))) {
+    /**
+     * Comments require different approach for indentation and do not have condensed format
+     */
+    // TODO: Handle indentation with comments
+    return autoIndentedData;
+  } else {
+    data.forEach((doc) => {
+      const requestDataLines = doc.split(`\n`);
+      let indent = requestDataLines.length === 1; // Unindent multi docs by default
+      let formattedData = formatRequestBodyDoc(requestDataLines, indent);
+      if (!formattedData.changed) {
+        // toggle
+        indent = !indent;
+        formattedData = formatRequestBodyDoc(requestDataLines, indent);
+      }
+      autoIndentedData.push(...formattedData.data);
+    });
+  }
+
+  return autoIndentedData;
+};
+
+export const getAutoIndentedRequests = (requests: EditorRequest[]): string[] => {
+  const newRequestsText: string[] = [];
+
+  requests.forEach((request) => {
+    if (newRequestsText.length > 0) {
+      newRequestsText.push(`\n`);
+    }
+    newRequestsText.push(request.method + ' ' + request.url);
+
+    if (request.data && request.data.length > 0) {
+      const autoIndentedData = getAutoIndentedRequestData(request.data);
+      newRequestsText.push(...autoIndentedData);
+    }
+  });
+
+  return newRequestsText;
 };

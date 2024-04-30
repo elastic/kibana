@@ -17,7 +17,6 @@ import {
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { formatRequestBodyDoc } from '../../../../lib/utils';
 import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
@@ -32,9 +31,8 @@ import {
   getCurlRequest,
   trackSentRequests,
   tokenizeRequestUrl,
-  getDocumentationLinkFromAutocompleteContext,
-} from './utils';
-import { hasComments } from '../../../../lib/utils';
+  getDocumentationLinkFromAutocompleteContext, getAutoIndentedRequests
+} from "./utils";
 
 const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
 
@@ -277,42 +275,12 @@ export class MonacoEditorActionsProvider {
       return;
     }
 
-    const newRequestsText: string[] = [];
-
-    requests.forEach((request) => {
-      if (newRequestsText.length > 0) {
-        newRequestsText.push(`\n`);
-      }
-      newRequestsText.push(request.method + ' ' + request.url);
-
-      if (request.data && request.data.length > 0) {
-        // TODO: The parsed request's data property is not split into multiple strings representing lines
-        const requestData = request.data[0].split(`\n`);
-
-        if (requestData.some((doc) => hasComments(doc))) {
-          /**
-           * Comments require different approach for indentation and do not have condensed format
-           * We need to delegate indentation logic to coreEditor since it has access to session and other methods used for formatting and indenting the comments
-           */
-          // TODO: Handle indentation with comments
-        } else {
-          let indent = requestData.length === 1; // Unindent multi docs by default
-          let formattedData = formatRequestBodyDoc(requestData, indent);
-          if (!formattedData.changed) {
-            // toggle
-            indent = !indent;
-            formattedData = formatRequestBodyDoc(requestData, indent);
-          }
-
-          newRequestsText.push(...formattedData.data);
-        }
-      }
-    });
+    const autoIndentedRequests = getAutoIndentedRequests(requests);
 
     this.editor.executeEdits('', [
       {
         range,
-        text: newRequestsText.join(`\n`),
+        text: autoIndentedRequests.join(`\n`),
       },
     ]);
   }
