@@ -676,20 +676,20 @@ function filterUnique<T>(value: T, index: number, array: T[]) {
  * returns array consisting of all field types from state's fields including nested fields
  * @param fields
  */
-const getallFieldsIncludingNestedFields = (fields: Fields) => {
-  const fieldArray: DataType[] = [];
+const getallFieldsIncludingNestedFields = (fields: Fields, fieldsArray: DataType[]) => {
   const fieldsValue = Object.values(fields);
   for (const field of fieldsValue) {
-    if (field.type) fieldArray.push(field.type);
-    if (field.fields) getallFieldsIncludingNestedFields(field.fields);
-    if (field.properties) getallFieldsIncludingNestedFields(field.properties);
+    if (field.type) fieldsArray.push(field.type);
+    if (field.fields) getallFieldsIncludingNestedFields(field.fields,fieldsArray);
+    if (field.properties) getallFieldsIncludingNestedFields(field.properties, fieldsArray);
   }
-  return fieldArray;
+  return fieldsArray;
 };
 
 /** returns all field types from the fields, including multifield and child fields
  * @param allFields fields from state
  */
 export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
-  return getallFieldsIncludingNestedFields(allFields).filter(filterUnique);
+  const fields: DataType[] = []
+  return getallFieldsIncludingNestedFields(allFields, fields).filter(filterUnique);
 };
