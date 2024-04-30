@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 
 import { layerTypes } from '../../../common/layer_types';
 import { AnnotationGroups } from '../../types';
@@ -280,7 +280,7 @@ function convertToLegendStats(state: XYState & { valuesInLegend?: unknown }) {
         ...state.legend,
         legendStats: [
           ...new Set([
-            ...(valuesInLegend ? [LegendStats.values] : []),
+            ...(valuesInLegend ? [XYLegendValue.CurrentAndLastValue] : []),
             ...(state.legend.legendStats || []),
           ]),
         ],
@@ -296,7 +296,9 @@ function convertToValuesInLegend(state: XYState) {
   const newState: XYPersistedState = cloneDeep(state);
 
   if ('legendStats' in newState.legend && Array.isArray(newState.legend.legendStats)) {
-    newState.valuesInLegend = newState.legend.legendStats.includes(LegendStats.values);
+    newState.valuesInLegend = newState.legend.legendStats.includes(
+      XYLegendValue.CurrentAndLastValue
+    );
     delete newState.legend.legendStats;
   }
   return newState;
