@@ -8,7 +8,7 @@
 
 import { isOfQueryType, isOfAggregateQueryType, getAggregateQueryMode } from './es_aggregate_query';
 
-describe('sql query helpers', () => {
+describe('esql query helpers', () => {
   describe('isOfQueryType', () => {
     it('should return true for a Query type query', () => {
       const flag = isOfQueryType({ query: 'foo', language: 'test' });
@@ -33,7 +33,7 @@ describe('sql query helpers', () => {
     });
 
     it('should return true for an Aggregate type query', () => {
-      const flag = isOfAggregateQueryType({ sql: 'SELECT * FROM foo' });
+      const flag = isOfAggregateQueryType({ esql: 'FROM foo' });
       expect(flag).toBe(true);
     });
   });
