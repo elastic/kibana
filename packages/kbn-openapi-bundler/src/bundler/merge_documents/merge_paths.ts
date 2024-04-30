@@ -8,32 +8,74 @@
 
 import chalk from 'chalk';
 import { OpenAPIV3 } from 'openapi-types';
-import { ConflictError } from '../../utils/conflict_error';
 import { BundledDocument } from '../bundle_document';
 
 export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.PathsObject {
-  const mergedPaths: OpenAPIV3.PathsObject = {};
+  const mergedPaths: Record<string, OpenAPIV3.PathItemObject> = {};
 
   for (const { absolutePath, document } of bundledDocuments) {
     if (!document.paths) {
       continue;
     }
 
-    const oasDocument = document as unknown as OpenAPIV3.Document;
+    const pathsObject = document.paths as Record<string, OpenAPIV3.PathItemObject>;
 
-    for (const path of Object.keys(oasDocument.paths)) {
+    for (const path of Object.keys(pathsObject)) {
       if (!mergedPaths[path]) {
         mergedPaths[path] = {};
       }
 
+      const sourcePathItem = pathsObject[path];
+      const mergedPathItem = mergedPaths[path];
+
       try {
-        mergeOptionalStringField(oasDocument.paths[path]!, mergedPaths[path]!, 'summary');
-        mergeOptionalStringField(oasDocument.paths[path]!, mergedPaths[path]!, 'description');
-        mergeOperations(oasDocument.paths[path]!, mergedPaths[path]!);
+        mergedPathItem.summary = mergeOptionalPrimitiveValue(
+          sourcePathItem.summary,
+          mergedPathItem.summary
+        );
+      } catch {
+        throw new Error(
+          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
+            `paths.${path}.summary`
+          )}'s value ${chalk.blue(
+            sourcePathItem.summary
+          )} doesn't match to already encountered ${chalk.magenta(mergedPathItem.summary)}.`
+        );
+      }
+
+      try {
+        mergedPathItem.description = mergeOptionalPrimitiveValue(
+          sourcePathItem.description,
+          mergedPathItem.description
+        );
+      } catch {
+        throw new Error(
+          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
+            `paths.${path}.description`
+          )}'s value ${chalk.blue(
+            sourcePathItem.description
+          )} doesn't match to already encountered ${chalk.magenta(mergedPathItem.description)}.`
+        );
+      }
+
+      try {
+        mergeOperations(sourcePathItem, mergedPathItem);
       } catch (e) {
-        if (e instanceof ConflictError) {
-          throw new Error(`❌ ${e.message} paths[${path}][${e.documentLocation}] ${absolutePath}`);
-        }
+        throw new Error(
+          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
+            `paths.${path}.${e.message}`
+          )}'s definition is duplicated and differs from previously encountered.`
+        );
+      }
+
+      try {
+        mergeParameters(sourcePathItem, mergedPathItem);
+      } catch (e) {
+        throw new Error(
+          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
+            `paths.${path}.parameters.[${e.message}]`
+          )}'s definition is duplicated and differs from previously encountered.`
+        );
       }
     }
   }
@@ -53,45 +95,72 @@ const KNOWN_HTTP_METHODS = [
 ];
 
 function mergeOperations(
-  pathItem: OpenAPIV3.PathItemObject,
-  mergedPathItems: OpenAPIV3.PathItemObject
+  sourcePathItem: OpenAPIV3.PathItemObject,
+  mergedPathItem: OpenAPIV3.PathItemObject
 ) {
   for (const httpMethod of KNOWN_HTTP_METHODS) {
-    if (!pathItem[httpMethod]) {
+    if (!sourcePathItem[httpMethod]) {
       continue;
     }
 
-    if (mergedPathItems[httpMethod]) {
-      throw new ConflictError(
-        `The same operation ${chalk.red(httpMethod)} is defined in more than one document`,
-        httpMethod
-      );
+    if (mergedPathItem[httpMethod]) {
+      throw new Error(httpMethod);
     }
 
-    mergedPathItems[httpMethod] = pathItem[httpMethod];
+    mergedPathItem[httpMethod] = sourcePathItem[httpMethod];
   }
 }
 
-function mergeOptionalStringField<FieldName extends string>(
-  source: { [field in FieldName]?: unknown },
-  merged: { [field in FieldName]?: unknown },
-  fieldName: FieldName
+function mergeOptionalPrimitiveValue<Value extends string | number | boolean | undefined>(
+  incoming: Value,
+  existing: Value
+): Value {
+  if (!incoming) {
+    return existing;
+  }
+
+  if (incoming && !existing) {
+    return incoming;
+  }
+
+  if (incoming !== existing) {
+    throw new Error('Primitive value merge conflict');
+  }
+
+  return existing;
+}
+
+function mergeParameters(
+  sourcePathItem: OpenAPIV3.PathItemObject,
+  mergedPathItem: OpenAPIV3.PathItemObject
 ): void {
-  if (!source[fieldName]) {
+  if (!sourcePathItem.parameters) {
     return;
   }
 
-  if (source[fieldName] && !merged[fieldName]) {
-    merged[fieldName] = source[fieldName];
-    return;
+  if (!mergedPathItem.parameters) {
+    mergedPathItem.parameters = [];
   }
 
-  if (merged[fieldName] !== source[fieldName]) {
-    throw new ConflictError(
-      `Encountered conflicting ${chalk.red(fieldName)} values. ${chalk.red(
-        fieldName
-      )} is optional and should be omitted or have the same value in all schemas`,
-      fieldName
-    );
+  for (const sourceParameter of sourcePathItem.parameters) {
+    if ('$ref' in sourceParameter) {
+      const existing = mergedPathItem.parameters.find(
+        (x) => '$ref' in x && x.$ref === sourceParameter.$ref
+      );
+
+      if (existing) {
+        continue;
+      }
+    } else {
+      const existing = mergedPathItem.parameters.find(
+        (x) => !('$ref' in x) && x.name === sourceParameter.name && x.in === sourceParameter.in
+      );
+
+      if (existing) {
+        throw new Error(`{ "name": "${sourceParameter.name}", "in": "${sourceParameter.in}" }`);
+      }
+    }
+
+    mergedPathItem.parameters.push(sourceParameter);
   }
 }
