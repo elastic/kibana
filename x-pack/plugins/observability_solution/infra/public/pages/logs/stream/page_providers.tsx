@@ -24,7 +24,7 @@ import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
-const ViewLogInContext: FC<PropsWithChildren> = ({ children }) => {
+const ViewLogInContext: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewReference } = useLogViewContext();
 

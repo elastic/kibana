@@ -17,7 +17,7 @@ import { timelineActions } from '../../../timelines/store';
  * This component should be used above all routes, but below the Provider.
  * It dispatches actions when the URL is changed.
  */
-export const RouteCapture = memo<PropsWithChildren>(({ children }) => {
+export const RouteCapture = memo<PropsWithChildren<unknown>>(({ children }) => {
   const location: AppLocation = useLocation();
   const dispatch = useDispatch();
 

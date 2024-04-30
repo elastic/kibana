@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
@@ -75,10 +76,12 @@ interface Props {
 
 const emptyNotes: string[] = [];
 
-const EventsTrSupplementContainerWrapper = React.memo<PropsWithChildren>(({ children }) => {
-  const width = useEventDetailsWidthContext();
-  return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
-});
+const EventsTrSupplementContainerWrapper = React.memo<PropsWithChildren<unknown>>(
+  ({ children }) => {
+    const width = useEventDetailsWidthContext();
+    return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
+  }
+);
 
 EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
