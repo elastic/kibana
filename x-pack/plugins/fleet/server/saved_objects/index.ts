@@ -514,6 +514,16 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         ],
       },
+      '9': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              overrides: { type: 'flattened', index: false },
+            },
+          },
+        ],
+      },
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
