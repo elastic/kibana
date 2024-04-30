@@ -15,6 +15,7 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../../../../../api_integration/ftr_provider_context';
+import { rootUserServerless } from '../../../../../common/lib/authentication/users';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -83,10 +84,10 @@ const expectedOverviewSourceResult = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const bsearch = getService('bsearch');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const secureBsearch = getService('secureBsearch');
 
-  describe('@serverless @ess Tls Test with Packetbeat', () => {
+  describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
       before(
         async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls')
@@ -96,8 +97,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
-          supertest,
+        const tls = await secureBsearch.send<NetworkTlsStrategyResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: rootUserServerless.username,
+            password: rootUserServerless.password,
+          },
+          internalOrigin: 'Kibana',
           options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
@@ -125,8 +131,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Ensure data is returned for FlowTarget.Destination', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
-          supertest,
+        const tls = await secureBsearch.send<NetworkTlsStrategyResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: rootUserServerless.username,
+            password: rootUserServerless.password,
+          },
+          internalOrigin: 'Kibana',
           options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
@@ -163,8 +174,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
-          supertest,
+        const tls = await secureBsearch.send<NetworkTlsStrategyResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: rootUserServerless.username,
+            password: rootUserServerless.password,
+          },
+          internalOrigin: 'Kibana',
           options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
@@ -192,8 +208,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Ensure data is returned for FlowTarget.Destination', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
-          supertest,
+        const tls = await secureBsearch.send<NetworkTlsStrategyResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: rootUserServerless.username,
+            password: rootUserServerless.password,
+          },
+          internalOrigin: 'Kibana',
           options: {
             factoryQueryType: NetworkQueries.tls,
             timerange: {
