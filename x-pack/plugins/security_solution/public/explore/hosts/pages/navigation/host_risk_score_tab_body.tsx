@@ -8,6 +8,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { RiskEnginePrivilegesCallOut } from '../../../../entity_analytics/components/risk_engine_privileges_callout';
+import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
 import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
 import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -64,6 +66,7 @@ export const HostRiskScoreQueryTabBody = ({
   }, [toggleStatus]);
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
+  const privileges = useMissingRiskEnginePrivileges();
   const {
     data,
     inspect,
@@ -92,6 +95,14 @@ export const HostRiskScoreQueryTabBody = ({
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
+
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return (
+      <EuiPanel hasBorder>
+        <RiskEnginePrivilegesCallOut privileges={privileges} />
+      </EuiPanel>
+    );
+  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (

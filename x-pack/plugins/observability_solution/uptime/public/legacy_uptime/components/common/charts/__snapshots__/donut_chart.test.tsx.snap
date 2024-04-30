@@ -420,6 +420,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "spacingBuffer": 10,
               "verticalWidth": 200,
             },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
+            },
             "lineSeriesStyle": Object {
               "fit": Object {
                 "line": Object {
@@ -517,6 +524,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,

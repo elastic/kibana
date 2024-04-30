@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/asset_manager'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/asset_manager',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/asset_manager'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/asset_manager',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/asset_manager/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/observability_solution/asset_manager/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };
