@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
@@ -430,12 +431,12 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             allowLegendStats={nonOrdinalXAxis}
             legendStats={state?.legend.legendStats}
-            onLegendStatsChange={(newLegendStats) => {
+            onLegendStatsChange={(checked) => {
               setState({
                 ...state,
                 legend: {
                   ...state.legend,
-                  legendStats: newLegendStats,
+                  legendStats: checked ? [XYLegendValue.CurrentAndLastValue] : [],
                 },
               });
             }}
