@@ -191,7 +191,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
       const CUSTOM_ESQL_FIELD = '_custom_agent_name';
       const queryWithCustomFields = [
-        `from auditbeat* metadata _id, _version, _index]`,
+        `from auditbeat* metadata _id, _version, _index`,
         `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
         `keep _id, _custom_agent_name`,
         `limit 5`,
