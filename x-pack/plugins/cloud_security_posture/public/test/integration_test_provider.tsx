@@ -4,44 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
-import { Observable, of } from 'rxjs';
-import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { identity } from 'lodash';
+
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SavedQuery } from '@kbn/data-plugin/common';
+import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { sessionStorageMock } from '@kbn/core-http-server-mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { plugin } from '@kbn/bfetch-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import { Server } from '@kbn/core-root-server-internal';
 import { SearchService } from '@kbn/data-plugin/public/search';
+import { Observable, of } from 'rxjs';
+import type { CspClientPluginStartDeps } from '../types';
 
-export class LocalStorageMock {
-  private store: Record<string, unknown>;
-  constructor(defaultStore: Record<string, unknown>) {
-    this.store = defaultStore;
-  }
-  clear() {
-    this.store = {};
-  }
-  get(key: string) {
-    return this.store[key] || null;
-  }
-  set(key: string, value: unknown) {
-    this.store[key] = String(value);
-  }
-  remove(key: string) {
-    delete this.store[key];
-  }
+interface CspAppDeps {
+  core: CoreStart;
+  deps: Partial<CspClientPluginStartDeps>;
+  params: AppMountParameters;
 }
 
 const filterManager = {
@@ -49,21 +40,6 @@ const filterManager = {
   getAppFilters: () => [],
   getFetches$: () => new Observable(),
 };
-
-export const uiSettingsMock = {
-  get: (key: string) => {
-    return true;
-  },
-  isDefault: () => {
-    return true;
-  },
-};
-
-const theme = {
-  theme$: of({ darkMode: false }),
-};
-
-const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
 
 const initializerContext = new Server(
   coreMock.createPluginInitializerContext({
@@ -87,130 +63,86 @@ searchService.setup(mockCoreSetup, {
   management: managementPluginMock.createSetupContract(),
 });
 
-export const services = {
-  core: {
-    http: { basePath: { prepend: () => void 0 } },
-    notifications: { toasts: {} },
-    docLinks: { links: { discover: {} } },
-    theme,
-  },
-  storage: new LocalStorageMock({}) as unknown as Storage,
-  data: {
-    query: {
-      timefilter: {
+export const IntegrationTestProvider: React.FC<Partial<CspAppDeps>> = ({
+  core = coreMock.createStart(),
+  deps = {
+    data: {
+      query: {
         timefilter: {
-          setTime: () => ({}),
-          getAbsoluteTime: () => {
-            return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+          timefilter: {
+            setTime: () => ({}),
+            getAbsoluteTime: () => {
+              return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+            },
+            getTime: () => ({
+              from: 'now-7d',
+              to: 'now',
+            }),
+            getRefreshInterval: () => ({}),
+            getFetch$: () => new Observable(),
+            getAutoRefreshFetch$: () => new Observable(),
+            calculateBounds: () => ({ min: undefined, max: undefined }),
+            getTimeDefaults: () => ({}),
+            createFilter: () => ({}),
           },
-          getTime: () => ({
-            from: 'now-7d',
-            to: 'now',
-          }),
-          getRefreshInterval: () => ({}),
-          getFetch$: () => new Observable(),
-          getAutoRefreshFetch$: () => new Observable(),
-          calculateBounds: () => ({ min: undefined, max: undefined }),
-          getTimeDefaults: () => ({}),
-          createFilter: () => ({}),
         },
-      },
-      savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
-      queryString: {
-        getDefaultQuery: () => {
-          return { query: '', language: 'kuery' };
+        savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
+        queryString: {
+          getDefaultQuery: () => {
+            return { query: '', language: 'kuery' };
+          },
+          getUpdates$: () => new Observable(),
         },
-        getUpdates$: () => new Observable(),
+        filterManager,
+        getState: () => {
+          return {
+            filters: [],
+            query: { query: '', language: 'kuery' },
+          };
+        },
+        state$: new Observable(),
       },
-      filterManager,
-      getState: () => {
-        return {
-          filters: [],
-          query: { query: '', language: 'kuery' },
-        };
+      search: searchService.start(mockCoreStart, {
+        fieldFormats: {} as any,
+        indexPatterns: {} as any,
+        inspector: {} as any,
+        screenshotMode: screenshotModePluginMock.createStartContract(),
+        scriptedFieldsEnabled: true,
+      }),
+      dataViews: {
+        getIdsWithTitle: () => Promise.resolve([]),
+        get: () =>
+          window
+            .fetch('http://localhost:5601/internal/data_views/fields')
+            .then((res) => res.json()),
+        find: () =>
+          window
+            .fetch('http://localhost:5601/internal/data_views/fields')
+            .then((res) => res.json()),
       },
-      state$: new Observable(),
     },
-    search: searchService.start(mockCoreStart, {
-      fieldFormats: {} as any,
-      indexPatterns: {} as any,
-      inspector: {} as any,
-      screenshotMode: screenshotModePluginMock.createStartContract(),
-      scriptedFieldsEnabled: true,
-    }),
-    dataViews: {
-      getIdsWithTitle: () => Promise.resolve([]),
-      get: () =>
-        window.fetch('http://localhost:5601/internal/data_views/fields').then((res) => res.json()),
-      find: () =>
-        window.fetch('http://localhost:5601/internal/data_views/fields').then((res) => res.json()),
-    },
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    charts: chartPluginMock.createStartContract(),
+    discover: discoverPluginMock.createStartContract(),
+    fleet: fleetMock.createStartMock(),
+    licensing: licensingMock.createStart(),
+    uiActions: uiActionsPluginMock.createStartContract(),
+    storage: sessionStorageMock.create(),
   },
-  uiSettings: uiSettingsMock,
-  dataViewFieldEditor: {
-    openEditor: () => void 0,
-    userPermissions: {
-      editIndexPattern: () => void 0,
-    },
-  },
-  navigation: NavigationPlugin.start({} as CoreStart, {
-    unifiedSearch: {
-      ui: { SearchBar, AggregateQuerySearchBar: SearchBar },
-    } as unknown as UnifiedSearchPublicPluginStart,
-  }),
-  theme,
-  capabilities: {
-    visualize: {
-      show: true,
-    },
-    discover: {
-      save: false,
-    },
-    advancedSettings: {
-      save: true,
-    },
-  },
-  docLinks: { links: { discover: {} } },
-  addBasePath: (path: string) => path,
-  filterManager,
-  history: () => ({}),
-  fieldFormats: {
-    deserialize: () => {
-      const DefaultFieldFormat = FieldFormat.from(identity);
-      return new DefaultFieldFormat();
-    },
-  },
-  toastNotifications: {
-    addInfo: () => ({}),
-  },
-  lens: {
-    EmbeddableComponent: <div>Histogram</div>,
-  },
-  unifiedSearch: {
-    autocomplete: {
-      hasQuerySuggestions: () => Promise.resolve([]),
-      getQuerySuggestions: () => Promise.resolve([]),
-    },
-  },
-};
-
-export const IntegrationTestProvider: React.FC = ({ children }) => {
-  const history = {
-    push: () => void 0,
-    replace: () => void 0,
-    createHref: () => '',
-    location: { pathname: '', search: '', hash: '', state: {} },
-    listen: () => () => void 0,
-    block: () => () => void 0,
-  } as any;
-
+  params = coreMock.createAppMountParameters(),
+  children,
+} = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
 
   return (
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>
-        <Router history={history}>
-          <I18nProvider>{children}</I18nProvider>
+        <Router history={params.history}>
+          <I18nProvider>
+            <Routes>
+              <Route path="*" render={() => <>{children}</>} />
+            </Routes>
+          </I18nProvider>
         </Router>
       </QueryClientProvider>
     </KibanaContextProvider>
