@@ -49,6 +49,7 @@
     "@kbn/serverless",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerting-comparators",
+    "@kbn/apm-utils"
   ],
   "exclude": ["target/**/*"]
 }
