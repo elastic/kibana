@@ -14,6 +14,8 @@ import registerSearchEmbeddableSource from '!!raw-loader!../react_embeddables/se
 import registerAttachActionSource from '!!raw-loader!../react_embeddables/search/register_add_search_panel_action';
 // @ts-ignore
 import registerFieldListEmbeddableSource from '!!raw-loader!../react_embeddables/field_list/register_field_list_embeddable';
+// @ts-ignore
+import registerReactEmbeddableSavedObjectSource from '!!raw-loader!../react_embeddables/register_saved_object_example';
 
 export const RegisterEmbeddable = () => {
   return (
@@ -90,26 +92,14 @@ export const RegisterEmbeddable = () => {
           Embeddable factories, such as Lens, Maps, Links, that can reference saved objects should
           register their saved object types using{' '}
           <strong>registerReactEmbeddableSavedObject</strong>. The <em>Add from library</em> flyout
-          on Dashboards uses this registry to list saved objects. The example below could be added
-          to the public start contract for a plugin.
+          on Dashboards uses this registry to list saved objects. The example function below could
+          be called from the public start contract for a plugin.
         </p>
       </EuiText>
       <EuiSpacer size="s" />
 
       <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-        {`
-registerReactEmbeddableSavedObject({
-  onAdd: (container, savedObject) => {
-    container.addNewPanel({
-    panelType: MY_EMBEDDABLE_TYPE,
-    initialState: savedObject.attributes,
-  });
-},
-  embeddableType: MY_EMBEDDABLE_TYPE,
-  savedObjectType: MY_SAVED_OBJECT_TYPE,
-  savedObjectName: 'Some saved object',
-  getIconForSavedObject: () => APP_ICON,
-});`}
+        {registerReactEmbeddableSavedObjectSource}
       </EuiCodeBlock>
     </>
   );
