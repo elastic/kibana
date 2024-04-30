@@ -102,6 +102,7 @@ interface ExplorerPageProps {
   queryString?: string;
   updateLanguage?: (language: string) => void;
   dataViews?: DataView[];
+  children: React.ReactNode;
 }
 
 const ExplorerPage: FC<ExplorerPageProps> = ({
