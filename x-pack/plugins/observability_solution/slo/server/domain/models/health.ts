@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './duration';
-export * from './indicators';
-export * from './time_window';
-export * from './slo';
-export * from './settings';
-export * from './health';
+import { healthStatusSchema, stateSchema } from '@kbn/slo-schema';
+import * as t from 'io-ts';
+
+type HealthStatus = t.OutputOf<typeof healthStatusSchema>;
+type State = t.OutputOf<typeof stateSchema>;
+
+export type { HealthStatus, State };
