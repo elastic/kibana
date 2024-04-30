@@ -60,7 +60,7 @@ jest.mock('../../../../containers/metrics_source', () => ({
 }));
 
 const renderUseMetricsExplorerDataHook = () => {
-  const wrapper: FC<PropsWithChildren> = ({ children }) => {
+  const wrapper: FC<PropsWithChildren<any>> = ({ children }) => {
     const services = {
       http: {
         post: mockedFetch,
