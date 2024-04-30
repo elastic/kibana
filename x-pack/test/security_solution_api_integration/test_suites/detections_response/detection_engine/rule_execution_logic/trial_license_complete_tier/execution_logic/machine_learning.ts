@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  const logAnomalyDebugData = async (index = '.ml-anomalies-custom-v3*') => {
+  const logAnomalyDebugData = async (index = '.ml-anomalies-custom*') => {
     const indexMappings = await es.indices.getMapping({ index });
     console.log('ML Anomaly Index Mappings:', JSON.stringify(indexMappings, null, 2));
     const anomalyData = await es.search({
