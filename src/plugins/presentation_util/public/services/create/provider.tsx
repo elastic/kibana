@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, FC, PropsWithChildren } from 'react';
 import { PluginServiceFactory } from './factory';
 
 /**
@@ -62,7 +62,7 @@ export class PluginServiceProvider<
   private _requiredServices?: RequiredServices;
   private context = createContext<Service | null>(null);
   private pluginService: Service | null = null;
-  public readonly Provider: React.FC = ({ children }) => {
+  public readonly Provider: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return <this.context.Provider value={this.getService()}>{children}</this.context.Provider>;
   };
 
