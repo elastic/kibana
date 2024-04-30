@@ -50,7 +50,7 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
     return shouldUseSearchCriteria
       ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
       : [
-          await buildCombinedHostsFilter({
+          buildCombinedHostsFilter({
             field: HOST_NAME_FIELD,
             values: currentPage.map((p) => p.name),
             dataView: resolvedDataView.dataViewReference,
