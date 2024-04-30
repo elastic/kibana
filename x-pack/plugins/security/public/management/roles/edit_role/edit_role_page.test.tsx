@@ -744,6 +744,30 @@ describe('<EditRolePage />', () => {
     expectSaveFormButtons(wrapper);
   });
 
+  it('render role with wildcard base privilege without edit/delete actions', async () => {
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage
+          {...getProps({
+            action: 'edit',
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['*'], feature: {} }],
+            },
+          })}
+        />
+      </KibanaContextProvider>
+    );
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('[data-test-subj="privilegeEditAction-0"]')).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="privilegeDeleteAction-0"]')).toHaveLength(0);
+    expectReadOnlyFormButtons(wrapper);
+  });
+
   describe('in create mode', () => {
     it('renders an error for existing role name', async () => {
       const props = getProps({ action: 'edit' });
