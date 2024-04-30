@@ -94,8 +94,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Pipeline creation', async () => {
       it('can redirect to the pipeline creation index page', async () => {
-        await pageObjects.svlSearchLandingPage.pipeline.click();
+        await pageObjects.svlSearchLandingPage.pipeline.createPipeline();
         await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToCreatePipelinePage();
+      });
+      it('can redirect to the manage pipelines page', async () => {
+        await pageObjects.svlSearchLandingPage.pipeline.managePipeline();
+        await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToManagePipelinePage();
       });
     });
   });
