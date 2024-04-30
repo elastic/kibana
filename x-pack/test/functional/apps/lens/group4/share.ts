@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   describe('lens share tests', () => {
     before(async () => {
@@ -22,10 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      retry.waitFor('close share modal', async () => {
-        await PageObjects.lens.closeShareModal();
-        return await testSubjects.exists('lnsApp_shareButton');
-      });
+      await PageObjects.lens.closeShareModal();
     });
 
     after(async () => {
@@ -73,7 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
       await PageObjects.lens.clickShareModal();
-
       expect(await testSubjects.isEnabled('copyShareUrlButton')).to.be(false);
     });
 

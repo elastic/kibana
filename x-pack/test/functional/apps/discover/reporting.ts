@@ -65,24 +65,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal();
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
-
       it('is available if new', async () => {
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
     });
 
@@ -103,15 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await reportingAPI.teardownEcommerce();
         await esArchiver.emptyKibanaIndex();
-      });
-
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
       });
 
       beforeEach(async () => {
@@ -274,12 +258,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reset();
       });
 
-      afterEach(async () => {
-        if (await testSubjects.exists('shareContextModal')) {
-          return await PageObjects.share.closeShareModal();
-        }
-      });
-
       beforeEach(async () => {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
@@ -318,13 +296,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await setupPage();
-      });
-
-      afterEach(async () => {
-        await PageObjects.reporting.checkForReportingToasts();
-        if (await testSubjects.exists('shareContextModal')) {
-          await PageObjects.share.closeShareModal();
-        }
       });
 
       it('generates a report with data', async () => {
