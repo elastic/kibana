@@ -154,28 +154,20 @@ image::images/es-query-rule-action-variables.png[Passing rule values to an actio
 The following variables are specific to the {es} query rule.
 You can also specify <<defining-rules-actions-variables,variables common to all rules>>.
 
-`context.title`:: A preconstructed title for the rule. Example: 
-`rule term match alert query matched`.
+`context.conditions`::
+(string) A description of the condition. For example: `Query matched documents`.
 
-`context.message`:: A preconstructed message for the rule. Example: +
-`rule 'my es-query' is active:` +
-`- Value: 2` +
-`- Conditions Met: Number of matching documents is greater than 1 over 5m` +
-`- Timestamp: 2022-02-03T20:29:27.732Z`
+`context.date`::
+(string) The date, in ISO format, that the rule met the condition. For example: `2024-04-30T00:55:42.765Z`.
 
-`context.group`:: The name of the action group associated with the condition. 
+`context.group`::
+The name of the action group associated with the condition. 
 Example: `query matched`.
+//TBD: Is this still accurate? Missing from test output.
 
-`context.date`:: The date, in ISO format, that the rule met the condition. 
-Example: `2022-02-03T20:29:27.732Z`.
-
-`context.value`:: The value of the rule that met the condition.
-
-`context.conditions`:: A description of the condition. Example: 
-`count greater than 4`.
-
-`context.hits`:: The most recent documents that matched the query. Using the 
-https://mustache.github.io/[Mustache] template array syntax, you can iterate 
+`context.hits`::
+(array of objects) The most recent documents that matched the query.
+Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate 
 over these hits to get values from the {es} documents into your actions.
 For example, the message in an email connector action might contain:
 +
@@ -221,6 +213,73 @@ Labels:
 // NOTCONSOLE
 --
 
+`context.link`::
+(string) The URL for the rule that generated the alert.
+For example: `/app/management/insightsAndAlerting/triggersActions/rule/47754354-d894-49d3-87ec-05745a74e2b7`.
+
+`context.message`::
+(string) A preconstructed message for the rule.
+For example: +
+`rule 'my es-query' is active:` +
+`- Value: 2` +
+`- Conditions Met: Number of matching documents is greater than 1 over 5m` +
+`- Timestamp: 2022-02-03T20:29:27.732Z`
+
+`context.sourceFields`::
+(object)
+// TBD: When and what type of information is returned here?
+
+`context.title`::
+(string) A preconstructed title for the rule. Example: 
+`rule 'my-query-rule' matched query`.
+
+`context.value`::
+(integer) The value of the rule that met the condition.
+//TBD: Is it correct that this is always a number?
+
+`rule.params`::
+(object) The rule parameters. For the definitive list, refer to the API documentation.
+
+`rule.params.aggType`:::
+(string) TBD. For example: `count`.
+
+`rule.params.groupBy`:::
+(string) TBD. For example: `all`.
+
+`rule.params.esqlQuery`:::
+(object) TBD
+For example: `{"esql":"FROM kibana_sample_data_logs\n| STATS total_bytes = SUM(bytes) BY host\n| WHERE total_bytes > 200000\n| SORT total_bytes DESC\n| LIMIT 10"}`
+
+`rule.params.excludeHitsFromPreviousRun`:::
+(boolean) TBD
+
+`rule.params.size`:::
+(integer) TBD
+
+`rule.params.sourceFields`:::
+(array) TBD
+
+`rule.params.termSize`:::
+(integer) TBD
+
+`rule.params.threshold`:::
+(array) TBD
+
+`rule.params.thresholdComparator`:::
+(string) For example, `>`.
+
+`rule.params.timeField`:::
+(string) For example, `@timestamp`.
+
+`rule.params.timeWindowSize`:::
+(integer) TBD
+
+`rule.params.timeWindowUnit`:::
+(string) TBD
+
+`rule.params.searchType`:::
+(string) The type of query. For example, `esqlQuery`.
+
 [float]
 === Handling multiple matches of the same document
 
@@ -253,3 +312,83 @@ window of 1 hour and checks if there are more than 99 matches for the query. The
 | Rule finds 190 matches in the last hour. 71 of them are duplicates that were already alerted on previously, so you actually have 119 matches: `119 > 99`
 | Rule is active and user is alerted.
 |===
+
+////
+[float]
+=== Example
+
+This example demonstrates a Mustache template for an email action.
+
+An {es} query rule collects data like this when an alert occurs:
+
+[source,json]
+----
+{
+  "date": "2023-04-27T22:40:34.153Z",
+  "context": {
+    "title": "rule 'esq' matched query for group host-2",
+    "conditions": "Number of matching documents for group \"host-2\" is less than 1000",
+    "link": "https://example.com/this-will-link-to-Discover",
+    "hits": [
+      {
+        "_source": {
+          "event": {
+            "provider": "alerting",
+            "action": "active-instance",
+            "duration": "96023000000"
+          }
+        }
+      },
+      {
+        "_source": {
+          "@timestamp": "2023-04-27T22:40:22.251Z",
+          "event": {
+            "provider": "alerting",
+            "action": "execute-action"
+          }
+        }
+      }
+    ]
+  }
+}
+----
+
+You can use a Mustache template in the email action for your rule to include the appropriate alert details. 
+The template references the following variables that are specific to the {es} query rule:
+
+- `context.title`
+- `context.conditions`
+- `context.link`
+- `context.hits[]._source.event.provider`
+- `context.hits[]._source.event.action`
+- `context.hits[]._source.event.duration`
+
+[source,js]
+----
+# {{context.title}} <1>
+
+{{#FormatDate}} {{{date}}} ; America/New_York {{/FormatDate}} <2>
+
+{{context.conditions}}
+
+**documents** _[view in Discover]({{{context.link}}})_ <3>
+
+| provider | action | duration | <4>
+| -------- | ------ | -------- |
+{{#context.hits}}{{#_source.event}}| {{provider}} | {{action}} | {{#duration}}{{#EvalMath}} round( {{{duration}}} / 1000 / 1000 / 1000 ) {{/EvalMath}} sec{{/duration}} {{^duration}}-n/a-{{/duration}} |{{/_source.event}}
+{{/context.hits}}
+----
+<1> Renders the value of the `context.title` variable as a level 1 heading.
+<2> Renders the value of the `date` variable as a formatted date in the America/New_York time zone.
+<3> Shows examples of `**bold**`, `_italic_`, and `[text](url)` links.
+<4> Shows a table with three columns, with one row per element in the `context.hits` array.
+From each of those elements, you can access the `provider`, `action`, and `duration` fields of the `_source.event` object.
+The `duration` field is rendered as a number of seconds, rounded to the nearest second.
+It's stored as nanoseconds so it needs to be divided by a billion to yield seconds.
+The duration field is optional, so you can use a `{{#duration}} ... {{/duration}}` section to render the duration if it's present and show `-n/a-` otherwise.
+
+When rendered into Markdown and then HTML and viewed in an email client, it looks like this:
+
+[role="screenshot"]
+image:images/email-mustache-template-rendered.png[Email template rendered in an email client]
+////
