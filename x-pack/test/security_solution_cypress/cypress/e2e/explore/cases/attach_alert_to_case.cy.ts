@@ -8,7 +8,7 @@ import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/te
 
 import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, logout } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
