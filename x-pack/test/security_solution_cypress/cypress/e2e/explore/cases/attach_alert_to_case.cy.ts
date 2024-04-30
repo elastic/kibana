@@ -30,7 +30,9 @@ const cleanKibana = () => {
 describe('Alerts timeline', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     cleanKibana();
+
     cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+    // First we login as a privileged user so data view can be created.
     loadDetectionsPage();
   });
 
