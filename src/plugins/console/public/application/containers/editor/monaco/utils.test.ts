@@ -7,9 +7,10 @@
  */
 
 import {
+  cleanUrl,
+  getBodyTokenPath,
   getCurlRequest,
   getDocumentationLink,
-  removeTrailingWhitespaces,
   replaceRequestVariables,
   stringifyRequest,
   trackSentRequests,
@@ -41,20 +42,20 @@ describe('monaco editor utils', () => {
       test: 'test',
     },
   ];
-  describe('removeTrailingWhitespaces', () => {
+  describe('cleanUrl', () => {
     it(`works with an empty string`, () => {
       const url = '';
-      const result = removeTrailingWhitespaces(url);
+      const result = cleanUrl(url);
       expect(result).toBe(url);
     });
     it(`doesn't change the string if no trailing whitespaces`, () => {
       const url = '_search';
-      const result = removeTrailingWhitespaces(url);
+      const result = cleanUrl(url);
       expect(result).toBe(url);
     });
     it(`removes any text after the first whitespace`, () => {
       const url = '_search some_text';
-      const result = removeTrailingWhitespaces(url);
+      const result = cleanUrl(url);
       expect(result).toBe('_search');
     });
   });
@@ -238,5 +239,94 @@ describe('monaco editor utils', () => {
       const link = getDocumentationLink(mockRequest, version);
       expect(link).toBe(expectedLink);
     });
+  });
+
+  describe('getBodyTokenPath', () => {
+    const testCases: Array<{ value: string; tokens: string[] }> = [
+      {
+        // add opening curly brackets to tokens
+        value: '{',
+        tokens: ['{'],
+      },
+      {
+        // allow whitespaces
+        value: '  {',
+        tokens: ['{'],
+      },
+      {
+        // allow line comments
+        value: '//comment\n{',
+        tokens: ['{'],
+      },
+      {
+        // inside the object line comment are ignored
+        value: '{//comment',
+        tokens: ['{'],
+      },
+      {
+        value: '{//comment\n"test":',
+        tokens: ['{', 'test'],
+      },
+      {
+        // do not add property name if no colon (:)
+        value: '{"test"',
+        tokens: ['{'],
+      },
+      {
+        // add property names to tokens (double quotes are removed)
+        value: '{"test":',
+        tokens: ['{', 'test'],
+      },
+      {
+        // add nested object to tokens
+        value: '{"test":{',
+        tokens: ['{', 'test', '{'],
+      },
+      {
+        // empty object
+        value: '{}',
+        tokens: [],
+      },
+      {
+        // empty object with inline comment
+        value: '{//comment\n}',
+        tokens: [],
+      },
+      {
+        value: '{"test":[',
+        tokens: ['{', 'test', '['],
+      },
+      {
+        value: '{"test":123,',
+        tokens: ['{'],
+      },
+      {
+        value: '{"test":{},',
+        tokens: ['{'],
+      },
+      {
+        value: '{"test":[],',
+        tokens: ['{'],
+      },
+      {
+        value: '{"property1":"value1","property2":',
+        tokens: ['{', 'property2'],
+      },
+      {
+        value: '{"property1":[123,',
+        tokens: ['{', 'property1', '['],
+      },
+      {
+        value: '{"property1":[123,"test"]',
+        tokens: ['{', 'property1'],
+      },
+    ];
+    for (const testCase of testCases) {
+      const { value, tokens } = testCase;
+      it(`${value}`, () => {
+        const parsedTokens = getBodyTokenPath(value);
+        expect(parsedTokens).toEqual(tokens);
+      });
+    }
   });
 });

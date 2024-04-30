@@ -24,6 +24,7 @@ import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 import {
   containsUrlParams,
+  getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLink,
   getLineTokens,
@@ -327,6 +328,18 @@ export class MonacoEditorActionsProvider {
     if (autocompleteType === AutocompleteType.URL_PARAMS) {
       return {
         suggestions: getUrlParamsCompletionItems(model, position),
+      };
+    }
+
+    if (autocompleteType === AutocompleteType.BODY) {
+      const requests = await this.getRequestsBetweenLines(
+        model,
+        position.lineNumber,
+        position.lineNumber
+      );
+      const requestStartLineNumber = requests[0].startLineNumber;
+      return {
+        suggestions: getBodyCompletionItems(model, position, requestStartLineNumber),
       };
     }
 
