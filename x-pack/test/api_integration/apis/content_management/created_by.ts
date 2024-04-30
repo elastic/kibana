@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { loginAsInteractiveUser, sampleDashboard } from './helpers';
+import {
+  loginAsInteractiveUser,
+  setupInteractiveUser,
+  sampleDashboard,
+  cleanupInteractiveUser,
+} from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('created_by', function () {
@@ -30,7 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
       let sessionHeaders: { [key: string]: string } = {};
 
       before(async () => {
+        await setupInteractiveUser({ getService });
         sessionHeaders = await loginAsInteractiveUser({ getService });
+      });
+
+      after(async () => {
+        await cleanupInteractiveUser({ getService });
       });
 
       it('created_by is with profile_id', async () => {

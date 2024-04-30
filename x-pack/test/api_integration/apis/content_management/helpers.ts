@@ -21,16 +21,43 @@ export const sampleDashboard = {
   version: 2,
 };
 
+const usernameOrRole = 'content_manager_dashboard';
+export async function setupInteractiveUser({ getService }: Pick<FtrProviderContext, 'getService'>) {
+  const security = getService('security');
+  await security.role.create(usernameOrRole, {
+    elasticsearch: { cluster: [], indices: [], run_as: [] },
+    kibana: [
+      {
+        spaces: ['default'],
+        base: [],
+        feature: { dashboard: ['all'] },
+      },
+    ],
+  });
+
+  await security.user.create(usernameOrRole, {
+    password: usernameOrRole,
+    roles: [usernameOrRole],
+    full_name: usernameOrRole.toUpperCase(),
+    email: `${usernameOrRole}@elastic.co`,
+  });
+}
+
+export async function cleanupInteractiveUser({
+  getService,
+}: Pick<FtrProviderContext, 'getService'>) {
+  const security = getService('security');
+  await security.user.delete(usernameOrRole);
+  await security.role.delete(usernameOrRole);
+}
+
 export async function loginAsInteractiveUser({
   getService,
 }: Pick<FtrProviderContext, 'getService'>): Promise<{
   Cookie: string;
 }> {
-  const config = getService('config');
   const supertest = getService('supertestWithoutAuth');
 
-  const username = config.get('servers.kibana.username');
-  const password = config.get('servers.kibana.password');
   const response = await supertest
     .post('/internal/security/login')
     .set('kbn-xsrf', 'xxx')
@@ -38,7 +65,7 @@ export async function loginAsInteractiveUser({
       providerType: 'basic',
       providerName: 'basic',
       currentURL: '/',
-      params: { username, password },
+      params: { username: usernameOrRole, password: usernameOrRole },
     })
     .expect(200);
   const cookie = parseCookie(response.header['set-cookie'][0])!.cookieString();
