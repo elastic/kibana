@@ -9,7 +9,7 @@ import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { buildCombinedHostsFilter } from './build';
+import { buildCombinedAssetFilter } from './build';
 import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
 
 export interface AlertsEsQuery {
@@ -28,7 +28,7 @@ export const createAlertsEsQuery = ({
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
-  const hostsFilter = buildCombinedHostsFilter({
+  const hostsFilter = buildCombinedAssetFilter({
     field: findInventoryFields('host').id,
     values: assetIds,
   });

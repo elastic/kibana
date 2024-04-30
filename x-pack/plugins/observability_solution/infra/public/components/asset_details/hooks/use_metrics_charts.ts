@@ -230,3 +230,63 @@ const getContainerK8sCharts = async (metric: ContainerMetricTypes) => {
       return [];
   }
 };
+
+export const useContainerKpiCharts = ({
+  dataViewId,
+  options,
+}: {
+  dataViewId?: string;
+  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
+}) => {
+  const { value: charts = [] } = useAsync(async () => {
+    const model = findInventoryModel('container');
+    const { cpu, memory } = await model.metrics.getCharts();
+
+    return [cpu.metric.containerCpuUsage, memory.metric.containerMemoryUsage].map((chart) => ({
+      ...chart,
+      seriesColor: options?.seriesColor,
+      decimals: 1,
+      subtitle: options?.getSubtitle
+        ? options?.getSubtitle(chart.value)
+        : getSubtitleFromFormula(chart.value),
+      ...(dataViewId && {
+        dataset: {
+          index: dataViewId,
+        },
+      }),
+    }));
+  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
+
+  return charts;
+};
+
+export const useContainerK8sKpiCharts = ({
+  dataViewId,
+  options,
+}: {
+  dataViewId?: string;
+  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
+}) => {
+  const { value: charts = [] } = useAsync(async () => {
+    const model = findInventoryModel('container');
+    const { cpu, memory } = await model.metrics.getCharts();
+
+    return [cpu.metric.containerK8sCpuUsage, memory.metric.containerK8sMemoryUsage].map(
+      (chart) => ({
+        ...chart,
+        seriesColor: options?.seriesColor,
+        decimals: 1,
+        subtitle: options?.getSubtitle
+          ? options?.getSubtitle(chart.value)
+          : getSubtitleFromFormula(chart.value),
+        ...(dataViewId && {
+          dataset: {
+            index: dataViewId,
+          },
+        }),
+      })
+    );
+  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
+
+  return charts;
+};

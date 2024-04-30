@@ -7,7 +7,6 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { ContainerAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 
@@ -22,15 +21,6 @@ class DockerContainer extends Entity<DockerContainerDocument> {
       ...this.fields,
       'docker.cpu.total.pct': 25,
       'docker.memory.usage.pct': 20,
-    });
-  }
-
-  asset() {
-    return new ContainerAsset({
-      'asset.kind': 'container',
-      'asset.id': this.fields['container.id'],
-      'asset.name': this.fields['container.id'],
-      'asset.ean': `container:${this.fields['container.id']}`,
     });
   }
 }
