@@ -24,7 +24,7 @@ export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = (
   indexName,
   ingestionMethod,
 }) => {
-  const playgroundUrl = APPLICATIONS_PLUGIN.URL + PLAYGROUND_PATH + `?default-index=${indexName}`;
+  const playgroundUrl = `${APPLICATIONS_PLUGIN.URL}${PLAYGROUND_PATH}?default-index=${indexName}`;
 
   return (
     <EuiButton
