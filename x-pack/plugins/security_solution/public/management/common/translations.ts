@@ -196,7 +196,7 @@ export const CONSOLE_COMMANDS = {
 
 export const CONFIRM_WARNING_MODAL_LABELS = {
   title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
-    defaultMessage: 'Confirm trusted application',
+    defaultMessage: 'Confirm entry',
   }),
   body: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.body', {
     defaultMessage:
