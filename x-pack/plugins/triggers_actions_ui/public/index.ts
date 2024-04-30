@@ -119,7 +119,6 @@ export {
   getTimeFieldOptions,
   getTimeOptions,
   GroupByExpression,
-  COMPARATORS,
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from './common';
