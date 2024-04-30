@@ -21,28 +21,31 @@ jest.mock('../utils/kibana_react', () => ({
 
 describe('useFetchAlertDetail', () => {
   const getResult = {
-    'kibana.alert.rule.category': 'Metric threshold',
-    'kibana.alert.rule.consumer': 'infrastructure',
-    'kibana.alert.rule.execution.uuid': 'e62c418d-734d-47e7-bbeb-e6f182f5fb45',
-    'kibana.alert.rule.name': 'A super rule',
-    'kibana.alert.rule.producer': 'infrastructure',
-    'kibana.alert.rule.revision': 0,
-    'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
-    'kibana.alert.rule.uuid': '69411af0-82a2-11ec-8139-c1568734434e',
-    'kibana.space_ids': ['default'],
-    'kibana.alert.rule.tags': [],
-    '@timestamp': '2022-01-31T18:20:57.204Z',
-    'kibana.alert.reason': 'Document count reported no data in the last 1 hour for all hosts',
-    'kibana.alert.duration.us': 13793555000,
-    'kibana.alert.instance.id': '*',
-    'kibana.alert.start': '2022-01-31T14:31:03.649Z',
-    'kibana.alert.uuid': '73c0d0cd-2df4-4550-862c-1d447e9c1db2',
-    'kibana.alert.status': 'active',
-    'kibana.alert.workflow_status': 'open',
-    'event.kind': 'signal',
-    'event.action': 'active',
-    'kibana.version': '8.1.0',
-    tags: [],
+    _index: 'alert-index',
+    _source: {
+      'kibana.alert.rule.category': 'Metric threshold',
+      'kibana.alert.rule.consumer': 'infrastructure',
+      'kibana.alert.rule.execution.uuid': 'e62c418d-734d-47e7-bbeb-e6f182f5fb45',
+      'kibana.alert.rule.name': 'A super rule',
+      'kibana.alert.rule.producer': 'infrastructure',
+      'kibana.alert.rule.revision': 0,
+      'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+      'kibana.alert.rule.uuid': '69411af0-82a2-11ec-8139-c1568734434e',
+      'kibana.space_ids': ['default'],
+      'kibana.alert.rule.tags': [],
+      '@timestamp': '2022-01-31T18:20:57.204Z',
+      'kibana.alert.reason': 'Document count reported no data in the last 1 hour for all hosts',
+      'kibana.alert.duration.us': 13793555000,
+      'kibana.alert.instance.id': '*',
+      'kibana.alert.start': '2022-01-31T14:31:03.649Z',
+      'kibana.alert.uuid': '73c0d0cd-2df4-4550-862c-1d447e9c1db2',
+      'kibana.alert.status': 'active',
+      'kibana.alert.workflow_status': 'open',
+      'event.kind': 'signal',
+      'event.action': 'active',
+      'kibana.version': '8.1.0',
+      tags: [],
+    },
   };
 
   const id = '123';
@@ -103,6 +106,7 @@ describe('useFetchAlertDetail', () => {
         Array [
           false,
           Object {
+            "_index": "alert-index",
             "formatted": Object {
               "0": "a",
               "1": " ",
