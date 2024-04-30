@@ -8,7 +8,7 @@ Expression from which to return the minimum value.
 DescriptionReturns the minimum value of a numeric expression.Example
 ```esql
 FROM employees
-| STATS min_languages = MIN(languages)
+| STATS MIN(languages)
 ```
 
 The expression can use inline functions. For example, to calculate the minimum

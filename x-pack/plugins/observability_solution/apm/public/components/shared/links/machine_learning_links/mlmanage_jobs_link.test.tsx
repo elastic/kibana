@@ -12,8 +12,7 @@ import { MLManageJobsLink } from './mlmanage_jobs_link';
 
 test('MLManageJobsLink', async () => {
   const href = await getRenderedHref(() => <MLManageJobsLink />, {
-    search:
-      '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
+    search: '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
   } as Location);
 
   expect(href).toMatchInlineSnapshot(

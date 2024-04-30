@@ -62,6 +62,7 @@ export class EmulatorServer {
         started: new Date(req.server.info.started).toISOString(),
         uri: req.server.info.uri,
         plugins: Object.keys(req.server.registrations),
+        routes: req.server.table().map((route) => `${route.method.toUpperCase()} ${route.path}`),
       }),
     });
   }

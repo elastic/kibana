@@ -86,12 +86,46 @@ describe('correctCommonEsqlMistakes', () => {
   it(`escapes the column name if SORT uses an expression`, () => {
     expectQuery(
       'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC',
-      'FROM logs-*\n| STATS COUNT(*) by service.name\n| SORT `COUNT(*)` DESC'
+      'FROM logs-*\n| STATS COUNT(*) BY service.name\n| SORT `COUNT(*)` DESC'
     );
 
     expectQuery(
       'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC, @timestamp ASC',
-      'FROM logs-*\n| STATS COUNT(*) by service.name\n| SORT `COUNT(*)` DESC, @timestamp ASC'
+      'FROM logs-*\n| STATS COUNT(*) BY service.name\n| SORT `COUNT(*)` DESC, @timestamp ASC'
+    );
+  });
+
+  it(`handles complicated queries correctly`, () => {
+    expectQuery(
+      `FROM "postgres-logs*"
+      | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
+      | EVAL "@timestamp" = TO_DATETIME(timestamp)
+      | WHERE statement LIKE 'SELECT%'
+      | STATS avg_duration = AVG(duration)`,
+      `FROM \`postgres-logs*\`
+    | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
+    | EVAL @timestamp = TO_DATETIME(timestamp)
+    | WHERE statement LIKE "SELECT%"
+    | STATS avg_duration = AVG(duration)`
+    );
+
+    expectQuery(
+      `FROM metrics-apm*
+      | WHERE metricset.name == "service_destination" AND @timestamp > NOW() - 24 hours
+      | EVAL total_events = span.destination.service.response_time.count
+      | EVAL total_latency = span.destination.service.response_time.sum.us
+      | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
+      | STATS 
+          avg_throughput = AVG(total_events), 
+          avg_latency_per_request = AVG(total_latency / total_events), 
+          failure_rate = AVG(is_failure) 
+        BY span.destination.service.resource`,
+      `FROM metrics-apm*
+      | WHERE metricset.name == "service_destination" AND @timestamp > NOW() - 24 hours
+      | EVAL total_events = span.destination.service.response_time.count
+      | EVAL total_latency = span.destination.service.response_time.sum.us
+      | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
+      | STATS avg_throughput = AVG(total_events), avg_latency_per_request = AVG(total_latency / total_events), failure_rate = AVG(is_failure) BY span.destination.service.resource`
     );
   });
 });

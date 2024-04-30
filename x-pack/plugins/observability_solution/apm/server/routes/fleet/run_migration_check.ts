@@ -8,10 +8,7 @@
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 import { getApmPackagePolicies } from './get_apm_package_policies';
-import {
-  getApmPackagePolicy,
-  getCloudAgentPolicy,
-} from './get_cloud_apm_package_policy';
+import { getApmPackagePolicy, getCloudAgentPolicy } from './get_cloud_apm_package_policy';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { isSuperuser } from './is_superuser';
 
@@ -31,14 +28,8 @@ export async function runMigrationCheck({
   context,
   core,
   request,
-}: Pick<
-  APMRouteHandlerResources,
-  'plugins' | 'context' | 'core' | 'request' | 'config'
-> & {
-  plugins: Pick<
-    Required<APMRouteHandlerResources['plugins']>,
-    'fleet' | 'security'
-  >;
+}: Pick<APMRouteHandlerResources, 'plugins' | 'context' | 'core' | 'request' | 'config'> & {
+  plugins: Pick<Required<APMRouteHandlerResources['plugins']>, 'fleet' | 'security'>;
 }): Promise<RunMigrationCheckResponse> {
   const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 

@@ -39,9 +39,7 @@ export async function createApmTelemetry({
   isProd,
 }: {
   core: CoreSetup;
-  getApmIndices: (
-    soClient: SavedObjectsClientContract
-  ) => Promise<APMDataAccessConfig['indices']>;
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -130,10 +128,7 @@ export async function createApmTelemetry({
 
     try {
       const currentData = (
-        await savedObjectsClient.get(
-          APM_TELEMETRY_SAVED_OBJECT_TYPE,
-          APM_TELEMETRY_SAVED_OBJECT_ID
-        )
+        await savedObjectsClient.get(APM_TELEMETRY_SAVED_OBJECT_TYPE, APM_TELEMETRY_SAVED_OBJECT_ID)
       ).attributes as { kibanaVersion?: string };
 
       if (currentData.kibanaVersion !== kibanaVersion) {

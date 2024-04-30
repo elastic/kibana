@@ -14,7 +14,11 @@ jest.mock('./use_load_connectors', () => ({
   useLoadConnectors: jest.fn(),
 }));
 
-const mockConnectors = [{ id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai }];
+const mockConnectors = [
+  { id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai },
+  { id: 'connectorId2', title: 'OpenAI Azure Connector', type: LLMs.openai_azure },
+  { id: 'connectorId2', title: 'Bedrock Connector', type: LLMs.bedrock },
+];
 const mockUseLoadConnectors = (data: any) => {
   (useLoadConnectors as jest.Mock).mockReturnValue({ data });
 };
@@ -32,6 +36,7 @@ describe('useLLMsModels Hook', () => {
     expect(result.current).toEqual([
       {
         connectorId: 'connectorId1',
+        connectorName: undefined,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId1gpt-3.5-turbo ',
@@ -41,12 +46,43 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId1',
+        connectorName: undefined,
         disabled: false,
         icon: expect.any(Function),
         id: 'connectorId1gpt-4 ',
         name: 'gpt-4 ',
         showConnectorName: false,
         value: 'gpt-4',
+      },
+      {
+        connectorId: 'connectorId2',
+        connectorName: undefined,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId2Azure OpenAI ',
+        name: 'Azure OpenAI ',
+        showConnectorName: false,
+        value: undefined,
+      },
+      {
+        connectorId: 'connectorId2',
+        connectorName: undefined,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId2Claude 3 Haiku',
+        name: 'Claude 3 Haiku',
+        showConnectorName: false,
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+      },
+      {
+        connectorId: 'connectorId2',
+        connectorName: undefined,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId2Claude 3 Sonnet',
+        name: 'Claude 3 Sonnet',
+        showConnectorName: false,
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
       },
     ]);
   });

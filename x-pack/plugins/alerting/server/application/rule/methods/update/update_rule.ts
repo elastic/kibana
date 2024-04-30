@@ -176,7 +176,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     actionsAuthorization: context.actionsAuthorization,
     connectorAdapterRegistry: context.connectorAdapterRegistry,
     systemActions: data.systemActions,
-    rule: { consumer: originalRuleSavedObject.attributes.consumer },
+    rule: { consumer: originalRuleSavedObject.attributes.consumer, producer: ruleType.producer },
   });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it

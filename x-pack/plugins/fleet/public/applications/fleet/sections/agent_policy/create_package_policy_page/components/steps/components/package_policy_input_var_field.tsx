@@ -143,6 +143,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       <FormRow
         isInvalid={isInvalid}
         error={errors}
+        hasChildLabel={!varDef.multi}
         label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
           isOptional ? (

@@ -63,6 +63,7 @@ describe('OnboardingComponent', () => {
       EnablePrebuiltRulesSteps.enablePrebuiltRules,
       ViewAlertsSteps.viewAlerts,
     ],
+    spaceId: 'spaceId',
   };
   beforeEach(() => {
     jest.clearAllMocks();

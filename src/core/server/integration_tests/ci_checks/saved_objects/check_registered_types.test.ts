@@ -57,6 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "cc93fe2c0c76e57c2568c63170e05daea897c136",
         "action_task_params": "96e27e7f4e8273ffcd87060221e2b75e81912dd5",
+        "ad_hoc_run_params": "d4e3c5c794151d0a4f5c71e886b2aa638da73ad2",
         "alert": "3a67d3f1db80af36bd57aaea47ecfef87e43c58f",
         "api_key_pending_invalidation": "1399e87ca37b3d3a65d269c924eda70726cfe886",
         "apm-custom-dashboards": "b67128f78160c288bd7efe25b2da6e2afd5e82fc",
@@ -146,6 +147,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-note": "0a32fb776907f596bedca292b8c646496ae9c57b",
         "siem-ui-timeline-pinned-event": "082daa3ce647b33873f6abccf340bdfa32057c8d",
         "slo": "9a9995e4572de1839651c43b5fc4dc8276bb5815",
+        "slo-settings": "f6b5ed339470a6a2cda272bde1750adcf504a11b",
         "space": "8de4ec513e9bbc6b2f1d635161d850be7747d38e",
         "spaces-usage-stats": "3abca98713c52af8b30300e386c7779b3025a20e",
         "synthetics-monitor": "5ceb25b6249bd26902c9b34273c71c3dce06dbea",

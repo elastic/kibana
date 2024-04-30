@@ -5,7 +5,7 @@ current release documentation.
 Elastic Docs
 ›Elasticsearch Guide [master]
 ›ES|QL
-« ES|QL task management
+« ES|QL language versions
 ES|QL examples »
 ES|QL limitationsedit
 Result set size limitedit

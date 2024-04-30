@@ -84,13 +84,10 @@ export interface NodeStats {
   };
 }
 
-export const invalidLicenseMessage = i18n.translate(
-  'xpack.apm.serviceMap.invalidLicenseMessage',
-  {
-    defaultMessage:
-      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
-  }
-);
+export const invalidLicenseMessage = i18n.translate('xpack.apm.serviceMap.invalidLicenseMessage', {
+  defaultMessage:
+    "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
+});
 
 const NONGROUPED_SPANS: Record<string, string[]> = {
   aws: ['servicename'],
@@ -106,8 +103,7 @@ export function isSpanGroupingSupported(type?: string, subtype?: string) {
     return true;
   }
   return !NONGROUPED_SPANS[type].some(
-    (nongroupedSubType) =>
-      nongroupedSubType === 'all' || nongroupedSubType === subtype
+    (nongroupedSubType) => nongroupedSubType === 'all' || nongroupedSubType === subtype
   );
 }
 

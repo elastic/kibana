@@ -211,6 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
           hasTimeField: false,
         });
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
@@ -259,6 +260,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
           hasTimeField: false,
         });
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });

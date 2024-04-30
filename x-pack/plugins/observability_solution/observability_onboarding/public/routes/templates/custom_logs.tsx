@@ -28,10 +28,9 @@ export function CustomLogs({ children }: Props) {
   useBreadcrumbs(
     [
       {
-        text: i18n.translate(
-          'xpack.observability_onboarding.breadcrumbs.customLogs',
-          { defaultMessage: 'Stream log files' }
-        ),
+        text: i18n.translate('xpack.observability_onboarding.breadcrumbs.customLogs', {
+          defaultMessage: 'Stream log files',
+        }),
       },
     ],
     breadcrumbsApp
@@ -70,53 +69,34 @@ function AnimatedTransitionsWizard({ children }: Props) {
   }
 
   return (
-    <WizardProvider
-      transitionDuration={TRANSITION_DURATION}
-      onChangeStep={onChangeStep}
-    >
+    <WizardProvider transitionDuration={TRANSITION_DURATION} onChangeStep={onChangeStep}>
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="l" />
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow={false}>
-              <EuiTitle
-                size="l"
-                data-test-subj="obltOnboardingStreamLogFilePageHeader"
-              >
+              <EuiTitle size="l" data-test-subj="obltOnboardingStreamLogFilePageHeader">
                 <h1>
                   {title
                     ? title
-                    : i18n.translate(
-                        'xpack.observability_onboarding.title.collectCustomLogs',
-                        {
-                          defaultMessage: 'Stream log files to Elastic',
-                        }
-                      )}
+                    : i18n.translate('xpack.observability_onboarding.title.collectCustomLogs', {
+                        defaultMessage: 'Stream log files to Elastic',
+                      })}
                 </h1>
               </EuiTitle>
             </EuiFlexItem>
             {isServerless && (
-              <EuiFlexItem
-                grow={false}
-                css={{ position: 'absolute', right: 10 }}
-              >
+              <EuiFlexItem grow={false} css={{ position: 'absolute', right: 10 }}>
                 <ObservabilityOnboardingHeaderActionMenu />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ width: '50%' }}>
-          <FilmstripTransition
-            duration={TRANSITION_DURATION}
-            transition={transition}
-          >
+          <FilmstripTransition duration={TRANSITION_DURATION} transition={transition}>
             <FilmstripFrame
               position={
-                transition === 'ready'
-                  ? 'center'
-                  : transition === 'back'
-                  ? 'left'
-                  : 'right'
+                transition === 'ready' ? 'center' : transition === 'back' ? 'left' : 'right'
               }
             >
               {children}

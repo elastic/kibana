@@ -574,36 +574,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    name: 'auto_bucket',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.autoBucketDoc', {
-      defaultMessage: `Automatically bucket dates based on a given range and bucket target.`,
-    }),
-    signatures: [
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number' },
-          { name: 'startDate', type: 'string', literalOnly: true },
-          { name: 'endDate', type: 'string', literalOnly: true },
-        ],
-        returnType: 'date',
-        examples: [
-          'from index | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
-      },
-      {
-        params: [
-          { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number' },
-          { name: 'startValue', type: 'number', literalOnly: true },
-          { name: 'endValue', type: 'number', literalOnly: true },
-        ],
-        returnType: 'number',
-        examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],
-      },
-    ],
-  },
-  {
     name: 'case',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.caseDoc', {
       defaultMessage:

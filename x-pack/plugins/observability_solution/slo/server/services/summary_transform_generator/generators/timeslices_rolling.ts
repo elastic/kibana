@@ -6,18 +6,18 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO } from '../../../domain/models';
+import { SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_DESTINATION_INDEX_NAME,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
 import { getGroupBy } from './common';
 
 export function generateSummaryTransformForTimeslicesAndRolling(
-  slo: SLO
+  slo: SLODefinition
 ): TransformPutTransformRequest {
   return {
     transform_id: getSLOSummaryTransformId(slo.id, slo.revision),
@@ -26,7 +26,7 @@ export function generateSummaryTransformForTimeslicesAndRolling(
       index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
     },
     source: {
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: `${SLO_DESTINATION_INDEX_NAME}*`,
       query: {
         bool: {
           filter: [

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +24,7 @@ const KEY = 'insights';
 /**
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
-export const InsightsSection: FC = memo(() => {
+export const InsightsSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
@@ -48,10 +47,10 @@ export const InsightsSection: FC = memo(() => {
         <>
           <EuiSpacer size="s" />
           <ThreatIntelligenceOverview />
-          <EuiSpacer size="s" />
-          <CorrelationsOverview />
         </>
       )}
+      <EuiSpacer size="s" />
+      <CorrelationsOverview />
       <EuiSpacer size="s" />
       <PrevalenceOverview />
     </ExpandableSection>

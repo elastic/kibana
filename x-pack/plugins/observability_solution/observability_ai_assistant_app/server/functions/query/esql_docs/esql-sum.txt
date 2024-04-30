@@ -7,7 +7,7 @@ Numeric expression.
 DescriptionReturns the sum of a numeric expression.Example
 ```esql
 FROM employees
-| STATS sum_languages = SUM(languages)
+| STATS SUM(languages)
 ```
 
 The expression can use inline functions. For example, to calculate

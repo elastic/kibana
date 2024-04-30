@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 
 interface InstructionsFieldProps {
   value?: string;
@@ -25,7 +26,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
         <EuiToolTip
           content={i18n.translate('xpack.searchPlayground.sidebar.instructionsField.help', {
             defaultMessage:
-              'This is the instruction or question you want the AI to respond to. Be clear and specific for the best results.',
+              'These preliminary instructions and guidelines define the behavior of the model. Be clear and specific for best results.',
           })}
         >
           <>
@@ -49,6 +50,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
         value={value}
         onChange={handlePromptChange}
         fullWidth
+        isInvalid={isEmpty(value)}
       />
     </EuiFormRow>
   );

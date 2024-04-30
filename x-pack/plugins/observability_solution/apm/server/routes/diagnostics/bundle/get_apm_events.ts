@@ -17,10 +17,7 @@ import {
   INDEX,
 } from '../../../../common/es_fields/apm';
 import { getApmIndexPatterns } from './get_indices';
-import {
-  getTypedSearch,
-  TypedSearch,
-} from '../../../utils/create_typed_es_client';
+import { getTypedSearch, TypedSearch } from '../../../utils/create_typed_es_client';
 
 export interface ApmEvent {
   legacy?: boolean;

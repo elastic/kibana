@@ -17,11 +17,9 @@ import {
 } from '../../../shared_imports';
 import { ENRICH_POLICIES_REQUIRED_PRIVILEGES } from '../../constants';
 
-export const EnrichPoliciesWithPrivileges: FunctionComponent = ({
-  children,
-}: {
+export const EnrichPoliciesWithPrivileges: FunctionComponent<{
   children?: React.ReactNode;
-}) => {
+}> = ({ children }) => {
   const { apiError } = useAuthorizationContext();
 
   if (apiError) {

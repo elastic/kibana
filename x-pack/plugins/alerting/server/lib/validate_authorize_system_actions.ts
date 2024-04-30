@@ -17,7 +17,7 @@ interface Params {
   actionsAuthorization: ActionsAuthorization;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   systemActions: Array<RuleSystemAction | NormalizedSystemAction>;
-  rule: { consumer: string };
+  rule: { consumer: string; producer: string };
 }
 
 export const validateAndAuthorizeSystemActions = async ({
@@ -73,7 +73,7 @@ export const validateAndAuthorizeSystemActions = async ({
   const additionalPrivileges = getSystemActionKibanaPrivileges({
     connectorAdapterRegistry,
     systemActions: systemActionsWithActionTypeId,
-    rule: { consumer: rule.consumer },
+    rule: { consumer: rule.consumer, producer: rule.producer },
   });
 
   await actionsAuthorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });

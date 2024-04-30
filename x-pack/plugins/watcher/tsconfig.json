@@ -37,6 +37,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

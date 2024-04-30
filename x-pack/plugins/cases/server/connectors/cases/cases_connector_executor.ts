@@ -40,6 +40,12 @@ import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
 import { CasesConnectorError } from './cases_connector_error';
+import {
+  AUTO_CREATED_TITLE,
+  CASE_CREATED_BY_RULE_DESC,
+  GROUPED_BY_DESC,
+  GROUPED_BY_TITLE,
+} from './translations';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -717,13 +723,7 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord } = groupingData;
-
-    const ruleName = params.rule.ruleUrl
-      ? `[${params.rule.name}](${params.rule.ruleUrl})`
-      : params.rule.name;
-
-    const groupingDescription = this.getGroupingDescription(grouping);
-    const description = `This case is auto-created by ${ruleName}. \n\n Grouping: ${groupingDescription}`;
+    const flattenGrouping = getFlattenedObject(grouping);
 
     const requiredCustomFields = buildRequiredCustomFieldsForRequest(customFieldsConfigurations);
     this.logger.debug(
@@ -739,9 +739,9 @@ export class CasesConnectorExecutor {
 
     return {
       id: caseId,
-      description,
-      tags: this.getCaseTags(params, grouping),
-      title: this.getCasesTitle(params.rule.name, oracleRecord.counter),
+      description: this.getCaseDescription(params, flattenGrouping),
+      tags: this.getCaseTags(params, flattenGrouping),
+      title: this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
       /**
        * TODO: Turn on for Security solution
@@ -752,28 +752,56 @@ export class CasesConnectorExecutor {
     };
   }
 
-  private getCasesTitle(ruleName: string, oracleCounter: number) {
-    const suffix =
-      oracleCounter === INITIAL_ORACLE_RECORD_COUNTER
-        ? '(Auto-created)'
-        : `(${oracleCounter}) (Auto-created)`;
+  private getCasesTitle(
+    params: CasesConnectorRunParams,
+    grouping: GroupedAlerts['grouping'],
+    oracleCounter: number
+  ) {
+    const totalDots = 3;
 
-    const ruleNameTrimmed = ruleName.slice(0, MAX_TITLE_LENGTH - suffix.length - 1);
+    const groupingDescription = Object.entries(grouping)
+      .map(([_, value]) => {
+        return convertValueToString(value);
+      })
+      .join(' & ');
 
-    return `${ruleNameTrimmed} ${suffix}`;
+    const suffix = `${
+      groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE(groupingDescription)}` : ''
+    }${
+      oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''
+    } (${AUTO_CREATED_TITLE})`;
+
+    const ruleNameTrimmed = params.rule.name.slice(
+      0,
+      MAX_TITLE_LENGTH - suffix.length - totalDots - 1
+    );
+
+    const ruleNameTrimmedWithDots =
+      params.rule.name.length > ruleNameTrimmed.length
+        ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`
+        : ruleNameTrimmed;
+
+    return `${ruleNameTrimmedWithDots}${suffix}`;
   }
 
-  private getGroupingDescription(grouping: GroupedAlerts['grouping']) {
-    const flattenGrouping = getFlattenedObject(grouping);
+  private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+    const ruleName = params.rule.ruleUrl
+      ? `['${params.rule.name}'](${params.rule.ruleUrl})`
+      : params.rule.name;
 
-    return Object.entries(flattenGrouping)
+    const description = `${CASE_CREATED_BY_RULE_DESC(ruleName)}.`;
+
+    const groupingDescription = Object.entries(grouping)
       .map(([key, value]) => {
-        const keyAsCodeBlock = `\`${key}\``;
-        const valueAsCodeBlock = `\`${convertValueToString(value)}\``;
-
-        return `${keyAsCodeBlock} equals ${valueAsCodeBlock}`;
+        return `\`${key}: ${convertValueToString(value)}\``;
       })
       .join(' and ');
+
+    if (groupingDescription.length > 0) {
+      return `${description} ${GROUPED_BY_DESC(groupingDescription)}.`;
+    }
+
+    return description;
   }
 
   private getCaseTags(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
@@ -789,11 +817,10 @@ export class CasesConnectorExecutor {
       .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
   }
 
-  private getGroupingAsTags(grouping: GroupedAlerts['grouping']) {
-    const flattenGrouping = getFlattenedObject(grouping);
-    return Object.entries(flattenGrouping).map(
-      ([key, value]) => `${key}:${convertValueToString(value)}`
-    );
+  private getGroupingAsTags(grouping: GroupedAlerts['grouping']): string[] {
+    return Object.entries(grouping)
+      .map(([key, value]) => [key, `${key}:${convertValueToString(value)}`])
+      .flat();
   }
 
   private async handleClosedCases(

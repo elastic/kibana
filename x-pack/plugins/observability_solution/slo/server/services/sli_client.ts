@@ -21,14 +21,14 @@ import {
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Duration, IndicatorData, SLO } from '../domain/models';
+import { DateRange, Duration, IndicatorData, SLODefinition } from '../domain/models';
 import { InternalQueryError } from '../errors';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';
 
 export interface SLIClient {
   fetchSLIDataFrom(
-    slo: SLO,
+    slo: SLODefinition,
     instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>>;
@@ -47,9 +47,10 @@ export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetchSLIDataFrom(
-    slo: SLO,
+    slo: SLODefinition,
     instanceId: string,
-    lookbackWindows: LookbackWindow[]
+    lookbackWindows: LookbackWindow[],
+    remoteName?: string
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
       a.duration.isShorterThan(b.duration) ? 1 : -1
@@ -62,10 +63,14 @@ export class DefaultSLIClient implements SLIClient {
       delayInSeconds
     );
 
+    const index = remoteName
+      ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
+      : SLO_DESTINATION_INDEX_PATTERN;
+
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
-        index: SLO_DESTINATION_INDEX_PATTERN,
+        index,
         aggs: toLookbackWindowsAggregationsQuery(
           longestDateRange.to,
           sortedLookbackWindows,
@@ -79,7 +84,7 @@ export class DefaultSLIClient implements SLIClient {
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, instanceId, longestDateRange),
-        index: SLO_DESTINATION_INDEX_PATTERN,
+        index,
         aggs: toLookbackWindowsSlicedAggregationsQuery(
           longestDateRange.to,
           sortedLookbackWindows,
@@ -95,7 +100,7 @@ export class DefaultSLIClient implements SLIClient {
 }
 
 function commonQuery(
-  slo: SLO,
+  slo: SLODefinition,
   instanceId: string,
   dateRange: DateRange
 ): Pick<MsearchMultisearchBody, 'size' | 'query'> {

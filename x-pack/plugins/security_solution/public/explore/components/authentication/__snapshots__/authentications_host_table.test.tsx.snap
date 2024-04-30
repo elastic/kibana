@@ -160,212 +160,196 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     class="euiBasicTable c3"
     data-test-subj="paginated-basic-table"
   >
-    <div>
-      <div
-        class="euiTableHeaderMobile"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          />
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          />
-        </div>
-      </div>
-      <table
-        class="euiTable css-0 euiTable--responsive"
-        id="__table_generated-id"
-        tabindex="-1"
-      >
-        <caption
-          class="euiTableCaption emotion-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_User_0"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="User"
-                >
-                  User
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.successes_1"
-              role="columnheader"
-              scope="col"
-              style="width: 8%;"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Successes"
-                >
-                  Successes
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_node.failures_2"
-              role="columnheader"
-              scope="col"
-              style="width: 8%;"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Failures"
-                >
-                  Failures
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Last success_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Last success"
-                >
-                  Last success
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Last successful source_4"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Last successful source"
-                >
-                  Last successful source
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Last successful destination_5"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Last successful destination"
-                >
-                  Last successful destination
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Last failure_6"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Last failure"
-                >
-                  Last failure
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Last failed source_7"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Last failed source"
-                >
-                  Last failed source
-                </span>
-              </span>
-            </th>
-            <th
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Last failed destination_8"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiTableCellContent"
-              >
-                <span
-                  class="euiTableCellContent__text"
-                  title="Last failed destination"
-                >
-                  Last failed destination
-                </span>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
-        >
-          <tr
-            class="euiTableRow"
+    <table
+      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_User_0"
+            role="columnheader"
+            scope="col"
           >
-            <td
-              class="euiTableRowCell euiTableRowCell--middle"
-              colspan="9"
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
             >
-              <div
-                class="euiTableCellContent euiTableCellContent--alignCenter"
+              <span
+                class="eui-textTruncate"
+                title="User"
               >
-                <span
-                  class="euiTableCellContent__text"
-                >
-                  No items found
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                User
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.successes_1"
+            role="columnheader"
+            scope="col"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Successes"
+              >
+                Successes
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_node.failures_2"
+            role="columnheader"
+            scope="col"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Failures"
+              >
+                Failures
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last success_3"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last success"
+              >
+                Last success
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last successful source_4"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last successful source"
+              >
+                Last successful source
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last successful destination_5"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last successful destination"
+              >
+                Last successful destination
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last failure_6"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last failure"
+              >
+                Last failure
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last failed source_7"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last failed source"
+              >
+                Last failed source
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last failed destination_8"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last failed destination"
+              >
+                Last failed destination
+              </span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            colspan="9"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              >
+                No items found
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <div
     class="euiFlexGroup c4 emotion-euiFlexGroup-l-flexStart-center-row"

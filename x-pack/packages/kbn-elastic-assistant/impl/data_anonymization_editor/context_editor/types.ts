@@ -26,6 +26,7 @@ export const FIELDS = {
   ANONYMIZED: 'anonymized',
   DENIED: 'denied',
   FIELD: 'field',
+  ID: 'id',
   RAW_VALUES: 'rawValues',
 };
 

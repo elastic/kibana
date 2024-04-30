@@ -41,9 +41,7 @@ const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   left: 0;
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   background: ${({ isLibraryFrame, theme }) =>
-    isLibraryFrame
-      ? theme.eui.euiColorEmptyShade
-      : theme.eui.euiColorLightestShade};
+    isLibraryFrame ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
 `;
 
 const LineNumber = euiStyled.div<{ highlight: boolean }>`

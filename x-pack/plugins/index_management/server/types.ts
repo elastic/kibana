@@ -26,6 +26,7 @@ export interface RouteDependencies {
     isLegacyTemplatesEnabled: boolean;
     isIndexStatsEnabled: boolean;
     isDataStreamsStorageColumnEnabled: boolean;
+    enableTogglingDataRetention: boolean;
   };
   indexDataEnricher: IndexDataEnricher;
   lib: {

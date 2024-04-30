@@ -73,7 +73,10 @@
     "@kbn/core-saved-objects-server",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": ["target/**/*"]
 }

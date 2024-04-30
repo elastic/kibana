@@ -9,13 +9,13 @@ import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
-import { RulesClientContext, BulkOptions } from './types';
+import { RulesClientContext } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
-import { get, GetParams } from './methods/get';
+import { getRule, GetRuleParams } from '../application/rule/methods/get';
 import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
 import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
@@ -52,7 +52,7 @@ import {
   bulkEditRules,
   BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
-import { bulkEnableRules } from './methods/bulk_enable';
+import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
 import { disable } from './methods/disable';
@@ -69,6 +69,12 @@ import {
   bulkUntrackAlerts,
   BulkUntrackBody,
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
+import { scheduleBackfill } from '../application/backfill/methods/schedule';
+import { getBackfill } from '../application/backfill/methods/get';
+import { findBackfill } from '../application/backfill/methods/find';
+import { deleteBackfill } from '../application/backfill/methods/delete';
+import { FindBackfillParams } from '../application/backfill/methods/find/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -128,8 +134,8 @@ export class RulesClient {
   public delete = (params: { id: string }) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
     find<Params>(this.context, params);
-  public get = <Params extends RuleTypeParams = never>(params: GetParams) =>
-    get<Params>(this.context, params);
+  public get = <Params extends RuleTypeParams = never>(params: GetRuleParams) =>
+    getRule<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
     resolveRule<Params>(this.context, params);
   public update = <Params extends RuleTypeParams = never>(params: UpdateRuleParams<Params>) =>
@@ -154,7 +160,7 @@ export class RulesClient {
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
-  public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
+  public bulkEnableRules = (params: BulkEnableRulesParams) => bulkEnableRules(this.context, params);
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
 
@@ -181,6 +187,15 @@ export class RulesClient {
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
+
+  public scheduleBackfill = (params: ScheduleBackfillParams) =>
+    scheduleBackfill(this.context, params);
+
+  public getBackfill = (id: string) => getBackfill(this.context, id);
+
+  public findBackfill = (params: FindBackfillParams) => findBackfill(this.context, params);
+
+  public deleteBackfill = (id: string) => deleteBackfill(this.context, id);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;

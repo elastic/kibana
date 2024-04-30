@@ -671,4 +671,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:profilingFetchTopNFunctionsFromStacktraces': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
 };

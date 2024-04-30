@@ -9,27 +9,25 @@ import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
-import {
-  apmRouter as apmRouterBase,
-  ApmRouter,
-} from '../../routing/apm_route_config';
-import {
-  logsLocatorsMock,
-  observabilityLogsExplorerLocatorsMock,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { apmRouter as apmRouterBase, ApmRouter } from '../../routing/apm_route_config';
+import { logsLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const apmRouter = {
   ...apmRouterBase,
-  link: (...args: [any]) =>
-    `some-basepath/app/apm${apmRouterBase.link(...args)}`,
+  link: (...args: [any]) => `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
 
-const { allDatasetsLocator } = observabilityLogsExplorerLocatorsMock;
 const { nodeLogsLocator, traceLogsLocator } = logsLocatorsMock;
+const uptimeLocator = sharePluginMock.createLocator();
 
 const expectLogsLocatorsToBeCalled = () => {
   expect(nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
   expect(traceLogsLocator.getRedirectUrl).toBeCalledTimes(1);
+};
+
+const expectUptimeLocatorToBeCalled = () => {
+  expect(uptimeLocator.getRedirectUrl).toBeCalledTimes(1);
 };
 
 describe('Transaction action menu', () => {
@@ -64,8 +62,8 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        allDatasetsLocator,
         logsLocators: logsLocatorsMock,
+        uptimeLocator,
         infraLinksAvailable: false,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -114,6 +112,7 @@ describe('Transaction action menu', () => {
         },
       ],
     ]);
+    expectUptimeLocatorToBeCalled();
     expectLogsLocatorsToBeCalled();
   });
 
@@ -131,7 +130,7 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        allDatasetsLocator,
+        uptimeLocator,
         logsLocators: logsLocatorsMock,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
@@ -144,8 +143,7 @@ describe('Transaction action menu', () => {
         {
           key: 'podDetails',
           title: 'Pod details',
-          subtitle:
-            'View logs and metrics for this pod to get further details.',
+          subtitle: 'View logs and metrics for this pod to get further details.',
           actions: [
             {
               key: 'podLogs',
@@ -200,6 +198,7 @@ describe('Transaction action menu', () => {
         },
       ],
     ]);
+    expectUptimeLocatorToBeCalled();
     expectLogsLocatorsToBeCalled();
   });
 
@@ -217,7 +216,7 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        allDatasetsLocator,
+        uptimeLocator,
         logsLocators: logsLocatorsMock,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
@@ -285,6 +284,7 @@ describe('Transaction action menu', () => {
         },
       ],
     ]);
+    expectUptimeLocatorToBeCalled();
     expectLogsLocatorsToBeCalled();
   });
 });

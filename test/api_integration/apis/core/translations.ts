@@ -18,8 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.locale).to.eql('en');
 
         expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
-        expect(response.header).to.have.property('cache-control', 'must-revalidate');
-        expect(response.header).to.have.property('etag');
+        expect(response.header).to.have.property(
+          'cache-control',
+          'public, max-age=31536000, immutable'
+        );
+        expect(response.header).not.to.have.property('etag');
       });
     });
 
