@@ -28,6 +28,7 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   registerReactEmbeddableFactory,
+  registerReactEmbeddableSavedObject,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -80,6 +81,8 @@ import { HistoryService } from './history_service';
 import { registerFeature } from './register_feature';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { injectTruncateStyles } from './utils/truncate_styles';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { i18n } from '@kbn/i18n';
 
 /**
  * @public
@@ -473,6 +476,21 @@ export class DiscoverPlugin
       const [coreStart, deps] = await core.getStartServices();
       return this.getDiscoverServices(coreStart, deps);
     };
+
+    registerReactEmbeddableSavedObject({
+      onAdd: (container, savedObject) => {
+        container.addNewPanel({
+          panelType: SEARCH_EMBEDDABLE_TYPE,
+          initialState: { savedObjectId: savedObject.id },
+        });
+      },
+      embeddableType: SEARCH_EMBEDDABLE_TYPE,
+      savedObjectType: SavedSearchType,
+      savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
+        defaultMessage: 'Saved search',
+      }),
+      getIconForSavedObject: () => 'discoverApp',
+    });
 
     registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([

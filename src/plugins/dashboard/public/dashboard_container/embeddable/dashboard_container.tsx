@@ -310,15 +310,15 @@ export class DashboardContainer
     this.executionContext = initialInput.executionContext;
   }
 
-  // public getAppContext() {
-  //   const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
-  //     this.getDashboardSavedObjectId()
-  //   );
-  //   return {
-  //     ...embeddableAppContext,
-  //     currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
-  //   };
-  // }
+  public getAppContext() {
+    const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
+      this.getDashboardSavedObjectId()
+    );
+    return {
+      ...embeddableAppContext,
+      currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
+    };
+  }
 
   public getDashboardSavedObjectId() {
     return this.getState().componentState.lastSavedId;
