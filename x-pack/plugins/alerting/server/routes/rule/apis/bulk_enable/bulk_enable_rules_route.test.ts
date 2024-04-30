@@ -7,18 +7,19 @@
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { bulkEnableRulesRoute } from './bulk_enable_rules';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { RuleAction, RuleSystemAction } from '../types';
-import { Rule } from '../application/rule/types';
+import { bulkEnableRulesRoute } from './bulk_enable_rules_route';
+import { BulkEnableRulesResult } from '../../../../application/rule/methods/bulk_enable';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { RuleAction, RuleSystemAction } from '../../../../types';
+import { Rule, RuleParams } from '../../../../application/rule/types';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -29,6 +30,7 @@ beforeEach(() => {
 describe('bulkEnableRulesRoute', () => {
   const bulkEnableRequest = { filter: '' };
   const bulkEnableResult = { errors: [], rules: [], total: 1, taskIdsFailedToBeEnabled: [] };
+  const bulkEnableResponse = { errors: [], rules: [], total: 1, task_ids_failed_to_be_enabled: [] };
 
   it('should enable rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
@@ -51,7 +53,7 @@ describe('bulkEnableRulesRoute', () => {
     );
 
     expect(await handler(context, req, res)).toEqual({
-      body: bulkEnableResult,
+      body: bulkEnableResponse,
     });
 
     expect(rulesClient.bulkEnableRules).toHaveBeenCalledTimes(1);
@@ -127,15 +129,15 @@ describe('bulkEnableRulesRoute', () => {
   });
 
   describe('actions', () => {
-    const mockedRule: Rule<{}> = {
+    const mockedRule: Rule<RuleParams> = {
       id: '1',
       alertTypeId: '1',
       schedule: { interval: '10s' },
       params: {
         bar: true,
       },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date('2020-08-20T19:23:38Z'),
+      updatedAt: new Date('2020-08-20T19:23:38Z'),
       actions: [
         {
           group: 'default',
@@ -184,7 +186,7 @@ describe('bulkEnableRulesRoute', () => {
       uuid: '123-456',
     };
 
-    const mockedRules: Array<Rule<{}>> = [
+    const mockedRules: Array<Rule<RuleParams>> = [
       {
         ...mockedRule,
         actions: [action],
@@ -208,7 +210,9 @@ describe('bulkEnableRulesRoute', () => {
       bulkEnableRulesRoute({ router, licenseState });
       const [_, handler] = router.patch.mock.calls[0];
 
-      rulesClient.bulkEnableRules.mockResolvedValueOnce(bulkEnableActionsResult);
+      rulesClient.bulkEnableRules.mockResolvedValueOnce(
+        bulkEnableActionsResult as BulkEnableRulesResult<RuleParams>
+      );
 
       const [context, req, res] = mockHandlerArguments(
         { rulesClient, actionsClient },
@@ -221,25 +225,60 @@ describe('bulkEnableRulesRoute', () => {
       const routeRes = await handler(context, req, res);
 
       // @ts-expect-error: body exists
-      expect(routeRes.body.rules[0].actions).toEqual([
-        {
-          actionTypeId: 'test',
-          group: 'default',
-          id: '2',
-          params: {
-            foo: true,
+      expect(routeRes.body).toEqual({
+        rules: [
+          {
+            id: '1',
+            enabled: true,
+            name: 'abc',
+            tags: ['foo'],
+            rule_type_id: '1',
+            consumer: 'bar',
+            schedule: {
+              interval: '10s',
+            },
+            actions: [
+              {
+                group: 'default',
+                id: '2',
+                params: {
+                  foo: true,
+                },
+                connector_type_id: 'test',
+                uuid: '123-456',
+              },
+              {
+                id: 'system_action-id',
+                params: {
+                  foo: true,
+                },
+                uuid: '123-456',
+                connector_type_id: 'test-2',
+              },
+            ],
+            params: {
+              bar: true,
+            },
+            created_by: '',
+            updated_by: '',
+            created_at: '2020-08-20T19:23:38.000Z',
+            updated_at: '2020-08-20T19:23:38.000Z',
+            api_key_owner: '',
+            throttle: '30s',
+            mute_all: false,
+            notify_when: 'onActionGroupChange',
+            muted_alert_ids: [],
+            execution_status: {
+              status: 'unknown',
+              last_execution_date: '2020-08-20T19:23:38.000Z',
+            },
+            revision: 0,
           },
-          uuid: '123-456',
-        },
-        {
-          actionTypeId: 'test-2',
-          id: 'system_action-id',
-          params: {
-            foo: true,
-          },
-          uuid: '123-456',
-        },
-      ]);
+        ],
+        errors: [],
+        total: 1,
+        task_ids_failed_to_be_enabled: [],
+      });
     });
   });
 });

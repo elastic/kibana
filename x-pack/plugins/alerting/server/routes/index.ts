@@ -41,7 +41,7 @@ import { snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
-import { bulkEnableRulesRoute } from './bulk_enable_rules';
+import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
 import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
