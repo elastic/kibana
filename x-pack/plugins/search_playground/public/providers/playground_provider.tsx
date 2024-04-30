@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../types';
@@ -13,10 +13,11 @@ import { ChatForm, ChatFormFields } from '../types';
 const queryClient = new QueryClient({});
 
 export interface PlaygroundProviderProps {
+  children: React.ReactNode;
   defaultValues?: Partial<Pick<ChatForm, ChatFormFields.indices>>;
 }
 
-export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
+export const PlaygroundProvider: FC<PropsWithChildren<PlaygroundProviderProps>> = ({
   children,
   defaultValues,
 }) => {
