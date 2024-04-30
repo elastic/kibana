@@ -446,6 +446,8 @@ const QueryTabContent = connector(
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
+      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+      prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&

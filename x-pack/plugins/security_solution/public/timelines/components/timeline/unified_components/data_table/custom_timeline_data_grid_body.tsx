@@ -31,6 +31,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   eventIdToNoteIds?: Record<string, string[]>;
   eventIdsAddingNotes?: Set<string>;
   onToggleShowNotes: (eventId?: string) => void;
+  refetch?: () => void;
 };
 
 const emptyNotes: string[] = [];
@@ -60,6 +61,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       eventIdToNoteIds = {},
       eventIdsAddingNotes = new Set<string>(),
       onToggleShowNotes,
+      refetch,
     } = props;
     const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
     const notesById = useDeepEqualSelector(getNotesByIds);
@@ -67,20 +69,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
       [rows, visibleRowData]
     );
-    const eventIds = useMemo(() => events.map((e) => e._id), [events]);
-    const rowIndicesWithNotes = useMemo(() => {
-      return new Map(
-        eventIds
-          .map((eventId, index) => {
-            if (eventIdToNoteIds[eventId]) {
-              return [index, eventIdToNoteIds[eventId]];
-            } else {
-              return null;
-            }
-          })
-          .filter((x) => x !== null) as Array<[number, string[]]>
-      );
-    }, [eventIdToNoteIds, eventIds]);
+    const eventIds = useMemo(() => events.map((event) => event._id), [events]);
 
     return (
       <>
@@ -102,7 +91,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                 return null;
               }
             })
-            .filter((x) => x !== null) as TimelineResultNote[];
+            .filter((note) => note !== null) as TimelineResultNote[];
           return (
             <CustomDataGridSingleRow
               rowData={row}
@@ -112,10 +101,10 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               Cell={Cell}
               enabledRowRenderers={enabledRowRenderers}
               notes={notes}
-              rowIndicesWithNotes={rowIndicesWithNotes}
               eventIdsAddingNotes={eventIdsAddingNotes}
               eventId={eventId}
               onToggleShowNotes={onToggleShowNotes}
+              refetch={refetch}
             />
           );
         })}
@@ -155,11 +144,13 @@ type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
   notes?: TimelineResultNote[] | null;
-  rowIndicesWithNotes?: Map<number, string[]>;
   eventId?: string;
   eventIdsAddingNotes?: Set<string>;
   onToggleShowNotes: (eventId?: string) => void;
-} & Pick<CustomTimelineDataGridBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
+} & Pick<
+  CustomTimelineDataGridBodyProps,
+  'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch'
+>;
 
 /**
  *
@@ -176,10 +167,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     visibleColumns,
     Cell,
     notes,
-    rowIndicesWithNotes,
     eventIdsAddingNotes,
     eventId = '',
     onToggleShowNotes,
+    refetch,
   } = props;
   const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
@@ -212,8 +203,11 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           noteId,
         })
       );
+      if (refetch) {
+        refetch();
+      }
     },
-    [dispatch, eventId]
+    [dispatch, eventId, refetch]
   );
 
   return (
@@ -237,17 +231,15 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
-      {rowIndicesWithNotes?.has(rowIndex) && (
-        <NoteCards
-          ariaRowindex={rowIndex}
-          associateNote={associateNote}
-          data-test-subj="note-cards"
-          notes={notes ?? []}
-          showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
-          toggleShowAddNote={onToggleShowNotes}
-          eventId={eventId}
-        />
-      )}
+      <NoteCards
+        ariaRowindex={rowIndex}
+        associateNote={associateNote}
+        data-test-subj="note-cards"
+        notes={notes ?? []}
+        showAddNote={eventIdsAddingNotes?.has(eventId) ?? false}
+        toggleShowAddNote={onToggleShowNotes}
+        eventId={eventId}
+      />
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell

@@ -356,6 +356,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           enabledRowRenderers={enabledRowRenderers}
           eventIdsAddingNotes={cellContext?.eventIdsAddingNotes}
           onToggleShowNotes={cellContext?.onToggleShowNotes}
+          refetch={refetch}
         />
       ),
       [
@@ -365,6 +366,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         eventIdToNoteIds,
         cellContext?.eventIdsAddingNotes,
         cellContext?.onToggleShowNotes,
+        refetch,
       ]
     );
 
