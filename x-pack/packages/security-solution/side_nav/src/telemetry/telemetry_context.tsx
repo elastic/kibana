@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 import type { Tracker } from '../types';
 
@@ -15,7 +15,10 @@ interface TelemetryProviderProps {
 
 const TelemetryContext = createContext<{ tracker?: Tracker } | null>(null);
 
-export const TelemetryContextProvider: FC<TelemetryProviderProps> = ({ children, tracker }) => {
+export const TelemetryContextProvider: FC<PropsWithChildren<TelemetryProviderProps>> = ({
+  children,
+  tracker,
+}) => {
   return <TelemetryContext.Provider value={{ tracker }}>{children}</TelemetryContext.Provider>;
 };
 
