@@ -53,7 +53,7 @@ export const installWithTimeout = async ({
             clearTimeout(timeoutId);
             reject(new InstallShutdownError());
           })
-          .catch(reject);
+          .catch(() => reject(new InstallShutdownError()));
       });
     };
 
