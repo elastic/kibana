@@ -150,6 +150,7 @@
     "@kbn/coloring",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
+    "@kbn/assets-data-access-plugin",
     "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
