@@ -181,8 +181,7 @@ export class TaskPool {
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
-    // the `.then` at the end confuses TS and thinks it's an unhandled promise.
-    void taskRunner
+    taskRunner
       .run()
       .catch((err) => {
         // If a task Saved Object can't be found by an in flight task runner
@@ -199,7 +198,8 @@ export class TaskPool {
       })
       .then(() => {
         this.tasksInPool.delete(taskRunner.taskExecutionId);
-      });
+      })
+      .catch(() => {});
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
@@ -230,7 +230,7 @@ export class TaskPool {
 
   private cancelTask(task: TaskRunner) {
     // internally async (without rejections), but public-facing is synchronous
-    void (async () => {
+    (async () => {
       try {
         this.logger.debug(`Cancelling task ${task.toString()}.`);
         this.tasksInPool.delete(task.taskExecutionId);
@@ -238,7 +238,7 @@ export class TaskPool {
       } catch (err) {
         this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
       }
-    })();
+    })().catch(() => {});
   }
 }
 
