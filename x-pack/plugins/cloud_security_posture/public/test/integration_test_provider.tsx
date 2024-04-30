@@ -26,7 +26,7 @@ import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { plugin } from '@kbn/bfetch-plugin/public';
 import { Server } from '@kbn/core-root-server-internal';
 import { SearchService } from '@kbn/data-plugin/public/search';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
