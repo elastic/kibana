@@ -25,7 +25,7 @@ import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
 export interface RightPanelProps extends FlyoutPanelProps {
-  key: 'document-details-right';
+  key: typeof DocumentDetailsRightPanelKey;
   path?: PanelPath;
   params?: {
     id: string;
