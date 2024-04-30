@@ -26,6 +26,14 @@ jest.mock('fs', () => ({
       return JSON.stringify(mockProtectedKeystoreData);
     }
 
+    if (path.includes('keystore_correct_password_file')) {
+      return 'changeme';
+    }
+
+    if (path.includes('keystore_incorrect_password_file')) {
+      return 'wrongpassword';
+    }
+
     if (path.includes('data/test') || path.includes('data/nonexistent')) {
       throw { code: 'ENOENT' };
     }
@@ -84,6 +92,17 @@ describe('Keystore', () => {
   });
 
   describe('load', () => {
+    const env = process.env;
+
+    beforeEach(() => {
+      jest.resetModules();
+      process.env = { ...env };
+    });
+
+    afterAll(() => {
+      process.env = env;
+    });
+
     it('is called on initialization', async () => {
       const load = sandbox.spy(Keystore.prototype, 'load');
 
@@ -95,6 +114,38 @@ describe('Keystore', () => {
     it('can load a password protected keystore', async () => {
       const keystore = await Keystore.initialize('/data/protected.keystore', 'changeme');
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
+    });
+
+    it('can load a valid password protected keystore from env KBN_KEYSTORE_PASSWORD', async () => {
+      process.env.KBN_KEYSTORE_PASSWORD = 'changeme';
+      const keystore = await Keystore.initialize('/data/protected.keystore');
+      expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
+    });
+
+    it('can not load a password protected keystore from env KBN_KEYSTORE_PASSWORD with the wrong password', async () => {
+      process.env.KBN_KEYSTORE_PASSWORD = 'wrongpassword';
+      expect.assertions(1);
+      try {
+        await Keystore.initialize('/data/protected.keystore');
+      } catch (e) {
+        expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
+      }
+    });
+
+    it('can load a password protected keystore from env KBN_KEYSTORE_PASSWORD_FILE', async () => {
+      process.env.KBN_KEYSTORE_PASSWORD_FILE = 'keystore_correct_password_file';
+      const keystore = await Keystore.initialize('/data/protected.keystore');
+      expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
+    });
+
+    it('can not load a password protected keystore from env KBN_KEYSTORE_PASSWORD_FILE with the wrong password', async () => {
+      process.env.KBN_KEYSTORE_PASSWORD_FILE = 'keystore_incorrect_password_file';
+      expect.assertions(1);
+      try {
+        await Keystore.initialize('/data/protected.keystore');
+      } catch (e) {
+        expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
+      }
     });
 
     it('throws unable to read keystore', async () => {
