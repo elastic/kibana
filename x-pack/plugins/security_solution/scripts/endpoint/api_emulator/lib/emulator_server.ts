@@ -80,20 +80,40 @@ export class EmulatorServer {
   }
 
   public async register({ register, prefix, ...options }: EmulatorServerPlugin) {
-    await this.server.register(
+    const hapiServer = this.server;
+    await hapiServer.register(
       {
+        ...options,
         register(server) {
           const scopedServer: EmulatorServerPluginRegisterOptions = {
             router: {
-              route: (...args) => {
-                return server.route(...args);
+              route: (routesToRegister) => {
+                const routes = Array.isArray(routesToRegister)
+                  ? routesToRegister
+                  : [routesToRegister];
+
+                // Inject `services` to every request under `request.pre.services`
+                for (const routeDefinition of routes) {
+                  if (typeof routeDefinition.options === 'function') {
+                    throw new Error(
+                      `a callback function for 'route.options' is not currently supported!`
+                    );
+                  }
+                  routeDefinition.options = routeDefinition.options ?? {};
+                  routeDefinition.options.pre = routeDefinition.options.pre ?? [];
+                  routeDefinition.options.pre.unshift({
+                    method: () => hapiServer.app.services,
+                    assign: 'services',
+                  });
+                }
+
+                return server.route(routes);
               },
             },
           };
 
           return register(scopedServer);
         },
-        ...options,
       },
       {
         routes: {

@@ -16,9 +16,16 @@ export const getSentinelOneEmulator = (): EmulatorServerPlugin => {
         method: 'GET',
         handler: async (req) => {
           return {
-            message: `test: activities from S1. req.app: ${Object.keys(
-              req.server.app.services ?? {}
-            ).join(' | ')}`,
+            message: `test: activities from S1. req.app:
+${Object.keys(req.app ?? {}).join(' | ')}
+req.server.app.services:
+${Object.keys(req.server.app.services || {})}
+
+req.pre.services:
+${Object.keys(req.pre.services || {})}
+
+
+`,
           };
         },
       });
