@@ -8,7 +8,7 @@ import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/te
 
 import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login } from '../../../tasks/login';
+import { login, logout } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -16,7 +16,7 @@ import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../..
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-const loadDetectionsPage = (role: SecurityRoleName) => {
+const loadDetectionsPage = (role?: SecurityRoleName) => {
   login(role);
   visitWithTimeRange(ALERTS_URL);
   waitForAlertsToPopulate();
@@ -31,6 +31,7 @@ describe('Alerts timeline', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+    loadDetectionsPage();
   });
 
   afterEach(() => {
