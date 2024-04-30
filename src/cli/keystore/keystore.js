@@ -8,7 +8,7 @@
 
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync } from 'crypto';
-import { question } from '../../cli_keystore/utils/prompt';
+import { question } from './utils/prompt';
 import * as errors from './errors';
 
 const VERSION = 1;

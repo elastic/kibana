@@ -30,7 +30,7 @@ import sinon from 'sinon';
 import { Keystore } from '../cli/keystore';
 import { create } from './create';
 import { Logger } from '../cli/logger';
-import * as prompt from './utils/prompt';
+import * as prompt from '../cli/keystore/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('create', () => {

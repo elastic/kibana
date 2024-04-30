@@ -7,7 +7,7 @@
  */
 
 import { Logger } from '../cli/logger';
-import { confirm, question } from './utils';
+import { confirm, question } from '../cli/keystore/utils';
 
 export async function create(keystore, options = {}) {
   const logger = new Logger(options);

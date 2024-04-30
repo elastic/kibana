@@ -15,7 +15,7 @@ jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
 }));
 
-import * as prompt from './utils/prompt';
+import * as prompt from '../cli/keystore/utils/prompt';
 
 import { Keystore } from '../cli/keystore';
 import { passwd } from './passwd';
