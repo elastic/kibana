@@ -184,7 +184,7 @@ export async function cloneRule<Params extends RuleParams = never>(
   try {
     ruleDomainSchema.validate(ruleDomain);
   } catch (e) {
-    context.logger.warn(`Error validating created rule domain object for id: ${id}, ${e}`);
+    context.logger.warn(`Error validating clone rule domain object for id: ${id}, ${e}`);
   }
 
   // Convert domain rule to rule (Remove certain properties)
