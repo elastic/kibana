@@ -156,6 +156,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   const hasDeferredInstallations =
     Array.isArray(deferredInstallations) && deferredInstallations.length > 0;
+
   let content: JSX.Element | Array<JSX.Element | null> | null;
   if (isLoading) {
     content = <Loading />;
@@ -224,6 +225,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       content = (
         <ExtensionWrapper>
           <customAssetsExtension.Component />
+          <EuiSpacer size="l" />
         </ExtensionWrapper>
       );
     } else {
@@ -240,6 +242,15 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     }
   } else {
     content = [
+      // Ensure we add any custom assets provided via UI extension to the before other assets
+      customAssetsExtension ? (
+        <ExtensionWrapper>
+          <customAssetsExtension.Component />
+          <EuiSpacer size="l" />
+        </ExtensionWrapper>
+      ) : null,
+
+      // Lista all assets by order of `displayedAssetTypes`
       ...displayedAssetTypes.map((assetType) => {
         const assets = pkgAssetsByType[assetType] || [];
         const soAssets = assetSavedObjectsByType[assetType] || {};
@@ -261,12 +272,6 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
           </Fragment>
         );
       }),
-      // Ensure we add any custom assets provided via UI extension to the end of the list of other assets
-      customAssetsExtension ? (
-        <ExtensionWrapper>
-          <customAssetsExtension.Component />
-        </ExtensionWrapper>
-      ) : null,
     ];
   }
   const deferredInstallationsContent = hasDeferredInstallations ? (
