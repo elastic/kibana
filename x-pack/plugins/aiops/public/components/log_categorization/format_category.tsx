@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
@@ -175,7 +175,7 @@ export const FormattedTokens: FC<Props> = ({ category }) => {
   );
 };
 
-const WrapInText: FC = ({ children }) => (
+const WrapInText: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiText css={{ fontWeight: 'bold' }} size="s">
     {children}
   </EuiText>

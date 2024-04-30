@@ -27,6 +27,7 @@ import { letBrowserHandleEvent } from './link_events';
 
 interface IEuiReactRouterProps {
   to: string;
+  children?: React.ReactNode;
 }
 
 export const ReactRouterHelperForEui: React.FC<IEuiReactRouterProps> = ({ to, children }) => {

@@ -80,14 +80,15 @@ export function registerTelemetryConfigRoutes({
   const v2Validations = {
     response: {
       200: {
-        body: schema.object({
-          allowChangingOptInStatus: schema.boolean(),
-          optIn: schema.oneOf([schema.boolean(), schema.literal(null)]),
-          sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')]),
-          telemetryNotifyUserAboutOptInDefault: schema.boolean(),
-          // Declare the `serverless` label as optional in both offerings while we fix https://github.com/elastic/kibana/issues/167862
-          labels: labelsSchema.extends({ serverless: schema.maybe(schema.string()) }),
-        }),
+        body: () =>
+          schema.object({
+            allowChangingOptInStatus: schema.boolean(),
+            optIn: schema.oneOf([schema.boolean(), schema.literal(null)]),
+            sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')]),
+            telemetryNotifyUserAboutOptInDefault: schema.boolean(),
+            // Declare the `serverless` label as optional in both offerings while we fix https://github.com/elastic/kibana/issues/167862
+            labels: labelsSchema.extends({ serverless: schema.maybe(schema.string()) }),
+          }),
       },
     },
   };
