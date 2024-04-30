@@ -36,7 +36,7 @@ describe('useInstalledIntegrations', () => {
         },
       },
     });
-    const wrapper: FC<PropsWithChildren> = ({ children }) => (
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;
