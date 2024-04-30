@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DisplayedAssetTypes } from '../types/models';
-import { ElasticsearchAssetType, KibanaAssetType } from '../types/models';
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../types/models';
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
@@ -90,7 +90,7 @@ export const installationStatuses = {
 // These asset types are allowed to be shown on Integration details > Assets tab
 // This array also controls the order in which the asset types are displayed
 export const displayedAssetTypes: DisplayedAssetTypes = [
-  ...Object.values(KibanaAssetType),
+  ...Object.values(KibanaSavedObjectType),
   ...Object.values(ElasticsearchAssetType),
 ];
 

@@ -53,11 +53,11 @@ export type AssetType =
 */
 export enum KibanaAssetType {
   dashboard = 'dashboard',
+  lens = 'lens',
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
-  lens = 'lens',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   mlModule = 'ml_module',
@@ -99,7 +99,7 @@ export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType.index
 >;
 
-export type DisplayedAssetTypes = Array<`${KibanaAssetType | ElasticsearchAssetType}`>;
+export type DisplayedAssetTypes = Array<`${KibanaSavedObjectType | ElasticsearchAssetType}`>;
 
 // Defined as part of the removing public references to saved object schemas
 export interface SimpleSOAssetType {

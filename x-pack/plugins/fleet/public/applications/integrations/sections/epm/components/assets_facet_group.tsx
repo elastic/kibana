@@ -28,7 +28,7 @@ import { entries } from '../../../types';
 import {
   AssetIcons,
   AssetTitleMap,
-  DisplayedAssets,
+  DisplayedAssetsFromPackageInfo,
   ServiceIcons,
   ServiceTitleMap,
 } from '../constants';
@@ -65,7 +65,7 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
         // filter out assets we are not going to display
         const filteredTypes: AssetTypeToParts = entries(typeToParts).reduce(
           (acc: any, [asset, value]) => {
-            if (DisplayedAssets[service].includes(asset)) acc[asset] = value;
+            if (DisplayedAssetsFromPackageInfo[service].includes(asset)) acc[asset] = value;
             return acc;
           },
           {}

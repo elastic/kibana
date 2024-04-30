@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState, useCallback } from 'react';
+import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
@@ -13,14 +13,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } f
 import type {
   EsAssetReference,
   AssetSOObject,
-  GetBulkAssetsResponse,
+  KibanaAssetReference,
+  SimpleSOAssetType,
 } from '../../../../../../../../common';
 import { displayedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
-import { ElasticsearchAssetType, InstallStatus } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 
 import {
   useGetPackageInstallStatus,
@@ -56,11 +57,31 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   // assume assets are installed in this space until we find otherwise
   const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
-  const [assetSavedObjects, setAssetsSavedObjects] = useState<
-    undefined | GetBulkAssetsResponse['items']
-  >();
+  const [assetSavedObjectsByType, setAssetsSavedObjectsByType] = useState<
+    Record<string, Record<string, SimpleSOAssetType & { appLink?: string }>>
+  >({});
   const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
 
+  const pkgInstallationInfo =
+    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const pkgAssets = useMemo(
+    () => [
+      ...(pkgInstallationInfo?.installed_kibana || []),
+      ...(pkgInstallationInfo?.installed_es || []),
+    ],
+    [pkgInstallationInfo?.installed_es, pkgInstallationInfo?.installed_kibana]
+  );
+  const pkgAssetsByType = useMemo(
+    () =>
+      pkgAssets.reduce((acc, asset) => {
+        if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
+          acc[asset.type] = [];
+        }
+        acc[asset.type].push(asset);
+        return acc;
+      }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
+    [pkgAssets]
+  );
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -72,66 +93,60 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
-      if ('installationInfo' in packageInfo) {
-        if (spaces) {
-          const { id: spaceId } = await spaces.getActiveSpace();
-          const assetInstallSpaceId = packageInfo.installationInfo?.installed_kibana_space_id;
+      if (!pkgInstallationInfo) {
+        setIsLoading(false);
+        return;
+      }
 
-          // if assets are installed in a different space no need to attempt to load them.
-          if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
-            setAssetsInstalledInCurrentSpace(false);
-            setIsLoading(false);
-            return;
-          }
-        }
+      if (spaces) {
+        const { id: spaceId } = await spaces.getActiveSpace();
+        const assetInstallSpaceId = pkgInstallationInfo.installed_kibana_space_id;
 
-        const pkgInstallationInfo = packageInfo.installationInfo;
-
-        if (
-          pkgInstallationInfo?.installed_es &&
-          Array.isArray(pkgInstallationInfo.installed_es) &&
-          pkgInstallationInfo.installed_es.length > 0
-        ) {
-          const deferredAssets = pkgInstallationInfo.installed_es.filter(
-            (asset) => asset.deferred === true
-          );
-          setDeferredInstallations(deferredAssets);
-        }
-        const authorizedTransforms = (pkgInstallationInfo?.installed_es || []).filter(
-          (asset) => asset.type === ElasticsearchAssetType.transform && !asset.deferred
-        );
-
-        if (
-          authorizedTransforms?.length === 0 &&
-          (!pkgInstallationInfo?.installed_kibana ||
-            pkgInstallationInfo.installed_kibana.length === 0)
-        ) {
+        // if assets are installed in a different space no need to attempt to load them.
+        if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
+          setAssetsInstalledInCurrentSpace(false);
           setIsLoading(false);
           return;
         }
-        try {
-          const assetIds: AssetSOObject[] = [
-            ...authorizedTransforms,
-            ...(pkgInstallationInfo?.installed_kibana || []),
-            ...(pkgInstallationInfo?.installed_es || []),
-          ].map(({ id, type }) => ({
-            id,
-            type,
-          }));
+      }
 
-          const response = await sendGetBulkAssets({ assetIds });
-          setAssetsSavedObjects(response.data?.items);
-        } catch (e) {
-          setFetchError(e);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
+      if (pkgAssets.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (pkgAssets.length > 0) {
+        const deferredAssets = pkgAssets.filter((asset): asset is EsAssetReference => {
+          return 'deferred' in asset && asset.deferred === true;
+        });
+        setDeferredInstallations(deferredAssets);
+      }
+
+      try {
+        const assetIds: AssetSOObject[] = pkgAssets.map(({ id, type }) => ({
+          id,
+          type,
+        }));
+
+        const response = await sendGetBulkAssets({ assetIds });
+
+        setAssetsSavedObjectsByType(
+          (response.data?.items || []).reduce((acc, asset) => {
+            if (!acc[asset.type]) {
+              acc[asset.type] = {};
+            }
+            acc[asset.type][asset.id] = asset;
+            return acc;
+          }, {} as typeof assetSavedObjectsByType)
+        );
+      } catch (e) {
+        setFetchError(e);
+      } finally {
         setIsLoading(false);
       }
     };
     fetchAssetSavedObjects();
-  }, [packageInfo, spaces]);
+  }, [packageInfo, pkgAssets, pkgInstallationInfo, spaces]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -139,7 +154,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
 
-  const showDeferredInstallations =
+  const hasDeferredInstallations =
     Array.isArray(deferredInstallations) && deferredInstallations.length > 0;
   let content: JSX.Element | Array<JSX.Element | null> | null;
   if (isLoading) {
@@ -202,7 +217,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         </p>
       </EuiCallOut>
     );
-  } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
+  } else if (pkgAssets.length === 0) {
     if (customAssetsExtension) {
       // If a UI extension for custom asset entries is defined, render the custom component here despite
       // there being no saved objects found
@@ -212,7 +227,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         </ExtensionWrapper>
       );
     } else {
-      content = !showDeferredInstallations ? (
+      content = !hasDeferredInstallations ? (
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -226,19 +241,22 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   } else {
     content = [
       ...displayedAssetTypes.map((assetType) => {
-        const sectionAssetSavedObjects = assetSavedObjects.filter((so) => so.type === assetType);
+        const assets = pkgAssetsByType[assetType] || [];
+        const soAssets = assetSavedObjectsByType[assetType] || {};
+        const finalAssets = assets.map((asset) => {
+          return {
+            ...asset,
+            ...soAssets[asset.id],
+          };
+        });
 
-        if (!sectionAssetSavedObjects.length) {
+        if (!finalAssets.length) {
           return null;
         }
 
         return (
           <Fragment key={assetType}>
-            <AssetsAccordion
-              savedObjects={sectionAssetSavedObjects}
-              type={assetType}
-              key={assetType}
-            />
+            <AssetsAccordion savedObjects={finalAssets} type={assetType} key={assetType} />
             <EuiSpacer size="l" />
           </Fragment>
         );
@@ -251,7 +269,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       ) : null,
     ];
   }
-  const deferredInstallationsContent = showDeferredInstallations ? (
+  const deferredInstallationsContent = hasDeferredInstallations ? (
     <>
       <DeferredAssetsSection
         deferredInstallations={deferredInstallations}

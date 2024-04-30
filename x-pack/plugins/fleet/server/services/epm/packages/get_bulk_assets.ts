@@ -34,11 +34,10 @@ export async function getBulkAssets(
 
   const res: SimpleSOAssetType[] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
-    .filter(
-      (savedObject) =>
-        savedObject?.error?.statusCode !== 404 && displayedAssetTypesLookup.has(savedObject.type)
-    )
+    .filter((savedObject) => displayedAssetTypesLookup.has(savedObject.type))
     .map((obj) => {
+      // Kibana SOs are registered with an app URL getter, so try to use that
+      // for retrieving links to assets whenever possible
       if (!types[obj.type]) {
         types[obj.type] = soTypeRegistry.getType(obj.type);
       }
@@ -46,6 +45,9 @@ export async function getBulkAssets(
       if (types[obj.type]?.management?.getInAppUrl) {
         appLink = types[obj.type]!.management!.getInAppUrl!(obj)?.path || '';
       }
+
+      // If we still don't have an app link at this point, manually map them
+
       return {
         id: obj.id,
         type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
