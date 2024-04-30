@@ -8,6 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { Refetch } from '../../../common/types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import { inputsSelectors } from '../../../common/store';
+import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
@@ -70,6 +75,22 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
+  const { refetch: refetchRiskInputsTab } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, RISK_INPUTS_TAB_QUERY_ID)
+  );
+
+  const refetchRiskScore = useCallback(() => {
+    refetch();
+    (refetchRiskInputsTab as Refetch | null)?.();
+  }, [refetch, refetchRiskInputsTab]);
+
+  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    RiskScoreEntity.user,
+    userName,
+    refetchRiskScore
+  );
+
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -108,7 +129,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
+  if (observedUser.isLoading || managedUser.isLoading || !riskScoreState.data) {
     return <FlyoutLoading />;
   }
 
@@ -144,6 +165,8 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               managedUser={managedUser}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              onAssetCriticalityChange={calculateEntityRiskScore}
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}

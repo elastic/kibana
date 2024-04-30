@@ -20,6 +20,8 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import type { Refetch } from '../../../../common/types';
+import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
   useAssetCriticalityPrivileges,
@@ -33,7 +35,7 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -44,7 +46,10 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import { HostOverview } from '../../../../overview/components/host_overview';
+import {
+  HostOverview,
+  HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
+} from '../../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -177,10 +182,27 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
+
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
+  const { refetch: refetchOverviewRiskScore } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, HOST_OVERVIEW_RISK_SCORE_QUERY_ID)
+  );
+
+  const refetchRiskScore = useCallback(() => {
+    (refetchOverviewRiskScore as Refetch | null)?.();
+  }, [refetchOverviewRiskScore]);
+
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    RiskScoreEntity.host,
+    detailName,
+    refetchRiskScore
+  );
+
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
     enabled: canReadAssetCriticality,
+    onChange: calculateEntityRiskScore,
   });
 
   return (

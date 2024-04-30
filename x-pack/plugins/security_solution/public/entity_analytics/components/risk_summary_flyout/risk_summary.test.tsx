@@ -49,6 +49,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -79,6 +80,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -110,6 +112,7 @@ describe('RiskSummary', () => {
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -123,6 +126,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -137,6 +141,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -151,6 +156,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -177,6 +183,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -198,6 +205,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -219,6 +227,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );

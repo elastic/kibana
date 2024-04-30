@@ -44,6 +44,7 @@ export const useRefetchByRestartingSession = ({
 
   const refetchByRestartingSession = useCallback(() => {
     const searchSessionId = session.current.start();
+
     dispatch(
       inputsActions.setInspectionParameter({
         id: queryId,
