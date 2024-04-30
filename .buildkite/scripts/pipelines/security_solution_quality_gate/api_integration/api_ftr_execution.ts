@@ -27,7 +27,15 @@ const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 // Function to execute a command and return a Promise with the status code
 function executeCommand(command: string, envVars: any, workDir: string): Promise<number> {
   return new Promise((resolve, reject) => {
-    const childProcess = exec(command, { env: envVars, cwd: workDir });
+    const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        process.exitCode = error.code; // Set exit code of the script to the child process exit code
+        return;
+      }
+
+      console.log(`Output: ${stdout}`);
+    });
 
     // Listen for stdout data
     childProcess.stdout?.on('data', (data) => {
@@ -131,27 +139,21 @@ export const cli = () => {
       await waitForEsAccess(project.es_url, auth, id);
 
       let statusCode: number | undefined;
-      try {
-        log.info('test');
-        const FORMATTED_ES_URL = project.es_url.replace('https://', '');
-        const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
+      const FORMATTED_ES_URL = project.es_url.replace('https://', '');
+      const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
 
-        const command = `yarn run ${process.env.TARGET_SCRIPT}`;
-        const testCloud = 1;
-        const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
-        const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
-        const workDir = 'x-pack/test/security_solution_api_integration';
-        const envVars = {
-          ...process.env,
-          TEST_CLOUD: testCloud.toString(),
-          TEST_ES_URL: testEsUrl,
-          TEST_KIBANA_URL: testKibanaUrl,
-        };
-        log.info(envVars);
-        statusCode = await executeCommand(command, envVars, workDir);
-      } catch (ex) {
-        console.error('PR pipeline error', ex.message);
-      }
+      const command = `yarn run ${process.env.TARGET_SCRIPT}`;
+      const testCloud = 1;
+      const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
+      const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
+      const workDir = 'x-pack/test/security_solution_api_integration';
+      const envVars = {
+        ...process.env,
+        TEST_CLOUD: testCloud.toString(),
+        TEST_ES_URL: testEsUrl,
+        TEST_KIBANA_URL: testKibanaUrl,
+      };
+      statusCode = await executeCommand(command, envVars, workDir);
       // Delete serverless project
       log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
       await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
