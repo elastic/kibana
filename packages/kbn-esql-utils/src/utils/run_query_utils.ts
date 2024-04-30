@@ -25,7 +25,7 @@ export async function getESQLQueryColumns({
     search.search(
       {
         params: {
-          query: `${esqlQuery}`,
+          query: `${esqlQuery} | limit 0`,
           version: ESQL_LATEST_VERSION,
         },
       },
