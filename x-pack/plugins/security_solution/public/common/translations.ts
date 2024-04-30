@@ -100,6 +100,8 @@ export const getAgentTypeName = (agentType: ResponseActionAgentType) => {
       return 'Elastic Defend';
     case 'sentinel_one':
       return 'SentinelOne';
+    case 'crowdstrike':
+      return 'Crowdstrike';
     default:
       return agentType;
   }

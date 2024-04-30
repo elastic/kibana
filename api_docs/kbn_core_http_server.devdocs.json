@@ -4526,6 +4526,10 @@
                 "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
@@ -15450,7 +15454,7 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/insights/alerts/post_alerts_insights.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/post_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",

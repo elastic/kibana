@@ -23,16 +23,6 @@ import type { ColumnHeaderOptions } from '../../../common/types';
 import { defaultHeaders } from '../../../store/data_table/defaults';
 import { mockBrowserFields } from '../../../mock/mock_source';
 
-window.matchMedia = jest.fn().mockImplementation((query) => {
-  return {
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-  };
-});
-
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {
     test('it returns the expected width for a non-date column', () => {

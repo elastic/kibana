@@ -27,7 +27,7 @@ interface Props {
   /**
    * Override the default `observability` option.
    */
-  selectedCategory?: string;
+  selectedCategory?: string[];
   showSearchBar?: boolean;
   packageListRef?: React.Ref<HTMLDivElement>;
   searchQuery?: string;
@@ -48,7 +48,7 @@ type WrapperProps = Props & {
 const Loading = () => <EuiSkeletonText isLoading={true} lines={10} />;
 
 const PackageListGridWrapper = ({
-  selectedCategory = 'observability',
+  selectedCategory = ['observability', 'os_system'],
   useAvailablePackages,
   showSearchBar = false,
   packageListRef,
@@ -114,12 +114,13 @@ const PackageListGridWrapper = ({
             showSearchTools={false}
             // we either don't need these properties (yet) or handle them upstream, but
             // they are marked as required in the original API.
-            selectedCategory={selectedCategory}
+            selectedCategory=""
             setSearchTerm={() => {}}
             setCategory={() => {}}
             categories={[]}
             setUrlandReplaceHistory={() => {}}
             setUrlandPushHistory={() => {}}
+            showCardLabels={false}
           />
         )}
       </div>
