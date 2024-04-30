@@ -49,7 +49,7 @@ describe('GET privileges', () => {
         isLegacyTemplatesEnabled: true,
         isIndexStatsEnabled: true,
         isDataStreamsStorageColumnEnabled: true,
-        enableTogglingDataRetention: false,
+        enableTogglingDataRetention: true,
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
@@ -119,7 +119,7 @@ describe('GET privileges', () => {
           isLegacyTemplatesEnabled: true,
           isIndexStatsEnabled: true,
           isDataStreamsStorageColumnEnabled: true,
-          enableTogglingDataRetention: false,
+          enableTogglingDataRetention: true,
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {
