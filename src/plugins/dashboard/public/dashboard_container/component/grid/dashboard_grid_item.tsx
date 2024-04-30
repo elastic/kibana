@@ -99,7 +99,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       } = pluginServices.getServices();
 
       const references = getReferencesForPanelId(id, container.savedObjectReferences);
-      console.log('references', id, container.savedObjectReferences, references);
       const panelProps = {
         showBadges: true,
         showBorder: useMargins,

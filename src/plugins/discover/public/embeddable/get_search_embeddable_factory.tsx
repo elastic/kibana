@@ -7,10 +7,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -23,7 +22,6 @@ import {
   apiHasAppContext,
   apiHasParentApi,
   FetchContext,
-  HasAppContext,
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -39,7 +37,6 @@ import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -62,7 +59,7 @@ export const getSearchEmbeddableFactory = ({
       if (!state.rawState) return {};
       const serializedState = state.rawState as EmbeddableStateWithType;
       const deserializedState = inject(serializedState, state.references ?? []);
-      console.log('deserializedState', { state, deserializedState });
+      // console.log('deserializedState', { state, deserializedState });
       return deserializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
@@ -91,7 +88,7 @@ export const getSearchEmbeddableFactory = ({
       };
 
       const getAppTarget = async () => {
-        const savedObjectId = searchEmbeddableApi.savedObjectId.getValue();
+        const savedObjectId = fetchContext$.getValue()?.searchSessionId;
         const dataView = searchEmbeddableApi.savedSearch$.getValue().searchSource.getField('index');
         const locatorParams = getDiscoverLocatorParams(searchEmbeddableApi);
 
@@ -122,10 +119,10 @@ export const getSearchEmbeddableFactory = ({
           canLinkToLibrary: async () => {
             return (
               discoverServices.capabilities.discover.save &&
-              !Boolean(searchEmbeddableApi.savedObjectId.getValue())
+              !Boolean(fetchContext$.getValue()?.searchSessionId)
             );
           },
-          canUnlinkFromLibrary: async () => Boolean(searchEmbeddableApi.savedObjectId.getValue()),
+          canUnlinkFromLibrary: async () => Boolean(fetchContext$.getValue()?.searchSessionId),
           saveToLibrary: async (title: string) => {
             const savedObjectId = await attributeService.saveMethod({
               ...searchEmbeddableApi.attributes$.getValue(),

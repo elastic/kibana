@@ -10,7 +10,7 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, skip } from 'rxjs';
 
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import type { StateComparators } from '@kbn/presentation-publishing';
+import type { PublishesSavedObjectId, StateComparators } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import {
   SavedSearch,
@@ -20,7 +20,7 @@ import {
 
 import { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable } from '../utils';
-import { SearchEmbeddableSerializedState } from './types';
+import { HasSavedSearch, PublishesRows, SearchEmbeddableSerializedState } from './types';
 
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableSerializedState,
@@ -34,7 +34,19 @@ export const initializeSearchEmbeddableApi = async (
     };
     discoverServices: DiscoverServices;
   }
-) => {
+): Promise<{
+  onUnmount: () => void;
+  searchEmbeddableApi: HasSavedSearch &
+    PublishesSavedObjectId &
+    PublishesRows & {
+      attributes$: BehaviorSubject<SavedSearchByValueAttributes>;
+      savedSearch$: BehaviorSubject<SavedSearch>;
+    };
+  searchEmbeddableComparators: StateComparators<
+    Omit<SearchEmbeddableSerializedState, 'title' | 'description' | 'hidePanelTitles'>
+  >;
+  serializeSearchEmbeddable: () => SearchEmbeddableSerializedState;
+}> => {
   const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
 
   const unwrapResult = initialState?.savedObjectId
@@ -84,18 +96,14 @@ export const initializeSearchEmbeddableApi = async (
 
   // savedSearchToAttributes - unsubscribe
 
-  const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableSerializedState> => {
-    if (savedObjectId$.getValue()) {
-      /** When saved to the library, only compare the saved object ID */
-      return {
-        savedObjectId: [
-          savedObjectId$,
-          (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
-        ],
-      };
-    }
-    /** Otherwise, compare all of the state */
+  const getSearchEmbeddableComparators = (): StateComparators<
+    Omit<SearchEmbeddableSerializedState, 'title' | 'description' | 'hidePanelTitles'>
+  > => {
     return {
+      savedObjectId: [
+        savedObjectId$,
+        (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
+      ],
       attributes: [
         attributes$ as BehaviorSubject<SavedSearchByValueAttributes | undefined>,
         (attributes: SavedSearchByValueAttributes | undefined) =>

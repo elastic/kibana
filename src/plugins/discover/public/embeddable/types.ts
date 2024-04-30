@@ -30,6 +30,7 @@ import type {
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 
 import type { DiscoverServices } from '../build_services';
 import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
@@ -45,8 +46,8 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
   savedObjectId?: string;
 };
 
-interface PublishesRows {
-  rows$: PublishingSubject<DataTableRecord[]>;
+export interface PublishesRows {
+  rows$: BehaviorSubject<DataTableRecord[]>;
 }
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
