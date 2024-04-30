@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
@@ -15,7 +15,7 @@ import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
-const Wrapper: FC = ({ children }) => {
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <IntlProvider locale="en">
       <>{children}</>

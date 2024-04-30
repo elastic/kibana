@@ -938,5 +938,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
+    playground: {
+      chatPlayground: `${KIBANA_DOCS}playground.html`,
+    },
   });
 };

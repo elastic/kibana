@@ -2,11 +2,10 @@
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-KIBANA_CURRENT_COMMIT=${KIBANA_BASE_IMAGE}:sec-sol-qg-${BUILDKITE_COMMIT:0:12}
 KIBANA_LATEST=${KIBANA_BASE_IMAGE}:latest
 
-if [ "$KIBANA_MKI_USE_LATEST_COMMIT" = "1" ]; then
-    KBN_IMAGE=${KIBANA_CURRENT_COMMIT}
+if [ -v KIBANA_MKI_IMAGE_COMMIT ]; then
+    KBN_IMAGE=${KIBANA_BASE_IMAGE}:git-${KIBANA_MKI_IMAGE_COMMIT:0:12}
 else
     KBN_IMAGE=${KIBANA_LATEST}
 fi

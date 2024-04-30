@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
 
@@ -184,6 +185,10 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       setConfirmModalLabels(formState.confirmModalLabels);
     }, []);
 
+    const eventFiltersCreateFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'eventFiltersCreateFlyoutTitle',
+    });
+
     const confirmModal = useMemo(() => {
       if (confirmModalLabels) {
         const { title, body, confirmButton, cancelButton } = confirmModalLabels;
@@ -206,11 +211,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         size="l"
         onClose={handleOnClose}
         data-test-subj="eventFiltersCreateFlyout"
+        aria-labelledby={eventFiltersCreateFlyoutTitleId}
         {...flyoutProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={eventFiltersCreateFlyoutTitleId}>
               {data ? (
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"
