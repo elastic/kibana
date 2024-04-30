@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 import React, { useState } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { SAVE_LABEL } from '../../../../../common/i18n_string';
 import { useConnector } from '../../../hooks/api/use_connector';
@@ -79,6 +89,61 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
         indexName={newIndexName || ''}
         onChange={(name) => setNewIndexname(name)}
       />
+      <EuiSpacer />
+      <EuiPanel hasBorder>
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.serverlessSearch.connectors.config.preprocessData.title', {
+                  defaultMessage: 'Preprocess your data',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.serverlessSearch.connectors.config.preprocessData.description"
+                  defaultMessage="You can use ingest pipelines to preprocess data before indexing into Elasticseearch. Connectors clients use {clientIngestionPipeline} pipeline before indexing data into Elasticsearch"
+                  values={{
+                    clientIngestionPipeline: (
+                      <strong>
+                        {i18n.translate(
+                          'xpack.serverlessSearch.connectors.config.preprocessData.clientIngestionPipeline',
+                          {
+                            defaultMessage: 'search-default-ingestion',
+                          }
+                        )}
+                        ,
+                      </strong>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                <EuiLink
+                  data-test-subj="serverlessSearchConnectorIndexNameLearnMoreLink"
+                  href={'#'}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.serverlessSearch.connectors.config.preprocessDataTitle.learnMore',
+                    {
+                      defaultMessage: 'Learn More',
+                    }
+                  )}
+                </EuiLink>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
       <EuiSpacer />
       <ApiKeyPanel connector={connector} />
       <EuiSpacer />
