@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  title?: React.ReactNode;
+  title: React.ReactNode;
   closedSectionContent?: React.ReactNode;
   extraAction?: React.ReactNode;
   children: React.ReactNode;

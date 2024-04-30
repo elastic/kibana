@@ -10,6 +10,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 
 export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
+export type ContainerMetricTypes = 'cpu' | 'memory';
 interface UseChartsOptions {
   overview?: boolean;
 }
@@ -153,16 +154,16 @@ const getHostsCharts = async ({
 };
 
 export const useContainerPageViewMetricsCharts = ({
+  metric,
   metricsDataViewId,
 }: {
+  metric: ContainerMetricTypes;
   metricsDataViewId?: string;
 }) => {
-  const model = findInventoryModel('container');
-
   const { value: charts = [], error } = useAsync(async () => {
-    const { cpu, memory } = await model.metrics.getCharts();
+    const containerCharts = await getContainerCharts(metric);
 
-    return [cpu.xy.containerCpuUsage, memory.xy.containerMemoryUsage].map((chart) => {
+    return containerCharts.map((chart) => {
       return {
         ...chart,
         ...(metricsDataViewId && {
@@ -177,17 +178,31 @@ export const useContainerPageViewMetricsCharts = ({
   return { charts, error };
 };
 
+const getContainerCharts = async (metric: ContainerMetricTypes) => {
+  const model = findInventoryModel('container');
+  const { cpu, memory } = await model.metrics.getCharts();
+
+  switch (metric) {
+    case 'cpu':
+      return [cpu.xy.containerCpuUsage];
+    case 'memory':
+      return [memory.xy.containerMemoryUsage];
+    default:
+      return [];
+  }
+};
+
 export const useContainerK8sPageViewMetricsCharts = ({
+  metric,
   metricsDataViewId,
 }: {
+  metric: ContainerMetricTypes;
   metricsDataViewId?: string;
 }) => {
-  const model = findInventoryModel('container');
-
   const { value: charts = [], error } = useAsync(async () => {
-    const { cpu, memory } = await model.metrics.getCharts();
+    const containerK8sCharts = await getContainerK8sCharts(metric);
 
-    return [cpu.xy.containerK8sCpuUsage, memory.xy.containerK8sMemoryUsage].map((chart) => {
+    return containerK8sCharts.map((chart) => {
       return {
         ...chart,
         ...(metricsDataViewId && {
@@ -200,4 +215,18 @@ export const useContainerK8sPageViewMetricsCharts = ({
   }, [metricsDataViewId]);
 
   return { charts, error };
+};
+
+const getContainerK8sCharts = async (metric: ContainerMetricTypes) => {
+  const model = findInventoryModel('container');
+  const { cpu, memory } = await model.metrics.getCharts();
+
+  switch (metric) {
+    case 'cpu':
+      return [cpu.xy.containerK8sCpuUsage];
+    case 'memory':
+      return [memory.xy.containerK8sMemoryUsage];
+    default:
+      return [];
+  }
 };

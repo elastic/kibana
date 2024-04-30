@@ -19,7 +19,7 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
 
       const CONTAINERS = Array(numContainers)
         .fill(0)
-        .map((_, idx) => infra.container(`container-${idx}`, `pod-${idx}`, `node-${idx}`));
+        .map((_, idx) => infra.k8sContainer(`container-${idx}`, `pod-${idx}`, `node-${idx}`));
 
       const containers = range
         .interval('30s')

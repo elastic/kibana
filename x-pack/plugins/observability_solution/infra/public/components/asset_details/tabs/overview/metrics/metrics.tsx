@@ -34,7 +34,7 @@ export const MetricsContent = ({ assetType, ...props }: Props) => {
 
   return (
     <Section
-      title={<MetricsSectionTitle />}
+      title={<MetricsSectionTitle assetType={assetType} />}
       data-test-subj="infraAssetDetailsMetricsCollapsible"
       id="metrics"
       collapsible

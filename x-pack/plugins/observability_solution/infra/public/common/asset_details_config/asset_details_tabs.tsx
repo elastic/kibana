@@ -83,8 +83,8 @@ export const hostDetailsTabs: Tab[] = [
   osqueryTab,
   dashboardsTab,
 ];
-
-export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab, profilingTab, logsTab];
+// Profiling and Logs tab would be added in next iteration
+export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab];
 
 export const assetDetailsTabs = (type: string): Tab[] => {
   switch (type) {

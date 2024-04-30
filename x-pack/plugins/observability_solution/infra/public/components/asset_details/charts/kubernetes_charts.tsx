@@ -36,7 +36,7 @@ export const KubernetesCharts = React.forwardRef<
     options: { overview },
   });
 
-  const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetes });
+  const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesNode });
 
   if (!hasIntegration) {
     return null;
