@@ -19,7 +19,9 @@ import {
   EuiCallOut,
   EuiHighlight,
   EuiTextColor,
+  euiTextTruncate,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 
@@ -340,12 +342,24 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               gutterSize="s"
               responsive={false}
             >
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              <EuiFlexItem style={{ minWidth: 0, flexBasis: 'auto' }}>
+                <EuiHighlight
+                  css={css`
+                    ${euiTextTruncate()}
+                  `}
+                  search={searchValue}
+                >
+                  {option.label}
+                </EuiHighlight>
               </EuiFlexItem>
               {option.user.email && option.user.email !== option.label ? (
-                <EuiFlexItem grow={false}>
-                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
+                <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                  <EuiTextColor
+                    color={option.disabled ? 'disabled' : 'subdued'}
+                    css={css`
+                      ${euiTextTruncate()}
+                    `}
+                  >
                     {searchValue ? (
                       <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
                     ) : (
