@@ -402,7 +402,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                   const { messages } = conversation;
 
-                  expect(messages.length).to.eql(5);
+                  expect(messages.length).to.eql(9);
 
                   expect(messages[0].message.role).to.eql('system');
                   // Verify that system message extension that happen on the server are captured in the telemetry
