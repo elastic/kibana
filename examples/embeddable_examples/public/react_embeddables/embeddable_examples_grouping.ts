@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const addPanelGrouping = {
+export const embeddableExamplesGrouping = {
   id: 'embeddableExamples',
+  getIconType: () => 'documentation',
   getDisplayName: () => 'Embeddable examples',
 };
