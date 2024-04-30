@@ -29,6 +29,8 @@ while using Reporting.
 <<reporting-troubleshooting-pdf,PDF>>
 
 * <<reporting-diagnostics>>
+* <<reporting-troubleshooting-nss-dependency>>
+* <<reporting-troubleshooting-sandbox-dependency>>
 * <<reporting-troubleshooting-text-incorrect>>
 * <<reporting-troubleshooting-missing-data>>
 * <<reporting-troubleshooting-pdf-connection-refused>>
@@ -207,7 +209,7 @@ server with an environment variable for revealing additional debugging logs. Ref
 [[reporting-troubleshooting-nss-dependency]]
 ==== You must install nss for Reporting to work
 Reporting using the Chromium browser relies on the Network Security Service libraries (NSS). Install the appropriate nss package for your
-distribution.
+distribution. See <<install-reporting-packages>>.
 
 [float]
 [[reporting-troubleshooting-sandbox-dependency]]
