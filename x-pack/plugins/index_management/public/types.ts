@@ -40,4 +40,5 @@ export interface ClientConfigType {
   editableIndexSettings?: 'all' | 'limited';
   enableDataStreamsStorageColumn?: boolean;
   enableMappingsSourceFieldSection?: boolean;
+  enableTogglingDataRetention?: boolean;
 }

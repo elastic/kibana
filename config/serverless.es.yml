@@ -46,4 +46,4 @@ xpack.ml.compatibleModuleType: 'search'
 data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Search Playground
-xpack.searchPlayground.ui.enabled: false
+xpack.searchPlayground.ui.enabled: true
