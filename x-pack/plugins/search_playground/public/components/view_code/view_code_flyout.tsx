@@ -70,7 +70,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.title"
-              defaultMessage="View Code"
+              defaultMessage="Application code"
             />
           </h2>
         </EuiTitle>
@@ -79,7 +79,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.subtitle"
-              defaultMessage="Copy the code into your app to use this. Modify the code as needed to fit your use case."
+              defaultMessage="Here's the code used to render this search experience. You can integrate it into your own application, modifying as needed."
             />
           </p>
         </EuiText>

@@ -18,7 +18,7 @@ import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
 import { EmbeddableSloProps } from './types';
-import { SloOverviewDetails } from '../common/slo_overview_details'; // TODO change to slo_details
+import { SloOverviewDetails } from '../common/slo_overview_details';
 import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
 import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';
 
@@ -111,7 +111,7 @@ export function SloErrorBudget({
   }
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
   return (
-    <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
+    <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiLink
