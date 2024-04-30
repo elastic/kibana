@@ -78,25 +78,35 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
         }
 
         if (identifier && !identifier.startsWith(`${i18nAppId}.`)) {
-          const oldI18nIdentifierArray = identifier.split('.');
+          const i18nIdentifierRange = node.arguments[0].range;
 
-          const newI18nIdentifier =
+          const oldI18nIdentifierArray = identifier.split('.');
+          const correctI18nIdentifier =
             oldI18nIdentifierArray[0] === 'xpack'
               ? `${i18nAppId}.${oldI18nIdentifierArray.slice(2).join('.')}`
               : `${i18nAppId}.${oldI18nIdentifierArray.slice(1).join('.')}`;
 
-          const opts = node.arguments[1]
-            ? sourceCode.getText().slice(node.arguments[1].range[0], node.arguments[1].range[1])
-            : "{ defaultMessage: '' }";
+          const hasExistingOpts = node.arguments.length > 1;
 
           report({
             node: node as any,
             message: RULE_WARNING_MESSAGE,
             fix(fixer) {
-              return fixer.replaceTextRange(
-                node.range,
-                `i18n.translate('${newI18nIdentifier}', ${opts})`
-              );
+              return [
+                hasExistingOpts
+                  ? // if there are existing options, only replace the i18n identifier and keep the options
+                    fixer.replaceTextRange(i18nIdentifierRange, `\'${correctI18nIdentifier}\'`)
+                  : // if there are no existing options, add an options object with an empty default message
+                    fixer.replaceTextRange(
+                      i18nIdentifierRange,
+                      `\'${correctI18nIdentifier}\', { defaultMessage: '' }`
+                    ),
+                !hasI18nImportLine && rangeToAddI18nImportLine
+                  ? replaceMode === 'replace'
+                    ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
+                    : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
+                  : null,
+              ].filter(isTruthy);
             },
           });
         }
