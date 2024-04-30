@@ -16,7 +16,7 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
