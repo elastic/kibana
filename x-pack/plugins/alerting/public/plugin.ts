@@ -57,7 +57,7 @@ export interface PluginSetupContract {
 }
 export interface PluginStartContract {
   getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
-  getMaxAlertsPerRun: () => number | undefined;
+  getMaxAlertsPerRun: () => number;
 }
 export interface AlertingPluginSetup {
   management: ManagementSetup;
@@ -86,7 +86,7 @@ export class AlertingPublicPlugin
 {
   private alertNavigationRegistry?: AlertNavigationRegistry;
   private config: AlertingUIConfig;
-  readonly maxAlertsPerRun?: number;
+  readonly maxAlertsPerRun: number;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.config = this.initContext.config.get<AlertingUIConfig>();

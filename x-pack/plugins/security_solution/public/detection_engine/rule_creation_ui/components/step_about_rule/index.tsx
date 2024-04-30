@@ -34,7 +34,10 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_MAX_SIGNALS,
+} from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
@@ -336,6 +339,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleMaxSignals',
                   dataTestSubj: 'detectionEngineStepAboutRuleMaxSignals',
                   isDisabled: isLoading,
+                  placeholder: DEFAULT_MAX_SIGNALS,
                 }}
               />
             </EuiFormRow>

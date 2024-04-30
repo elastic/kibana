@@ -16,7 +16,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 interface MaxSignalsFieldProps {
   dataTestSubj: string;
-  field: FieldHook;
+  field: FieldHook<number | ''>;
   idAria: string;
   isDisabled: boolean;
   placeholder?: string;
@@ -33,7 +33,7 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
 }): JSX.Element => {
   const { setValue, value } = field;
   const { alerting } = useKibana().services;
-  const maxAlertsPerRun = alerting.getMaxAlertsPerRun() ?? 1000; // Defaults to 1000 in the alerting framework config
+  const maxAlertsPerRun = alerting.getMaxAlertsPerRun();
 
   const [isInvalid, error] = useMemo(() => {
     if (typeof value === 'number' && !isNaN(value) && value <= 0) {

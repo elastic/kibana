@@ -782,6 +782,18 @@ describe('description_step', () => {
           expect(result[0].title).toEqual('Max alerts per run');
           expect(result[0].description).toEqual(100);
         });
+
+        test('returns empty array when "value" is a undefined', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'maxSignals',
+            'Max alerts per run',
+            { ...mockAboutStep, maxSignals: undefined },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result.length).toEqual(0);
+        });
       });
     });
   });
