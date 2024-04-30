@@ -16,7 +16,7 @@ source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault
 
 
 node .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/start_api_ftr_execution
-ts-node .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/start_api_ftr_execution
+# ts-node .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/start_api_ftr_execution
 
 
 # cd x-pack/test/security_solution_api_integration

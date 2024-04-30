@@ -43,7 +43,11 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
-let log: ToolingLog;
+let log: ToolingLog = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
@@ -239,10 +243,6 @@ const getProductTypes = (
 export const cli = () => {
   run(
     async (context) => {
-      log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       // This works for either local executions or fallback in case proxy service is unavailable.
