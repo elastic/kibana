@@ -89,7 +89,7 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
 
 export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
   const { onClickRefresh } = props;
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);
 
   return (
     <EuiEmptyPrompt
