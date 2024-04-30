@@ -6,22 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { of, BehaviorSubject } from 'rxjs';
-import type { Subscription } from 'rxjs';
+import { of, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type {
-  NormalSamplingOption,
-  FieldStatisticsTableEmbeddableState,
-  FieldStatisticsTableEmbeddableApi,
-  FieldStatisticsTableProps,
-} from './types';
+import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
 export type { FieldStatisticsTableProps };
 
 const statsTableCss = css({
@@ -32,6 +26,9 @@ const statsTableCss = css({
     overflowX: 'hidden',
   },
 });
+
+const fallBackAvailableFields$ = new BehaviorSubject(undefined);
+const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
@@ -50,163 +47,65 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
 
   const services = useDiscoverServices();
+  const dataVisualizerService = services.dataVisualizer;
 
   // State from Discover we want the embeddable to reflect
-  const embeddableState$ = useMemo(
-    () => new BehaviorSubject<FieldStatisticsTableEmbeddableState | undefined>(undefined),
-    []
-  );
-  // Embeddable state exposed to external consumers like Discover
-  const embeddableApiSubscription = useRef<Subscription | undefined>(undefined);
-
   const showPreviewByDefault = useMemo(
     () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 
-  useEffect(
-    function syncChangesToEmbeddableState() {
-      const availableFields$ = stateContainer?.dataState.data$.availableFields$;
-
-      const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
-        if (embeddableState$) {
-          embeddableState$.next({
-            ...embeddableState$.getValue(),
-            lastReloadRequestTime: Date.now(),
-          });
-        }
-      });
-
-      const fields = availableFields$?.subscribe(() => {
-        if (embeddableState$ && !availableFields$?.getValue().error) {
-          embeddableState$.next({
-            ...embeddableState$.getValue(),
-            fieldsToFetch: availableFields$?.getValue().fields,
-          });
-        }
-      });
-
-      return () => {
-        refetch?.unsubscribe();
-        fields?.unsubscribe();
-        embeddableState$?.unsubscribe();
-        embeddableApiSubscription.current?.unsubscribe();
-      };
-    },
-    [embeddableState$, stateContainer]
+  const fieldsToFetch = useObservable(
+    stateContainer ? stateContainer.dataState?.data$?.availableFields$ : fallBackAvailableFields$,
+    undefined
   );
-
-  const initialState = useMemo(() => {
-    return {
-      shouldGetSubfields: true,
-      dataView,
-      savedSearch,
-      query,
-      visibleFieldNames: columns,
-      sessionId: searchSessionId,
-      fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
-      totalDocuments,
-      showPreviewByDefault,
-      samplingOption: {
-        mode: 'normal_sampling',
-        shardSize: 5000,
-        seed: searchSessionId,
-      } as NormalSamplingOption,
-    };
-    // We just need a snapshot of initialState upon table mounting
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (embeddableState$) {
-      // Update embeddable whenever one of the important input changes
-      embeddableState$.next({
-        shouldGetSubfields: true,
-        dataView,
-        savedSearch,
-        query,
-        visibleFieldNames: columns,
-        sessionId: searchSessionId,
-        fieldsToFetch: stateContainer?.dataState.data$.availableFields$?.getValue().fields,
-        totalDocuments,
-        showPreviewByDefault,
-        samplingOption: {
-          mode: 'normal_sampling',
-          shardSize: 5000,
-          seed: searchSessionId,
-        } as NormalSamplingOption,
-      });
-    }
-  }, [
-    embeddableState$,
-    dataView,
-    savedSearch,
-    query,
-    columns,
-    filters,
-    searchSessionId,
-    totalDocuments,
-    stateContainer,
-    showPreviewByDefault,
-  ]);
+  const lastReloadRequestTime$ = stateContainer?.dataState?.refetch$
+    ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
+    : fallBacklastReloadRequestTime$;
+  const lastReloadRequestTime = useObservable(lastReloadRequestTime$, 0);
 
   useEffect(() => {
     // Track should only be called once when component is loaded
     trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
   }, [trackUiMetric]);
 
-  const embeddableApi = useRef<FieldStatisticsTableEmbeddableApi>();
-  const parentApi = useMemo(() => {
-    return {
-      embeddableState$,
-      // Overriding with data service from Discover because
-      // Discover's data service might be a proxy
-      // in which case the proxied version might be different
-      overrideServices: { data: services.data },
-      onAddFilter,
-    };
-  }, [embeddableState$, services.data, onAddFilter]);
+  const samplingOption: NormalSamplingOption = useMemo(
+    () =>
+      ({
+        mode: 'normal_sampling',
+        shardSize: 5000,
+        seed: searchSessionId,
+      } as NormalSamplingOption),
+    [searchSessionId]
+  );
 
-  const handleEmbeddableApiReady = useCallback(
-    (api: FieldStatisticsTableEmbeddableApi) => {
-      embeddableApi.current = api;
-      if (api) {
-        embeddableApiSubscription.current = api.showDistributions$?.subscribe(
-          (showDistributions?: boolean) => {
-            if (showDistributions !== undefined && stateContainer) {
-              stateContainer.appState.update({
-                hideAggregatedPreview: !showDistributions,
-              });
-            }
-          }
-        );
+  const updateState = useCallback(
+    (changes) => {
+      if (changes.showDistributions !== undefined && stateContainer) {
+        stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions });
       }
     },
     [stateContainer]
   );
 
+  if (!dataVisualizerService) return null;
+
   return (
     <EuiFlexItem css={statsTableCss} data-test-subj="dscFieldStatsEmbeddedContent">
-      <ReactEmbeddableRenderer<
-        FieldStatisticsTableEmbeddableState,
-        FieldStatisticsTableEmbeddableApi
-      >
-        maybeId={'discover_data_visualizer_grid'}
-        type={'data_visualizer_grid'}
-        onApiAvailable={handleEmbeddableApiReady}
-        state={{
-          // initialState of the embeddable to be serialized
-          rawState: initialState,
-        }}
-        parentApi={parentApi}
-        panelProps={{
-          hideHeader: true,
-          hideInspector: true,
-          showShadow: false,
-          showBorder: false,
-        }}
-        // Render embeddable without PresentationPanel wrapper
-        hidePanelChrome={true}
+      <dataVisualizerService.FieldStatisticsTable
+        shouldGetSubfields={true}
+        dataView={dataView}
+        savedSearch={savedSearch}
+        query={query}
+        visibleFieldNames={columns}
+        sessionId={searchSessionId}
+        fieldsToFetch={stateContainer?.dataState.data$.availableFields$?.getValue().fields}
+        totalDocuments={totalDocuments}
+        samplingOption={samplingOption}
+        lastReloadRequestTime={lastReloadRequestTime}
+        onAddFilter={onAddFilter}
+        showPreviewByDefault={showPreviewByDefault}
+        onTableUpdate={updateState}
       />
     </EuiFlexItem>
   );

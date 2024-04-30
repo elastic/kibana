@@ -61,8 +61,12 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const {
+    trackUiMetric,
+    // dataVisualizer: dataVisualizerServiceAvailable
+  } = useDiscoverServices();
 
+  const dataVisualizerServiceAvailable = true;
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.appState.update({ viewMode: mode });
@@ -81,7 +85,7 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   const viewModeToggle = useMemo(() => {
-    return (
+    return dataVisualizerServiceAvailable ? (
       <DocumentViewModeToggle
         viewMode={viewMode}
         isTextBasedQuery={isPlainRecord}
@@ -93,7 +97,7 @@ export const DiscoverMainContent = ({
             : undefined
         }
       />
-    );
+    ) : null;
   }, [
     viewMode,
     setDiscoverViewMode,
@@ -101,6 +105,7 @@ export const DiscoverMainContent = ({
     stateContainer,
     panelsToggle,
     isChartAvailable,
+    dataVisualizerServiceAvailable,
   ]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);

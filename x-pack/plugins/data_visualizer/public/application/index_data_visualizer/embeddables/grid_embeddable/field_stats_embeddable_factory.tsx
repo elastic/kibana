@@ -101,7 +101,7 @@ export const getFieldStatsTableFactory = (core: DataVisualizerCoreSetup) => {
                       id={uuid}
                       embeddableState$={embeddableState$}
                       onAddFilter={onAddFilter}
-                      onApiUpdate={(changes) => {
+                      onTableUpdate={(changes) => {
                         if ('showDistributions' in changes && Object.keys(changes).length === 1) {
                           showDistributions$.next(changes.showDistributions);
                         }

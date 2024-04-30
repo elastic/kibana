@@ -9,6 +9,7 @@ import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { Plugin } from '@kbn/core/public';
 
 import type { CoreSetup } from '@kbn/core/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
@@ -19,9 +20,6 @@ import type {
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
-
-import { registerReactEmbeddablesAndActions } from './application/index_data_visualizer/embeddables';
-
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -57,7 +55,6 @@ export class DataVisualizerPlugin
       registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
     }
-    registerReactEmbeddablesAndActions(core, plugins);
 
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
@@ -75,6 +72,12 @@ export class DataVisualizerPlugin
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,
+      FieldStatisticsTable: dynamic(
+        async () =>
+          import(
+            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_embeddable_wrapper'
+          )
+      ),
     };
   }
 }

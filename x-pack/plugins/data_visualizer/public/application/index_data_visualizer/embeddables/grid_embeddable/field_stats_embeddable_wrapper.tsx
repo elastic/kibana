@@ -4,20 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Observable } from 'rxjs';
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
-import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import type { DatePickerDependencies } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { pick } from 'lodash';
+import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
   FieldStatisticsTableEmbeddableState,
   ESQLDataVisualizerGridEmbeddableState,
 } from './types';
+
+const EmbeddableESQLFieldStatsTableWrapper = dynamic(
+  () => import('./embeddable_esql_field_stats_table')
+);
+const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_field_stats_table'));
 
 function isESQLFieldStatisticTableEmbeddableState(
   input: unknown
@@ -34,24 +42,17 @@ function isFieldStatisticTableEmbeddableState(
   );
 }
 
-const FieldStatisticsWrapper = (props: {
-  id: string;
-  embeddableState$: Readonly<Observable<FieldStatisticsTableEmbeddableState>>;
-  onApiUpdate?: (output: any) => void;
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-}) => {
-  const { embeddableState$, onApiUpdate, onAddFilter } = props;
+const FieldStatisticsWrapperContent = (props: FieldStatisticsTableEmbeddableState) => {
+  const { onTableUpdate, onAddFilter } = props;
 
-  const input = useObservable(embeddableState$);
-
-  if (isESQLFieldStatisticTableEmbeddableState(input)) {
-    return <EmbeddableESQLFieldStatsTableWrapper input={input} onApiUpdate={onApiUpdate} />;
+  if (isESQLFieldStatisticTableEmbeddableState(props)) {
+    return <EmbeddableESQLFieldStatsTableWrapper input={props} onTableUpdate={onTableUpdate} />;
   }
-  if (isFieldStatisticTableEmbeddableState(input)) {
+  if (isFieldStatisticTableEmbeddableState(props)) {
     return (
       <EmbeddableFieldStatsTableWrapper
-        input={input}
-        onApiUpdate={onApiUpdate}
+        input={props}
+        onTableUpdate={onTableUpdate}
         onAddFilter={onAddFilter}
       />
     );
@@ -81,6 +82,54 @@ const FieldStatisticsWrapper = (props: {
   }
 };
 
+const FieldStatisticsWrapper = (props) => {
+  const coreStart = getCoreStart();
+  const {
+    data,
+    maps,
+    embeddable,
+    discover,
+    share,
+    security,
+    fileUpload,
+    lens,
+    dataViewFieldEditor,
+    uiActions,
+    charts,
+    unifiedSearch,
+  } = getPluginsStart();
+  const services = {
+    ...coreStart,
+    data,
+    maps,
+    embeddable,
+    discover,
+    share,
+    security,
+    fileUpload,
+    lens,
+    dataViewFieldEditor,
+    uiActions,
+    charts,
+    unifiedSearch,
+  };
+
+  const kibanaRenderServices = pick(coreStart, 'analytics', 'i18n', 'theme');
+  const datePickerDeps: DatePickerDependencies = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
+  return (
+    <KibanaRenderContextProvider {...kibanaRenderServices}>
+      <KibanaContextProvider services={services}>
+        <DatePickerContextProvider {...datePickerDeps}>
+          <FieldStatisticsWrapperContent {...props} />
+        </DatePickerContextProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
+  );
+};
 // exporting as default so it can be used with React.lazy
 // eslint-disable-next-line import/no-default-export
 export default FieldStatisticsWrapper;

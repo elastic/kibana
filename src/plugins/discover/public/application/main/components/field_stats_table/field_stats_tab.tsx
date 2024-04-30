@@ -20,6 +20,8 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
     });
     const savedSearch = useSavedSearch();
 
+    if (!services.dataVisualizer) return null;
+
     return (
       <FieldStatisticsTable
         {...props}

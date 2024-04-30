@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldStatisticsTableEmbeddableState } from './types';
+import type { FieldStatisticTableEmbeddableProps } from './types';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -21,14 +20,12 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultDataVisualizerListState();
 
-export const EmbeddableFieldStatsTableWrapper = ({
+const EmbeddableFieldStatsTableWrapper = ({
   input,
-  onApiUpdate,
-  onAddFilter,
+  onTableUpdate,
 }: {
-  input: Required<FieldStatisticsTableEmbeddableState, 'dataView'>;
-  onApiUpdate?: (ouput: any) => void;
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>;
+  onTableUpdate?: (ouput: DataVisualizerTableState) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -36,11 +33,11 @@ export const EmbeddableFieldStatsTableWrapper = ({
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onApiUpdate) {
-        onApiUpdate(update);
+      if (onTableUpdate) {
+        onTableUpdate(update);
       }
     },
-    [dataVisualizerListState, onApiUpdate]
+    [dataVisualizerListState, onTableUpdate]
   );
 
   const {
@@ -67,7 +64,7 @@ export const EmbeddableFieldStatsTableWrapper = ({
               item={item}
               dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={onAddFilter}
+              onAddFilter={input.onAddFilter}
               totalDocuments={input.totalDocuments}
             />
           );
@@ -75,7 +72,7 @@ export const EmbeddableFieldStatsTableWrapper = ({
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [input, searchQueryLanguage, searchString, onAddFilter]
+    [input.dataView, searchQueryLanguage, searchString, input.totalDocuments, input.onAddFilter]
   );
 
   if (progress === 100 && configs.length === 0) {
@@ -89,9 +86,13 @@ export const EmbeddableFieldStatsTableWrapper = ({
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onApiUpdate}
+      onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
     />
   );
 };
+
+// exporting as default so it be lazy-loaded
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableFieldStatsTableWrapper;

@@ -21,12 +21,12 @@ import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_resu
 
 const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
-export const EmbeddableESQLFieldStatsTableWrapper = ({
-  input,
-  onApiUpdate,
+const EmbeddableESQLFieldStatsTableWrapper = ({
+  onTableUpdate,
+  ...props
 }: {
-  input: ESQLDataVisualizerGridEmbeddableState;
-  onApiUpdate?: (ouput: any) => void;
+  props: ESQLDataVisualizerGridEmbeddableState;
+  onTableUpdate?: (ouput: any) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -34,11 +34,11 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
   const onTableChange = useCallback(
     (update: DataVisualizerTableState) => {
       setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onApiUpdate) {
-        onApiUpdate(update);
+      if (onTableUpdate) {
+        onTableUpdate(update);
       }
     },
-    [dataVisualizerListState, onApiUpdate]
+    [dataVisualizerListState, onTableUpdate]
   );
 
   const {
@@ -48,11 +48,11 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
     overallStatsProgress,
     setLastRefresh,
     getItemIdToExpandedRowMap,
-  } = useESQLDataVisualizerData(input, dataVisualizerListState);
+  } = useESQLDataVisualizerData(props, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
-  }, [input?.lastReloadRequestTime, setLastRefresh]);
+  }, [props?.lastReloadRequestTime, setLastRefresh]);
 
   if (progress === 100 && configs.length === 0) {
     return <EmbeddableNoResultsEmptyPrompt />;
@@ -64,10 +64,13 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
-      showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onApiUpdate}
+      showPreviewByDefault={props?.showPreviewByDefault}
+      onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
     />
   );
 };
+// exporting as default so it be lazy-loaded
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableESQLFieldStatsTableWrapper;
