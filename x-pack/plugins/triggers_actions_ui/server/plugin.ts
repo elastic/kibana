@@ -60,7 +60,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       alertingConfig: plugins.alerting.getConfig,
       getRulesClientWithRequest: async (request) => {
         const [, pluginStart] = await core.getStartServices();
-        return await pluginStart.alerting.getRulesClientWithRequest(request);
+        return pluginStart.alerting.getRulesClientWithRequest(request);
       },
     });
   }
