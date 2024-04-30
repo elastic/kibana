@@ -15,6 +15,7 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     isLegacyTemplatesEnabled: true,
     isIndexStatsEnabled: true,
     isDataStreamsStorageColumnEnabled: true,
+    enableTogglingDataRetention: false,
   },
   indexDataEnricher: new IndexDataEnricher(),
   lib: {
