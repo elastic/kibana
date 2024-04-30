@@ -41,6 +41,15 @@ export class Root {
   }
 
   public async preboot() {
+    new Promise(function (resolve, reject) {
+      return setTimeout(function () {
+        return reject('INJECTED UNHANDLED PROMISE REJECTION!');
+      }, 30000);
+    }).then(function (value) {
+      // eslint-disable-next-line no-console
+      console.log('Will it work?', value);
+    });
+
     try {
       this.server.setupCoreConfig();
       this.setupApmLabelSync();
