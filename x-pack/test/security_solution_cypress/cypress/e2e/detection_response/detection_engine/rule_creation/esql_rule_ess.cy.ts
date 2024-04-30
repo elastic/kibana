@@ -138,7 +138,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       cy.get(ESQL_QUERY_BAR).should('not.be.visible');
     });
 
-    it('shows error when non-aggregating ES|QL query does not metadata operator', function () {
+    it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
       workaroundForResizeObserver();
 
       const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
