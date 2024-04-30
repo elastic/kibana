@@ -58,7 +58,7 @@ export const CaseRequestCustomFieldsRt = limitedArraySchema({
   max: MAX_CUSTOM_FIELDS_PER_CASE,
 });
 
-export const CaseRequestFieldsRt = rt.exact(
+export const CaseFieldsRt = rt.exact(
   rt.partial({
     /**
      * The description of the case
@@ -68,10 +68,6 @@ export const CaseRequestFieldsRt = rt.exact(
       min: 1,
       max: MAX_DESCRIPTION_LENGTH,
     }),
-    /**
-     * The current status of the case (open, closed, in-progress)
-     */
-    status: CaseStatusRt,
     /**
      * The identifying strings for filter a case
      */
@@ -89,14 +85,6 @@ export const CaseRequestFieldsRt = rt.exact(
      * The external system that the case can be synced with
      */
     connector: CaseConnectorRt,
-    /**
-     * The alert sync settings
-     */
-    settings: CaseSettingsRt,
-    /**
-     * The plugin owner of the case
-     */
-    owner: rt.string,
     /**
      * The severity of the case
      */
@@ -123,6 +111,27 @@ export const CaseRequestFieldsRt = rt.exact(
     customFields: CaseRequestCustomFieldsRt,
   })
 );
+
+export const CaseRequestFieldsRt = rt.intersection([
+  CaseFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The current status of the case (open, closed, in-progress)
+       */
+      status: CaseStatusRt,
+
+      /**
+       * The alert sync settings
+       */
+      settings: CaseSettingsRt,
+      /**
+       * The plugin owner of the case
+       */
+      owner: rt.string,
+    })
+  ),
+]);
 
 /**
  * Create case

@@ -1181,19 +1181,19 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
 
 export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
   {
-    id: 'test_template_1',
+    key: 'test_template_1',
     name: 'First test template',
     description: 'This is a first test template',
     caseFields: null,
   },
   {
-    id: 'test_template_2',
+    key: 'test_template_2',
     name: 'Second test template',
     description: 'This is a second test template',
     caseFields: {},
   },
   {
-    id: 'test_template_3',
+    key: 'test_template_3',
     name: 'Third test template',
     description: 'This is a third test template with few case fields',
     caseFields: {
@@ -1203,7 +1203,7 @@ export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
     },
   },
   {
-    id: 'test_template_4',
+    key: 'test_template_4',
     name: 'Fourth test template',
     description: 'This is a fourth test template',
     caseFields: {

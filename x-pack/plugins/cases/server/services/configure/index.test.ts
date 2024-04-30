@@ -22,11 +22,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CaseConfigureService } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import type { ESCaseConnectorWithId } from '../test_utils';
+import { basicCaseFields, ESCaseConnectorWithId } from '../test_utils';
 import { createESJiraConnector, createJiraConnector } from '../test_utils';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { unset } from 'lodash';
 import type { ConfigurationPatchRequest } from '../../../common/types/api';
+import { templates } from 'handlebars';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,
@@ -61,13 +62,13 @@ const basicConfigFields = {
   ],
   templates: [
     {
-      id: 'test_template_1',
+      key: 'test_template_1',
       name: 'First test template',
       description: 'This is a first test template',
       caseFields: null,
     },
     {
-      id: 'test_template_4',
+      key: 'test_template_4',
       name: 'Fourth test template',
       description: 'This is a fourth test template',
       caseFields: {
@@ -100,7 +101,7 @@ const createConfigUpdateParams = (connector?: CaseConnector): Partial<Configurat
 });
 
 const createConfigPostParams = (connector: CaseConnector): ConfigurationAttributes => ({
-  ...basicConfigFields,
+  ...(basicConfigFields as ConfigurationAttributes),
   connector,
 });
 
@@ -242,7 +243,7 @@ describe('CaseConfigureService', () => {
               Object {
                 "caseFields": null,
                 "description": "This is a first test template",
-                "id": "test_template_1",
+                "key": "test_template_1",
                 "name": "First test template",
               },
               Object {
@@ -274,7 +275,7 @@ describe('CaseConfigureService', () => {
                   "title": "Case with sample template 4",
                 },
                 "description": "This is a fourth test template",
-                "id": "test_template_4",
+                "key": "test_template_4",
                 "name": "Fourth test template",
               },
             ],
@@ -568,7 +569,7 @@ describe('CaseConfigureService', () => {
               Object {
                 "caseFields": null,
                 "description": "This is a first test template",
-                "id": "test_template_1",
+                "key": "test_template_1",
                 "name": "First test template",
               },
               Object {
@@ -600,7 +601,7 @@ describe('CaseConfigureService', () => {
                   "title": "Case with sample template 4",
                 },
                 "description": "This is a fourth test template",
-                "id": "test_template_4",
+                "key": "test_template_4",
                 "name": "Fourth test template",
               },
             ],

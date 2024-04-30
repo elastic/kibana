@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
+import type { CaseSeverity, ConfigurationAttributes } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsRt,
   ConfigurationAttributesRt,
@@ -39,20 +39,22 @@ type PersistedCustomFieldsConfiguration = Array<{
 }>;
 
 type PersistedTemplatesConfiguration = Array<{
-  id: string;
+  key: string;
   name: string;
   description: string;
-  caseFields?: {
-    title?: string;
-    assignees?: UserProfile[];
-    connector?: ConnectorPersisted;
-    description?: string;
-    severity?: CasePersistedSeverity;
-    tags: string[];
-    category?: string;
-    customFields?: CasePersistedCustomFields;
-  };
+  caseFields?: CaseFieldsAttributes;
 }>;
+
+export type CaseFieldsAttributes = {
+  title?: string;
+  assignees?: UserProfile[];
+  connector?: ConnectorPersisted;
+  description?: string;
+  severity?: CasePersistedSeverity;
+  tags?: string[];
+  category?: string | null;
+  customFields?: CasePersistedCustomFields;
+};
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;

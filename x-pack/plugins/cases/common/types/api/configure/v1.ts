@@ -11,6 +11,7 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_TEMPLATES_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
@@ -18,7 +19,7 @@ import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
-import { CaseRequestFieldsRt } from '../case/v1';
+import { CaseFieldsRt, CaseRequestFieldsRt } from '../case/v1';
 import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
@@ -69,6 +70,14 @@ export const CustomFieldsConfigurationRt = limitedArraySchema({
 
 export const TemplateConfigurationRt = rt.strict({
   /**
+   * key of template
+   */
+  key: regexStringRt({
+    codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
+    pattern: '^[a-z0-9_-]+$',
+    message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+  }),
+  /**
    * name of template
    */
   name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
@@ -79,7 +88,7 @@ export const TemplateConfigurationRt = rt.strict({
   /**
    * case fields
    */
-  caseFields: rt.union([rt.null, CaseRequestFieldsRt]),
+  caseFields: rt.union([rt.null, CaseFieldsRt]),
 });
 
 export const TemplatesConfigurationRt = limitedArraySchema({

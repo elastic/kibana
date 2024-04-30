@@ -101,9 +101,21 @@ const caseFieldsRt = rt.exact(
 );
 
 export const TemplateConfigurationRt = rt.strict({
-  id: rt.string,
+  /**
+   * key of template
+   */
+  key: rt.string,
+  /**
+   * name of template
+   */
   name: rt.string,
+  /**
+   * description of template
+   */
   description: rt.string,
+  /**
+   * case fields of template
+   */
   caseFields: rt.union([rt.null, caseFieldsRt]),
 });
 
@@ -165,6 +177,8 @@ export const ConfigurationsRt = rt.array(ConfigurationRt);
 
 export type CustomFieldsConfiguration = rt.TypeOf<typeof CustomFieldsConfigurationRt>;
 export type CustomFieldConfiguration = rt.TypeOf<typeof CustomFieldConfigurationRt>;
+export type TemplatesConfiguration = rt.TypeOf<typeof TemplatesConfigurationRt>;
+export type TemplateConfiguration = rt.TypeOf<typeof TemplateConfigurationRt>;
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;

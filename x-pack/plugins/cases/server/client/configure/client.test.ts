@@ -15,6 +15,7 @@ import { createCasesClientInternalMock, createCasesClientMockArgs } from '../moc
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
+  MAX_TEMPLATES_LENGTH,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -306,7 +307,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: Invalid duplicated custom field keys in request: duplicated_key'
+        'Failed to get patch configure in route: Error: Invalid duplicated customFields keys in request: duplicated_key'
       );
     });
 
@@ -345,6 +346,93 @@ describe('client', () => {
       ).rejects.toThrow(
         'Failed to get patch configure in route: Error: Invalid custom field types in request for the following labels: "text label"'
       );
+    });
+
+    describe('templates', () => {
+      it(`throws when trying to update more than ${MAX_TEMPLATES_LENGTH} templates`, async () => {
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+                key: 'template_1',
+                name: 'template 1',
+                description: 'test',
+                caseFields: null,
+              }),
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          `Failed to get patch configure in route: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+        );
+      });
+
+      describe('customFields', () => {
+        it('throws when there are duplicated template keys in the request', async () => {
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'duplicated_key',
+                    name: 'template 1',
+                    description: 'test',
+                    caseFields: null,
+                  },
+                  {
+                    key: 'duplicated_key',
+                    name: 'template 2',
+                    description: 'test',
+                    caseFields: {
+                      title: 'Case title',
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid duplicated templates keys in request: duplicated_key'
+          );
+        });
+
+        it('throws when template has duplicated custom field keys in the request', async () => {
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'test',
+                    caseFields: null,
+                  },
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'test',
+                    caseFields: {
+                      title: 'case title',
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid duplicated templates keys in request: template_1'
+          );
+        });
+      });
     });
   });
 
@@ -404,7 +492,57 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to create case configuration: Error: Invalid duplicated custom field keys in request: duplicated_key'
+        'Failed to create case configuration: Error: Invalid duplicated customFields keys in request: duplicated_key'
+      );
+    });
+
+    it(`throws when trying to create more than ${MAX_TEMPLATES_LENGTH} custom fields`, async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+              key: 'template_1',
+              name: 'template 1',
+              description: 'test',
+              caseFields: null,
+            }),
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        `Failed to create case configuration: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+      );
+    });
+
+    it('throws when there are duplicated template keys in the request', async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            templates: [
+              {
+                key: 'duplicated_key',
+                name: 'template 1',
+                description: 'test',
+                caseFields: null,
+              },
+              {
+                key: 'duplicated_key',
+                name: 'template 2',
+                description: 'test',
+                caseFields: {
+                  title: 'Case title',
+                },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: Invalid duplicated templates keys in request: duplicated_key'
       );
     });
   });

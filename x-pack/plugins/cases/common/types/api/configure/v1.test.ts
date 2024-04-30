@@ -13,6 +13,7 @@ import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
   MAX_TEMPLATES_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
@@ -99,6 +100,7 @@ describe('configure', () => {
         ...defaultRequest,
         templates: [
           {
+            key: 'template_key_1',
             name: 'Template 1',
             description: 'this is first template',
             caseFields: {
@@ -106,6 +108,7 @@ describe('configure', () => {
             },
           },
           {
+            key: 'template_key_2',
             name: 'Template 2',
             description: 'this is second template',
             caseFields: null,
@@ -122,6 +125,7 @@ describe('configure', () => {
 
     it(`limits templates to ${MAX_TEMPLATES_LENGTH}`, () => {
       const templates = new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+        key: 'template_key_1',
         name: 'Template 1',
         description: 'this is first template',
         caseFields: {
@@ -208,6 +212,7 @@ describe('configure', () => {
         ...defaultRequest,
         templates: [
           {
+            key: 'template_key_1',
             name: 'Template 1',
             description: 'this is first template',
             caseFields: {
@@ -215,6 +220,7 @@ describe('configure', () => {
             },
           },
           {
+            key: 'template_key_2',
             name: 'Template 2',
             description: 'this is second template',
             caseFields: null,
@@ -231,6 +237,7 @@ describe('configure', () => {
 
     it(`limits templates to ${MAX_TEMPLATES_LENGTH}`, () => {
       const templates = new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+        key: 'template_key_1',
         name: 'Template 1',
         description: 'this is first template',
         caseFields: {
@@ -494,6 +501,7 @@ describe('configure', () => {
 
   describe('TemplateConfigurationRt', () => {
     const defaultRequest = {
+      key: 'template_key_1',
       name: 'Template 1',
       description: 'this is first template',
       caseFields: {
@@ -516,6 +524,44 @@ describe('configure', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest },
+      });
+    });
+
+    it('limits key to 36 characters', () => {
+      const longKey = 'x'.repeat(MAX_TEMPLATE_KEY_LENGTH + 1);
+
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, key: longKey }))
+      ).toContain('The length of the key is too long. The maximum length is 36.');
+    });
+
+    it('returns an error if they key is not in the expected format', () => {
+      const key = 'Not a proper key';
+
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, key }))
+      ).toContain(`Key must be lower case, a-z, 0-9, '_', and '-' are allowed`);
+    });
+
+    it('accepts a uuid as an key', () => {
+      const key = uuidv4();
+
+      const query = TemplateConfigurationRt.decode({ ...defaultRequest, key });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, key },
+      });
+    });
+
+    it('accepts a slug as an key', () => {
+      const key = 'abc_key-1';
+
+      const query = TemplateConfigurationRt.decode({ ...defaultRequest, key });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, key },
       });
     });
 
