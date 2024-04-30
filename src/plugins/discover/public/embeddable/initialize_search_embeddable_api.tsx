@@ -108,7 +108,7 @@ export const initializeSearchEmbeddableApi = async (
         attributes$ as BehaviorSubject<SavedSearchByValueAttributes | undefined>,
         (attributes: SavedSearchByValueAttributes | undefined) =>
           attributes$.next(attributes as SavedSearchByValueAttributes),
-        (a, b) => deepEqual(a, b),
+        (a, b) => (savedObjectId$.getValue() ? true : deepEqual(a, b)),
       ],
     };
   };
