@@ -24,7 +24,7 @@ const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 
 
 const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   mutations.processAny(schema);
-  /* At runtime the type can be broader than NonArraySchemaObjectType, so we set it to 'string' */
+  /* At runtime 'type' can be broader than 'NonArraySchemaObjectType', so we set it to 'string' */
   const type: undefined | string = schema.type;
   if (type === 'array') {
     walkSchema(ctx, schema.items as OpenAPIV3.SchemaObject);
