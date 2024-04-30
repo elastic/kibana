@@ -17,7 +17,11 @@ import {
   type SavedObjectsRawDocParseOptions,
   type DecoratedError,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  SavedObjectsUtils,
+  ALL_NAMESPACES_STRING,
+  DEFAULT_NAMESPACE_STRING,
+} from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,
@@ -119,10 +123,13 @@ export function getSavedObjectFromSource<T>(
   } = doc._source;
 
   let namespaces: string[] = [];
-  if (!registry.isNamespaceAgnostic(type)) {
-    namespaces = doc._source.namespaces ?? [
-      SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
-    ];
+  if (registry.isSingleNamespace(type)) {
+    namespaces = [SavedObjectsUtils.namespaceIdToString(doc._source.namespace)];
+  } else if (registry.isMultiNamespace(type)) {
+    namespaces = doc._source.namespaces ?? [];
+    if (!namespaces.length) {
+      namespaces = [DEFAULT_NAMESPACE_STRING];
+    }
   }
 
   return {
@@ -170,7 +177,11 @@ export function rawDocExistsInNamespace(
     return true;
   }
 
-  const namespaces = raw._source.namespaces;
+  let namespaces = raw._source.namespaces ?? [];
+  if (!namespaces.length) {
+    namespaces = [DEFAULT_NAMESPACE_STRING];
+  }
+
   const existsInNamespace =
     namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
     namespaces?.includes(ALL_NAMESPACES_STRING);
@@ -205,7 +216,7 @@ export function rawDocExistsInNamespaces(
   }
 
   const namespacesToCheck = new Set(namespaces);
-  const existingNamespaces = raw._source.namespaces ?? [];
+  const existingNamespaces = raw._source.namespaces ?? [DEFAULT_NAMESPACE_STRING];
 
   if (namespacesToCheck.size === 0 || existingNamespaces.length === 0) {
     return false;
@@ -278,7 +289,8 @@ export function getSavedObjectNamespaces(
   document?: SavedObjectsRawDoc
 ): string[] | undefined {
   if (document) {
-    return document._source?.namespaces;
+    const namespaces = document._source?.namespaces ?? [];
+    return namespaces.length ? namespaces : [DEFAULT_NAMESPACE_STRING];
   }
   return [SavedObjectsUtils.namespaceIdToString(namespace)];
 }
@@ -290,4 +302,16 @@ export const errorContent = (error: DecoratedError) => error.output.payload;
 
 export function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
+}
+
+export function getRawDocNamespacesFromSource(
+  registry: ISavedObjectTypeRegistry,
+  source: SavedObjectsRawDocSource
+) {
+  const rawDocType = source.type;
+  if (!registry.isMultiNamespace(rawDocType)) {
+    return [];
+  }
+  const namespaces = source.namespaces ?? [];
+  return namespaces.length ? namespaces : [DEFAULT_NAMESPACE_STRING];
 }
