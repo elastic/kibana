@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { ServiceName, KibanaSavedObjectType } from '../../types';
@@ -121,25 +120,4 @@ export const AssetTitleMap: Record<
 export const ServiceTitleMap: Record<ServiceName, string> = {
   kibana: 'Kibana',
   elasticsearch: 'Elasticsearch',
-};
-
-// TODO add icons for ES assets?
-export const AssetIcons: Record<KibanaAssetType, IconType> = {
-  dashboard: 'dashboardApp',
-  index_pattern: 'indexPatternApp',
-  search: 'searchProfilerApp',
-  visualization: 'visualizeApp',
-  map: 'emsApp',
-  lens: 'lensApp',
-  security_rule: 'securityApp',
-  csp_rule_template: 'securityApp', // TODO ICON
-  ml_module: 'mlApp',
-  tag: 'tagApp',
-  osquery_pack_asset: 'osqueryApp',
-  osquery_saved_query: 'osqueryApp',
-};
-
-export const ServiceIcons: Record<ServiceName, IconType> = {
-  elasticsearch: 'logoElasticsearch',
-  kibana: 'logoKibana',
 };
