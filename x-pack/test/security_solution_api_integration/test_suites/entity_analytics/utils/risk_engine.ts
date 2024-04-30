@@ -379,13 +379,29 @@ export const clearTransforms = async ({
   es: Client;
   log: ToolingLog;
 }): Promise<void> => {
+  let transformResponse;
+
   try {
-    await es.transform.deleteTransform({
-      transform_id: 'risk_score_latest_transform_default',
-      force: true,
+    transformResponse = await es.transform.getTransform({
+      transform_id: 'risk_score_pivot_transform_default',
     });
   } catch (e) {
-    log.warning(`Error deleting risk_score_latest_transform_default: ${e.message}`);
+    if (e.statusCode !== 404) {
+      log.warning(`Error getting risk_score_pivot_transform_default: ${e.message}`);
+    }
+  }
+
+  if (transformResponse) {
+    try {
+      await es.transform.deleteTransform({
+        transform_id: 'risk_score_pivot_transform_default',
+        force: true,
+      });
+    } catch (e) {
+      log.warning(`Error deleting risk_score_pivot_transform_default: ${e.message}`);
+    }
+  } else {
+    log.debug('No risk_score_pivot_transform_default found to delete');
   }
 };
 
@@ -396,12 +412,26 @@ export const clearLegacyTransforms = async ({
   es: Client;
   log: ToolingLog;
 }): Promise<void> => {
-  const transforms = legacyTransformIds.map((transform) =>
-    es.transform.deleteTransform({
+  const transforms = legacyTransformIds.map(async (transform) => {
+    let transformResponse;
+    try {
+      transformResponse = await es.transform.getTransform({
+        transform_id: transform,
+      });
+    } catch (e) {
+      if (e.statusCode !== 404) {
+        log.warning(`Error getting transform ${transform}: ${e.message}`);
+      }
+    }
+    if (!transformResponse) {
+      log.debug(`No transform ${transform} found to delete`);
+      return;
+    }
+    return es.transform.deleteTransform({
       transform_id: transform,
       force: true,
-    })
-  );
+    });
+  });
   try {
     await Promise.all(transforms);
   } catch (e) {
@@ -488,14 +518,23 @@ export const riskEngineRouteHelpersFactory = (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   namespace?: string
 ) => ({
-  init: async (expectStatusCode: number = 200) =>
-    await supertest
+  init: async (expectStatusCode: number = 200) => {
+    const res = await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(expectStatusCode),
+      .send();
+
+    if (res.status !== expectStatusCode) {
+      // eslint-disable-next-line no-console
+      console.log('res.body', res.body);
+    }
+
+    expect(res.status).toBe(expectStatusCode);
+
+    return res;
+  },
 
   getStatus: async (expectStatusCode: number = 200) =>
     await supertest
