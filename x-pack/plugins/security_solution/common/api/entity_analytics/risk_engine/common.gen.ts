@@ -29,7 +29,7 @@ export type DataViewId = z.infer<typeof DataViewId>;
 export const DataViewId = z.string();
 
 /**
- * An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves.
+ * An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves. See https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer
  */
 export type Filter = z.infer<typeof Filter>;
 export const Filter = z.unknown();
