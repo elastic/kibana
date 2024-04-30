@@ -37,8 +37,7 @@
       "savedObjectsTaggingOss",
       "lens",
       "noDataPage",
-      "globalSearch",
-      "observabilityAIAssistant"
+      "globalSearch"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]
