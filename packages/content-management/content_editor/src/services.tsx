@@ -10,9 +10,11 @@ import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import type { EuiComboBoxProps } from '@elastic/eui';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 type NotifyFn = (title: JSX.Element, text?: string) => void;

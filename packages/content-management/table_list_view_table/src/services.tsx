@@ -9,18 +9,21 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import type { FormattedRelative } from '@kbn/i18n-react';
-import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
-import type { UserProfile } from '@kbn/core-user-profile-common';
-import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+
 import {
   ContentEditorKibanaProvider,
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
-import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
