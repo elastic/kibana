@@ -8,7 +8,7 @@
 
 import type { CoreAuthenticationService } from './authc';
 import type { CoreSecurityDelegateContract } from './api_provider';
-import { CoreAuditService } from './audit';
+import type { CoreAuditService } from './audit';
 /**
  * Setup contract for Core's security service.
  *

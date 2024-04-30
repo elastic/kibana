@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreAuditService } from './audit';
+import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService } from './authc';
 
 /**
