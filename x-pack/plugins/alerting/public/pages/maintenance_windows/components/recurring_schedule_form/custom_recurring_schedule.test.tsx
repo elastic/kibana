@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { fireEvent, waitFor, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
@@ -29,7 +29,7 @@ const initialValue: FormProps = {
 describe('CustomRecurringSchedule', () => {
   let appMockRenderer: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ iv?: FormProps }> = ({
+  const MockHookWrapperComponent: FC<PropsWithChildren<{ iv?: FormProps }>> = ({
     children,
     iv = initialValue,
   }) => {
