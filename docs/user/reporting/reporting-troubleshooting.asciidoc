@@ -31,11 +31,13 @@ while using Reporting.
 * <<reporting-diagnostics>>
 * <<reporting-troubleshooting-text-incorrect>>
 * <<reporting-troubleshooting-missing-data>>
+* <<reporting-troubleshooting-pdf-connection-refused>>
 * <<reporting-troubleshooting-file-permissions>>
 * <<reporting-troubleshooting-puppeteer-debug-logs>>
 * <<reporting-troubleshooting-system-requirements>>
 * <<reporting-troubleshooting-maps-ems>>
 * <<reporting-manual-chromium-install>>
+* <<reporting-troubleshooting-pdf-still-issues>>
 
 [[reporting-troubleshooting-general]]
 === General troubleshooting
@@ -234,6 +236,13 @@ There is currently a known limitation with the Data Table visualization that onl
 visible on the screen, are shown in PDF reports.
 
 [float]
+[[reporting-troubleshooting-pdf-connection-refused]]
+==== "Connection refused," or "Unable to connect"
+If PDF/PNG reports are not working due to a "connection refused" type of error, ensure that the `kibana.yml`
+file uses the setting of `server.host: 0.0.0.0`, and make sure that no firewall rules or other routing rules
+prevent local services from accessing this address. Find out more at <<set-reporting-server-host>>.
+
+[float]
 [[reporting-troubleshooting-file-permissions]]
 ==== File permissions
 Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
@@ -257,7 +266,6 @@ Using Puppeteer's debug method when launching Kibana would look like:
 env DEBUG="puppeteer:*" ./bin/kibana
 ```
 The internal DevTools protocol traffic will be logged via the `debug` module under the `puppeteer` namespace.
-
 
 The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.
 
@@ -301,3 +309,9 @@ Chromium browser and install it into the {kib} installation path.
 ** `.chromium/arm64` for ARM systems
 
 When {kib} starts, it will automatically extract the browser from the zip file, and is then ready for PNG and PDF reports.
+
+[float]
+[[reporting-troubleshooting-pdf-still-issues]]
+==== Still having issues?
+For the most reliable configuration of PDF/PNG {report-features}, consider installing {kib} using <<docker, Docker>>, or
+using <<set-up-on-cloud, Elastic Cloud>>.
