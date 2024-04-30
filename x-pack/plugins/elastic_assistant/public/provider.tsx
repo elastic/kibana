@@ -13,11 +13,8 @@ import type { Observable } from 'rxjs';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 import { StartServices } from './types';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from '../common/anonymization';
-import { BASE_SECURITY_QUICK_PROMPTS } from '../common/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from '../common/prompts/system';
-import { PROMPT_CONTEXTS } from '../common/prompt_contexts';
 import { useAnonymizationStore } from './components/use_anonymization_store';
 import { getComments } from './get_comments';
 import { augmentMessageCodeBlocks } from './components/helpers';
@@ -59,13 +56,16 @@ export function AssistantProvider({
   const basePath = http.basePath.get();
 
   const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
-  const baseConversations = useMemo(() => new Rx.BehaviorSubject({}), []);
+  const assistantDefaults = useMemo(
+    () => new Rx.BehaviorSubject<AIAssistantDefaults>({ conversations: {} }),
+    []
+  );
   if (applicationService) {
     applicationService.currentAppId$.subscribe((appId) => {
       if (appId) {
         currentAppId.next(appId);
-        baseConversations.next(
-          appContextService.getRegisteredBaseConversations(currentAppId.getValue() ?? '')
+        assistantDefaults.next(
+          appContextService.getRegisteredAIAssistantDefaults(currentAppId.getValue() ?? '')
         );
       }
     });
@@ -105,13 +105,8 @@ export function AssistantProvider({
             defaultAllow={defaultAllow} // to server and plugin start
             defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
             docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
-            baseAllow={DEFAULT_ALLOW} // to server and plugin start
-            baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT} // to server and plugin start
             basePath={basePath}
-            basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-            baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
-            baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
-            baseConversations={baseConversations}
+            assistantDefaults={assistantDefaults}
             getComments={getComments}
             http={http}
             currentAppId={currentAppId}

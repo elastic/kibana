@@ -35,8 +35,14 @@ interface QuickPromptsProps {
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
   ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
-    const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab, currentAppId } =
-      useAssistantContext();
+    const {
+      allQuickPrompts,
+      assistantDefaults,
+      knowledgeBase,
+      promptContexts,
+      setSelectedSettingsTab,
+      currentAppId,
+    } = useAssistantContext();
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
@@ -44,7 +50,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
       if (knowledgeBase.isEnabledKnowledgeBase) {
         registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
       }
-      return allQuickPrompts.filter((quickPrompt) => {
+      return (assistantDefaults.getValue().quickPrompts ?? []).filter((quickPrompt) => {
         if (quickPrompt.consumer !== currentAppId.getValue()) {
           return false;
         }
@@ -57,7 +63,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           });
         }
       });
-    }, [allQuickPrompts, currentAppId, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
+    }, [assistantDefaults, currentAppId, knowledgeBase.isEnabledKnowledgeBase, promptContexts]);
 
     // Overflow state
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);

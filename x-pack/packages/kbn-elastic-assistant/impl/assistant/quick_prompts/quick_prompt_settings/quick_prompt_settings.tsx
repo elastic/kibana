@@ -44,7 +44,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
   }) => {
-    const { basePromptContexts, currentAppId } = useAssistantContext();
+    const { assistantDefaults, currentAppId } = useAssistantContext();
 
     // Prompt
     const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
@@ -107,10 +107,10 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     // Prompt Contexts
     const selectedPromptContexts = useMemo(
       () =>
-        basePromptContexts.filter((bpc) =>
+        (assistantDefaults.getValue().promptContexts ?? []).filter((bpc) =>
           selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
         ) ?? [],
-      [basePromptContexts, selectedQuickPrompt?.categories]
+      [assistantDefaults, selectedQuickPrompt?.categories]
     );
 
     const onPromptContextSelectionChange = useCallback(
@@ -217,7 +217,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
           <PromptContextSelector
             isDisabled={selectedQuickPrompt == null}
             onPromptContextSelectionChange={onPromptContextSelectionChange}
-            promptContexts={basePromptContexts}
+            promptContexts={assistantDefaults.getValue().promptContexts ?? []}
             selectedPromptContexts={selectedPromptContexts}
           />
         </EuiFormRow>

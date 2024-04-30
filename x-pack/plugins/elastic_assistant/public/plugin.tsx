@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Conversation } from '@kbn/elastic-assistant';
+import { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 import {
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantPluginStartDependencies,
@@ -78,14 +78,11 @@ export class ElasticAssistantPublicPlugin
 
     appContextService.start();
     return {
-      getDefaultConversations: (pluginName: string) => {
-        return appContextService.getRegisteredBaseConversations(pluginName);
+      getAIAssistantDefaults: (pluginName: string) => {
+        return appContextService.getRegisteredAIAssistantDefaults(pluginName);
       },
-      registerDefaultConversations: (
-        pluginName: string,
-        baseConversations: Record<string, Conversation>
-      ) => {
-        return appContextService.registerBaseConversations(pluginName, baseConversations);
+      registerAIAssistantDefaults: (pluginName: string, assistantDefaults: AIAssistantDefaults) => {
+        return appContextService.registerAIAssistantDefaults(pluginName, assistantDefaults);
       },
     };
   }

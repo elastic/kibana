@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/elastic-assistant';
+import { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 
 export type PluginName = string;
-export type RegisteredBaseConversationsStorage = Map<PluginName, Record<string, Conversation>>;
-export type GetRegisteredBaseConversations = (pluginName: string) => Record<string, Conversation>;
+export type RegisteredBaseConversationsStorage = Map<PluginName, AIAssistantDefaults>;
+export type GetRegisteredBaseConversations = (pluginName: string) => AIAssistantDefaults;
 
 /**
  * Service for managing context specific to the Elastic Assistant
@@ -17,28 +17,44 @@ export type GetRegisteredBaseConversations = (pluginName: string) => Record<stri
  * Inspired by `AppContextService` impl from fleet plugin: x-pack/plugins/fleet/server/services/app_context.ts
  */
 class AppContextService {
-  private registeredBaseConversations: RegisteredBaseConversationsStorage = new Map<
+  private registeredAIAssistantDefaults: RegisteredBaseConversationsStorage = new Map<
     PluginName,
-    Record<string, Conversation>
+    AIAssistantDefaults
   >();
 
   public start() {}
 
   public stop() {
-    this.registeredBaseConversations.clear();
+    this.registeredAIAssistantDefaults.clear();
   }
 
-  public registerBaseConversations(
-    pluginName: string,
-    baseConversations: Record<string, Conversation>
-  ) {
-    if (!this.registeredBaseConversations.has(pluginName)) {
-      this.registeredBaseConversations.set(pluginName, {});
+  public registerAIAssistantDefaults(pluginName: string, assistantDefaults: AIAssistantDefaults) {
+    if (!this.registeredAIAssistantDefaults.has(pluginName)) {
+      this.registeredAIAssistantDefaults.set(pluginName, { conversations: {} });
     }
-    Object.keys(baseConversations).forEach((key) => {
-      const conversation = this.registeredBaseConversations.get(pluginName) ?? {};
-      conversation[key] = baseConversations[key];
+    const defaults = this.registeredAIAssistantDefaults.get(pluginName) ?? { conversations: {} };
+    const conversations = assistantDefaults.conversations;
+    Object.keys(conversations).forEach((key) => {
+      defaults.conversations[key] = conversations[key];
     });
+    if (assistantDefaults.quickPrompts) {
+      defaults.quickPrompts = assistantDefaults.quickPrompts;
+    }
+    if (assistantDefaults.systemPrompts) {
+      defaults.systemPrompts = assistantDefaults.systemPrompts;
+    }
+    if (assistantDefaults.title) {
+      defaults.title = assistantDefaults.title;
+    }
+    if (assistantDefaults.allowFields) {
+      defaults.allowFields = assistantDefaults.allowFields;
+    }
+    if (assistantDefaults.allowReplacementFields) {
+      defaults.allowReplacementFields = assistantDefaults.allowReplacementFields;
+    }
+    if (assistantDefaults.allowReplacementFields) {
+      defaults.promptContexts = assistantDefaults.promptContexts;
+    }
   }
 
   /**
@@ -46,9 +62,9 @@ class AppContextService {
    *
    * @param pluginName
    */
-  public getRegisteredBaseConversations(pluginName: string): Record<string, Conversation> {
-    const baseConversations = this.registeredBaseConversations?.get(pluginName) ?? {};
-    return baseConversations;
+  public getRegisteredAIAssistantDefaults(pluginName: string): AIAssistantDefaults {
+    const defaults = this.registeredAIAssistantDefaults?.get(pluginName) ?? { conversations: {} };
+    return defaults;
   }
 }
 

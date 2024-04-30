@@ -53,6 +53,7 @@ export const useSettingsUpdater = (
     setKnowledgeBase,
     http,
     toasts,
+    assistantDefaults,
   } = useAssistantContext();
 
   /**
@@ -64,8 +65,9 @@ export const useSettingsUpdater = (
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
   // Quick Prompts
-  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
-    useState<QuickPrompt[]>(allQuickPrompts);
+  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] = useState<QuickPrompt[]>(
+    assistantDefaults.getValue().quickPrompts ?? []
+  );
   // System Prompts
   const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
     useState<Prompt[]>(allSystemPrompts);
@@ -83,14 +85,14 @@ export const useSettingsUpdater = (
   const resetSettings = useCallback((): void => {
     setConversationSettings(conversations);
     setConversationsSettingsBulkActions({});
-    setUpdatedQuickPromptSettings(allQuickPrompts);
+    setUpdatedQuickPromptSettings(assistantDefaults.getValue().quickPrompts ?? []);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedSystemPromptSettings(allSystemPrompts);
     setUpdatedDefaultAllow(defaultAllow);
     setUpdatedDefaultAllowReplacement(defaultAllowReplacement);
   }, [
-    allQuickPrompts,
     allSystemPrompts,
+    assistantDefaults,
     conversations,
     defaultAllow,
     defaultAllowReplacement,

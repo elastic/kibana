@@ -79,6 +79,9 @@ import {
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
+import { BASE_DISCOVER_QUICK_PROMPTS } from './assistant/quick_prompts';
+import { PROMPT_CONTEXTS } from './assistant/prompt_contexts';
+import { BASE_DISCOVER_SYSTEM_PROMPTS } from './assistant/prompts/system';
 
 /**
  * @public
@@ -431,24 +434,30 @@ export class DiscoverPlugin
       );
     }
 
-    plugins.elasticAssistant?.registerDefaultConversations('discover', {
-      ['Discover summary']: {
-        id: '',
-        title: 'Discover summary',
-        category: 'assistant',
-        consumer: 'discover',
-        isDefault: true,
-        messages: [],
-        replacements: [],
-      },
-      ['Welcome']: {
-        id: '',
-        title: 'Welcome',
-        category: 'assistant',
-        consumer: 'discover',
-        isDefault: true,
-        messages: [],
-        replacements: [],
+    plugins.elasticAssistant?.registerAIAssistantDefaults('discover', {
+      quickPrompts: BASE_DISCOVER_QUICK_PROMPTS,
+      systemPrompts: BASE_DISCOVER_SYSTEM_PROMPTS,
+      promptContexts: Object.values(PROMPT_CONTEXTS),
+      allowFields: [],
+      conversations: {
+        ['Discover summary']: {
+          id: '',
+          title: 'Discover summary',
+          category: 'assistant',
+          consumer: 'discover',
+          isDefault: true,
+          messages: [],
+          replacements: [],
+        },
+        ['Welcome']: {
+          id: '',
+          title: 'Welcome',
+          category: 'assistant',
+          consumer: 'discover',
+          isDefault: true,
+          messages: [],
+          replacements: [],
+        },
       },
     });
 

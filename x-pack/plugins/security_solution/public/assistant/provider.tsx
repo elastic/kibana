@@ -22,15 +22,11 @@ import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/ass
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
+import type { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
-import { useBaseConversations } from './use_conversation_store';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
-import { PROMPT_CONTEXTS } from './content/prompt_contexts';
-import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
@@ -132,13 +128,17 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
-  const baseConversations = useMemo(() => new Rx.BehaviorSubject({}), []);
+  const assistantDefaults = useMemo(
+    () => new Rx.BehaviorSubject<AIAssistantDefaults>({ conversations: {} }),
+    []
+  );
   const currentAppId = useMemo(() => new Rx.BehaviorSubject(''), []);
   if (application) {
     application.currentAppId$.subscribe((appId) => {
       if (appId) {
         currentAppId.next(appId);
-        baseConversations.next(elasticAssistant.getDefaultConversations(appId));
+        console.log(elasticAssistant.getAIAssistantDefaults(appId));
+        assistantDefaults.next(elasticAssistant.getAIAssistantDefaults(appId));
       }
     });
   }
@@ -180,13 +180,8 @@ export const AssistantProvider: React.FC = ({ children }) => {
       defaultAllow={defaultAllow} // to server and plugin start
       defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
-      baseAllow={DEFAULT_ALLOW} // to server and plugin start
-      baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT} // to server and plugin start
       basePath={basePath}
-      basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
-      baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
-      baseConversations={baseConversations}
+      assistantDefaults={assistantDefaults}
       getComments={getComments}
       http={http}
       setDefaultAllow={setDefaultAllow} // remove

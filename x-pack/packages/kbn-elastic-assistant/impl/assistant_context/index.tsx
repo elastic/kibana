@@ -17,6 +17,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { updatePromptContexts } from './helpers';
 import type {
+  AIAssistantDefaults,
   PromptContext,
   RegisterPromptContext,
   UnRegisterPromptContext,
@@ -24,10 +25,8 @@ import type {
 import type { Conversation } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
-import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { QuickPrompt } from '../assistant/quick_prompts/types';
 import type { KnowledgeBaseConfig, Prompt } from '../assistant/types';
-import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
@@ -61,14 +60,9 @@ export interface AssistantProviderProps {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  baseAllow: string[];
-  baseAllowReplacement: string[];
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePath: string;
-  basePromptContexts?: PromptContextTemplate[];
-  baseQuickPrompts?: QuickPrompt[];
-  baseSystemPrompts?: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
@@ -85,7 +79,7 @@ export interface AssistantProviderProps {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
-  baseConversations: Rx.BehaviorSubject<Record<string, Conversation>>;
+  assistantDefaults: Rx.BehaviorSubject<AIAssistantDefaults>;
   nameSpace?: string;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
@@ -106,16 +100,11 @@ export interface UseAssistantContext {
   ) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
-  baseAllow: string[];
-  baseAllowReplacement: string[];
   docLinks: Omit<DocLinksStart, 'links'>;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePath: string;
-  basePromptContexts: PromptContextTemplate[];
-  baseQuickPrompts: QuickPrompt[];
-  baseSystemPrompts: Prompt[];
-  baseConversations: Rx.BehaviorSubject<Record<string, Conversation>>;
+  assistantDefaults: Rx.BehaviorSubject<AIAssistantDefaults>;
   getComments: ({
     currentConversation,
     showAnonymizedValues,
@@ -159,19 +148,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   assistantAvailability,
   assistantTelemetry,
   augmentMessageCodeBlocks,
-  baseAllow,
-  baseAllowReplacement,
   defaultAllow,
   defaultAllowReplacement,
   docLinks,
   basePath,
-  basePromptContexts = [],
-  baseQuickPrompts = [],
-  baseSystemPrompts = BASE_SYSTEM_PROMPTS,
+  // baseSystemPrompts = BASE_SYSTEM_PROMPTS,
   children,
   getComments,
   http,
-  baseConversations,
+  assistantDefaults,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setDefaultAllow,
   setDefaultAllowReplacement,
@@ -184,7 +169,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [localStorageQuickPrompts, setLocalStorageQuickPrompts] = useLocalStorage(
     `${nameSpace}.${QUICK_PROMPT_LOCAL_STORAGE_KEY}`,
-    baseQuickPrompts
+    assistantDefaults.getValue().quickPrompts
   );
 
   /**
@@ -192,7 +177,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [localStorageSystemPrompts, setLocalStorageSystemPrompts] = useLocalStorage(
     `${nameSpace}.${SYSTEM_PROMPT_LOCAL_STORAGE_KEY}`,
-    baseSystemPrompts
+    assistantDefaults.getValue().systemPrompts
   );
 
   const [localStorageLastConversationTitle, setLocalStorageLastConversationTitle] =
@@ -273,14 +258,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      allQuickPrompts: localStorageQuickPrompts ?? [],
-      allSystemPrompts: localStorageSystemPrompts ?? [],
-      baseAllow: uniq(baseAllow),
-      baseAllowReplacement: uniq(baseAllowReplacement),
+      allQuickPrompts: assistantDefaults.getValue().quickPrompts ?? [],
+      allSystemPrompts: assistantDefaults.getValue().systemPrompts ?? [],
       basePath,
-      basePromptContexts,
-      baseQuickPrompts,
-      baseSystemPrompts,
       defaultAllow: uniq(defaultAllow),
       defaultAllowReplacement: uniq(defaultAllowReplacement),
       docLinks,
@@ -305,7 +285,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       unRegisterPromptContext,
       getLastConversationTitle,
       setLastConversationTitle: setLocalStorageLastConversationTitle,
-      baseConversations,
+      assistantDefaults,
       currentAppId,
     }),
     [
@@ -315,14 +295,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
-      localStorageQuickPrompts,
-      localStorageSystemPrompts,
-      baseAllow,
-      baseAllowReplacement,
       basePath,
-      basePromptContexts,
-      baseQuickPrompts,
-      baseSystemPrompts,
       defaultAllow,
       defaultAllowReplacement,
       docLinks,
@@ -345,7 +318,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       unRegisterPromptContext,
       getLastConversationTitle,
       setLocalStorageLastConversationTitle,
-      baseConversations,
+      assistantDefaults,
       currentAppId,
     ]
   );

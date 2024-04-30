@@ -15,7 +15,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
   TriggersAndActionsUIPublicPluginSetup,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Conversation } from '@kbn/elastic-assistant';
+import { AIAssistantDefaults } from '@kbn/elastic-assistant/impl/assistant/prompt_context/types';
 import { GetRegisteredBaseConversations } from './services/app_context';
 
 export interface ElasticAssistantPluginSetupDependencies {
@@ -37,9 +37,6 @@ export type StartServices = CoreStart &
   };
 
 export interface ElasticAssistantPublicPluginStart {
-  registerDefaultConversations: (
-    pluginName: string,
-    baseConversations: Record<string, Conversation>
-  ) => void;
-  getDefaultConversations: GetRegisteredBaseConversations;
+  registerAIAssistantDefaults: (pluginName: string, assistantDefaults: AIAssistantDefaults) => void;
+  getAIAssistantDefaults: GetRegisteredBaseConversations;
 }

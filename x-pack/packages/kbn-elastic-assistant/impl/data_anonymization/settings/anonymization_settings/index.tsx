@@ -45,7 +45,7 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
   setUpdatedDefaultAllow,
   setUpdatedDefaultAllowReplacement,
 }) => {
-  const { baseAllow, baseAllowReplacement } = useAssistantContext();
+  const { assistantDefaults } = useAssistantContext();
 
   const onListUpdated = useCallback(
     (updates: BatchUpdateListItem[]) => {
@@ -66,9 +66,9 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
   );
 
   const onReset = useCallback(() => {
-    setUpdatedDefaultAllow(baseAllow);
-    setUpdatedDefaultAllowReplacement(baseAllowReplacement);
-  }, [baseAllow, baseAllowReplacement, setUpdatedDefaultAllow, setUpdatedDefaultAllowReplacement]);
+    setUpdatedDefaultAllow(assistantDefaults.getValue().allowFields ?? []);
+    setUpdatedDefaultAllowReplacement(assistantDefaults.getValue().allowReplacementFields ?? []);
+  }, [assistantDefaults, setUpdatedDefaultAllow, setUpdatedDefaultAllowReplacement]);
 
   const anonymized: number = useMemo(() => {
     const allowSet = new Set(defaultAllow);

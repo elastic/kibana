@@ -94,7 +94,7 @@ const AssistantComponent: React.FC<Props> = ({
     getLastConversationTitle,
     title,
     allSystemPrompts,
-    baseConversations,
+    assistantDefaults,
   } = useAssistantContext();
 
   const { getDefaultConversation, getConversation, deleteConversation } = useConversation();
@@ -110,8 +110,11 @@ const AssistantComponent: React.FC<Props> = ({
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations.getValue(), conversationsData),
-    [baseConversations]
+      mergeBaseWithPersistedConversations(
+        assistantDefaults.getValue().conversations,
+        conversationsData
+      ),
+    [assistantDefaults]
   );
   const {
     data: conversationsData,

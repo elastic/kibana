@@ -66,6 +66,10 @@ import { TopValuesPopoverService } from './app/components/top_values_popover/top
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { getBaseConversations } from './assistant/tools';
+import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './assistant/content/anonymization';
+import { PROMPT_CONTEXTS } from './assistant/content/prompt_contexts';
+import { BASE_SECURITY_QUICK_PROMPTS } from './assistant/content/quick_prompts';
+import { BASE_SECURITY_SYSTEM_PROMPTS } from './assistant/content/prompts/system';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -371,7 +375,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    plugins.elasticAssistant.registerDefaultConversations(APP_UI_ID, getBaseConversations());
+    plugins.elasticAssistant.registerAIAssistantDefaults(APP_UI_ID, {
+      conversations: getBaseConversations(),
+      allowFields: DEFAULT_ALLOW,
+      allowReplacementFields: DEFAULT_ALLOW_REPLACEMENT,
+      promptContexts: Object.values(PROMPT_CONTEXTS),
+      quickPrompts: BASE_SECURITY_QUICK_PROMPTS, // to server and plugin start
+      systemPrompts: BASE_SECURITY_SYSTEM_PROMPTS,
+    });
 
     return this.contract.getStartContract();
   }
