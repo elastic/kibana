@@ -103,7 +103,7 @@ export const setRecoveredAlertsContext = async <ActionGroupIds extends string>({
   defaultStartedAt: string;
   spaceId: string;
 }) => {
-  for await (const recoveredAlert of alertsClient?.getRecoveredAlerts() ?? []) {
+  for (const recoveredAlert of alertsClient?.getRecoveredAlerts() ?? []) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const alertUuid = recoveredAlert.alert.getUuid();
     const indexedStartedAt = recoveredAlert.alert.getStart() ?? defaultStartedAt;

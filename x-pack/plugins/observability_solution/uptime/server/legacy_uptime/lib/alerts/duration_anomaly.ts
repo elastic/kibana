@@ -187,7 +187,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             'url.full': summary.monitorUrl,
             'observer.geo.name': summary.observerLocation,
             'anomaly.start': summary.anomalyStartTimestamp,
-            'anomaly.bucket_span.minutes': `${summary.bucketSpan}`,
+            'anomaly.bucket_span.minutes': summary.bucketSpan as unknown as string,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_REASON]: alertReasonMessage,
