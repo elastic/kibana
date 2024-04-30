@@ -115,15 +115,19 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
-  execution_status: {
-    status: rule.executionStatus.status,
-    ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
-    ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
-    last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
-    ...(rule.executionStatus.lastDuration !== undefined
-      ? { last_duration: rule.executionStatus.lastDuration }
-      : {}),
-  },
+  ...(rule.executionStatus
+    ? {
+        execution_status: {
+          status: rule.executionStatus.status,
+          ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
+          ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
+          last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
+          ...(rule.executionStatus.lastDuration !== undefined
+            ? { last_duration: rule.executionStatus.lastDuration }
+            : {}),
+        },
+      }
+    : {}),
   ...(rule.monitoring ? { monitoring: transformMonitoring(rule.monitoring) } : {}),
   ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
   ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
