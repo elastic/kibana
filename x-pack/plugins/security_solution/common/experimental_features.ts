@@ -125,7 +125,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout in timeline
    */
-  expandableTimelineFlyoutEnabled: false,
+  expandableTimelineFlyoutEnabled: true,
   /*
 
   /**
