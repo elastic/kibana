@@ -32,6 +32,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/console-plugin"
   ],
   "exclude": [
     "target/**/*",
