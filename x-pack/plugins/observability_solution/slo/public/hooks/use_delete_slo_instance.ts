@@ -44,7 +44,7 @@ export function useDeleteSloInstance() {
       onError: (error, { slo }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.slo.deleteInstance.errorNotification', {
-            defaultMessage: 'Failed to delete {name} [instance = {instanceId}]',
+            defaultMessage: 'Failed to delete {name} [instance: {instanceId}]',
             values: { name: slo.name, instanceId: slo.instanceId },
           }),
         });
@@ -54,7 +54,7 @@ export function useDeleteSloInstance() {
 
         toasts.addSuccess(
           i18n.translate('xpack.slo.slo.delete.successNotification', {
-            defaultMessage: 'Deleted {name} [instance = {instanceId}]',
+            defaultMessage: 'Deleted {name} [instance: {instanceId}]',
             values: { name: slo.name, instanceId: slo.instanceId },
           })
         );
