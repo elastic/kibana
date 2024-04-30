@@ -414,9 +414,11 @@ export class TaskScheduling {
       });
 
       if (cancel) {
-        cancel.then(() => {
-          subscription.unsubscribe();
-        }, reject);
+        cancel
+          .then(() => {
+            subscription.unsubscribe();
+          })
+          .catch(() => {});
       }
     });
   }
