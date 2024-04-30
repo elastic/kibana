@@ -127,11 +127,15 @@ describe('Observability AI Assistant client', () => {
   function createClient() {
     jest.resetAllMocks();
 
+    // uncomment this line for debugging
+    // const consoleOrPassThrough = console.log.bind(console);
+    const consoleOrPassThrough = () => {};
+
     loggerMock = {
-      log: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-      trace: jest.fn(),
+      log: jest.fn().mockImplementation(consoleOrPassThrough),
+      error: jest.fn().mockImplementation(consoleOrPassThrough),
+      debug: jest.fn().mockImplementation(consoleOrPassThrough),
+      trace: jest.fn().mockImplementation(consoleOrPassThrough),
       isLevelEnabled: jest.fn().mockReturnValue(true),
     } as any;
 

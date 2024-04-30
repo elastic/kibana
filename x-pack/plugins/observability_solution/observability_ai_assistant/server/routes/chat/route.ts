@@ -16,6 +16,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { screenContextRt, messageRt, functionRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import { withAssistantSpan } from '../../service/util/with_assistant_span';
 
 const chatCompleteBaseRt = t.type({
   body: t.intersection([
@@ -68,14 +69,16 @@ async function guardAgainstInvalidConnector({
   request: KibanaRequest;
   connectorId: string;
 }) {
-  const actionsClient = await actions.getActionsClientWithRequest(request);
+  return withAssistantSpan('guard_against_invalid_connector', async () => {
+    const actionsClient = await actions.getActionsClientWithRequest(request);
 
-  const connector = await actionsClient.get({
-    id: connectorId,
-    throwIfSystemAction: true,
+    const connector = await actionsClient.get({
+      id: connectorId,
+      throwIfSystemAction: true,
+    });
+
+    return connector;
   });
-
-  return connector;
 }
 
 const chatRoute = createObservabilityAIAssistantServerRoute({

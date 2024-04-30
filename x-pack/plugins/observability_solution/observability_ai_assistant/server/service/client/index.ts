@@ -25,6 +25,7 @@ import {
   combineLatest,
   tap,
   catchError,
+  defer,
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
@@ -448,14 +449,13 @@ export class ObservabilityAIAssistantClient {
       simulateFunctionCalling?: boolean;
     }
   ): Observable<ChatCompletionChunkEvent | TokenCountEvent> => {
-    return of(undefined).pipe(
-      switchMap(() =>
-        from(
-          withAssistantSpan('get_connector', () =>
-            this.dependencies.actionsClient.get({ id: connectorId, throwIfSystemAction: true })
-          )
+    return defer(() =>
+      from(
+        withAssistantSpan('get_connector', () =>
+          this.dependencies.actionsClient.get({ id: connectorId, throwIfSystemAction: true })
         )
-      ),
+      )
+    ).pipe(
       switchMap((connector) => {
         this.dependencies.logger.debug(`Creating "${connector.actionTypeId}" adapter`);
 

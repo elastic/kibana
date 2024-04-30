@@ -92,13 +92,14 @@ export function getGeneratedTitle({
         if (typeof event === 'string') {
           logger.debug(`Generated title: ${event}`);
         }
-      }),
-      catchError((error) => {
-        logger.error(`Error generating title`);
-        logger.error(error);
-        // TODO: i18n
-        return of('New conversation');
       })
     )
+  ).pipe(
+    catchError((error) => {
+      logger.error(`Error generating title`);
+      logger.error(error);
+      // TODO: i18n
+      return of('New conversation');
+    })
   );
 }
