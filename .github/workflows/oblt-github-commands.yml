@@ -50,8 +50,7 @@ jobs:
 
               Just comment with:
               - \`/oblt-deploy\` : Deploy a Kibana instance using the Observability test environments.
-              - \`run\` \`elasticsearch-ci/docs\` : Re-trigger the docs validation. (use unformatted text in the comment!)
-
+              - \`run\` \`docs-build\` : Re-trigger the docs validation. (use unformatted text in the comment!)
               </p>
               </details>
             `.replace(/  +/g, '')
