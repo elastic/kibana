@@ -16,14 +16,26 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
 
-const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
-const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./components/doc_viewer_source'));
+const fallback = (
+  <EuiDelayRender delay={300}>
+    <EuiSkeletonText />
+  </EuiDelayRender>
+);
+
+const LazyDocViewerLogsOverview = dynamic(() => import('./components/doc_viewer_logs_overview'), {
+  fallback,
+});
+const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
+  fallback,
+});
+const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
+const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
 
 export interface UnifiedDocViewerSetup {
   registry: DocViewsRegistry;
@@ -45,6 +57,18 @@ export class UnifiedDocViewerPublicPlugin
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
     this.docViewsRegistry.add({
+      id: 'doc_view_logs_overview',
+      title: i18n.translate('unifiedDocViewer.docViews.logsOverview.title', {
+        defaultMessage: 'Overview',
+      }),
+      order: 0,
+      enabled: false, // Disabled doc view by default, can be programmatically enabled using the DocViewsRegistry.prototype.enableById method.
+      component: (props) => {
+        return <LazyDocViewerLogsOverview {...props} />;
+      },
+    });
+
+    this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -53,24 +77,15 @@ export class UnifiedDocViewerPublicPlugin
       component: (props) => {
         const { textBasedHits } = props;
         const { uiSettings } = getUnifiedDocViewerServices();
-        const DocView = isLegacyTableEnabled({
+
+        const LazyDocView = isLegacyTableEnabled({
           uiSettings,
           isTextBasedQueryMode: Array.isArray(textBasedHits),
         })
-          ? DocViewerLegacyTable
-          : DocViewerTable;
+          ? LazyDocViewerLegacyTable
+          : LazyDocViewerTable;
 
-        return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <DocView {...props} />
-          </React.Suspense>
-        );
+        return <LazyDocView {...props} />;
       },
     });
 
@@ -82,22 +97,14 @@ export class UnifiedDocViewerPublicPlugin
       order: 20,
       component: ({ hit, dataView, textBasedHits }) => {
         return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <SourceViewer
-              index={hit.raw._index}
-              id={hit.raw._id ?? hit.id}
-              dataView={dataView}
-              textBasedHits={textBasedHits}
-              hasLineNumbers
-              onRefresh={() => {}}
-            />
-          </React.Suspense>
+          <LazySourceViewer
+            index={hit.raw._index}
+            id={hit.raw._id ?? hit.id}
+            dataView={dataView}
+            textBasedHits={textBasedHits}
+            hasLineNumbers
+            onRefresh={() => {}}
+          />
         );
       },
     });

@@ -66,7 +66,7 @@ export const getFieldListFactory = (
   > = {
     type: FIELD_LIST_ID,
     deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState) as FieldListSerializedStateState;
+      const serializedState = cloneDeep(state.rawState);
       // inject the reference
       const dataViewIdRef = state.references?.find(
         (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
@@ -97,6 +97,9 @@ export const getFieldListFactory = (
       const initialDataView = await dataViews.get(initialDataViewId);
       const selectedDataViewId$ = new BehaviorSubject<string | undefined>(initialDataViewId);
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([initialDataView]);
+      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
+        initialState.selectedFieldNames
+      );
 
       subscriptions.add(
         selectedDataViewId$
@@ -106,17 +109,15 @@ export const getFieldListFactory = (
           )
           .subscribe((nextSelectedDataView) => {
             dataViews$.next([nextSelectedDataView]);
+            selectedFieldNames$.next([]);
           })
-      );
-
-      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
-        initialState.selectedFieldNames
       );
 
       const api = buildApi(
         {
           ...titlesApi,
           dataViews: dataViews$,
+          selectedFields: selectedFieldNames$,
           serializeState: () => {
             const dataViewId = selectedDataViewId$.getValue();
             const references: Reference[] = dataViewId
