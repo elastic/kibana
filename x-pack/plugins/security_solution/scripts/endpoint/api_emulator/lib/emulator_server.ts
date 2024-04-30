@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -17,25 +15,29 @@ import type { DeferredPromiseInterface } from '../../common/utils';
 import { getDeferredPromise, prefixedOutputLogger } from '../../common/utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 
-interface EmulatorServerOptions {
-  services?: Record<string, any>;
+interface EmulatorServerOptions<TServices extends {} = {}> {
+  /**
+   * An object that contains services to be exposed
+   */
+  services?: TServices;
   logger?: ToolingLog;
   logPrefix?: string;
   port?: number;
 }
 
-export class EmulatorServer {
-  protected readonly server: Hapi.Server;
+export class EmulatorServer<TServices extends {} = {}> {
+  protected readonly server: Hapi.Server & { app: { services: TServices | {} } };
   protected log: ToolingLog;
   private stoppedDeferred: DeferredPromiseInterface;
   private wasStarted: boolean = false;
 
-  constructor(protected readonly options: EmulatorServerOptions = {}) {
+  constructor(protected readonly options: EmulatorServerOptions<TServices> = {}) {
     this.log = prefixedOutputLogger(
       (this.options.logPrefix || this.constructor.name) ?? 'EmulatorServer',
       options.logger ?? createToolingLogger()
     );
 
+    // @ts-expect-error
     this.server = Hapi.server({
       port: this.options.port ?? 0,
     });
@@ -99,6 +101,7 @@ export class EmulatorServer {
                       `a callback function for 'route.options' is not currently supported!`
                     );
                   }
+
                   routeDefinition.options = routeDefinition.options ?? {};
                   routeDefinition.options.pre = routeDefinition.options.pre ?? [];
                   routeDefinition.options.pre.unshift({
@@ -125,6 +128,7 @@ export class EmulatorServer {
   }
 
   public route() {
+    throw new Error(`Not implemented yet`);
     // TODO:PT implememnt
   }
 
