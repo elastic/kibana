@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -50,6 +58,16 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
 
             <EuiIcon type="discuss" size="xl" />
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.searchPlayground.startNewChat.description"
+                defaultMessage="Combine your Elasticsearch data with the power of large language models for retrieval augmented generation (RAG). Use the UI to view and edit the Elasticsearch queries used to search your data, then download the code to integrate into your own application."
+              />
+            </p>
+          </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
