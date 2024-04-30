@@ -131,10 +131,33 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
 
 /**
  * Map of status codes to response schemas.
+ *
+ * @note Response schemas can be expensive to instantiate. We expect consumers
+ * to provide these schemas lazily since they may not be needed.
+ *
+ * @note The {@link TypeOf} type utility from @kbn/config-schema can extract
+ * types from lazily created schemas
+ *
+ * @example
+ *
+ * ```ts
+ * // Avoid this:
+ * const responseSchema = schema.object({ foo: foo.string() });
+ * // Do this:
+ * const lazyResponseSchema = () => schema.object({ foo: foo.string() });
+ *
+ * type ResponseType = TypeOf<typeof lazyResponseSchema>; // Can take a func
+ * ...
+ * router.post(
+ *  { validation: { response: responseSchema } },
+ *  handlerFn
+ * )
+ * ...
+ * ```
  * @public
  */
 export interface RouteValidatorFullConfigResponse {
-  [statusCode: number]: { body: ObjectType | Type<any> };
+  [statusCode: number]: { body: LazyValidator };
   unsafe?: {
     body?: boolean;
   };
@@ -146,6 +169,9 @@ export interface RouteValidatorFullConfigResponse {
  */
 export interface RouteValidatorRequestAndResponses<P, Q, B> {
   request: RouteValidatorFullConfigRequest<P, Q, B>;
+  /**
+   * Response schemas for your route.
+   */
   response?: RouteValidatorFullConfigResponse;
 }
 
@@ -156,3 +182,14 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
 export type RouteValidator<P, Q, B> =
   | RouteValidatorFullConfigRequest<P, Q, B>
   | RouteValidatorRequestAndResponses<P, Q, B>;
+
+/**
+ * A validation schema factory.
+ *
+ * @note Used to lazily create schemas that are otherwise not needed
+ * @note Assume this function will only be called once
+ *
+ * @return A @kbn/config-schema schema
+ * @public
+ */
+export type LazyValidator = () => Type<unknown>;
