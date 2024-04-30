@@ -15,10 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
+import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
