@@ -6,12 +6,11 @@
  */
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import moment from 'moment';
 import { ALL_VALUE } from '@kbn/slo-schema';
-
+import moment from 'moment';
 import { Duration, DurationUnit } from '../domain/models';
+import { DefaultBurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
-import { DefaultSLIClient } from './sli_client';
 
 const commonEsResponse = {
   took: 100,
@@ -41,7 +40,7 @@ describe('SummaryClient', () => {
     jest.useRealTimers();
   });
 
-  describe('fetchSLIDataFrom', () => {
+  describe('burnRatesClient', () => {
     const LONG_WINDOW = 'long_window';
     const SHORT_WINDOW = 'short_window';
 
@@ -65,10 +64,10 @@ describe('SummaryClient', () => {
                   to_as_string: '2022-12-31T23:54:00.000Z',
                   doc_count: 60,
                   total: {
-                    value: 32169,
+                    value: 5000,
                   },
                   good: {
-                    value: 15748,
+                    value: 4500,
                   },
                 },
               ],
@@ -83,19 +82,19 @@ describe('SummaryClient', () => {
                   to_as_string: '2022-12-31T23:54:00.000Z',
                   doc_count: 5,
                   total: {
-                    value: 2211,
+                    value: 300,
                   },
                   good: {
-                    value: 772,
+                    value: 290,
                   },
                 },
               ],
             },
           },
         });
-        const summaryClient = new DefaultSLIClient(esClientMock);
+        const client = new DefaultBurnRatesClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
+        const results = await client.calculate(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
@@ -132,8 +131,16 @@ describe('SummaryClient', () => {
           },
         });
 
-        expect(result[LONG_WINDOW]).toMatchObject({ good: 15748, total: 32169 });
-        expect(result[SHORT_WINDOW]).toMatchObject({ good: 772, total: 2211 });
+        expect(results.find((result) => result.name === LONG_WINDOW)).toMatchObject({
+          name: LONG_WINDOW,
+          sli: 0.9,
+          burnRate: 100,
+        });
+        expect(results.find((result) => result.name === SHORT_WINDOW)).toMatchObject({
+          name: SHORT_WINDOW,
+          sli: 0.966667,
+          burnRate: 33.333,
+        });
       });
     });
 
@@ -144,7 +151,7 @@ describe('SummaryClient', () => {
           objective: {
             target: 0.95,
             timesliceTarget: 0.9,
-            timesliceWindow: new Duration(10, DurationUnit.Minute),
+            timesliceWindow: new Duration(5, DurationUnit.Minute),
           },
         });
 
@@ -158,17 +165,17 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               buckets: [
                 {
-                  key: '2022-12-31T22:36:00.000Z-2022-12-31T23:36:00.000Z',
+                  key: '2022-12-31T22:46:00.000Z-2022-12-31T23:46:00.000Z',
                   from: 1672526160000,
-                  from_as_string: '2022-12-31T22:36:00.000Z',
+                  from_as_string: '2022-12-31T22:46:00.000Z',
                   to: 1672529760000,
-                  to_as_string: '2022-12-31T23:36:00.000Z',
-                  doc_count: 60,
+                  to_as_string: '2022-12-31T23:46:00.000Z',
+                  doc_count: 12,
                   total: {
-                    value: 32169,
+                    value: 12,
                   },
                   good: {
-                    value: 15748,
+                    value: 10,
                   },
                 },
               ],
@@ -176,26 +183,26 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               buckets: [
                 {
-                  key: '2022-12-31T23:31:00.000Z-2022-12-31T23:36:00.000Z',
+                  key: '2022-12-31T23:41:00.000Z-2022-12-31T23:46:00.000Z',
                   from: 1672529460000,
-                  from_as_string: '2022-12-31T23:31:00.000Z',
+                  from_as_string: '2022-12-31T23:41:00.000Z',
                   to: 1672529760000,
-                  to_as_string: '2022-12-31T23:36:00.000Z',
-                  doc_count: 5,
+                  to_as_string: '2022-12-31T23:46:00.000Z',
+                  doc_count: 1,
                   total: {
-                    value: 2211,
+                    value: 1,
                   },
                   good: {
-                    value: 772,
+                    value: 1,
                   },
                 },
               ],
             },
           },
         });
-        const summaryClient = new DefaultSLIClient(esClientMock);
+        const client = new DefaultBurnRatesClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
+        const results = await client.calculate(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
@@ -204,8 +211,8 @@ describe('SummaryClient', () => {
                 field: '@timestamp',
                 ranges: [
                   {
-                    from: '2022-12-31T22:36:00.000Z',
-                    to: '2022-12-31T23:36:00.000Z',
+                    from: '2022-12-31T22:46:00.000Z',
+                    to: '2022-12-31T23:46:00.000Z',
                   },
                 ],
               },
@@ -227,8 +234,8 @@ describe('SummaryClient', () => {
                 field: '@timestamp',
                 ranges: [
                   {
-                    from: '2022-12-31T23:31:00.000Z',
-                    to: '2022-12-31T23:36:00.000Z',
+                    from: '2022-12-31T23:41:00.000Z',
+                    to: '2022-12-31T23:46:00.000Z',
                   },
                 ],
               },
@@ -248,8 +255,16 @@ describe('SummaryClient', () => {
           },
         });
 
-        expect(result[LONG_WINDOW]).toMatchObject({ good: 15748, total: 32169 });
-        expect(result[SHORT_WINDOW]).toMatchObject({ good: 772, total: 2211 });
+        expect(results.find((result) => result.name === LONG_WINDOW)).toMatchObject({
+          name: LONG_WINDOW,
+          sli: 0.833333,
+          burnRate: 3.33334,
+        });
+        expect(results.find((result) => result.name === SHORT_WINDOW)).toMatchObject({
+          name: SHORT_WINDOW,
+          sli: 1,
+          burnRate: 0,
+        });
       });
     });
   });
