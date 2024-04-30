@@ -2575,14 +2575,7 @@
         "label": "AssetDocument",
         "description": [],
         "signature": [
-          "AssetKindDocument",
-          "<\"host\"> | ",
-          "AssetKindDocument",
-          "<\"pod\"> | ",
-          "AssetKindDocument",
-          "<\"container\"> | ",
-          "AssetKindDocument",
-          "<\"service\">"
+          "ServiceAssetDocument"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/assets/index.ts",
         "deprecated": false,
