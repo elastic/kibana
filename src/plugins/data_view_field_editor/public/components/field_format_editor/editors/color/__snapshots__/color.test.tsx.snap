@@ -82,7 +82,6 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
   <EuiSpacer
@@ -181,7 +180,6 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
   <EuiSpacer
@@ -280,7 +278,6 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
   <EuiSpacer

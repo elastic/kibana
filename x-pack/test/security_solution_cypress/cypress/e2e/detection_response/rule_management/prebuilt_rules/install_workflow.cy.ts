@@ -32,7 +32,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     describe('Installation of prebuilt rules', () => {
       const RULE_1 = createRuleAssetSavedObject({

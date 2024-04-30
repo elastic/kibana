@@ -42,7 +42,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { captureCallingStack, prefixedOutputLogger } from '../utils';
+import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
@@ -62,7 +62,6 @@ import {
   getFleetElasticsearchOutputHost,
   waitForHostToEnroll,
 } from '../fleet_services';
-import { dump } from '../../endpoint_agent_runner/utils';
 import { getLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
 

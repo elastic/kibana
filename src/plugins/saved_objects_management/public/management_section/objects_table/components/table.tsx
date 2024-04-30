@@ -234,7 +234,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTypeName', {
           defaultMessage: 'Type',
         }),
-        width: '50px',
+        width: '65px',
         align: 'center',
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.table.columnTypeDescription',

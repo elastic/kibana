@@ -10,7 +10,7 @@ import Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
-import { deleteField, stripBadDefault } from './utils';
+import { deleteField, stripBadDefault, processDeprecated } from './utils';
 import { IContext } from '../context';
 
 const {
@@ -62,6 +62,7 @@ export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void 
 };
 
 export const processAny = (schema: OpenAPIV3.SchemaObject): void => {
+  processDeprecated(schema);
   stripBadDefault(schema);
 };
 

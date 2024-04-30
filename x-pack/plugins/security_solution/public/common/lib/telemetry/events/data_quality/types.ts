@@ -11,7 +11,7 @@ import type { TelemetryEventTypes } from '../../constants';
 export type ReportDataQualityIndexCheckedParams = ReportDataQualityCheckAllCompletedParams & {
   errorCount?: number;
   ilmPhase?: string;
-  indexId?: string;
+  indexId?: string | null;
   indexName: string;
   sameFamilyFields?: string[];
   unallowedMappingFields?: string[];

@@ -14,7 +14,7 @@ import { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
-import { getRuleRoute, getInternalRuleRoute } from './get_rule';
+import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
 import { deleteRuleRoute } from './delete_rule';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
@@ -41,7 +41,7 @@ import { snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
-import { bulkEnableRulesRoute } from './bulk_enable_rules';
+import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
 import { cloneRuleRoute } from './rule/apis/clone/clone_rule_route';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
@@ -65,6 +65,12 @@ import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_ge
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+
+// backfill API
+import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
+import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
+import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
+import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -139,4 +145,10 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   getQueryDelaySettingsRoute(router, licenseState);
   updateQueryDelaySettingsRoute(router, licenseState);
+
+  // backfill APIs
+  scheduleBackfillRoute(router, licenseState);
+  getBackfillRoute(router, licenseState);
+  findBackfillRoute(router, licenseState);
+  deleteBackfillRoute(router, licenseState);
 }

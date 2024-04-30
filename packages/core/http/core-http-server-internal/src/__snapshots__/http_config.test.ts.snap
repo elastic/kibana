@@ -73,6 +73,9 @@ Object {
     "valueInBytes": 1048576,
   },
   "name": "kibana-hostname",
+  "oas": Object {
+    "enabled": false,
+  },
   "payloadTimeout": 20000,
   "port": 5601,
   "requestId": Object {

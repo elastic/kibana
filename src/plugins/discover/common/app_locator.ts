@@ -14,7 +14,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
-import { addProfile } from './customizations';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -106,10 +105,6 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;
-  /**
-   * The Discover profile to use
-   */
-  profile?: string;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -153,7 +148,6 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       hideAggregatedPreview,
       breakdownField,
       isAlertResults,
-      profile,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -193,13 +187,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (dataViewSpec) state.dataViewSpec = dataViewSpec;
     if (isAlertResults) state.isAlertResults = isAlertResults;
 
-    let path = '#/';
-
-    if (profile) {
-      path = addProfile(path, profile);
-    }
-
-    path = `${path}${savedSearchPath}`;
+    let path = `#/${savedSearchPath}`;
 
     if (searchSessionId) {
       path = `${path}?searchSessionId=${searchSessionId}`;
