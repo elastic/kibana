@@ -39,7 +39,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
     fieldFormats,
   };
 
-  const EmptyContext: FC<PropsWithChildren> = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (

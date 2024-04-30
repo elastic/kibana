@@ -29,7 +29,9 @@ const patchComment = jest.fn();
 const clearDraftComment = jest.fn();
 const openLensModal = jest.fn();
 
-const wrapper: FC<PropsWithChildren> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useUserActionsHandler', () => {
   beforeAll(() => {
