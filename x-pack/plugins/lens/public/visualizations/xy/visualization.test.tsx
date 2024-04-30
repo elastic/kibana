@@ -612,7 +612,7 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: ['value' as LegendValue.Value],
+            legendStats: ['currentAndLastValue' as LegendValue.CurrentAndLastValue],
           },
         };
 
@@ -3844,7 +3844,7 @@ describe('xy_visualization', () => {
       expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
       expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
 
-      state.legend.legendStats = ['value' as LegendValue.Value];
+      state.legend.legendStats = ['currentAndLastValue' as LegendValue.CurrentAndLastValue];
       const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
       expect(legendStatsState.legend.legendStats).not.toBeDefined();
       expect(legendStatsState.valuesInLegend).toEqual(true);

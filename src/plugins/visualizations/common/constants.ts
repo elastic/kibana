@@ -53,5 +53,6 @@ export const SUPPORTED_AGGREGATIONS = [
 ] as const;
 
 export enum LegendValue {
+  CurrentAndLastValue = 'currentAndLastValue',
   Value = 'value',
 }

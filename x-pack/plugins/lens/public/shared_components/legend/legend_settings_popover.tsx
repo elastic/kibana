@@ -113,7 +113,7 @@ export interface LegendSettingsPopoverProps {
   /**
    * Callback on value in legend status change
    */
-  onLegendStatsChange?: (legendStats?: LegendValue[]) => void;
+  onLegendStatsChange?: (checked?: boolean) => void;
   /**
    * If true, value in legend switch is rendered
    */
@@ -333,13 +333,9 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-show-value"
                 showLabel={false}
-                checked={legendStats?.[0] === LegendValue.Value}
+                checked={!!legendStats?.length}
                 onChange={(ev) => {
-                  if (ev.target.checked) {
-                    onLegendStatsChange([LegendValue.Value]);
-                  } else {
-                    onLegendStatsChange([]);
-                  }
+                  onLegendStatsChange(ev.target.checked);
                 }}
               />
             </EuiFormRow>
