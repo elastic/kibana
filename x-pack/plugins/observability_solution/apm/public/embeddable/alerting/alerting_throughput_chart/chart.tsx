@@ -11,6 +11,7 @@ import ThroughputChart from '../../../components/alerting/ui_components/alert_de
 import { EmbeddableAPMAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
+import { ServiceNameCallout } from '../service_name_callout';
 
 export function APMAlertingThroughputChart({
   rule,
@@ -41,9 +42,8 @@ export function APMAlertingThroughputChart({
     return <TimeRangeCallout />;
   }
 
-  // Todo: Add error state
   if (!serviceName || !currentTransactionType) {
-    return null;
+    return <ServiceNameCallout />;
   }
 
   return (

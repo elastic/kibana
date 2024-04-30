@@ -11,6 +11,7 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useAlertingProps } from '../use_alerting_props';
 import { TimeRangeCallout } from '../time_range_callout';
 import type { EmbeddableAPMAlertingVizProps } from '../types';
+import { ServiceNameCallout } from '../service_name_callout';
 
 export function APMAlertingLatencyChart({
   rule,
@@ -49,7 +50,7 @@ export function APMAlertingLatencyChart({
   }
 
   if (!serviceName || !currentTransactionType) {
-    return null;
+    return <ServiceNameCallout />;
   }
 
   return (

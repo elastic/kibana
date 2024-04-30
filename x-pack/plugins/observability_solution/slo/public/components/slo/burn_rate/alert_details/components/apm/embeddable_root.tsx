@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { GetSLOResponse, APMTransactionDurationIndicator } from '@kbn/slo-schema';
-import { BurnRateAlert, BurnRateRule, TimeRange } from '../../types';
+import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../types';
 
 type EmbeddableId =
   | 'APM_THROUGHPUT_CHART_EMBEDDABLE'
