@@ -128,7 +128,7 @@ const mountComponent = async ({
   };
 
   const component = mountWithIntl(
-    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+    <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverMainContent {...props} />

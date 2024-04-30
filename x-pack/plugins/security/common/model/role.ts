@@ -54,7 +54,9 @@ export function isRoleSystem(role: Partial<Role>) {
  */
 export function isRoleAdmin(role: Partial<Role>) {
   return (
-    (isRoleReserved(role) && (role.name?.endsWith('_admin') || role.name === 'superuser')) ?? false
+    ((isRoleReserved(role) && (role.name?.endsWith('_admin') || role.name === 'superuser')) ||
+      isRoleWithWildcardBasePrivilege(role)) ??
+    false
   );
 }
 
@@ -78,8 +80,21 @@ export function getExtendedRoleDeprecationNotice(role: Partial<Role>) {
  *
  * @param role the Role as returned by roles API
  */
+export function isRoleWithWildcardBasePrivilege(role: Partial<Role>): boolean {
+  return role.kibana?.some((entry) => entry.base.includes('*')) ?? false;
+}
+
+/**
+ * Returns whether given role is editable through the UI or not.
+ *
+ * @param role the Role as returned by roles API
+ */
 export function isRoleReadOnly(role: Partial<Role>): boolean {
-  return isRoleReserved(role) || (role._transform_error?.length ?? 0) > 0;
+  return (
+    isRoleReserved(role) ||
+    isRoleWithWildcardBasePrivilege(role) ||
+    (role._transform_error?.length ?? 0) > 0
+  );
 }
 
 /**
