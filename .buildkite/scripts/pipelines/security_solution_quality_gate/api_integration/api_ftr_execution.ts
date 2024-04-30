@@ -27,25 +27,21 @@ const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 // Function to execute a command and return a Promise with the status code
 function executeCommand(command: string, envVars: any, workDir: string): Promise<number> {
   return new Promise((resolve, reject) => {
-    const log = new ToolingLog({
-      level: 'info',
-      writeTo: process.stdout,
-    });
     const childProcess = exec(command, { env: envVars, cwd: workDir });
 
     // Listen for stdout data
     childProcess.stdout?.on('data', (data) => {
-      log.info(data);
+      console.log(data);
     });
 
     // Listen for stderr data
     childProcess.stderr?.on('data', (data) => {
-      log.error(data);
+      console.log(data);
     });
 
     // Listen for process exit
     childProcess.on('exit', (code) => {
-      log.info(`Child process exits with code : ${code}`);
+      console.log(`Child process exits with code : ${code}`);
       if (code !== 0) {
         reject(code);
         return;
