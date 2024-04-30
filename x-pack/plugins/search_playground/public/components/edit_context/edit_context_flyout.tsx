@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiPanel,
@@ -26,6 +27,7 @@ import {
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
@@ -90,7 +92,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.title"
-              defaultMessage="Edit Context"
+              defaultMessage="Edit context"
             />
           </h2>
         </EuiTitle>
@@ -99,8 +101,18 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.description"
-              defaultMessage="Documents retrieved and selected fields will be used to build the context."
+              defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
+            <EuiLink
+              href={docLinks.chatPlayground}
+              target="_blank"
+              data-test-subj="context-optimization-documentation-link"
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.editContext.flyout.learnMoreLink"
+                defaultMessage=" Learn more."
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </EuiFlyoutHeader>
@@ -113,7 +125,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                   prepend={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Retrieved Documents',
+                      defaultMessage: 'Retrieved documents',
                     }
                   )}
                   options={[
@@ -138,7 +150,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                 <h5>
                   <FormattedMessage
                     id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected Fields"
+                    defaultMessage="Selected fields"
                   />
                 </h5>
               </EuiText>

@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiIconTip,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
@@ -108,13 +107,8 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         <>
           <FormattedMessage
             id="xpack.searchPlayground.sidebar.summarizationModel.label"
-            defaultMessage="Summarization Model"
+            defaultMessage="Model"
           />{' '}
-          <EuiIconTip
-            content={i18n.translate('xpack.searchPlayground.sidebar.summarizationModel.help', {
-              defaultMessage: 'The large language model used to summarize your documents.',
-            })}
-          />
         </>
       }
       labelAppend={
