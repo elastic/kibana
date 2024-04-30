@@ -7,6 +7,7 @@
  */
 
 import {
+  getAutoIndentedRequests,
   getCurlRequest,
   getDocumentationLinkFromAutocompleteContext,
   removeTrailingWhitespaces,
@@ -222,6 +223,59 @@ describe('monaco editor utils', () => {
       } as AutoCompleteContext['endpoint'];
       const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
       expect(link).toBe(expectedLink);
+    });
+  });
+
+  describe('getAutoIndentedRequests', () => {
+    const TEST_REQUEST_1 = {
+      method: 'GET',
+      url: '_search',
+      data: ['{\n  "query": {\n    "match_all": {}\n  }\n}'],
+    };
+
+    const TEST_REQUEST_2 = {
+      method: 'GET',
+      url: '_all',
+      data: [],
+    };
+
+    const TEST_REQUEST_3 = {
+      method: 'POST',
+      url: '/_bulk',
+      data: ['{\n  "index": {\n    "_index": "books"\n  }\n}', '{\n  "name": "1984"\n}'],
+    };
+
+    it('correctly auto-indents a single request with data', () => {
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_1]);
+      const expectedResult = 'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}';
+      expect(formattedData).toBe(expectedResult);
+    });
+
+    it('correctly auto-indents a single request with no data', () => {
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_2]);
+      const expectedResult = 'GET _all';
+
+      expect(formattedData).toBe(expectedResult);
+    });
+
+    it('correctly auto-indents a single request with multiple data', () => {
+      const formattedData = getAutoIndentedRequests([TEST_REQUEST_3]);
+      const expectedResult =
+        'POST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
+
+      expect(formattedData).toBe(expectedResult);
+    });
+
+    it('correctly auto-indents multiple request', () => {
+      const formattedData = getAutoIndentedRequests([
+        TEST_REQUEST_1,
+        TEST_REQUEST_2,
+        TEST_REQUEST_3,
+      ]);
+      const expectedResult =
+        'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}\n\nGET _all\n\nPOST /_bulk\n{\n  "index": {\n    "_index": "books"\n  }\n}\n{\n  "name": "1984"\n}';
+
+      expect(formattedData).toBe(expectedResult);
     });
   });
 });

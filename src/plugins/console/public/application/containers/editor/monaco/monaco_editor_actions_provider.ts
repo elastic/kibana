@@ -31,8 +31,9 @@ import {
   getCurlRequest,
   trackSentRequests,
   tokenizeRequestUrl,
-  getDocumentationLinkFromAutocompleteContext, getAutoIndentedRequests
-} from "./utils";
+  getDocumentationLinkFromAutocompleteContext,
+  getAutoIndentedRequests,
+} from './utils';
 
 const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
 
@@ -280,7 +281,7 @@ export class MonacoEditorActionsProvider {
     this.editor.executeEdits('', [
       {
         range,
-        text: autoIndentedRequests.join(`\n`),
+        text: autoIndentedRequests,
       },
     ]);
   }
