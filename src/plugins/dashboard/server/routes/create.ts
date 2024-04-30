@@ -8,6 +8,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { LATEST_VERSION } from '@kbn/data-views-plugin/common';
+import { Dashboard } from '../../common/api/2023_10_31';
 import { v2023_10_31 } from '../../common/api';
 import { DashboardStorage } from '../content_management';
 
@@ -32,11 +33,9 @@ export function registerCreate(router: VersionedRouter, cmStorage: DashboardStor
       },
       async (ctx, req, res) => {
         const { id: reqId, ...attrs } = req.body;
-        let id = reqId;
+        let result: Dashboard;
         try {
-          ({
-            item: { id },
-          } = await cmStorage.create(
+          ({ item: result } = await cmStorage.create(
             {} as any,
             {
               ...attrs,
@@ -53,7 +52,7 @@ export function registerCreate(router: VersionedRouter, cmStorage: DashboardStor
           // do some handling;
           throw e;
         }
-        return res.ok({ body: { id, ...req.body } });
+        return res.ok({ body: result });
       }
     );
 }
