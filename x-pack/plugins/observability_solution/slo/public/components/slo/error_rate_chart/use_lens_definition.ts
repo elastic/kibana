@@ -38,7 +38,7 @@ export function useLensDefinition({
   alertTimeRange?: TimeRange;
   annotations?: AlertAnnotation[];
   showErrorRateAsLine?: boolean;
-  selectedTabId: SloTabId;
+  selectedTabId?: SloTabId;
 }): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 

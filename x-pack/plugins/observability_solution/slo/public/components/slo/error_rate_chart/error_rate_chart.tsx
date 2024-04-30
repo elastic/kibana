@@ -22,7 +22,7 @@ interface Props {
   alertTimeRange?: TimeRange;
   showErrorRateAsLine?: boolean;
   annotations?: AlertAnnotation[];
-  selectedTabId: SloTabId;
+  selectedTabId?: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
