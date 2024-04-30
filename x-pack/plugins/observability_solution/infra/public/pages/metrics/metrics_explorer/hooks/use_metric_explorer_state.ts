@@ -23,7 +23,7 @@ import { useMetricsExplorerOptionsContainerContext } from './use_metrics_explore
 
 export type { MetricsExplorerViewState };
 
-export const useMetricsExplorerState = ({ enabled = true }: { enabled: boolean }) => {
+export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { enabled: true }) => {
   const {
     defaultViewState,
     options,

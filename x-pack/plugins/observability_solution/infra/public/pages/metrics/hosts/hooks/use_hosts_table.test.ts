@@ -148,6 +148,7 @@ describe('useHostTable hook', () => {
       },
       error: undefined,
       loading: false,
+      refetch: jest.fn(),
     } as ReturnType<typeof useMetricsDataViewHooks.useMetricsDataViewContext>);
 
     mockUseKibanaContextForPlugin.mockReturnValue({

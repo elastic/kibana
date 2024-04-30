@@ -335,7 +335,6 @@ export const ExpressionRow = ({
                   aggregationTypes={aggregationType}
                   onChange={handleCustomMetricChange}
                   errors={errors}
-                  dataView={metricsView?.dataViewReference}
                 />
               </StyledExpressionRow>
               <EuiSpacer size={'s'} />

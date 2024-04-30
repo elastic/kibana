@@ -8,17 +8,26 @@
 import React from 'react';
 import { MetricsExplorerChartContextMenu, Props } from './chart_context_menu';
 import { ReactWrapper, mount } from 'enzyme';
-import {
-  options,
-  source,
-  timeRange,
-  chartOptions,
-} from '../../../../utils/fixtures/metrics_explorer';
+import { options, timeRange, chartOptions } from '../../../../utils/fixtures/metrics_explorer';
 import { Capabilities } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { MetricsDataViewProvider, SourceProvider } from '../../../../containers/metrics_source';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { ResolvedDataView } from '../../../../utils/data_view';
 
 const coreStartMock = coreMock.createStart();
+
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
+
 const series = { id: 'exmaple-01', rows: [], columns: [] };
 const uiCapabilities: Capabilities = {
   navLinks: { show: false },
@@ -28,6 +37,24 @@ const uiCapabilities: Capabilities = {
   infrastructure: { save: true },
 };
 
+jest.mock('../../../../containers/metrics_source', () => ({
+  SourceProvider: jest.fn(({ children }) => <>{children}</>),
+  MetricsDataViewProvider: jest.fn(({ children }) => <>{children}</>),
+  useSourceContext: () => ({
+    source: { id: 'default' },
+  }),
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'metricbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
+  }),
+}));
+
 const getTestSubject = (component: ReactWrapper, name: string) => {
   return component.find(`[data-test-subj="${name}"]`).hostNodes();
 };
@@ -35,7 +62,11 @@ const getTestSubject = (component: ReactWrapper, name: string) => {
 const mountComponentWithProviders = (props: Props): ReactWrapper => {
   return mount(
     <KibanaContextProvider services={{ ...coreStartMock }}>
-      <MetricsExplorerChartContextMenu {...props} />
+      <SourceProvider sourceId="default">
+        <MetricsDataViewProvider>
+          <MetricsExplorerChartContextMenu {...props} />
+        </MetricsDataViewProvider>
+      </SourceProvider>
     </KibanaContextProvider>
   );
 };
@@ -56,7 +87,6 @@ describe('MetricsExplorerChartContextMenu', () => {
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options,
         onFilter,
@@ -74,7 +104,6 @@ describe('MetricsExplorerChartContextMenu', () => {
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options: customOptions,
         onFilter,
@@ -88,7 +117,6 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display "Add Filter" without onFilter', async () => {
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options,
         uiCapabilities,
@@ -103,7 +131,6 @@ describe('MetricsExplorerChartContextMenu', () => {
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options: customOptions,
         onFilter,
@@ -118,7 +145,6 @@ describe('MetricsExplorerChartContextMenu', () => {
       const customOptions = { ...options, metrics: [] };
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options: customOptions,
         uiCapabilities,
@@ -135,7 +161,6 @@ describe('MetricsExplorerChartContextMenu', () => {
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options,
         onFilter,
@@ -153,7 +178,6 @@ describe('MetricsExplorerChartContextMenu', () => {
       const customOptions = { ...options, groupBy: void 0 };
       const component = mountComponentWithProviders({
         timeRange,
-        source,
         series,
         options: customOptions,
         onFilter,

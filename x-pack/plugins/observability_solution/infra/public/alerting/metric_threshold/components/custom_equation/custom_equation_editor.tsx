@@ -56,7 +56,6 @@ export const CustomEquationEditor = ({
   fields,
   aggregationTypes,
   errors,
-  dataView,
 }: CustomEquationEditorProps) => {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.customMetrics ?? [NEW_METRIC]
@@ -134,7 +133,6 @@ export const CustomEquationEditor = ({
           disableDelete={disableDelete}
           onChange={handleChange}
           errors={errors}
-          dataView={dataView}
         />
       );
     }

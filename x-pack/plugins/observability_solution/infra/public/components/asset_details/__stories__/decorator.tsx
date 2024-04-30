@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { JSXElementConstructor, ReactElement } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   KibanaContextProvider,
@@ -22,12 +22,11 @@ import type {
   ISearchOptions,
   SearchSessionState,
 } from '@kbn/data-plugin/public';
-import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
 import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
-import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { MemoryRouter } from 'react-router-dom';
+import { AlertPrefillProvider } from '../../../alerting/use_alert_prefill';
 import { PluginConfigProvider } from '../../../containers/plugin_config_context';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
@@ -39,6 +38,7 @@ import type { InfraConfig } from '../../../../server';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
+  'timepicker:timeDefaults': ['now-15m', 'now'],
 };
 const getSettings = (key: string): any => settings[key];
 
@@ -59,6 +59,16 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         action(`Navigate to: ${url}`);
       },
       getUrlForApp: (url: string) => url,
+    },
+    chrome: {
+      docTitle: {
+        change(newTitle) {
+          action('chrome.docTitle.change')(newTitle);
+          return newTitle;
+        },
+      },
+      setBreadcrumbs: () => {},
+      setBreadcrumbsAppendExtension: () => {},
     },
     data: {
       search: {
@@ -96,9 +106,8 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       get: () => ({ key: 'mock', defaultOverride: undefined } as any),
     },
     triggersActionsUi: {
-      getAlertSummaryWidget: AlertSummaryWidget as (
-        props: AlertSummaryWidgetProps
-      ) => ReactElement<AlertSummaryWidgetProps, string | JSXElementConstructor<any>>,
+      getAlertSummaryWidget: () => <></>,
+      getAlertsStateTable: () => <></>,
     },
     charts: {
       theme: {
@@ -128,6 +137,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
               navigate: async () => {
                 return Promise.resolve();
               },
+              getRedirectUrl: (args: any) => {
+                action('share.url.locators.getRedirectUrl')(args);
+              },
             } as unknown as LocatorPublic<any>),
         },
       },
@@ -155,6 +167,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     telemetry: {
       reportAssetDetailsFlyoutViewed: () => {},
       reportAssetDetailsPageViewed: () => {},
+    },
+    observabilityShared: {
+      navigation: { PageTemplate: ({ children }: { children?: any }) => <>{children}</> },
     },
   };
 
@@ -197,7 +212,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       <MemoryRouter initialEntries={['/infra/metrics/hosts']}>
         <PluginConfigProvider value={config}>
           <KibanaContextProvider services={mockServices}>
-            <SourceProvider sourceId="default">{story()}</SourceProvider>
+            <SourceProvider sourceId="default">
+              <AlertPrefillProvider>{story()} </AlertPrefillProvider>
+            </SourceProvider>
           </KibanaContextProvider>
         </PluginConfigProvider>
       </MemoryRouter>
