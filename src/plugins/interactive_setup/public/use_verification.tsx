@@ -38,7 +38,7 @@ const [OuterVerificationProvider, useVerification] = constate(
   }
 );
 
-const InnerVerificationProvider: FC<PropsWithChildren> = ({ children }) => {
+const InnerVerificationProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 

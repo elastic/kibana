@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-export const mockCasesContext: FC<PropsWithChildren> = (props) => {
+export const mockCasesContext: FC<PropsWithChildren<unknown>> = (props) => {
   return <>{props?.children ?? null}</>;
 };
 mockCasesContext.displayName = 'CasesContextMock';
