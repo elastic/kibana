@@ -19,7 +19,6 @@ export function APMAlertingLatencyChart({
   environment = ENVIRONMENT_ALL.value,
   transactionType,
   transactionName,
-  timeZone,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
   latencyThresholdInMicroseconds,
@@ -35,6 +34,7 @@ export function APMAlertingLatencyChart({
     comparisonChartTheme,
     latencyAggregationType,
     setLatencyAggregationType,
+    timeZone,
   } = useAlertingProps({
     rule,
     rangeFrom,

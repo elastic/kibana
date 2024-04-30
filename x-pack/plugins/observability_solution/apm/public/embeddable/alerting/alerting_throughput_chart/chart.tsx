@@ -14,7 +14,6 @@ import { TimeRangeCallout } from '../time_range_callout';
 
 export function APMAlertingThroughputChart({
   rule,
-  timeZone,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
   transactionName,
@@ -29,6 +28,7 @@ export function APMAlertingThroughputChart({
     setTransactionType,
     transactionType: currentTransactionType,
     transactionTypes,
+    timeZone,
   } = useAlertingProps({
     rule,
     rangeTo,

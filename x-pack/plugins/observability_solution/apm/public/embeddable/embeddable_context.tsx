@@ -58,7 +58,7 @@ export function APMEmbeddableContext({
           <ApmThemeProvider>
             <KibanaContextProvider services={deps.coreStart}>
               <TimeRangeMetadataContextProvider
-                uiSettings={services.core.uiSettings}
+                uiSettings={deps.coreStart.uiSettings}
                 start={rangeFrom}
                 end={rangeTo}
                 kuery={kuery}

@@ -16,7 +16,6 @@ export function APMAlertingFailedTransactionsChart({
   rule,
   serviceName,
   environment = ENVIRONMENT_ALL.value,
-  timeZone,
   rangeFrom = 'now-15m',
   rangeTo = 'now',
   transactionType,
@@ -29,6 +28,7 @@ export function APMAlertingFailedTransactionsChart({
     transactionTypes,
     setTransactionType,
     comparisonChartTheme,
+    timeZone,
   } = useAlertingProps({
     rule,
     serviceName,

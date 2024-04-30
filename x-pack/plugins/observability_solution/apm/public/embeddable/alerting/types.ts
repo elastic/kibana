@@ -15,7 +15,6 @@ export interface EmbeddableAPMAlertingVizProps {
   transactionName?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  timeZone: string;
   latencyThresholdInMicroseconds?: number;
   kuery?: string;
   filters?: BoolQuery;
