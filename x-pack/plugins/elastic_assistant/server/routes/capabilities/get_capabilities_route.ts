@@ -40,7 +40,7 @@ export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHand
         validate: {
           response: {
             200: {
-              body: buildRouteValidationWithZod(GetCapabilitiesResponse),
+              body: { custom: buildRouteValidationWithZod(GetCapabilitiesResponse) },
             },
           },
         },
