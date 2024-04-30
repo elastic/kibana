@@ -999,6 +999,20 @@
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.playground",
+            "type": "Object",
+            "tags": [],
+            "label": "playground",
+            "description": [],
+            "signature": [
+              "{ readonly chatPlayground: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

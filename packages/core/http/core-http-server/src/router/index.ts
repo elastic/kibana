@@ -62,6 +62,7 @@ export type {
   RouteValidatorOptions,
   RouteValidator,
   RouteValidatorRequestAndResponses,
+  LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';

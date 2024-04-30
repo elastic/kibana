@@ -9,11 +9,10 @@ import React, { type FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { EuiErrorBoundary } from '@elastic/eui';
-
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { ScopedHistory } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { ExperimentalFeatures } from '../../common/config';
 import { SECTION_SLUG } from './common/constants';
@@ -49,8 +48,6 @@ export const renderApp = (
   enabledFeatures: TransformEnabledFeatures,
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  const I18nContext = appDependencies.i18n.Context;
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -61,21 +58,17 @@ export const renderApp = (
   });
 
   render(
-    <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...appDependencies}>
       <QueryClientProvider client={queryClient}>
-        <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
-          <KibanaContextProvider services={appDependencies}>
-            <I18nContext>
-              <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
-                <ExperimentalFeaturesContextProvider experimentalFeatures={experimentalFeatures}>
-                  <App history={appDependencies.history} />
-                </ExperimentalFeaturesContextProvider>
-              </EnabledFeaturesContextProvider>
-            </I18nContext>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
+        <KibanaContextProvider services={appDependencies}>
+          <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
+            <ExperimentalFeaturesContextProvider experimentalFeatures={experimentalFeatures}>
+              <App history={appDependencies.history} />
+            </ExperimentalFeaturesContextProvider>
+          </EnabledFeaturesContextProvider>
+        </KibanaContextProvider>
       </QueryClientProvider>
-    </EuiErrorBoundary>,
+    </KibanaRenderContextProvider>,
     element
   );
 

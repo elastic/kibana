@@ -12,7 +12,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import styled from 'styled-components';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -71,6 +70,7 @@ import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
+  BackLink,
   IntegrationAgentPolicyCount,
   UpdateIcon,
   IconPanel,
@@ -314,12 +314,7 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <EuiButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
-              <FormattedMessage
-                id="xpack.fleet.epm.browseAllButtonText"
-                defaultMessage="Back to integrations"
-              />
-            </EuiButtonEmpty>
+            <BackLink queryParams={queryParams} href={href} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -366,7 +361,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, href]
+    [integrationInfo, isLoading, packageInfo, href, queryParams]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(

@@ -19,6 +19,7 @@ import {
   EuiIconTip,
   EuiSkeletonTitle,
 } from '@elastic/eui';
+import { InfoIndicators } from '../../../../common/types';
 import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelQualityDegradedText,
@@ -28,7 +29,6 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
-import { InfoIndicators } from '../../common';
 
 export function DatasetsQualityIndicators() {
   const { datasetsQuality, isDatasetsQualityLoading, datasetsActivity } = useSummaryPanelContext();

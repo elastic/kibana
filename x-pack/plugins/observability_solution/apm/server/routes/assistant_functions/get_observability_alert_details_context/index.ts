@@ -36,6 +36,7 @@ export const observabilityAlertDetailsContextRt = t.intersection([
     // infrastructure fields
     'host.name': t.string,
     'container.id': t.string,
+    'kubernetes.pod.name': t.string,
   }),
 ]);
 
@@ -61,6 +62,7 @@ export async function getObservabilityAlertDetailsContext({
   const alertStartedAt = query.alert_started_at;
   const serviceEnvironment = query['service.environment'];
   const hostName = query['host.name'];
+  const kubernetesPodName = query['kubernetes.pod.name'];
   const [serviceName, containerId] = await Promise.all([
     getServiceNameFromSignals({
       query,
@@ -76,70 +78,93 @@ export async function getObservabilityAlertDetailsContext({
     }),
   ]);
 
+  async function handleError<T>(cb: () => Promise<T>): Promise<T | undefined> {
+    try {
+      return await cb();
+    } catch (error) {
+      logger.error('Error while fetching observability alert details context');
+      logger.error(error);
+      return;
+    }
+  }
+
   const serviceSummaryPromise = serviceName
-    ? getApmServiceSummary({
-        apmEventClient,
-        annotationsClient,
-        esClient,
-        apmAlertsClient,
-        mlClient,
-        logger,
-        arguments: {
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-          end: alertStartedAt,
-        },
-      })
+    ? handleError(() =>
+        getApmServiceSummary({
+          apmEventClient,
+          annotationsClient,
+          esClient,
+          apmAlertsClient,
+          mlClient,
+          logger,
+          arguments: {
+            'service.name': serviceName,
+            'service.environment': serviceEnvironment,
+            start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+            end: alertStartedAt,
+          },
+        })
+      )
     : undefined;
 
   const downstreamDependenciesPromise = serviceName
-    ? getAssistantDownstreamDependencies({
-        apmEventClient,
-        arguments: {
-          'service.name': serviceName,
-          'service.environment': serviceEnvironment,
-          start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-          end: alertStartedAt,
-        },
-      })
+    ? handleError(() =>
+        getAssistantDownstreamDependencies({
+          apmEventClient,
+          arguments: {
+            'service.name': serviceName,
+            'service.environment': serviceEnvironment,
+            start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+            end: alertStartedAt,
+          },
+        })
+      )
     : undefined;
 
-  const logCategoriesPromise = getLogCategories({
-    esClient,
-    coreContext,
-    arguments: {
-      start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-      end: alertStartedAt,
-      'service.name': serviceName,
-      'host.name': hostName,
-      'container.id': containerId,
-    },
-  });
+  const logCategoriesPromise = handleError(() =>
+    getLogCategories({
+      esClient,
+      coreContext,
+      arguments: {
+        start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+        end: alertStartedAt,
+        'service.name': serviceName,
+        'host.name': hostName,
+        'container.id': containerId,
+        'kubernetes.pod.name': kubernetesPodName,
+      },
+    })
+  );
 
-  const serviceChangePointsPromise = getServiceChangePoints({
-    apmEventClient,
-    alertStartedAt,
-    serviceName,
-    serviceEnvironment,
-    transactionType: query['transaction.type'],
-    transactionName: query['transaction.name'],
-  });
+  const serviceChangePointsPromise = handleError(() =>
+    getServiceChangePoints({
+      apmEventClient,
+      alertStartedAt,
+      serviceName,
+      serviceEnvironment,
+      transactionType: query['transaction.type'],
+      transactionName: query['transaction.name'],
+    })
+  );
 
-  const exitSpanChangePointsPromise = getExitSpanChangePoints({
-    apmEventClient,
-    alertStartedAt,
-    serviceName,
-    serviceEnvironment,
-  });
+  const exitSpanChangePointsPromise = handleError(() =>
+    getExitSpanChangePoints({
+      apmEventClient,
+      alertStartedAt,
+      serviceName,
+      serviceEnvironment,
+    })
+  );
 
-  const anomaliesPromise = getAnomalies({
-    start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
-    end: moment(alertStartedAt).valueOf(),
-    environment: serviceEnvironment,
-    mlClient,
-    logger,
-  });
+  const anomaliesPromise = handleError(() =>
+    getAnomalies({
+      start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
+      end: moment(alertStartedAt).valueOf(),
+      environment: serviceEnvironment,
+      mlClient,
+      logger,
+    })
+  );
 
   const [
     serviceSummary,

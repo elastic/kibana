@@ -11,7 +11,7 @@ import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default ({ getService }: FtrProviderContext) => {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
@@ -738,4 +738,4 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
   });
-};
+}
