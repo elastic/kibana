@@ -52,11 +52,10 @@ interface PublishesRows {
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   HasSavedSearch &
   HasLibraryTransforms &
-  HasEditCapabilities &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesRows &
-  Partial<PublishesSavedObjectId>;
+  Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
 // TODO: Delete
 export interface SearchOutput extends EmbeddableOutput {

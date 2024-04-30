@@ -20,7 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import {
+  apiHasAppContext,
+  apiHasParentApi,
   FetchContext,
+  HasAppContext,
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -36,6 +39,7 @@ import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -102,39 +106,16 @@ export const getSearchEmbeddableFactory = ({
         return { path: editPath, app: editApp };
       };
 
-      const api = buildApi(
+      const api: SearchEmbeddableApi = buildApi(
         {
           ...titlesApi,
           ...searchEmbeddableApi,
           dataLoading: dataLoading$,
           blockingError: blockingError$,
-          onEdit: async () => {
-            const stateTransfer = discoverServices.embeddable.getStateTransfer();
-            const parentApiContext = (api.parentApi as DashboardContainer).getAppContext();
-            const appTarget = await getAppTarget();
-
-            if (stateTransfer && parentApiContext && appTarget) {
-              const valueInput = serializeState();
-              await stateTransfer.navigateToEditor(appTarget.app, {
-                path: appTarget.path,
-                state: {
-                  embeddableId: uuid,
-                  valueInput: { id: uuid, ...valueInput },
-                  originatingApp: parentApiContext.currentAppId,
-                  searchSessionId: fetchContext$.getValue()?.searchSessionId,
-                  originatingPath: parentApiContext.getCurrentPath?.(),
-                },
-              });
-            }
-          },
-          getEditHref: async () => {
-            return (await getAppTarget())?.path;
-          },
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
               defaultMessage: 'search',
             }),
-          isEditingEnabled: startServices.isEditable,
           getSavedSearch: () => {
             return undefined;
           },
@@ -165,9 +146,6 @@ export const getSearchEmbeddableFactory = ({
             }),
           getByValueState: () => {
             const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
-            // console.log('getByValueState', {
-            //   attributes: searchEmbeddableApi.attributes$.getValue(),
-            // });
             return {
               ...byValueState,
               attributes: searchEmbeddableApi.attributes$.getValue(),
@@ -180,6 +158,35 @@ export const getSearchEmbeddableFactory = ({
           ...searchEmbeddableComparators,
         }
       );
+
+      /**
+       * If the parent is providing context, then the embeddable state transfer service can be used
+       * and editing should be allowed; otherwise, do not provide editing capabilities
+       */
+      const parentApiContext =
+        apiHasParentApi(api) && apiHasAppContext(api.parentApi)
+          ? api.parentApi.getAppContext()
+          : undefined;
+      if (parentApiContext) {
+        api.isEditingEnabled = startServices.isEditable;
+        api.onEdit = async () => {
+          const stateTransfer = discoverServices.embeddable.getStateTransfer();
+          const appTarget = await getAppTarget();
+          await stateTransfer.navigateToEditor(appTarget.app, {
+            path: appTarget.path,
+            state: {
+              embeddableId: uuid,
+              valueInput: api.getByValueState(),
+              originatingApp: parentApiContext.currentAppId,
+              searchSessionId: fetchContext$.getValue()?.searchSessionId,
+              originatingPath: parentApiContext.getCurrentPath?.(),
+            },
+          });
+        };
+        api.getEditHref = async () => {
+          return (await getAppTarget())?.path;
+        };
+      }
 
       const unsubscribeFromFetch = initializeFetch({
         api: {
@@ -202,7 +209,6 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               onUnmount();
               unsubscribeFromFetch();
-              appTargetSubscription.unsubscribe();
             };
           }, []);
 
@@ -251,6 +257,7 @@ export const getSearchEmbeddableFactory = ({
           );
 
           return (
+            // <KibanaRenderContextProvider {...discoverServices.core}>
             <KibanaContextProvider services={discoverServices}>
               {renderAsFieldStatsTable ? (
                 <SearchEmbeddablFieldStatsTableComponent
@@ -278,6 +285,7 @@ export const getSearchEmbeddableFactory = ({
                 </CellActionsProvider>
               )}
             </KibanaContextProvider>
+            // </KibanaRenderContextProvider>
           );
         },
       };
