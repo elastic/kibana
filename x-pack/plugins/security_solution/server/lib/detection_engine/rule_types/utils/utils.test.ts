@@ -575,6 +575,24 @@ describe('utils', () => {
         "The rule's max alerts per run setting (20) is greater than the Kibana alerting limit (10). The rule will only write a maximum of 10 alerts per rule run."
       );
     });
+
+    test('should use maxSignals value if maxSignals is less than alerting framework limit', async () => {
+      const { tuples, wroteWarningStatus, warningStatusMessage } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
+      const someTuple = tuples[0];
+      expect(someTuple.maxSignals).toEqual(20);
+      expect(tuples.length).toEqual(1);
+      expect(wroteWarningStatus).toEqual(false);
+      expect(warningStatusMessage).toEqual(undefined);
+    });
   });
 
   describe('getMaxCatchupRatio', () => {
