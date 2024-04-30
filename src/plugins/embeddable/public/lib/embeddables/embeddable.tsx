@@ -12,10 +12,10 @@ import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import {
-  EmbeddableAppContext,
   EmbeddableError,
   EmbeddableOutput,
   IEmbeddable,
