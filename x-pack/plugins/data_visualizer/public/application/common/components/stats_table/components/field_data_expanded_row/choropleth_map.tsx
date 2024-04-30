@@ -95,7 +95,7 @@ export const getChoroplethTopValuesLayer = (
 };
 
 interface Props {
-  stats: FieldVisStats | undefined;
+  stats: FieldVisStats;
   suggestion: EMSTermJoinConfig;
 }
 
@@ -106,14 +106,12 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
     },
   } = useDataVisualizerKibana();
 
-  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
+  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats;
 
   const layerList: VectorLayerDescriptor[] = useMemo(
     () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
     [suggestion, fieldName, topValues]
   );
-
-  if (!stats) return null;
 
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
 
