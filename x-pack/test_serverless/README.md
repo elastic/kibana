@@ -232,7 +232,6 @@ Steps to follow to run on QA environment:
   ```
   We would use these credentials for `TEST_ES_URL="https://USERNAME:PASSWORD@ES_HOSTNAME:443"` and `TEST_KIBANA_URL="https://USERNAME:PASSWORD@KIBANA_HOSTNAME"`
 - Now we need to create a user with the roles we want to test. Go to [members page](https://console.qa.cld.elstc.co/account/members) and click `[Invite member]`.
-  - Provide email. You can use your email, but with `elasticsearch.com` domain `name.lastname@elasticsearch.com`. Invite should appear in your inbox, accept it and check that you can login now.
   - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instanse access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
   - Create `.ftr/role_users.json` in the root of Kibana repo. Add record for created user.
     ```
