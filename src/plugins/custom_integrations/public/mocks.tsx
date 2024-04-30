@@ -25,7 +25,7 @@ function createCustomIntegrationsStart(): jest.Mocked<CustomIntegrationsStart> {
 
   return {
     languageClientsUiComponents: {},
-    ContextProvider: jest.fn(({ children }: PropsWithChildren) => (
+    ContextProvider: jest.fn(({ children }: PropsWithChildren<unknown>) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
       </CustomIntegrationsServicesProvider>

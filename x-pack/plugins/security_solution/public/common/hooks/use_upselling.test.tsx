@@ -30,7 +30,7 @@ jest.mock('../lib/kibana', () => {
 });
 
 const TestComponent = () => <div>{'TEST 1 2 3'}</div>;
-const RenderWrapper: FC<PropsWithChildren> = ({ children }) => {
+const RenderWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return <UpsellingProvider upsellingService={mockUpselling}>{children}</UpsellingProvider>;
 };
 

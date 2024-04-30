@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
