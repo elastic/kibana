@@ -194,7 +194,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
               />
             </EuiFlexItem>
           )}
-          {isEsqlRuleTypeEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
+          {((!isUpdateView && isEsqlRuleTypeEnabled) || esqlSelectableConfig.isSelected) && (
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqlRuleType"
