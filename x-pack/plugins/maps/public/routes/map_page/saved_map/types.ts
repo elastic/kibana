@@ -28,7 +28,7 @@ export interface ParsedMapStateJSON {
 }
 
 // parsed contents of uiStateJSON
-export interface ParsedUiState {
+export interface ParsedUiStateJSON {
   isLayerTOCOpen: boolean;
   openTOCDetails: string[];
 }

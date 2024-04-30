@@ -53,7 +53,7 @@ import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
-import { ParsedMapStateJSON, ParsedUiState } from './types';
+import { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
@@ -181,7 +181,7 @@ export class SavedMap {
       isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
     } else if (this._attributes?.uiStateJSON) {
       try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiState;
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
         if ('isLayerTOCOpen' in uiState) {
           isLayerTOCOpen = uiState.isLayerTOCOpen;
         }
@@ -196,7 +196,7 @@ export class SavedMap {
       openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
     } else if (this._attributes?.uiStateJSON) {
       try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiState;
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
         if ('openTOCDetails' in uiState) {
           openTOCDetails = uiState.openTOCDetails;
         }
@@ -585,7 +585,7 @@ export class SavedMap {
     this._attributes!.uiStateJSON = JSON.stringify({
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
-    } as ParsedUiState);
+    } as ParsedUiStateJSON);
   }
 
   private async _getAdHocDataViews() {
