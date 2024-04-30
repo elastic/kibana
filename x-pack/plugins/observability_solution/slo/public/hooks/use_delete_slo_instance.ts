@@ -53,7 +53,7 @@ export function useDeleteSloInstance() {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
         toasts.addSuccess(
-          i18n.translate('xpack.slo.slo.delete.successNotification', {
+          i18n.translate('xpack.slo.slo.deleteInstance.successNotification', {
             defaultMessage: 'Deleted {name} [instance: {instanceId}]',
             values: { name: slo.name, instanceId: slo.instanceId },
           })

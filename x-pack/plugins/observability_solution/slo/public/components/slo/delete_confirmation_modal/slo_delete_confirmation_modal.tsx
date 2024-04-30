@@ -115,7 +115,7 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
             fill
           >
             <FormattedMessage
-              id="xpack.slo.deleteConfirmationModal.deleteButtonLabel"
+              id="xpack.slo.deleteConfirmationModal.deleteInstanceButtonLabel"
               defaultMessage="Delete {instanceId}"
               values={{ instanceId }}
             />
@@ -155,7 +155,7 @@ function getTitleLabel(name: string): React.ReactNode {
 }
 
 function getInstanceTitleLabel(name: string, instanceId?: string): React.ReactNode {
-  return i18n.translate('xpack.slo.deleteConfirmationModal.title', {
+  return i18n.translate('xpack.slo.deleteConfirmationModal.instanceTitle', {
     defaultMessage: 'Delete {name} [{instanceId}]?',
     values: { name, instanceId },
   });
