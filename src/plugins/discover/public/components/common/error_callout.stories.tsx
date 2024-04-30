@@ -14,30 +14,29 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { storiesOf } from '@storybook/react';
 import { DiscoverServicesProvider } from '../../__mocks__/__storybook_mocks__/with_discover_services';
 import { ErrorCallout } from './error_callout';
 
-export const Default = () => {
+storiesOf('components/common/ErrorCallout', module).add('Error Callout', () => {
   const sampleError = new Error('This is a sample error message');
   return (
     <DiscoverServicesProvider>
       <ErrorCallout title="Sample Error Title" error={sampleError} />
     </DiscoverServicesProvider>
   );
-};
+});
 
-export const VeryLongErrorMessage = () => {
-  const sampleError = new Error(
-    'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
-  );
-  return (
-    <DiscoverServicesProvider>
-      <ErrorCallout title="Sample Error Title" error={sampleError} />
-    </DiscoverServicesProvider>
-  );
-};
-
-export default {
-  title: 'ErrorCallout',
-  component: ErrorCallout,
-};
+storiesOf('components/common/ErrorCallout', module).add(
+  'Error Callout with a very long error message without whitespace',
+  () => {
+    const sampleError = new Error(
+      'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
+    );
+    return (
+      <DiscoverServicesProvider>
+        <ErrorCallout title="Sample Error Title" error={sampleError} />
+      </DiscoverServicesProvider>
+    );
+  }
+);
