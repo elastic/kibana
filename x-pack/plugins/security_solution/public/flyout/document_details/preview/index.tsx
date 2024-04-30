@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { panels } from './panels';
 
 export type PreviewPanelPaths = 'rule-preview' | 'alert-reason-preview';
@@ -15,7 +16,7 @@ export const RulePreviewPanel: PreviewPanelPaths = 'rule-preview';
 export const AlertReasonPreviewPanel: PreviewPanelPaths = 'alert-reason-preview';
 
 export interface PreviewPanelProps extends FlyoutPanelProps {
-  key: 'document-details-preview';
+  key: typeof DocumentDetailsPreviewPanelKey;
   path?: PanelPath;
   params?: {
     id: string;

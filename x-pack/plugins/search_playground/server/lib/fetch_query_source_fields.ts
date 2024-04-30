@@ -103,7 +103,7 @@ export const parseFieldsCapabilities = (
 
       for (const index of indicesPresentIn) {
         const indexDoc = indexDocs.find((x) => x.index === index);
-        if ('rank_features' in field) {
+        if ('rank_features' in field || 'sparse_vector' in field) {
           const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
 
           const elserModelField = {
