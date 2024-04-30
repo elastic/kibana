@@ -22,7 +22,9 @@
       "licensing",
       "share",
       "kibanaUtils",
-      "alerting"
+      "alerting",
+//       "securitySolution",
+//       "securitySolutionServerless",
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]

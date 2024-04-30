@@ -30,6 +30,9 @@ import type {
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+// import { getProductProductFeatures } from '@kbn/security-solution-serverless/common/pli/pli_features';
+import { registerUpsellings } from '@kbn/security-solution-serverless/public';
+import { useKibana } from '../../common/hooks/use_kibana';
 import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
@@ -538,6 +541,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     handleSetupTechnologyChange,
     agentlessPolicy,
   }) => {
+    const { licensing } = useKibana().services;
+    // const t = getProductProductFeatures([]);
+    const t = registerUpsellings();
+    console.log(t);
+
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
