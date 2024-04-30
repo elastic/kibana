@@ -5,23 +5,23 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { findRulesRoute } from './find_rules';
+import { findRulesRoute } from './find_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { trackLegacyTerminology } from './lib/track_legacy_terminology';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 
 const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('./lib/track_legacy_terminology', () => ({
+jest.mock('../../../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
@@ -79,7 +79,6 @@ describe('findRulesRoute', () => {
           "includeSnoozeData": true,
           "options": Object {
             "defaultSearchOperator": "OR",
-            "filterConsumers": undefined,
             "page": 1,
             "perPage": 1,
           },
@@ -130,6 +129,7 @@ describe('findRulesRoute', () => {
           schedule: {
             interval: '1s',
           },
+          snoozeSchedule: [],
           actions: [
             {
               actionTypeId: '.server-log',
@@ -145,12 +145,12 @@ describe('findRulesRoute', () => {
             { actionTypeId: '.test', id: 'system_action-id', params: {}, uuid: '789' },
           ],
           params: { x: 42 },
-          updatedAt: '2024-03-21T13:15:00.498Z',
-          createdAt: '2024-03-21T13:15:00.498Z',
+          updatedAt: new Date('2024-03-21T13:15:00.498Z'),
+          createdAt: new Date('2024-03-21T13:15:00.498Z'),
           scheduledTaskId: '52125fb0-5895-11ec-ae69-bb65d1a71b72',
           executionStatus: {
             status: 'ok' as const,
-            lastExecutionDate: '2024-03-21T13:15:00.498Z',
+            lastExecutionDate: new Date('2024-03-21T13:15:00.498Z'),
             lastDuration: 1194,
           },
           revision: 0,
@@ -158,7 +158,6 @@ describe('findRulesRoute', () => {
       ],
     };
 
-    // @ts-expect-error: TS complains about group being undefined in the system action
     rulesClient.find.mockResolvedValueOnce(findResult);
 
     const [context, req, res] = mockHandlerArguments(
@@ -195,7 +194,6 @@ describe('findRulesRoute', () => {
                   "uuid": "789",
                 },
               ],
-              "apiKey": null,
               "api_key_owner": "2889684073",
               "consumer": "alerts",
               "created_at": "2024-03-21T13:15:00.498Z",
@@ -220,7 +218,7 @@ describe('findRulesRoute', () => {
                 "interval": "1s",
               },
               "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
-              "snooze_schedule": undefined,
+              "snooze_schedule": Array [],
               "tags": Array [],
               "throttle": null,
               "updated_at": "2024-03-21T13:15:00.498Z",
@@ -242,7 +240,6 @@ describe('findRulesRoute', () => {
           "includeSnoozeData": true,
           "options": Object {
             "defaultSearchOperator": "OR",
-            "filterConsumers": undefined,
             "page": 1,
             "perPage": 1,
           },
@@ -274,7 +271,6 @@ describe('findRulesRoute', () => {
                 uuid: '789',
               },
             ],
-            apiKey: null,
             api_key_owner: '2889684073',
             consumer: 'alerts',
             created_at: '2024-03-21T13:15:00.498Z',
@@ -299,7 +295,7 @@ describe('findRulesRoute', () => {
               interval: '1s',
             },
             scheduled_task_id: '52125fb0-5895-11ec-ae69-bb65d1a71b72',
-            snooze_schedule: undefined,
+            snooze_schedule: [],
             tags: [],
             throttle: null,
             updated_at: '2024-03-21T13:15:00.498Z',
