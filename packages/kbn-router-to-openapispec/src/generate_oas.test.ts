@@ -49,8 +49,8 @@ describe('generateOpenApiDocument', () => {
                         body: otherSchema,
                       },
                       response: {
-                        200: {
-                          body: schema.string({ maxLength: 10, minLength: 1 }),
+                        [200]: {
+                          body: () => schema.string({ maxLength: 10, minLength: 1 }),
                         },
                       },
                     },

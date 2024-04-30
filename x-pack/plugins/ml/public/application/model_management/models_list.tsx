@@ -486,7 +486,7 @@ export const ModelsList: FC<Props> = ({
   const columns: Array<EuiBasicTableColumn<ModelItem>> = [
     {
       align: 'left',
-      width: '40px',
+      width: '32px',
       isExpander: true,
       render: (item: ModelItem) => {
         if (!item.stats) {
@@ -512,7 +512,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      width: '215px',
+      width: '15%',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
@@ -533,7 +533,6 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
-      width: '300px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
@@ -567,6 +566,7 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
+      width: '15%',
       field: ModelsTableToConfigMapping.type,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
@@ -586,9 +586,9 @@ export const ModelsList: FC<Props> = ({
         </EuiFlexGroup>
       ),
       'data-test-subj': 'mlModelsTableColumnType',
-      width: '130px',
     },
     {
+      width: '10%',
       field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
@@ -604,9 +604,9 @@ export const ModelsList: FC<Props> = ({
         ) : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
-      width: '130px',
     },
     {
+      width: '20%',
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
         defaultMessage: 'Created at',
@@ -615,10 +615,9 @@ export const ModelsList: FC<Props> = ({
       render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
-      width: '210px',
     },
     {
-      width: '150px',
+      width: '15%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
@@ -768,7 +767,7 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
-          css={{ overflowX: 'auto' }}
+          responsiveBreakpoint={'xl'}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

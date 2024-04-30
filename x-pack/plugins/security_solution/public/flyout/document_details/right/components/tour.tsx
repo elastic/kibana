@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
@@ -15,8 +14,10 @@ import {
   getLeftSectionTourSteps,
 } from '../../shared/utils/tour_step_config';
 import { getField } from '../../shared/utils';
-import { DocumentDetailsRightPanelKey } from '..';
-import { DocumentDetailsLeftPanelKey } from '../../left';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour/tour';
@@ -25,7 +26,7 @@ import { SecurityStepId } from '../../../../common/components/guided_onboarding_
 /**
  * Guided tour for the right panel in details flyout
  */
-export const RightPanelTour: FC = memo(() => {
+export const RightPanelTour = memo(() => {
   const { isTourShown: isGuidedOnboardingTourShown } = useTourContext();
 
   const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
