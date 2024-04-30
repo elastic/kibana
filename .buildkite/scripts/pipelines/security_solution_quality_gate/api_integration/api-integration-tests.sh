@@ -15,7 +15,7 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true
 source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 
 
-node .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/start_api_ftr_execution
+TARGET_SCRIPT=$1 node .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/start_api_ftr_execution
 # ts-node .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/start_api_ftr_execution
 
 

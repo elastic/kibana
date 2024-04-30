@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-// import axios, { AxiosError } from 'axios';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { exec } from 'child_process';
 import crypto from 'crypto';
 
-import type {
-  Credentials,
-  ProjectHandler,
-} from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/project_handler';
+import type { ProjectHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/cloud_project_handler';
 import { ProxyHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
@@ -98,14 +94,31 @@ export const cli = () => {
 
       try {
         log.info('test');
-        exec('pwd', (error, stdout, stderr) => {
-          if (error) {
-            log.error(`exec error: ${error}`);
-            return;
-          }
+        const FORMATTED_ES_URL = project.es_url.replace('https://', '');
+        const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
 
-          log.info(`stdout: ${stdout}`);
-          log.error(`stderr: ${stderr}`);
+        const command = `yarn run ${process.env.TARGET_SCRIPT}`;
+        const testCloud = 1;
+        const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}:443`;
+        const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}:443`;
+        const workDir = 'x-pack/test/security_solution_api_integration';
+        const envVars = {
+          ...process.env,
+          TEST_CLOUD: testCloud.toString(),
+          TEST_ES_URL: testEsUrl,
+          TEST_KIBANA_URL: testKibanaUrl,
+        };
+        const childProcess = exec(command, { env: envVars, cwd: workDir });
+
+        childProcess.stdout?.on('data', (data) => {
+          log.info(data);
+        });
+        childProcess.stderr?.on('data', (data) => {
+          console.error(data);
+        });
+
+        childProcess.on('exit', (code) => {
+          console.log(`Exit code with status: ${code}`);
         });
       } catch (ex) {
         console.error('PR pipeline error', ex.message);
