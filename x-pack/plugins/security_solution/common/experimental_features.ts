@@ -103,7 +103,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
 
   /**
    * Enables expandable flyout in timeline
