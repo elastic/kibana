@@ -92,7 +92,7 @@ export async function getTransactionDurationChartPreview({
   const aggs = {
     series: {
       multi_terms: {
-        terms: [...getGroupByTerms(allGroupByFields)],
+        terms: getGroupByTerms(allGroupByFields),
         size: 1000,
       },
       aggs: {

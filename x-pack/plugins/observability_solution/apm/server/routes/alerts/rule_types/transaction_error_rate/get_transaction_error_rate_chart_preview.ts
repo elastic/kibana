@@ -99,7 +99,7 @@ export async function getTransactionErrorRateChartPreview({
       aggs: {
         series: {
           multi_terms: {
-            terms: [...getGroupByTerms(allGroupByFields)],
+            terms: getGroupByTerms(allGroupByFields),
             size: 1000,
             order: { _count: 'desc' as const },
           },
