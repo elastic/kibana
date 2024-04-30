@@ -58,8 +58,13 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem
+          grow
+          css={{
+            maxWidth: 500,
+          }}
+        >
           <EuiSuperDatePicker
             isLoading={false}
             start={start}

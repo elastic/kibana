@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
+
 export const SLOS_BASE_PATH = '/app/slos';
 export const SLO_PREFIX = '/slos';
 export const SLOS_PATH = '/' as const;
@@ -28,7 +30,7 @@ export const paths = {
     `${SLOS_BASE_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,
   sloDetails: (sloId: string, instanceId?: string, remoteName?: string, tabId?: string) => {
     const qs = new URLSearchParams();
-    if (!!instanceId && instanceId !== '*') qs.append('instanceId', instanceId);
+    if (!!instanceId && instanceId !== ALL_VALUE) qs.append('instanceId', instanceId);
     if (!!remoteName) qs.append('remoteName', remoteName);
     if (tabId) {
       return `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}/${tabId}?${qs.toString()}`;
