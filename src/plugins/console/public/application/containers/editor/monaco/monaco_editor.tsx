@@ -141,7 +141,6 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
         }}
-        editorDidMount={editorDidMountCallback}
         suggestionProvider={suggestionProvider}
       />
     </div>
