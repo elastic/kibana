@@ -20,13 +20,10 @@ async function checkPermissions() {
   } catch (err) {
     permissionsError = 'REQUEST_ERROR';
   }
-  return permissionsError;
+  return { error: permissionsError };
 }
 
 export const useCheckPermissions = () => {
-  const { data: permissionsError, isInitialLoading } = useQuery(
-    ['fetch-check-permissions'],
-    checkPermissions
-  );
-  return { isPermissionsLoading: isInitialLoading, permissionsError };
+  const { data, isInitialLoading } = useQuery(['fetch-check-permissions'], checkPermissions);
+  return { isPermissionsLoading: isInitialLoading, permissionsError: data?.error };
 };
