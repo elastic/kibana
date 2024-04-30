@@ -29,10 +29,7 @@ export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.Paths
       const mergedPathItem = mergedPaths[path];
 
       try {
-        mergedPathItem.summary = mergeOptionalPrimitiveValue(
-          sourcePathItem.summary,
-          mergedPathItem.summary
-        );
+        mergeOptionalPrimitiveValue('summary', sourcePathItem, mergedPathItem);
       } catch {
         throw new Error(
           `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
@@ -44,10 +41,7 @@ export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.Paths
       }
 
       try {
-        mergedPathItem.description = mergeOptionalPrimitiveValue(
-          sourcePathItem.description,
-          mergedPathItem.description
-        );
+        mergeOptionalPrimitiveValue('description', sourcePathItem, mergedPathItem);
       } catch {
         throw new Error(
           `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
@@ -111,23 +105,22 @@ function mergeOperations(
   }
 }
 
-function mergeOptionalPrimitiveValue<Value extends string | number | boolean | undefined>(
-  incoming: Value,
-  existing: Value
-): Value {
-  if (!incoming) {
-    return existing;
+function mergeOptionalPrimitiveValue<FieldName extends string>(
+  fieldName: FieldName,
+  source: { [field in FieldName]?: unknown },
+  merged: { [field in FieldName]?: unknown }
+): void {
+  if (!source[fieldName]) {
+    return;
   }
 
-  if (incoming && !existing) {
-    return incoming;
+  if (source[fieldName] && !merged[fieldName]) {
+    merged[fieldName] = source[fieldName];
   }
 
-  if (incoming !== existing) {
-    throw new Error('Primitive value merge conflict');
+  if (source[fieldName] !== merged[fieldName]) {
+    throw new Error(`${fieldName} merge conflict`);
   }
-
-  return existing;
 }
 
 function mergeParameters(
