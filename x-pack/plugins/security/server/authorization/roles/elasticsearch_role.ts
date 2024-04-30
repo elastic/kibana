@@ -45,7 +45,7 @@ export function transformElasticsearchRoleToRole(
   );
   return {
     name,
-    description: elasticsearchRole.description,
+    ...(elasticsearchRole.description && { description: elasticsearchRole.description }),
     metadata: elasticsearchRole.metadata,
     transient_metadata: elasticsearchRole.transient_metadata,
     elasticsearch: {
