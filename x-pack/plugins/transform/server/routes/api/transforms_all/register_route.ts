@@ -29,7 +29,7 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
       path: addInternalBasePath('transforms'),
       access: 'internal',
     })
-    .addVersion(
+    .addVersion<estypes.TransformGetTransformRequest, undefined, undefined>(
       {
         version: '1',
         validate: false,

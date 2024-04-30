@@ -23,7 +23,7 @@ export const getScheduleNotificationResponseActionsService =
     osqueryCreateActionService,
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
-  async ({ signals, responseActions }: Promise<ScheduleNotificationActions>) => {
+  async ({ signals, responseActions }: ScheduleNotificationActions) => {
     const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
     await Promise.all(
