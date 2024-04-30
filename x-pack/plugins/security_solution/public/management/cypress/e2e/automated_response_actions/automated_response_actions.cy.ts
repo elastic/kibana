@@ -73,8 +73,7 @@ describe(
       login();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/169828
-    describe.skip('From alerts', () => {
+    describe('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
