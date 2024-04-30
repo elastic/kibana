@@ -13,7 +13,7 @@ import { CellActionsProvider, useCellActionsContext } from './cell_actions_conte
 
 const action = makeAction('action-1', 'icon', 1);
 const mockGetTriggerCompatibleActions = jest.fn(async () => [action]);
-const ContextWrapper: FC<PropsWithChildren> = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <CellActionsProvider getTriggerCompatibleActions={mockGetTriggerCompatibleActions}>
     {children}
   </CellActionsProvider>
