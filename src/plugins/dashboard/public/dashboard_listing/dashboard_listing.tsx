@@ -42,6 +42,7 @@ export const DashboardListing = ({
     chrome: { theme },
     savedObjectsTagging,
     coreContext: { executionContext },
+    userProfile,
   } = pluginServices.getServices();
 
   useExecutionContext(executionContext, {
@@ -75,6 +76,7 @@ export const DashboardListing = ({
             overlays,
             http,
             theme,
+            userProfile,
           },
           toMountPoint,
           savedObjectsTagging: savedObjectsTaggingFakePlugin,
