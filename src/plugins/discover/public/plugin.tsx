@@ -46,6 +46,10 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -166,6 +170,7 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 /**
@@ -196,6 +201,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export type StartRenderServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
