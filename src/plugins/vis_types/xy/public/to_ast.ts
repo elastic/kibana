@@ -48,7 +48,7 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
     shouldTruncate: params.truncateLegend,
     showSingleSeries: true,
     legendSize,
-    legendStats: params.labels.show ? [LegendValue.Value] : undefined,
+    legendStats: params.labels.show ? [LegendValue.CurrentAndLastValue] : undefined,
   });
 
   return buildExpression([legend]);

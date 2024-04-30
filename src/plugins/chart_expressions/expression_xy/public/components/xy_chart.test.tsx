@@ -742,7 +742,10 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart
         {...defaultProps}
-        args={{ ...args, legend: { ...args.legend, legendStats: [LegendValue.Value] } }}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendStats: [LegendValue.CurrentAndLastValue] },
+        }}
       />
     );
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
@@ -757,7 +760,7 @@ describe('XYChart component', () => {
           ...args,
           legend: {
             ...args.legend,
-            legendStats: [LegendValue.Value],
+            legendStats: [LegendValue.CurrentAndLastValue],
           },
           layers: [dateHistogramLayer],
         }}
