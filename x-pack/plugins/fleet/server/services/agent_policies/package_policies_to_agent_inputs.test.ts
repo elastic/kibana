@@ -549,7 +549,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ]);
   });
 
-  it('returns agent inputs merged with overrides from package policies if available', async () => {
+  it('returns agent inputs merged with overrides from package policies if available for that input', async () => {
     expect(
       await storedPackagePoliciesToAgentInputs(
         [
@@ -558,13 +558,12 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             inputs: [
               {
                 ...mockInput,
-                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
               },
             ],
             namespace: '',
             overrides: {
               inputs: {
-                'some-uuid': {
+                'test-logs-some-uuid': {
                   agent: {
                     logging: {
                       level: 'debug',
@@ -600,12 +599,119 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
           },
+          {
+            data_stream: {
+              dataset: 'bar',
+              type: 'logs',
+            },
+            id: 'test-logs-bar',
+          },
         ],
       },
     ]);
   });
 
-  it('returns agent inputs if overrides are empty', async () => {
+  it('returns agent inputs merged with overrides based on passed input id', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [mockInput, mockInput2],
+            namespace: '',
+            overrides: {
+              inputs: {
+                'test-logs-some-uuid': {
+                  agent: {
+                    logging: {
+                      level: 'debug',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+        packageInfoCache
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        agent: {
+          logging: {
+            level: 'debug',
+          },
+        },
+        data_stream: {
+          namespace: 'default',
+        },
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'logs',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-logs-foo',
+          },
+          {
+            data_stream: {
+              dataset: 'bar',
+              type: 'logs',
+            },
+            id: 'test-logs-bar',
+          },
+        ],
+        type: 'test-logs',
+        use_output: 'default',
+      },
+      {
+        data_stream: {
+          namespace: 'default',
+        },
+        id: 'test-metrics-some-template-some-uuid',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        streams: [
+          {
+            data_stream: {
+              dataset: 'foo',
+              type: 'metrics',
+            },
+            fooKey: 'fooValue1',
+            fooKey2: ['fooValue2'],
+            id: 'test-metrics-foo',
+          },
+        ],
+        type: 'test-metrics',
+        use_output: 'default',
+      },
+    ]);
+  });
+
+  it('returns unchanged agent inputs if overrides are empty', async () => {
     expect(
       await storedPackagePoliciesToAgentInputs(
         [

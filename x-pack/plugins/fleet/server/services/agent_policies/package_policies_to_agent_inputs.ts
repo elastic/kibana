@@ -95,9 +95,10 @@ export const mergeInputsOverrides = (
   if (packagePolicy?.overrides?.inputs) {
     const overrideInputs = packagePolicy.overrides.inputs;
     const keys = Object.keys(overrideInputs);
-    if (keys.length === 0) return fullInput;
 
-    return deepMerge<FullAgentPolicyInput>(fullInput, overrideInputs[keys[0]]);
+    if (keys.length > 0 && fullInput.id === keys[0]) {
+      return deepMerge<FullAgentPolicyInput>(fullInput, overrideInputs[keys[0]]);
+    }
   }
   return fullInput;
 };
