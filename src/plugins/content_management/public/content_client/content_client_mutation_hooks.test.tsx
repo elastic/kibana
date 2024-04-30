@@ -28,7 +28,7 @@ const setup = () => {
   });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
-  const Wrapper: FC<PropsWithChildren> = ({ children }) => (
+  const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
   );
 
