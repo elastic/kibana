@@ -154,7 +154,6 @@ export async function getPodEvents(client: any, podName: string, namespace: stri
   };
 
   const esResponse = await client.search(dsl);
-  console.log(esResponse);
   var  event = {} as Event;
   if (esResponse.hits.hits.length > 0) {
     const hit = esResponse.hits.hits[0];
@@ -167,7 +166,8 @@ export async function getPodEvents(client: any, podName: string, namespace: stri
       'reason': reason,
       'note': note,
       'time': lastObserved,
-      'type': eventType
+      'type': eventType,
+      'pod': podName
     };
   }
   return event;

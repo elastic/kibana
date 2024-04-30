@@ -12,14 +12,14 @@ import {extractFieldValue, phaseToState, Event} from '../lib/utils';
 import {getPodEvents} from './pods';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
-    DEPLOYMENT_STATUS_ROUTE,
+    DAEMONSET_STATUS_ROUTE,
 } from '../../common/constants';
 
-export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
+export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
       access: 'internal',
-      path: DEPLOYMENT_STATUS_ROUTE,
+      path: DAEMONSET_STATUS_ROUTE,
     })
     .addVersion(
       {
@@ -27,7 +27,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              deployment_name: schema.string(),
+              daemonset_name: schema.string(),
               namespace: schema.string(),
             }),
           },
@@ -38,15 +38,16 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
         const musts = [
             {
                 term: {
-                  'resource.attributes.k8s.deployment.name': request.query.deployment_name,
+                  'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
                 },
-              },
-              {
+            },
+            {
                 term: {
                   'resource.attributes.k8s.namespace.name': request.query.namespace,
                 },
-              },
-              { exists: { field: 'metrics.k8s.deployment.available' } }
+            },
+            {   exists: { field: 'metrics.k8s.daemonset.ready_nodes' } 
+            }
           ];
         const dsl: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
@@ -55,8 +56,8 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
             _source: false,
             fields: [
               '@timestamp',
-              'metrics.k8s.deployment.available',
-              'metrics.k8s.deployment.desired',
+              'metrics.k8s.daemonset.ready_nodes',
+              'metrics.k8s.daemonset.desired_scheduled_nodes',
               'resource.attributes.k8s.*',
             ],
             query: {
@@ -68,24 +69,24 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
         console.log(musts);
         console.log(dsl);
         const esResponse = await client.search(dsl);
-        console.log(esResponse.hits);
+        console.log(esResponse);
         if (esResponse.hits.hits.length > 0) {
             const hit = esResponse.hits.hits[0];
             const { fields = {} } = hit;
-            const replicasAvailable = extractFieldValue(fields['metrics.k8s.deployment.available']);
-            const replicasdesired = extractFieldValue(fields['metrics.k8s.deployment.desired']);
+            const readyNodes = extractFieldValue(fields['metrics.k8s.daemonset.ready_nodes']);
+            const desiredNodes = extractFieldValue(fields['metrics.k8s.daemonset.desired_scheduled_nodes']);
             var message = '';
             var reason = '';
             const time = extractFieldValue(fields['@timestamp']);
-            if (replicasAvailable == replicasdesired) {
-                message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has as many replicas available as desired`;
+            if (readyNodes == desiredNodes) {
+                message = `Daemonset ${request.query.namespace}/${request.query.daemonset_name} has as many ready nodes as desired`;
                 return response.ok({
                     body: {
                     time: time,
                     message: message,
-                    replicasAvailable: replicasAvailable,
-                    replicasDesired:replicasdesired,
-                    name: request.query.deployment_name,
+                    readyNodes: readyNodes,
+                    desiredNodes: desiredNodes,
+                    name: request.query.daemonset_name,
                     namespace: request.query.namespace,
                     reason: reason,
                     },
@@ -95,7 +96,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                 const musts = [
                     {
                         term: {
-                        'resource.attributes.k8s.deployment.name': request.query.deployment_name,
+                        'resource.attributes.k8s.daemonset.name': request.query.daemonset_name,
                         },
                     },
                     {
@@ -105,7 +106,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                     },
                     { exists: { field: 'metrics.k8s.pod.phase' } }
                 ];
-                var size: number = +replicasdesired;
+                var size: number = +desiredNodes;
                 const dslPods: estypes.SearchRequest = {
                     index: ["metrics-otel.*"],
                     size: size,
@@ -135,21 +136,20 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                     const { fields = {} } = hit;
                     const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
                     const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-                    message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has ${replicasdesired} replicas desired but ${replicasAvailable} are available`;
+                    message = `Daemonset ${request.query.namespace}/${request.query.daemonset_name} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
                     if (podPhase !== 2 && podPhase !== 3) {
                         console.log(podName);
                         console.log(podPhase);
                         const state = phaseToState(podPhase);
-                        reason = `Pod ${request.query.namespace}/${podName} is in ${state} state`;
                         var failingReason = {} as Event;
                         const event = await getPodEvents(client, podName, request.query.namespace);
                         if (event.note != '') {
                             failingReason = event;
                         }
                         var pod = {
-                          'name': podName,
-                          'state': state,
-                          'event': failingReason,
+                            'name': podName,
+                            'state': state,
+                            'event': failingReason,
                         };
                         notRunningPods.push(pod);
                     }
@@ -157,32 +157,32 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                 var reasons = new Array();
                 var events = new Array();
                 for (const pod of notRunningPods) {
-                    reason = `Pod ${request.query.namespace}/${pod.name} is in ${pod.state} state`;
-                    reasons.push(reason);
+                    reason += `Pod ${request.query.namespace}/${pod.name} is in ${pod.state} state`;
+                    reasons.push(reason)
                     if (Object.keys(pod.event).length !== 0) {
                         events.push(pod.event);
                     }
                 }
                 return response.ok({
-                  body: {
-                  time: time,
-                  message: message,
-                  replicasAvailable: replicasAvailable,
-                  replicasDesired:replicasdesired,
-                  name: request.query.deployment_name,
-                  namespace: request.query.namespace,
-                  reason: reasons.join(" & "),
-                  events: events,
-                  },
-              });
+                    body: {
+                    time: time,
+                    message: message,
+                    readyNodes: readyNodes,
+                    desiredNodes: desiredNodes,
+                    name: request.query.daemonset_name,
+                    namespace: request.query.namespace,
+                    reason: reasons.join(" & "),
+                    events: events,
+                    },
+                });
             }
         } else {
-            message =  `Deployment ${request.query.namespace}/${request.query.deployment_name} not found`
+            message =  `Daemonset ${request.query.namespace}/${request.query.daemonset_name} not found`
             return response.ok({
                 body: {
                 time: '',
                 message: message,
-                name: request.query.deployment_name,
+                name: request.query.daemonset_name,
                 namespace: request.query.namespace,
                 reason: "Not found",
                 },

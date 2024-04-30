@@ -10,6 +10,7 @@ export type Event = {
     reason: string;
     type: string;
     time: string;
+    pod: string;
   };
 
 export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {

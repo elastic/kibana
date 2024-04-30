@@ -8,6 +8,7 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import { registerPodsRoute } from './pods';
 import { registerDeploymentsRoute } from './deployments';
+import { registerDaemonsetsRoute } from './daemonsets';
 
 
 export const registerRoutes = (
@@ -17,4 +18,5 @@ export const registerRoutes = (
 ) => {
   registerPodsRoute(router, logger);
   registerDeploymentsRoute(router, logger);
+  registerDaemonsetsRoute(router, logger);
 };
