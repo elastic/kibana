@@ -17,6 +17,8 @@ import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import { TaskRunnerContext } from './types';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AdHocTaskRunner } from './ad_hoc_task_runner';
 
 export class TaskRunnerFactory {
   private isInitialized = false;
@@ -67,10 +69,27 @@ export class TaskRunnerFactory {
       RecoveryActionGroupId,
       AlertData
     >({
-      ruleType,
-      taskInstance,
       context: this.taskRunnerContext!,
       inMemoryMetrics,
+      internalSavedObjectsRepository: this.taskRunnerContext!.savedObjects.createInternalRepository(
+        [RULE_SAVED_OBJECT_TYPE]
+      ),
+      ruleType,
+      taskInstance,
+    });
+  }
+
+  public createAdHoc({ taskInstance }: RunContext) {
+    if (!this.isInitialized) {
+      throw new Error('TaskRunnerFactory not initialized');
+    }
+
+    return new AdHocTaskRunner({
+      taskInstance,
+      context: this.taskRunnerContext!,
+      internalSavedObjectsRepository: this.taskRunnerContext!.savedObjects.createInternalRepository(
+        [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE]
+      ),
     });
   }
 }

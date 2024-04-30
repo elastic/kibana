@@ -144,7 +144,7 @@ describe(
       });
 
       // https://github.com/elastic/kibana/issues/179248
-      describe('Managed data section', { tags: ['@skipInServerless'] }, () => {
+      describe('Managed data section', { tags: ['@skipInServerlessMKI'] }, () => {
         beforeEach(() => {
           mockFleetInstalledIntegrations([
             {
