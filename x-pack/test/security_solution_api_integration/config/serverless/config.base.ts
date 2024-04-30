@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GenericFtrProviderContext } from '@kbn/test';
-import type { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
-
-export type FtrProviderContextWithSpaces = GenericFtrProviderContext<typeof services, {}>;
 
 export interface CreateTestConfigOptions {
   testFiles: string[];
@@ -19,7 +16,7 @@ export interface CreateTestConfigOptions {
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
-  return async ({ readConfigFile }: FtrProviderContextWithSpaces) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../../../test_serverless/shared/config.base.ts')
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -16,7 +16,7 @@ import {
   BarePinnedEventWithoutExternalRefs,
   TimelineWithoutExternalRefs,
 } from '@kbn/security-solution-plugin/common/api/timeline';
-import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { getSavedObjectFromES } from '../../../../utils';
 
 interface TimelineWithoutSavedQueryId {
