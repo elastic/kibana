@@ -30,7 +30,11 @@ export const useEsqlIndex = (
       return '';
     }
     const esqlQuery = typeof query === 'string' && isEsqlRule(ruleType) ? query : undefined;
-    return getIndexPatternFromESQLQuery(esqlQuery);
+    try {
+      return getIndexPatternFromESQLQuery(esqlQuery);
+    } catch (e) {
+      return '';
+    }
   }, [query, isQueryReadEnabled, ruleType]);
 
   const index = useMemo(() => getIndexListFromIndexString(indexString), [indexString]);

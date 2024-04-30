@@ -40,7 +40,7 @@ type UseEsqlFields = (esqlQuery: string | undefined) => {
 /**
  * fetches ES|QL fields and convert them to DataViewBase fields
  */
-const useEsqlFields: UseEsqlFields = (esqlQuery) => {
+export const useEsqlFields: UseEsqlFields = (esqlQuery) => {
   const kibana = useKibana<{ expressions: ExpressionsStart }>();
 
   const { expressions } = kibana.services;

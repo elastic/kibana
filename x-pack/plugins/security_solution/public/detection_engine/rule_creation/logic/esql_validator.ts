@@ -60,11 +60,9 @@ export const esqlValidator = async (
 
   try {
     const services = KibanaServices.get();
+    const { isEsqlQueryAggregating, isMissingMetadataOperator } = parseEsqlQuery(query);
 
-    const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
-
-    // non-aggregating query which does not have [metadata], is not a valid one
-    if (!isEsqlQueryAggregating && !computeHasMetadataOperator(query)) {
+    if (isMissingMetadataOperator) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
         message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
@@ -91,4 +89,18 @@ export const esqlValidator = async (
   } catch (error) {
     return constructValidationError(error);
   }
+};
+
+/**
+ * check if esql query valid for Security rule:
+ * - it it's non aggregation query it must have metadata operator
+ */
+export const parseEsqlQuery = (query: string) => {
+  const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
+
+  return {
+    isEsqlQueryAggregating,
+    // non-aggregating query which does not have [metadata], is not a valid one
+    isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(query),
+  };
 };

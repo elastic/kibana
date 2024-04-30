@@ -240,6 +240,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       const queryWithCustomFields = [
         `from auditbeat* [metadata _id, _version, _index]`,
         `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
+        `drop agent.*`,
       ].join(' | ');
 
       workaroundForResizeObserver();
@@ -248,7 +249,10 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       expandEsqlQueryBar();
       fillEsqlQueryBar(queryWithCustomFields);
 
-      // fill suppress by fields and select non-default suppression options
+      // wait until suppression fields fetched
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(1000);
+
       fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
       selectAlertSuppressionPerInterval();
       setAlertSuppressionDuration(2, 'h');
@@ -258,7 +262,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       // ensures details preview works correctly
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
-        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '2h');
         getDetails(SUPPRESS_MISSING_FIELD).should(
           'have.text',
           'Do not suppress alerts for events with missing fields'
@@ -272,7 +276,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       // ensures rule details displayed correctly after rule created
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
-        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '2h');
         getDetails(SUPPRESS_MISSING_FIELD).should(
           'have.text',
           'Do not suppress alerts for events with missing fields'

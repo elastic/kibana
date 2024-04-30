@@ -98,6 +98,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useSuppressionFields } from '../../hooks/use_suppression_fields';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 
 const CommonUseField = getUseField({ component: Field });
@@ -451,6 +452,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
+
+  const { suppressionFields: esqlSuppressionFields, isLoading: isSuppressionLoading } =
+    useSuppressionFields({
+      esqlQuery: isEsqlRule(ruleType) ? (queryBar?.query?.query as string) : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
+
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
@@ -1061,9 +1069,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="groupByFields"
                 component={MultiSelectFieldsAutocomplete}
                 componentProps={{
-                  browserFields: termsAggregationFields,
+                  browserFields: isEsqlRule(ruleType)
+                    ? esqlSuppressionFields
+                    : termsAggregationFields,
                   isDisabled:
-                    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
+                    !isAlertSuppressionLicenseValid ||
+                    areSuppressionFieldsDisabledBySequence ||
+                    isSuppressionLoading,
                   disabledText: areSuppressionFieldsDisabledBySequence
                     ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
                     : alertSuppressionUpsellingMessage,

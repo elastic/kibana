@@ -115,8 +115,10 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
     const NEW_SUPPRESS_BY_FIELDS = ['event.category', '_count'];
 
     beforeEach(() => {
+      deleteAlertsAndRules();
       createRule({
         ...rule,
+        query: expectedValidEsqlQuery,
         alert_suppression: {
           group_by: SUPPRESS_BY_FIELDS,
           duration: { value: 3, unit: 'h' },
@@ -137,6 +139,9 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
       selectAlertSuppressionPerRuleExecution();
       selectDoNotSuppressForMissingFields();
+      // wait until suppression fields fetched
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(1000);
       fillAlertSuppressionFields(['_count']);
 
       saveEditedRule();
@@ -156,13 +161,19 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
     const SUPPRESS_BY_FIELDS = ['event.category'];
 
     beforeEach(() => {
-      createRule(rule);
+      deleteAlertsAndRules();
+      createRule({
+        ...rule,
+        query: expectedValidEsqlQuery,
+      });
     });
 
     it('enables suppression on time interval', () => {
       visit(RULES_MANAGEMENT_URL);
       editFirstRule();
-
+      // wait until suppression fields fetched
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(1000);
       fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
 
       saveEditedRule();
