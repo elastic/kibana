@@ -7,4 +7,4 @@
 
 import { FC, PropsWithChildren } from 'react';
 
-declare const AutoFollowPatternDeleteProvider: FC<PropsWithChildren>;
+declare const AutoFollowPatternDeleteProvider: FC<PropsWithChildren<unknown>>;
