@@ -98,5 +98,6 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/datemath",
+    "@kbn/presentation-containers",
   ]
 }
