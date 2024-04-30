@@ -5,17 +5,53 @@
  * 2.0.
  */
 
-import type { PluginBase, ServerRegisterOptions, Server } from '@hapi/hapi';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type HapiTypes from '@hapi/hapi';
 
 export interface EmulatorServerPluginRegisterOptions {
-  router: Pick<Server, 'route'>;
+  router: {
+    route(route: EmulatorServerRouteDefinition | EmulatorServerRouteDefinition[]): void;
+  };
 }
 
-export interface EmulatorServerPlugin extends Omit<PluginBase<unknown>, 'register'> {
+export interface EmulatorServerPlugin extends Omit<HapiTypes.PluginBase<unknown>, 'register'> {
   register: (options: EmulatorServerPluginRegisterOptions) => void | Promise<void>;
   name: string;
   /**
    * A prefix for the routes that will be registered via this plugin. Default is the plugin's `name`
    */
-  prefix?: Required<ServerRegisterOptions>['routes']['prefix'];
+  prefix?: Required<HapiTypes.ServerRegisterOptions>['routes']['prefix'];
+}
+
+export interface EmulatorServerRequest<
+  TParams extends HapiTypes.Request['params'] = any,
+  TQuery extends HapiTypes.Request['query'] = any,
+  TPayload extends HapiTypes.Request['payload'] = any,
+  TPre extends HapiTypes.Request['pre'] = any
+> extends HapiTypes.Request {
+  params: TParams;
+  query: TQuery;
+  payload: TPayload;
+  pre: TPre;
+}
+
+export type EmulatorServerRouteHandlerMethod<
+  TParams extends HapiTypes.Request['params'] = any,
+  TQuery extends HapiTypes.Request['query'] = any,
+  TPayload extends HapiTypes.Request['payload'] = any,
+  TPre extends HapiTypes.Request['pre'] = HapiTypes.Request['pre']
+> = (
+  request: EmulatorServerRequest<TParams, TQuery, TPayload, TPre>,
+  h: HapiTypes.ResponseToolkit,
+  err?: Error
+) => HapiTypes.Lifecycle.ReturnValue;
+
+export interface EmulatorServerRouteDefinition<
+  TParams extends HapiTypes.Request['params'] = any,
+  TQuery extends HapiTypes.Request['query'] = any,
+  TPayload extends HapiTypes.Request['payload'] = any,
+  TPre extends HapiTypes.Request['pre'] = any
+> extends Omit<HapiTypes.ServerRoute, 'handler'> {
+  handler: EmulatorServerRouteHandlerMethod<TParams, TQuery, TPayload, TPre>;
 }

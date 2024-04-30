@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { EmulatorServerPlugin } from '../../lib/emulator_server.types';
+import type {
+  EmulatorServerPlugin,
+  EmulatorServerRouteHandlerMethod,
+} from '../../lib/emulator_server.types';
 
 export const getSentinelOneEmulator = (): EmulatorServerPlugin => {
   const plugin: EmulatorServerPlugin = {
@@ -14,23 +17,22 @@ export const getSentinelOneEmulator = (): EmulatorServerPlugin => {
       router.route({
         path: '/activities',
         method: 'GET',
-        handler: async (req) => {
-          return {
-            message: `test: activities from S1. req.app:
-${Object.keys(req.app ?? {}).join(' | ')}
-req.server.app.services:
-${Object.keys(req.server.app.services || {})}
-
-req.pre.services:
-${Object.keys(req.pre.services || {})}
-
-
-`,
-          };
-        },
+        handler: sentinelOneActivityApiHandler,
       });
     },
   };
 
   return plugin;
+};
+
+const sentinelOneActivityApiHandler: EmulatorServerRouteHandlerMethod<
+  {},
+  {},
+  {},
+  { services: { foo: 'hello' } }
+> = async (req, h) => {
+  return {
+    message: `test: activities from S1`,
+    preServices: Object.keys(req.pre.services || {}),
+  };
 };
