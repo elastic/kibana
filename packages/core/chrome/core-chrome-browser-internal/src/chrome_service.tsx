@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -186,6 +186,8 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
+
+    setEuiDevProviderWarning('error');
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
