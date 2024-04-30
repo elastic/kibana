@@ -9,7 +9,7 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { useDrilldownManager } from '../context';
 
-export const DrilldownManagerFooter: FC<PropsWithChildren> = ({ children }) => {
+export const DrilldownManagerFooter: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const drilldowns = useDrilldownManager();
   React.useEffect(() => {
     drilldowns.setFooter(children);

@@ -8,6 +8,7 @@
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Pagination } from '@kbn/slo-schema/src/models/pagination';
+import { createSLO } from './fixtures/slo';
 import {
   aHitFromSummaryIndex,
   aHitFromTempSummaryIndex,
@@ -43,7 +44,7 @@ describe('Summary Search Client', () => {
       esClientMock,
       soClientMock,
       loggerMock.create(),
-      'some-space'
+      'default'
     );
   });
 
@@ -79,11 +80,11 @@ describe('Summary Search Client', () => {
   });
 
   it('returns the summary documents without duplicate temporary summary documents', async () => {
-    const SLO_ID1 = 'slo-one';
-    const SLO_ID2 = 'slo_two';
-    const SLO_ID3 = 'slo-three';
-    const SLO_ID4 = 'slo-four';
-    const SLO_ID5 = 'slo-five';
+    const SLO_ID1 = createSLO({ id: 'slo-one' });
+    const SLO_ID2 = createSLO({ id: 'slo_two' });
+    const SLO_ID3 = createSLO({ id: 'slo-three' });
+    const SLO_ID4 = createSLO({ id: 'slo-four' });
+    const SLO_ID5 = createSLO({ id: 'slo-five' });
 
     esClientMock.search.mockResolvedValue({
       took: 0,
@@ -101,14 +102,14 @@ describe('Summary Search Client', () => {
         },
         max_score: 1,
         hits: [
-          aHitFromSummaryIndex(aSummaryDocument({ id: SLO_ID1 })),
-          aHitFromSummaryIndex(aSummaryDocument({ id: SLO_ID2 })),
-          aHitFromSummaryIndex(aSummaryDocument({ id: SLO_ID3 })),
-          aHitFromSummaryIndex(aSummaryDocument({ id: SLO_ID5 })), // no related temp doc
-          aHitFromTempSummaryIndex(aSummaryDocument({ id: SLO_ID1, isTempDoc: true })), // removed as dup
-          aHitFromTempSummaryIndex(aSummaryDocument({ id: SLO_ID2, isTempDoc: true })), // removed as dup
-          aHitFromTempSummaryIndex(aSummaryDocument({ id: SLO_ID3, isTempDoc: true })), // removed as dup
-          aHitFromTempSummaryIndex(aSummaryDocument({ id: SLO_ID4, isTempDoc: true })), // kept
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID1, { isTempDoc: false })),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID2, { isTempDoc: false })),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID3, { isTempDoc: false })),
+          aHitFromSummaryIndex(aSummaryDocument(SLO_ID5, { isTempDoc: false })), // no related temp doc
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID1, { isTempDoc: true })), // removed as dup
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID2, { isTempDoc: true })), // removed as dup
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID3, { isTempDoc: true })), // removed as dup
+          aHitFromTempSummaryIndex(aSummaryDocument(SLO_ID4, { isTempDoc: true })), // kept
         ],
       },
     });

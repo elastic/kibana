@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
 export interface IndexOverviewPanelProps {
@@ -34,7 +34,7 @@ export const IndexOverviewPanel: FC<PropsWithChildren<IndexOverviewPanelProps>> 
   </EuiSplitPanel.Outer>
 );
 
-export const IndexOverviewPanelStat: FC<PropsWithChildren> = ({ children }) => (
+export const IndexOverviewPanelStat: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiTitle size="l">
     <p>{children}</p>
   </EuiTitle>
