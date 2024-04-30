@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+// import axios, { AxiosError } from 'axios';
+import { run } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
+import { exec } from 'child_process';
+import crypto from 'crypto';
+
+import type {
+  Credentials,
+  ProjectHandler,
+} from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/project_handler';
+import { CloudHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/cloud_project_handler';
+import { ProxyHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/proxy_project_handler';
+import {
+  proxyHealthcheck,
+  waitForEsStatusGreen,
+  waitForKibanaAvailable,
+  waitForEsAccess,
+} from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/parallel_serverless';
+
+const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
+const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
+
+export const cli = () => {
+  run(
+    async (context) => {
+      const log = new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      });
+
+      const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
+      const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
+      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
+      const API_KEY = process.env.CLOUD_QA_API_KEY ? process.env.CLOUD_QA_API_KEY : undefined;
+
+      log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
+      log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
+      log.info(`PROXY_SECRET is defined : ${PROXY_SECRET !== undefined}`);
+      log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
+
+      let cloudHandler: ProjectHandler;
+      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+        log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
+        cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
+      } else if (API_KEY) {
+        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
+        cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
+      } else {
+        log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(1);
+      }
+
+      const id = crypto.randomBytes(8).toString('hex');
+      const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
+
+      // Creating project for the test to run
+      const project = await cloudHandler.createSecurityProject(PROJECT_NAME, [], '');
+      log.info(project);
+
+      if (!project) {
+        log.error('Failed to create project.');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(1);
+      }
+
+      // Reset credentials for elastic user
+      const credentials = await cloudHandler.resetCredentials(project.id, id);
+
+      if (!credentials) {
+        log.error('Credentials could not be reset.');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(1);
+      }
+
+      // Wait for project to be initialized
+      await cloudHandler.waitForProjectInitialized(project.id);
+
+      // Base64 encode the credentials in order to invoke ES and KB APIs
+      const auth = btoa(`${credentials.username}:${credentials.password}`);
+
+      // Wait for elasticsearch status to go green.
+      await waitForEsStatusGreen(project.es_url, auth, id);
+
+      // Wait until Kibana is available
+      await waitForKibanaAvailable(project.kb_url, auth, id);
+
+      // Wait for Elasticsearch to be accessible
+      await waitForEsAccess(project.es_url, auth, id);
+
+      try {
+        log.info('test');
+        exec('pwd', (error, stdout, stderr) => {
+          if (error) {
+            log.error(`exec error: ${error}`);
+            return;
+          }
+
+          log.info(`stdout: ${stdout}`);
+          log.error(`stderr: ${stderr}`);
+        });
+      } catch (ex) {
+        console.error('PR pipeline error', ex.message);
+        process.exit(1);
+      }
+
+      // Delete serverless project
+      log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+      await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
+    },
+    {
+      flags: {
+        allowUnexpected: true,
+      },
+    }
+  );
+};

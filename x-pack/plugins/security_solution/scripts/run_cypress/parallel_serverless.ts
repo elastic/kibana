@@ -66,7 +66,7 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
 };
 
 // Check if proxy service is up and running executing a healthcheck call.
-function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
+export function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
   const fetchHealthcheck = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
@@ -89,7 +89,7 @@ function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
 }
 
 // Wait until elasticsearch status goes green
-function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
@@ -120,7 +120,7 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
 }
 
 // Wait until Kibana is available
-function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if kibana is available.`);
     const response = await axios
@@ -154,7 +154,7 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
 }
 
 // Wait for Elasticsearch to be accessible
-function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
