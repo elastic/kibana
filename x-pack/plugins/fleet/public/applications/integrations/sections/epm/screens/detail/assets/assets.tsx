@@ -177,18 +177,6 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         />
       </EuiCallOut>
     );
-  } else if (fetchError) {
-    content = (
-      <Error
-        title={
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.fetchAssetsErrorTitle"
-            defaultMessage="Error loading assets"
-          />
-        }
-        error={fetchError}
-      />
-    );
   } else if (!assetsInstalledInCurrentSpace) {
     content = (
       <EuiCallOut
@@ -289,6 +277,20 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1} />
       <EuiFlexItem grow={6}>
+        {fetchError && (
+          <>
+            <Error
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.epm.packageDetails.assets.fetchAssetsErrorTitle"
+                  defaultMessage="Error loading complete asset information"
+                />
+              }
+              error={fetchError}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {deferredInstallationsContent}
         {content}
       </EuiFlexItem>
