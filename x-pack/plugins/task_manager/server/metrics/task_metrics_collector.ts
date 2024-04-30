@@ -64,7 +64,7 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
   private start() {
     if (!this.running) {
       this.running = true;
-      void this.runCollectionCycle();
+      this.runCollectionCycle().catch(() => {});
     }
   }
 
