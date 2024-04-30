@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
-export const Description: FC<PropsWithChildren<{}>> = memo(({ children }) => {
+export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

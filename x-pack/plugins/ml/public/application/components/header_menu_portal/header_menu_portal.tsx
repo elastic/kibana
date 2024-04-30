@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageControlsContext } from '../ml_page';
 
-export const HeaderMenuPortal: FC<PropsWithChildren<{}>> = ({ children }) => {
+export const HeaderMenuPortal: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { services } = useMlKibana();
 
   const { setHeaderActionMenu } = useContext(MlPageControlsContext);

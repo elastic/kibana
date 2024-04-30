@@ -58,7 +58,7 @@ function insertHighlighting(result: FormattedQuestionAnsweringResult, inputText:
   );
 }
 
-const ResultBadge: FC<PropsWithChildren<{}>> = ({ children }) => {
+const ResultBadge: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge
