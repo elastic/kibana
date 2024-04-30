@@ -55,10 +55,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     [stateContainer]
   );
 
-  const fieldsToFetch = useObservable(
-    stateContainer ? stateContainer.dataState?.data$?.availableFields$ : fallBackAvailableFields$,
-    undefined
-  );
   const lastReloadRequestTime$ = stateContainer?.dataState?.refetch$
     ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
     : fallBacklastReloadRequestTime$;
@@ -96,10 +92,10 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         shouldGetSubfields={true}
         dataView={dataView}
         savedSearch={savedSearch}
+        filters={filters}
         query={query}
         visibleFieldNames={columns}
         sessionId={searchSessionId}
-        fieldsToFetch={stateContainer?.dataState.data$.availableFields$?.getValue().fields}
         totalDocuments={totalDocuments}
         samplingOption={samplingOption}
         lastReloadRequestTime={lastReloadRequestTime}
