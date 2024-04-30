@@ -157,7 +157,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when > 0.75.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when above 0.75.',
         tags: [],
       });
     });
@@ -179,7 +179,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when < 1.5.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when below 1.5.',
         tags: [],
       });
     });
@@ -201,7 +201,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when >= 0.75.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when above or equal 0.75.',
         tags: [],
       });
     });
@@ -223,7 +223,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when <= 1.5.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when below or equal 1.5.',
         tags: [],
       });
     });
@@ -344,7 +344,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when > 0.75.',
+        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.75.',
         tags: [],
         groupByKeys: { something: alertIdA },
       });
@@ -399,7 +399,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when < 1.5.',
+        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when below 1.5.',
         tags: [],
         groupByKeys: { something: alertIdA },
       });
@@ -953,7 +953,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min for host-01. Alert when > 0.75.',
+        reason: 'test.metric.1 is 1 in the last 1 min for host-01. Alert when above 0.75.',
         tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
         groupByKeys: { host: { name: alertIdA } },
       });
@@ -964,7 +964,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 3 in the last 1 min for host-02. Alert when > 0.75.',
+        reason: 'test.metric.1 is 3 in the last 1 min for host-02. Alert when above 0.75.',
         tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
         groupByKeys: { host: { name: alertIdB } },
       });
@@ -1028,7 +1028,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when > 0.75.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when above 0.75.',
         tags: ['ruleTag1', 'ruleTag2'],
       });
     });
@@ -1107,7 +1107,7 @@ describe('The metric threshold rule type', () => {
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason:
-          'test.metric.1 is 1 in the last 1 min. Alert when >= 1.\ntest.metric.2 is 3 in the last 1 min. Alert when >= 3.',
+          'test.metric.1 is 1 in the last 1 min. Alert when above or equal 1.\ntest.metric.2 is 3 in the last 1 min. Alert when above or equal 3.',
         tags: [],
       });
     });
@@ -1201,7 +1201,7 @@ describe('The metric threshold rule type', () => {
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
         reason:
-          'test.metric.1 is 1 in the last 1 min for a. Alert when >= 1.\ntest.metric.2 is 3 in the last 1 min for a. Alert when >= 3.',
+          'test.metric.1 is 1 in the last 1 min for a. Alert when above or equal 1.\ntest.metric.2 is 3 in the last 1 min for a. Alert when above or equal 3.',
         tags: [],
         groupByKeys: { something: alertIdA },
       });
@@ -1250,7 +1250,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'count', threshold: [0.9], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'count is 1 in the last 1 min. Alert when > 0.9.',
+        reason: 'count is 1 in the last 1 min. Alert when above 0.9.',
         tags: [],
       });
 
@@ -1367,7 +1367,7 @@ describe('The metric threshold rule type', () => {
           conditions: [{ metric: 'count', threshold: [0], value: '0', evaluation_value: 0 }],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
-          reason: 'count is 0 in the last 1 min for a. Alert when <= 0.',
+          reason: 'count is 0 in the last 1 min for a. Alert when below or equal= 0.',
           tags: [],
           groupByKeys: { something: alertIdA },
         });
@@ -1376,7 +1376,7 @@ describe('The metric threshold rule type', () => {
           conditions: [{ metric: 'count', threshold: [0], value: '0', evaluation_value: 0 }],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
-          reason: 'count is 0 in the last 1 min for b. Alert when <= 0.',
+          reason: 'count is 0 in the last 1 min for b. Alert when below or equal 0.',
           tags: [],
           groupByKeys: { something: alertIdB },
         });
@@ -1426,7 +1426,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.2', threshold: [1], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.2 is 3 in the last 1 min. Alert when > 1.',
+        reason: 'test.metric.2 is 3 in the last 1 min. Alert when above 1.',
         tags: [],
       });
 
@@ -1497,7 +1497,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min. Alert when > 0.25.',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when above 0.25.',
         tags: [],
       });
 
@@ -1793,7 +1793,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.1', threshold: [0], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when > 0.',
+        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdA },
       });
@@ -1802,7 +1802,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.1', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when > 0.',
+        reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdB },
       });
@@ -1916,7 +1916,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.2', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.2 is 3 in the last 1 min for a. Alert when > 0.',
+        reason: 'test.metric.2 is 3 in the last 1 min for a. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdA },
       });
@@ -1925,7 +1925,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.2', threshold: [0], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.2 is 1 in the last 1 min for b. Alert when > 0.',
+        reason: 'test.metric.2 is 1 in the last 1 min for b. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdB },
       });
@@ -1934,7 +1934,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.2', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.2 is 3 in the last 1 min for c. Alert when > 0.',
+        reason: 'test.metric.2 is 3 in the last 1 min for c. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdC },
       });
@@ -1974,7 +1974,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.1', threshold: [0], value: '1', evaluation_value: 1 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when > 0.',
+        reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdA },
       });
@@ -1983,7 +1983,7 @@ describe('The metric threshold rule type', () => {
         conditions: [{ metric: 'test.metric.1', threshold: [0], value: '3', evaluation_value: 3 }],
         actionGroup: FIRED_ACTIONS.id,
         alertState: 'ALERT',
-        reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when > 0.',
+        reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when above 0.',
         tags: [],
         groupByKeys: { something: alertIdB },
       });
@@ -2090,7 +2090,7 @@ describe('The metric threshold rule type', () => {
           ],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
-          reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when > 0.',
+          reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.',
           tags: [],
           groupByKeys: { something: alertIdA },
         });
@@ -2101,7 +2101,7 @@ describe('The metric threshold rule type', () => {
           ],
           actionGroup: FIRED_ACTIONS.id,
           alertState: 'ALERT',
-          reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when > 0.',
+          reason: 'test.metric.1 is 3 in the last 1 min for b. Alert when above 0.',
           tags: [],
           groupByKeys: { something: alertIdB },
         });
@@ -2274,7 +2274,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: WARNING_ACTIONS.id,
         alertState: 'WARNING',
-        reason: 'test.metric.1 is 2.5 in the last 1 min. Alert when > 2.49.',
+        reason: 'test.metric.1 is 2.5 in the last 1 min. Alert when above 2.49.',
         tags: [],
       });
 
@@ -2307,7 +2307,7 @@ describe('The metric threshold rule type', () => {
         ],
         actionGroup: WARNING_ACTIONS.id,
         alertState: 'WARNING',
-        reason: 'system.cpu.user.pct is 82% in the last 1 min. Alert when > 81%.',
+        reason: 'system.cpu.user.pct is 82% in the last 1 min. Alert when above 81%.',
         tags: [],
       });
     });
