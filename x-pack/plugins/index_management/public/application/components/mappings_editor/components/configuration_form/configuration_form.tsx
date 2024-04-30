@@ -26,7 +26,7 @@ interface Props {
   esNodesPlugins: string[];
 }
 
-const formSerializer = (formData: GenericObject) => {
+const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
   const {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,
@@ -50,7 +50,7 @@ const formSerializer = (formData: GenericObject) => {
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: sourceField,
+    _source: sourceFieldMode ? { mode: sourceFieldMode } : sourceField,
     _meta: metaField,
     _routing,
     _size,
@@ -106,7 +106,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
 
   const { form } = useForm({
     schema: configurationFormSchema,
-    serializer: formSerializer,
+    serializer: (formData: GenericObject) => formSerializer(formData, value?._source?.mode),
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
@@ -164,7 +164,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      {enableMappingsSourceFieldSection && (
+      {enableMappingsSourceFieldSection && !value?._source?.mode && (
         <>
           <SourceFieldSection /> <EuiSpacer size="xl" />
         </>
