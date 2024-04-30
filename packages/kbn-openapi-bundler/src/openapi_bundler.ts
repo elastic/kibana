@@ -49,6 +49,36 @@ export const bundle = async ({
 
   logger.debug(`Processing schemas...`);
 
+  const resolvedDocuments = await resolveDocuments(schemaFilePaths);
+
+  logger.success(`Processed ${resolvedDocuments.length} schemas`);
+
+  const blankOasFactory = (version: string) =>
+    createBlankOpenApiDocument({
+      version,
+      title: specInfo?.title ?? 'Bundled OpenAPI specs',
+      ...omitBy(
+        {
+          description: specInfo?.description,
+          termsOfService: specInfo?.termsOfService,
+          contact: specInfo?.contact,
+          license: specInfo?.license,
+        },
+        isUndefined
+      ),
+    });
+  const resultDocumentsMap = await mergeDocuments(resolvedDocuments, blankOasFactory);
+
+  await writeDocuments(resultDocumentsMap, outputFilePath);
+};
+
+function logSchemas(schemaFilePaths: string[]): void {
+  for (const filePath of schemaFilePaths) {
+    logger.debug(`Found OpenAPI spec ${chalk.bold(filePath)}`);
+  }
+}
+
+async function resolveDocuments(schemaFilePaths: string[]): Promise<BundledDocument[]> {
   const resolvedDocuments = await Promise.all(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
@@ -67,34 +97,9 @@ export const bundle = async ({
       }
     })
   );
-
   const processedDocuments = filterOutSkippedDocuments(resolvedDocuments);
 
-  logger.success(`Processed ${processedDocuments.length} schemas`);
-
-  const blankOasFactory = (version: string) =>
-    createBlankOpenApiDocument({
-      version,
-      title: specInfo?.title ?? 'Bundled OpenAPI specs',
-      ...omitBy(
-        {
-          description: specInfo?.description,
-          termsOfService: specInfo?.termsOfService,
-          contact: specInfo?.contact,
-          license: specInfo?.license,
-        },
-        isUndefined
-      ),
-    });
-  const resultDocumentsMap = await mergeDocuments(processedDocuments, blankOasFactory);
-
-  await writeDocuments(resultDocumentsMap, outputFilePath);
-};
-
-function logSchemas(schemaFilePaths: string[]): void {
-  for (const filePath of schemaFilePaths) {
-    logger.debug(`Found OpenAPI spec ${chalk.bold(filePath)}`);
-  }
+  return processedDocuments;
 }
 
 function filterOutSkippedDocuments(
