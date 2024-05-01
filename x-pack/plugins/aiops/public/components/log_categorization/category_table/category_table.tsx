@@ -130,7 +130,7 @@ export const CategoryTable: FC<Props> = ({
         defaultMessage: 'Actions',
       }),
       sortable: false,
-      width: '70px',
+      width: '65px',
       actions: [
         {
           name: openInDiscoverLabels.singleSelect.in,
