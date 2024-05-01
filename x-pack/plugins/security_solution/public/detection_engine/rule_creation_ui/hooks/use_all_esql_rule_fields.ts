@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Datatable, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
+import useDebounce from 'react-use/lib/useDebounce';
 
 import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { parseEsqlQuery } from '../../rule_creation/logic/esql_validator';
 
 import { getEsqlQueryConfig } from '../../rule_creation/logic/get_esql_query_config';
 
@@ -58,34 +59,45 @@ export const useEsqlFields: UseEsqlFields = (esqlQuery) => {
   };
 };
 
-type UseInvestigationFields = (params: {
+type UseAllEsqlRuleFields = (params: {
   esqlQuery: string | undefined;
   indexPatternsFields: DataViewFieldBase[];
 }) => {
   isLoading: boolean;
-  investigationFields: DataViewFieldBase[];
+  fields: DataViewFieldBase[];
 };
 
-export const useInvestigationFields: UseInvestigationFields = ({
-  esqlQuery,
-  indexPatternsFields,
-}) => {
-  const { fields: esqlFields, isLoading } = useEsqlFields(esqlQuery);
+/**
+ * returns all fields available for ES|QL rule:
+ * - fields returned from ES|QL query for aggregating queries
+ * - fields returned from ES|QL query + index fields for non-aggregating queries
+ */
+export const useAllEsqlRuleFields: UseAllEsqlRuleFields = ({ esqlQuery, indexPatternsFields }) => {
+  const [debouncedEsqlQuery, setDebouncedEsqlQuery] = useState<string | undefined>(undefined);
+  const { fields: esqlFields, isLoading } = useEsqlFields(debouncedEsqlQuery);
 
-  const investigationFields = useMemo(() => {
-    if (!esqlQuery) {
+  const { isEsqlQueryAggregating } = useMemo(
+    () => parseEsqlQuery(debouncedEsqlQuery ?? ''),
+    [debouncedEsqlQuery]
+  );
+
+  useDebounce(
+    () => {
+      setDebouncedEsqlQuery(esqlQuery);
+    },
+    300,
+    [esqlQuery]
+  );
+
+  const fields = useMemo(() => {
+    if (!debouncedEsqlQuery) {
       return indexPatternsFields;
     }
-
-    // alerts generated from non-aggregating queries are enriched with source document
-    // so, index patterns fields should be included in the list of investigation fields
-    const isEsqlQueryAggregating = computeIsESQLQueryAggregating(esqlQuery);
-
     return isEsqlQueryAggregating ? esqlFields : [...esqlFields, ...indexPatternsFields];
-  }, [esqlFields, esqlQuery, indexPatternsFields]);
+  }, [esqlFields, debouncedEsqlQuery, indexPatternsFields, isEsqlQueryAggregating]);
 
   return {
-    investigationFields,
+    fields,
     isLoading,
   };
 };

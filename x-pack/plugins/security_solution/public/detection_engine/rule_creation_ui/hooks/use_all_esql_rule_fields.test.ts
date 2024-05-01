@@ -8,22 +8,22 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { DataViewFieldBase } from '@kbn/es-query';
 
-import { useInvestigationFields } from './use_investigation_fields';
+import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
+import { parseEsqlQuery } from '../../rule_creation/logic/esql_validator';
 
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 
-jest.mock('@kbn/securitysolution-utils', () => ({
-  computeIsESQLQueryAggregating: jest.fn(),
+jest.mock('../../rule_creation/logic/esql_validator', () => ({
+  parseEsqlQuery: jest.fn(),
 }));
 
 jest.mock('@kbn/text-based-editor', () => ({
   fetchFieldsFromESQL: jest.fn(),
 }));
 
-const computeIsESQLQueryAggregatingMock = computeIsESQLQueryAggregating as jest.Mock;
+const parseEsqlQueryMock = parseEsqlQuery as jest.Mock;
 const fetchFieldsFromESQLMock = fetchFieldsFromESQL as jest.Mock;
 
 const { wrapper } = createQueryWrapperMock();
@@ -45,16 +45,17 @@ const mockEsqlDatatable = {
   columns: [{ id: '_custom_field', name: '_custom_field', meta: { type: 'string' } }],
 };
 
-describe('useInvestigationFields', () => {
+describe('useAllEsqlRuleFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     fetchFieldsFromESQLMock.mockResolvedValue(mockEsqlDatatable);
+    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
   });
 
   it('should return loading true when esql fields still loading', () => {
     const { result } = renderHook(
       () =>
-        useInvestigationFields({
+        useAllEsqlRuleFields({
           esqlQuery: mockEsqlQuery,
           indexPatternsFields: mockIndexPatternFields,
         }),
@@ -65,71 +66,72 @@ describe('useInvestigationFields', () => {
   });
 
   it('should return only index pattern fields when ES|QL query is empty', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
-        useInvestigationFields({
+        useAllEsqlRuleFields({
           esqlQuery: '',
           indexPatternsFields: mockIndexPatternFields,
         }),
       { wrapper }
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.investigationFields).toEqual(mockIndexPatternFields);
+    expect(result.current.fields).toEqual(mockIndexPatternFields);
   });
 
   it('should return only index pattern fields when ES|QL query is undefined', async () => {
     const { result } = renderHook(
       () =>
-        useInvestigationFields({
+        useAllEsqlRuleFields({
           esqlQuery: undefined,
           indexPatternsFields: mockIndexPatternFields,
         }),
       { wrapper }
     );
 
-    expect(result.current.investigationFields).toEqual(mockIndexPatternFields);
+    expect(result.current.fields).toEqual(mockIndexPatternFields);
   });
 
   it('should return index pattern fields concatenated with ES|QL fields when ES|QL query is non-aggregating', async () => {
-    computeIsESQLQueryAggregatingMock.mockReturnValue(false);
+    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
 
-    const { result } = renderHook(
+    const { result, waitFor } = renderHook(
       () =>
-        useInvestigationFields({
+        useAllEsqlRuleFields({
           esqlQuery: mockEsqlQuery,
           indexPatternsFields: mockIndexPatternFields,
         }),
       { wrapper }
     );
 
-    expect(result.current.investigationFields).toEqual([
-      {
-        name: '_custom_field',
-        type: 'string',
-      },
-      ...mockIndexPatternFields,
-    ]);
+    await waitFor(() => {
+      expect(result.current.fields).toEqual([
+        {
+          name: '_custom_field',
+          type: 'string',
+        },
+        ...mockIndexPatternFields,
+      ]);
+    });
   });
 
   it('should return only ES|QL fields when ES|QL query is aggregating', async () => {
-    computeIsESQLQueryAggregatingMock.mockReturnValue(true);
+    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: true });
 
-    const { result } = renderHook(
+    const { result, waitFor } = renderHook(
       () =>
-        useInvestigationFields({
+        useAllEsqlRuleFields({
           esqlQuery: mockEsqlQuery,
           indexPatternsFields: mockIndexPatternFields,
         }),
       { wrapper }
     );
-
-    expect(result.current.investigationFields).toEqual([
-      {
-        name: '_custom_field',
-        type: 'string',
-      },
-    ]);
+    await waitFor(() => {
+      expect(result.current.fields).toEqual([
+        {
+          name: '_custom_field',
+          type: 'string',
+        },
+      ]);
+    });
   });
 });

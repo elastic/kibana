@@ -99,7 +99,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { useSuppressionFields } from '../../hooks/use_suppression_fields';
+import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 
 const CommonUseField = getUseField({ component: Field });
@@ -456,8 +456,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
 
-  const { suppressionFields: esqlSuppressionFields, isLoading: isSuppressionLoading } =
-    useSuppressionFields({
+  const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
+    useAllEsqlRuleFields({
       esqlQuery: isEsqlRule(ruleType) ? (queryBar?.query?.query as string) : undefined,
       indexPatternsFields: indexPattern.fields,
     });
@@ -1079,7 +1079,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   isDisabled:
                     !isAlertSuppressionLicenseValid ||
                     areSuppressionFieldsDisabledBySequence ||
-                    isSuppressionLoading,
+                    isEsqlSuppressionLoading,
                   disabledText: areSuppressionFieldsDisabledBySequence
                     ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
                     : alertSuppressionUpsellingMessage,
