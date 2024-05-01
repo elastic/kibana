@@ -25,7 +25,6 @@ export default function ({
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-  const retry = getService('retry');
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -86,13 +85,9 @@ export default function ({
 
     describe('Print PDF button', () => {
       afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
+        await PageObjects.share.closeShareModal();
       });
+
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -142,15 +137,6 @@ export default function ({
         await unloadEcommerce();
       });
 
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
-
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -173,16 +159,9 @@ export default function ({
       before(async () => {
         await loadEcommerce();
       });
+
       after(async () => {
         await unloadEcommerce();
-      });
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
@@ -246,14 +225,6 @@ export default function ({
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
-      });
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
       });
 
       xit('PNG file matches the baseline image', async function () {

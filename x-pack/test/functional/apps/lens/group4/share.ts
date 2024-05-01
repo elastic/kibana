@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   describe('lens share tests', () => {
     before(async () => {
@@ -22,12 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      retry.waitFor('close share modal', async () => {
-        if (await testSubjects.exists('shareContextModal')) {
-          await PageObjects.lens.closeShareModal();
-        }
-        return await testSubjects.exists('lnsApp_shareButton');
-      });
+      await PageObjects.lens.closeShareModal();
     });
 
     after(async () => {
@@ -51,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.isShareable()).to.eql(false);
     });
 
-    it('should make the share button avaialble as soon as a valid configuration is generated', async () => {
+    it('should make the share button available as soon as a valid configuration is generated', async () => {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
@@ -66,6 +60,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.isShareActionEnabled('export'));
       expect(await PageObjects.lens.isShareActionEnabled('link'));
+    });
+
+    it('should have the copy link button disabled when lens is not saved', async () => {
+      await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
+      await queryBar.setQuery('host.keyword www.elastic.co');
+      await queryBar.submitQuery();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+
+      await PageObjects.lens.clickShareModal();
+      expect(await testSubjects.isEnabled('copyShareUrlButton')).to.be(false);
     });
 
     xit('should preserve filter and query when sharing', async () => {

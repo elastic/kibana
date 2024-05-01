@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -44,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         body: { query: { match_all: {} } },
       });
     });
+
     describe('Print PDF button', () => {
       const ecommerceSOPath =
         'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
@@ -70,12 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
+        await PageObjects.share.closeShareModal();
       });
 
       it('is available if new', async () => {
@@ -125,13 +120,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.share.closeShareModal(); // close modal
-          }
-          return await testSubjects.exists('shareTopNavButton');
-        });
+        await PageObjects.share.closeShareModal();
       });
+
       it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await PageObjects.visualize.loadSavedVisualization(
