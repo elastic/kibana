@@ -22,16 +22,6 @@
       "_meta": {
         "version": "8.0.0"
       },
-      "dynamic_templates": [
-        {
-          "strings_as_keywords": {
-            "mapping": {
-              "type": "keyword"
-            },
-            "match": "*"
-          }
-        }
-      ],
       "properties": {
         "actual": {
           "type": "double"
