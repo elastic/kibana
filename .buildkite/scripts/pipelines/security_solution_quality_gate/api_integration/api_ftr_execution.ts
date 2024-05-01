@@ -30,28 +30,19 @@ function executeCommand(command: string, envVars: any, workDir: string): Promise
     const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
-        process.exitCode = error.code; // Set exit code of the script to the child process exit code
+        process.exitCode = error.code;
       }
     });
 
-    // Listen for stdout data
+    // Listen and print stdout data
     childProcess.stdout?.on('data', (data) => {
       console.log(data);
     });
 
-    // Listen for stderr data
+    // Listen and print stderr data
     childProcess.stderr?.on('data', (data) => {
       console.log(data);
     });
-
-    // Listen for process exit
-    // childProcess.on('close', (code) => {
-    // if (code !== 0) {
-    // reject(code);
-    // return;
-    // }
-    // resolve(code);
-    // });
 
     // Listen for process exit
     childProcess.on('exit', (code) => {
@@ -148,7 +139,9 @@ export const cli = () => {
         TEST_ES_URL: testEsUrl,
         TEST_KIBANA_URL: testKibanaUrl,
       };
+      
       statusCode = await executeCommand(command, envVars, workDir);
+
       // Delete serverless project
       log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
       await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
