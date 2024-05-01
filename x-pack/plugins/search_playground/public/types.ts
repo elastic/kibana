@@ -86,7 +86,7 @@ export interface Message {
   id: string;
   content: string | React.ReactNode;
   createdAt?: Date;
-  annotations?: Array<AnnotationDoc | AnnotationTokens>;
+  annotations?: Annotation[];
   role: MessageRole;
 }
 
@@ -94,6 +94,8 @@ export interface DocAnnotation {
   metadata: { _id: string; _score: number; _index: string };
   pageContent: string;
 }
+
+export type Annotation = AnnotationDoc | AnnotationTokens;
 
 export interface AnnotationDoc {
   type: 'citations' | 'retrieved_docs';

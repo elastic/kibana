@@ -39,10 +39,6 @@ interface ConversationalChainOptions {
   rag?: RAGOptions;
 }
 
-interface RunnableMetadata {
-  type: 'conversational_retrieval_qa' | 'standalone_question';
-}
-
 const CONDENSE_QUESTION_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language. Be verbose in your answer.
 
 Chat History:
