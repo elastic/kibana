@@ -9,9 +9,13 @@
 import { PanelState, EmbeddableInput, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { panelPlacementStrategies } from './place_new_panel_strategies';
 import { IProvidesPanelPlacementSettings, PanelPlacementSettings } from './types';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
+import { runPanelPlacementStrategy } from './place_new_panel_strategies';
+import {
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+  PanelPlacementStrategy,
+} from '../../../dashboard_constants';
 
 export const providesPanelPlacementSettings = (
   value: unknown
@@ -31,7 +35,7 @@ export function placePanel<TEmbeddableInput extends EmbeddableInput>(
   let placementSettings: PanelPlacementSettings = {
     width: DEFAULT_PANEL_WIDTH,
     height: DEFAULT_PANEL_HEIGHT,
-    strategy: 'findTopLeftMostOpenSpace',
+    strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
   };
   if (providesPanelPlacementSettings(factory)) {
     placementSettings = {
@@ -41,7 +45,7 @@ export function placePanel<TEmbeddableInput extends EmbeddableInput>(
   }
   const { width, height, strategy } = placementSettings;
 
-  const { newPanelPlacement, otherPanels } = panelPlacementStrategies[strategy]({
+  const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(strategy, {
     currentPanels,
     height,
     width,

@@ -7,24 +7,25 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  registerEmbeddablePlacementStrategy,
-  registerReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+  registerDashboardPanelPlacementSetting,
+  PanelPlacementStrategy,
+} from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
 import { FieldListSerializedStateState, Services } from './types';
 
-const getFieldListPlacementSettings = (serializedState: FieldListSerializedStateState) => {
+const getPanelPlacementSettings = (serializedState?: FieldListSerializedStateState) => {
   // Consider using the serialized state to determine the width, height, and strategy
   return {
     width: 12,
     height: 36,
-    strategy: 'placeAtTop',
+    strategy: PanelPlacementStrategy.placeAtTop,
   };
 };
 
 export function registerFieldListEmbeddable(core: CoreStart, services: Services) {
-  registerEmbeddablePlacementStrategy(FIELD_LIST_ID, getFieldListPlacementSettings);
+  registerDashboardPanelPlacementSetting(FIELD_LIST_ID, getPanelPlacementSettings);
   registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
     const { getFieldListFactory } = await import('./field_list_react_embeddable');
     return getFieldListFactory(core, services);

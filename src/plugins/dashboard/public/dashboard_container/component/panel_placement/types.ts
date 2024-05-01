@@ -9,9 +9,7 @@
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { DashboardPanelState } from '../../../../common';
 import { GridData } from '../../../../common/content_management';
-import { panelPlacementStrategies } from './place_new_panel_strategies';
-
-export type PanelPlacementStrategy = keyof typeof panelPlacementStrategies;
+import { PanelPlacementStrategy } from '../../../dashboard_constants';
 
 export interface PanelPlacementSettings {
   strategy: PanelPlacementStrategy;

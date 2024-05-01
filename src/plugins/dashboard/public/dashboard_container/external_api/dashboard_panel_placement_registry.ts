@@ -6,25 +6,24 @@
  * Side Public License, v 1.
  */
 
-type GetPanelPlacementSettings<StateType> = (serializedState: StateType) => {
-  width?: number;
-  height?: number;
-  strategy?: string;
-};
+import { PanelPlacementSettings } from '../component/panel_placement/types';
 
-const registry: Map<string, GetPanelPlacementSettings<any>> = new Map();
+type GetPanelPlacementSettings<SerializedState extends object = object> = (
+  serializedState?: SerializedState
+) => PanelPlacementSettings;
 
-export const registerEmbeddablePlacementStrategy = <StateType>(
+const registry = new Map<string, GetPanelPlacementSettings<object>>();
+
+export const registerDashboardPanelPlacementSetting = (
   panelType: string,
-  getPanelPlacementSettings: GetPanelPlacementSettings<StateType>
+  getPanelPlacementSettings: GetPanelPlacementSettings
 ) => {
   if (registry.has(panelType)) {
     throw new Error(`Embeddable placement for embeddable type ${panelType} already exists`);
   }
-
   registry.set(panelType, getPanelPlacementSettings);
 };
 
-export const getEmbeddablePlacementStrategy = (panelType: string) => {
+export const getDashboardPanelPlacementSetting = (panelType: string) => {
   return registry.get(panelType);
 };

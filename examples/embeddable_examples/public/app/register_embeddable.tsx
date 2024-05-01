@@ -65,17 +65,15 @@ export const RegisterEmbeddable = () => {
         <h2>Specify panel placement settings (optional)</h2>
         <p>
           Embeddable factories can specify placement settings for their embeddables. This is done by
-          registering placement settings with <strong>registerEmbeddablePlacementStrategy</strong>.
-          The placement settings is a function that takes the serialized state of the embeddable and
-          returns an object with width, height, and strategy properties. The width and height
-          properties are numbers that specify the relative dimensions of the embeddable panel. For
-          example, a DashboardContainer uses <em>grid units</em> where the maximum width is{' '}
-          <EuiCode>48</EuiCode> and the max height is virtually unlimited. The strategy property is
-          a string that specifies the placement strategy to use. Strategies are specific to the
-          consumer. For example, DashboardContainer currently supports the{' '}
-          <EuiCode>placeAtTop</EuiCode> and
-          <EuiCode>findTopLeftMostOpenSpace</EuiCode> strategies. The example below shows how the
-          Field List embeddable developer example specificies its placement settings on a Dashboard.
+          registering an embeddable type with a <em>getPanelPlacementSettings</em> function using{' '}
+          <strong>registerDashboardPanelPlacementSetting</strong>. The{' '}
+          <em>getPanelPlacementSettings</em> function that takes the serialized state of the
+          embeddable and returns an object with optional width, height, and strategy properties. The
+          width and height properties are numbers that specify the dimensions of the panel in the
+          Dashboard where the max width is <EuiCode>48</EuiCode> and the max height is virtually
+          unlimited. The strategy property is an enum that specifies the placement strategy to use.
+          The example below shows how the Field List embeddable developer example specificies its
+          placement settings on a Dashboard.
         </p>
       </EuiText>
       <EuiSpacer size="s" />

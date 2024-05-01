@@ -105,3 +105,11 @@ export const backupServiceStrings = {
       values: { message },
     }),
 };
+
+export const panelPlacementStrings = {
+  unknownStrategyError: (strategy: string) =>
+    i18n.translate('dashboard.panelPlacement.unknownStrategyError', {
+      defaultMessage: 'Unknown panel placement strategy: {strategy}',
+      values: { strategy },
+    }),
+};
