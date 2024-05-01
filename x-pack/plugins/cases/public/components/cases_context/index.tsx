@@ -85,12 +85,6 @@ export const CasesProvider: FC<
 }) => {
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
-  console.log(
-    '-----cases---',
-    state.createCaseFlyout.isFlyoutOpen,
-    state.selectCaseModal.isModalOpen
-  );
-
   const value: CasesContextValue = useMemo(
     () => ({
       externalReferenceAttachmentTypeRegistry,
