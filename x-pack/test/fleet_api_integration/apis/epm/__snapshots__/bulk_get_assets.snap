@@ -94,7 +94,6 @@ Array [
     },
     "id": "sample_dashboard",
     "type": "dashboard",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "/app/dashboards#/view/sample_dashboard2",
@@ -104,7 +103,6 @@ Array [
     },
     "id": "sample_dashboard2",
     "type": "dashboard",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "/app/lens#/edit/sample_lens",
@@ -114,7 +112,6 @@ Array [
     },
     "id": "sample_lens",
     "type": "lens",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "/app/visualize#/edit/sample_visualization",
@@ -124,7 +121,6 @@ Array [
     },
     "id": "sample_visualization",
     "type": "visualization",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "/app/discover#/view/sample_search",
@@ -134,7 +130,6 @@ Array [
     },
     "id": "sample_search",
     "type": "search",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "/app/management/kibana/dataViews/dataView/test-*",
@@ -143,7 +138,6 @@ Array [
     },
     "id": "test-*",
     "type": "index-pattern",
-    "updatedAt": "2024-04-30T20:21:16.045Z",
   },
   Object {
     "appLink": "",
@@ -153,7 +147,6 @@ Array [
     },
     "id": "sample_ml_module",
     "type": "ml-module",
-    "updatedAt": "2024-04-30T20:21:16.045Z",
   },
   Object {
     "appLink": "",
@@ -162,21 +155,18 @@ Array [
     },
     "id": "sample_security_rule",
     "type": "security-rule",
-    "updatedAt": "2024-04-30T20:21:16.045Z",
   },
   Object {
     "appLink": "",
     "attributes": Object {},
     "id": "sample_csp_rule_template",
     "type": "csp-rule-template",
-    "updatedAt": "2024-04-30T20:21:16.045Z",
   },
   Object {
     "appLink": "",
     "attributes": Object {},
     "id": "sample_osquery_pack_asset",
     "type": "osquery-pack-asset",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "/app/osquery/saved_queries/sample_osquery_saved_query",
@@ -185,7 +175,6 @@ Array [
     },
     "id": "sample_osquery_saved_query",
     "type": "osquery-saved-query",
-    "updatedAt": "2024-04-30T20:21:16.121Z",
   },
   Object {
     "appLink": "",
@@ -194,7 +183,6 @@ Array [
     },
     "id": "sample_tag",
     "type": "tag",
-    "updatedAt": "2024-04-30T20:21:16.045Z",
   },
 ]
 `;

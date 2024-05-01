@@ -59,7 +59,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // check overall list of assets and app links
-        expectSnapshot(body.items).toMatch();
+        expectSnapshot(
+          body.items.map((item) => ({
+            type: item.type,
+            id: item.id,
+            appLink: item.appLink,
+            attributes: item.attributes,
+          }))
+        ).toMatch();
       });
     });
   });
