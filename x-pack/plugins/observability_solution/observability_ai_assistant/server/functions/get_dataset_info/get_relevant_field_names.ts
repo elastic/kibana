@@ -36,9 +36,25 @@ export async function getRelevantFieldNames({
 }): Promise<{ fields: string[] }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
+  const hasAnyHitsResponse = await esClient.search({
+    index,
+    _source: false,
+    track_total_hits: 1,
+    terminate_after: 1,
+  });
+
+  const hitCount =
+    typeof hasAnyHitsResponse.hits.total === 'number'
+      ? hasAnyHitsResponse.hits.total
+      : hasAnyHitsResponse.hits.total?.value ?? 0;
+
+  // all fields are empty in this case, so get them all
+  const includeEmptyFields = hitCount === 0;
+
   const fields = await dataViewsService.getFieldsForWildcard({
     pattern: castArray(index).join(','),
     allowNoIndex: true,
+    includeEmptyFields,
     indexFilter:
       start && end
         ? {
@@ -74,7 +90,7 @@ export async function getRelevantFieldNames({
   const relevantFields = await Promise.all(
     chunk(fieldNames, 500).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
-        await chat('get_relevent_dataset_names', {
+        await chat('get_relevant_dataset_names', {
           signal,
           messages: [
             {
@@ -88,7 +104,8 @@ export async function getRelevantFieldNames({
             CIRCUMSTANCES include fields not mentioned in this list.`,
               },
             },
-            ...messages.slice(1),
+            // remove the system message and the function request
+            ...messages.slice(1, -1),
             {
               '@timestamp': new Date().toISOString(),
               message: {

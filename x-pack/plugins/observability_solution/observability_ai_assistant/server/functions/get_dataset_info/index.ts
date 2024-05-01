@@ -26,7 +26,6 @@ export function registerGetDatasetInfoFunction({
         'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           index: {
             type: 'string',
@@ -90,7 +89,7 @@ export function registerGetDatasetInfoFunction({
       return {
         content: {
           indices: [index],
-          fields: relevantFieldNames,
+          fields: relevantFieldNames.fields,
         },
       };
     }
