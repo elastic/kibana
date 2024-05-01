@@ -12,6 +12,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { EuiSelectable } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { PipelineSelect } from './pipeline_select';
 
@@ -27,6 +28,8 @@ const DEFAULT_VALUES = {
 const MOCK_ACTIONS = {
   selectExistingPipeline: jest.fn(),
 };
+
+const EUI_BASE_SIZE = parseFloat(euiThemeVars.euiSize);
 
 describe('PipelineSelect', () => {
   beforeEach(() => {
@@ -70,7 +73,7 @@ describe('PipelineSelect', () => {
     const wrapper = mount(<PipelineSelect />);
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
-    expect(selectable.prop('height')).toEqual(16 * 6 * 3); // TODO: Use euiTheme.base to calculate height
+    expect(selectable.prop('height')).toEqual(EUI_BASE_SIZE * 6 * 3);
     expect(selectable.prop('options')).toHaveLength(3);
   });
   it('limits pipeline select height to 4.5 options', () => {
@@ -113,7 +116,7 @@ describe('PipelineSelect', () => {
     const wrapper = mount(<PipelineSelect />);
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
-    expect(selectable.prop('height')).toEqual(16 * 6 * 4.5); // TODO: Use euiTheme.base to calculate height
+    expect(selectable.prop('height')).toEqual(EUI_BASE_SIZE * 6 * 4.5);
     expect(selectable.prop('options')).toHaveLength(5);
   });
   it('selects the chosen option', () => {
