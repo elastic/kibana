@@ -19,7 +19,9 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  describe(describeType, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182263
+  // Failing: See https://github.com/elastic/kibana/issues/182284
+  describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
