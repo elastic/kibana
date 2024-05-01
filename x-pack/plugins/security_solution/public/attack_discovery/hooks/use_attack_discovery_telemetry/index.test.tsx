@@ -43,13 +43,15 @@ describe('useAttackDiscoveryTelemetry', () => {
       actionTypeId: '.gen-ai',
       model: 'gpt-4',
       durationMs: 8000,
-      alertCount: 20,
+      alertsCount: 20,
+      configuredAlertsCount: 30,
     });
     expect(reportAttackDiscoveriesGenerated).toHaveBeenCalledWith({
       actionTypeId: '.gen-ai',
       model: 'gpt-4',
       durationMs: 8000,
-      alertCount: 20,
+      alertsCount: 20,
+      configuredAlertsCount: 30,
     });
   });
 });
