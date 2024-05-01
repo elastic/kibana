@@ -1001,7 +1001,6 @@
     "file-saver": "^1.3.8",
     "flat": "5",
     "fnv-plus": "^1.3.1",
-    "follow-redirects": "^1.15.6",
     "font-awesome": "4.7.0",
     "formik": "^2.4.5",
     "fp-ts": "^2.3.1",
