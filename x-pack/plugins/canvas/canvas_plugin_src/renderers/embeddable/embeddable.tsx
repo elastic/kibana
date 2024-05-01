@@ -6,7 +6,6 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
@@ -17,6 +16,7 @@ import {
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
