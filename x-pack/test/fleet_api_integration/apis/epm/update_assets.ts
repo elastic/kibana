@@ -450,6 +450,19 @@ export default function (providerContext: FtrProviderContext) {
           test_logs: 'logs-all_assets.test_logs-*',
           test_metrics: 'metrics-all_assets.test_metrics-*',
         },
+        data_streams: [
+          {
+            name: 'test_logs',
+            pattern: 'logs-all_assets.test_logs-*',
+            display_name: 'Test Dataset',
+          },
+          {
+            name: 'test_metrics',
+            pattern: 'metrics-all_assets.test_metrics-*',
+            display_name: 'Test Dataset',
+          },
+        ],
+
         package_assets: [
           { id: '3eb4c54a-638f-51b6-84e2-d53f5a666e37', type: 'epm-packages-assets' },
           { id: '4acfbf69-7a27-5c58-9c99-7c86843d958f', type: 'epm-packages-assets' },

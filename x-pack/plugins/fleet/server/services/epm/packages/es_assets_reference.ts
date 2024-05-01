@@ -10,6 +10,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { uniqBy } from 'lodash';
 
+import type { EsDataStream } from '../../../../common/types';
+
 import type { EsAssetReference, Installation } from '../../../types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -92,7 +94,8 @@ export const optimisticallyAddEsAssetReferences = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetsToAdd: EsAssetReference[],
-  esIndexPatterns?: Record<string, string>
+  esIndexPatterns?: Record<string, string>,
+  esDataStreams?: EsDataStream[]
 ): Promise<EsAssetReference[]> => {
   const addEsAssets = async () => {
     // TODO: Should this be replaced by a `get()` call from epm/get.ts?
@@ -116,6 +119,11 @@ export const optimisticallyAddEsAssetReferences = async (
       esIndexPatterns
     );
 
+    const deduplicatedDataStreams = uniqBy(
+      [...(so.attributes.data_streams ?? []), ...(esDataStreams ?? [])],
+      (datastream) => datastream.name
+    );
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
@@ -130,6 +138,7 @@ export const optimisticallyAddEsAssetReferences = async (
       {
         installed_es: deduplicatedAssets,
         es_index_patterns: deduplicatedIndexPatterns,
+        data_streams: deduplicatedDataStreams,
       },
       {
         version: so.version,

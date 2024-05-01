@@ -286,6 +286,11 @@
   ],
   "enterprise_search_telemetry": [],
   "epm-packages": [
+    "data_streams",
+    "data_streams.display_name",
+    "data_streams.name",
+    "data_streams.pattern",
+    "display_name",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
