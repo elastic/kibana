@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('bulk create jobs', function () {
+  describe.only('bulk create jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -150,6 +150,72 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const expectedJobIds = requestBody.map((j) => j.job.job_id).sort();
+      // only one datafeed
+      const expectedDatafeedIds = [singleMetricJob.datafeed.datafeed_id];
+
+      await ml.api.adJobsExistsInSpace(expectedJobIds);
+      await ml.api.datafeedsExistsInSpace(expectedDatafeedIds);
+    });
+
+    it('creates multiple jobs, with an expected job and datafeed error', async () => {
+      const requestBody = [
+        singleMetricJob,
+        {
+          job: { ...multiMetricJob.job, job_id: 'BAD_JOB_ID' },
+          datafeed: multiMetricJob.datafeed,
+        },
+      ];
+      const expectedResponse = {
+        [SINGLE_METRIC_JOB_CONFIG.job_id]: {
+          job: { success: true },
+          datafeed: { success: true },
+        },
+        BAD_JOB_ID: {
+          job: {
+            success: false,
+            error: {
+              error: {
+                reason:
+                  "Invalid job_id; 'BAD_JOB_ID' can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with alphanumeric",
+                root_cause: [
+                  {
+                    reason:
+                      "Invalid job_id; 'BAD_JOB_ID' can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with alphanumeric",
+                    type: 'illegal_argument_exception',
+                  },
+                ],
+                type: 'illegal_argument_exception',
+              },
+              status: 400,
+            },
+          },
+          datafeed: {
+            success: false,
+            error: {
+              error: {
+                reason: `No known job with id '${multiMetricJob.job.job_id}'`,
+                root_cause: [
+                  {
+                    reason: `No known job with id '${multiMetricJob.job.job_id}'`,
+                    type: 'resource_not_found_exception',
+                  },
+                ],
+                type: 'resource_not_found_exception',
+              },
+              status: 404,
+            },
+          },
+        },
+      };
+      const resp = await runRequest(USER.ML_POWERUSER, requestBody, 200);
+
+      expect(resp).to.eql(
+        expectedResponse,
+        `response should equal ${JSON.stringify(expectedResponse)}, got ${JSON.stringify(resp)}`
+      );
+
+      // only one job
+      const expectedJobIds = [singleMetricJob.job.job_id];
       // only one datafeed
       const expectedDatafeedIds = [singleMetricJob.datafeed.datafeed_id];
 
