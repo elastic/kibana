@@ -35,7 +35,7 @@ export const useSuppressionFields: UseSuppressionFields = ({
     () => {
       setDebouncedEsqlQuery(esqlQuery);
     },
-    1000,
+    300,
     [esqlQuery]
   );
 

@@ -6,11 +6,10 @@
  */
 
 import { isEmpty } from 'lodash';
-
+import type { QueryClient } from '@tanstack/react-query';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 import { KibanaServices } from '../../../common/lib/kibana';
-import { securitySolutionQueryClient } from '../../../common/containers/query_client/query_client_provider';
 
 import type { ValidationError, ValidationFunc } from '../../../shared_imports';
 import { isEsqlRule } from '../../../../common/detection_engine/utils';
@@ -48,7 +47,9 @@ export const computeHasMetadataOperator = (esqlQuery: string) => {
 export const esqlValidator = async (
   ...args: Parameters<ValidationFunc>
 ): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
-  const [{ value, formData }] = args;
+  const [{ value, formData, customData }] = args;
+  const queryClient = (customData.value as { queryClient: QueryClient | undefined }).queryClient;
+
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
   const { ruleType } = formData as DefineStepRule;
@@ -69,7 +70,7 @@ export const esqlValidator = async (
       };
     }
 
-    const data = await securitySolutionQueryClient.fetchQuery(
+    const data = await queryClient?.fetchQuery(
       getEsqlQueryConfig({ esqlQuery: query, expressions: services.expressions })
     );
 

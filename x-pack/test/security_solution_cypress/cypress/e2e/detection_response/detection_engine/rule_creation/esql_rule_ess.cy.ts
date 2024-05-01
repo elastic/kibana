@@ -49,6 +49,7 @@ import {
   continueFromDefineStep,
   fillAboutRuleMinimumAndContinue,
   skipScheduleRuleAction,
+  interceptEsqlQueryFieldsRequest,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -247,12 +248,11 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
+
+      interceptEsqlQueryFieldsRequest(queryWithCustomFields, 'esqlSuppressionFieldsRequest');
       fillEsqlQueryBar(queryWithCustomFields);
 
-      // wait until suppression fields fetched
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(1000);
-
+      cy.wait('@esqlSuppressionFieldsRequest');
       fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
       selectAlertSuppressionPerInterval();
       setAlertSuppressionDuration(2, 'h');

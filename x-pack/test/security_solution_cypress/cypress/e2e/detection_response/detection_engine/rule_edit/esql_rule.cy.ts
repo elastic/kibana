@@ -39,6 +39,7 @@ import {
   selectAlertSuppressionPerRuleExecution,
   selectDoNotSuppressForMissingFields,
   fillAlertSuppressionFields,
+  interceptEsqlQueryFieldsRequest,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
@@ -129,6 +130,8 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
     it('displays suppress options correctly on edit form and allows its editing', () => {
       visit(RULES_MANAGEMENT_URL);
+
+      interceptEsqlQueryFieldsRequest(expectedValidEsqlQuery, 'esqlSuppressionFieldsRequest');
       editFirstRule();
 
       // check saved suppression settings
@@ -139,9 +142,8 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
       selectAlertSuppressionPerRuleExecution();
       selectDoNotSuppressForMissingFields();
-      // wait until suppression fields fetched
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(1000);
+
+      cy.wait('@esqlSuppressionFieldsRequest');
       fillAlertSuppressionFields(['_count']);
 
       saveEditedRule();
@@ -170,10 +172,11 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
     it('enables suppression on time interval', () => {
       visit(RULES_MANAGEMENT_URL);
+
+      interceptEsqlQueryFieldsRequest(expectedValidEsqlQuery, 'esqlSuppressionFieldsRequest');
       editFirstRule();
-      // wait until suppression fields fetched
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(1000);
+
+      cy.wait('@esqlSuppressionFieldsRequest');
       fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
 
       saveEditedRule();

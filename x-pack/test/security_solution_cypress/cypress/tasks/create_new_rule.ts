@@ -898,6 +898,20 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(TOOLTIP).contains('Platinum license');
 };
 
+/**
+ * intercepts /internal/bsearch request that contains esqlQuery and adds alias to it
+ */
+export const interceptEsqlQueryFieldsRequest = (
+  esqlQuery: string,
+  alias: string = 'esqlQueryFields'
+) => {
+  cy.intercept('POST', '/internal/bsearch?*', (req) => {
+    if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
+      req.alias = alias;
+    }
+  });
+};
+
 export const checkLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true });
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('be.checked');
