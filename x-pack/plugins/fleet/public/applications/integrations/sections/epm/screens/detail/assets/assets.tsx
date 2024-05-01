@@ -102,11 +102,9 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         const { id: spaceId } = await spaces.getActiveSpace();
         const assetInstallSpaceId = pkgInstallationInfo.installed_kibana_space_id;
 
-        // if assets are installed in a different space no need to attempt to load them.
+        // if assets are installed in a different space, flag that Kibana assets won't be shown
         if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
           setAssetsInstalledInCurrentSpace(false);
-          setIsLoading(false);
-          return;
         }
       }
 
@@ -128,17 +126,20 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
           type,
         }));
 
-        const response = await sendGetBulkAssets({ assetIds });
-
-        setAssetsSavedObjectsByType(
-          (response.data?.items || []).reduce((acc, asset) => {
-            if (!acc[asset.type]) {
-              acc[asset.type] = {};
-            }
-            acc[asset.type][asset.id] = asset;
-            return acc;
-          }, {} as typeof assetSavedObjectsByType)
-        );
+        const { data, error } = await sendGetBulkAssets({ assetIds });
+        if (error) {
+          setFetchError(error);
+        } else {
+          setAssetsSavedObjectsByType(
+            (data?.items || []).reduce((acc, asset) => {
+              if (!acc[asset.type]) {
+                acc[asset.type] = {};
+              }
+              acc[asset.type][asset.id] = asset;
+              return acc;
+            }, {} as typeof assetSavedObjectsByType)
+          );
+        }
       } catch (e) {
         setFetchError(e);
       } finally {
@@ -177,35 +178,6 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         />
       </EuiCallOut>
     );
-  } else if (!assetsInstalledInCurrentSpace) {
-    content = (
-      <EuiCallOut
-        heading="h2"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceTitle"
-            defaultMessage="Assets not available in this space"
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceBody"
-            defaultMessage="This integration is installed, but no assets are available in this space. {learnMoreLink}."
-            values={{
-              learnMoreLink: (
-                <EuiLink href={docLinks.links.fleet.installAndUninstallIntegrationAssets} external>
-                  <FormattedMessage
-                    id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpace.learnMore"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiCallOut>
-    );
   } else if (pkgAssets.length === 0) {
     if (customAssetsExtension) {
       // If a UI extension for custom asset entries is defined, render the custom component here despite
@@ -230,6 +202,43 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     }
   } else {
     content = [
+      // Show callout if Kibana assets are installed in a different space
+      !assetsInstalledInCurrentSpace ? (
+        <>
+          <EuiCallOut
+            heading="h2"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceTitle"
+                defaultMessage="Kibana assets not available in this space"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceBody"
+                defaultMessage="This integration is installed, but Kibana assets may not be available in this space. {learnMoreLink}."
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={docLinks.links.fleet.installAndUninstallIntegrationAssets}
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpace.learnMore"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      ) : null,
+
       // Ensure we add any custom assets provided via UI extension to the before other assets
       customAssetsExtension ? (
         <ExtensionWrapper>
@@ -238,7 +247,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
         </ExtensionWrapper>
       ) : null,
 
-      // Lista all assets by order of `displayedAssetTypes`
+      // List all assets by order of `displayedAssetTypes`
       ...displayedAssetTypes.map((assetType) => {
         const assets = pkgAssetsByType[assetType] || [];
         const soAssets = assetSavedObjectsByType[assetType] || {};

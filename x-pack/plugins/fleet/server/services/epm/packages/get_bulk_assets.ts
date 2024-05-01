@@ -63,8 +63,13 @@ export async function getBulkAssets(
         types[obj.type] = soTypeRegistry.getType(obj.type);
       }
       let appLink: string = '';
-      if (types[obj.type]?.management?.getInAppUrl) {
-        appLink = types[obj.type]!.management!.getInAppUrl!(obj)?.path || '';
+      try {
+        if (types[obj.type]?.management?.getInAppUrl) {
+          appLink = types[obj.type]!.management!.getInAppUrl!(obj)?.path || '';
+        }
+      } catch (e) {
+        // Ignore errors from `getInAppUrl()`
+        // This can happen if user can't access the saved object (i.e. in a different space)
       }
 
       // TODO: Ask for Kibana SOs to have `getInAppUrl()` registered so that the above works safely:

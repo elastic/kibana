@@ -58,7 +58,8 @@ export const AssetsAccordion: FunctionComponent<{
       <>
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-          {savedObjects.map(({ id, attributes: { title: soTitle, description }, appLink }, idx) => {
+          {savedObjects.map(({ id, attributes, appLink }, idx) => {
+            const { title: soTitle, description } = attributes || {};
             // Ignore custom asset views or if not a Kibana asset
             if (type === 'view') {
               return;
