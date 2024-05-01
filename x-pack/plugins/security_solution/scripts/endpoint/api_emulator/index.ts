@@ -7,11 +7,17 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { dump } from '../common/utils';
+import { startExternalEdrServerEmulator } from './external_edr_server_emulator';
+import type { ExternalEdrServerEmulatorCoreServices } from './external_edr_server_emulator.types';
 import { createRuntimeServices } from '../common/stack_services';
-import { getSentinelOneEmulator } from './emulators/sentinelone';
-import { handleProcessInterruptions } from '../common/nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { EmulatorServer } from './lib/emulator_server';
+
+export {
+  startExternalEdrServerEmulator,
+  type StartExternalEdrServerEmulatorOptions,
+} from './external_edr_server_emulator';
+export * from './external_edr_server_emulator.types';
 
 export const cli = () => {
   run(
@@ -76,7 +82,7 @@ const cliRunner: RunFn = async (cliContext) => {
     noCertForSsl: true,
   });
 
-  const appServices = {
+  const coreServices: ExternalEdrServerEmulatorCoreServices = {
     get kbnClient() {
       return kbnClient;
     },
@@ -87,22 +93,13 @@ const cliRunner: RunFn = async (cliContext) => {
       return log;
     },
   };
-  const emulator = new EmulatorServer({ logger: log, port, services: appServices });
-  let stopping: Promise<void> | undefined;
 
-  await handleProcessInterruptions(
-    async () => {
-      await emulator.register(getSentinelOneEmulator());
+  const emulatorServer = await startExternalEdrServerEmulator({
+    port,
+    coreServices,
+  });
 
-      await emulator.start();
-      await emulator.stopped;
-    },
-    () => {
-      stopping = emulator.stop();
-    }
-  );
+  log.debug(`Server info:\n${dump(emulatorServer.info)}`);
 
-  if (stopping) {
-    await stopping;
-  }
+  await emulatorServer.stopped;
 };

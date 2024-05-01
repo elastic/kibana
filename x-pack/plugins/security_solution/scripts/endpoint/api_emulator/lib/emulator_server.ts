@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { ServerRoute } from '@hapi/hapi';
 import Hapi from '@hapi/hapi';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   EmulatorServerPlugin,
   EmulatorServerPluginRegisterOptions,
+  EmulatorServerRouteDefinition,
 } from './emulator_server.types';
 import type { DeferredPromiseInterface } from '../../common/utils';
 import { getDeferredPromise, prefixedOutputLogger } from '../../common/utils';
@@ -25,6 +27,9 @@ interface EmulatorServerOptions<TServices extends {} = {}> {
   port?: number;
 }
 
+/**
+ * An HTTP server module wrapped around Hapi
+ */
 export class EmulatorServer<TServices extends {} = {}> {
   protected readonly server: Hapi.Server & { app: { services: TServices | {} } };
   protected log: ToolingLog;
@@ -70,7 +75,43 @@ export class EmulatorServer<TServices extends {} = {}> {
   }
 
   /**
-   * Returns a promise that resolves when the server is stopped
+   * Utility that creates a Hapi Route definition based on the Route Definition defined for this framework
+   * @param routesToRegister
+   * @protected
+   */
+  protected createHapiRouteDefinition(
+    routesToRegister: EmulatorServerRouteDefinition | EmulatorServerRouteDefinition[]
+  ): ServerRoute[] {
+    const routes = Array.isArray(routesToRegister) ? routesToRegister : [routesToRegister];
+
+    // Inject `services` to every request under `request.pre.services`
+    for (const routeDefinition of routes) {
+      if (typeof routeDefinition.options === 'function') {
+        throw new Error(`a callback function for 'route.options' is not currently supported!`);
+      }
+
+      routeDefinition.options = routeDefinition.options ?? {};
+      routeDefinition.options.pre = routeDefinition.options.pre ?? [];
+      routeDefinition.options.pre.unshift({
+        method: () => this.server.app.services,
+        assign: 'services',
+      });
+    }
+
+    return routes;
+  }
+
+  /**
+   * Access information about the running server
+   */
+  public get info(): Hapi.ServerInfo {
+    return this.server.info;
+  }
+
+  /**
+   * A promise that resolves when the server is stopped
+   *
+   * **IMPORTANT**: Only use this property after server has been started!
    */
   public get stopped(): Promise<void> {
     if (!this.wasStarted) {
@@ -81,36 +122,23 @@ export class EmulatorServer<TServices extends {} = {}> {
     return this.stoppedDeferred.promise;
   }
 
+  /**
+   * Register a plugin with the server
+   * @param register
+   * @param prefix
+   * @param options
+   */
   public async register({ register, prefix, ...options }: EmulatorServerPlugin) {
-    const hapiServer = this.server;
-    await hapiServer.register(
+    const createHapiRouteDefinition = this.createHapiRouteDefinition.bind(this);
+
+    await this.server.register(
       {
         ...options,
-        register(server) {
+        register(pluginScopedServer) {
           const scopedServer: EmulatorServerPluginRegisterOptions = {
             router: {
               route: (routesToRegister) => {
-                const routes = Array.isArray(routesToRegister)
-                  ? routesToRegister
-                  : [routesToRegister];
-
-                // Inject `services` to every request under `request.pre.services`
-                for (const routeDefinition of routes) {
-                  if (typeof routeDefinition.options === 'function') {
-                    throw new Error(
-                      `a callback function for 'route.options' is not currently supported!`
-                    );
-                  }
-
-                  routeDefinition.options = routeDefinition.options ?? {};
-                  routeDefinition.options.pre = routeDefinition.options.pre ?? [];
-                  routeDefinition.options.pre.unshift({
-                    method: () => hapiServer.app.services,
-                    assign: 'services',
-                  });
-                }
-
-                return server.route(routes);
+                return pluginScopedServer.route(createHapiRouteDefinition(routesToRegister));
               },
             },
           };
@@ -127,9 +155,14 @@ export class EmulatorServer<TServices extends {} = {}> {
     );
   }
 
-  public route() {
-    throw new Error(`Not implemented yet`);
-    // TODO:PT implememnt
+  /**
+   * Register a route with the root server (non-plugin scoped)
+   * @param routesToRegister
+   */
+  public route(
+    routesToRegister: EmulatorServerRouteDefinition | EmulatorServerRouteDefinition[]
+  ): void {
+    return this.server.route(this.createHapiRouteDefinition(routesToRegister));
   }
 
   public async start() {
@@ -147,7 +180,7 @@ export class EmulatorServer<TServices extends {} = {}> {
       this.stoppedDeferred.resolve();
     });
 
-    this.log.debug(`Server started and available at: ${this.server.info.uri}`);
+    this.log.info(`Server started and available at: ${this.server.info.uri}`);
   }
 
   public async stop() {
