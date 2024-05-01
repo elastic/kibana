@@ -11,6 +11,7 @@ import {
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
+import { uniq } from 'lodash';
 import type { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
@@ -235,7 +236,10 @@ export const useAttackDiscovery = ({
       reportAttackDiscoveriesGenerated({
         actionTypeId,
         durationMs,
-        alertCount: knowledgeBase.latestAlerts,
+        alertsCount: uniq(
+          newAttackDiscoveries.flatMap((attackDiscovery) => attackDiscovery.alertIds)
+        ).length,
+        configuredAlertsCount: knowledgeBase.latestAlerts,
         provider: connectorConfig?.apiProvider,
         model: connectorConfig?.defaultModel,
       });

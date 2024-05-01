@@ -25,10 +25,17 @@ export const insightsGeneratedEvent: TelemetryEvent = {
         optional: false,
       },
     },
-    alertCount: {
+    alertsCount: {
       type: 'integer',
       _meta: {
         description: 'Number of alerts evaluated',
+        optional: false,
+      },
+    },
+    configuredAlertsCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of alerts configured by the user',
         optional: false,
       },
     },
