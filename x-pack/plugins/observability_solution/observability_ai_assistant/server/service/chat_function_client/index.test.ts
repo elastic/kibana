@@ -20,14 +20,9 @@ describe('chatFunctionClient', () => {
       });
 
       client = new ChatFunctionClient([]);
-      client.registerContext({
-        description: '',
-        name: 'core',
-      });
 
       client.registerFunction(
         {
-          contexts: ['core'],
           description: '',
           name: 'myFunction',
           parameters: {
@@ -93,7 +88,6 @@ describe('chatFunctionClient', () => {
 
       expect(functions[0]).toEqual({
         definition: {
-          contexts: ['core'],
           description: expect.any(String),
           name: 'get_data_on_screen',
           parameters: expect.any(Object),
