@@ -124,5 +124,20 @@ and \`dest\`=="Crete"`
         )
       ).toBe(`from logstash-* | where \`country\`!= "GR"`);
     });
+
+    it('appends an and clause in an existing query with where command as the last pipe if the filter preexists but the operator is not the correct one', () => {
+      expect(
+        appendWhereClauseToESQLQuery(
+          `from logstash-* | where CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")`,
+          'ip',
+          '127.0.0.2/32',
+          '-',
+          'ip'
+        )
+      ).toBe(
+        `from logstash-* | where CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
+and \`ip\`::string!="127.0.0.2/32"`
+      );
+    });
   });
 });

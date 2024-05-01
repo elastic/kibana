@@ -13,6 +13,33 @@ export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): 
   return `${baseESQLQuery}\n${appendedText}`;
 }
 
+// function findFunction(id, currentNode) {
+//   let i;
+//   let currentChild;
+//   let result;
+
+//   if (id == currentNode.id) {
+//     return currentNode;
+//   } else {
+//     // Use a for loop instead of forEach to avoid nested functions
+//     // Otherwise "return" will not work properly
+//     for (i = 0; i < currentNode.children.length; i += 1) {
+//       currentChild = currentNode.children[i];
+
+//       // Search in the current child
+//       result = findNode(id, currentChild);
+
+//       // Return the result if the node has been found
+//       if (result !== false) {
+//         return result;
+//       }
+//     }
+
+//     // The node has not been found and we have no more options
+//     return false;
+//   }
+// }
+
 export function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
   field: string,
@@ -46,6 +73,7 @@ export function appendWhereClauseToESQLQuery(
   // - we need to append with and if the filter doesnt't exist
   // - we need to change the filter operator if the filter exists with different operator
   // - we do nothing if the filter exists with the same operator
+  console.dir(ast[ast.length - 1]);
   if (lastCommandIsWhere) {
     const whereCommand = ast[ast.length - 1];
     const whereAstText = whereCommand.text;
@@ -56,6 +84,9 @@ export function appendWhereClauseToESQLQuery(
       const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
       if (matches) {
         const existingOperator = matches[1]?.trim().replace('`', '');
+        if (!['==', '!='].includes(existingOperator.trim())) {
+          return appendToESQLQuery(baseESQLQuery, `and ${fieldName}${operator}${filterValue}`);
+        }
         // the filter is the same
         if (existingOperator === operator) {
           return baseESQLQuery;
