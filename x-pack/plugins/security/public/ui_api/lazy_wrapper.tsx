@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 
 interface InternalProps<T> {
-  fn: () => Promise<FC<T>>;
+  fn: () => Promise<FC<PropsWithChildren<T>>>;
   core: CoreStart;
   props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>;
 }

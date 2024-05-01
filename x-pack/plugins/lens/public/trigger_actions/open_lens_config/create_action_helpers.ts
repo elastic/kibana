@@ -6,13 +6,13 @@
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
@@ -66,21 +66,17 @@ export async function executeCreateAction({
   // so we are requesting them with limit 0
   // this is much more performant than requesting
   // all the table
-  const performantQuery = {
-    esql: `from ${defaultIndex} | limit 0`,
-  };
-
-  const table = await fetchDataFromAggregateQuery(
-    performantQuery,
-    dataView,
-    deps.data,
-    deps.expressions
-  );
+  const abortController = new AbortController();
+  const columns = await getESQLQueryColumns({
+    esqlQuery: `from ${defaultIndex}`,
+    search: deps.data.search,
+    signal: abortController.signal,
+  });
 
   const context = {
     dataViewSpec: dataView.toSpec(),
     fieldName: '',
-    textBasedColumns: table?.columns,
+    textBasedColumns: columns,
     query: defaultEsqlQuery,
   };
 
@@ -98,7 +94,7 @@ export async function executeCreateAction({
     dataView,
   });
 
-  const embeddable = await api.addNewPanel<Embeddable>({
+  const embeddable = await api.addNewPanel<object, Embeddable>({
     panelType: 'lens',
     initialState: {
       attributes: attrs,
