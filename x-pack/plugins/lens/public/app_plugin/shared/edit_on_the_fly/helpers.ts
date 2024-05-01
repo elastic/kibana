@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getIndexPatternFromESQLQuery,
-  getESQLAdHocDataview,
-} from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
