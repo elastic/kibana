@@ -5,7 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import {
+  type ESQLFunction,
+  type ESQLSingleAstItem,
+  type ESQLColumn,
+  type ESQLLiteral,
+  getAstAndSyntaxErrors,
+} from '@kbn/esql-ast';
+
+interface FilterArguments {
+  fieldName: string;
+  value: string;
+  operator: string;
+}
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
 // in these cases a base query such as "from index // comment" will result in errors or wrong data if we don't append in a new line
@@ -13,32 +25,42 @@ export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): 
   return `${baseESQLQuery}\n${appendedText}`;
 }
 
-// function findFunction(id, currentNode) {
-//   let i;
-//   let currentChild;
-//   let result;
-
-//   if (id == currentNode.id) {
-//     return currentNode;
-//   } else {
-//     // Use a for loop instead of forEach to avoid nested functions
-//     // Otherwise "return" will not work properly
-//     for (i = 0; i < currentNode.children.length; i += 1) {
-//       currentChild = currentNode.children[i];
-
-//       // Search in the current child
-//       result = findNode(id, currentChild);
-
-//       // Return the result if the node has been found
-//       if (result !== false) {
-//         return result;
-//       }
-//     }
-
-//     // The node has not been found and we have no more options
-//     return false;
-//   }
-// }
+function findInAst(
+  astItem: ESQLFunction,
+  fieldName: string,
+  value: string
+): FilterArguments | undefined {
+  const singleAstItem = astItem as ESQLFunction;
+  const args = singleAstItem.args;
+  const isLastNode = args?.some((a) => 'type' in a && a.type === 'column');
+  if (isLastNode) {
+    const column = args.find((a) => {
+      const argument = a as ESQLSingleAstItem;
+      return argument.type === 'column';
+    }) as ESQLColumn;
+    const literal = args.find((a) => {
+      const argument = a as ESQLSingleAstItem;
+      return argument.type === 'literal';
+    }) as ESQLLiteral;
+    if (column?.name === fieldName && literal?.name.includes(value)) {
+      return {
+        fieldName,
+        value,
+        operator: astItem.name,
+      };
+    } else {
+      return undefined;
+    }
+  } else {
+    const functions = args?.filter((item) => 'type' in item && item.type === 'function');
+    for (const functionAstItem of functions) {
+      const item = findInAst(functionAstItem as ESQLFunction, fieldName, value);
+      if (item) {
+        return item;
+      }
+    }
+  }
+}
 
 export function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
@@ -62,6 +84,7 @@ export function appendWhereClauseToESQLQuery(
   // checking that the value is not null
   // this is the existence filter
   if (operation === '_exists_') {
+    fieldName = `\`${String(field)}\``;
     operator = ' is not null';
     filterValue = '';
   }
@@ -73,7 +96,6 @@ export function appendWhereClauseToESQLQuery(
   // - we need to append with and if the filter doesnt't exist
   // - we need to change the filter operator if the filter exists with different operator
   // - we do nothing if the filter exists with the same operator
-  console.dir(ast[ast.length - 1]);
   if (lastCommandIsWhere) {
     const whereCommand = ast[ast.length - 1];
     const whereAstText = whereCommand.text;
@@ -81,9 +103,12 @@ export function appendWhereClauseToESQLQuery(
     if (whereAstText.includes(field) && whereAstText.includes(String(filterValue))) {
       const pipesArray = baseESQLQuery.split('|');
       const whereClause = pipesArray[pipesArray.length - 1];
-      const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
-      if (matches) {
-        const existingOperator = matches[1]?.trim().replace('`', '');
+
+      const args = ast[ast.length - 1].args[0] as ESQLFunction;
+      const astItem = findInAst(args, field, String(value));
+
+      if (astItem) {
+        const existingOperator = astItem.operator;
         if (!['==', '!='].includes(existingOperator.trim())) {
           return appendToESQLQuery(baseESQLQuery, `and ${fieldName}${operator}${filterValue}`);
         }
@@ -92,9 +117,12 @@ export function appendWhereClauseToESQLQuery(
           return baseESQLQuery;
           // the filter has different operator
         } else {
-          const existingFilter = matches[0].trim();
-          const newFilter = existingFilter.replace(existingOperator, operator);
-          return baseESQLQuery.replace(existingFilter, newFilter);
+          const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
+          if (matches) {
+            const existingFilter = matches[0].trim();
+            const newFilter = existingFilter.replace(existingOperator, operator);
+            return baseESQLQuery.replace(existingFilter, newFilter);
+          }
         }
       }
     }
