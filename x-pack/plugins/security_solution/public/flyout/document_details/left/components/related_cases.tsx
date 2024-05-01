@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
@@ -21,7 +21,7 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const ICON = 'warning';
 
-const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
+const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase>> = (data) => [
   {
     field: 'title',
     name: (
@@ -30,13 +30,16 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
         defaultMessage="Name"
       />
     ),
-    render: (value: string, caseData: RelatedCase) => (
-      <CellTooltipWrapper tooltip={caseData.title}>
-        <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
-          {caseData.title}
-        </CaseDetailsLink>
-      </CellTooltipWrapper>
-    ),
+    render: (value: string, caseData: RelatedCase) => {
+      const index = data.findIndex((d) => d.id === caseData.id);
+      return (
+        <CellTooltipWrapper tooltip={caseData.title}>
+          <CaseDetailsLink detailName={caseData.id} title={caseData.title} index={index}>
+            {caseData.title}
+          </CaseDetailsLink>
+        </CellTooltipWrapper>
+      );
+    },
   },
   {
     field: 'status',
@@ -63,6 +66,7 @@ export interface RelatedCasesProps {
  */
 export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, data, dataCount } = useFetchRelatedCases({ eventId });
+  const columns = useMemo(() => getColumns(data), [data]);
 
   if (error) {
     return null;

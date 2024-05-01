@@ -59,7 +59,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
     );
 
     const renderTabs = tabs.map((tab, index) =>
-      isAlert ? (
+      isAlert && tab.id === 'overview' ? (
         <GuidedOnboardingTourStep
           isTourAnchor={isAlert}
           step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}

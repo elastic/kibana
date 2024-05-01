@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import {
   eventHasNotes,
   getEventType,
@@ -38,7 +39,10 @@ import * as i18n from './translations';
 import { useTourContext } from '../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import {
+  GuidedOnboardingTourStep,
+  hiddenWhenCaseFlyoutExpanded,
+} from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 
 const ActionsContainer = styled.div`
@@ -78,6 +82,17 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
+  const panels = useExpandableFlyoutState();
+  const isExpandableFlyoutExpanded: boolean = !!panels.right;
+
+  const hiddenWhenExpandableFlyoutOpened = useMemo(
+    () =>
+      isExpandableFlyoutExpanded &&
+      hiddenWhenCaseFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
+        AlertsCasesTourSteps.expandEvent
+      ),
+    [isExpandableFlyoutExpanded]
+  );
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
@@ -249,6 +264,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         onClick={onExpandEvent}
         step={AlertsCasesTourSteps.expandEvent}
         tourId={SecurityStepId.alertsCases}
+        hidden={hiddenWhenExpandableFlyoutOpened}
       >
         <div key="expand-event">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

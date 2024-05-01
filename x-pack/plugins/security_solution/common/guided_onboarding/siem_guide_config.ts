@@ -45,7 +45,7 @@ export const getSiemGuideConfig = (launchDarkly = defaultGuideTranslations): Gui
   telemetryId: siemGuideId,
   completedGuideRedirectLocation: {
     appID: 'securitySolutionUI',
-    path: '/alerts',
+    path: '/dashboards',
   },
   description: launchDarkly.description ?? defaultGuideTranslations.description,
   docs: {

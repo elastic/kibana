@@ -14,7 +14,10 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -26,6 +29,10 @@ import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/sea
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useTourContext } from '../../guided_onboarding_tour';
+import { SecurityStepId } from '../../guided_onboarding_tour/tour_config';
+import { LeftPanelInsightsTab } from '../../../../flyout/document_details/left';
+import { CORRELATIONS_TAB_ID } from '../../../../flyout/document_details/left/components/correlations_details';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -78,6 +85,7 @@ const RowActionComponent = ({
   const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
     'expandableFlyoutInCreateRuleEnabled'
   );
+  const { isTourShown: isGuidedOnboardingTourShown } = useTourContext();
 
   const columnValues = useMemo(
     () =>
@@ -111,20 +119,51 @@ const RowActionComponent = ({
     };
 
     if (showExpandableFlyout) {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
+      // If Guided onboarding is enabled, open the flyout with the left panel strght away
+      // As we want to show the case links in the correlation tab
+      if (isGuidedOnboardingTourShown(SecurityStepId.alertsCases)) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: tableId,
+            },
           },
-        },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: tableId,
-        panel: 'right',
-      });
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelInsightsTab,
+              subTab: CORRELATIONS_TAB_ID,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: tableId,
+            },
+          },
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: tableId,
+          panel: 'left',
+        });
+      } else {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: tableId,
+            },
+          },
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: tableId,
+          panel: 'right',
+        });
+      }
     }
     // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
     // support of old flyout in cases page
@@ -147,7 +186,17 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout, telemetry]);
+  }, [
+    eventId,
+    indexName,
+    showExpandableFlyout,
+    tableId,
+    isGuidedOnboardingTourShown,
+    openFlyout,
+    telemetry,
+    dispatch,
+    tabType,
+  ]);
 
   const Action = controlColumn.rowCellRender;
 

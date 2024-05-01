@@ -12,11 +12,15 @@ import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
+import {
+  GuidedOnboardingTourStep,
+  hiddenWhenCaseFlyoutExpanded,
+} from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
   AlertsCasesTourSteps,
@@ -116,6 +120,17 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
         ?.value?.[0] as number | undefined;
       return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
     }, [ecsData, data]);
+    const panels = useExpandableFlyoutState();
+    const isExpandableFlyoutExpanded: boolean = !!panels.right;
+
+    const hiddenWhenExpandableFlyoutOpened = useMemo(
+      () =>
+        isExpandableFlyoutExpanded &&
+        hiddenWhenCaseFlyoutExpanded[SecurityStepId.alertsCases]?.includes(
+          AlertsCasesTourSteps.pointToAlertName
+        ),
+      [isExpandableFlyoutExpanded]
+    );
 
     const Renderer = useMemo(() => {
       const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
@@ -126,6 +141,7 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
           isTourAnchor={isTourAnchor}
           step={AlertsCasesTourSteps.pointToAlertName}
           tourId={SecurityStepId.alertsCases}
+          hidden={hiddenWhenExpandableFlyoutOpened}
         >
           <DefaultCellRenderer
             browserFields={browserFields}
@@ -151,27 +167,28 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
         </GuidedOnboardingTourStep>
       );
     }, [
-      isTourAnchor,
-      finalData,
-      browserFieldsByName,
       header,
       columnId,
+      browserFieldsByName,
+      columnHeaders,
       ecsData,
-      linkValues,
-      rowRenderers,
-      isDetails,
-      isExpandable,
-      isDraggable,
-      isExpanded,
-      colIndex,
+      isTourAnchor,
+      hiddenWhenExpandableFlyoutOpened,
+      browserFields,
+      finalData,
       eventId,
+      isDetails,
+      isDraggable,
+      isExpandable,
+      isExpanded,
+      linkValues,
+      rowIndex,
+      colIndex,
+      rowRenderers,
       setCellProps,
+      tableId,
       truncate,
       context,
-      tableId,
-      browserFields,
-      rowIndex,
-      columnHeaders,
     ]);
 
     return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (

@@ -44,6 +44,8 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  isCreateCaseFlyoutOpen: boolean;
+  isSelectCaseModalOpen: boolean;
 }
 
 export interface CasesContextProps
@@ -83,6 +85,12 @@ export const CasesProvider: FC<
 }) => {
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
+  console.log(
+    '-----cases---',
+    state.createCaseFlyout.isFlyoutOpen,
+    state.selectCaseModal.isModalOpen
+  );
+
   const value: CasesContextValue = useMemo(
     () => ({
       externalReferenceAttachmentTypeRegistry,
@@ -110,6 +118,8 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      isCreateCaseFlyoutOpen: state.createCaseFlyout.isFlyoutOpen,
+      isSelectCaseModalOpen: state.selectCaseModal.isModalOpen,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.
@@ -126,6 +136,8 @@ export const CasesProvider: FC<
       permissions.read,
       permissions.settings,
       permissions.update,
+      state.createCaseFlyout.isFlyoutOpen,
+      state.selectCaseModal.isModalOpen,
     ]
   );
 

@@ -22,11 +22,18 @@ import { EventKind } from '../../shared/constants/event_kinds';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour/tour';
 import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { useKibana } from '../../../../common/lib/kibana';
 
 /**
  * Guided tour for the right panel in details flyout
  */
 export const RightPanelTour = memo(() => {
+  const { cases } = useKibana().services;
+  const isAddToNewCaseFlyoutOpen = cases.hooks.useIsAddToNewCaseFlyoutOpen();
+  const isAddToExistingCaseModalOpen = cases.hooks.useAddToExistingCaseModalOpen();
+
+  const casesFlyoutExpanded = isAddToNewCaseFlyoutOpen || isAddToExistingCaseModalOpen;
+
   const { isTourShown: isGuidedOnboardingTourShown } = useTourContext();
 
   const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
@@ -39,7 +46,8 @@ export const RightPanelTour = memo(() => {
     isAlert &&
     !isPreview &&
     !isTimelineFlyoutOpen &&
-    !isGuidedOnboardingTourShown(SecurityStepId.alertsCases);
+    !isGuidedOnboardingTourShown(SecurityStepId.alertsCases) &&
+    !casesFlyoutExpanded;
 
   const goToLeftPanel = useCallback(() => {
     openLeftPanel({
