@@ -7,10 +7,15 @@
 
 import type { FC } from 'react';
 import type { DefaultEmbeddableApi, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  HasEditCapabilities,
+  PublishesDataViews,
+  PublishesTimeRange,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { TimeRange } from '@kbn/es-query';
-import type { SelectedChangePoint } from '../components/change_point_detection/change_point_detection_context';
+import type { SelectedChangePoint } from '../../components/change_point_detection/change_point_detection_context';
 import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
@@ -32,9 +37,26 @@ export type ViewComponent = FC<{
 }>;
 
 export interface ChangePointComponentApi {
-  viewType?: PublishingSubject<ChangePointDetectionViewType>;
-  dataViewId: PublishingSubject<string>;
-  timeRange: TimeRange;
+  viewType: PublishingSubject<ChangePointEmbeddableState['viewType']>;
+  dataViewId: PublishingSubject<ChangePointEmbeddableState['dataViewId']>;
+  fn: PublishingSubject<ChangePointEmbeddableState['fn']>;
+  metricField: PublishingSubject<ChangePointEmbeddableState['metricField']>;
+  splitField: PublishingSubject<ChangePointEmbeddableState['splitField']>;
+  partitions: PublishingSubject<ChangePointEmbeddableState['partitions']>;
+  maxSeriesToPlot: PublishingSubject<ChangePointEmbeddableState['maxSeriesToPlot']>;
+  updateUserInput: (update: ChangePointEmbeddableState) => void;
+}
+
+export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointEmbeddableState> &
+  HasEditCapabilities &
+  PublishesDataViews &
+  PublishesTimeRange &
+  ChangePointComponentApi;
+
+export interface ChangePointEmbeddableState {
+  viewType: ChangePointDetectionViewType;
+  dataViewId: string;
+  timeRange?: TimeRange | undefined;
   fn: 'avg' | 'sum' | 'min' | 'max' | string;
   metricField: string;
   splitField?: string;
@@ -42,6 +64,4 @@ export interface ChangePointComponentApi {
   maxSeriesToPlot?: number;
 }
 
-export type ChangePointEmbeddableApi = DefaultEmbeddableApi &
-  PublishesDataViews &
-  ChangePointComponentApi;
+export type ChangePointEmbeddableRuntimeState = ChangePointEmbeddableState;

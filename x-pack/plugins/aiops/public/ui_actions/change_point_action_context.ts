@@ -6,11 +6,17 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
-import type { OpenInMLUIActionContext } from './open_change_point_ml';
+import type { ChangePointEmbeddableApi } from '../embeddable/change_point_chart/types';
 
-export function isChangePointChartEmbeddableContext(arg: unknown): arg is OpenInMLUIActionContext {
+export interface ChangePointChartActionContext extends EmbeddableApiContext {
+  embeddable: ChangePointEmbeddableApi;
+}
+
+export function isChangePointChartEmbeddableContext(
+  arg: unknown
+): arg is ChangePointChartActionContext {
   return (
     isPopulatedObject(arg, ['embeddable']) &&
     apiIsOfType(arg.embeddable, EMBEDDABLE_CHANGE_POINT_CHART_TYPE)

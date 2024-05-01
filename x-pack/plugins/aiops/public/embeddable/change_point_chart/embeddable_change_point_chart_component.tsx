@@ -15,9 +15,9 @@ import type {
   ChangePointDetectionViewType,
   EmbeddableChangePointType,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { AiopsPluginStartDeps } from '../types';
+import type { AiopsPluginStartDeps } from '../../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
-import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
+import type { ChangePointAnnotation } from '../../components/change_point_detection/change_point_detection_context';
 
 export interface EmbeddableChangePointChartProps {
   viewType?: ChangePointDetectionViewType;

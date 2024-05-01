@@ -191,6 +191,8 @@ export function useChangePointResults(
           runtimeMappings
         );
 
+        console.log(requestPayload, '___requestPayload___');
+
         if (usageCollection?.reportUiCounter && embeddingOrigin) {
           usageCollection.reportUiCounter(
             embeddingOrigin,

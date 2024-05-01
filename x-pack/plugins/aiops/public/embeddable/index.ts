@@ -5,5 +5,16 @@
  * 2.0.
  */
 
-export { EmbeddableChangePointChartFactory } from './embeddable_change_point_chart_factory';
-export { type EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
+import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
+
+export { type EmbeddableChangePointChartProps } from './change_point_chart/embeddable_change_point_chart_component';
+
+export const registerEmbeddable = (core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>) => {
+  registerReactEmbeddableFactory(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
+    const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart');
+    return getChangePointChartEmbeddableFactory(core.getStartServices);
+  });
+};
