@@ -95,10 +95,6 @@ export function getEsQueryFromSavedSearch({
   const userQuery = query;
   const userFilters = filters;
 
-  if (filterManager && userFilters) {
-    filterManager.addFilters(userFilters);
-  }
-
   const savedSearchSource = getSavedSearchSource(savedSearch);
 
   // If saved search has a search source with nested parent
@@ -125,6 +121,11 @@ export function getEsQueryFromSavedSearch({
       queryLanguage: userQuery.language as SearchQueryLanguage,
     };
   }
+
+  if (filterManager && userFilters) {
+    filterManager.addFilters(userFilters);
+  }
+
   // If no saved search available, use user's query and filters
   if (
     !savedSearch &&
