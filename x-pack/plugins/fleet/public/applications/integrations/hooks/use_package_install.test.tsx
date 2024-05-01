@@ -13,11 +13,16 @@ import { createIntegrationsTestRendererMock } from '../../../mock';
 
 import { useInstallPackage, PackageInstallProvider } from './use_package_install';
 
-const coreStart = coreMock.createStart();
-
 describe('usePackageInstall', () => {
+  const coreStart = coreMock.createStart();
+
+  const addErrorSpy = jest.spyOn(coreStart.notifications.toasts, 'addError');
+  const addSuccessSpy = jest.spyOn(coreStart.notifications.toasts, 'addSuccess');
+
   beforeEach(() => {
     createIntegrationsTestRendererMock();
+    addErrorSpy.mockReset();
+    addSuccessSpy.mockReset();
   });
 
   describe('useInstallPackage', () => {
@@ -43,7 +48,6 @@ describe('usePackageInstall', () => {
         throw error;
       }) as any);
 
-      const notifications = renderer.startServices.notifications;
       const wrapper: WrapperComponent<any> = ({ children }) => (
         <PackageInstallProvider startServices={coreStart}>{children}</PackageInstallProvider>
       );
@@ -53,12 +57,11 @@ describe('usePackageInstall', () => {
 
       return {
         installPackage,
-        notifications,
       };
     }
 
     it('should work for install', async () => {
-      const { notifications, installPackage } = createRenderer();
+      const { installPackage } = createRenderer();
       let res: boolean | undefined;
       await act(async () => {
         res = await installPackage({
@@ -68,14 +71,14 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(notifications.toasts.addError).not.toBeCalled();
-      expect(notifications.toasts.addSuccess).toBeCalled();
+      expect(addErrorSpy).not.toBeCalled();
+      expect(addSuccessSpy).toBeCalled();
 
       expect(res).toBeTruthy();
     });
 
     it('should work for upgrade', async () => {
-      const { notifications, installPackage } = createRenderer();
+      const { installPackage } = createRenderer();
       let res: boolean | undefined;
       await act(async () => {
         res = await installPackage({
@@ -86,14 +89,14 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(notifications.toasts.addError).not.toBeCalled();
-      expect(notifications.toasts.addSuccess).toBeCalled();
+      expect(addErrorSpy).not.toBeCalled();
+      expect(addSuccessSpy).toBeCalled();
 
       expect(res).toBeTruthy();
     });
 
     it('should handle install error', async () => {
-      const { notifications, installPackage } = createRenderer();
+      const { installPackage } = createRenderer();
 
       let res: boolean | undefined;
       await act(async () => {
@@ -104,8 +107,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(notifications.toasts.addSuccess).not.toBeCalled();
-      expect(notifications.toasts.addError).toBeCalled();
+      expect(addSuccessSpy).not.toBeCalled();
+      expect(addErrorSpy).toBeCalled();
 
       expect(res).toBeFalsy();
     });
