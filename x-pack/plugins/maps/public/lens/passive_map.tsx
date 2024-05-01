@@ -12,7 +12,7 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializeState } from '../react_embeddable/types';
+import { MapApi, MapSerializedState } from '../react_embeddable/types';
 
 interface Props {
   passiveLayer: LayerDescriptor;
@@ -76,7 +76,7 @@ export function PassiveMap(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializeState, MapApi>
+      <ReactEmbeddableRenderer<MapSerializedState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         state={initialState}
         onApiAvailable={(api) => {

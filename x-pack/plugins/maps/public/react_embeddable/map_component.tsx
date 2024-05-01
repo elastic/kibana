@@ -14,7 +14,7 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializeState } from './types';
+import { MapApi, MapSerializedState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 interface Props {
@@ -73,7 +73,7 @@ export function MapComponent(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializeState, MapApi>
+      <ReactEmbeddableRenderer<MapSerializedState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         state={initialState}
         parentApi={parentApi}

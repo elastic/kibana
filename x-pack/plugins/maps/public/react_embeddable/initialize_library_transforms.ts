@@ -11,12 +11,12 @@ import { getCore, getCoreOverlays } from '../kibana_services';
 import { SavedMap } from '../routes/map_page';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
 import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
-import { MapSerializeState } from './types';
+import { MapSerializedState } from './types';
 
 export function initializeLibraryTransforms(
   savedMap: SavedMap,
-  serializeState: () => SerializedPanelState<MapSerializeState>
-): HasLibraryTransforms<MapSerializeState> {
+  serializeState: () => SerializedPanelState<MapSerializedState>
+): HasLibraryTransforms<MapSerializedState> {
   return {
     canLinkToLibrary: async () => {
       const { maps } = getCore().application.capabilities;

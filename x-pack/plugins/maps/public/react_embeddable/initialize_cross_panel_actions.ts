@@ -27,7 +27,7 @@ import { setGotoWithCenter, setMapSettings } from '../actions';
 import { MapExtent } from '../../common/descriptor_types';
 import { getUiActions } from '../kibana_services';
 import { getGeoFieldsLabel } from '../embeddable/get_geo_fields_label';
-import { MapApi, MapSerializeState } from './types';
+import { MapApi, MapSerializedState } from './types';
 import { setOnMapMove } from '../reducers/non_serializable_instances';
 
 export function initializeCrossPanelActions({
@@ -42,7 +42,7 @@ export function initializeCrossPanelActions({
   getActionContext: () => ActionExecutionContext;
   getApi: () => MapApi | undefined;
   savedMap: SavedMap;
-  state: MapSerializeState;
+  state: MapSerializedState;
   uuid: string;
 }) {
   const isMovementSynchronized$ = new BehaviorSubject<boolean | undefined>(
@@ -213,7 +213,7 @@ export function initializeCrossPanelActions({
     comparators: {
       isMovementSynchronized: [isMovementSynchronized$, setIsMovementSynchronized],
       filterByMapExtent: [isFilterByMapExtent$, setIsFilterByMapExtent],
-    } as StateComparators<MapSerializeState>,
+    } as StateComparators<MapSerializedState>,
     getIsFilterByMapExtent,
     serialize: () => {
       return {

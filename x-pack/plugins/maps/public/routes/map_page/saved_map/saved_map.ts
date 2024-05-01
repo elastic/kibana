@@ -35,8 +35,9 @@ import {
   setHiddenLayers,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
-import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
+import { loadFromLibrary, SharingSavedObjectProps } from './load_from_library';
+import { saveToLibrary } from './save_to_library';
+import { MapSerializedState } from '../../../react_embeddable/types';
 import {
   getCoreChrome,
   getIndexPatternService,
@@ -57,6 +58,7 @@ import { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+import { extractReferences } from '../../../../common/migrations/references';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -77,7 +79,7 @@ export class SavedMap {
   private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
-  private _mapEmbeddableInput?: MapEmbeddableInput;
+  private _mapSerializedState?: MapSerializedState;
   private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
   private _originatingPath?: string;
@@ -89,7 +91,7 @@ export class SavedMap {
 
   constructor({
     defaultLayers = [],
-    mapEmbeddableInput,
+    mapSerializedState,
     embeddableId,
     onSaveCallback,
     originatingApp,
@@ -98,7 +100,7 @@ export class SavedMap {
     defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
-    mapEmbeddableInput?: MapEmbeddableInput;
+    mapSerializedState?: MapSerializedState;
     embeddableId?: string;
     onSaveCallback?: () => void;
     originatingApp?: string;
@@ -107,7 +109,7 @@ export class SavedMap {
     defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
-    this._mapEmbeddableInput = mapEmbeddableInput;
+    this._mapSerializedState = mapSerializedState;
     this._embeddableId = embeddableId;
     this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
@@ -122,28 +124,32 @@ export class SavedMap {
     return this._store;
   }
 
+  async _loadAttributes() {
+    if (this._mapSerializedState?.savedObjectId) {
+
+    }
+  }
+
   async whenReady() {
     await whenLicenseInitialized();
 
-    if (!this._mapEmbeddableInput) {
-      this._attributes = {
-        title: '',
-        description: '',
-      };
-    } else {
-      const { attributes: doc, metaInfo } = await getMapAttributeService().unwrapAttributes(
-        this._mapEmbeddableInput
-      );
-      const { references, ...savedObjectAttributes } = doc;
-      this._attributes = savedObjectAttributes;
-      if (metaInfo?.sharingSavedObjectProps) {
-        this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
+    if (this._mapSerializedState?.savedObjectId) {
+      const { attributes, managed, references, sharingSavedObjectProps } = await loadFromLibrary(this._mapSerializedState.savedObjectId);
+      this._attributes = attributes;
+      if (sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = sharingSavedObjectProps;
       }
-      this._managed = Boolean(metaInfo?.managed);
+      this._managed = managed;
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
       }
+    } else {
+      this._attributes = this._mapSerializedState?.attributes
+      ? this._mapSerializedState.attributes
+      : {
+          title: '',
+        };
     }
 
     this._reportUsage();
@@ -163,8 +169,8 @@ export class SavedMap {
       }
     }
 
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
+    if (this._mapSerializedState?.mapSettings !== undefined) {
+      this._store.dispatch(setMapSettingsFromEncodedState(this._mapSerializedState.mapSettings));
     } else if (this._attributes?.mapStateJSON) {
       try {
         const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
@@ -177,8 +183,8 @@ export class SavedMap {
     }
 
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
+    if (this._mapSerializedState?.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._mapSerializedState.isLayerTOCOpen;
     } else if (this._attributes?.uiStateJSON) {
       try {
         const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
@@ -192,8 +198,8 @@ export class SavedMap {
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
 
     let openTOCDetails: string[] = [];
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
-      openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
+    if (this._mapSerializedState?.openTOCDetails !== undefined) {
+      openTOCDetails = this._mapSerializedState.openTOCDetails;
     } else if (this._attributes?.uiStateJSON) {
       try {
         const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
@@ -206,12 +212,12 @@ export class SavedMap {
     }
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
 
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapCenter !== undefined) {
+    if (this._mapSerializedState?.mapCenter !== undefined) {
       this._store.dispatch(
         setGotoWithCenter({
-          lat: this._mapEmbeddableInput.mapCenter.lat,
-          lon: this._mapEmbeddableInput.mapCenter.lon,
-          zoom: this._mapEmbeddableInput.mapCenter.zoom,
+          lat: this._mapSerializedState.mapCenter.lat,
+          lon: this._mapSerializedState.mapCenter.lon,
+          zoom: this._mapSerializedState.mapCenter.zoom,
         })
       );
     } else if (this._attributes?.mapStateJSON) {
@@ -246,8 +252,8 @@ export class SavedMap {
       }
     }
     this._store.dispatch<any>(replaceLayerList(layerList));
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
-      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
+    if (this._mapSerializedState?.hiddenLayers !== undefined) {
+      this._store.dispatch<any>(setHiddenLayers(this._mapSerializedState.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
 
@@ -284,7 +290,7 @@ export class SavedMap {
   }
 
   private _getPageTitle(): string {
-    if (!this._mapEmbeddableInput) {
+    if (!this._mapSerializedState) {
       return i18n.translate('xpack.maps.breadcrumbsCreate', {
         defaultMessage: 'Create',
       });
@@ -355,8 +361,8 @@ export class SavedMap {
   }
 
   public getSavedObjectId(): string | undefined {
-    return this._mapEmbeddableInput && 'savedObjectId' in this._mapEmbeddableInput
-      ? (this._mapEmbeddableInput as MapByReferenceInput).savedObjectId
+    return this._mapSerializedState?.savedObjectId
+      ? this._mapSerializedState.savedObjectId
       : undefined;
   }
 
@@ -407,10 +413,9 @@ export class SavedMap {
 
   public getAutoFitToBounds(): boolean {
     if (
-      this._mapEmbeddableInput &&
-      this._mapEmbeddableInput?.mapSettings?.autoFitToDataBounds !== undefined
+      this._mapSerializedState?.mapSettings?.autoFitToDataBounds !== undefined
     ) {
-      return this._mapEmbeddableInput.mapSettings.autoFitToDataBounds;
+      return this._mapSerializedState.mapSettings.autoFitToDataBounds;
     }
 
     if (!this._attributes || !this._attributes.mapStateJSON) {
@@ -447,13 +452,13 @@ export class SavedMap {
     newTitle,
     newCopyOnSave,
     returnToOrigin,
-    newTags,
+    tags,
     saveByReference,
     dashboardId,
     history,
   }: OnSaveProps & {
     returnToOrigin?: boolean;
-    newTags?: string[];
+    tags?: string[];
     saveByReference: boolean;
     dashboardId?: string | null;
     history: ScopedHistory;
@@ -464,36 +469,45 @@ export class SavedMap {
 
     const prevTitle = this._attributes.title;
     const prevDescription = this._attributes.description;
-    const prevTags = this._tags;
     this._attributes.title = newTitle;
     this._attributes.description = newDescription;
-    if (newTags) {
-      this._tags = newTags;
-    }
     await this._syncAttributesWithStore();
 
-    let updatedMapEmbeddableInput: MapEmbeddableInput;
-    try {
-      const savedObjectsTagging = getSavedObjectsTagging();
-      // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
-      const attributes =
-        savedObjectsTagging && newTags
-          ? {
-              ...this._attributes,
-              references: savedObjectsTagging.ui.updateTagsReferences([], newTags),
-            }
-          : this._attributes;
-      updatedMapEmbeddableInput = (await getMapAttributeService().wrapAttributes(
-        attributes,
-        saveByReference,
-        newCopyOnSave ? undefined : this._mapEmbeddableInput
-      )) as MapEmbeddableInput;
-    } catch (e) {
-      // Error toast displayed by wrapAttributes
-      this._attributes.title = prevTitle;
-      this._attributes.description = prevDescription;
-      this._tags = prevTags;
-      return;
+    let savedObjectId: string | undefined;
+    if (saveByReference) {
+      try {
+        const { attributes, references } = extractReferences({
+          attributes: this._attributes,
+        });
+        const savedObjectsTagging = getSavedObjectsTagging();
+        // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
+        const tagReferences =
+          savedObjectsTagging && tags
+            ? savedObjectsTagging.ui.updateTagsReferences([], tags)
+            : [];
+        const { id } = await saveToLibrary(
+          attributes,
+          [...references, ...tagReferences],
+          newCopyOnSave ? undefined : this._mapSerializedState?.savedObjectId,
+        );
+        savedObjectId = id;
+      } catch (e) {
+        this._attributes.title = prevTitle;
+        this._attributes.description = prevDescription;
+        getToasts().addDanger({
+          title: i18n.translate('xpack.maps.saveToLibraryError', {
+            defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
+            values: {
+              errorMessage: e.message,
+            },
+          }),
+        });
+        return;
+      }
+    }
+
+    if (tags) {
+      this._tags = tags;
     }
 
     if (returnToOrigin) {
@@ -513,7 +527,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          input: updatedMapEmbeddableInput,
+          input: { attributes: this._attributes },
         },
         path: this._originatingPath,
       });
@@ -522,14 +536,14 @@ export class SavedMap {
       await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
-          input: updatedMapEmbeddableInput,
+          input: { attributes: this._attributes },
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
     }
 
-    this._mapEmbeddableInput = updatedMapEmbeddableInput;
+    this._mapSerializedState = { savedObjectId };
     // break connection to originating application
     this._originatingApp = undefined;
 

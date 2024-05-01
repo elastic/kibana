@@ -31,7 +31,7 @@ import { ILayer } from '../classes/layers/layer';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { EventHandlers } from '../reducers/non_serializable_instances';
 
-export type MapSerializeState = SerializedTitles &
+export type MapSerializedState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
     // by-valye
     attributes?: MapAttributes;
@@ -55,15 +55,15 @@ export type MapSerializeState = SerializedTitles &
     isSharable?: boolean;
   };
 
-export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
+export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   HasDynamicActions &
-  HasEditCapabilities &
+  Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapSerializeState> & {
+  HasLibraryTransforms<MapSerializedState> & {
     getLayerList: () => ILayer[];
     setEventHandlers: (eventHandlers: EventHandlers) => void;
     setLayerList: (layerList: LayerDescriptor[]) => void;

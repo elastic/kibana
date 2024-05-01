@@ -11,7 +11,7 @@ import { MapAttributes } from '@kbn/maps-plugin/common/content_management';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { savedObjectToEmbeddableAttributes } from '../map_attribute_service';
-import { MapSerializeState } from './types';
+import { MapSerializedState } from './types';
 
 export function setupMapEmbeddable() {
   registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
@@ -35,7 +35,7 @@ export function setupMapEmbeddable() {
   });
 }
 
-export function getInitialState(savedObject: SavedObjectCommon<MapAttributes>): MapSerializeState {
+export function getInitialState(savedObject: SavedObjectCommon<MapAttributes>): MapSerializedState {
   if (!savedObject.managed) {
     return { savedObjectId: savedObject.id };
   }

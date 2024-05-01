@@ -17,7 +17,7 @@ import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/pu
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
 import { extract, type MapEmbeddablePersistableState } from '../../common/embeddable';
-import type { MapApi, MapSerializeState } from './types';
+import type { MapApi, MapSerializedState } from './types';
 import { SavedMap } from '../routes/map_page';
 import type { MapEmbeddableInput } from '../embeddable/types';
 import { initializeReduxSync } from './initialize_redux_sync';
@@ -36,19 +36,19 @@ export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
 
-export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, MapApi> = {
+export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   deserializeState: (state) => {
     return state.rawState
       ? (inject(
           state.rawState as EmbeddableStateWithType,
           state.references ?? []
-        ) as unknown as MapSerializeState)
+        ) as unknown as MapSerializedState)
       : {};
   },
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
     const savedMap = new SavedMap({
-      mapEmbeddableInput: state as unknown as MapEmbeddableInput,
+      mapSerializedState: state,
     });
     await savedMap.whenReady();
 
@@ -96,7 +96,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ...reduxSync.serialize(),
       } as unknown as MapEmbeddablePersistableState);
       return {
-        rawState: rawState as unknown as MapSerializeState,
+        rawState: rawState as unknown as MapSerializedState,
         references,
       };
     }

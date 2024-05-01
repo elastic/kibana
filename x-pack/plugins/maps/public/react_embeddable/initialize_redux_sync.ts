@@ -34,7 +34,7 @@ import {
   setOpenTOCDetails,
   setReadOnly,
 } from '../actions';
-import type { MapSerializeState } from './types';
+import type { MapSerializedState } from './types';
 import { getCharts, getExecutionContextService } from '../kibana_services';
 import {
   EventHandlers,
@@ -64,7 +64,7 @@ export function initializeReduxSync({
   uuid,
 }: {
   savedMap: SavedMap;
-  state: MapSerializeState;
+  state: MapSerializedState;
   syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
 }) {
@@ -220,7 +220,7 @@ export function initializeReduxSync({
         },
         fastIsEqual,
       ],
-    } as StateComparators<MapSerializeState>,
+    } as StateComparators<MapSerializedState>,
     serialize: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),
