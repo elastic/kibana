@@ -9,16 +9,18 @@ import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { fetchFields } from './utils/fetch_query_source_fields';
+import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
-import { ConversationalChain } from './utils/conversational_chain';
+import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
-import { getChatParams } from './utils/get_chat_params';
+import { getChatParams } from './lib/get_chat_params';
+import { fetchIndices } from './lib/fetch_indices';
+import { isNotNullish } from '../common/is_not_nullish';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -195,6 +197,37 @@ export function defineRoutes({
 
       return response.ok({
         body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  // SECURITY: We don't apply any authorization tags to this route because all actions performed
+  // on behalf of the user making the request and governed by the user's own cluster privileges.
+  router.get(
+    {
+      path: APIRoutes.GET_INDICES,
+      validate: {
+        query: schema.object({
+          search_query: schema.maybe(schema.string()),
+          size: schema.number({ defaultValue: 10, min: 0 }),
+        }),
+      },
+    },
+    errorHandler(async (context, request, response) => {
+      const { search_query: searchQuery, size } = request.query;
+      const {
+        client: { asCurrentUser },
+      } = (await context.core).elasticsearch;
+
+      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
+
+      const indexNameSlice = indexNames.slice(0, size).filter(isNotNullish);
+
+      return response.ok({
+        body: {
+          indices: indexNameSlice,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })
