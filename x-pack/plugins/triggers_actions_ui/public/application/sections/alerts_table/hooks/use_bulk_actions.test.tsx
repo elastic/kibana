@@ -10,6 +10,7 @@ import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from '
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
+import { BulkActionsVerbs } from '../../../../types';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -421,6 +422,46 @@ describe('bulk action hooks', () => {
           },
         ]
       `);
+    });
+
+    it('should not append duplicate items on rerender', async () => {
+      const onClick = () => {};
+      const items = [
+        {
+          label: 'test',
+          key: 'test',
+          'data-test-subj': 'test',
+          disableOnQuery: true,
+          disabledLabel: 'test',
+          onClick,
+        },
+      ];
+      const customBulkActionConfig = [
+        {
+          id: 0,
+          items,
+        },
+      ];
+      const useBulkActionsConfig = () => customBulkActionConfig;
+      const { result, rerender } = renderHook(
+        () => useBulkActions({ alerts: [], query: {}, casesConfig, refresh, useBulkActionsConfig }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+      const initialBulkActions = result.current.bulkActions[0].items
+        ? [...result.current.bulkActions[0].items]
+        : [];
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectCurrentPage });
+      rerender();
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.clear });
+      rerender();
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectCurrentPage });
+      rerender();
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectAll });
+      rerender();
+      const newBulkActions = result.current.bulkActions[0].items;
+      expect(initialBulkActions).toEqual(newBulkActions);
     });
   });
 });
