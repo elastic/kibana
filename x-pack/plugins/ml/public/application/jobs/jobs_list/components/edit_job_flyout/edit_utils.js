@@ -106,6 +106,7 @@ function extractMML(job, newJobData) {
         model_memory_limit: mml,
         // work around for issue in es where categorization_examples_limit will be reset to the default value
         // if it is not included in the update request
+        // https://github.com/elastic/elasticsearch/issues/108068
         ...(job.analysis_limits.categorization_examples_limit !== undefined
           ? {
               categorization_examples_limit: job.analysis_limits.categorization_examples_limit,
