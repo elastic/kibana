@@ -46,9 +46,7 @@ async function main() {
 
 async function headAssetUrl(assetPath: string) {
   const testUrl = `${CDN_URL_PREFIX}/${assetPath}`;
-  const response = await axios.head(testUrl, {
-    timeout: 1000,
-  });
+  const response = await axios.head(testUrl);
   return {
     status: response.status,
     testUrl,
