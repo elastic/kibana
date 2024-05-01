@@ -61,7 +61,6 @@ export interface DataStream {
   nextGenerationManagedBy: string;
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
-    // TODO: remove this prop as it should be defined in ES
     effective_retention?: string;
     retention_determined_by?: string;
   };
