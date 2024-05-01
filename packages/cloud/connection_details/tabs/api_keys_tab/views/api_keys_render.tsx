@@ -7,17 +7,19 @@
  */
 
 import { EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
-import { ValidPermissionsResult } from '@kbn/cloud/connection_details/kibana/kibana_connection_details_provider';
 import * as React from 'react';
+import { ValidPermissionsResult } from '../../../kibana/kibana_connection_details_provider';
 
 export interface APIKeysProps {
   getAPIKeys: Promise<ValidPermissionsResult | undefined>;
 }
 
 export const APIKeysRender: React.FC<APIKeysProps> = ({ getAPIKeys }) => {
-  console.log(getAPIKeys)
+  console.log(getAPIKeys);
   const body = (
-    <EuiFormRow><EuiFieldText>{'placeholder'}</EuiFieldText></EuiFormRow>
-  )
+    <EuiFormRow>
+      <EuiFieldText>{'placeholder'}</EuiFieldText>
+    </EuiFormRow>
+  );
   return <EuiForm>{body}</EuiForm>;
 };
