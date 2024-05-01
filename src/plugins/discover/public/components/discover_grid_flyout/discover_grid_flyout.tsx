@@ -234,6 +234,7 @@ export function DiscoverGridFlyout({
         onResize={setFlyoutWidth}
         css={{
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
+          'z-index': (euiTheme.levels.flyout as number) + 2, // For its usage in the Security Solution timeline, we need this flyout to be above the timeline flyout (which has a z-index of 1002)
         }}
         paddingSize="m"
       >
