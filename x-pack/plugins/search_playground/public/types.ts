@@ -86,7 +86,7 @@ export interface Message {
   id: string;
   content: string | React.ReactNode;
   createdAt?: Date;
-  annotations?: Annotation[];
+  annotations?: Array<AnnotationDoc | AnnotationTokens>;
   role: MessageRole;
 }
 
@@ -95,9 +95,14 @@ export interface DocAnnotation {
   pageContent: string;
 }
 
-export interface Annotation {
+export interface AnnotationDoc {
   type: 'citations' | 'retrieved_docs';
   documents: DocAnnotation[];
+}
+
+export interface AnnotationTokens {
+  type: 'prompt_token_count' | 'context_token_count';
+  count: number;
 }
 
 export interface Doc {
@@ -109,6 +114,10 @@ export interface AIMessage extends Message {
   role: MessageRole.assistant;
   citations: Doc[];
   retrievalDocs: Doc[];
+  inputTokens: {
+    context: number;
+    total: number;
+  };
 }
 
 export interface ElasticsearchIndex {
