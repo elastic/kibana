@@ -34,6 +34,19 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { AnomalyResults } from '../../../machine_learning';
 
+interface MachineLearningRuleExecutorParams {
+  completeRule: CompleteRule<MachineLearningRuleParams>;
+  tuple: RuleRangeTuple;
+  ml: SetupPlugins['ml'];
+  listClient: ListClient;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
+}
+
 export const mlExecutor = async ({
   completeRule,
   tuple,
@@ -45,18 +58,7 @@ export const mlExecutor = async ({
   wrapHits,
   exceptionFilter,
   unprocessedExceptions,
-}: {
-  completeRule: CompleteRule<MachineLearningRuleParams>;
-  tuple: RuleRangeTuple;
-  ml: SetupPlugins['ml'];
-  listClient: ListClient;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
-}) => {
+}: MachineLearningRuleExecutorParams) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
