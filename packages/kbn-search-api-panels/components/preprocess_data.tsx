@@ -20,7 +20,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const PreprocessDataPanel: React.FC = () => {
+export const PreprocessDataPanel: React.FC<{
+  docLinks: {
+    arrayOrJson: string;
+    dataEnrichment: string;
+    dataFiltering: string;
+    dataTransformation: string;
+    pipelineHandling: string;
+  };
+}> = ({ docLinks }) => {
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
@@ -56,7 +64,7 @@ export const PreprocessDataPanel: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={'#'} target="_blank">
+                    <EuiLink href={docLinks.dataEnrichment} target="_blank">
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataEnrichment.learnMore',
                         {
@@ -92,7 +100,7 @@ export const PreprocessDataPanel: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={'#'} target="_blank">
+                    <EuiLink href={docLinks.dataFiltering} target="_blank">
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataFiltering.learnMore',
                         {
@@ -130,7 +138,7 @@ export const PreprocessDataPanel: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={'#'} target="_blank">
+                    <EuiLink href={docLinks.arrayOrJson} target="_blank">
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.arrayJsonHandling.learnMore',
                         {
@@ -169,7 +177,7 @@ export const PreprocessDataPanel: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiText size="s">
                   <p>
-                    <EuiLink href={'#'} target="_blank">
+                    <EuiLink href={docLinks.dataTransformation} target="_blank">
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataTransformation.learnMore',
                         {
@@ -208,7 +216,7 @@ export const PreprocessDataPanel: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={'#'} target="_blank">
+                    <EuiLink href={docLinks.pipelineHandling} target="_blank">
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.pipelineHandling.learnMore',
                         {

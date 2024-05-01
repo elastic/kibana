@@ -27,7 +27,7 @@ import { useKibanaServices } from '../../../hooks/use_kibana';
 import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
-
+import { docLinks } from '../../../../../common/doc_links';
 interface ConnectorIndexNameProps {
   connector: Connector;
 }
@@ -129,7 +129,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
               <p>
                 <EuiLink
                   data-test-subj="serverlessSearchConnectorIndexNameLearnMoreLink"
-                  href={'#'}
+                  href={docLinks.pipelines}
                   target="_blank"
                 >
                   {i18n.translate(

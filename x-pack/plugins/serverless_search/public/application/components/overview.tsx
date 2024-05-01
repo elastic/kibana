@@ -260,7 +260,7 @@ export const ElasticsearchOverview = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          leftPanelContent={<PreprocessDataPanel />}
+          leftPanelContent={<PreprocessDataPanel docLinks={docLinks} />}
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.preprocessData.title', {
             defaultMessage:
