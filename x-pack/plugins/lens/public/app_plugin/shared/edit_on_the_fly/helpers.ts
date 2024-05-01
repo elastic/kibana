@@ -7,7 +7,6 @@
 import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
-  getESQLQueryColumns,
 } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
