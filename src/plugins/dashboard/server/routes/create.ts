@@ -7,12 +7,12 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import { LATEST_VERSION } from '@kbn/data-views-plugin/common';
-import { Dashboard } from '../../common/api/2023_10_31';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { CONTENT_ID } from '@kbn/visualizations-plugin/common/content_management';
+import type { Dashboard } from '../../common/api/2023_10_31';
 import { v2023_10_31 } from '../../common/api';
-import { DashboardStorage } from '../content_management';
 
-export function registerCreate(router: VersionedRouter, cmStorage: DashboardStorage) {
+export function registerCreate(router: VersionedRouter, cm: ContentManagementServerSetup) {
   router
     .post({
       path: '/api/dashboard',
@@ -32,22 +32,13 @@ export function registerCreate(router: VersionedRouter, cmStorage: DashboardStor
         },
       },
       async (ctx, req, res) => {
-        const { id: reqId, ...attrs } = req.body;
+        const client = cm.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<Dashboard>(CONTENT_ID);
         let result: Dashboard;
         try {
-          ({ item: result } = await cmStorage.create(
-            {} as any,
-            {
-              ...attrs,
-              timeRestore: attrs.timeRestore ?? false,
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: attrs.kibanaSavedObjectMeta.searchSourceJSON ?? '',
-              },
-              panelsJSON: attrs.panelsJSON ?? '[]',
-              version: LATEST_VERSION,
-            },
-            { id: req.body.id }
-          ));
+          const cmResult = await client.create(req.body);
+          result = cmResult.result as unknown as Dashboard;
         } catch (e) {
           // do some handling;
           throw e;

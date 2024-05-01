@@ -65,7 +65,7 @@ export class DashboardPlugin
       throwOnResultValidationError: this.initializerContext.env.mode.dev,
       logger: this.logger.get('storage'),
     });
-    registerCreate(core.http.createRouter().versioned, dashboardCMStorage);
+    registerCreate(core.http.createRouter().versioned, plugins.contentManagement);
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
