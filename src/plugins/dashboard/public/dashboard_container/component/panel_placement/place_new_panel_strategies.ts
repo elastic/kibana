@@ -99,6 +99,6 @@ export const runPanelPlacementStrategy = (
         otherPanels: currentPanels,
       };
     default:
-      throw new Error(panelPlacementStrings.unknownStrategyError(strategy));
+      throw new Error(panelPlacementStrings.getUnknownStrategyError(strategy));
   }
 };

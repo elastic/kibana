@@ -107,9 +107,14 @@ export const backupServiceStrings = {
 };
 
 export const panelPlacementStrings = {
-  unknownStrategyError: (strategy: string) =>
+  getUnknownStrategyError: (strategy: string) =>
     i18n.translate('dashboard.panelPlacement.unknownStrategyError', {
       defaultMessage: 'Unknown panel placement strategy: {strategy}',
       values: { strategy },
+    }),
+  getPanelPlacementSettingsExistsError: (panelType: string) =>
+    i18n.translate('dashboard.panelPlacement.panelPlacementSettingsExistsError', {
+      defaultMessage: 'Panel placement settings for embeddable type {panelType} already exists',
+      values: { panelType },
     }),
 };

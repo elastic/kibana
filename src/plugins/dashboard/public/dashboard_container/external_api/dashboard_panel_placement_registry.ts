@@ -7,6 +7,7 @@
  */
 
 import { PanelPlacementSettings } from '../component/panel_placement/types';
+import { panelPlacementStrings } from '../_dashboard_container_strings';
 
 type GetPanelPlacementSettings<SerializedState extends object = object> = (
   serializedState?: SerializedState
@@ -19,7 +20,7 @@ export const registerDashboardPanelPlacementSetting = (
   getPanelPlacementSettings: GetPanelPlacementSettings
 ) => {
   if (registry.has(panelType)) {
-    throw new Error(`Embeddable placement for embeddable type ${panelType} already exists`);
+    throw new Error(panelPlacementStrings.getPanelPlacementSettingsExistsError(panelType));
   }
   registry.set(panelType, getPanelPlacementSettings);
 };
