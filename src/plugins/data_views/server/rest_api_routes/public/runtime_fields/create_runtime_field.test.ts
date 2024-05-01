@@ -12,7 +12,7 @@ import { getUsageCollection } from '../test_utils';
 import { DataViewLazy } from '../../../../common';
 
 describe('create runtime field', () => {
-  it('call usageCollection', () => {
+  it('call usageCollection', async () => {
     const usageCollection = getUsageCollection();
 
     dataViewsService.getDataViewLazy.mockImplementation(
@@ -28,7 +28,7 @@ describe('create runtime field', () => {
         } as unknown as DataViewLazy)
     );
 
-    createRuntimeField({
+    await createRuntimeField({
       dataViewsService,
       counterName: 'POST /path',
       usageCollection,
