@@ -37,7 +37,7 @@ const groupTypeQueryFields = (
   fields: IndicesQuerySourceFields,
   queryFields: IndexFields
 ): string[] =>
-  Object.entries(queryFields).reduce((results, [index, selectedFields]) => {
+  Object.entries(queryFields).map(([index, selectedFields]) => {
     const indexFields = fields[index];
     let typeQueryFields = '';
 
@@ -61,8 +61,8 @@ const groupTypeQueryFields = (
       typeQueryFields += (typeQueryFields ? '_' : '') + 'SPARSE';
     }
 
-    return [...results, typeQueryFields];
-  }, []);
+    return typeQueryFields;
+  });
 
 interface ViewQueryFlyoutProps {
   onClose: () => void;
