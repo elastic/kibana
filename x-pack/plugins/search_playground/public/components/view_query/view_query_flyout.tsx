@@ -83,7 +83,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.viewQuery.flyout.title"
-              defaultMessage="Customise your Elasticsearch Query"
+              defaultMessage="Customize your Elasticsearch query"
             />
           </h2>
         </EuiTitle>
@@ -92,8 +92,8 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.viewQuery.flyout.description"
-              defaultMessage="The query that will be used to search your data. You can customise it by choosing which
-            fields to search on."
+              defaultMessage="This query will be used to search your indices. Customize by choosing which
+            fields in your Elasticsearch documents to search."
             />
           </p>
         </EuiText>
@@ -117,7 +117,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                 <h5>
                   <FormattedMessage
                     id="xpack.searchPlayground.viewQuery.flyout.table.title"
-                    defaultMessage="Selected Fields"
+                    defaultMessage="Fields to search (per index)"
                   />
                 </h5>
               </EuiText>
