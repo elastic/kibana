@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';

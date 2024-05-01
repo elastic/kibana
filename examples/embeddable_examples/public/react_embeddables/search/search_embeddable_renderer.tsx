@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type { Api, State } from './types';
+import type { SearchApi, SearchSerializedState } from './types';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 
 interface Props {
@@ -43,7 +43,7 @@ export function SearchEmbeddableRenderer(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<State, Api>
+      <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
         type={SEARCH_EMBEDDABLE_ID}
         getParentApi={() => parentApi}
         hidePanelChrome={true}

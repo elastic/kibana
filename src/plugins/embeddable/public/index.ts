@@ -62,7 +62,6 @@ export type {
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
-  EmbeddableAppContext,
   EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,

@@ -24,7 +24,7 @@ import { TimeRange } from '@kbn/es-query';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
 import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
-import type { Api, State } from '../react_embeddables/search/types';
+import type { SearchApi, SearchSerializedState } from '../react_embeddables/search/types';
 
 export const RenderExamples = () => {
   const parentApi = useMemo(() => {
@@ -43,7 +43,7 @@ export const RenderExamples = () => {
     // only run onMount
   }, []);
 
-  const [api, setApi] = useState<Api | null>(null);
+  const [api, setApi] = useState<SearchApi | null>(null);
   const [hidePanelChrome, setHidePanelChrome] = useState<boolean>(false);
   const [dataLoading, timeRange] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
@@ -98,7 +98,7 @@ export const RenderExamples = () => {
 
           <EuiSpacer size="s" />
 
-          <ReactEmbeddableRenderer<State, Api>
+          <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
             key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
             type={SEARCH_EMBEDDABLE_ID}
             getParentApi={() => parentApi}

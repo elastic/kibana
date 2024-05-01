@@ -103,12 +103,16 @@ export type StreamingChatResponseEvent =
   | ConversationCreateEvent
   | ConversationUpdateEvent
   | MessageAddEvent
-  | ChatCompletionErrorEvent;
+  | ChatCompletionErrorEvent
+  | TokenCountEvent;
 
 export type StreamingChatResponseEventWithoutError = Exclude<
   StreamingChatResponseEvent,
   ChatCompletionErrorEvent
 >;
+
+export type ChatEvent = ChatCompletionChunkEvent | TokenCountEvent;
+export type MessageOrChatEvent = ChatEvent | MessageAddEvent;
 
 export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
