@@ -116,9 +116,14 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
-  const tools: ToolInterface[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
-  );
+
+  const tools: ToolInterface[] = assistantTools
+    .filter((tool) =>
+      isStream
+        ? tool.id !== 'esql-knowledge-base-tool'
+        : tool.id !== 'esql-knowledge-base-structured-tool'
+    )
+    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
