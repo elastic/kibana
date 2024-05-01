@@ -282,6 +282,7 @@ export class ObservabilityAIAssistantClient {
             knowledgeBaseInstructions,
             requestInstructions,
             signal,
+            logger: this.dependencies.logger,
           })
         );
       }),
