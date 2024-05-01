@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Subject, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
@@ -93,7 +94,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, triggersActionsUi, usageCollection } = plugins;
+    const { home, triggersActionsUi, usageCollection, management } = plugins;
+
+    const assistantManagementTitle = i18n.translate(
+      'xpack.securitySolution.securityAiAssistantManagement.app.title',
+      {
+        defaultMessage: 'AI Assistant for Security',
+      }
+    );
 
     if (home) {
       home.featureCatalogue.registerSolution({
@@ -107,6 +115,54 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         path: APP_PATH,
         order: 300,
       });
+
+      home.featureCatalogue.register({
+        id: 'ai_assistant_security',
+        title: assistantManagementTitle,
+        description: i18n.translate(
+          'xpack.securitySolution.securityAiAssistantManagement.app.description',
+          {
+            defaultMessage: 'Manage your AI Assistant for Security.',
+          }
+        ),
+        icon: 'sparkles',
+        path: '/app/management/kibana/securityAiAssistantManagement',
+        showOnHomePage: false,
+        category: 'admin',
+      });
+
+      if (management) {
+        management.sections.section.kibana.registerApp({
+          id: 'securityAiAssistantManagement',
+          title: assistantManagementTitle,
+          hideFromSidebar: true,
+          order: 1,
+          mount: async (params) => {
+            // required to show the alert table inside cases
+            const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+            const { registerAlertsTableConfiguration } =
+              await this.lazyRegisterAlertsTableConfiguration();
+            registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
+
+            const [coreStart, startPlugins] = await core.getStartServices();
+            const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+            const store = await this.store(coreStart, startPlugins, subPlugins);
+            const services = await this.services.generateServices(coreStart, startPlugins);
+            await this.registerActions(store, params.history, core, services);
+
+            const { renderApp } = await this.lazyApplicationDependencies();
+            const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+
+            return renderApp({
+              ...params,
+              services,
+              store,
+              usageCollection: plugins.usageCollection,
+              children: <ManagementSettings />,
+            });
+          },
+        });
+      }
     }
 
     const mount: AppMount = async (params) => {
@@ -119,7 +175,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { renderApp } = await this.lazyApplicationDependencies();
       const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
-      await this.registerActions(store, params.history, services);
+      await this.registerActions(store, params.history, core, services);
       await this.registerAlertsTableConfiguration(triggersActionsUi);
 
       const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
@@ -145,7 +201,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: 'app/siem',
       title: 'SIEM',
       visibleIn: [],
-      mount: async (params: AppMountParameters) => {
+      mount: async (_params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
         const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
@@ -248,8 +304,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
-        aiInsights: new subPluginClasses.AiInsights(),
         alerts: new subPluginClasses.Detections(),
+        attackDiscovery: new subPluginClasses.AttackDiscovery(),
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
@@ -281,8 +337,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.createSubPlugins();
     return {
-      aiInsights: subPlugins.aiInsights.start(this.experimentalFeatures.assistantAlertsInsights),
       alerts: subPlugins.alerts.start(storage),
+      attackDiscovery: subPlugins.attackDiscovery.start(
+        this.experimentalFeatures.attackDiscoveryEnabled
+      ),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
@@ -332,11 +390,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async registerActions(
     store: SecurityAppStore,
     history: H.History,
+    coreSetup: CoreSetup,
     services: StartServices
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(store, history, services);
+      registerActions(store, history, coreSetup, services);
       this._actionsRegistered = true;
     }
   }
@@ -466,6 +525,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "actions" */
       './actions'
+    );
+  }
+
+  private lazyAssistantSettingsManagement() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "actions" */
+      './lazy_assistant_settings_management'
     );
   }
 }

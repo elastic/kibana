@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiDescriptionListProps,
-} from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiDescriptionListProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -30,14 +26,11 @@ export function ServerlessDetails({ serverless }: Props) {
 
   if (!!serverless.functionNames?.length) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.cloud.functionNameLabel',
-        {
-          defaultMessage:
-            '{functionNames, plural, =0 {Function name} one {Function name} other {Function names}} ',
-          values: { functionNames: serverless.functionNames.length },
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.cloud.functionNameLabel', {
+        defaultMessage:
+          '{functionNames, plural, =0 {Function name} one {Function name} other {Function names}} ',
+        values: { functionNames: serverless.functionNames.length },
+      }),
       description: (
         <ul>
           {serverless.functionNames.map((type, index) => (
@@ -52,14 +45,11 @@ export function ServerlessDetails({ serverless }: Props) {
 
   if (!!serverless.faasTriggerTypes?.length) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.cloud.faasTriggerTypeLabel',
-        {
-          defaultMessage:
-            '{triggerTypes, plural, =0 {Trigger type} one {Trigger type} other {Trigger types}} ',
-          values: { triggerTypes: serverless.faasTriggerTypes.length },
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.cloud.faasTriggerTypeLabel', {
+        defaultMessage:
+          '{triggerTypes, plural, =0 {Trigger type} one {Trigger type} other {Trigger types}} ',
+        values: { triggerTypes: serverless.faasTriggerTypes.length },
+      }),
       description: (
         <ul>
           {serverless.faasTriggerTypes.map((type, index) => (
@@ -74,13 +64,10 @@ export function ServerlessDetails({ serverless }: Props) {
 
   if (serverless.hostArchitecture) {
     listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.cloud.architecture',
-        { defaultMessage: 'Architecture' }
-      ),
-      description: (
-        <EuiBadge color="hollow">{serverless.hostArchitecture}</EuiBadge>
-      ),
+      title: i18n.translate('xpack.apm.serviceIcons.serviceDetails.cloud.architecture', {
+        defaultMessage: 'Architecture',
+      }),
+      description: <EuiBadge color="hollow">{serverless.hostArchitecture}</EuiBadge>,
     });
   }
 

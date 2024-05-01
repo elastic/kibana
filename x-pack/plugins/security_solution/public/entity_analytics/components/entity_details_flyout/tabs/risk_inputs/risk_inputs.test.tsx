@@ -73,9 +73,7 @@ describe('RiskInputsTab', () => {
     );
 
     expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
-    expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
-      'Rule nameRule Name'
-    );
+    expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent('Rule Name');
   });
 
   it('Does not render the context section if enabled but no asset criticality', () => {

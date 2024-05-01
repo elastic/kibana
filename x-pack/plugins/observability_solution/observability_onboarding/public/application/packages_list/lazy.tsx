@@ -14,8 +14,7 @@ export const PackageList = lazy(async () => ({
     .then((pkg) => pkg.PackageListGrid),
 }));
 
-export const fetchAvailablePackagesHook =
-  (): Promise<AvailablePackagesHookType> =>
-    import('@kbn/fleet-plugin/public')
-      .then((module) => module.AvailablePackagesHook())
-      .then((hook) => hook.useAvailablePackages);
+export const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
+  import('@kbn/fleet-plugin/public')
+    .then((module) => module.AvailablePackagesHook())
+    .then((hook) => hook.useAvailablePackages);

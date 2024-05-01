@@ -151,6 +151,8 @@ const alerts = [
     [AlertsField.name]: ['five'],
     [AlertsField.reason]: ['six'],
     [AlertsField.uuid]: ['1047d115-5afd-469e-baf6-f28c2b68db46'],
+    [ALERT_CASE_IDS]: [],
+    [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   },
 ] as unknown as Alerts;
 
@@ -260,10 +262,6 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
         header: () => <>{'header'}</>,
         footer: () => <>{'footer'}</>,
       }),
-      getRenderCellValue: () =>
-        jest.fn().mockImplementation((props) => {
-          return `${props.colIndex}:${props.rowIndex}`;
-        }),
       useActionsColumn: () => ({
         renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
           return (
@@ -326,12 +324,19 @@ const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (p
 );
 
 describe('AlertsTableState', () => {
-  const tableProps = {
+  const tableProps: AlertsTableStateProps = {
     alertsTableConfigurationRegistry: alertsTableConfigurationRegistryMock,
     configurationId: PLUGIN_ID,
-    id: `test-alerts`,
+    id: PLUGIN_ID,
     featureIds: [AlertConsumers.LOGS],
     query: {},
+    columns,
+    pagination: {
+      pageIndex: 0,
+      pageSize: 10,
+      onChangePage: jest.fn(),
+      onChangeItemsPerPage: jest.fn(),
+    },
   };
 
   const mockCustomProps = (customProps: Partial<AlertsTableConfigurationRegistry>) => {
@@ -349,6 +354,7 @@ describe('AlertsTableState', () => {
       has: hasMock,
       get: getMockWithUsePersistentControls,
       update: updateMock,
+      getActions: getActionsMock,
     } as unknown as AlertTableConfigRegistry;
 
     return {
@@ -454,15 +460,19 @@ describe('AlertsTableState', () => {
 
       const props = mockCustomProps({
         cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
-        columns: [
-          {
-            id: AlertsField.name,
-            displayAsText: 'Name',
-          },
-        ],
       });
 
-      render(<AlertsTableWithLocale {...props} />);
+      render(
+        <AlertsTableWithLocale
+          {...props}
+          columns={[
+            {
+              id: AlertsField.name,
+              displayAsText: 'Name',
+            },
+          ]}
+        />
+      );
       await waitFor(() => {
         expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
       });
@@ -643,16 +653,17 @@ describe('AlertsTableState', () => {
     it('should not fetch maintenance windows if the user does not have permission', async () => {});
 
     it('should not fetch maintenance windows if the column is not visible', async () => {
-      const props = mockCustomProps({
-        columns: [
-          {
-            id: AlertsField.name,
-            displayAsText: 'Name',
-          },
-        ],
-      });
-
-      render(<AlertsTableWithLocale {...props} />);
+      render(
+        <AlertsTableWithLocale
+          {...tableProps}
+          columns={[
+            {
+              id: AlertsField.name,
+              displayAsText: 'Name',
+            },
+          ]}
+        />
+      );
       await waitFor(() => {
         expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -798,6 +809,7 @@ describe('AlertsTableState', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
       hookUseFetchBrowserFieldCapabilities.mockClear();
       hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
       useBulkGetCasesMock.mockReturnValue({ data: new Map(), isFetching: false });

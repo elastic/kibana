@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import React, { useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import dedent from 'dedent';
 import { useKibana } from '../../utils/kibana_react';
@@ -15,26 +15,68 @@ import { AlertData } from '../../hooks/use_fetch_alert_detail';
 
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {
-    services: { observabilityAIAssistant },
+    services: { observabilityAIAssistant, http },
   } = useKibana();
 
   const ObservabilityAIAssistantContextualInsight =
     observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
 
-  const messages = useMemo(() => {
-    if (!observabilityAIAssistant) {
-      return null;
+  const getPromptMessages = useCallback(async () => {
+    const fields = alert?.formatted.fields as Record<string, string> | undefined;
+    if (!observabilityAIAssistant || !fields || !alert) {
+      return [];
     }
 
-    return observabilityAIAssistant.getContextualInsightMessages({
-      message: `I'm looking at an alert and trying to understand why it was triggered`,
-      instructions: dedent(
-        `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.`
-      ),
-    });
-  }, [observabilityAIAssistant]);
+    try {
+      const { context } = await http.get<{
+        context: Array<{ description: string; data: unknown }>;
+      }>('/internal/apm/assistant/alert_details_contextual_insights', {
+        query: {
+          alert_started_at: new Date(alert.formatted.start).toISOString(),
 
-  if (!ObservabilityAIAssistantContextualInsight || !messages) {
+          // service fields
+          'service.name': fields['service.name'],
+          'service.environment': fields['service.environment'],
+          'transaction.type': fields['transaction.type'],
+          'transaction.name': fields['transaction.name'],
+
+          // infra fields
+          'host.name': fields['host.name'],
+          'container.id': fields['container.id'],
+          'kubernetes.pod.name': fields['kubernetes.pod.name'],
+        },
+      });
+
+      const obsAlertContext = context
+        .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
+        .join('\n\n');
+
+      return observabilityAIAssistant.getContextualInsightMessages({
+        message: `I'm looking at an alert and trying to understand why it was triggered`,
+        instructions: dedent(
+          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.        
+
+        The following contextual information is available to help me understand the alert:
+        ${obsAlertContext}
+
+        Be brief and to the point.
+        Do not list the alert details as bullet points.
+        Refer to the contextual information provided above when relevant.
+        Pay specific attention to why the alert happened and what may have contributed to it.
+        `
+        ),
+      });
+    } catch (e) {
+      return observabilityAIAssistant.getContextualInsightMessages({
+        message: `I'm looking at an alert and trying to understand why it was triggered`,
+        instructions: dedent(
+          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.`
+        ),
+      });
+    }
+  }, [alert, http, observabilityAIAssistant]);
+
+  if (!ObservabilityAIAssistantContextualInsight) {
     return null;
   }
 
@@ -46,7 +88,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
             'xpack.observability.alertDetailContextualInsights.InsightButtonLabel',
             { defaultMessage: 'Help me understand this alert' }
           )}
-          messages={messages}
+          messages={getPromptMessages}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

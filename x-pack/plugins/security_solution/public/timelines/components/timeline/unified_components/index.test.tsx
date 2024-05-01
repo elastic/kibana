@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
+import type { ComponentProps, FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type QueryTabContent from '.';
 import { UnifiedTimeline } from '.';
@@ -136,7 +136,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
 
 const customStore = createMockStore();
 
-const TestProviderWrapperWithCustomStore: React.FC = ({ children }) => {
+const TestProviderWrapperWithCustomStore: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return <TestProviders store={customStore}>{children}</TestProviders>;
 };
 
@@ -542,7 +542,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('unified field list', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180937
+  // FLAKY: https://github.com/elastic/kibana/issues/180956
+  describe.skip('unified field list', () => {
     it(
       'should be able to add filters',
       async () => {

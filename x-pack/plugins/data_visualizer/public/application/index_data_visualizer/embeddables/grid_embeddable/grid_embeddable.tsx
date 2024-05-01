@@ -18,7 +18,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataVisualizerStartDependencies } from '../../../../plugin';
@@ -107,31 +108,28 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
     super.render(node);
     this.node = node;
 
-    const I18nContext = this.services[0].i18n.Context;
-
     const services = { ...this.services[0], ...this.services[1] };
+    const startServices = pick(this.services[0], 'analytics', 'i18n', 'theme');
     const datePickerDeps = {
       ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       uiSettingsKeys: UI_SETTINGS,
     };
 
     ReactDOM.render(
-      <I18nContext>
-        <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
-          <KibanaContextProvider services={services}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <Suspense fallback={<EmbeddableLoading />}>
-                <IndexDataVisualizerViewWrapper
-                  id={this.input.id}
-                  embeddableContext={this}
-                  embeddableInput={this.getInput$()}
-                  onOutputChange={(output) => this.updateOutput(output)}
-                />
-              </Suspense>
-            </DatePickerContextProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>,
+      <KibanaRenderContextProvider {...startServices}>
+        <KibanaContextProvider services={services}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <IndexDataVisualizerViewWrapper
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput={this.getInput$()}
+                onOutputChange={(output) => this.updateOutput(output)}
+              />
+            </Suspense>
+          </DatePickerContextProvider>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>,
       node
     );
   }

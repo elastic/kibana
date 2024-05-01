@@ -88,9 +88,7 @@ describe('Error details', () => {
       it('shows top erroneous transactions table', () => {
         cy.visitKibana(errorDetailsPageHref);
         cy.contains('Top 5 affected transactions');
-        cy.getByTestSubj('topErroneousTransactionsTable')
-          .contains('a', 'GET /apple 🍎')
-          .click();
+        cy.getByTestSubj('topErroneousTransactionsTable').contains('a', 'GET /apple 🍎').click();
         cy.url().should('include', 'opbeans-java/transactions/view');
       });
 

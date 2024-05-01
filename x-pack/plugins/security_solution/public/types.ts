@@ -52,6 +52,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
@@ -71,7 +72,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
-import type { AiInsights } from './ai_insights';
+import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
@@ -93,6 +94,7 @@ export interface SetupPlugins {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  management: ManagementSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -167,8 +169,8 @@ export type StartServices = CoreStart &
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
-    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    onAppLeave: (handler: AppLeaveHandler) => void;
+    setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+    onAppLeave?: (handler: AppLeaveHandler) => void;
 
     /**
      * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.
@@ -183,6 +185,16 @@ export type StartServices = CoreStart &
     topValuesPopover: TopValuesPopoverService;
     timelineFilterManager: FilterManager;
   };
+
+export type StartRenderServices = Pick<
+  CoreStart,
+  // Used extensively in rendering Security Solution UI
+  | 'notifications'
+  // Needed for rendering Shared React modules
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
@@ -205,8 +217,8 @@ export const CASES_SUB_PLUGIN_KEY = 'cases';
 
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  aiInsights: AiInsights;
   alerts: Detections;
+  attackDiscovery: AttackDiscovery;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
@@ -227,8 +239,8 @@ export interface SubPlugins {
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  aiInsights: ReturnType<AiInsights['start']>;
   alerts: ReturnType<Detections['start']>;
+  attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;

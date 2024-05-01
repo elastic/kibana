@@ -34,7 +34,7 @@ export interface UsageStats {
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
-  'discover:enableESQL': boolean;
+  enableESQL: boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
@@ -176,4 +176,5 @@ export interface UsageStats {
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
+  'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
 }

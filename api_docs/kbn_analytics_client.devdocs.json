@@ -696,7 +696,7 @@
               },
               {
                 "plugin": "@kbn/core-root-server-internal",
-                "path": "packages/core/root/core-root-server-internal/src/server.ts"
+                "path": "packages/core/root/core-root-server-internal/src/events/kibana_started.ts"
               },
               {
                 "plugin": "security",
@@ -949,6 +949,10 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "observabilityLogsExplorer",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
               },
               {
                 "plugin": "observabilityOnboarding",

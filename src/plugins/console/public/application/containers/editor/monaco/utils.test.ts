@@ -8,12 +8,15 @@
 
 import {
   getCurlRequest,
+  getDocumentationLinkFromAutocompleteContext,
   removeTrailingWhitespaces,
   replaceRequestVariables,
   stringifyRequest,
+  tokenizeRequestUrl,
   trackSentRequests,
 } from './utils';
 import { MetricsTracker } from '../../../../types';
+import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
 
 describe('monaco editor utils', () => {
   const dataObjects = [
@@ -177,6 +180,48 @@ describe('monaco editor utils', () => {
       expect(mockMetricsTracker.count).toHaveBeenCalledTimes(2);
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(1, 'GET__search');
       expect(mockMetricsTracker.count).toHaveBeenNthCalledWith(2, 'POST__test');
+    });
+  });
+
+  describe('tokenizeRequestUrl', () => {
+    it('returns the url if it has only 1 part', () => {
+      const url = '_search';
+      const urlTokens = tokenizeRequestUrl(url);
+      expect(urlTokens).toEqual(['_search', '__url_path_end__']);
+    });
+
+    it('returns correct url tokens', () => {
+      const url = '_search/test';
+      const urlTokens = tokenizeRequestUrl(url);
+      expect(urlTokens).toEqual(['_search', 'test', '__url_path_end__']);
+    });
+  });
+
+  describe('getDocumentationLinkFromAutocompleteContext', () => {
+    const version = '8.13';
+    const expectedLink = 'http://elastic.co/8.13/_search';
+    it('correctly replaces {branch} with the version', () => {
+      const endpoint = {
+        documentation: 'http://elastic.co/{branch}/_search',
+      } as AutoCompleteContext['endpoint'];
+      const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
+      expect(link).toBe(expectedLink);
+    });
+
+    it('correctly replaces /master/ with the version', () => {
+      const endpoint = {
+        documentation: 'http://elastic.co/master/_search',
+      } as AutoCompleteContext['endpoint'];
+      const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
+      expect(link).toBe(expectedLink);
+    });
+
+    it('correctly replaces /current/ with the version', () => {
+      const endpoint = {
+        documentation: 'http://elastic.co/current/_search',
+      } as AutoCompleteContext['endpoint'];
+      const link = getDocumentationLinkFromAutocompleteContext({ endpoint }, version);
+      expect(link).toBe(expectedLink);
     });
   });
 });

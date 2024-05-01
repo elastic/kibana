@@ -6,10 +6,12 @@
  */
 import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { dataStreamsRouteRepository } from './data_streams/routes';
+import { integrationsRouteRepository } from './integrations/routes';
 
 function getTypedDatasetQualityServerRouteRepository() {
   const repository = {
     ...dataStreamsRouteRepository,
+    ...integrationsRouteRepository,
   };
 
   return repository;

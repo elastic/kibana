@@ -8,7 +8,6 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { copyToClipboard } from '@elastic/eui';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { useShareTabsContext } from '../../context';
 import { LinkContent } from './link_content';
@@ -16,6 +15,7 @@ import { LinkContent } from './link_content';
 type ILinkTab = IModalTabDeclaration<{
   dashboardUrl: string;
   isNotSaved: boolean;
+  setIsClicked: boolean;
 }>;
 
 const LINK_TAB_ACTIONS = {
@@ -27,6 +27,7 @@ const linkTabReducer: ILinkTab['reducer'] = (
   state = {
     dashboardUrl: '',
     isNotSaved: false,
+    setIsClicked: false,
   },
   action
 ) => {
@@ -51,11 +52,11 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     objectType,
     objectId,
     isDirty,
-    isEmbedded,
     shareableUrl,
     shareableUrlForSavedObject,
     urlService,
     shareableUrlLocatorParams,
+    allowShortUrl,
   } = useShareTabsContext()!;
 
   const setDashboardLink = useCallback(
@@ -68,9 +69,17 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
   const setIsNotSaved = useCallback(() => {
     dispatch({
       type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
-      payload: objectType === 'lens' ? isDirty : false,
+      payload:
+        objectType === 'lens' || (objectType === 'dashboard' && !allowShortUrl) ? isDirty : false,
     });
-  }, [dispatch, objectType, isDirty]);
+  }, [dispatch, objectType, isDirty, allowShortUrl]);
+
+  const setIsClicked = useCallback(() => {
+    dispatch({
+      type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
+      payload: setIsClicked,
+    });
+  }, [dispatch]);
 
   return (
     <LinkContent
@@ -78,15 +87,16 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         objectType,
         objectId,
         isDirty,
-        isEmbedded,
         shareableUrl,
         shareableUrlForSavedObject,
         urlService,
         shareableUrlLocatorParams,
-        dashboardLink: state.dashboardUrl,
-        isNotSaved: state.isNotSaved,
+        dashboardLink: state?.dashboardUrl,
         setDashboardLink,
+        isNotSaved: state?.isNotSaved,
         setIsNotSaved,
+        allowShortUrl,
+        setIsClicked: state?.setIsClicked,
       }}
     />
   );
@@ -102,13 +112,4 @@ export const linkTab: ILinkTab = {
   }),
   content: LinkTabContent,
   reducer: linkTabReducer,
-  modalActionBtn: {
-    id: 'link',
-    dataTestSubj: 'copyShareUrlButton',
-    label: i18n.translate('share.link.copyLinkButton', { defaultMessage: 'Copy link' }),
-    handler: ({ state }) => {
-      copyToClipboard(state.dashboardUrl);
-    },
-    style: ({ state }) => state.isNotSaved,
-  },
 };
