@@ -8,10 +8,9 @@
 
 import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import { pipeline, Readable } from 'stream';
+import { Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
-import { deleteSummaryFieldTransform } from '../lib/utils/transform_helpers';
 import { withClient } from '../lib/utils/with_client';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { Logger } from '../lib/utils/create_logger';
@@ -26,15 +25,9 @@ const scenario: Scenario<ApmFields> = async ({
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
         apmEsClient.pipeline((base: Readable) => {
-          const defaultPipeline = apmEsClient.getDefaultPipeline({
+          return apmEsClient.getDefaultPipeline({
             versionOverride: version,
-          })(base) as unknown as NodeJS.ReadableStream;
-
-          return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
-            if (err) {
-              logger.error(err);
-            }
-          });
+          })(base);
         });
       }
     },

@@ -11,21 +11,12 @@ import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from './create_es_client/document_type';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
-import { getDurationLegacyFilter as getDurationLegacyUnsupportedFilter } from './transactions';
+import { isDurationSummaryNotSupportedFilter } from './transactions';
 
 const QUERY_INDEX = {
-  BEFORE: 0,
-  CURRENT: 1,
-  DURATION_SUMMARY_UNSUPPORTED: 2,
+  DOCUMENT_TYPE: 0,
+  DURATION_SUMMARY_NOT_SUPPORTED: 1,
 } as const;
-
-interface DocumentTypeData {
-  documentType: ApmDocumentType;
-  rollupInterval: RollupInterval;
-  hasDocsPreviousRange: boolean;
-  hasDocsCurrentRange: boolean;
-  canUseDurationSummary: boolean;
-}
 
 const getRequest = ({
   documentType,
@@ -84,14 +75,6 @@ export async function getDocumentSources({
     ApmDocumentType.TransactionMetric as const,
   ];
 
-  const docTypeAvailability = documentTypesToCheck.reduce<Record<string, boolean>>(
-    (acc, docType) => {
-      acc[docType] = true;
-      return acc;
-    },
-    {}
-  );
-
   const documentTypesInfo = await getDocumentTypesInfo({
     apmEventClient,
     start,
@@ -102,7 +85,7 @@ export async function getDocumentSources({
   });
 
   return [
-    ...mapToSources(documentTypesInfo),
+    ...documentTypesInfo,
     {
       documentType: ApmDocumentType.TransactionEvent,
       rollupInterval: RollupInterval.None,
@@ -126,7 +109,7 @@ const getDocumentTypesInfo = async ({
   kuery: string;
   enableContinuousRollups: boolean;
   documentTypesToCheck: ApmDocumentType[];
-}): Promise<DocumentTypeData[]> => {
+}): Promise<TimeRangeMetadata['sources']> => {
   const getRequests = getDocumentTypeRequestsFn({
     enableContinuousRollups,
     start,
@@ -137,33 +120,38 @@ const getDocumentTypesInfo = async ({
   const sourceRequests = documentTypesToCheck.flatMap(getRequests);
 
   const allSearches = sourceRequests
-    .flatMap(({ before, current, durationSummaryCheck }) => [before, current, durationSummaryCheck])
+    .flatMap(({ documentTypeQuery, durationSummaryNotSupportedQuery }) => [
+      documentTypeQuery,
+      durationSummaryNotSupportedQuery,
+    ])
     .filter((request): request is ReturnType<typeof getRequest> => request !== undefined);
 
   const allResponses = (await apmEventClient.msearch('get_document_availability', ...allSearches))
     .responses;
 
+  const hasAnyLegacyDocuments = sourceRequests.some(
+    ({ documentType, rollupInterval }, index) =>
+      isRetroCompatibleDocType(documentType, rollupInterval) &&
+      allResponses[index + QUERY_INDEX.DURATION_SUMMARY_NOT_SUPPORTED].hits.total.value > 0
+  );
+
   return sourceRequests.map(({ documentType, rollupInterval, ...queries }) => {
     const numberOfQueries = Object.values(queries).filter(Boolean).length;
     // allResponses is sorted by the order of the requests in sourceRequests
     const docTypeResponses = allResponses.splice(0, numberOfQueries);
-
-    const hasDocsPreviousRange = docTypeResponses[QUERY_INDEX.BEFORE].hits.total.value > 0;
-    const hasDocsCurrentRange = docTypeResponses[QUERY_INDEX.CURRENT].hits.total.value > 0;
-
-    const canUseDurationSummary = isLegacyDocumentType(documentType, rollupInterval)
-      ? hasDocsCurrentRange &&
-        // If transaction.duration.histogram field exists without transaction.duration.summary field
-        // we assume these are legacy (<8.7) and this evaluates to false. When no hits, we assume >=8.7 docs are supported.
-        docTypeResponses[QUERY_INDEX.DURATION_SUMMARY_UNSUPPORTED].hits.total.value === 0
-      : true;
+    const hasDocs = docTypeResponses[QUERY_INDEX.DOCUMENT_TYPE].hits.total.value > 0;
+    // can only use >=8.7 document types (ServiceTransactionMetrics or TransactionMetrics with 10m and 60m intervals)
+    // if there are no legacy documents
+    const canUseContinousRollupDocs = hasDocs && !hasAnyLegacyDocuments;
 
     return {
       documentType,
       rollupInterval,
-      hasDocsPreviousRange,
-      hasDocsCurrentRange,
-      canUseDurationSummary,
+      hasDocs: isRetroCompatibleDocType(documentType, rollupInterval)
+        ? hasDocs
+        : canUseContinousRollupDocs,
+      // all >=8.7 document types with rollups support duration summary
+      hasDurationSummaryField: canUseContinousRollupDocs,
     };
   });
 };
@@ -182,9 +170,7 @@ const getDocumentTypeRequestsFn =
   }) =>
   (documentType: ApmDocumentType) => {
     const currentRange = rangeQuery(start, end);
-    const diff = end - start;
     const kql = kqlQuery(kuery);
-    const beforeRange = rangeQuery(start - diff, end - diff);
 
     const rollupIntervals = enableContinuousRollups
       ? getConfigForDocumentType(documentType).rollupIntervals
@@ -193,70 +179,29 @@ const getDocumentTypeRequestsFn =
     return rollupIntervals.map((rollupInterval) => ({
       documentType,
       rollupInterval,
-      before: getRequest({
-        documentType,
-        rollupInterval,
-        filters: [...kql, ...beforeRange],
-      }),
-      current: getRequest({
+      documentTypeQuery: getRequest({
         documentType,
         rollupInterval,
         filters: [...kql, ...currentRange],
       }),
-      ...(isLegacyDocumentType(documentType, rollupInterval)
+      ...(isRetroCompatibleDocType(documentType, rollupInterval)
         ? {
-            durationSummaryCheck: getRequest({
+            durationSummaryNotSupportedQuery: getRequest({
               documentType,
               rollupInterval,
-              filters: [...kql, ...currentRange, getDurationLegacyUnsupportedFilter()],
+              filters: [...kql, ...currentRange, isDurationSummaryNotSupportedFilter()],
             }),
           }
         : undefined),
     }));
   };
 
-const isLegacyDocumentType = (documentType: ApmDocumentType, rollupInterval: RollupInterval) => {
+const isRetroCompatibleDocType = (
+  documentType: ApmDocumentType,
+  rollupInterval: RollupInterval
+) => {
   return (
     documentType === ApmDocumentType.TransactionMetric &&
     rollupInterval === RollupInterval.OneMinute
   );
-};
-
-const mapToSources = (sources: DocumentTypeData[]) => {
-  const hasAnySourceDocPreviousRange = sources.some((source) => source.hasDocsPreviousRange);
-
-  return sources.map((source) => {
-    const {
-      documentType,
-      hasDocsCurrentRange,
-      hasDocsPreviousRange,
-      rollupInterval,
-      canUseDurationSummary,
-    } = source;
-
-    // To return that transaction (with 10m and 60m intervals) and serviceTransaction doc. types are available,
-    // data has to exist before **and** after to avoid missing data generated by < 8.7
-    // versions which only ships transactionMetric 1m docs.
-    const hasRequiredDocAvailability = isLegacyDocumentType(documentType, rollupInterval)
-      ? hasDocsPreviousRange || hasDocsCurrentRange
-      : hasDocsPreviousRange && hasDocsCurrentRange;
-
-    // If there is any data before, we require that data is available before
-    // this time range to mark this source as available. If we don't do that,
-    // users that upgrade to a version that starts generating service tx metrics
-    // will see a mostly empty screen for a while after upgrading.
-    // If we only check before, users with a new deployment will use raw transaction
-    // events.
-    const isDataSourceAvailable =
-      isLegacyDocumentType(documentType, rollupInterval) && hasAnySourceDocPreviousRange
-        ? hasDocsPreviousRange
-        : hasRequiredDocAvailability;
-
-    return {
-      documentType,
-      rollupInterval,
-      hasDocs: isDataSourceAvailable,
-      hasDurationSummaryField: isDataSourceAvailable && canUseDurationSummary,
-    };
-  });
 };

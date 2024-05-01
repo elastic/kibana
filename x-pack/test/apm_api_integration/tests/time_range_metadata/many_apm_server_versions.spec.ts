@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { ApmSynthtraceEsClient, deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_DURATION_SUMMARY,
@@ -15,7 +15,7 @@ import {
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { pipeline, Readable } from 'stream';
+import { Readable } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiClient } from '../../common/config';
 
@@ -271,16 +271,7 @@ function generateTraceDataForService({
     );
 
   const apmPipeline = (base: Readable) => {
-    const defaultPipeline = synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(
-      base
-    ) as unknown as NodeJS.ReadableStream;
-
-    return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
-      if (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    });
+    return synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(base);
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);

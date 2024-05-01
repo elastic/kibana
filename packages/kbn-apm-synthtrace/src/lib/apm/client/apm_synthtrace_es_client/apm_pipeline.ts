@@ -12,6 +12,7 @@ import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
 import { Logger } from '../../../utils/create_logger';
 import { fork } from '../../../utils/stream_utils';
+import { deleteSummaryFieldTransform } from '../../../utils/transform_helpers';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createServiceMetricsAggregator } from '../../aggregators/create_service_metrics_aggregator';
 import { createServiceSummaryMetricsAggregator } from '../../aggregators/create_service_summary_metrics_aggregator';
@@ -23,10 +24,13 @@ import { getRoutingTransform } from './get_routing_transform';
 
 export function apmPipeline(logger: Logger, version: string, includeSerialization: boolean = true) {
   return (base: Readable) => {
+    const continousRollupSupported =
+      !version || semver.gte(semver.coerce(version)?.version ?? version, '8.7.0');
+
     const aggregators = [
       createTransactionMetricsAggregator('1m'),
       createSpanMetricsAggregator('1m'),
-      ...(!version || semver.gte(semver.coerce(version)?.version ?? version, '8.7.0')
+      ...(continousRollupSupported
         ? [
             createTransactionMetricsAggregator('10m'),
             createTransactionMetricsAggregator('60m'),
@@ -43,6 +47,9 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
     ];
 
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+    const removeDurationSummaryTransform = !continousRollupSupported
+      ? [deleteSummaryFieldTransform()]
+      : [];
 
     return pipeline(
       // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
@@ -54,6 +61,7 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
       getApmServerMetadataTransform(version),
       getRoutingTransform(),
       getDedotTransform(),
+      ...removeDurationSummaryTransform,
       (err) => {
         if (err) {
           logger.error(err);

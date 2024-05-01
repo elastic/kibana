@@ -11,8 +11,8 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmSynthtraceEsClient, deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
-import { Readable, pipeline } from 'stream';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -514,8 +514,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('when service metrics are only available in the current time range', () => {
-        before(async () => {
-          await es.deleteByQuery({
+        before(async () =>
+          es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {
@@ -528,7 +528,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   {
                     range: {
                       '@timestamp': {
-                        lte: start.toISOString(),
+                        gte: start.toISOString(),
                       },
                     },
                   },
@@ -537,8 +537,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             refresh: true,
             expand_wildcards: ['open', 'hidden'],
-          });
-        });
+          })
+        );
 
         it('marks service transaction metrics as unavailable', async () => {
           const response = await getTimeRangeMedata({
@@ -675,15 +675,7 @@ function getTransactionEvents({
   ];
 
   const apmPipeline = (base: Readable) => {
-    const defaultPipeline = synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(
-      base
-    ) as unknown as NodeJS.ReadableStream;
-
-    return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
-      if (err) {
-        logger.error(err);
-      }
-    });
+    return synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(base);
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
