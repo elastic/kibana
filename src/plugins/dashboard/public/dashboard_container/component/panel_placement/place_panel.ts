@@ -9,7 +9,7 @@
 import { PanelState, EmbeddableInput, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { IProvidesPanelPlacementSettings, PanelPlacementSettings } from './types';
+import { IProvidesPanelPlacementSettings } from './types';
 import { runPanelPlacementStrategy } from './place_new_panel_strategies';
 import {
   DEFAULT_PANEL_HEIGHT,
@@ -32,7 +32,7 @@ export function placePanel<TEmbeddableInput extends EmbeddableInput>(
   newPanel: DashboardPanelState<TEmbeddableInput>;
   otherPanels: { [key: string]: DashboardPanelState };
 } {
-  let placementSettings: PanelPlacementSettings = {
+  let placementSettings = {
     width: DEFAULT_PANEL_WIDTH,
     height: DEFAULT_PANEL_HEIGHT,
     strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,

@@ -91,7 +91,6 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { PanelPlacementSettings } from '../component/panel_placement/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -502,7 +501,7 @@ export class DashboardContainer
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
 
-      const placementSettings: PanelPlacementSettings = {
+      const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
         height: DEFAULT_PANEL_HEIGHT,
         strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
