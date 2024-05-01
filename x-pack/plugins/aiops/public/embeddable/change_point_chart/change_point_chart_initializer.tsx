@@ -39,13 +39,12 @@ import { ViewTypeSelector } from '../../components/change_point_detection/view_t
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { DEFAULT_SERIES } from './const';
-import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-import { type EmbeddableChangePointChartExplicitInput } from './types';
+import type { ChangePointEmbeddableRuntimeState } from './types';
 
 export interface AnomalyChartsInitializerProps {
-  initialInput?: Partial<EmbeddableChangePointChartInput>;
-  onCreate: (props: EmbeddableChangePointChartExplicitInput) => void;
+  initialInput?: Partial<ChangePointEmbeddableRuntimeState>;
+  onCreate: (props: ChangePointEmbeddableRuntimeState) => void;
   onCancel: () => void;
 }
 

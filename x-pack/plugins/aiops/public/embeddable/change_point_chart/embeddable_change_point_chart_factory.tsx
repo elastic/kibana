@@ -16,7 +16,6 @@ import {
   apiHasType,
   fetch$,
   initializeTimeRange,
-  initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useMemo } from 'react';
@@ -110,8 +109,6 @@ export const getChangePointChartEmbeddableFactory = (
         serialize: serializeTimeRange,
       } = initializeTimeRange(state);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-
       const {
         changePointControlsApi,
         changePointControlsComparators,
@@ -158,7 +155,6 @@ export const getChangePointChartEmbeddableFactory = (
             return {
               rawState: {
                 timeRange: undefined,
-                ...serializeTitles(),
                 ...serializeTimeRange(),
                 ...serializeChangePointChartState(),
               },
@@ -168,7 +164,6 @@ export const getChangePointChartEmbeddableFactory = (
         },
         {
           ...timeRangeComparators,
-          ...titleComparators,
           ...changePointControlsComparators,
         }
       );
@@ -229,10 +224,8 @@ export const getChangePointChartEmbeddableFactory = (
                             dataViewId={dataViewId}
                             partitions={partitions}
                             onLoading={(v) => dataLoading.next(v)}
-                            // onRenderComplete={onRenderComplete}
-                            // onError={onError}
-                            // onChange={input.onChange}
-                            // emptyState={input.emptyState}
+                            onRenderComplete={() => dataLoading.next(false)}
+                            onError={(error) => blockingError.next(error)}
                           />
                         </ChangePointDetectionControlsContextProvider>
                       </FilterQueryContextProvider>

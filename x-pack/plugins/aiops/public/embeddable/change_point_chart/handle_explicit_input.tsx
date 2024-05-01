@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import type { ChangePointEmbeddableState, EmbeddableChangePointChartExplicitInput } from './types';
+import type { ChangePointEmbeddableState } from './types';
 import type { AiopsAppDependencies } from '../..';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
@@ -18,7 +18,7 @@ export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps,
   input?: ChangePointEmbeddableState
-): Promise<EmbeddableChangePointChartExplicitInput> {
+): Promise<ChangePointEmbeddableState> {
   const { overlays } = coreStart;
 
   return new Promise(async (resolve, reject) => {
@@ -35,7 +35,7 @@ export async function resolveEmbeddableChangePointUserInput(
           >
             <ChangePointChartInitializer
               initialInput={input}
-              onCreate={(update: EmbeddableChangePointChartExplicitInput) => {
+              onCreate={(update) => {
                 modalSession.close();
                 resolve(update);
               }}
