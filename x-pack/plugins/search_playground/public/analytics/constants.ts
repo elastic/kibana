@@ -31,9 +31,6 @@ export enum AnalyticsEvents {
   viewQueryFlyoutOpened = 'view_query_flyout_opened',
   viewQueryFieldsUpdated = 'view_query_fields_updated',
   viewQuerySaved = 'view_query_saved',
-  viewQuerySparseFields = 'view_query_sparse_fields',
-  viewQueryBm25Fields = 'view_query_bm25_fields',
-  viewQueryDenseVectorFields = 'view_query_dense_vector_fields',
   viewCodeFlyoutOpened = 'view_code_flyout_opened',
   viewCodeLanguageChange = 'view_code_language_change',
 }

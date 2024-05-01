@@ -202,6 +202,7 @@ export interface LLMModel {
   showConnectorName?: boolean;
   connectorId: string;
   connectorName: string;
+  connectorType: string;
   icon: ComponentType;
   disabled: boolean;
 }

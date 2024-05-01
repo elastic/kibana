@@ -33,28 +33,36 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields, IndicesQuerySourceFields } from '../../types';
 import { createQuery, getDefaultQueryFields, IndexFields } from '../../utils/create_query';
 
-const groupFields = (
+const groupTypeQueryFields = (
   fields: IndicesQuerySourceFields,
   queryFields: IndexFields
-): { bm25: number; denseVector: number; sparse: number } =>
-  Object.entries(queryFields).reduce(
-    (results, [index, selectedFields]) => {
-      const indexFields = fields[index];
+): string[] =>
+  Object.entries(queryFields).reduce((results, [index, selectedFields]) => {
+    const indexFields = fields[index];
+    let typeQueryFields = '';
 
-      results.bm25 += selectedFields.filter((field) =>
-        indexFields.bm25_query_fields.includes(field)
-      ).length;
-      results.denseVector += selectedFields.filter((field) =>
+    if (selectedFields.some((field) => indexFields.bm25_query_fields.includes(field))) {
+      typeQueryFields = 'BM25';
+    }
+
+    if (
+      selectedFields.some((field) =>
         indexFields.dense_vector_query_fields.find((vectorField) => vectorField.field === field)
-      ).length;
-      results.sparse += selectedFields.filter((field) =>
-        indexFields.elser_query_fields.find((elserField) => elserField.field === field)
-      ).length;
+      )
+    ) {
+      typeQueryFields += (typeQueryFields ? '_' : '') + 'DENSE';
+    }
 
-      return results;
-    },
-    { bm25: 0, denseVector: 0, sparse: 0 }
-  );
+    if (
+      selectedFields.some((field) =>
+        indexFields.elser_query_fields.find((elserField) => elserField.field === field)
+      )
+    ) {
+      typeQueryFields += (typeQueryFields ? '_' : '') + 'SPARSE';
+    }
+
+    return [...results, typeQueryFields];
+  }, []);
 
 interface ViewQueryFlyoutProps {
   onClose: () => void;
@@ -102,12 +110,11 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
 
-    const groupedQueryFields = groupFields(fields, tempQueryFields);
+    const groupedQueryFields = groupTypeQueryFields(fields, tempQueryFields);
 
-    usageTracker.click(AnalyticsEvents.viewQuerySaved);
-    usageTracker.count(AnalyticsEvents.viewQuerySparseFields, groupedQueryFields.sparse);
-    usageTracker.count(AnalyticsEvents.viewQueryBm25Fields, groupedQueryFields.bm25);
-    usageTracker.count(AnalyticsEvents.viewQueryDenseVectorFields, groupedQueryFields.denseVector);
+    groupedQueryFields.forEach((typeQueryFields) =>
+      usageTracker.click(`${AnalyticsEvents.viewQuerySaved}_${typeQueryFields}`)
+    );
   };
 
   useEffect(() => {

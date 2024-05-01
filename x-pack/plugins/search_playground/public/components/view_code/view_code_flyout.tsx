@@ -67,13 +67,15 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
   };
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedLanguage(e.target.value);
-
-    usageTracker.click(`${AnalyticsEvents.viewCodeLanguageChange}_${e.target.value}`);
   };
 
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.viewCodeFlyoutOpened);
   }, [usageTracker]);
+
+  useEffect(() => {
+    usageTracker.click(`${AnalyticsEvents.viewCodeLanguageChange}_${selectedLanguage}`);
+  }, [usageTracker, selectedLanguage]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose}>

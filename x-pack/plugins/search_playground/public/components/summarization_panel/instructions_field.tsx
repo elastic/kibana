@@ -19,10 +19,19 @@ interface InstructionsFieldProps {
 }
 
 export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onChange }) => {
+  const [baseValue, setBaseValue] = React.useState(value);
   const usageTracker = useUsageTracker();
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
-    usageTracker.click(AnalyticsEvents.instructionsFieldChanged);
+  };
+  const handleFocus = () => {
+    setBaseValue(value);
+  };
+  const handleBlur = () => {
+    if (baseValue !== value) {
+      usageTracker.click(AnalyticsEvents.instructionsFieldChanged);
+    }
+    setBaseValue('');
   };
 
   return (
@@ -53,6 +62,8 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
           }
         )}
         value={value}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         onChange={handlePromptChange}
         fullWidth
         isInvalid={isEmpty(value)}
