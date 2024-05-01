@@ -22,15 +22,6 @@ export function isOfAggregateQueryType(
   return Boolean(query && 'esql' in query);
 }
 
-/**
- * True if the query is of type AggregateQuery and is of type esql, false otherwise.
- */
-export function isOfEsqlQueryType(
-  query?: AggregateQuery | Query | { [key: string]: any }
-): query is { esql: string } {
-  return Boolean(query && 'esql' in query);
-}
-
 // returns the language of the aggregate Query, sql, esql etc
 export function getAggregateQueryMode(query: AggregateQuery): Language {
   return Object.keys(query)[0] as Language;

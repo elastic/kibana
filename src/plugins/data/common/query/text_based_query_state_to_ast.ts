@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType, getAggregateQueryMode, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
   ExpressionFunctionKibana,
@@ -56,18 +56,15 @@ export function textBasedQueryStateToExpressionAst({
   const ast = buildExpression([kibana, kibanaContext]).toAst();
 
   if (query && isOfAggregateQueryType(query)) {
-    const mode = getAggregateQueryMode(query);
-    if (mode === 'esql') {
-      const esql = aggregateQueryToAst({
-        query,
-        timeField: timeFieldName,
-        titleForInspector,
-        descriptionForInspector,
-      });
+    const esql = aggregateQueryToAst({
+      query,
+      timeField: timeFieldName,
+      titleForInspector,
+      descriptionForInspector,
+    });
 
-      if (esql) {
-        ast.chain.push(esql);
-      }
+    if (esql) {
+      ast.chain.push(esql);
     }
   }
   return ast;

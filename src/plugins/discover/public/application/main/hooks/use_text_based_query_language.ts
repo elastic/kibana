@@ -66,8 +66,7 @@ export function useTextBasedQueryLanguage({
           };
           const { index, viewMode } = stateContainer.appState.getState();
           let nextColumns: string[] = [];
-          const isTextBasedQueryLang =
-            recordRawType === 'plain' && isOfAggregateQueryType(query) && 'esql' in query;
+          const isTextBasedQueryLang = recordRawType === 'plain' && isOfAggregateQueryType(query);
           const hasResults = Boolean(next.result?.length);
           let queryHasTransformationalCommands = false;
           if ('esql' in query) {
