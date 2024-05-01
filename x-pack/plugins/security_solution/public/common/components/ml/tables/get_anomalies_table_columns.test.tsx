@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../../mock/match_media';
 import * as i18n from './translations';
 import type { AnomaliesBy, Anomaly } from '../types';
 import type { Columns } from '../../../../explore/components/paginated_table';
