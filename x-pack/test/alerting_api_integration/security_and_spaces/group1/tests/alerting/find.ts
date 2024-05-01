@@ -20,6 +20,7 @@ const findTestUtils = (
   supertestWithoutAuth: any
 ) => {
   // Failing: See https://github.com/elastic/kibana/issues/182263
+  // Failing: See https://github.com/elastic/kibana/issues/182284
   describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
