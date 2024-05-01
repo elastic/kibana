@@ -27,6 +27,11 @@ import { plugin } from '@kbn/bfetch-plugin/public';
 import { Server } from '@kbn/core-root-server-internal';
 import { SearchService } from '@kbn/data-plugin/public/search';
 import { Observable, of } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
+import { envDetector } from '@opentelemetry/resources';
+import { getEnvOptions } from '@kbn/config-mocks';
+import { Env, RawConfigService } from '@kbn/config';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
@@ -41,21 +46,44 @@ const filterManager = {
   getFetches$: () => new Observable(),
 };
 
-const initializerContext = new Server(
-  coreMock.createPluginInitializerContext({
-    cloudSecurityPosture: { enabled: true },
-  }),
-  'cloud_security_posture',
-  new Map()
+const env = new Env(
+  '/some/home/dir',
+  {
+    branch: 'whathaveyou',
+    version: 'v1',
+    build: {
+      distributable: true,
+      number: 100,
+      sha: 'abc123',
+      date: '2023-05-15T23:12:09+0000',
+    },
+  },
+  getEnvOptions({
+    cliArgs: { dev: false },
+    configs: ['/some/other/path/some-kibana.yml'],
+    repoPackages: ['FakePackage1', 'FakePackage2'] as any,
+  })
 );
+
+const rawConfigService = new RawConfigService(['/config/kibana.yml']);
+// const initializerContext = new Server(rawConfigService, env, loggingSystemMock.create());
+const initializerContext = {
+  core: coreMock.createSetup(),
+  env,
+  logger: loggingSystemMock.create(),
+  config: rawConfigService,
+  environment: environmentServiceMock.create(),
+  envDetector,
+};
 const searchService = new SearchService(initializerContext);
 const mockCoreStart = coreMock.createStart();
 
-initializerContext.setup();
+// initializerContext.setup();
 
 const bfetch = plugin(initializerContext);
 
 const mockCoreSetup = coreMock.createSetup();
+
 searchService.setup(mockCoreSetup, {
   packageInfo: { version: '8' },
   bfetch,
