@@ -367,8 +367,15 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [onFieldEdited]);
 
   const cellContext = useMemo(() => {
-    return { events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds };
-  }, [events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds]);
+    return {
+      events,
+      pinnedEventIds,
+      eventIdsAddingNotes,
+      onToggleShowNotes,
+      eventIdToNoteIds,
+      refetch,
+    };
+  }, [events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds, refetch]);
 
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
