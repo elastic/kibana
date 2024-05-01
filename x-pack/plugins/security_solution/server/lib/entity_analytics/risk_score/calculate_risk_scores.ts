@@ -268,29 +268,32 @@ const calculateScores = async ({
 
   return buckets.map((bucket) => {
     const identifier = bucket.key[getFieldForIdentifier(identifierType)];
-    const inputs: CalculationInput[] = bucket.top_inputs.hits.hits.map(({ _source: input }) => {
-      const score = _.get(input, ALERT_RISK_SCORE, 0);
-      const eventKind = _.get(input, EVENT_KIND);
-      return {
-        category: eventKind || 'signal', // TODO: this is bad
-        score,
-        time: _.get(input, '@timestamp') as string,
-        rule_name: _.get(input, ALERT_RULE_NAME),
-        index: _.get(input, '_index'),
-        id: _.get(input, ALERT_UUID),
-        weighted_score: calculateWeightedScore({
-          category: eventKind,
+    const inputsWithWeights: CalculationInput[] = bucket.top_inputs.hits.hits.map(
+      ({ _source: input }) => {
+        const score = _.get(input, ALERT_RISK_SCORE, 0);
+        const eventKind = _.get(input, EVENT_KIND);
+        // all of this can be changed to just use the input as-is and add weighted_score
+        return {
+          category: eventKind || 'signal', // TODO: this is bad
           score,
-          userWeights: weights,
-          identifierType,
-        }),
-      };
-    });
+          time: _.get(input, '@timestamp') as string,
+          rule_name: _.get(input, ALERT_RULE_NAME),
+          index: _.get(input, '_index'),
+          id: _.get(input, ALERT_UUID),
+          weighted_score: calculateWeightedScore({
+            category: eventKind,
+            score,
+            userWeights: weights,
+            identifierType,
+          }),
+        };
+      }
+    );
 
     return {
       identifier,
       result: calculateRiskScore({
-        inputs,
+        inputs: inputsWithWeights,
         globalIdentifierTypeWeight,
       }),
     };
