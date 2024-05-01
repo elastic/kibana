@@ -27,7 +27,6 @@ const statsTableCss = css({
   },
 });
 
-const fallBackAvailableFields$ = new BehaviorSubject(undefined);
 const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
