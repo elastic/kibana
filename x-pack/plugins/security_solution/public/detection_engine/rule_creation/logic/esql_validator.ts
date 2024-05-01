@@ -36,10 +36,10 @@ const constructValidationError = (error: Error) => {
 };
 
 /**
- * checks whether query has [metadata _id] operator
+ * checks whether query has metadata _id operator
  */
 export const computeHasMetadataOperator = (esqlQuery: string) => {
-  return /(?<!\|[\s\S.]*)\[\s*metadata[\s\S.]*_id[\s\S.]*\]/i.test(esqlQuery);
+  return /(?<!\|[\s\S.]*)\s*metadata[\s\S.]*_id[\s\S.]*/i.test(esqlQuery?.split('|')?.[0]);
 };
 
 /**
