@@ -7,8 +7,17 @@
 import { http, HttpResponse } from 'msw';
 
 export const defaultBenchmarks = http.get(
-  'http://localhost/internal/cloud_security_posture/benchmarks?package_policy_name=&per_page=100&page=1&sort_field=package_policy.name&sort_order=asc',
-  () => {
+  'http://localhost/internal/cloud_security_posture/benchmarks',
+  ({ request }) => {
+    // package_policy_name=&per_page=100&page=1&sort_field=package_policy.name&sort_order=asc
+    const url = new URL(request.url);
+    // const packagePolicyName = url.searchParams.get('package_policy_name');
+    const perPage = url.searchParams.get('per_page');
+    const page = url.searchParams.get('page');
+    // const sortField = url.searchParams.get('sort_field');
+
+    console.log('perPage:', perPage);
+
     return HttpResponse.json({
       data: [
         {
@@ -46,8 +55,8 @@ export const defaultBenchmarks = http.get(
           },
         },
       ],
-      page: 1,
-      per_page: 100,
+      page,
+      per_page: perPage,
       total: 1,
     });
   }
