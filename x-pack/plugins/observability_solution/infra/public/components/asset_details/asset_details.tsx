@@ -25,17 +25,11 @@ const ContentTemplate = ({
   );
 };
 
-export const AssetDetails = ({
-  tabs,
-  links,
-  renderMode,
-  metricsIndexPattern,
-  ...props
-}: AssetDetailsProps) => {
+export const AssetDetails = ({ tabs, links, renderMode, ...props }: AssetDetailsProps) => {
   return (
     <ContextProviders {...props} renderMode={renderMode}>
       <TabSwitcherProvider defaultActiveTabId={tabs[0]?.id}>
-        <DataViewsProvider metricsIndexPattern={metricsIndexPattern}>
+        <DataViewsProvider>
           <ContentTemplate tabs={tabs} links={links} renderMode={renderMode} />
         </DataViewsProvider>
       </TabSwitcherProvider>

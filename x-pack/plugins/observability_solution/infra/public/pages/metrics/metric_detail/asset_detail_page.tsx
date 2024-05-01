@@ -8,12 +8,10 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { AssetDetails } from '../../../components/asset_details';
 import { commonFlyoutTabs } from '../../../common/asset_details_config/asset_details_tabs';
 
 export const AssetDetailPage = () => {
-  const { metricsView } = useMetricsDataViewContext();
   const {
     params: { type: nodeType, node: nodeId },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
@@ -26,7 +24,6 @@ export const AssetDetailPage = () => {
       renderMode={{
         mode: 'page',
       }}
-      metricsIndexPattern={metricsView?.indices ?? ''}
     />
   );
 };

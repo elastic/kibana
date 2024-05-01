@@ -29,7 +29,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { AlertPrefillProvider } from '../../../alerting/use_alert_prefill';
 import { PluginConfigProvider } from '../../../containers/plugin_config_context';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
-import { SourceProvider } from '../../../containers/metrics_source';
+import { MetricsDataViewProvider, SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
 import { assetDetailsProps, getLogEntries } from './context/fixtures';
 import { ContextProviders } from '../context_providers';
@@ -213,7 +213,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         <PluginConfigProvider value={config}>
           <KibanaContextProvider services={mockServices}>
             <SourceProvider sourceId="default">
-              <AlertPrefillProvider>{story()} </AlertPrefillProvider>
+              <MetricsDataViewProvider>
+                <AlertPrefillProvider>{story()} </AlertPrefillProvider>
+              </MetricsDataViewProvider>
             </SourceProvider>
           </KibanaContextProvider>
         </PluginConfigProvider>
@@ -231,7 +233,7 @@ export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
         to: '2023-04-09T11:23:49Z',
       }}
     >
-      <DataViewsProvider metricsIndexPattern="metrics-*">{story()}</DataViewsProvider>
+      <DataViewsProvider>{story()}</DataViewsProvider>
     </ContextProviders>
   );
 };
