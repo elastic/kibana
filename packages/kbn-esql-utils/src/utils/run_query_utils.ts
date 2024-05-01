@@ -12,13 +12,13 @@ import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { ESQL_LATEST_VERSION } from '../../constants';
 
-export type ISearchESQL = (
+export type ESQLSearchRequest = (
   params?: { params: ESQLSearchParams },
   options?: { abortSignal?: AbortSignal; strategy?: string }
 ) => Observable<{ rawResponse: ESQLSearchReponse }>;
 
-interface ISearch {
-  search: ISearchESQL;
+interface Search {
+  search: ESQLSearchRequest;
 }
 
 export async function getESQLQueryColumns({
@@ -27,7 +27,7 @@ export async function getESQLQueryColumns({
   signal,
 }: {
   esqlQuery: string;
-  search: ISearch;
+  search: Search;
   signal?: AbortSignal;
 }): Promise<DatatableColumn[]> {
   const response = await lastValueFrom(
