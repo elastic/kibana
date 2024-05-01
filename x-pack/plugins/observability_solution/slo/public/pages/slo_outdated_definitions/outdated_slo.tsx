@@ -102,7 +102,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
       ) : null}
       {isResetConfirmationModalOpen ? (
         <SloResetConfirmationModal
