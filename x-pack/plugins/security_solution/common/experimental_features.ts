@@ -97,6 +97,12 @@ export const allowedExperimentalValues = Object.freeze({
   agentStatusClientEnabled: false,
 
   /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -114,7 +120,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
 
   /**
    * Enables expandable flyout in timeline
@@ -128,9 +134,9 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
-   * Enables the Assistant Alerts Insights feature and API endpoint
+   * Enables the Attack discovery feature and API endpoint
    */
-  assistantAlertsInsights: false,
+  attackDiscoveryEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -184,16 +190,6 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for new terms rules
-   */
-  alertSuppressionForNewTermsRuleEnabled: false,
-
-  /**
-   * Enables alerts suppression for Eql rules with non-sequence queries
-   */
-  alertSuppressionForNonSequenceEqlRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer

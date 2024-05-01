@@ -6,7 +6,6 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
@@ -17,7 +16,8 @@ import {
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -73,8 +73,7 @@ const renderReactEmbeddable = ({
   );
 };
 
-const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
-  const I18nContext = core.i18n.Context;
+const renderEmbeddableFactory = (core: CoreStart, _plugins: StartDeps) => {
   const EmbeddableRenderer: FC<{ embeddable: IEmbeddable }> = ({ embeddable }) => {
     const currentAppId = useObservable(core.application.currentAppId$, undefined);
 
@@ -99,16 +98,14 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
 
   return (embeddableObject: IEmbeddable) => {
     return (
-      <div
-        className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: '100%', height: '100%', cursor: 'auto' }}
-      >
-        <I18nContext>
-          <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>
-            <EmbeddableRenderer embeddable={embeddableObject} />
-          </KibanaThemeProvider>
-        </I18nContext>
-      </div>
+      <KibanaRenderContextProvider {...core}>
+        <div
+          className={CANVAS_EMBEDDABLE_CLASSNAME}
+          style={{ width: '100%', height: '100%', cursor: 'auto' }}
+        >
+          <EmbeddableRenderer embeddable={embeddableObject} />
+        </div>
+      </KibanaRenderContextProvider>
     );
   };
 };

@@ -125,6 +125,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
+            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -350,14 +351,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               lists: params.exceptionsList,
             });
 
+            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
               ruleExecutionLogger,
-              experimentalFeatures
+              experimentalFeatures,
+              alertTimestampOverride
             );
 
-            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const wrapHits = wrapHitsFactory({
               ignoreFields: [...ignoreFields, ...legacySignalFields],
@@ -462,7 +464,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (result.warningMessages.length) {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages).join(),
+                message: truncateList(result.warningMessages).join(', '),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
