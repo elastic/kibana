@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality flyout', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/182154
+  describe.skip('Dataset quality flyout', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();

@@ -17,3 +17,4 @@ export {
   removeDropCommandsFromESQLQuery,
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
+export { getESQLQueryColumns } from './utils/run_query_utils';
