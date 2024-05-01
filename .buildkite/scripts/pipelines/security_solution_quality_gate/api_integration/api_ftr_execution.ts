@@ -124,7 +124,6 @@ export const cli = () => {
       // Wait for Elasticsearch to be accessible
       await waitForEsAccess(project.es_url, auth, id);
 
-      let statusCode: number | undefined;
       const FORMATTED_ES_URL = project.es_url.replace('https://', '');
       const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
 
@@ -139,8 +138,8 @@ export const cli = () => {
         TEST_ES_URL: testEsUrl,
         TEST_KIBANA_URL: testKibanaUrl,
       };
-
-      statusCode = await executeCommand(command, envVars, workDir);
+      
+      const statusCode = await executeCommand(command, envVars, workDir);
 
       // Delete serverless project
       log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
