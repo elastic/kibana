@@ -221,7 +221,7 @@ describe('callAgentExecutor', () => {
             mockInvokeWithChainCallback({ ...props, agentType }, more),
         })
       );
-      const onLlmResponse = jest.fn();
+      const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
       await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
 
       expect(onLlmResponse).toHaveBeenCalledWith(
@@ -250,7 +250,7 @@ describe('callAgentExecutor', () => {
             mockInvokeWithChainCallback({ ...props, agentType }, more),
         })
       );
-      const onLlmResponse = jest.fn();
+      const onLlmResponse = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
       await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
 
       expect(mockPush).toHaveBeenCalledWith({ payload: 'hi', type: 'content' });
