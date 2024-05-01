@@ -209,6 +209,9 @@ The default selection in the time filter.
 The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
+[[enableESQL]]`enableESQL`::
+This setting enables ES|QL in Kibana.
+
 [float]
 [[presentation-labs]]
 ==== Presentation Labs
@@ -289,9 +292,6 @@ in the current data view is used.
 [[defaultcolumns]]`defaultColumns`::
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
-
-[[discover:enableESQL]]`discover:enableESQL`::
-experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
