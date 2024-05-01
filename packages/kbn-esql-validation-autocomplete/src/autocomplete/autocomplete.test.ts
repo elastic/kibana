@@ -15,7 +15,6 @@ import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 
 const triggerCharacters = [',', '(', '=', ' '];
@@ -231,7 +230,7 @@ function getPolicyFields(policyName: string) {
 describe('autocomplete', () => {
   type TestArgs = [
     string,
-    Array<string | Partial<SuggestionRawDefinition>>,
+    string[],
     (string | number)?,
     Parameters<typeof createCustomCallbackMocks>?
   ];
