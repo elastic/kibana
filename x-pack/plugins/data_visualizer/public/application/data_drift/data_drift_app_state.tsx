@@ -81,7 +81,6 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     data,
     maps,
     embeddable,
-    discover,
     share,
     security,
     fileUpload,
