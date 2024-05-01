@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
@@ -34,7 +35,7 @@ export const DataSourceContext = React.createContext<DataSourceContextValue>(
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider: FC = ({ children }) => {
+export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [value, setValue] = useState<DataSourceContextValue>();
   const [error, setError] = useState<Error>();
 
