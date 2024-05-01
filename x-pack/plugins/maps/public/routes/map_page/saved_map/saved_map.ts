@@ -59,6 +59,7 @@ import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { extractReferences } from '../../../../common/migrations/references';
+import { getByReferenceState, getByValueState } from '../../../react_embeddable/library_transforms';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -122,12 +123,6 @@ export class SavedMap {
 
   public getStore() {
     return this._store;
-  }
-
-  async _loadAttributes() {
-    if (this._mapSerializedState?.savedObjectId) {
-
-    }
   }
 
   async whenReady() {
@@ -473,7 +468,7 @@ export class SavedMap {
     this._attributes.description = newDescription;
     await this._syncAttributesWithStore();
 
-    let savedObjectId: string | undefined;
+    let mapSerializedState: MapSerializedState | undefined;
     if (saveByReference) {
       try {
         const { attributes, references } = extractReferences({
@@ -485,12 +480,12 @@ export class SavedMap {
           savedObjectsTagging && tags
             ? savedObjectsTagging.ui.updateTagsReferences([], tags)
             : [];
-        const { id } = await saveToLibrary(
+        const { id: savedObjectId } = await saveToLibrary(
           attributes,
           [...references, ...tagReferences],
           newCopyOnSave ? undefined : this._mapSerializedState?.savedObjectId,
         );
-        savedObjectId = id;
+        mapSerializedState = getByReferenceState(this._mapSerializedState, savedObjectId);
       } catch (e) {
         this._attributes.title = prevTitle;
         this._attributes.description = prevDescription;
@@ -504,6 +499,8 @@ export class SavedMap {
         });
         return;
       }
+    } else {
+      mapSerializedState = getByValueState(this._mapSerializedState, this._attributes);
     }
 
     if (tags) {
@@ -527,7 +524,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          input: { attributes: this._attributes },
+          input: mapSerializedState,
         },
         path: this._originatingPath,
       });
@@ -536,14 +533,14 @@ export class SavedMap {
       await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
-          input: { attributes: this._attributes },
+          input: mapSerializedState,
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
     }
 
-    this._mapSerializedState = { savedObjectId };
+    this._mapSerializedState = mapSerializedState;
     // break connection to originating application
     this._originatingApp = undefined;
 

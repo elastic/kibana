@@ -8,10 +8,27 @@
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
+import type { MapAttributes } from '../../common/content_management';
 import { SavedMap } from '../routes/map_page';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
 import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { MapSerializedState } from './types';
+
+export function getByReferenceState(state: MapSerializedState | undefined, savedObjectId: string) {
+  const { attributes, ...byRefState } = state ?? {};
+  return {
+    ...byRefState,
+    savedObjectId,
+  };
+}
+
+export function getByValueState(state: MapSerializedState | undefined, attributes: MapAttributes) {
+  const { savedObjectId, ...byValueState } = state ?? {};
+  return {
+    ...byValueState,
+    attributes,
+  };
+}
 
 export function initializeLibraryTransforms(
   savedMap: SavedMap,
@@ -36,12 +53,7 @@ export function initializeLibraryTransforms(
       return savedObjectId;
     },
     getByReferenceState: (libraryId: string) => {
-      const state = serializeState();
-      const { attributes, ...byRefState } = state.rawState ?? {};
-      return {
-        ...byRefState,
-        savedObjectId: libraryId,
-      };
+      return getByReferenceState(serializeState().rawState, libraryId);
     },
     checkForDuplicateTitle: async (
       newTitle: string,
@@ -66,11 +78,7 @@ export function initializeLibraryTransforms(
       return savedMap.getSavedObjectId() !== undefined;
     },
     getByValueState: () => {
-      const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
-      return {
-        ...byValueState,
-        attributes: savedMap.getAttributes(),
-      };
+      return getByValueState(serializeState().rawState, savedMap.getAttributes());
     },
   };
 }

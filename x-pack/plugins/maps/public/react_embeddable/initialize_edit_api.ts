@@ -5,19 +5,43 @@
  * 2.0.
  */
 
-import { getFullPath, MAP_EMBEDDABLE_NAME } from '../../common/constants';
-import { getHttp, getMapsCapabilities } from '../kibana_services';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
+import { APP_ID, getEditPath, getFullPath, MAP_EMBEDDABLE_NAME } from '../../common/constants';
+import { getEmbeddableService, getHttp, getMapsCapabilities } from '../kibana_services';
+import { MapSerializedState } from './types';
 
-export function initializeEditApi(savedObjectId?: string) {
+export function initializeEditApi(
+  uuid: string, 
+  getState: () => MapSerializedState, 
+  parentApi?: unknown, 
+  savedObjectId?: string
+) {
+  if (!apiHasAppContext(parentApi)) {
+    return {};
+  }
+
+  const parentApiContext = parentApi.getAppContext();
+
   return {
     getTypeDisplayName: () => {
       return MAP_EMBEDDABLE_NAME;
     },
-    onEdit: () => {},
+    onEdit: async () => {
+      const stateTransfer = getEmbeddableService().getStateTransfer();
+      await stateTransfer.navigateToEditor(APP_ID, {
+        path: getEditPath(savedObjectId),
+        state: {
+          embeddableId: uuid,
+          valueInput: getState(),
+          originatingApp: parentApiContext.currentAppId,
+          originatingPath: parentApiContext.getCurrentPath?.(),
+        },
+      });
+    },
     isEditingEnabled: () => {
       return getMapsCapabilities().save as boolean;
     },
-    getEditHref: () => {
+    getEditHref: async () => {
       return getHttp().basePath.prepend(getFullPath(savedObjectId));
     },
   }

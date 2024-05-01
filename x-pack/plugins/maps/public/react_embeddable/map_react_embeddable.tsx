@@ -16,12 +16,10 @@ import { BehaviorSubject } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
-import { extract, type MapEmbeddablePersistableState } from '../../common/embeddable';
 import type { MapApi, MapSerializedState } from './types';
 import { SavedMap } from '../routes/map_page';
-import type { MapEmbeddableInput } from '../embeddable/types';
 import { initializeReduxSync } from './initialize_redux_sync';
-import { initializeLibraryTransforms } from './initialize_library_transforms';
+import { getByReferenceState, getByValueState, initializeLibraryTransforms } from './library_transforms';
 import { getEmbeddableEnhanced, getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
@@ -31,6 +29,7 @@ import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { initializeEditApi } from './initialize_edit_api';
+import { extractReferences } from '../../common/migrations/references';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -39,6 +38,7 @@ export function getControlledBy(id: string) {
 export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   deserializeState: (state) => {
+    console.log(state);
     return state.rawState
       ? (inject(
           state.rawState as EmbeddableStateWithType,
@@ -86,17 +86,36 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
       uuid,
     });
 
-    function serializeState() {
-      const { state: rawState, references } = extract({
+    function getState() {
+      return {
         ...state,
         ...timeRange.serialize(),
         ...title.serializeTitles(),
         ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
         ...crossPanelActions.serialize(),
         ...reduxSync.serialize(),
-      } as unknown as MapEmbeddablePersistableState);
+      };
+    }
+
+    function serializeState() {
+      const rawState = getState();
+
+      // by-reference embeddable
+      if (rawState.savedObjectId) {
+        // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
+        return {
+          rawState: getByReferenceState(rawState, rawState.savedObjectId),
+          references: [],
+        };
+      }
+
+      // by-value embeddable
+      const { attributes, references } = extractReferences({
+        attributes: savedMap.getAttributes(),
+      });
+
       return {
-        rawState: rawState as unknown as MapSerializedState,
+        rawState: getByValueState(rawState, attributes),
         references,
       };
     }
@@ -108,7 +127,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         ...title.titlesApi,
         ...reduxSync.api,
-        ...initializeEditApi(state.savedObjectId),
+        ...initializeEditApi(uuid, getState, parentApi, state.savedObjectId),
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,
