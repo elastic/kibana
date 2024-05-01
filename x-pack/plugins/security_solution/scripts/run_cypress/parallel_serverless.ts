@@ -124,7 +124,11 @@ export function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: stri
 }
 
 // Wait until Kibana is available
-export function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForKibanaAvailable(
+  kbUrl: string,
+  auth: string,
+  runnerId: string
+): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if kibana is available.`);
     const response = await axios
@@ -243,7 +247,6 @@ const getProductTypes = (
 export const cli = () => {
   run(
     async (context) => {
-
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       // This works for either local executions or fallback in case proxy service is unavailable.
       if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {

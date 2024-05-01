@@ -11,15 +11,15 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { exec } from 'child_process';
 import crypto from 'crypto';
 
-import type { ProjectHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/project_handler';
-import { CloudHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/cloud_project_handler';
-import { ProxyHandler } from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/project_handler/proxy_project_handler';
+import type { ProjectHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
+import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
+import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
   proxyHealthcheck,
   waitForEsStatusGreen,
   waitForKibanaAvailable,
   waitForEsAccess,
-} from '../../../../../x-pack/plugins/security_solution/scripts/run_cypress/parallel_serverless';
+} from '@kbn/security-solution-plugin/scripts/run_cypress/parallel_serverless';
 
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
@@ -83,7 +83,7 @@ export const cli = () => {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
@@ -96,7 +96,7 @@ export const cli = () => {
 
       if (!project) {
         log.error('Failed to create project.');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
@@ -105,7 +105,7 @@ export const cli = () => {
 
       if (!credentials) {
         log.error('Credentials could not be reset.');
-        // eslint-disable-next-line no-process-exit
+
         return process.exit(1);
       }
 
@@ -139,7 +139,7 @@ export const cli = () => {
         TEST_ES_URL: testEsUrl,
         TEST_KIBANA_URL: testKibanaUrl,
       };
-      
+
       statusCode = await executeCommand(command, envVars, workDir);
 
       // Delete serverless project
