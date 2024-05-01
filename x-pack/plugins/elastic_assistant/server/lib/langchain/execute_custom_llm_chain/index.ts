@@ -162,7 +162,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
             traceId: streamingSpan?.ids?.['trace.id'],
           },
           isError
-        );
+        ).catch(() => {});
       }
       streamEnd();
       didEnd = true;
