@@ -11,8 +11,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
-import { MessageRole } from '../../../../common';
 import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
 
 describe('apm', () => {
