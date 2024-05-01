@@ -617,18 +617,10 @@ export const getFieldsMatchingFilterFromState = (
 ): {
   [id: string]: NormalizedField;
 } => {
-  const getFieldId = (fieldId: string) => {
-    if (filteredDataTypes.includes(TYPE_DEFINITION[state.fields.byId[fieldId].source.type].label)) {
-      return fieldId;
-    } else {
-      return undefined;
-    }
-  };
-
-  const getfieldIds = Object.entries(state.fields.byId).map(([key, _]) => getFieldId(key));
-
   return Object.fromEntries(
-    Object.entries(state.fields.byId).filter(([id]) => getfieldIds.includes(id))
+    Object.entries(state.fields.byId).filter(([_, fieldId]) =>
+      filteredDataTypes.includes(TYPE_DEFINITION[state.fields.byId[fieldId.id].source.type].label)
+    )
   );
 };
 
@@ -680,7 +672,7 @@ const getallFieldsIncludingNestedFields = (fields: Fields, fieldsArray: DataType
   const fieldsValue = Object.values(fields);
   for (const field of fieldsValue) {
     if (field.type) fieldsArray.push(field.type);
-    if (field.fields) getallFieldsIncludingNestedFields(field.fields,fieldsArray);
+    if (field.fields) getallFieldsIncludingNestedFields(field.fields, fieldsArray);
     if (field.properties) getallFieldsIncludingNestedFields(field.properties, fieldsArray);
   }
   return fieldsArray;
@@ -690,6 +682,6 @@ const getallFieldsIncludingNestedFields = (fields: Fields, fieldsArray: DataType
  * @param allFields fields from state
  */
 export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
-  const fields: DataType[] = []
+  const fields: DataType[] = [];
   return getallFieldsIncludingNestedFields(allFields, fields).filter(filterUnique);
 };
