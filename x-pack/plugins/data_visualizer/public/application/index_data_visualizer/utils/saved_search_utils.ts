@@ -148,11 +148,10 @@ export function getEsQueryFromSavedSearch({
     if (savedSearchSource.getField('filter')) {
       filterManager?.addFilters(savedSearchSource.getField('filter') as Filter[]);
     }
-    const currentFilters = userFilters ?? [];
     const combinedQuery = buildEsQuery(
       dataView,
       currentQuery,
-      filterManager ? [...filterManager?.getFilters(), ...currentFilters] : currentFilters,
+      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
 
