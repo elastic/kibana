@@ -68,6 +68,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
 }) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timelineType = useShallowEqualSelector(
@@ -224,6 +227,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
+  const showExpandEvent = useMemo(
+    () => !isEventViewer && timelineId !== TimelineId.active,
+    [isEventViewer, timelineId]
+  );
 
   return (
     <ActionsContainer>
@@ -245,36 +252,37 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </div>
       )}
       <>
-        {timelineId !== TimelineId.active && (
-          <>
-            <GuidedOnboardingTourStep
-              isTourAnchor={isTourAnchor}
-              onClick={onExpandEvent}
-              step={AlertsCasesTourSteps.expandEvent}
-              tourId={SecurityStepId.alertsCases}
-            >
-              <div key="expand-event">
-                <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-                  <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-                    <EuiButtonIcon
-                      aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                      data-test-subj="expand-event"
-                      iconType="expand"
-                      onClick={onExpandEvent}
-                      size="s"
-                    />
-                  </EuiToolTip>
-                </EventsTdContent>
-              </div>
-            </GuidedOnboardingTourStep>
+        {showExpandEvent && (
+          <GuidedOnboardingTourStep
+            isTourAnchor={isTourAnchor}
+            onClick={onExpandEvent}
+            step={AlertsCasesTourSteps.expandEvent}
+            tourId={SecurityStepId.alertsCases}
+          >
+            <div key="expand-event">
+              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+                <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                  <EuiButtonIcon
+                    aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                    data-test-subj="expand-event"
+                    iconType="expand"
+                    onClick={onExpandEvent}
+                    size="s"
+                  />
+                </EuiToolTip>
+              </EventsTdContent>
+            </div>
+          </GuidedOnboardingTourStep>
+        )}
+        <>
+          {timelineId !== TimelineId.active && (
             <InvestigateInTimelineAction
               ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
               key="investigate-in-timeline"
               ecsRowData={ecsData}
             />
-          </>
-        )}
-
+          )}
+        </>
         {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction
