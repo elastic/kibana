@@ -12,9 +12,9 @@ import { GridData } from '../../../../common/content_management';
 import { PanelPlacementStrategy } from '../../../dashboard_constants';
 
 export interface PanelPlacementSettings {
-  strategy: PanelPlacementStrategy;
-  height: number;
-  width: number;
+  strategy?: PanelPlacementStrategy;
+  height?: number;
+  width?: number;
 }
 
 export interface PanelPlacementReturn {
