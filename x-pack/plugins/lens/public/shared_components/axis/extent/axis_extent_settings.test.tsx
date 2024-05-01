@@ -6,17 +6,17 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisBoundsControl, DataBoundsObject, getBounds } from './axis_extent_settings';
 import { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import { UnifiedAxisExtentConfig } from './types';
+import { render, screen } from '@testing-library/react';
 
 type Props = ComponentProps<typeof AxisBoundsControl>;
 
 describe('AxisBoundsControl', () => {
-  let props: Props;
+  let defaultProps: Props;
   beforeEach(() => {
-    props = {
+    defaultProps = {
       type: 'metric',
       extent: { mode: 'full' },
       setExtent: jest.fn(),
@@ -28,6 +28,10 @@ describe('AxisBoundsControl', () => {
       scaleType: 'linear',
     };
   });
+
+  const renderAxisBoundsControl = (props: Partial<Props> = {}) => {
+    return render(<AxisBoundsControl {...defaultProps} {...props} />);
+  };
 
   it.each<{
     hideShow: 'hide' | 'show';
@@ -48,16 +52,13 @@ describe('AxisBoundsControl', () => {
   ])(
     'should $hideShow custom range when type is $type, extent.mode is $mode as disabled is $disableCustomRange',
     ({ type, mode, disableCustomRange, hideShow }) => {
-      const component = shallow(
-        <AxisBoundsControl
-          {...props}
-          type={type}
-          disableCustomRange={disableCustomRange}
-          extent={{ mode }}
-        />
-      );
-
-      expect(component.find('RangeInputField').exists()).toBe(hideShow === 'show');
+      renderAxisBoundsControl({ type, extent: { mode }, disableCustomRange });
+      const customRange = screen.queryByTestId('lnsXY_axisExtent_customBounds');
+      if (hideShow === 'show') {
+        expect(customRange).toBeInTheDocument();
+      } else {
+        expect(customRange).not.toBeInTheDocument();
+      }
     }
   );
 
@@ -82,18 +83,14 @@ describe('AxisBoundsControl', () => {
   ])(
     'should $hideShow nice values switch when type is $type, extent.mode is $mode as canHaveNiceValues is $canHaveNiceValues',
     ({ type, mode, canHaveNiceValues = true, hideShow }) => {
-      const component = shallow(
-        <AxisBoundsControl
-          {...props}
-          type={type}
-          canHaveNiceValues={canHaveNiceValues}
-          extent={{ mode }}
-        />
-      );
+      renderAxisBoundsControl({ type, extent: { mode }, canHaveNiceValues });
 
-      expect(component.find('[data-test-subj="lnsXY_axisExtent_niceValues"]').exists()).toBe(
-        hideShow === 'show'
-      );
+      const niceValuesSwitch = screen.queryByTestId('lnsXY_axisExtent_niceValues');
+      if (hideShow === 'show') {
+        expect(niceValuesSwitch).toBeInTheDocument();
+      } else {
+        expect(niceValuesSwitch).not.toBeInTheDocument();
+      }
     }
   );
 
