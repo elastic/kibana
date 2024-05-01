@@ -23,6 +23,5 @@
     "@kbn/expressions-plugin",
     "@kbn/field-types",
     "@kbn/es-types",
-    "@kbn/data-plugin",
   ]
 }

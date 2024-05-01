@@ -6,11 +6,20 @@
  * Side Public License, v 1.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { ISearchStart } from '@kbn/data-plugin/public';
+import { Observable } from 'rxjs';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { ESQL_LATEST_VERSION } from '../../constants';
+
+export type ISearchESQL = (
+  params?: { params: ESQLSearchParams },
+  options?: { abortSignal?: AbortSignal; strategy?: string }
+) => Observable<{ rawResponse: ESQLSearchReponse }>;
+
+interface ISearch {
+  search: ISearchESQL;
+}
 
 export async function getESQLQueryColumns({
   esqlQuery,
@@ -18,7 +27,7 @@ export async function getESQLQueryColumns({
   signal,
 }: {
   esqlQuery: string;
-  search: ISearchStart;
+  search: ISearch;
   signal?: AbortSignal;
 }): Promise<DatatableColumn[]> {
   const response = await lastValueFrom(
