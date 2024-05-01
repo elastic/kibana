@@ -80,9 +80,8 @@
     "@kbn/discover-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/core-execution-context-browser",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers"
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",
