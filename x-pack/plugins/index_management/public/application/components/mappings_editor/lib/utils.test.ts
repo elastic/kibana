@@ -10,7 +10,7 @@ jest.mock('../constants', () => {
   return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
 });
 
-import { Fields, NormalizedFields, SearchResult, State } from '../types';
+import { Fields, NormalizedFields, State } from '../types';
 import {
   stripUndefinedValues,
   getTypeLabelFromField,
@@ -343,28 +343,6 @@ describe('utils', () => {
   });
 
   describe('getFieldsMatchingFilterFromState', () => {
-    const result: SearchResult[] = [
-      {
-        field: {
-          id: '844112d0-21bd-4a59-81e7-8e4b7fc712ef',
-          nestedDepth: 0,
-          isMultiField: false,
-          path: ['title'],
-          source: {
-            name: 'title',
-            type: 'text',
-          },
-          childFieldsName: 'fields',
-          canHaveChildFields: false,
-          hasChildFields: false,
-          canHaveMultiFields: true,
-          hasMultiFields: false,
-          isExpanded: false,
-        },
-        display:
-          '<span style={{ lineHeight: 1.5 }}> <strong>title</strong> </span>' as unknown as JSX.Element,
-      },
-    ];
     const sampleState: State = {
       isValid: true,
       configuration: {
