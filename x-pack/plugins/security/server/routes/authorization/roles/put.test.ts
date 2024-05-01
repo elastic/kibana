@@ -464,6 +464,7 @@ describe('PUT role', () => {
     putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {
+        description: 'test description',
         metadata: {
           foo: 'test-metadata',
         },
@@ -540,6 +541,7 @@ describe('PUT role', () => {
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
+                description: 'test description',
                 indices: [
                   {
                     field_security: {

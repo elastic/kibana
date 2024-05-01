@@ -167,7 +167,7 @@ class ConversationalChainFn {
 
               // check that main chain (without parent) is finished:
               if (parentRunId == null) {
-                data.close();
+                data.close().catch(() => {});
               }
             },
           },

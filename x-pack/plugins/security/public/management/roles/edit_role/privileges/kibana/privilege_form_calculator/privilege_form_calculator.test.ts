@@ -915,4 +915,30 @@ describe('PrivilegeFormCalculator', () => {
       expect(calculator.hasSupersededInheritedPrivileges(0)).toEqual(false);
     });
   });
+
+  describe('#isWildcardBasePrivilege', () => {
+    it('returns true for the base privilege with wildcard', () => {
+      const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+      const role = createRole([
+        {
+          base: ['*'],
+          feature: {
+            with_sub_features: ['all'],
+          },
+          spaces: ['foo'],
+        },
+        {
+          base: ['all'],
+          feature: {
+            with_sub_features: ['read'],
+          },
+          spaces: ['*'],
+        },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+      expect(calculator.isWildcardBasePrivilege(0)).toEqual(true);
+    });
+  });
 });
