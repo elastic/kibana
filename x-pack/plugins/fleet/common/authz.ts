@@ -98,6 +98,14 @@ export const calculateAuthz = ({
     ? !!(fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all)
     : fleet.all;
 
+  const writeIntegrationPolicies = subfeatureEnabled
+    ? (fleet.agentPolicies?.all && integrations.all) ?? false
+    : ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all;
+  const readIntegrationPolicies = subfeatureEnabled
+    ? (fleet.agentPolicies?.read && (integrations.all || integrations.read)) ?? false
+    : ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
+      (integrations.all || integrations.read);
+
   // TODO remove fallback when the feature flag is removed
   const fleetAuthz: FleetAuthz['fleet'] = subfeatureEnabled
     ? {
@@ -139,14 +147,6 @@ export const calculateAuthz = ({
         readAgentPolicies:
           (fleet.all || fleet.read || fleet.setup || fleet.agentPolicies?.read) ?? false,
       };
-
-  const writeIntegrationPolicies = subfeatureEnabled
-    ? (fleet.agentPolicies?.all && integrations.all) ?? false
-    : ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all;
-  const readIntegrationPolicies = subfeatureEnabled
-    ? (fleet.agentPolicies?.read && (integrations.all || integrations.read)) ?? false
-    : ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
-      (integrations.all || integrations.read);
 
   return {
     fleet: fleetAuthz,
