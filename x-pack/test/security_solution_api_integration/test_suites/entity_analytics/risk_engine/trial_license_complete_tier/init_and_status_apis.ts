@@ -260,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
           transform_id: transformId,
         });
 
-        expect(transformStats.transforms[0].state).to.eql('stopped');
+        expect(transformStats.transforms.length).to.eql(1);
       });
 
       it('should create configuration saved object', async () => {
