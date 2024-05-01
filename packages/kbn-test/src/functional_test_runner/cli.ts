@@ -92,6 +92,7 @@ export function runFtrCli() {
             ...Object.fromEntries(flagsReader.getUsed().entries()),
           });
         }
+
         process.exit();
       };
 
