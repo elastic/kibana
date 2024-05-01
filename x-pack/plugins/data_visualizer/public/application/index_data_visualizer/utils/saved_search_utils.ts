@@ -16,7 +16,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -122,10 +121,6 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  if (filterManager && userFilters) {
-    filterManager.addFilters(userFilters);
-  }
-
   // If no saved search available, use user's query and filters
   if (
     !savedSearch &&
@@ -150,10 +145,10 @@ export function getEsQueryFromSavedSearch({
   if (savedSearchSource) {
     // FIXME: Add support for AggregateQuery type #150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
-    const currentFilters =
-      userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
-    if (filterManager) filterManager.addFilters(currentFilters);
-
+    if (savedSearchSource.getField('filter')) {
+      filterManager?.addFilters(savedSearchSource.getField('filter') as Filter[]);
+    }
+    const currentFilters = userFilters ?? [];
     const combinedQuery = buildEsQuery(
       dataView,
       currentQuery,
