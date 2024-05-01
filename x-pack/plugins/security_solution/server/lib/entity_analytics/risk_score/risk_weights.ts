@@ -27,7 +27,7 @@ const DEFAULT_CATEGORY_WEIGHTS: RiskWeights = RISK_CATEGORIES.map((category) => 
 /*
  * This function and its use can be deleted once we've replaced our use of event.kind with a proper risk category field.
  */
-const convertCategoryToEventKindValue = (category?: string): string | undefined =>
+export const convertCategoryToEventKindValue = (category?: string): string | undefined =>
   category === 'category_1' ? 'signal' : category;
 
 const isGlobalIdentifierTypeWeight = (weight: RiskWeight): weight is GlobalRiskWeight =>
@@ -53,14 +53,6 @@ const getWeightForIdentifierType = (weight: RiskWeight, identifierType: Identifi
   return typeof configuredWeight === 'number' ? configuredWeight : 1;
 };
 
-export const buildCategoryScoreDeclarations = (): string => {
-  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0.0;`).join('');
-};
-
-export const buildCategoryCountDeclarations = (): string => {
-  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_count'] = 0;`).join('');
-};
-
 export const buildCategoryWeights = (userWeights?: RiskWeights): RiskCategoryRiskWeight[] => {
   const categoryWeights = getRiskCategoryWeights(userWeights);
 
@@ -69,32 +61,24 @@ export const buildCategoryWeights = (userWeights?: RiskWeights): RiskCategoryRis
   );
 };
 
-export const buildCategoryAssignment = (): string => {
-  return RISK_CATEGORIES.map(
-    (category) =>
-      `if (inputs[i].category == '${convertCategoryToEventKindValue(
-        category
-      )}') { results['${category}_score'] += current_score; results['${category}_count'] += 1; }`
-  ).join(' else ');
-};
-
-export const buildWeightingOfScoreByCategory = ({
+export const calculateWeightedScore = ({
+  category,
+  score,
   userWeights,
   identifierType,
 }: {
+  category?: string;
+  score: number;
   userWeights?: RiskWeights;
   identifierType: IdentifierType;
-}): string => {
-  const otherClause = `weighted_score = score;`;
+}): number => {
   const categoryWeights = buildCategoryWeights(userWeights);
 
-  return categoryWeights
-    .map(
-      (weight) =>
-        `if (category == '${convertCategoryToEventKindValue(
-          weight.value
-        )}') { weighted_score = score * ${getWeightForIdentifierType(weight, identifierType)}; }`
-    )
-    .join(' else ')
-    .concat(` else { ${otherClause} }`);
+  const categoryWeight = categoryWeights.find((weight) => weight.value === category);
+
+  if (categoryWeight) {
+    return score * getWeightForIdentifierType(categoryWeight, identifierType);
+  }
+
+  return score;
 };

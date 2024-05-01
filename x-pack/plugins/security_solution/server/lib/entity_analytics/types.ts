@@ -8,6 +8,13 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type {
+  ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
+  ALERT_UUID,
+  EVENT_KIND,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
+import type {
   AfterKey,
   AfterKeys,
   IdentifierType,
@@ -141,15 +148,18 @@ export interface RiskScoreBucket {
   doc_count: number;
   top_inputs: {
     doc_count: number;
-    risk_details: {
-      value: {
-        score: number;
-        normalized_score: number;
-        notes: string[];
-        category_1_score: number;
-        category_1_count: number;
-        risk_inputs: SearchHitRiskInput[];
-      };
+    hits: {
+      hits: Array<{
+        _id: string;
+        _source: Pick<
+          SecurityAlert,
+          | typeof ALERT_RISK_SCORE
+          | typeof EVENT_KIND
+          | typeof ALERT_RULE_NAME
+          | typeof ALERT_UUID
+          | '@timestamp'
+        >;
+      }>;
     };
   };
 }
