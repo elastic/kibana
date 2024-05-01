@@ -131,10 +131,10 @@ export function defineRoutes({
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
-        if (typeof e === 'string') {
+        if (typeof e === 'object') {
           return response.badRequest({
             body: {
-              message: e,
+              message: e.message,
             },
           });
         }
