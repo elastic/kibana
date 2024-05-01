@@ -80,8 +80,9 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV1Enabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously as well as support
-   * for more response actions.
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: false,
 
@@ -94,6 +95,12 @@ export const allowedExperimentalValues = Object.freeze({
    * for endpoint and third-party agents.
    */
   agentStatusClientEnabled: false,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -113,7 +120,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
 
   /**
    * Enables expandable flyout in timeline
@@ -127,9 +134,9 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
-   * Enables the Assistant Alerts Insights feature and API endpoint
+   * Enables the Attack discovery feature and API endpoint
    */
-  assistantAlertsInsights: false,
+  attackDiscoveryEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -185,22 +192,14 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables alerts suppression for new terms rules
-   */
-  alertSuppressionForNewTermsRuleEnabled: false,
-
-  /**
-   * Enables alerts suppression for Eql rules with non-sequence queries
-   */
-  alertSuppressionForNonSequenceEqlRuleEnabled: false,
-
-  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: true,
 
   /**
-   * Enables SentinelOne manual host manipulation actions
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
 

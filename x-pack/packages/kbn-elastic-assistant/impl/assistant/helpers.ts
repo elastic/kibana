@@ -16,7 +16,7 @@ export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
 ): ClientMessage => {
   const { response, isStream, isError } = rawResponse;
-  const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
+  const dateTimeString = new Date().toISOString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
