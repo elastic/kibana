@@ -132,10 +132,10 @@ export function defineRoutes({
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
-        if (typeof e === 'string') {
+        if (typeof e === 'object') {
           return response.badRequest({
             body: {
-              message: e,
+              message: e.message,
             },
           });
         }
@@ -148,15 +148,18 @@ export function defineRoutes({
       const reader = (stream as ReadableStream).getReader();
       const textDecoder = new TextDecoder();
 
-      async function pushStreamUpdate() {
-        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-          if (done) {
-            end();
-            return;
-          }
-          push(textDecoder.decode(value));
-          pushStreamUpdate();
-        });
+      function pushStreamUpdate() {
+        reader
+          .read()
+          .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+            if (done) {
+              end();
+              return;
+            }
+            push(textDecoder.decode(value));
+            pushStreamUpdate();
+          })
+          .catch(() => {});
       }
 
       pushStreamUpdate();

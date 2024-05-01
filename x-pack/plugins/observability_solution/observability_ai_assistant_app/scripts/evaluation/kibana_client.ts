@@ -5,6 +5,29 @@
  * 2.0.
  */
 
+import {
+  BufferFlushEvent,
+  ChatCompletionChunkEvent,
+  ChatCompletionErrorCode,
+  ChatCompletionErrorEvent,
+  concatenateChatCompletionChunks,
+  ConversationCreateEvent,
+  FunctionDefinition,
+  isChatCompletionError,
+  MessageAddEvent,
+  StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
+import {
+  APIReturnType,
+  isSupportedConnectorType,
+  Message,
+  MessageRole,
+  ObservabilityAIAssistantAPIClientRequestParamsOf,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
 import { isArray, pick, remove } from 'lodash';
@@ -24,23 +47,6 @@ import {
 } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { inspect } from 'util';
-import { ChatCompletionErrorCode, isChatCompletionError, Message, MessageRole } from '../../common';
-import { isSupportedConnectorType } from '../../common/connectors';
-import {
-  BufferFlushEvent,
-  ChatCompletionChunkEvent,
-  ChatCompletionErrorEvent,
-  ConversationCreateEvent,
-  MessageAddEvent,
-  StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
-} from '../../common/conversation_complete';
-import { FunctionDefinition } from '../../common/functions/types';
-import { ObservabilityAIAssistantScreenContext } from '../../common/types';
-import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
-import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
-import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
-import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
 import { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment

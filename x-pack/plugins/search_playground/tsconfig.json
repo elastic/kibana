@@ -36,6 +36,7 @@
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
+    "@kbn/core-logging-server-mocks",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin"
   ],
