@@ -24,18 +24,52 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
-import { ChatForm, ChatFormFields } from '../../types';
-import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { ChatForm, ChatFormFields, IndicesQuerySourceFields } from '../../types';
+import { createQuery, getDefaultQueryFields, IndexFields } from '../../utils/create_query';
+
+const groupTypeQueryFields = (
+  fields: IndicesQuerySourceFields,
+  queryFields: IndexFields
+): string[] =>
+  Object.entries(queryFields).map(([index, selectedFields]) => {
+    const indexFields = fields[index];
+    let typeQueryFields = '';
+
+    if (selectedFields.some((field) => indexFields.bm25_query_fields.includes(field))) {
+      typeQueryFields = 'BM25';
+    }
+
+    if (
+      selectedFields.some((field) =>
+        indexFields.dense_vector_query_fields.find((vectorField) => vectorField.field === field)
+      )
+    ) {
+      typeQueryFields += (typeQueryFields ? '_' : '') + 'DENSE';
+    }
+
+    if (
+      selectedFields.some((field) =>
+        indexFields.elser_query_fields.find((elserField) => elserField.field === field)
+      )
+    ) {
+      typeQueryFields += (typeQueryFields ? '_' : '') + 'SPARSE';
+    }
+
+    return typeQueryFields;
+  });
 
 interface ViewQueryFlyoutProps {
   onClose: () => void;
 }
 
 export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => {
+  const usageTracker = useUsageTracker();
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);
@@ -48,7 +82,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     defaultValue: defaultFields,
   });
 
-  const [tempQueryFields, setTempQueryFields] = useState(queryFields);
+  const [tempQueryFields, setTempQueryFields] = useState<IndexFields>(queryFields);
 
   const {
     field: { onChange: elasticsearchQueryChange },
@@ -68,13 +102,24 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       ...tempQueryFields,
       [index]: newFields,
     });
+    usageTracker.count(AnalyticsEvents.viewQueryFieldsUpdated, newFields.length);
   };
 
   const saveQuery = () => {
     queryFieldsOnChange(tempQueryFields);
     elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
+
+    const groupedQueryFields = groupTypeQueryFields(fields, tempQueryFields);
+
+    groupedQueryFields.forEach((typeQueryFields) =>
+      usageTracker.click(`${AnalyticsEvents.viewQuerySaved}_${typeQueryFields}`)
+    );
   };
+
+  useEffect(() => {
+    usageTracker.load(AnalyticsEvents.viewQueryFlyoutOpened);
+  }, [usageTracker]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} size="l">
