@@ -12,7 +12,7 @@ import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 
 const MAX_TAGS_TO_SHOW = 3;
 
-const TagListWrapper: FC = ({ children }) => (
+const TagListWrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
   <ul
     className="kbnSearchOption__tagsList"
     aria-label={i18n.translate('xpack.globalSearchBar.searchBar.optionTagListAriaLabel', {
