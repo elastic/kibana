@@ -9,6 +9,9 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
+  apiIsOfType,
+  apiPublishesPanelTitle,
+  apiPublishesUnifiedSearch,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -71,3 +74,13 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
     updateLayerById: (layerDescriptor: LayerDescriptor) => void;
     onRenderComplete$: Observable<void>;
   };
+
+export const isMapApi = (api: unknown): api is MapApi => {
+  return Boolean(
+    api &&
+      apiIsOfType(api, 'map') &&
+      typeof (api as MapApi).getLayerList === 'function' &&
+      apiPublishesPanelTitle(api) &&
+      apiPublishesUnifiedSearch(api)
+  );
+};
