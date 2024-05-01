@@ -12,7 +12,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
-import { TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { SuggestionRawDefinition } from './types';
@@ -238,7 +238,7 @@ describe('autocomplete', () => {
 
   const testSuggestionsFn = (
     statement: string,
-    expected: Array<string | Partial<SuggestionRawDefinition>>,
+    expected: string[],
     triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
@@ -271,23 +271,11 @@ describe('autocomplete', () => {
           async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
           callbackMocks
         );
-        const suggestionInertTextSorted = suggestions
-          // simulate the editor behaviour for sorting suggestions
-          // copied from https://github.com/microsoft/vscode/blob/0a141d23179c76c5771df25a43546d9d9b6ed71c/src/vs/workbench/contrib/testing/browser/testingDecorations.ts#L971-L972
-          // still not sure how accurate this is...
-          .sort((a, b) => (a.sortText || a.label).localeCompare(b.sortText || b.label));
 
-        expect(suggestionInertTextSorted).toHaveLength(expected.length);
-        for (const [index, receivedSuggestion] of suggestionInertTextSorted.entries()) {
-          if (typeof expected[index] !== 'object') {
-            expect(receivedSuggestion.text).toEqual(expected[index]);
-          } else {
-            // check all properties that are defined in the expected suggestion
-            for (const [key, value] of Object.entries(expected[index])) {
-              expect(receivedSuggestion[key as keyof SuggestionRawDefinition]).toEqual(value);
-            }
-          }
-        }
+        const sortedSuggestions = suggestions.map((suggestion) => suggestion.text).sort();
+        const sortedExpected = expected.sort();
+
+        expect(sortedSuggestions).toEqual(sortedExpected);
       }
     );
   };
@@ -613,6 +601,16 @@ describe('autocomplete', () => {
       'any',
       {
         evalMath: true,
+        grouping: false,
+      },
+      undefined,
+      undefined,
+      'by'
+    );
+    const allGroupingFunctions = getFunctionSignaturesByReturnType(
+      'stats',
+      'any',
+      {
         grouping: true,
       },
       undefined,
@@ -620,25 +618,26 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions('from a | stats a ', [
-      { text: '= $0', asSnippet: true, command: TRIGGER_SUGGESTION_COMMAND },
-    ]);
+    testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions.only('from a | stats a=max(b) by ', [
+    testSuggestions('from a | stats a=max(b) by ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=max(b) BY ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=c by d ', [',', '|']);
     testSuggestions('from a | stats a=c by d, ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=max(b), ', [
       'var0 =',
@@ -660,6 +659,7 @@ describe('autocomplete', () => {
       'var0 =',
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats var0=min(b),var1=c,', [
@@ -702,19 +702,23 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('number'),
       '`avg(b)`',
       ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by var0 = ', [
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by c, ', [
       'var0 =',
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by c, var0 = ', [
       ...getFieldNamesByType('any'),
       ...allEvaFunctions,
+      ...allGroupingFunctions,
     ]);
     testSuggestions('from a | stats avg(b) by numberField % 2 ', [',', '|']);
 
@@ -1157,7 +1161,7 @@ describe('autocomplete', () => {
       }
     }
 
-    testSuggestions('from a | eval var0 = bucket(@timestamp,', []);
+    testSuggestions('from a | eval var0 = bucket(@timestamp,', getUnitDuration(1));
 
     describe('date math', () => {
       const dateSuggestions = timeLiterals.map(({ name }) => name);
