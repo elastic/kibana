@@ -12,7 +12,6 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { ThreatIntelligenceStartServices } from '../../../../types';
 import { CopyToClipboardButtonEmpty } from '../common/copy_to_clipboard';
 import { FilterInButtonEmpty } from '../../../query_bar/components/filter_in';
 import { FilterOutButtonEmpty } from '../../../query_bar/components/filter_out';
@@ -34,11 +33,7 @@ import {
  * @param pagination information about table current page
  */
 export const cellPopoverRendererFactory =
-  (
-    indicators: Indicator[],
-    pagination: Pagination,
-    startServices: ThreatIntelligenceStartServices
-  ) =>
+  (indicators: Indicator[], pagination: Pagination) =>
   (props: EuiDataGridCellPopoverElementProps) => {
     const styles = useStyles();
 
@@ -77,7 +72,6 @@ export const cellPopoverRendererFactory =
               data={indicator}
               field={key}
               data-test-subj={CELL_POPOVER_FILTER_OUT_BUTTON_TEST_ID}
-              startServices={startServices}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

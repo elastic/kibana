@@ -22,7 +22,6 @@ import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
-import { CloudSecurityPostureStartServices } from '../../types';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
@@ -50,11 +49,7 @@ export interface CloudSecurityDataTableProps {
    * This is the component that will be rendered in the flyout when a row is expanded.
    * This component will receive the row data and a function to close the flyout.
    */
-  flyoutComponent: (
-    hit: DataTableRecord,
-    onCloseFlyout: () => void,
-    startServices: CloudSecurityPostureStartServices
-  ) => JSX.Element;
+  flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   /**
    * This is the object that contains all the data and functions from the useCloudPostureDataTable hook.
    * This is also used to manage the table state from the parent component.
@@ -82,10 +77,6 @@ export interface CloudSecurityDataTableProps {
    * Height override for the data grid.
    */
   height?: number | string;
-  /**
-   * services needed for using shared modules that render React
-   */
-  startServices: CloudSecurityPostureStartServices;
 }
 
 export const CloudSecurityDataTable = ({
@@ -133,7 +124,7 @@ export const CloudSecurityDataTable = ({
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   const renderDocumentView = (hit: DataTableRecord) =>
-    flyoutComponent(hit, () => setExpandedDoc(undefined), rest.startServices);
+    flyoutComponent(hit, () => setExpandedDoc(undefined));
 
   // services needed for unified-data-table package
   const {

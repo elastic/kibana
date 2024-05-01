@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { ThreatIntelligenceStartServices } from '../../../types';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { Indicator } from '../../../../common/types/indicator';
@@ -39,10 +38,6 @@ export interface AddToTimelineProps {
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
-  /**
-   * Used for shared modules that render React
-   */
-  startServices: ThreatIntelligenceStartServices;
 }
 
 export interface AddToTimelineCellActionProps extends AddToTimelineProps {
@@ -64,12 +59,11 @@ export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
-  startServices,
 }) => {
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
-  const { addToTimelineProps } = useAddToTimeline({ indicator: data, field, startServices });
+  const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!addToTimelineProps) {
     return null;
   }
@@ -95,14 +89,14 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
-  startServices,
 }) => {
   const styles = useStyles();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const addToTimelineButton =
-    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const startServices = { analytics, i18n: i18nStart, theme };
+  const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -156,14 +150,15 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
-  startServices,
 }) => {
   const styles = useStyles();
 
   const contextMenuRef = useRef<HTMLButtonElement>(null);
 
-  const addToTimelineButton =
-    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const startServices = { analytics, i18n: i18nStart, theme };
+
+  const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -215,12 +210,11 @@ export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
   field,
   Component,
   'data-test-subj': dataTestSubj,
-  startServices,
 }) => {
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
-  const { addToTimelineProps } = useAddToTimeline({ indicator: data, field, startServices });
+  const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!addToTimelineProps) {
     return null;
   }

@@ -33,7 +33,6 @@ interface TakeActionProps {
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
   isCreateDetectionRuleDisabled?: boolean;
-  startServices: CloudSecurityPostureStartServices;
 }
 
 export const showCreateDetectionRuleSuccessToast = (
@@ -89,14 +88,14 @@ export const showCreateDetectionRuleSuccessToast = (
 };
 
 export const showChangeBenchmarkRuleStatesSuccessToast = (
-  clousSecurityStartServices: CloudSecurityPostureStartServices,
+  cloudSecurityStartServices: CloudSecurityPostureStartServices,
   isBenchmarkRuleMuted: boolean,
   data: {
     numberOfRules: number;
     numberOfDetectionRules: number;
   }
 ) => {
-  const { notifications, ...startServices } = clousSecurityStartServices;
+  const { notifications, ...startServices } = cloudSecurityStartServices;
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
@@ -167,7 +166,6 @@ export const TakeAction = ({
   enableBenchmarkRuleFn,
   disableBenchmarkRuleFn,
   isCreateDetectionRuleDisabled = false,
-  startServices,
 }: TakeActionProps) => {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -180,7 +178,8 @@ export const TakeAction = ({
     prefix: 'smallContextMenuPopover',
   });
 
-  const { http, notifications } = useKibana().services;
+  const { http, ...startServices } = useKibana().services;
+  const { notifications } = startServices;
 
   const button = (
     <EuiButton

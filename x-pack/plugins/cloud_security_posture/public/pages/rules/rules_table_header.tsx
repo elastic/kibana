@@ -254,7 +254,8 @@ const CurrentPageOfTotal = ({
     { match: 'any' }
   );
 
-  const startServices = useKibana().services;
+  const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const startServices = { notifications, analytics, i18n: i18nStart, theme };
 
   const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {

@@ -13,7 +13,6 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { ThreatIntelligenceStartServices } from '../../../../types';
 import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { Indicator } from '../../../../../common/types/indicator';
 import { FilterInButtonIcon } from '../../../query_bar/components/filter_in';
@@ -46,10 +45,6 @@ interface IndicatorValueActions {
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
-  /**
-   * used for shared modules that render React code
-   */
-  startServices: ThreatIntelligenceStartServices;
 }
 
 /**
@@ -64,7 +59,6 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   indicator,
   field,
   'data-test-subj': dataTestSubj,
-  startServices,
 }) => {
   const { kqlBarIntegration } = useIndicatorsFlyoutContext();
 
@@ -84,24 +78,14 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   if (kqlBarIntegration) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
-        <AddToTimelineButtonIcon
-          data={indicator}
-          field={field}
-          data-test-subj={timelineTestId}
-          startServices={startServices}
-        />
+        <AddToTimelineButtonIcon data={indicator} field={field} data-test-subj={timelineTestId} />
         <CopyToClipboardButtonIcon value={value as string} data-test-subj={copyToClipboardTestId} />
       </EuiFlexGroup>
     );
   }
 
   const popoverItems = [
-    <AddToTimelineContextMenu
-      data={indicator}
-      field={field}
-      data-test-subj={timelineTestId}
-      startServices={startServices}
-    />,
+    <AddToTimelineContextMenu data={indicator} field={field} data-test-subj={timelineTestId} />,
     <CopyToClipboardContextMenu value={value as string} data-test-subj={copyToClipboardTestId} />,
   ];
 

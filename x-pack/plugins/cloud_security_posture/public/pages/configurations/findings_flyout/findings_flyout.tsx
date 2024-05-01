@@ -28,7 +28,6 @@ import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
-import { CloudSecurityPostureStartServices } from '../../../types';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
@@ -84,7 +83,6 @@ interface FindingFlyoutProps {
   flyoutIndex?: number;
   findingsCount?: number;
   onPaginate?: (pageIndex: number) => void;
-  startServices: CloudSecurityPostureStartServices;
 }
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
@@ -145,7 +143,6 @@ export const FindingsRuleFlyout = ({
   flyoutIndex,
   findingsCount,
   onPaginate,
-  startServices,
 }: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
@@ -202,7 +199,7 @@ export const FindingsRuleFlyout = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <TakeAction createRuleFn={createMisconfigurationRuleFn} startServices={startServices} />
+            <TakeAction createRuleFn={createMisconfigurationRuleFn} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

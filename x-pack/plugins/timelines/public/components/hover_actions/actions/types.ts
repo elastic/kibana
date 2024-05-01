@@ -7,7 +7,6 @@
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { TimelinesStartServices } from '../../..';
 
 export interface FilterValueFnArgs {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
@@ -29,5 +28,4 @@ export interface HoverActionComponentProps {
   size?: 'xs' | 's' | 'm';
   showTooltip?: boolean;
   value?: string[] | string | null;
-  startServices: TimelinesStartServices;
 }

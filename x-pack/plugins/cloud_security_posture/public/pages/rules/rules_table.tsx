@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { CoreStart, HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { CloudSecurityPostureStartServices } from '../../types';
+import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
@@ -29,7 +30,6 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
-import { CloudSecurityPostureStartServices } from '../../types';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -133,40 +133,42 @@ export const RulesTable = ({
     return true;
   };
 
-  const { http, ...startServices } = useKibana<CoreStart>().services;
+  const { http, notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
   useEffect(() => {
     if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
       setIsAllRulesSelectedThisPage(true);
     else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
-  const columns = useMemo(
-    () =>
-      getColumns({
-        refetchRulesStates,
-        postRequestChangeRulesStates,
-        selectedRules,
-        setSelectedRules,
-        items,
-        setIsAllRulesSelectedThisPage,
-        isAllRulesSelectedThisPage,
-        isCurrentPageRulesASubset,
-        onRuleClick,
-        http,
-        startServices,
-      }),
-    [
+  const columns = useMemo(() => {
+    const startServices = { notifications, analytics, i18n: i18nStart, theme };
+    return getColumns({
       refetchRulesStates,
       postRequestChangeRulesStates,
       selectedRules,
       setSelectedRules,
       items,
+      setIsAllRulesSelectedThisPage,
       isAllRulesSelectedThisPage,
+      isCurrentPageRulesASubset,
       onRuleClick,
       http,
       startServices,
-    ]
-  );
+    });
+  }, [
+    refetchRulesStates,
+    postRequestChangeRulesStates,
+    selectedRules,
+    setSelectedRules,
+    items,
+    isAllRulesSelectedThisPage,
+    onRuleClick,
+    notifications,
+    http,
+    analytics,
+    i18nStart,
+    theme,
+  ]);
 
   return (
     <>

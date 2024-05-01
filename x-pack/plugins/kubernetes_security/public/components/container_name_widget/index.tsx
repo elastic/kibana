@@ -9,7 +9,7 @@ import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react'
 import { EuiBasicTable, EuiTableSortingType, EuiProgress, EuiBasicTableColumn } from '@elastic/eui';
 import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
-import type { IndexPattern, GlobalFilter, KubernetesSecurityStartServices } from '../../types';
+import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter, useScroll } from '../../hooks';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { useFetchContainerNameData } from './hooks';
@@ -46,7 +46,6 @@ export interface ContainerNameWidgetDeps {
   groupedBy: string;
   countBy?: string;
   dataViewId?: string;
-  startServices: KubernetesSecurityStartServices;
 }
 
 interface FilterButtons {
@@ -65,7 +64,6 @@ export const ContainerNameWidget = ({
   globalFilter,
   groupedBy,
   countBy,
-  startServices,
 }: ContainerNameWidgetDeps) => {
   const [sortField, setSortField] = useState('count');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -122,7 +120,6 @@ export const ContainerNameWidget = ({
                 showTooltip: true,
                 value: aggData.key as string,
                 dataViewId,
-                startServices,
               });
             });
           })
@@ -142,21 +139,13 @@ export const ContainerNameWidget = ({
                 showTooltip: true,
                 value: aggData.key as string,
                 dataViewId,
-                startServices,
               });
             });
           })
           .flat() || [],
     };
     return result;
-  }, [
-    data?.pages,
-    getFilterForValueButton,
-    dataViewId,
-    filterManager,
-    getFilterOutValueButton,
-    startServices,
-  ]);
+  }, [data?.pages, getFilterForValueButton, dataViewId, filterManager, getFilterOutValueButton]);
 
   const copyToClipboardButtons = useMemo((): CopyButtons => {
     const result: CopyButtons = {
@@ -171,14 +160,13 @@ export const ContainerNameWidget = ({
                 ownFocus: false,
                 showTooltip: true,
                 value: aggData.key as string,
-                startServices,
               });
             });
           })
           .flat() || [],
     };
     return result;
-  }, [data, getCopyButton, startServices]);
+  }, [data, getCopyButton]);
 
   const containerNameArray = useMemo((): ContainerNameArrayDataValue[] => {
     return data

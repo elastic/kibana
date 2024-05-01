@@ -25,11 +25,7 @@ import {
 import { CellActions } from './cell_actions';
 import { cellPopoverRendererFactory } from './cell_popover_renderer';
 import { cellRendererFactory } from './cell_renderer';
-import {
-  BrowserFields,
-  SecuritySolutionDataViewBase,
-  ThreatIntelligenceStartServices,
-} from '../../../../types';
+import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from '../../hooks/use_table_context';
@@ -55,7 +51,6 @@ export interface IndicatorsTableProps {
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   columnSettings: ColumnSettingsValue;
-  startServices: ThreatIntelligenceStartServices;
 }
 
 const gridStyle = {
@@ -75,7 +70,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   isFetching,
   browserFields,
   columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
-  startServices,
 }) => {
   const [expanded, setExpanded] = useState<Indicator>();
 
@@ -87,8 +81,8 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   );
 
   const renderCellPopoverValue = useMemo(
-    () => cellPopoverRendererFactory(indicators, pagination, startServices),
-    [indicators, pagination, startServices]
+    () => cellPopoverRendererFactory(indicators, pagination),
+    [indicators, pagination]
   );
 
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
@@ -131,13 +125,12 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
                 Component={Component}
                 indicators={indicators}
                 pagination={pagination}
-                startServices={startServices}
               />
             ),
           ],
         };
       }),
-    [browserFields, columns, fieldTypes, indicators, pagination, startServices]
+    [browserFields, columns, fieldTypes, indicators, pagination]
   );
 
   const toolbarOptions = useToolbarOptions({

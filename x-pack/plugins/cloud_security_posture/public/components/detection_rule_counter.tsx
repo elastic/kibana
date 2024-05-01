@@ -36,7 +36,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
   const queryClient = useQueryClient();
-  const { http, ...startServices } = useKibana().services;
+  const { http, notifications, analytics, i18n, theme } = useKibana().services;
 
   const history = useHistory();
 
@@ -58,6 +58,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
+    const startServices = { analytics, notifications, i18n, theme };
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
     setIsCreateRuleLoading(false);
@@ -65,7 +66,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
     // Triggering a refetch of rules and alerts to update the UI
     queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
     queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
-  }, [createRuleFn, http, startServices, queryClient]);
+  }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
 
   return (
     <EuiSkeletonText
