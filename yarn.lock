@@ -3246,6 +3246,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/assets-data-access-plugin@link:x-pack/plugins/observability_solution/assets_data_access":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""

@@ -13,7 +13,7 @@ import {
 } from '../../../../../common/routes/rule/response';
 import { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
 
-const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
+export const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   return {
     outcome: lastRun.outcome,
     ...(lastRun.outcomeOrder !== undefined ? { outcome_order: lastRun.outcomeOrder } : {}),
@@ -23,7 +23,7 @@ const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   };
 };
 
-const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
+export const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
   return {
     run: {
       history: monitoring.run.history.map((history) => ({
@@ -39,7 +39,7 @@ const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
 };
 
 export const transformRuleActions = (
-  actions: Rule['actions'],
+  actions: Rule['actions'] = [],
   systemActions: Rule['systemActions'] = []
 ): RuleResponseV1['actions'] => {
   return [
