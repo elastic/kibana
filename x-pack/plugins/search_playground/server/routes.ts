@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { sendMessageEvent, SendMessageEventData } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
@@ -88,13 +89,13 @@ export function defineRoutes({
       },
     },
     errorHandler(async (context, request, response) => {
-      const [, { actions }] = await getStartServices();
+      const [{ analytics }, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
       const { messages, data } = await request.body;
-      const { chatModel, chatPrompt } = await getChatParams(
+      const { chatModel, chatPrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
           model: data.summarization_model,
@@ -162,6 +163,14 @@ export function defineRoutes({
       }
 
       pushStreamUpdate();
+
+      analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+        connectorType:
+          connector.actionTypeId +
+          (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+        model: data.summarization_model ?? '',
+        isCitationsEnabled: data.citations,
+      });
 
       return response.ok(responseWithHeaders);
     })
