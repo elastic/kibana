@@ -307,7 +307,8 @@ export function getUnitDuration(unit: number = 1) {
  *
  * Another thought... should literal suggestions be defined in the definitions file?
  * That approach might allow for greater specificity in the suggestions and remove some
- * "magical" logic.
+ * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
+ * definition property...
  */
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
   const suggestions: SuggestionRawDefinition[] = [];
