@@ -29,6 +29,7 @@ import {
   useStartServices,
   useUIExtension,
   useAuthz,
+  useFleetStatus,
 } from '../../../../../hooks';
 
 import { sendGetBulkAssets } from '../../../../../hooks';
@@ -46,7 +47,9 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const { name, version } = packageInfo;
 
   const pkgkey = `${name}-${version}`;
-  const { spaces, docLinks } = useStartServices();
+  const { docLinks } = useStartServices();
+  const { spaceId } = useFleetStatus();
+
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
   const canReadPackageSettings = useAuthz().integrations.readPackageInfo;
@@ -55,21 +58,26 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(packageInfo.name);
 
-  // assume assets are installed in this space until we find otherwise
-  const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
+  const pkgInstallationInfo =
+    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+
+  const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
+  const assetsInstalledInCurrentSpace = !installedSpaceId || installedSpaceId === spaceId;
+
   const [assetSavedObjectsByType, setAssetsSavedObjectsByType] = useState<
     Record<string, Record<string, SimpleSOAssetType & { appLink?: string }>>
   >({});
   const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
-
-  const pkgInstallationInfo =
-    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
   const pkgAssets = useMemo(
     () => [
-      ...(pkgInstallationInfo?.installed_kibana || []),
+      ...(assetsInstalledInCurrentSpace ? pkgInstallationInfo?.installed_kibana || [] : []),
       ...(pkgInstallationInfo?.installed_es || []),
     ],
-    [pkgInstallationInfo?.installed_es, pkgInstallationInfo?.installed_kibana]
+    [
+      assetsInstalledInCurrentSpace,
+      pkgInstallationInfo?.installed_es,
+      pkgInstallationInfo?.installed_kibana,
+    ]
   );
   const pkgAssetsByType = useMemo(
     () =>
@@ -96,16 +104,6 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       if (!pkgInstallationInfo) {
         setIsLoading(false);
         return;
-      }
-
-      if (spaces) {
-        const { id: spaceId } = await spaces.getActiveSpace();
-        const assetInstallSpaceId = pkgInstallationInfo.installed_kibana_space_id;
-
-        // if assets are installed in a different space, flag that Kibana assets won't be shown
-        if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
-          setAssetsInstalledInCurrentSpace(false);
-        }
       }
 
       if (pkgAssets.length === 0) {
@@ -147,7 +145,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       }
     };
     fetchAssetSavedObjects();
-  }, [packageInfo, pkgAssets, pkgInstallationInfo, spaces]);
+  }, [packageInfo, pkgAssets, pkgInstallationInfo]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -217,7 +215,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
             <p>
               <FormattedMessage
                 id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceBody"
-                defaultMessage="This integration is installed, but Kibana assets may not be available in this space. {learnMoreLink}."
+                defaultMessage="This integration is installed, but Kibana assets are not available in this space. {learnMoreLink}."
                 values={{
                   learnMoreLink: (
                     <EuiLink
