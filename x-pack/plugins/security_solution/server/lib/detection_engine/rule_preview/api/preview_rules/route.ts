@@ -69,7 +69,7 @@ import { wrapSearchSourceClient } from './wrap_search_source_client';
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
 
-export const previewRulesRoute = async (
+export const previewRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],

@@ -64,8 +64,8 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
 
   async fetch(params: FetchHistoricalSummaryParams): Promise<HistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<Record<SLOId, DateRange>>(
-      (acc, { sloId, timeWindow }) => {
-        acc[sloId] = getDateRange(timeWindow);
+      (acc, { sloId, timeWindow, range }) => {
+        acc[sloId] = range ?? getDateRange(timeWindow);
         return acc;
       },
       {}
@@ -272,6 +272,13 @@ function handleResultForRollingAndTimeslices(
     });
 }
 
+export const getEsDateRange = (dateRange: DateRange) => {
+  return {
+    gte: typeof dateRange.from === 'string' ? dateRange.from : dateRange.from.toISOString(),
+    lte: typeof dateRange.to === 'string' ? dateRange.to : dateRange.to.toISOString(),
+  };
+};
+
 function generateSearchQuery({
   sloId,
   groupBy,
@@ -309,10 +316,7 @@ function generateSearchQuery({
           { term: { 'slo.revision': revision } },
           {
             range: {
-              '@timestamp': {
-                gte: dateRange.from.toISOString(),
-                lte: dateRange.to.toISOString(),
-              },
+              '@timestamp': getEsDateRange(dateRange),
             },
           },
           ...extraFilterByInstanceId,
@@ -325,7 +329,7 @@ function generateSearchQuery({
           field: '@timestamp',
           fixed_interval: fixedInterval,
           extended_bounds: {
-            min: dateRange.from.toISOString(),
+            min: typeof dateRange.from === 'string' ? dateRange.from : dateRange.from.toISOString(),
             max: 'now/d',
           },
         },
