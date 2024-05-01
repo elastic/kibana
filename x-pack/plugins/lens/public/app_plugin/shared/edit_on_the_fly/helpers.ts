@@ -9,7 +9,6 @@ import {
   getESQLAdHocDataview,
   getESQLQueryColumns,
 } from '@kbn/esql-utils';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
