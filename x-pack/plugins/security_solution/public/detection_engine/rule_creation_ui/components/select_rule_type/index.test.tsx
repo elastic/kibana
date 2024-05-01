@@ -185,6 +185,29 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeTruthy();
     });
 
+    it('renders selected card only when in update mode for "esql" and esql feature is disabled', () => {
+      useEsqlAvailabilityMock.mockReturnValueOnce(false);
+      const field = useFormFieldMock<unknown>({ value: 'esql' });
+      const wrapper = mount(
+        <TestProviders>
+          <SelectRuleType
+            describedByIds={[]}
+            field={field}
+            isUpdateView={true}
+            hasValidLicense={true}
+            isMlAdmin={true}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="customRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="machineLearningRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeTruthy();
+    });
+
+    
     it('should not render "esql" rule type if esql rule is not enabled', () => {
       useEsqlAvailabilityMock.mockReturnValueOnce(false);
       const Component = () => {
