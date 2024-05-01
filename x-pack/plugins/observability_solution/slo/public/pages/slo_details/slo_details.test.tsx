@@ -83,6 +83,7 @@ const mockKibana = () => {
       http: {
         basePath: {
           prepend: (url: string) => url,
+          get: () => 'http://localhost:5601',
         },
       },
       dataViews: {
