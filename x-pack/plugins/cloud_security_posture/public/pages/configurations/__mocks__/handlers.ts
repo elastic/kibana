@@ -151,33 +151,88 @@ export const handlers = [
         // Encode the string chunks using "TextEncoder".
         controller.enqueue(
           encoder.encode(
-            JSON.stringify({
-              id: 0,
-              result: {
-                rawResponse: {
-                  took: 4,
-                  timed_out: false,
-                  _shards: {
-                    total: 1,
-                    successful: 1,
-                    skipped: 0,
-                    failed: 0,
+            JSON.stringify([
+              {
+                request: {
+                  params: {
+                    index: 'logs-cloud_security_posture.findings_latest-*',
+                    sort: [
+                      {
+                        '@timestamp': 'desc',
+                      },
+                    ],
+                    size: 500,
+                    aggs: {
+                      count: {
+                        terms: {
+                          field: 'result.evaluation',
+                        },
+                      },
+                    },
+                    ignore_unavailable: false,
+                    query: {
+                      bool: {
+                        must: [],
+                        filter: [
+                          {
+                            match_phrase: {
+                              'rule.benchmark.rule_number': '5.1.5',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'resource.id': '3dcd461e-4f16-50d9-8f55-30a510bbc587',
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-26h',
+                                lte: 'now',
+                              },
+                            },
+                          },
+                        ],
+                        should: [],
+                        must_not: [
+                          {
+                            bool: {
+                              must: [
+                                {
+                                  term: {
+                                    'rule.benchmark.id': 'cis_aws',
+                                  },
+                                },
+                                {
+                                  term: {
+                                    'rule.benchmark.version': 'v1.5.0',
+                                  },
+                                },
+                                {
+                                  term: {
+                                    'rule.benchmark.rule_number': '1.5',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
                   },
-                  hits: {},
                 },
-                isPartial: false,
-                isRunning: false,
-                requestParams: {
-                  method: 'POST',
-                  path: '/logs-cloud_security_posture.findings_latest-*/_async_search',
-                  querystring:
-                    'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=false',
+                options: {
+                  strategy: 'ese',
+                  isSearchStored: false,
+                  executionContext: {
+                    type: 'application',
+                    name: 'securitySolutionUI',
+                    url: '/app/security/cloud_security_posture/findings/configurations',
+                    page: '/cloud_security_posture/findings/configurations',
+                  },
                 },
-                total: 1,
-                loaded: 1,
-                isRestored: false,
               },
-            })
+            ])
           )
         );
         controller.close();
