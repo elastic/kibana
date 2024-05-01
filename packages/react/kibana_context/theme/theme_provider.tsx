@@ -11,9 +11,9 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { EuiThemeProvider, EuiThemeProviderProps } from '@elastic/eui';
 
-// @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
+// @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
-// @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
+// @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
 
 import { KibanaEuiProvider } from '@kbn/react-kibana-context-root';

@@ -17,14 +17,16 @@ import {
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
+  fetchSLOHealthParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
+  putSLOServerlessSettingsParamsSchema,
+  PutSLOSettingsParams,
   putSLOSettingsParamsSchema,
   resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
-import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -36,6 +38,7 @@ import {
   FindSLO,
   FindSLOGroups,
   GetSLO,
+  GetSLOHealth,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
 } from '../../services';
@@ -45,6 +48,7 @@ import { getBurnRates } from '../../services/get_burn_rates';
 import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
 import { GetSLOInstances } from '../../services/get_slo_instances';
+import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
 import { ManageSLO } from '../../services/manage_slo';
 import { ResetSLO } from '../../services/reset_slo';
@@ -558,6 +562,26 @@ const getDiagnosisRoute = createSloServerRoute({
   },
 });
 
+const fetchSloHealthRoute = createSloServerRoute({
+  endpoint: 'POST /internal/observability/slos/_health',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  params: fetchSLOHealthParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const getSLOHealth = new GetSLOHealth(esClient, repository);
+
+    return await getSLOHealth.execute(params.body);
+  },
+});
+
 const getSloBurnRates = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
   options: {
@@ -574,7 +598,8 @@ const getSloBurnRates = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
-    const burnRates = await getBurnRates({
+
+    return await getBurnRates({
       instanceId,
       spaceId,
       windows,
@@ -586,7 +611,6 @@ const getSloBurnRates = createSloServerRoute({
         logger,
       },
     });
-    return { burnRates };
   },
 });
 
@@ -623,40 +647,44 @@ const getSloSettingsRoute = createSloServerRoute({
   },
 });
 
-const putSloSettings = createSloServerRoute({
-  endpoint: 'PUT /internal/slo/settings',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'internal',
-  },
-  params: putSLOSettingsParamsSchema,
-  handler: async ({ context, params }) => {
-    await assertPlatinumLicense(context);
+const putSloSettings = (isServerless?: boolean) =>
+  createSloServerRoute({
+    endpoint: 'PUT /internal/slo/settings',
+    options: {
+      tags: ['access:slo_write'],
+      access: 'internal',
+    },
+    params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
+    handler: async ({ context, params }) => {
+      await assertPlatinumLicense(context);
 
-    const soClient = (await context.core).savedObjects.client;
-    return await storeSloSettings(soClient, params.body);
-  },
-});
+      const soClient = (await context.core).savedObjects.client;
+      return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
+    },
+  });
 
-export const sloRouteRepository = {
-  ...getSloSettingsRoute,
-  ...putSloSettings,
-  ...createSLORoute,
-  ...inspectSLORoute,
-  ...deleteSLORoute,
-  ...deleteSloInstancesRoute,
-  ...disableSLORoute,
-  ...enableSLORoute,
-  ...fetchHistoricalSummary,
-  ...findSloDefinitionsRoute,
-  ...findSLORoute,
-  ...getSLORoute,
-  ...updateSLORoute,
-  ...getDiagnosisRoute,
-  ...getSloBurnRates,
-  ...getPreviewData,
-  ...getSLOInstancesRoute,
-  ...resetSLORoute,
-  ...findSLOGroupsRoute,
-  ...getSLOSuggestionsRoute,
+export const getSloRouteRepository = (isServerless?: boolean) => {
+  return {
+    ...fetchSloHealthRoute,
+    ...getSloSettingsRoute,
+    ...putSloSettings(isServerless),
+    ...createSLORoute,
+    ...inspectSLORoute,
+    ...deleteSLORoute,
+    ...deleteSloInstancesRoute,
+    ...disableSLORoute,
+    ...enableSLORoute,
+    ...fetchHistoricalSummary,
+    ...findSloDefinitionsRoute,
+    ...findSLORoute,
+    ...getSLORoute,
+    ...updateSLORoute,
+    ...getDiagnosisRoute,
+    ...getSloBurnRates,
+    ...getPreviewData,
+    ...getSLOInstancesRoute,
+    ...resetSLORoute,
+    ...findSLOGroupsRoute,
+    ...getSLOSuggestionsRoute,
+  };
 };
