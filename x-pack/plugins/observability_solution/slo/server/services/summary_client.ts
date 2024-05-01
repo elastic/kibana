@@ -16,6 +16,7 @@ import {
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
+import { getEsDateRange } from './historical_summary_client';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
@@ -75,7 +76,7 @@ export class DefaultSummaryClient implements SummaryClient {
             { term: { 'slo.revision': slo.revision } },
             {
               range: {
-                '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+                '@timestamp': getEsDateRange(dateRange),
               },
             },
             ...instanceIdFilter,
