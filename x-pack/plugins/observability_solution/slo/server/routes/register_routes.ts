@@ -34,9 +34,9 @@ export interface RegisterRoutesDependencies {
   pluginsSetup: {
     core: CoreSetup;
   };
-  spaces?: SpacesPluginStart;
+  getSpacesStart: () => Promise<SpacesPluginStart | undefined>;
   ruleDataService: RuleDataPluginService;
-  getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
 }
 
 export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {

@@ -64,7 +64,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       delete oldRule.license;
       newRule.license = 'GPLv3';
 
-      const ThemeWrapper: FC<PropsWithChildren> = ({ children }) => (
+      const ThemeWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>
       );
 
