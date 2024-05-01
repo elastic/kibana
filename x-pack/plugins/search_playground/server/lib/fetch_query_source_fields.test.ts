@@ -10,8 +10,10 @@ import {
   DENSE_PASSAGE_FIRST_SINGLE_INDEX_FIELD_CAPS,
   DENSE_VECTOR_DOCUMENT_FIRST,
   DENSE_VECTOR_DOCUMENT_FIRST_FIELD_CAPS,
+  ELSER_PASSAGE_CHUNKED,
   ELSER_PASSAGE_CHUNKED_TWO_INDICES,
   ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS,
+  SPARSE_DOC_SINGLE_INDEX,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import { parseFieldsCapabilities } from './fetch_query_source_fields';
 
@@ -123,6 +125,31 @@ describe('fetch_query_source_fields', () => {
             'title_text',
             'main_button.button_link',
           ],
+        },
+      });
+    });
+
+    it('sparse vector passage first - should handle sparse_vector type fields', () => {
+      expect(
+        parseFieldsCapabilities(ELSER_PASSAGE_CHUNKED, [
+          {
+            index: 'search-nethys',
+            doc: SPARSE_DOC_SINGLE_INDEX,
+          },
+        ])
+      ).toEqual({
+        'search-nethys': {
+          bm25_query_fields: ['body_content', 'headings', 'title'],
+          dense_vector_query_fields: [],
+          elser_query_fields: [
+            {
+              field: 'ml.inference.body_content_expanded.predicted_value',
+              indices: ['search-nethys'],
+              model_id: '.elser_model_2_linux-x86_64',
+              nested: false,
+            },
+          ],
+          source_fields: ['body_content', 'headings', 'title'],
         },
       });
     });
