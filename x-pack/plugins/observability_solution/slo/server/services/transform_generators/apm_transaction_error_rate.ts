@@ -162,7 +162,9 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `params.goodEvents / params.totalEvents ${
+              slo.objective.timesliceTarget === 0 ? '>' : '>='
+            } ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
         },
       }),
