@@ -66,30 +66,36 @@ function extractOasVersion(bundledDocuments: BundledDocument[]): string {
     throw new Error('Empty bundled document list');
   }
 
-  let version = bundledDocuments[0].document.openapi as string;
-
-  // Automatically promote to the recent OAS 3.0 version which is 3.0.3
-  // 3.0.3 is the version used in the specification https://swagger.io/specification/v3/
-  if (version < '3.0.3') {
-    version = '3.0.3';
-  }
+  const firstBundledDocument = bundledDocuments[0];
 
   for (let i = 1; i < bundledDocuments.length; ++i) {
-    if (!areOasVersionsEqual(bundledDocuments[i].document.openapi as string, version)) {
+    if (
+      !areOasVersionsEqual(
+        bundledDocuments[i].document.openapi as string,
+        firstBundledDocument.document.openapi as string
+      )
+    ) {
       throw new Error(
-        `OpenAPI specs must have the same OpenAPI versions, conflicting versions are ${chalk.blue(
+        `OpenAPI specs must use the same OpenAPI version, encountered ${chalk.blue(
           bundledDocuments[i].document.openapi
-        )} and ${chalk.blue(version)}`
+        )} at ${chalk.bold(bundledDocuments[i].absolutePath)} does not match ${chalk.blue(
+          firstBundledDocument.document.openapi
+        )} at ${chalk.bold(firstBundledDocument.absolutePath)}`
       );
     }
   }
 
-  return version;
+  const version = firstBundledDocument.document.openapi as string;
+
+  // Automatically promote to the recent OAS 3.0 version which is 3.0.3
+  // 3.0.3 is the version used in the specification https://swagger.io/specification/v3/
+  return version < '3.0.3' ? '3.0.3' : version;
 }
 
 /**
  * Tells if versions are equal by comparing only major and minor OAS version parts
  */
 function areOasVersionsEqual(versionA: string, versionB: string): boolean {
+  // versionA.substring(0, 3) results in `3.0` or `3.1`
   return versionA.substring(0, 3) === versionB.substring(0, 3);
 }

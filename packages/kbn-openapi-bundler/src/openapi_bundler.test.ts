@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { bundle } from './openapi_bundler';
@@ -40,9 +39,7 @@ describe('OpenAPI Bundler', () => {
   it('DOES NOT bundle spec with different OpenAPI versions', async () => {
     await expectBundlingError(
       'different_openapi_versions',
-      `OpenAPI specs must have the same OpenAPI versions, conflicting versions are ${chalk.blue(
-        '3.1.0'
-      )} and ${chalk.blue('3.0.3')}`
+      new RegExp('^OpenAPI specs must use the same OpenAPI version')
     );
   });
 
