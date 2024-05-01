@@ -306,7 +306,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
-  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
+  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.() as any;
   if (incomingEmbeddable) {
     const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
       container.setScrollToPanelId(id);
