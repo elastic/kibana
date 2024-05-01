@@ -16,8 +16,8 @@ steps:
 
   - command: "cat .buildkite/pipelines/security_solution/api_integration_serverless_release.yml | buildkite-agent pipeline upload"
     label: 'Upload Release pipeline'
-    if: "build.env('QUALITY_GATE') == '1'"
+    if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
 
   - command: "cat .buildkite/pipelines/security_solution/api_integration_serverless_periodic.yml | buildkite-agent pipeline upload"
     label: 'Upload Periodic Serverless Pipeline'
-    if: "build.env('QUALITY_GATE') != '1'"
+    if: "build.env('KIBANA_MKI_QUALITY_GATE') != '1'"
