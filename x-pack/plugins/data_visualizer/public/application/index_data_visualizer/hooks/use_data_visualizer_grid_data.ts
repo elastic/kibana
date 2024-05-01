@@ -20,7 +20,6 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
@@ -76,10 +75,10 @@ export const useDataVisualizerGridData = (
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
-  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+  const componentExecutionContext: KibanaExecutionContext = useMemo(() => {
     const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE,
+      name: 'field_statistics_table',
       id: input.id,
     };
 
@@ -89,7 +88,7 @@ export const useDataVisualizerGridData = (
     };
   }, [parentExecutionContext, input.id]);
 
-  useExecutionContext(executionContext, embeddableExecutionContext);
+  useExecutionContext(executionContext, componentExecutionContext);
 
   const { visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
@@ -266,7 +265,7 @@ export const useDataVisualizerGridData = (
         nonAggregatableFields,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
-        embeddableExecutionContext,
+        componentExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -282,7 +281,7 @@ export const useDataVisualizerGridData = (
       lastRefresh,
       fieldsToFetch,
       browserSessionSeed,
-      embeddableExecutionContext,
+      componentExecutionContext,
     ]
   );
 
