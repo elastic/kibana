@@ -20,6 +20,9 @@ export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionPara
         ? privileges.index
         : [privileges.index];
       privileges.index = indexPriviledges.filter((privilege) => privilege !== 'none');
+      const remoteClusterPrivileges = ['monitor_enrich'];
+
+      privileges.remote_cluster = remoteClusterPrivileges;
 
       return response.ok({ body: privileges });
     }

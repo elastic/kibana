@@ -424,6 +424,36 @@ describe('Put payload schema', () => {
     `);
   });
 
+  test('passes through remote_cluster when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_cluster: [
+            {
+              privileges: ['monitor_enrich'],
+              clusters: ['my_remote*'],
+            },
+          ],
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "remote_cluster": [
+            {
+              "privileges": [
+                "monitor_enrich"
+              ],
+              "clusters": [
+                "my_remote*"
+              ],
+            },
+          ],
+        },
+      }
+    `);
+  });
+
   // This is important for backwards compatibility
   test('does not set default value for remote_indices when not specified', () => {
     expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`

@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../common';
+import type {
+  Role,
+  RoleIndexPrivilege,
+  RoleRemoteClusterPrivilege,
+  RoleRemoteIndexPrivilege,
+} from '../../../../common';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
 
 interface RoleValidatorOptions {
@@ -231,6 +236,58 @@ export class RoleValidator {
           'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
           {
             defaultMessage: 'Enter or select at least one action',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
+  public validateRemoteClusterPrivilegeClusterField(
+    remoteClusterPrivilege: RoleRemoteClusterPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!remoteClusterPrivilege.privileges.length && !remoteClusterPrivilege.clusters.length) {
+      return valid();
+    }
+
+    if (!remoteClusterPrivilege.clusters.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneClusterRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one cluster',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
+  public validateRemoteClusterPrivilegePrivilegesField(
+    remoteClusterPrivilege: RoleRemoteClusterPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!remoteClusterPrivilege.privileges.length && !remoteClusterPrivilege.clusters.length) {
+      return valid();
+    }
+
+    if (!remoteClusterPrivilege.privileges.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one privilege',
           }
         )
       );

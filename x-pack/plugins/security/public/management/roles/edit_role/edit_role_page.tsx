@@ -211,7 +211,7 @@ function useRole(
       ? rolesAPIClient.getRole(roleName)
       : Promise.resolve({
           name: '',
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
           kibana: [],
           _unrecognized_applications: [],
         } as Role);
