@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID } from '@kbn/visualizations-plugin/common/content_management';
 import type { Dashboard } from '../../common/api/2023_10_31';
 import { v2023_10_31 } from '../../common/api';
 
-export function registerCreate(router: VersionedRouter, cm: ContentManagementServerSetup) {
+export function registerCreate(
+  router: VersionedRouter<RequestHandlerContext>,
+  cm: ContentManagementServerSetup
+) {
   router
     .post({
       path: '/api/dashboard',
