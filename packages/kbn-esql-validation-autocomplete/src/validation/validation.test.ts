@@ -362,6 +362,10 @@ describe('validation logic', () => {
     type TestArgs = [string, string[], string[]?];
 
     // Make only and skip work with our custom wrapper
+    //
+    // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
+    // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
+    //
     const testErrorsAndWarnings = Object.assign(testErrorsAndWarningsFn, {
       skip: (...args: TestArgs) => {
         const warningArgs = [[]].slice(args.length - 2);

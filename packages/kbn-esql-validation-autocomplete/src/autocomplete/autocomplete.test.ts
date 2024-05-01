@@ -281,6 +281,10 @@ describe('autocomplete', () => {
   };
 
   // Enrich the function to work with .only and .skip as regular test function
+  //
+  // DO NOT CHANGE THE NAME OF THIS FUNCTION WITHOUT ALSO CHANGING
+  // THE LINTER RULE IN packages/kbn-eslint-config/typescript.js
+  //
   const testSuggestions = Object.assign(testSuggestionsFn, {
     skip: (...args: TestArgs) => {
       const paddingArgs = ['', [undefined, undefined, undefined]].slice(args.length - 2);
