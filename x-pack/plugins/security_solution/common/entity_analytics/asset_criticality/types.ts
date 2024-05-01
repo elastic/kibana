@@ -9,6 +9,8 @@ import type { AssetCriticalityRecord } from '../../api/entity_analytics/asset_cr
 
 export type CriticalityLevel = AssetCriticalityRecord['criticality_level'];
 
+export type CriticalityLevelWithUnassigned = CriticalityLevel | 'unassigned';
+
 export interface AssetCriticalityUpsert {
   idField: AssetCriticalityRecord['id_field'];
   idValue: AssetCriticalityRecord['id_value'];

@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
@@ -139,9 +140,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               label={
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <h4 id={titleElementId}>{packageInput.title || packageInput.type}</h4>
-                    </EuiText>
+                    <EuiTitle size="xs">
+                      <h3 id={titleElementId}>{packageInput.title || packageInput.type}</h3>
+                    </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }

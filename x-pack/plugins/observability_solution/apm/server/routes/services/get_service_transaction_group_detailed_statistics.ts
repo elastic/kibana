@@ -8,21 +8,14 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { ApmTransactionDocumentType } from '../../../common/document_type';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import {
-  getLatencyAggregation,
-  getLatencyValue,
-} from '../../lib/helpers/latency_aggregation_type';
+import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
@@ -77,10 +70,7 @@ async function getServiceTransactionGroupDetailedStatistics({
 
   const intervalString = `${bucketSizeInSeconds}s`;
 
-  const field = getDurationFieldForTransactions(
-    documentType,
-    useDurationSummary
-  );
+  const field = getDurationFieldForTransactions(documentType, useDurationSummary);
 
   const response = await apmEventClient.search(
     'get_service_transaction_group_detailed_statistics',
@@ -156,16 +146,13 @@ async function getServiceTransactionGroupDetailedStatistics({
       x: timeseriesBucket.key,
       y: calculateFailedTransactionRate(timeseriesBucket),
     }));
-    const transactionGroupTotalDuration =
-      bucket.transaction_group_total_duration.value || 0;
+    const transactionGroupTotalDuration = bucket.transaction_group_total_duration.value || 0;
     return {
       transactionName,
       latency,
       throughput,
       errorRate,
-      impact: totalDuration
-        ? (transactionGroupTotalDuration * 100) / totalDuration
-        : 0,
+      impact: totalDuration ? (transactionGroupTotalDuration * 100) / totalDuration : 0,
     };
   });
 }

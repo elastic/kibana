@@ -64,7 +64,6 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-user-settings-server",
     "@kbn/remote-clusters-plugin",
     "@kbn/analytics-client",
     "@kbn/security-plugin-types-common",
@@ -77,8 +76,13 @@
     "@kbn/core-security-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme",
     "@kbn/core-security-common",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-user-profile-server",
+    "@kbn/core-user-profile-browser"
   ],
   "exclude": [
     "target/**/*",

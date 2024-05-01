@@ -1,14 +1,19 @@
 GREATEST
 
-
-Returns the maximum value from many columns. This is similar to MV_MAX
-except it’s intended to run on multiple columns at once.
+Syntax
+Parameters
+first
+First of the columns to evaluate.
+rest
+The rest of the columns to evaluate.
+DescriptionReturns the maximum value from multiple columns. This is similar to MV_MAX
+except it is intended to run on multiple columns at once.
+When run on keyword or text fields, this returns the last string
+      in alphabetical order. When run on boolean columns this will return
+      true if any values are true.
+Supported types
+Example
 ```esql
 ROW a = 10, b = 20
 | EVAL g = GREATEST(a, b)
 ```
-
-When run on keyword or text fields, this’ll return the last string
-      in alphabetical order. When run on boolean columns this will return
-      true if any values are true.
-Supported types:

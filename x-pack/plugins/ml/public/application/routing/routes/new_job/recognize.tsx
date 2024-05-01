@@ -17,7 +17,7 @@ import { useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { mlJobService } from '../../../services/job_service';
+import { mlJobServiceFactory } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 import { DataSourceContextProvider } from '../../../contexts/ml';
@@ -54,10 +54,15 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
   const { id } = parse(location.search, { sort: false });
+  const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    existingJobsAndGroups: () => mlJobServiceFactory(undefined, mlApiServices).getJobAndGroupIds(),
   });
 
   return (

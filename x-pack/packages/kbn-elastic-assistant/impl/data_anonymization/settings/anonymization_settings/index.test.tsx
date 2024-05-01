@@ -76,6 +76,9 @@ const mockUseAssistantContext = {
       isDefault: true,
     },
   ],
+  assistantAvailability: {
+    hasUpdateAIAssistantAnonymization: true,
+  },
   baseAllow: ['@timestamp', 'event.category', 'user.name'],
   baseAllowReplacement: ['user.name', 'host.ip'],
   defaultAllow: ['foo', 'bar', 'baz', '@baz'],

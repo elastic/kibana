@@ -100,9 +100,9 @@ export class SyntheticsService {
 
   public start(taskManager: TaskManagerStartContract) {
     if (this.config?.manifestUrl) {
-      this.scheduleSyncTask(taskManager);
+      void this.scheduleSyncTask(taskManager);
     }
-    this.setupIndexTemplates();
+    void this.setupIndexTemplates();
   }
 
   public async setupIndexTemplates() {
@@ -178,7 +178,7 @@ export class SyntheticsService {
                 service.signupUrl = signupUrl;
 
                 if (service.isAllowed && service.config.manifestUrl) {
-                  service.setupIndexTemplates();
+                  void service.setupIndexTemplates();
                   await service.pushConfigs();
                 }
               } catch (e) {
@@ -588,7 +588,7 @@ export class SyntheticsService {
     }
 
     // no need to wait here
-    finder.close();
+    finder.close().catch(() => {});
 
     if (paramsBySpace[ALL_SPACES_ID]) {
       Object.keys(paramsBySpace).forEach((space) => {

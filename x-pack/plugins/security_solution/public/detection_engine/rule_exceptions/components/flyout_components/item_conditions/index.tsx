@@ -32,6 +32,7 @@ import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 import * as sharedI18n from '../../../utils/translations';
+import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
   {
@@ -265,6 +266,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         isDisabled: isExceptionBuilderFormDisabled,
         allowCustomFieldOptions: !isEndpointException,
         getExtendedFields,
+        showValueListModal: ShowValueListModal,
       })}
     </>
   );

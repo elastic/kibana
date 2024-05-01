@@ -41,10 +41,7 @@ const formatOptions = (
     key: item.url,
     meta: [
       I18LABELS.pageViews + ': ' + item.count,
-      I18LABELS.pageLoadDuration +
-        ': ' +
-        formatToSec(item.pld) +
-        ` (${percTitle})`,
+      I18LABELS.pageLoadDuration + ': ' + formatToSec(item.pld) + ` (${percTitle})`,
     ],
     url: item.url,
     checked: includedUrls?.includes(item.url)
@@ -86,10 +83,7 @@ const getWildcardLabel = (wildcard: string) => {
   });
 };
 
-export function URLSearch({
-  onChange: onFilterChange,
-  updateSearchTerm,
-}: Props) {
+export function URLSearch({ onChange: onFilterChange, updateSearchTerm }: Props) {
   const {
     uxUiFilters: { transactionUrl, transactionUrlExcluded },
     urlParams,
@@ -123,14 +117,7 @@ export function URLSearch({
       });
     }
     setItems(newItems);
-  }, [
-    data,
-    percentile,
-    searchTerm,
-    searchValue,
-    transactionUrl,
-    transactionUrlExcluded,
-  ]);
+  }, [data, percentile, searchTerm, searchValue, transactionUrl, transactionUrlExcluded]);
 
   const onChange = (updatedOptions: UrlOption[]) => {
     setItems(
@@ -162,8 +149,7 @@ export function URLSearch({
   };
 
   const hasChanged = () => {
-    const { includedItems, excludedItems, includedWildcards } =
-      processItems(items);
+    const { includedItems, excludedItems, includedWildcards } = processItems(items);
 
     let isWildcardChanged =
       (includedWildcards.length > 0 && !searchTerm) ||

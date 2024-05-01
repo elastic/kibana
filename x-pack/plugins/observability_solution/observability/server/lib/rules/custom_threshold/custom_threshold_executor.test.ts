@@ -55,6 +55,7 @@ const STARTED_AT_MOCK_DATE = new Date();
 const mockQuery = 'mockQuery';
 const mockOptions = {
   executionId: '',
+  startedAtOverridden: false,
   startedAt: STARTED_AT_MOCK_DATE,
   previousStartedAt: null,
   params: {

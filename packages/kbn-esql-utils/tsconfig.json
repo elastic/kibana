@@ -19,5 +19,6 @@
     "@kbn/data-views-plugin",
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
+    "@kbn/esql-ast",
   ]
 }

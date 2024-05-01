@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  NetworkQueries,
-  NetworkKpiQueries,
-} from '../../../../../common/search_strategy/security_solution';
+import { NetworkQueries } from '../../../../../common/search_strategy/security_solution';
 
 import { networkFactory } from '.';
 import { networkDetails } from './details';
@@ -19,11 +16,6 @@ import { networkTls } from './tls';
 import { networkTopCountries } from './top_countries';
 import { networkTopNFlow } from './top_n_flow';
 import { networkUsers } from './users';
-import { networkKpiDns } from './kpi/dns';
-import { networkKpiNetworkEvents } from './kpi/network_events';
-import { networkKpiTlsHandshakes } from './kpi/tls_handshakes';
-import { networkKpiUniqueFlows } from './kpi/unique_flows';
-import { networkKpiUniquePrivateIps } from './kpi/unique_private_ips';
 
 jest.mock('./details');
 jest.mock('./dns');
@@ -33,11 +25,6 @@ jest.mock('./tls');
 jest.mock('./top_countries');
 jest.mock('./top_n_flow');
 jest.mock('./users');
-jest.mock('./kpi/dns');
-jest.mock('./kpi/network_events');
-jest.mock('./kpi/tls_handshakes');
-jest.mock('./kpi/unique_flows');
-jest.mock('./kpi/unique_private_ips');
 
 describe('networkFactory', () => {
   test('should include correct apis', () => {
@@ -50,11 +37,6 @@ describe('networkFactory', () => {
       [NetworkQueries.topCountries]: networkTopCountries,
       [NetworkQueries.topNFlow]: networkTopNFlow,
       [NetworkQueries.users]: networkUsers,
-      [NetworkKpiQueries.dns]: networkKpiDns,
-      [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,
-      [NetworkKpiQueries.tlsHandshakes]: networkKpiTlsHandshakes,
-      [NetworkKpiQueries.uniqueFlows]: networkKpiUniqueFlows,
-      [NetworkKpiQueries.uniquePrivateIps]: networkKpiUniquePrivateIps,
     };
     expect(networkFactory).toEqual(expectedNetworkFactory);
   });

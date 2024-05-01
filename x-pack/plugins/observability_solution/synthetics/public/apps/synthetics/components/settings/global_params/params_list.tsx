@@ -240,7 +240,6 @@ export const ParamsList = () => {
         items={filteredItems}
         columns={columns}
         tableLayout="auto"
-        isSelectable={canSave}
         pagination={true}
         sorting={{
           sort: { field: 'key', direction: 'asc' },

@@ -51,11 +51,7 @@ export function TransactionDetailsTabs() {
   const isTransactionProfilingEnabled = useTransactionProfilingSetting();
 
   const availableTabs = useMemo(() => {
-    const tabs = [
-      traceSamplesTab,
-      latencyCorrelationsTab,
-      failedTransactionsCorrelationsTab,
-    ];
+    const tabs = [traceSamplesTab, latencyCorrelationsTab, failedTransactionsCorrelationsTab];
     if (isCriticalPathFeatureEnabled) {
       tabs.push(aggregatedCriticalPathTab);
     }
@@ -84,8 +80,7 @@ export function TransactionDetailsTabs() {
 
   const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
 
-  const { clearChartSelection, selectSampleFromChartSelection } =
-    useSampleChartSelection();
+  const { clearChartSelection, selectSampleFromChartSelection } = useSampleChartSelection();
 
   // When filtering in either the latency correlations or failed transactions correlations tab,
   // scroll to the top of the page and switch to the 'Trace samples' tab to trigger a refresh.
@@ -99,26 +94,17 @@ export function TransactionDetailsTabs() {
 
   useEffect(() => {
     const selectedSample = traceSamplesFetchResult.data?.traceSamples.find(
-      (sample) =>
-        sample.transactionId === transactionId && sample.traceId === traceId
+      (sample) => sample.transactionId === transactionId && sample.traceId === traceId
     );
 
-    if (
-      traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS &&
-      !selectedSample
-    ) {
+    if (traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
-      const preferredSample = maybe(
-        traceSamplesFetchResult.data?.traceSamples[0]
-      );
+      const preferredSample = maybe(traceSamplesFetchResult.data?.traceSamples[0]);
 
       history.replace({
         ...history.location,
         search: fromQuery({
-          ...omit(toQuery(history.location.search), [
-            'traceId',
-            'transactionId',
-          ]),
+          ...omit(toQuery(history.location.search), ['traceId', 'transactionId']),
           ...preferredSample,
         }),
       });

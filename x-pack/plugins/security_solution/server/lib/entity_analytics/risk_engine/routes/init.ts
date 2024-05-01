@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
-import type { StartPlugins } from '../../../../plugin';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { InitRiskEngineResultResponse } from '../../types';
+import type { EntityAnalyticsRoutesDeps, InitRiskEngineResultResponse } from '../../types';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
+import { RiskEngineAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 export const riskEngineInitRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  router: EntityAnalyticsRoutesDeps['router'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
@@ -29,8 +28,19 @@ export const riskEngineInitRoute = (
     .addVersion(
       { version: '1', validate: {} },
       withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
-        const siemResponse = buildSiemResponse(response);
         const securitySolution = await context.securitySolution;
+
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to initialize the risk engine',
+          event: {
+            action: RiskEngineAuditActions.RISK_ENGINE_INIT,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
+        const siemResponse = buildSiemResponse(response);
         const [_, { taskManager }] = await getStartServices();
         const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
         const riskScoreDataClient = securitySolution.getRiskScoreDataClient();

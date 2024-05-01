@@ -80,6 +80,7 @@ export const transformToCreateScheme = (
   { allowed, anonymized, field }: AnonymizationFieldCreateProps
 ): CreateAnonymizationFieldSchema => {
   return {
+    '@timestamp': createdAt,
     updated_at: createdAt,
     field,
     created_at: createdAt,

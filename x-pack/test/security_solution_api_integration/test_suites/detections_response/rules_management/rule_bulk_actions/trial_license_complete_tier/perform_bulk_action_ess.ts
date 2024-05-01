@@ -6,57 +6,38 @@
  */
 
 import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import expect from '@kbn/expect';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  BulkActionTypeEnum,
   BulkActionEditTypeEnum,
+  BulkActionTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import {
-  binaryToString,
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  getSimpleRule,
-  getWebHookAction,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFields,
-  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  checkInvestigationFieldSoValue,
-  getRuleSOById,
-} from '../../../utils';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
   createRule,
-  createAlertsIndex,
   deleteAllRules,
-  deleteAllAlerts,
   waitForRuleSuccess,
 } from '../../../../../../common/utils/security_solution';
-
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  binaryToString,
+  checkInvestigationFieldSoValue,
+  createLegacyRuleAction,
+  createRuleThroughAlertingEndpoint,
+  getLegacyActionSO,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getRuleSOById,
+  getSimpleRule,
+  getWebHookAction,
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
-
-  const postBulkAction = () =>
-    supertest
-      .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31');
-
-  const fetchRule = (ruleId: string) =>
-    supertest
-      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31');
 
   const createConnector = async (payload: Record<string, unknown>) =>
     (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
@@ -67,14 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
   // Failing: See https://github.com/elastic/kibana/issues/173804
   describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
-      await createAlertsIndex(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-    });
-
-    afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should delete rules and any associated legacy actions', async () => {
@@ -99,8 +73,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
-      const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionTypeEnum.delete })
+      const { body } = await securitySolutionApi
+        .performBulkAction({
+          body: { query: '', action: BulkActionTypeEnum.delete },
+          query: {},
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -113,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
       // Check that the updates have been persisted
-      await fetchRule(ruleId).expect(404);
+      await securitySolutionApi.readRule({ query: { rule_id: ruleId } }).expect(404);
     });
 
     it('should enable rules and migrate actions', async () => {
@@ -138,8 +115,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
-      const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionTypeEnum.enable })
+      const { body } = await securitySolutionApi
+        .performBulkAction({
+          body: { query: '', action: BulkActionTypeEnum.enable },
+          query: {},
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -148,7 +128,9 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.results.updated[0].enabled).to.eql(true);
 
       // Check that the updates have been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
+      const { body: ruleBody } = await securitySolutionApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
 
       // legacy sidecar action should be gone
       const sidecarActionsPostResults = await getLegacyActionSO(es);
@@ -193,8 +175,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).to.eql(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
-      const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionTypeEnum.disable })
+      const { body } = await securitySolutionApi
+        .performBulkAction({
+          body: { query: '', action: BulkActionTypeEnum.disable },
+          query: {},
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -203,7 +188,9 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.results.updated[0].enabled).to.eql(false);
 
       // Check that the updates have been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
+      const { body: ruleBody } = await securitySolutionApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
 
       // legacy sidecar action should be gone
       const sidecarActionsPostResults = await getLegacyActionSO(es);
@@ -248,11 +235,14 @@ export default ({ getService }: FtrProviderContext): void => {
         ruleToDuplicate.id
       );
 
-      const { body } = await postBulkAction()
-        .send({
-          query: '',
-          action: BulkActionTypeEnum.duplicate,
-          duplicate: { include_exceptions: false, include_expired_exceptions: false },
+      const { body } = await securitySolutionApi
+        .performBulkAction({
+          body: {
+            query: '',
+            action: BulkActionTypeEnum.duplicate,
+            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+          },
+          query: {},
         })
         .expect(200);
 
@@ -262,10 +252,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
 
       // Check that the updates have been persisted
-      const { body: rulesResponse } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
+      const { body: rulesResponse } = await securitySolutionApi
+        .findRules({ query: {} })
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);
@@ -293,16 +281,19 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return error if index patterns action is applied to ES|QL rule', async () => {
           const esqlRule = await createRule(supertest, log, getCreateEsqlRulesSchemaMock());
 
-          const { body } = await postBulkAction()
-            .send({
-              ids: [esqlRule.id],
-              action: BulkActionTypeEnum.edit,
-              [BulkActionTypeEnum.edit]: [
-                {
-                  type: BulkActionEditTypeEnum.add_index_patterns,
-                  value: ['index-*'],
-                },
-              ],
+          const { body } = await securitySolutionApi
+            .performBulkAction({
+              body: {
+                ids: [esqlRule.id],
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.add_index_patterns,
+                    value: ['index-*'],
+                  },
+                ],
+              },
+              query: {},
             })
             .expect(500);
 
@@ -345,15 +336,18 @@ export default ({ getService }: FtrProviderContext): void => {
           ruleToDuplicate.id
         );
 
-        const { body: setTagsBody } = await postBulkAction().send({
-          query: '',
-          action: BulkActionTypeEnum.edit,
-          [BulkActionTypeEnum.edit]: [
-            {
-              type: BulkActionEditTypeEnum.set_tags,
-              value: ['reset-tag'],
-            },
-          ],
+        const { body: setTagsBody } = await securitySolutionApi.performBulkAction({
+          body: {
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
+              {
+                type: BulkActionEditTypeEnum.set_tags,
+                value: ['reset-tag'],
+              },
+            ],
+          },
+          query: {},
         });
         expect(setTagsBody.attributes.summary).to.eql({
           failed: 0,
@@ -363,7 +357,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have been persisted
-        const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
+        const { body: setTagsRule } = await securitySolutionApi
+          .readRule({ query: { rule_id: ruleId } })
+          .expect(200);
 
         // Sidecar should be removed
         const sidecarActionsPostResults = await getLegacyActionSO(es);
@@ -422,24 +418,27 @@ export default ({ getService }: FtrProviderContext): void => {
               createdRule.id
             );
 
-            const { body } = await postBulkAction()
-              .send({
-                ids: [createdRule.id],
-                action: BulkActionTypeEnum.edit,
-                [BulkActionTypeEnum.edit]: [
-                  {
-                    type: BulkActionEditTypeEnum.set_rule_actions,
-                    value: {
-                      throttle: '1h',
-                      actions: [
-                        {
-                          ...webHookActionMock,
-                          id: webHookConnector.id,
-                        },
-                      ],
+            const { body } = await securitySolutionApi
+              .performBulkAction({
+                body: {
+                  ids: [createdRule.id],
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [
+                    {
+                      type: BulkActionEditTypeEnum.set_rule_actions,
+                      value: {
+                        throttle: '1h',
+                        actions: [
+                          {
+                            ...webHookActionMock,
+                            id: webHookConnector.id,
+                          },
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
+                query: {},
               })
               .expect(200);
 
@@ -457,7 +456,9 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
 
             // Check that the updates have been persisted
-            const { body: readRule } = await fetchRule(ruleId).expect(200);
+            const { body: readRule } = await securitySolutionApi
+              .readRule({ query: { rule_id: ruleId } })
+              .expect(200);
 
             expect(readRule.actions).to.eql(expectedRuleActions);
 
@@ -475,9 +476,6 @@ export default ({ getService }: FtrProviderContext): void => {
       let ruleWithIntendedInvestigationField: RuleResponse;
 
       beforeEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-        await createAlertsIndex(supertest, log);
         ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
           supertest,
           getRuleSavedObjectWithLegacyInvestigationFields()
@@ -495,13 +493,12 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      afterEach(async () => {
-        await deleteAllRules(supertest, log);
-      });
-
       it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
-        const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionTypeEnum.export })
+        const { body } = await securitySolutionApi
+          .performBulkAction({
+            body: { query: '', action: BulkActionTypeEnum.export },
+            query: {},
+          })
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
           .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
@@ -566,8 +563,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete rules with investigation fields and transform legacy field in response', async () => {
-        const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionTypeEnum.delete })
+        const { body } = await securitySolutionApi
+          .performBulkAction({
+            body: { query: '', action: BulkActionTypeEnum.delete },
+            query: {},
+          })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -590,14 +590,25 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have been persisted
-        await fetchRule(ruleWithLegacyInvestigationField.params.ruleId).expect(404);
-        await fetchRule(ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId).expect(404);
-        await fetchRule('rule-with-investigation-field').expect(404);
+        await securitySolutionApi
+          .readRule({ query: { rule_id: ruleWithLegacyInvestigationField.params.ruleId } })
+          .expect(404);
+        await securitySolutionApi
+          .readRule({
+            query: { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+          })
+          .expect(404);
+        await securitySolutionApi
+          .readRule({ query: { rule_id: 'rule-with-investigation-field' } })
+          .expect(404);
       });
 
       it('should enable rules with legacy investigation fields and transform legacy field in response', async () => {
-        const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionTypeEnum.enable })
+        const { body } = await securitySolutionApi
+          .performBulkAction({
+            body: { query: '', action: BulkActionTypeEnum.enable },
+            query: {},
+          })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -664,8 +675,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should disable rules with legacy investigation fields and transform legacy field in response', async () => {
-        const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionTypeEnum.disable })
+        const { body } = await securitySolutionApi
+          .performBulkAction({ body: { query: '', action: BulkActionTypeEnum.disable }, query: {} })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -735,11 +746,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should duplicate rules with legacy investigation fields and transform field in response', async () => {
-        const { body } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkActionTypeEnum.duplicate,
-            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+        const { body } = await securitySolutionApi
+          .performBulkAction({
+            body: {
+              query: '',
+              action: BulkActionTypeEnum.duplicate,
+              duplicate: { include_exceptions: false, include_expired_exceptions: false },
+            },
+            query: {},
           })
           .expect(200);
 
@@ -754,10 +768,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(names.includes('Test investigation fields object [Duplicate]')).to.eql(true);
 
         // Check that the updates have been persisted
-        const { body: rulesResponse } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body: rulesResponse } = await await securitySolutionApi
+          .findRules({ query: {} })
           .expect(200);
 
         expect(rulesResponse.total).to.eql(6);
@@ -854,15 +866,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should edit rules with legacy investigation fields', async () => {
-        const { body } = await postBulkAction().send({
-          query: '',
-          action: BulkActionTypeEnum.edit,
-          [BulkActionTypeEnum.edit]: [
-            {
-              type: BulkActionEditTypeEnum.set_tags,
-              value: ['reset-tag'],
-            },
-          ],
+        const { body } = await securitySolutionApi.performBulkAction({
+          body: {
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
+              {
+                type: BulkActionEditTypeEnum.set_tags,
+                value: ['reset-tag'],
+              },
+            ],
+          },
+          query: {},
         });
         expect(body.attributes.summary).to.eql({
           failed: 0,

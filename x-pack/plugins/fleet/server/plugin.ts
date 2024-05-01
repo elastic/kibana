@@ -301,8 +301,7 @@ export class FleetPlugin
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
-          defaultMessage:
-            'All Spaces is required for Fleet access. Subfeatures privileges functionality is in technical preview and may be changed or removed completely in a future release.',
+          defaultMessage: 'All Spaces is required for Fleet access.',
         }),
         reserved: {
           description:
@@ -614,12 +613,14 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-    this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.bulkActionsResolver?.start(plugins.taskManager);
-    this.fleetUsageSender?.start(plugins.taskManager);
-    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
-    startFleetUsageLogger(plugins.taskManager);
-    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
+    this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
+    this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
+    this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    startFleetUsageLogger(plugins.taskManager).catch(() => {});
+    this.fleetMetricsTask
+      ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -687,7 +688,7 @@ export class FleetPlugin
         );
 
         // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens();
+        this.initializeUninstallTokens().catch(() => {});
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

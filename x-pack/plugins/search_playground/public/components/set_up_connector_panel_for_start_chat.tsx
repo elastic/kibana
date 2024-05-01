@@ -35,16 +35,12 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
 
   return connectors && !isConnectorListLoading ? (
     <>
-      {!!Object.keys(connectors).length && showCallout && (
+      {!!connectors.length && showCallout && (
         <EuiCallOut
           title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.settled', {
-            defaultMessage:
-              '{connectorsNames} {count, plural, one {connector} other {connectors}} added',
+            defaultMessage: '{connectorName} connector added',
             values: {
-              connectorsNames: Object.values(connectors)
-                .map((connector) => connector.title)
-                .join(', '),
-              count: Object.values(connectors).length,
+              connectorName: connectors[0].title,
             },
           })}
           iconType="check"
@@ -56,12 +52,12 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
         <>
           <StartChatPanel
             title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.title', {
-              defaultMessage: 'Set up a Gen AI connector',
+              defaultMessage: 'Connect to LLM',
             })}
             description={
               <FormattedMessage
                 id="xpack.searchPlayground.emptyPrompts.setUpConnector.description"
-                defaultMessage="A large-language model is required to use a chat bot. Set up a connection to your LLM provider to continue."
+                defaultMessage="You need to connect to a large-language model to use this feature. Start by adding connection details for your LLM provider."
               />
             }
           >
@@ -74,7 +70,7 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
                 >
                   <FormattedMessage
                     id="xpack.searchPlayground.emptyPrompts.setUpConnector.btn"
-                    defaultMessage="Set up GenAI connector"
+                    defaultMessage="Connect"
                   />
                 </EuiButton>
               </EuiFlexItem>

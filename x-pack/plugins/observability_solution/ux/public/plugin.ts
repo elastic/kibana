@@ -22,10 +22,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
@@ -92,8 +89,9 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     const pluginSetupDeps = plugins;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
-        const { fetchUxOverviewDate, hasRumData, createCallApmApi } =
-          await import('./components/app/rum_dashboard/ux_overview_fetchers');
+        const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
+          './components/app/rum_dashboard/ux_overview_fetchers'
+        );
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core);
 
@@ -204,9 +202,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           core.getStartServices(),
         ]);
 
-        const activeSpace = await (
-          corePlugins as ApmPluginStartDeps
-        ).spaces?.getActiveSpace();
+        const activeSpace = await (corePlugins as ApmPluginStartDeps).spaces?.getActiveSpace();
 
         return renderApp({
           isDev,

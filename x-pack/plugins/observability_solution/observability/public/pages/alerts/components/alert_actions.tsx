@@ -25,7 +25,6 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
-import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { parseAlert } from '../helpers/parse_alert';
 import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
@@ -147,7 +146,7 @@ export function AlertActions({
       triggersActionsUi.getAlertsTableDefaultAlertActions({
         key: 'defaultRowActions',
         onActionExecuted: closeActionsPopover,
-        isAlertDetailsEnabled: isAlertDetailsEnabledPerApp(observabilityAlert, config),
+        isAlertDetailsEnabled: true,
         resolveRulePagePath: (ruleId, currentPageId) =>
           currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null,
         resolveAlertPagePath: (alertId, currentPageId) =>
@@ -156,7 +155,7 @@ export function AlertActions({
             : null,
         ...customActionsProps,
       }),
-    [config, customActionsProps, observabilityAlert, triggersActionsUi]
+    [customActionsProps, triggersActionsUi]
   );
 
   const actionsMenuItems = [

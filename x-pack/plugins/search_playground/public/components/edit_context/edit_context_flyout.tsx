@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiPanel,
@@ -26,6 +27,7 @@ import {
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
@@ -35,11 +37,10 @@ interface EditContextFlyoutProps {
 }
 
 export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
-  const { watch } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = watch('indices');
-  const { fields } = useIndicesFields(selectedIndices || []);
-  const defaultFields = useMemo(() => getDefaultSourceFields(fields), [fields]);
-  const [sourceFields, setSourceFields] = useState(defaultFields);
+  const { getValues } = useFormContext<ChatForm>();
+  const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const { fields } = useIndicesFields(selectedIndices);
+  const defaultFields = getDefaultSourceFields(fields);
 
   const {
     field: { onChange: onChangeSize, value: docSizeInitialValue },
@@ -50,26 +51,23 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
   const [docSize, setDocSize] = useState(docSizeInitialValue);
 
   const {
-    field: { onChange: onChangeSourceFields },
+    field: { onChange: onChangeSourceFields, value: sourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
+    defaultValue: defaultFields,
   });
 
-  useEffect(() => {
-    if (selectedIndices?.length > 0) {
-      setSourceFields(defaultFields);
-    }
-  }, [selectedIndices, defaultFields]);
+  const [tempSourceFields, setTempSourceFields] = useState(sourceFields);
 
   const toggleSourceField = (index: string, f: EuiSelectableOption[]) => {
-    setSourceFields({
-      ...sourceFields,
+    setTempSourceFields({
+      ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
   };
 
   const saveSourceFields = () => {
-    onChangeSourceFields(sourceFields);
+    onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
@@ -81,7 +79,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.title"
-              defaultMessage="Edit Context"
+              defaultMessage="Edit context"
             />
           </h2>
         </EuiTitle>
@@ -90,8 +88,18 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.description"
-              defaultMessage="Documents retrieved and selected fields will be used to build the context."
+              defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
+            <EuiLink
+              href={docLinks.chatPlayground}
+              target="_blank"
+              data-test-subj="context-optimization-documentation-link"
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.editContext.flyout.learnMoreLink"
+                defaultMessage=" Learn more."
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </EuiFlyoutHeader>
@@ -104,7 +112,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                   prepend={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Retrieved Documents',
+                      defaultMessage: 'Retrieved documents',
                     }
                   )}
                   options={[
@@ -129,7 +137,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                 <h5>
                   <FormattedMessage
                     id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected Fields"
+                    defaultMessage="Selected fields"
                   />
                 </h5>
               </EuiText>
@@ -148,9 +156,10 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                       <EuiSpacer size="s" />
                       <EuiSelectable
                         aria-label="Select context fields"
+                        data-test-subj="contextFieldsSelectable"
                         options={group.source_fields.map((field) => ({
                           label: field,
-                          checked: sourceFields[index]?.includes(field) ? 'on' : undefined,
+                          checked: tempSourceFields[index]?.includes(field) ? 'on' : undefined,
                         }))}
                         onChange={(newOptions) => toggleSourceField(index, newOptions)}
                         listProps={{ bordered: false }}

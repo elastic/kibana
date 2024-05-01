@@ -396,34 +396,36 @@ export const AnalyticsCollectionExploreTableLogic = kea<
       const { requestParams, parseResponse } = tablesParams[values.selectedTable] as TableParams;
       const timeRange = values.timeRange;
 
-      const search$ = KibanaLogic.values.data.search
-        .search(
-          requestParams(values.dataView, {
-            pageIndex: values.pageIndex,
-            pageSize: values.pageSize,
-            search: values.search,
-            sorting: values.sorting,
-            timeRange,
-          }),
-          {
-            indexPattern: values.dataView,
-            sessionId: values.searchSessionId,
-          }
-        )
-        .subscribe({
-          error: (e) => {
-            KibanaLogic.values.data.search.showError(e);
-          },
-          next: (response) => {
-            if (!isRunningResponse(response)) {
-              const { items, totalCount } = parseResponse(response);
-
-              actions.setItems(items);
-              actions.setTotalItemsCount(totalCount);
-              search$.unsubscribe();
+      if (KibanaLogic.values.data) {
+        const search$ = KibanaLogic.values.data.search
+          .search(
+            requestParams(values.dataView, {
+              pageIndex: values.pageIndex,
+              pageSize: values.pageSize,
+              search: values.search,
+              sorting: values.sorting,
+              timeRange,
+            }),
+            {
+              indexPattern: values.dataView,
+              sessionId: values.searchSessionId,
             }
-          },
-        });
+          )
+          .subscribe({
+            error: (e) => {
+              KibanaLogic.values.data?.search.showError(e);
+            },
+            next: (response) => {
+              if (!isRunningResponse(response)) {
+                const { items, totalCount } = parseResponse(response);
+
+                actions.setItems(items);
+                actions.setTotalItemsCount(totalCount);
+                search$.unsubscribe();
+              }
+            },
+          });
+      }
     };
 
     return {

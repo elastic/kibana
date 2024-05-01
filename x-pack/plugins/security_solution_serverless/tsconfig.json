@@ -43,5 +43,7 @@
     "@kbn/actions-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/discover-plugin",
+    "@kbn/logging",
+    "@kbn/analytics-client",
   ]
 }

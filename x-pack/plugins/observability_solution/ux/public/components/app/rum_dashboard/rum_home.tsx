@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
@@ -25,11 +25,11 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 });
 
 export function RumHome() {
-  const { docLinks, http, observabilityShared } = useKibanaServices();
+  const { docLinks, http, observabilityShared, observabilityAIAssistant } = useKibanaServices();
 
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
-  const { hasData, loading: isLoading } = useHasRumData();
+  const { hasData, loading: isLoading, dataViewTitle } = useHasRumData();
 
   const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
@@ -41,19 +41,47 @@ export function RumHome() {
             title: i18n.translate('xpack.ux.overview.beatsCard.title', {
               defaultMessage: 'Add RUM data',
             }),
-            description: i18n.translate(
-              'xpack.ux.overview.beatsCard.description',
-              {
-                defaultMessage:
-                  'Enable RUM with the APM agent to collect user experience data.',
-              }
-            ),
+            description: i18n.translate('xpack.ux.overview.beatsCard.description', {
+              defaultMessage: 'Enable RUM with the APM agent to collect user experience data.',
+            }),
             href: http.basePath.prepend('/app/apm/tutorial'),
           },
         },
         docsLink: docLinks.links.observability.guide,
       }
     : undefined;
+
+  let screenDescription = '';
+
+  if (!hasData) {
+    screenDescription = `The user is looking at a Getting Started screen that is displayed because no data could be retrieved.`;
+  }
+  if (dataViewTitle) {
+    screenDescription = `${screenDescription} The index that was used to query the system is called ${dataViewTitle}.`;
+  } else {
+    screenDescription = `${screenDescription} The index that was used to query the system is undefined, so it is not configured yet.`;
+  }
+
+  useEffect(() => {
+    return observabilityAIAssistant?.service.setScreenContext({
+      screenDescription,
+      starterPrompts: [
+        ...(!hasData
+          ? [
+              {
+                title: i18n.translate('xpack.ux.aiAssistant.starterPrompts.explainNoData.title', {
+                  defaultMessage: 'Explain',
+                }),
+                prompt: i18n.translate('xpack.ux.aiAssistant.starterPrompts.explainNoData.prompt', {
+                  defaultMessage: "Why don't I see any data?",
+                }),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
+    });
+  }, [hasData, observabilityAIAssistant?.service, screenDescription]);
 
   return (
     <PageTemplateComponent

@@ -9,10 +9,7 @@ import { EuiCallOut, EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import {
-  getTimeUnitLabel,
-  TIME_UNITS,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { getTimeUnitLabel, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 
 interface MinimumWindowSize {
   value: number;
@@ -79,22 +76,15 @@ export function ApmRuleParamsContainer(props: Props) {
   );
 }
 
-function MinimumWindowSizeWarning({
-  minimumWindowSize,
-}: {
-  minimumWindowSize: MinimumWindowSize;
-}) {
-  const description = i18n.translate(
-    'xpack.apm.alertTypes.minimumWindowSize.description',
-    {
-      defaultMessage:
-        'The recommended minimum value is {sizeValue} {sizeUnit}. This is to ensure that the alert has enough data to evaluate. If you choose a value that is too low, the alert may not fire as expected.',
-      values: {
-        sizeValue: minimumWindowSize.value,
-        sizeUnit: getTimeUnitLabel(minimumWindowSize.unit),
-      },
-    }
-  );
+function MinimumWindowSizeWarning({ minimumWindowSize }: { minimumWindowSize: MinimumWindowSize }) {
+  const description = i18n.translate('xpack.apm.alertTypes.minimumWindowSize.description', {
+    defaultMessage:
+      'The recommended minimum value is {sizeValue} {sizeUnit}. This is to ensure that the alert has enough data to evaluate. If you choose a value that is too low, the alert may not fire as expected.',
+    values: {
+      sizeValue: minimumWindowSize.value,
+      sizeUnit: getTimeUnitLabel(minimumWindowSize.unit),
+    },
+  });
 
   return (
     <EuiCallOut
@@ -118,17 +108,14 @@ function useShowMinimumWindowSize({
   windowUnit?: TIME_UNITS;
   minimumWindowSize?: MinimumWindowSize;
 }) {
-  const [showMinimumWindowSizeWarning, setShowMinimumWindowSizeWarning] =
-    useState(false);
+  const [showMinimumWindowSizeWarning, setShowMinimumWindowSizeWarning] = useState(false);
 
   useEffect(() => {
     if (windowSize === undefined || minimumWindowSize === undefined) {
       return;
     }
 
-    const currentWindowSize = moment
-      .duration(windowSize, windowUnit)
-      .asMilliseconds();
+    const currentWindowSize = moment.duration(windowSize, windowUnit).asMilliseconds();
     const minimumWindowSizeAsMillis = moment
       .duration(minimumWindowSize.value, minimumWindowSize.unit)
       .asMilliseconds();

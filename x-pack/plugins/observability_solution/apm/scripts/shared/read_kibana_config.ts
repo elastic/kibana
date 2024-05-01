@@ -18,10 +18,7 @@ export const readKibanaConfig = () => {
   const kibanaConfig = path.join(kibanaConfigDir, 'kibana.yml');
 
   const loadedKibanaConfig = (yaml.safeLoad(
-    fs.readFileSync(
-      fs.existsSync(kibanaDevConfig) ? kibanaDevConfig : kibanaConfig,
-      'utf8'
-    )
+    fs.readFileSync(fs.existsSync(kibanaDevConfig) ? kibanaDevConfig : kibanaConfig, 'utf8')
   ) || {}) as {};
 
   const cliEsCredentials = pickBy(

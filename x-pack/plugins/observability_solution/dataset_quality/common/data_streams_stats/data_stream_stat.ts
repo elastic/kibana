@@ -6,9 +6,10 @@
  */
 
 import { DEFAULT_DEGRADED_DOCS } from '../constants';
-import { DataStreamType } from '../types';
-import { indexNameToDataStreamParts } from '../utils';
+import { DataStreamType, QualityIndicators } from '../types';
+import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
+import { DegradedDocsStat } from './malformed_docs_stat';
 import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
@@ -24,6 +25,7 @@ export class DataStreamStat {
   degradedDocs: {
     percentage: number;
     count: number;
+    quality: QualityIndicators;
   };
 
   private constructor(dataStreamStat: DataStreamStat) {
@@ -39,6 +41,7 @@ export class DataStreamStat {
     this.degradedDocs = {
       percentage: dataStreamStat.degradedDocs.percentage,
       count: dataStreamStat.degradedDocs.count,
+      quality: dataStreamStat.degradedDocs.quality,
     };
   }
 
@@ -49,15 +52,38 @@ export class DataStreamStat {
       rawName: dataStreamStat.name,
       type,
       name: dataset,
-      title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
+      title: dataset,
       namespace,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
-      integration: dataStreamStat.integration
-        ? Integration.create(dataStreamStat.integration)
-        : undefined,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
+    };
+
+    return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static fromDegradedDocStat({
+    degradedDocStat,
+    datasetIntegrationMap,
+  }: {
+    degradedDocStat: DegradedDocsStat;
+    datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
+  }) {
+    const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
+
+    const dataStreamStatProps = {
+      rawName: degradedDocStat.dataset,
+      type,
+      name: dataset,
+      title: datasetIntegrationMap[dataset]?.title || dataset,
+      namespace,
+      integration: datasetIntegrationMap[dataset]?.integration,
+      degradedDocs: {
+        percentage: degradedDocStat.percentage,
+        count: degradedDocStat.count,
+        quality: mapPercentageToQuality(degradedDocStat.percentage),
+      },
     };
 
     return new DataStreamStat(dataStreamStatProps);

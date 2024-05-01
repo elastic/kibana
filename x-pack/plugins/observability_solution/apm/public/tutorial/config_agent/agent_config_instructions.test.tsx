@@ -35,9 +35,7 @@ describe('AgentConfigInstructions', () => {
     );
 
     expect(getApmAgentCommandsSpy).not.toHaveBeenCalled();
-    expect(
-      await component.queryByTestId('otel-instructions-table')
-    ).toBeInTheDocument();
+    expect(await component.queryByTestId('otel-instructions-table')).toBeInTheDocument();
     expect(await component.queryByTestId('commands')).not.toBeInTheDocument();
   });
 
@@ -52,8 +50,6 @@ describe('AgentConfigInstructions', () => {
 
     expect(getApmAgentCommandsSpy).toHaveBeenCalled();
     expect(await component.queryByTestId('commands')).toBeInTheDocument();
-    expect(
-      await component.queryByTestId('otel-instructions-table')
-    ).not.toBeInTheDocument();
+    expect(await component.queryByTestId('otel-instructions-table')).not.toBeInTheDocument();
   });
 });

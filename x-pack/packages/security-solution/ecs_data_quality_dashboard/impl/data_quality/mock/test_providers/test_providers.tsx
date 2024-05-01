@@ -39,6 +39,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
+    hasUpdateAIAssistantAnonymization: true,
     isAssistantEnabled: true,
   };
   const queryClient = new QueryClient({

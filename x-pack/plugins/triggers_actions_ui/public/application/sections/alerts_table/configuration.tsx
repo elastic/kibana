@@ -159,7 +159,7 @@ export const createGenericAlertsTableConfigurations = (
     {
       id: ALERT_TABLE_GENERIC_CONFIG_ID,
       columns: [firstColumn, ...genericColumns],
-      getRenderCellValue: getRenderCellValue(fieldFormats),
+      getRenderCellValue,
       useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
       sort,
       useActionsColumn,
@@ -167,7 +167,7 @@ export const createGenericAlertsTableConfigurations = (
     {
       id: ALERT_TABLE_GLOBAL_CONFIG_ID,
       columns,
-      getRenderCellValue: getRenderCellValue(fieldFormats),
+      getRenderCellValue,
       useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
       sort,
       useActionsColumn,
