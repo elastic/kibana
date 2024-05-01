@@ -342,10 +342,16 @@ export class MlServerPlugin
         this.security,
         this.spacesPlugin !== undefined
       );
-      initializeJobs().finally(() => {
-        this.setMlReady();
+      initializeJobs()
+        .catch((err) => {
+          this.log.debug(`Error initializing jobs`, err);
+        })
+        .finally(() => {
+          this.setMlReady();
+        });
+      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart).catch((err) => {
+        this.log.debug(`Error scheduling saved objects sync task`, err);
       });
-      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
     });
   }
 
