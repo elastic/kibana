@@ -172,21 +172,21 @@ export const CloudPosturePage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  const subscriptionStatus = useSubscriptionStatus();
-  const getLicenseManagementLocator = useLicenseManagementLocatorApi();
+  // const subscriptionStatus = useSubscriptionStatus();
+  // const getLicenseManagementLocator = useLicenseManagementLocatorApi();
 
   const render = () => {
-    if (subscriptionStatus.isError) {
-      return defaultErrorRenderer(subscriptionStatus.error);
-    }
+    // if (subscriptionStatus.isError) {
+    //   return defaultErrorRenderer(subscriptionStatus.error);
+    // }
 
-    if (subscriptionStatus.isLoading || getLicenseManagementLocator.isLoading) {
-      return defaultLoadingRenderer();
-    }
+    // if (subscriptionStatus.isLoading || getLicenseManagementLocator.isLoading) {
+    //   return defaultLoadingRenderer();
+    // }
 
-    if (!subscriptionStatus.data) {
-      return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
-    }
+    // if (!subscriptionStatus.data) {
+    //   return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
+    // }
 
     if (!query) {
       return children;
