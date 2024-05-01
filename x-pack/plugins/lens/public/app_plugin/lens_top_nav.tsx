@@ -577,10 +577,7 @@ export const LensTopNavMenu = ({
               return;
             }
 
-            const {
-              savedObjectURL,
-              reportingLocatorParams: locatorParams,
-            } = await getShareURL(
+            const { savedObjectURL, reportingLocatorParams: locatorParams } = await getShareURL(
               shortUrlService,
               { application, data },
               {
@@ -622,7 +619,7 @@ export const LensTopNavMenu = ({
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: false, 
+              allowShortUrl: false,
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
