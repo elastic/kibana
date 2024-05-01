@@ -138,7 +138,7 @@ export const cli = () => {
         TEST_ES_URL: testEsUrl,
         TEST_KIBANA_URL: testKibanaUrl,
       };
-      
+
       const statusCode = await executeCommand(command, envVars, workDir);
 
       // Delete serverless project
