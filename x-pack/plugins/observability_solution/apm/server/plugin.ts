@@ -40,6 +40,7 @@ import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 import { registerAssistantFunctions } from './assistant_functions';
+import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context/get_alert_details_context_handler';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -52,7 +53,7 @@ export class APMPlugin
   }
 
   public setup(core: CoreSetup<APMPluginStartDependencies>, plugins: APMPluginSetupDependencies) {
-    this.logger = this.initContext.logger.get();
+    const logger = (this.logger = this.initContext.logger.get());
     const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmTelemetry);
@@ -219,6 +220,10 @@ export class APMPlugin
         plugins: resourcePlugins,
         ruleDataClient,
       })
+    );
+
+    plugins.observability.alertDetailsContextualInsightsService.registerHandler(
+      getAlertDetailsContextHandler(resourcePlugins, logger)
     );
 
     return { config$ };
