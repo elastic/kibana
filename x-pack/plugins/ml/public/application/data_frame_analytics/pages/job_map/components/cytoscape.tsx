@@ -9,11 +9,11 @@ import type { CSSProperties, PropsWithChildren } from 'react';
 import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import cytoscape, { type Stylesheet } from 'cytoscape';
-// @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
 import { getCytoscapeOptions } from './cytoscape_options';
 import type { EuiThemeType } from '../../../../components/color_range_legend';
 
+// @ts-expect-error type version not the same causing incompatibility
 cytoscape.use(dagre);
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
