@@ -59,7 +59,8 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
                   <FormattedMessage
                     id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
                     defaultMessage="Grounding answer based on"
-                  />{` `}
+                  />
+                  {` `}
                 </p>
               </EuiText>
 
