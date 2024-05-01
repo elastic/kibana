@@ -9,8 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getTaskClaimer } from './task_claimers';
 
 export const MAX_WORKERS_LIMIT = 100;
-export const DEFAULT_MAX_WORKERS = 10;
-export const DEFAULT_POLL_INTERVAL = 3000;
+export const DEFAULT_MAX_WORKERS = 50;
+export const DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
@@ -84,7 +84,8 @@ export const configSchema = schema.object(
     max_workers: schema.number({
       defaultValue: DEFAULT_MAX_WORKERS,
       // disable the task manager rather than trying to specify it with 0 workers
-      min: 1,
+      min: DEFAULT_MAX_WORKERS,
+      max: DEFAULT_MAX_WORKERS,
     }),
     /* The interval at which monotonically increasing metrics counters will reset */
     metrics_reset_interval: schema.number({
@@ -129,7 +130,8 @@ export const configSchema = schema.object(
     /* How often, in milliseconds, the task manager will look for more work. */
     poll_interval: schema.number({
       defaultValue: DEFAULT_POLL_INTERVAL,
-      min: 100,
+      min: DEFAULT_POLL_INTERVAL,
+      max: DEFAULT_POLL_INTERVAL,
     }),
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
