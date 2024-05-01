@@ -7,7 +7,6 @@
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Observable } from 'rxjs';
 import type {
   MessageAddEvent,
@@ -108,7 +107,6 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}

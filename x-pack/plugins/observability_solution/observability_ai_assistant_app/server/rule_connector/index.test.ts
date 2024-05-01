@@ -16,6 +16,7 @@ import {
 } from '.';
 import { Observable } from 'rxjs';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 
 describe('observabilityAIAssistant rule_connector', () => {
   describe('getObsAIAssistantConnectorAdapter', () => {
@@ -56,7 +57,10 @@ describe('observabilityAIAssistant rule_connector', () => {
       const initResources = jest
         .fn()
         .mockResolvedValue({} as ObservabilityAIAssistantRouteHandlerResources);
-      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const connectorType = getObsAIAssistantConnectorType(
+        initResources,
+        new AlertDetailsContextualInsightsService()
+      );
       expect(connectorType.id).toEqual(OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID);
       expect(connectorType.isSystemActionType).toEqual(true);
       expect(connectorType.minimumLicenseRequired).toEqual('enterprise');
@@ -66,7 +70,10 @@ describe('observabilityAIAssistant rule_connector', () => {
       const initResources = jest
         .fn()
         .mockResolvedValue({} as ObservabilityAIAssistantRouteHandlerResources);
-      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const connectorType = getObsAIAssistantConnectorType(
+        initResources,
+        new AlertDetailsContextualInsightsService()
+      );
       const result = await connectorType.executor({
         actionId: 'observability-ai-assistant',
         request: getFakeKibanaRequest({ id: 'foo', api_key: 'bar' }),
@@ -106,7 +113,10 @@ describe('observabilityAIAssistant rule_connector', () => {
         },
       } as unknown as ObservabilityAIAssistantRouteHandlerResources);
 
-      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const connectorType = getObsAIAssistantConnectorType(
+        initResources,
+        new AlertDetailsContextualInsightsService()
+      );
       const result = await connectorType.executor({
         actionId: 'observability-ai-assistant',
         request: getFakeKibanaRequest({ id: 'foo', api_key: 'bar' }),
@@ -140,6 +150,26 @@ describe('observabilityAIAssistant rule_connector', () => {
               message: {
                 role: MessageRole.User,
                 content: 'hello',
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'get_alerts_context',
+                  arguments: JSON.stringify({}),
+                  trigger: MessageRole.Assistant as const,
+                },
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.User,
+                name: 'get_alerts_context',
+                content: expect.any(String),
               },
             },
             {

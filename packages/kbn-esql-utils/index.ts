@@ -17,7 +17,6 @@ export {
   getESQLWithSafeLimit,
   appendToESQLQuery,
   TextBasedLanguages,
-  getESQLQueryColumns,
 } from './src';
 
-export { ESQL_LATEST_VERSION } from './constants';
+export { ESQL_LATEST_VERSION, ENABLE_ESQL } from './constants';

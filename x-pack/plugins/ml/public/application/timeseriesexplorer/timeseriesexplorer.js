@@ -463,9 +463,8 @@ export class TimeSeriesExplorer extends React.Component {
               if (
                 // If the user's focus range is not defined (i.e. no 'zoom' parameter restored from the appState URL),
                 // then calculate the default focus range to use
-                zoom === undefined &&
-                (focusRange === undefined ||
-                  this.previousSelectedForecastId !== this.props.selectedForecastId)
+                zoom === undefined ||
+                focusRange === undefined
               ) {
                 focusRange = this.mlTimeSeriesExplorer.calculateDefaultFocusRange(
                   autoZoomDuration,
@@ -476,10 +475,12 @@ export class TimeSeriesExplorer extends React.Component {
                 this.previousSelectedForecastId = this.props.selectedForecastId;
               }
 
-              this.contextChartSelected({
-                from: focusRange[0],
-                to: focusRange[1],
-              });
+              if (focusRange !== undefined) {
+                this.contextChartSelected({
+                  from: focusRange[0],
+                  to: focusRange[1],
+                });
+              }
             }
 
             this.setState(stateUpdate);
