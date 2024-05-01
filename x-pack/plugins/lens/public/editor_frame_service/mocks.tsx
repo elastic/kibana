@@ -55,7 +55,7 @@ export function createMockSetupDependencies() {
 
 export function createMockStartDependencies() {
   return {
-    data: dataPluginMock.createStartContract(),
+    data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
