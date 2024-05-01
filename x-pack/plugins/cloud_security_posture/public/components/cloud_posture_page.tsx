@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+// import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CspLoadingState } from './csp_loading_state';
-import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
+// import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';

@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { http, HttpResponse } from 'msw';
+import { defaultStatusInstalled } from './cspmStatusHandlers';
+import { defaultBenchmarks } from './benchmarkHandlers';
 
 export const defaultHandlers = [
+  defaultStatusInstalled,
+  defaultBenchmarks,
   http.get('http://localhost/api/licensing/info', () => {
     return HttpResponse.json(
       {
