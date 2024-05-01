@@ -44,6 +44,7 @@ NotesContainer.displayName = 'NotesContainer';
 interface Props {
   ariaRowindex: number;
   associateNote: AssociateNote;
+  className?: string;
   notes: TimelineResultNote[];
   showAddNote: boolean;
   toggleShowAddNote: (eventId?: string) => void;
@@ -52,7 +53,7 @@ interface Props {
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ ariaRowindex, associateNote, notes, showAddNote, toggleShowAddNote, eventId }) => {
+  ({ ariaRowindex, associateNote, className, notes, showAddNote, toggleShowAddNote, eventId }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
@@ -76,7 +77,12 @@ export const NoteCards = React.memo<Props>(
     }, [eventId, toggleShowAddNote]);
 
     return (
-      <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
+      <NoteCardsCompContainer
+        className={className}
+        data-test-subj="note-cards"
+        hasShadow={false}
+        paddingSize="none"
+      >
         {notes.length ? (
           <NotePreviewsContainer data-test-subj="note-previews-container">
             <NotesContainer
