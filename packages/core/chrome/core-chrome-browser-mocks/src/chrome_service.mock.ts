@@ -80,6 +80,7 @@ const createStartContractMock = () => {
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),
       updateSolutionNavigations: jest.fn(),
+      setAddSolutionIdToUrlPath: jest.fn(),
     },
   };
   startContract.navLinks.getAll.mockReturnValue([]);

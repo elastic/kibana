@@ -8,8 +8,13 @@
 
 import { modifyUrl } from '@kbn/std';
 import { Request } from '@hapi/hapi';
-import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
+import type { KibanaRequest, IBasePath, PartialBasePathValue } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+
+const isPartialBasePath = (obj?: string | PartialBasePathValue): obj is PartialBasePathValue =>
+  !!obj && typeof obj === 'object';
+
+const isObject = (obj?: any): obj is Record<string, any> => !!obj && typeof obj === 'object';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -17,7 +22,10 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
+  private readonly basePathCache = new WeakMap<
+    Request,
+    string | Record<string, PartialBasePathValue>
+  >();
 
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;
@@ -28,19 +36,47 @@ export class BasePath implements IBasePath {
   }
 
   public get = (request: KibanaRequest) => {
-    const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
+    const cacheValue = this.basePathCache.get(ensureRawRequest(request));
+    const requestScopePath = isObject(cacheValue)
+      ? Object.values(cacheValue)
+          .sort((a, b) => a.index - b.index)
+          .map((v) => v.basePath)
+          .join('')
+      : cacheValue || '';
+
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
+  public set = (request: KibanaRequest, requestSpecificBasePath: string | PartialBasePathValue) => {
     const rawRequest = ensureRawRequest(request);
 
-    if (this.basePathCache.has(rawRequest)) {
-      throw new Error(
-        'Request basePath was previously set. Setting multiple times is not supported.'
-      );
+    const cached = this.basePathCache.get(rawRequest);
+    let updatedCache: Record<string, PartialBasePathValue> | string;
+
+    if (cached) {
+      if (typeof cached === 'string') {
+        throw new Error(
+          'Request basePath was previously set. Setting multiple times is not supported.'
+        );
+      }
+      if (isObject(cached) && !isObject(requestSpecificBasePath)) {
+        throw new Error(
+          'Request basePath was previously set with partial value. Setting with a string is not supported.'
+        );
+      }
     }
-    this.basePathCache.set(rawRequest, requestSpecificBasePath);
+
+    if (isPartialBasePath(requestSpecificBasePath)) {
+      if (typeof cached === 'string') throw new Error('Request basePath was previously set.');
+      updatedCache = {
+        ...cached,
+        [requestSpecificBasePath.id]: requestSpecificBasePath,
+      };
+    } else {
+      updatedCache = requestSpecificBasePath;
+    }
+
+    this.basePathCache.set(rawRequest, updatedCache);
   };
 
   public prepend = (path: string): string => {

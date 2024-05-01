@@ -29,7 +29,7 @@ test('it renders without crashing', () => {
   const component = shallowWithIntl(
     <SpaceSelector
       spacesManager={spacesManager as any}
-      serverBasePath={'/server-base-path'}
+      pageBasePath={'/page-base-path'}
       customBranding$={customBranding$}
     />
   );
@@ -42,7 +42,7 @@ test('it renders with custom logo', () => {
   const component = shallowWithIntl(
     <SpaceSelector
       spacesManager={spacesManager as any}
-      serverBasePath={'/server-base-path'}
+      pageBasePath={'/page-base-path'}
       customBranding$={customBranding$}
     />
   );
@@ -66,7 +66,7 @@ test('it queries for spaces when loaded', () => {
   shallowWithIntl(
     <SpaceSelector
       spacesManager={spacesManager as any}
-      serverBasePath={'/server-base-path'}
+      pageBasePath={'/page-base-path'}
       customBranding$={customBrandingServiceMock.createStartContract().customBranding$}
     />
   );

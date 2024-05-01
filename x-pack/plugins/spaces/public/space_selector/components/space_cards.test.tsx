@@ -18,5 +18,5 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  shallow(<SpaceCards spaces={[space]} serverBasePath={'/server-base-path'} />);
+  shallow(<SpaceCards spaces={[space]} pageBasePath={'/page-base-path'} />);
 });

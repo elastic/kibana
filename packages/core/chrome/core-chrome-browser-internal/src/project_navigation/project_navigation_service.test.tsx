@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { createMemoryHistory } from 'history';
+import { render } from '@testing-library/react';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -1003,28 +1005,16 @@ describe('solution navigations', () => {
     }
   });
 
-  it('should throw if the active solution navigation is not registered', async () => {
-    const { projectNavigation } = setup();
-
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-
-    expect(() => {
-      projectNavigation.changeActiveSolutionNavigation('3');
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Solution navigation definition with id \\"3\\" does not exist."`
-    );
-  });
-
   it('should change the active solution if no node match the current Location', async () => {
-    const { projectNavigation, navLinksService } = setup({
+    const { projectNavigation, application } = setup({
       locationPathName: '/app/app3', // we are on app3 which only exists in solution3
       navLinkIds: ['app1', 'app2', 'app3'],
     });
 
     const getActiveDefinition = () =>
-      lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
+      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
 
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2, 3: solution3 });
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
 
     {
       const definition = await getActiveDefinition();
@@ -1032,20 +1022,74 @@ describe('solution navigations', () => {
     }
 
     // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
-    projectNavigation.changeActiveSolutionNavigation('2');
+    projectNavigation.changeActiveSolutionNavigation('solution2');
 
     {
       const definition = await getActiveDefinition();
       expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
+      expect(application.navigateToUrl).not.toHaveBeenCalled(); // NO redirect
     }
+  });
 
-    navLinksService.get.mockReturnValue({ url: '/app/app2', href: '/app/app2' } as any);
-    projectNavigation.changeActiveSolutionNavigation('2', { redirect: true }); // We ask to redirect to the home page of solution 2
+  it('should change the active solution if no node match and redirect with URL containing solutionId', async () => {
+    const { projectNavigation, application } = setup({
+      locationPathName: '/app/app3', // we are on app3 which only exists in solution3
+      navLinkIds: ['app1', 'app2', 'app3'],
+    });
+
+    const getActiveDefinition = () =>
+      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
+
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
+    // Provide handler to add the solutionId to the path, which will trigger a redirect
+    projectNavigation.setAddSolutionIdToUrlPath((solutionId, url) => `/n/${solutionId}${url}`);
+
+    // Change to solution 2, but we are on '/app/app3' which only exists in solution3
+    projectNavigation.changeActiveSolutionNavigation('solution2');
+
     {
       const definition = await getActiveDefinition();
-      expect(definition?.id).toBe('solution2');
+      expect(definition?.id).toBe('solution2'); // Still on solution2, we will be redirected
+      expect(application.navigateToUrl).toHaveBeenCalledWith('/n/solution3/app/app3'); // Redirect
+    }
+  });
+
+  it('should add the solution to the solution home path if handler provided', async () => {
+    const { projectNavigation, application, navLinksService } = setup({
+      locationPathName: '/app/app1',
+      navLinkIds: ['app1'],
+    });
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
+    projectNavigation.changeActiveSolutionNavigation('solution1');
+    navLinksService.get.mockReturnValue({ url: '/foo' } as any);
+
+    // Render the breacrumb solution switcher
+    const noop = () => undefined;
+    const [solutionSwitcher] = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    const popoverContentJSX = (solutionSwitcher.popoverContent as any)?.(noop) ?? <></>;
+
+    const Comp = <>{popoverContentJSX}</>;
+    {
+      const { findByTestId, unmount } = render(Comp);
+
+      expect(application.navigateToUrl).not.toHaveBeenCalled();
+      const solution2Button = await findByTestId('solutionNavSwitcher-solution2');
+      solution2Button.click();
+
+      // No handler to add the solutionId to the path
+      expect(application.navigateToUrl).toHaveBeenCalledWith('/foo');
+      unmount();
     }
 
-    navLinksService.get.mockReset();
+    application.navigateToUrl.mockReset();
+    // Provide handler to add the solutionId to the path
+    projectNavigation.setAddSolutionIdToUrlPath((solutionId, url) => `/n/${solutionId}${url}`);
+
+    {
+      const { findByTestId } = render(Comp);
+      const solution2Button = await findByTestId('solutionNavSwitcher-solution2');
+      solution2Button.click();
+      expect(application.navigateToUrl).toHaveBeenCalledWith('/n/solution2/foo');
+    }
   });
 });

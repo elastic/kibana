@@ -51,7 +51,7 @@ describe('NavControlPopover', () => {
     const wrapper = mountWithIntl(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
-        serverBasePath={'/server-base-path'}
+        pageBasePath={'/page-base-path'}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
@@ -72,7 +72,7 @@ describe('NavControlPopover', () => {
     const { baseElement } = render(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
-        serverBasePath={'/server-base-path'}
+        pageBasePath={'/page-base-path'}
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
@@ -96,7 +96,7 @@ describe('NavControlPopover', () => {
     const wrapper = mountWithIntl(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
-        serverBasePath={'/server-base-path'}
+        pageBasePath={'/page-base-path'}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}

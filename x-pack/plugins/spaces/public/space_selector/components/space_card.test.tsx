@@ -19,7 +19,7 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  shallow(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  shallow(<SpaceCard space={space} pageBasePath={'/page-base-path'} />);
 });
 
 test('links to the indicated space', () => {
@@ -30,9 +30,9 @@ test('links to the indicated space', () => {
     disabledFeatures: [],
   };
 
-  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  const wrapper = mount(<SpaceCard space={space} pageBasePath={'/page-base-path'} />);
   expect(wrapper.find(EuiCard).props()).toMatchObject({
-    href: '/server-base-path/s/some-space/spaces/enter',
+    href: '/page-base-path/s/some-space/spaces/enter',
   });
 });
 
@@ -44,8 +44,8 @@ test('links to the default space too', () => {
     disabledFeatures: [],
   };
 
-  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  const wrapper = mount(<SpaceCard space={space} pageBasePath={'/page-base-path'} />);
   expect(wrapper.find(EuiCard).props()).toMatchObject({
-    href: '/server-base-path/spaces/enter',
+    href: '/page-base-path/spaces/enter',
   });
 });

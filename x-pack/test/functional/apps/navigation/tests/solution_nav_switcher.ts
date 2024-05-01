@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('solution navigation switcher', function describeIndexTests() {
     it('should be able to switch between solutions', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.common.navigateToApp('discover', { basePath: '/n/es' });
 
       // Default to "search" solution
       await testSubjects.existOrFail('searchSideNav');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should contain links to manage deployment and view all deployments', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.common.navigateToApp('discover', { basePath: '/n/es' });
 
       await navigation.openSolutionNavSwitcher();
 

@@ -7,9 +7,10 @@
  */
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UiSettingsParams } from '@kbn/core/types';
-import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 
+import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 import type { NavigationConfig } from './config';
+import { initSolutionOnRequestInterceptor } from './lib';
 import type {
   NavigationServerSetup,
   NavigationServerSetupDependencies,
@@ -33,17 +34,33 @@ export class NavigationServerPlugin
     core: CoreSetup<NavigationServerStartDependencies>,
     plugins: NavigationServerSetupDependencies
   ) {
-    if (plugins.cloud?.isCloudEnabled && !this.isServerless()) {
-      const config = this.initializerContext.config.get<NavigationConfig>();
+    const config = this.initializerContext.config.get<NavigationConfig>();
+    const isSolutionNavExperiementEnabled = plugins.cloud?.isCloudEnabled && !this.isServerless();
 
+    if (isSolutionNavExperiementEnabled) {
       core.getStartServices().then(([coreStart, deps]) => {
-        deps.cloudExperiments?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).then((value) => {
-          if (value) {
-            core.uiSettings.registerGlobal(getUiSettings(config));
-          } else {
-            this.removeUiSettings(coreStart, getUiSettings(config));
-          }
-        });
+        deps.cloudExperiments
+          ?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+          .then((enabled) => {
+            if (enabled) {
+              const soClient = coreStart.savedObjects.createInternalRepository();
+
+              const getIsEnabledInGlobalSettings = () =>
+                coreStart.uiSettings
+                  .globalAsScopedToClient(soClient)
+                  .get(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
+                  .catch(() => false);
+
+              core.uiSettings.registerGlobal(getUiSettings(config));
+              initSolutionOnRequestInterceptor({
+                http: core.http,
+                defaultSolution: config.solutionNavigation.defaultSolution,
+                getIsEnabledInGlobalSettings,
+              });
+            } else {
+              this.removeUiSettings(coreStart, getUiSettings(config));
+            }
+          });
       });
     }
 

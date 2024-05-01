@@ -39,7 +39,7 @@ const LazySpaceAvatar = lazy(() =>
 interface Props {
   id: string;
   spaces: Space[];
-  serverBasePath: string;
+  pageBasePath: string;
   toggleSpaceSelector: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
@@ -151,7 +151,7 @@ class SpacesMenuUI extends Component<Props> {
 
     if (!!selectedSpaceItem) {
       const urlToSelectedSpace = addSpaceIdToPath(
-        this.props.serverBasePath,
+        this.props.pageBasePath,
         selectedSpaceItem.key, // the key is the unique space id
         ENTER_SPACE_PATH
       );

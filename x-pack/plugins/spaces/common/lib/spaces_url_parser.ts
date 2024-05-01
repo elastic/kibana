@@ -7,7 +7,11 @@
 
 import { DEFAULT_SPACE_ID } from '../constants';
 
-const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
+// Other base path contains the following:
+// - the base path for the solution navigation (e.g. `/n/observability`)
+const otherBasePathRegexStr = '/n/[a-z0-9_-]+';
+const spaceRegexStr = '/s/([a-z0-9_-]+)';
+const spaceContextRegex = new RegExp(`^(${otherBasePathRegexStr})?${spaceRegexStr}`);
 
 /**
  * Extracts the space id from the given path.
@@ -36,8 +40,8 @@ export function getSpaceIdFromPath(
     };
   }
 
-  // Ignoring first result, we only want the capture group result at index 1
-  const [, spaceId] = matchResult;
+  // Ignoring first result and other known base paths, we only want the capture group result at index 1
+  const [, , spaceId] = matchResult;
 
   if (!spaceId) {
     throw new Error(`Unable to determine Space ID from request path: ${requestBasePath}`);
@@ -67,8 +71,10 @@ export function addSpaceIdToPath(
     throw new Error(`path must start with a /`);
   }
 
-  const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-
+  const normalizedBasePath = stripSpaceIdFromPath(
+    basePath.endsWith('/') ? basePath.slice(0, -1) : basePath,
+    true
+  );
   if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
     return `${normalizedBasePath}/s/${spaceId}${requestedPath}`;
   }
@@ -80,4 +86,11 @@ function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
     return requestBasePath.substr(serverBasePath.length);
   }
   return requestBasePath;
+}
+
+export function stripSpaceIdFromPath(path: string, anywhere = false): string {
+  if (anywhere) {
+    return path.replace(new RegExp(spaceRegexStr), '');
+  }
+  return path.replace(spaceContextRegex, (match, p1, p2) => p1 || '');
 }

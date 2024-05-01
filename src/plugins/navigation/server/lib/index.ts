@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SOLUTION_NAV_FEATURE_FLAG_NAME, ENABLE_SOLUTION_NAV_UI_SETTING_ID } from './constants';
-
-export {
-  addSolutionIdToPath,
-  getSolutionIdFromPath,
-  stripSolutionIdFromPath,
-} from './solutions_url_parser';
+export { initSolutionOnRequestInterceptor } from './on_request_interceptor';

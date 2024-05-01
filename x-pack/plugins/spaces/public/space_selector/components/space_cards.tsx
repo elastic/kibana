@@ -15,7 +15,7 @@ import type { Space } from '../../../common';
 
 interface Props {
   spaces: Space[];
-  serverBasePath: string;
+  pageBasePath: string;
 }
 
 export class SpaceCards extends Component<Props, {}> {
@@ -31,7 +31,7 @@ export class SpaceCards extends Component<Props, {}> {
 
   private renderSpace = (space: Space) => (
     <EuiFlexItem key={space.id} grow={false}>
-      <SpaceCard space={space} serverBasePath={this.props.serverBasePath} />
+      <SpaceCard space={space} pageBasePath={this.props.pageBasePath} />
     </EuiFlexItem>
   );
 }
