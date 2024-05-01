@@ -559,7 +559,10 @@ describe('autocomplete', () => {
   }
 
   describe('sort', () => {
-    testSuggestions('from a | sort ', getFieldNamesByType('any'));
+    testSuggestions('from a | sort ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('sort', 'any', { evalMath: true }),
+    ]);
     testSuggestions('from a | sort stringField ', ['asc', 'desc', ',', '|']);
     testSuggestions('from a | sort stringField desc ', ['nulls first', 'nulls last', ',', '|']);
     // @TODO: improve here

@@ -30,7 +30,7 @@ import {
   getConsoleRequest,
 } from '@kbn/search-api-panels';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
@@ -484,7 +484,7 @@ const OverviewFooter = () => {
   );
 };
 
-const FooterButtonContainer: React.FC = ({ children }) => (
+const FooterButtonContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiFlexItem>
     <EuiPanel hasShadow={false} paddingSize="none">
       <EuiFlexGroup>
