@@ -47,7 +47,7 @@ export interface ShareContext {
    *
    * If not set it will default to `window.location.href`
    */
-  shareableUrl: string;
+  shareableUrl?: string;
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
