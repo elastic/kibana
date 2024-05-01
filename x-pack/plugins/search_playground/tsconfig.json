@@ -35,7 +35,8 @@
     "@kbn/elastic-assistant-common",
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": [
     "target/**/*",
