@@ -62,6 +62,32 @@ export const useSloDetailsTabs = ({
               : undefined,
           }),
     },
+    ...(slo?.timeWindow.type === 'rolling'
+      ? [
+          {
+            id: HISTORY_TAB_ID,
+            label: i18n.translate('xpack.slo.sloDetails.tab.historyLabel', {
+              defaultMessage: 'History',
+            }),
+            'data-test-subj': 'historyTab',
+            isSelected: selectedTabId === HISTORY_TAB_ID,
+            ...(setSelectedTabId
+              ? {
+                  onClick: () => setSelectedTabId(HISTORY_TAB_ID),
+                }
+              : {
+                  href: slo
+                    ? `${basePath.get()}${paths.sloDetails(
+                        slo.id,
+                        slo.instanceId,
+                        slo.remote?.remoteName,
+                        HISTORY_TAB_ID
+                      )}`
+                    : undefined,
+                }),
+          },
+        ]
+      : []),
     {
       id: ALERTS_TAB_ID,
       label: isRemote ? (
@@ -101,31 +127,6 @@ export const useSloDetailsTabs = ({
           }),
     },
   ];
-
-  if (slo?.timeWindow.type === 'rolling') {
-    tabs.push({
-      id: HISTORY_TAB_ID,
-      label: i18n.translate('xpack.slo.sloDetails.tab.historyLabel', {
-        defaultMessage: 'History',
-      }),
-      'data-test-subj': 'historyTab',
-      isSelected: selectedTabId === HISTORY_TAB_ID,
-      ...(setSelectedTabId
-        ? {
-            onClick: () => setSelectedTabId(HISTORY_TAB_ID),
-          }
-        : {
-            href: slo
-              ? `${basePath.get()}${paths.sloDetails(
-                  slo.id,
-                  slo.instanceId,
-                  slo.remote?.remoteName,
-                  HISTORY_TAB_ID
-                )}`
-              : undefined,
-          }),
-    });
-  }
 
   return { tabs };
 };
