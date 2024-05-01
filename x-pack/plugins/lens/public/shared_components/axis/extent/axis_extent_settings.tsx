@@ -164,13 +164,6 @@ function MetricAxisBoundsControl({
         label={i18n.translate('xpack.lens.axisExtent.label', {
           defaultMessage: 'Bounds',
         })}
-        helpText={
-          hasBarOrArea
-            ? i18n.translate('xpack.lens.axisExtent.disabledDataBoundsMessage', {
-                defaultMessage: 'Only line charts can be fit to the data bounds',
-              })
-            : undefined
-        }
       >
         <EuiButtonGroup
           isFullWidth
@@ -194,6 +187,11 @@ function MetricAxisBoundsControl({
               }),
               'data-test-subj': `${testSubjPrefix}_axisExtent_groups_data`,
               isDisabled: hasBarOrArea,
+              toolTipContent: hasBarOrArea
+                ? i18n.translate('xpack.lens.axisExtent.disabledDataBoundsMessage', {
+                    defaultMessage: 'Only line charts can be fit to the data bounds',
+                  })
+                : undefined,
             },
             {
               id: `${idPrefix}custom`,
