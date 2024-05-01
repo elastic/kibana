@@ -207,7 +207,6 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeTruthy();
     });
 
-    
     it('should not render "esql" rule type if esql rule is not enabled', () => {
       useEsqlAvailabilityMock.mockReturnValueOnce(false);
       const Component = () => {
