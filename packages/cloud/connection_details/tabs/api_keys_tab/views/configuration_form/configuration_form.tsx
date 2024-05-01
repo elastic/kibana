@@ -11,7 +11,6 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { ConfigurationFormControlled } from './configuration_form_controlled';
 import { useConnectionDetailsService } from '../../../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
-import { APIKeysRender } from '../api_keys_render';
 
 export const ConfigurationForm: React.FC = () => {
   const service = useConnectionDetailsService();
@@ -24,7 +23,6 @@ export const ConfigurationForm: React.FC = () => {
 
   return (
     <EuiSkeletonText isLoading={isLoadingPermissions}>
-      <APIKeysRender getAPIKeys={service.getValidPermissionsApiKeys()} />
       <ConfigurationFormControlled
         name={keyName}
         error={keyError}

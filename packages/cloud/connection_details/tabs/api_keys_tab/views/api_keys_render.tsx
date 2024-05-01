@@ -6,18 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
-import { ValidPermissionsResult } from '@kbn/cloud/connection_details/kibana/kibana_connection_details_provider';
+import { EuiForm, EuiText } from '@elastic/eui';
+import type { ValidPermissionsResult } from '@kbn/security-plugin-types-server';
 import * as React from 'react';
 
 export interface APIKeysProps {
-  getAPIKeys: Promise<ValidPermissionsResult | undefined>;
+  getAPIKeys: () => Promise<ValidPermissionsResult | undefined>;
 }
 
 export const APIKeysRender: React.FC<APIKeysProps> = ({ getAPIKeys }) => {
-  console.log(getAPIKeys)
-  const body = (
-    <EuiFormRow><EuiFieldText>{'placeholder'}</EuiFieldText></EuiFormRow>
-  )
-  return <EuiForm>{body}</EuiForm>;
+  const name = getAPIKeys().then((keys) => {
+    if (keys) {
+      return console.log(keys?.apiKeys.map((key) => key.name));
+    }
+  });
+  return (
+    <EuiForm>
+      {Array.from(name).forEach((keyName) => (
+        <EuiText>{keyName}</EuiText>
+      ))}
+    </EuiForm>
+  );
 };

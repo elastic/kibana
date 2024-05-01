@@ -12,6 +12,7 @@ import { useBehaviorSubject } from '../../hooks/use_behavior_subject';
 import { ConfigurationForm } from './views/configuration_form';
 import { MissingPermissionsPanel } from './views/missing_permissions_panel';
 import { SuccessForm } from './views/success_form';
+import { APIKeysRender } from './views/api_keys_render';
 
 export const ApiKeysTab: React.FC = () => {
   const service = useConnectionDetailsService();
@@ -23,5 +24,10 @@ export const ApiKeysTab: React.FC = () => {
   if (hasAccess === false) return <MissingPermissionsPanel />;
   if (apiKey) return <SuccessForm />;
 
-  return <ConfigurationForm />;
+  return (
+    <>
+      <APIKeysRender getAPIKeys={() => service.getValidPermissionsApiKeys()} />
+      <ConfigurationForm />
+    </>
+  );
 };

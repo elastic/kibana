@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ValidPermissionsResult } from './kibana/kibana_connection_details_provider';
+import type { ValidPermissionsResult } from '@kbn/security-plugin-types-server';
 import type { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 
 export interface ConnectionDetailsOpts {

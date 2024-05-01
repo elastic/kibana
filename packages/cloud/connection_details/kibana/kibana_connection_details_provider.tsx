@@ -12,20 +12,12 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   CreateAPIKeyParams,
-  APIKeys,
   CreateAPIKeyResult,
+  ValidPermissionsResult,
 } from '@kbn/security-plugin-types-server';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
-
-export interface ValidPermissionsResult {
-  id: string;
-  name: string;
-  api_key: string;
-  encoded: string;
-  apiKeys: APIKeys[];
-}
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
@@ -76,7 +68,8 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => await http?.get<ValidPermissionsResult>('/internal/security/api_key/valid_permissions'),
+      hasPermission: async () =>
+        await http?.get<ValidPermissionsResult>('/internal/security/api_key/valid_permissions'),
       ...options?.apiKeys,
     },
   };

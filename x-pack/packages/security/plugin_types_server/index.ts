@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { APIKeys } from './src/authentication';
+
 export type {
   AuditEvent,
   AuditHttp,
@@ -65,6 +67,14 @@ export type {
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
 } from './src/user_profile';
+
+export interface ValidPermissionsResult {
+  id: string;
+  name: string;
+  api_key: string;
+  encoded: string;
+  apiKeys: APIKeys[];
+}
 
 export {
   restApiKeySchema,
