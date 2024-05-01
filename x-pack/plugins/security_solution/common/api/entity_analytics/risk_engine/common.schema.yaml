@@ -32,6 +32,7 @@ components:
       type: string
 
     Filter:
+      type: object
       description: An elasticsearch DSL filter object. Used to filter the risk inputs involved, which implicitly filters the risk scores themselves. See https://cloud.elastic.co/api/v1/api-docs/spec.json#/definitions/QueryContainer
 
     PageSize:
