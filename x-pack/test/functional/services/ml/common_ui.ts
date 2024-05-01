@@ -438,5 +438,14 @@ export function MachineLearningCommonUIProvider({
         }
       });
     },
+
+    async assertDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
   };
 }

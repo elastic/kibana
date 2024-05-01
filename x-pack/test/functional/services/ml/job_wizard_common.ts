@@ -542,14 +542,6 @@ export function MachineLearningJobWizardCommonProvider(
         await testSubjects.missingOrFail(selector);
       }
     },
-    async assertDataTierOptionsVisible(shouldBeVisible: boolean) {
-      const selector = 'mlDatePickerButtonDataTierOptions';
-      if (shouldBeVisible === true) {
-        await testSubjects.existOrFail(selector);
-      } else {
-        await testSubjects.missingOrFail(selector);
-      }
-    },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
