@@ -11,9 +11,9 @@ import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from './test_utils';
 
 describe('default data view', () => {
-  it('set - calls usageCollection', () => {
+  it('set - calls usageCollection', async () => {
     const usageCollection = getUsageCollection();
-    setDefault({
+    await setDefault({
       dataViewsService,
       counterName: 'POST /path',
       usageCollection,
@@ -23,9 +23,9 @@ describe('default data view', () => {
     expect(usageCollection.incrementCounter).toBeCalledTimes(1);
   });
 
-  it('get - calls usageCollection', () => {
+  it('get - calls usageCollection', async () => {
     const usageCollection = getUsageCollection();
-    getDefault({
+    await getDefault({
       dataViewsService,
       counterName: 'GET /path',
       usageCollection,

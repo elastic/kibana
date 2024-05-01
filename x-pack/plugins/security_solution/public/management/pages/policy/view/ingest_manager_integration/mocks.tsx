@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type { Action, Reducer } from 'redux';
 import type { RenderOptions } from '@testing-library/react';
@@ -82,7 +83,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
+  const Wrapper: RenderOptions['wrapper'] = ({ children }: PropsWithChildren<unknown>) => {
     useEffect(() => {
       return () => {
         // When the component un-mounts, reset the Experimental features since

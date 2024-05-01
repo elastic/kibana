@@ -74,7 +74,7 @@ export function renderApp(
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage,
-  UsageTracker: React.FC
+  UsageTracker: React.FC<{ children: React.ReactNode }>
 ) {
   ReactDOM.render(
     <UsageTracker>
