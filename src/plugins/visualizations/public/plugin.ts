@@ -468,6 +468,8 @@ export class VisualizationsPlugin
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
+    console.log('QUERY', data.query);
+
     setTypes(types);
     setEmbeddable(embeddable);
     setApplication(core.application);
