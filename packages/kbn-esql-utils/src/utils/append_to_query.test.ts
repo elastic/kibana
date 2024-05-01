@@ -60,7 +60,15 @@ describe('appendToQuery', () => {
     });
 
     it('appends a where clause in an existing query checking that the value is not null if the user asks for existence', () => {
-      expect(appendWhereClauseToESQLQuery('from logstash-* // meow', '_exists_', 'dest', '+')).toBe(
+      expect(
+        appendWhereClauseToESQLQuery(
+          'from logstash-* // meow',
+          'dest',
+          undefined,
+          '_exists_',
+          'string'
+        )
+      ).toBe(
         `from logstash-* // meow
 | where \`dest\` is not null`
       );

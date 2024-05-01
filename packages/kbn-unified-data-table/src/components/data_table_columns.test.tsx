@@ -402,6 +402,10 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        columnsMeta: {
+          extension: { type: 'number' },
+          message: { type: 'string', esType: 'keyword' },
+        },
       });
 
       const extensionGridColumn = gridColumns[0];
@@ -428,6 +432,10 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
+        columnsMeta: {
+          extension: { type: 'number' },
+          message: { type: 'string', esType: 'keyword' },
+        },
       });
 
       expect(customizedGridColumns).toMatchSnapshot();

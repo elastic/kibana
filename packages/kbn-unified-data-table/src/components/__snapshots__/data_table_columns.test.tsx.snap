@@ -43,6 +43,8 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <span>
       test
@@ -50,7 +52,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": true,
-    "schema": "kibana-json",
+    "schema": "numeric",
     "visibleCellActions": undefined,
   },
   Object {
@@ -94,10 +96,23 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -319,7 +334,7 @@ Array [
     "displayAsText": "message",
     "id": "message",
     "isSortable": true,
-    "schema": "kibana-json",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
 ]

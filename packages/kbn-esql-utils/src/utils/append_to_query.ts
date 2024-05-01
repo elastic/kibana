@@ -17,7 +17,7 @@ export function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
   field: string,
   value: unknown,
-  operation: '+' | '-',
+  operation: '+' | '-' | '_exists_',
   fieldType?: string
 ): string {
   let operator = operation === '+' ? '==' : '!=';
@@ -34,8 +34,7 @@ export function appendWhereClauseToESQLQuery(
 
   // checking that the value is not null
   // this is the existence filter
-  if (field === '_exists_') {
-    fieldName = `\`${String(value)}\``;
+  if (operation === '_exists_') {
     operator = ' is not null';
     filterValue = '';
   }
