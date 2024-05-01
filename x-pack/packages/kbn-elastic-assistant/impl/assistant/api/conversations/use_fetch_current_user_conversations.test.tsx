@@ -14,11 +14,10 @@ import {
   UseFetchCurrentUserConversationsParams,
   useFetchCurrentUserConversations,
 } from './use_fetch_current_user_conversations';
-
-const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(statusResponse),
+  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
 };
 const onFetch = jest.fn();
 
