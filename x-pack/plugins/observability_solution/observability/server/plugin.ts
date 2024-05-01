@@ -282,7 +282,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       logsExplorerLocator,
     });
 
-    core.getStartServices().then(([coreStart, pluginStart]) => {
+    void core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
         config,

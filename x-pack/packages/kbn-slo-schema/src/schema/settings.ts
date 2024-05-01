@@ -11,3 +11,5 @@ export const sloSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
 });
+
+export const sloServerlessSettingsSchema = t.type({});
