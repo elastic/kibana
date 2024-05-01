@@ -31,7 +31,7 @@ export async function getLogCategories({
   arguments: args,
 }: {
   esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
+  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
     start: string;
     end: string;

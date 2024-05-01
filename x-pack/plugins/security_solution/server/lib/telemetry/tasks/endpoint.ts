@@ -94,14 +94,14 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
           }
         }
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
 
         return documents.length;
       } catch (err) {
         log.l(`Error running endpoint alert telemetry task`, {
           error: JSON.stringify(err),
         });
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

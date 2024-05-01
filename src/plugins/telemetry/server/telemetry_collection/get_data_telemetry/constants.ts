@@ -63,6 +63,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
   { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
   { pattern: 'filebeat-*', patternName: 'filebeat', shipper: 'filebeat' },
+  { pattern: '.internal.alerts-*', patternName: 'alerts' },
   // Security - 3rd party
   { pattern: '*apache*', patternName: 'apache' }, // Already in Observability (keeping it in here for documentation)
   { pattern: '*tomcat*', patternName: 'tomcat' },

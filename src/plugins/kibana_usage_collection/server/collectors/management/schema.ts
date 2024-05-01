@@ -539,7 +539,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableESQL': {
+  enableESQL: {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
