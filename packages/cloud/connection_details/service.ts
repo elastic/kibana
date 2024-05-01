@@ -23,7 +23,7 @@ export class ConnectionDetailsService {
 
   constructor(public readonly opts: ConnectionDetailsOpts) {
     opts.apiKeys
-      ?.hasPermission()
+      ?.hasPermission() // doesn't return a boolean but the keys
       .then((hasAccess) => {
         this.apiKeyHasAccess$.next(Boolean(hasAccess));
       })
