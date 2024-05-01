@@ -82,7 +82,7 @@ const groupActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerInventoryThresholdRuleType(
+export function registerInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs,
   { featureFlags }: InfraConfig

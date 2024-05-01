@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:enableESQL': true,
+    enableESQL: true,
   };
 
   describe('discover esql view', async function () {
