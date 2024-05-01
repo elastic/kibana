@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { Message } from '../../common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { KibanaClient } from './kibana_client';
 import { SynthtraceEsClients } from './setup_synthtrace';
 
