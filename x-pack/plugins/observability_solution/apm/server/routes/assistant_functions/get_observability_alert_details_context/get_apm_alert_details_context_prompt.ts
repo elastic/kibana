@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { AlertDetailsContextualInsight } from '@kbn/observability-plugin/server/services';
 import { APMDownstreamDependency } from '../get_apm_downstream_dependencies';
 import { ServiceSummary } from '../get_apm_service_summary';
-import { LogCategories } from '../get_log_categories';
+import { LogCategory } from '../get_log_categories';
 import { ApmAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { ChangePointGrouping } from '../get_changepoints';
 
@@ -27,7 +27,7 @@ export function getApmAlertDetailsContextPrompt({
   serviceEnvironment?: string;
   serviceSummary?: ServiceSummary;
   downstreamDependencies?: APMDownstreamDependency[];
-  logCategories: LogCategories;
+  logCategories?: LogCategory[];
   serviceChangePoints?: ChangePointGrouping[];
   exitSpanChangePoints?: ChangePointGrouping[];
   anomalies?: ApmAnomalies;

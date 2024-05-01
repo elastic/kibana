@@ -7,7 +7,7 @@
 
 import {
   ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
+  SynthtraceKibanaClient,
   createLogger,
   InfraSynthtraceEsClient,
   LogLevel,
@@ -56,7 +56,7 @@ export default async function createTestConfig({
           })
           .slice(0, -1);
 
-        const kibanaClient = new ApmSynthtraceKibanaClient({
+        const kibanaClient = new SynthtraceKibanaClient({
           target: kibanaServerUrlWithAuth,
           logger: createLogger(LogLevel.debug),
         });

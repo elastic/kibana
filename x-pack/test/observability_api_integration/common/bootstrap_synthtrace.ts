@@ -12,10 +12,10 @@ import {
 } from '@kbn/apm-synthtrace';
 import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
-import { InheritedFtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 
-export async function bootstrapApmSynthtrace(
-  context: InheritedFtrProviderContext,
+export async function bootstrapApmSynthtraceEsClient(
+  context: FtrProviderContext,
   kibanaClient: SynthtraceKibanaClient
 ) {
   const es = context.getService('es');
@@ -33,7 +33,7 @@ export async function bootstrapApmSynthtrace(
   return esClient;
 }
 
-export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {
+export function getSynthtraceKibanaClient(kibanaServerUrl: string) {
   const kibanaServerUrlWithAuth = url
     .format({
       ...url.parse(kibanaServerUrl),

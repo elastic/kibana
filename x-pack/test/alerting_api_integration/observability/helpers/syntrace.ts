@@ -8,7 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import {
   ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
+  SynthtraceKibanaClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
@@ -21,7 +21,7 @@ export const getSyntraceClient = async ({
   kibanaUrl: string;
   esClient: Client;
 }) => {
-  const kibanaClient = new ApmSynthtraceKibanaClient({
+  const kibanaClient = new SynthtraceKibanaClient({
     logger: createLogger(LogLevel.info),
     target: kibanaUrl,
   });
