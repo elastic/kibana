@@ -74,15 +74,16 @@ export const swapReferencesRoute =
           },
           response: {
             200: {
-              body: schema.object({
-                result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
-                deleteStatus: schema.maybe(
-                  schema.object({
-                    remainingRefs: schema.number(),
-                    deletePerformed: schema.boolean(),
-                  })
-                ),
-              }),
+              body: () =>
+                schema.object({
+                  result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
+                  deleteStatus: schema.maybe(
+                    schema.object({
+                      remainingRefs: schema.number(),
+                      deletePerformed: schema.boolean(),
+                    })
+                  ),
+                }),
             },
           },
         },
