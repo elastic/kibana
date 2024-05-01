@@ -31,10 +31,7 @@ function executeCommand(command: string, envVars: any, workDir: string): Promise
       if (error) {
         console.error(`exec error: ${error}`);
         process.exitCode = error.code; // Set exit code of the script to the child process exit code
-        return;
       }
-
-      console.log(`Output: ${stdout}`);
     });
 
     // Listen for stdout data
@@ -48,25 +45,23 @@ function executeCommand(command: string, envVars: any, workDir: string): Promise
     });
 
     // Listen for process exit
+    // childProcess.on('close', (code) => {
+    // if (code !== 0) {
+    // reject(code);
+    // return;
+    // }
+    // resolve(code);
+    // });
+
+    // Listen for process exit
     childProcess.on('exit', (code) => {
-      console.log(`Child process exits with code : ${code}`);
+      console.log(`Node process for target ${process.env.TARGET_SCRIPT} exits with code : ${code}`);
       if (code !== 0) {
         reject(code);
         return;
       }
       resolve(code);
     });
-
-    // exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
-    //   console.log(`stdout: ${stdout}`);
-    //   console.error(`stderr: ${stderr}`);
-    //   if (error) {
-    //     console.error(`exec error: ${error}`);
-    //     reject(error.code); // Reject with the exit code
-    //     return;
-    //   }
-    //   resolve(0); // Resolve with exit code 0 if command succeeds
-    // });
   });
 }
 
