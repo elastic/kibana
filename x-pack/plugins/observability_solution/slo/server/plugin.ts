@@ -29,6 +29,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { ServerlessPluginStart } from '@kbn/serverless/server';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { slo, SO_SLO_TYPE } from './saved_objects';
@@ -56,6 +57,7 @@ export interface PluginStart {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
+  serverless: ServerlessPluginStart;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -150,7 +152,9 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
         },
         logger: this.logger,
-        repository: getSloServerRouteRepository(config),
+        repository: getSloServerRouteRepository({
+          isServerless: !!pluginStart.serverless,
+        }),
       });
 
       const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
