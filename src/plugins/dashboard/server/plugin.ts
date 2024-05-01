@@ -61,15 +61,14 @@ export class DashboardPlugin
       })
     );
 
-    const dashboardCMStorage = new DashboardStorage({
-      throwOnResultValidationError: this.initializerContext.env.mode.dev,
-      logger: this.logger.get('storage'),
-    });
     registerCreate(core.http.createRouter().versioned, plugins.contentManagement);
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: dashboardCMStorage,
+      storage: new DashboardStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },
