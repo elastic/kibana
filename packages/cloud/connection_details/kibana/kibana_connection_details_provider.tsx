@@ -76,8 +76,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () =>
-        await http?.get<ValidPermissionsResult>('/internal/security/api_key/valid_permissions'),
+      hasPermission: async () => await http?.get<ValidPermissionsResult>('/internal/security/api_key/valid_permissions'),
       ...options?.apiKeys,
     },
   };

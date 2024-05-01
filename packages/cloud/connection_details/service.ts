@@ -25,7 +25,7 @@ export class ConnectionDetailsService {
     opts.apiKeys
       ?.hasPermission()
       .then((hasAccess) => {
-        this.apiKeyHasAccess$.next(hasAccess);
+        this.apiKeyHasAccess$.next(Boolean(hasAccess));
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
@@ -85,6 +85,6 @@ export class ConnectionDetailsService {
   };
 
   public async getValidPermissionsApiKeys() {
-    return await this.opts.apiKeys?.hasPermission;
+    return await this.opts.apiKeys?.hasPermission();
   }
 }
