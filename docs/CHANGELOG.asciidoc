@@ -86,9 +86,9 @@ Lens & Visualizations::
 * Fixes table sorting on time picker interval change in *Lens* ({kibana-pull}182173[#182173]).
 * Fixes controls on fields with custom label ({kibana-pull}180615[#180615]).
 Machine Learning::
-* Fixes deep link for Index data visualizer & ES|QL data visualizer ({kibana-pull}180389
+* Fixes deep link for Index data visualizer & ES|QL data visualizer ({kibana-pull}180389[#180389]).
 Observability::
-* Make anomalyDetectorTypes opcional ({kibana-pull}180717[#180717]).[#180389]).
+* Make anomalyDetectorTypes optional ({kibana-pull}180717[#180717]).
 SharedUX::
 * Revert change to shared UX markdown component for dashboard vis ({kibana-pull}180906[#180906]).
 Sharing::
