@@ -12,6 +12,8 @@ export interface ReportAttackDiscoveriesGeneratedParams {
   actionTypeId: string;
   provider?: string;
   model?: string;
+  durationMs: number;
+  alertCount: number;
 }
 
 export type ReportAttackDiscoveryTelemetryEventParams = ReportAttackDiscoveriesGeneratedParams;

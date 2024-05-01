@@ -41,6 +41,7 @@ import {
 } from '../pages/session_storage';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import type { AttackDiscovery, GenerationInterval } from '../types';
+import { getGenAiConfig } from './helpers';
 
 const MAX_GENERATION_INTERVALS = 5;
 
@@ -230,7 +231,14 @@ export const useAttackDiscovery = ({
       setAttackDiscoveries(newAttackDiscoveries);
       setLastUpdated(newLastUpdated);
       setConnectorId?.(connectorId);
-      reportAttackDiscoveriesGenerated({ actionTypeId });
+      const connectorConfig = getGenAiConfig(selectedConnector);
+      reportAttackDiscoveriesGenerated({
+        actionTypeId,
+        durationMs,
+        alertCount: knowledgeBase.latestAlerts,
+        provider: connectorConfig?.apiProvider,
+        model: connectorConfig?.defaultModel,
+      });
     } catch (error) {
       toasts?.addDanger(error, {
         title: ERROR_GENERATING_ATTACK_DISCOVERIES,

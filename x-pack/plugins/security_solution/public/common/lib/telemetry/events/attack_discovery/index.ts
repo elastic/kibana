@@ -18,6 +18,20 @@ export const insightsGeneratedEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    durationMs: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of request in ms',
+        optional: false,
+      },
+    },
+    alertCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of alerts evaluated',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
