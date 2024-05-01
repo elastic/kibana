@@ -76,7 +76,7 @@ describe('conversational chain', () => {
 
     const stream = await conversationalChain.stream(aiClient, chat);
 
-    const streamToValue: string[] = await new Promise((resolve) => {
+    const streamToValue: string[] = await new Promise((resolve, reject) => {
       const reader = stream.getReader();
       const textDecoder = new TextDecoder();
       const chunks: string[] = [];
@@ -89,7 +89,7 @@ describe('conversational chain', () => {
             chunks.push(textDecoder.decode(value));
             read();
           }
-        });
+        }, reject);
       };
       read();
     });

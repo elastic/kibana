@@ -551,7 +551,7 @@ export class TaskRunner<
           // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
           this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
         }
-      })();
+      })().catch(() => {});
 
       return runRuleParams;
     });
