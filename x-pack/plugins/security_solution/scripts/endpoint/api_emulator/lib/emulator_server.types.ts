@@ -40,7 +40,7 @@ export type EmulatorServerRouteHandlerMethod<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends HapiTypes.Request['query'] = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = HapiTypes.Request['pre']
+  TPre extends HapiTypes.Request['pre'] = any
 > = (
   request: EmulatorServerRequest<TParams, TQuery, TPayload, TPre>,
   h: HapiTypes.ResponseToolkit,

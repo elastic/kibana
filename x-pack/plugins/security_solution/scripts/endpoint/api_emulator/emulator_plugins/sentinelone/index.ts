@@ -5,34 +5,16 @@
  * 2.0.
  */
 
-import type {
-  EmulatorServerPlugin,
-  EmulatorServerRouteHandlerMethod,
-} from '../../lib/emulator_server.types';
+import { getSentinelOneRouteDefinitions } from './routes';
+import type { EmulatorServerPlugin } from '../../lib/emulator_server.types';
 
 export const getSentinelOneEmulator = (): EmulatorServerPlugin => {
   const plugin: EmulatorServerPlugin = {
     name: 'sentinelone',
     register({ router }) {
-      router.route({
-        path: '/activities',
-        method: 'GET',
-        handler: sentinelOneActivityApiHandler,
-      });
+      router.route(getSentinelOneRouteDefinitions());
     },
   };
 
   return plugin;
-};
-
-const sentinelOneActivityApiHandler: EmulatorServerRouteHandlerMethod<
-  {},
-  {},
-  {},
-  { services: { foo: 'hello' } }
-> = async (req, h) => {
-  return {
-    message: `test: activities from S1`,
-    preServices: Object.keys(req.pre.services || {}),
-  };
 };
