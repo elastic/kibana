@@ -188,6 +188,14 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'elasticsearch';
+      service_settings: {
+        num_allocations: number;
+        num_threads: number;
+        model_id: string;
+      };
+    }
+  | {
       service: 'openai';
       service_settings: {
         api_key: string;
