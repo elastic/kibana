@@ -11,6 +11,7 @@ import {
   AlertDetailsContextualInsightsRequestContext,
 } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 import { getApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../../lib/helpers/get_ml_client';
@@ -21,7 +22,6 @@ import { getLogCategories } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
-import { getApmAlertDetailsContextPrompt } from './get_apm_alert_details_context_prompt';
 import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
 import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
 
@@ -204,15 +204,37 @@ export const getAlertDetailsContextHandler = (
       anomaliesPromise,
     ]);
 
-    return getApmAlertDetailsContextPrompt({
-      serviceName,
-      serviceEnvironment,
-      serviceSummary,
-      downstreamDependencies,
-      logCategories,
-      serviceChangePoints,
-      exitSpanChangePoints,
-      anomalies,
-    });
+    return [
+      {
+        key: 'serviceSummary',
+        description: 'Metadata for the service where the alert occurred',
+        data: serviceSummary,
+      },
+      {
+        key: 'downstreamDependencies',
+        description: `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}"`,
+        data: downstreamDependencies,
+      },
+      {
+        key: 'serviceChangePoints',
+        description: `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate`,
+        data: serviceChangePoints,
+      },
+      {
+        key: 'exitSpanChangePoints',
+        description: `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies`,
+        data: exitSpanChangePoints,
+      },
+      {
+        key: 'logCategories',
+        description: `Log events occurring around the time of the alert`,
+        data: logCategories,
+      },
+      {
+        key: 'anomalies',
+        description: `Anomalies for services running in the environment "${serviceEnvironment}"`,
+        data: anomalies,
+      },
+    ].filter(({ data }) => !isEmpty(data));
   };
 };
