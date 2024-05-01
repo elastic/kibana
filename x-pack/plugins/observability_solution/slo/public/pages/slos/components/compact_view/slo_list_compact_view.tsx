@@ -262,7 +262,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     },
     {
       type: 'icon',
-      icon: 'wrench',
+      icon: 'refresh',
       name: buildActionName(
         i18n.translate('xpack.slo.item.actions.reset', {
           defaultMessage: 'Reset',

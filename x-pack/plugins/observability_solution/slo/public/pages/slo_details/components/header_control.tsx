@@ -56,7 +56,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
-  const { mutateAsync: deleteSlo } = useDeleteSlo();
+  const { mutate: deleteSlo } = useDeleteSlo();
   const { mutateAsync: resetSlo } = useResetSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
@@ -127,9 +127,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setDeleteConfirmationModalOpen(false);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = () => {
     if (slo) {
-      await deleteSlo({ id: slo.id, name: slo.name });
+      deleteSlo({ id: slo.id, name: slo.name });
       navigate(basePath.prepend(paths.slos));
     }
   };
@@ -291,7 +291,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="reset"
-                icon="wrench"
+                icon="refresh"
                 disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
                 onClick={handleReset}
                 data-test-subj="sloDetailsHeaderControlPopoverReset"

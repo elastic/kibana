@@ -252,7 +252,7 @@ export function SloItemActions({
           ,
           <EuiContextMenuItem
             key="reset"
-            icon="wrench"
+            icon="refresh"
             disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
             onClick={handleReset}
             toolTipContent={
