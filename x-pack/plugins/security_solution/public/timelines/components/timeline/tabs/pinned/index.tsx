@@ -346,6 +346,8 @@ const PinnedTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      prevProps.status === nextProps.status &&
+      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.sort, nextProps.sort)
