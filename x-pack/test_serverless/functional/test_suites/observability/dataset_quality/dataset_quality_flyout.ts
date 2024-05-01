@@ -274,7 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchTab(0);
     });
 
-    it('goes to infra hosts for hosts when show all is clicked', async () => {
+    // Blocked by https://github.com/elastic/kibana/issues/181705
+    it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
       const apacheAccessDatasetHumanName = 'Apache access logs';
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
@@ -401,13 +402,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
-        integrationActions.template
-      );
-
-      await action.click();
-
       await retry.tryForTime(5000, async () => {
+        const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+          integrationActions.template
+        );
+
+        await action.click();
+
         const currentUrl = await browser.getCurrentUrl();
         const parsedUrl = new URL(currentUrl);
         expect(parsedUrl.pathname).to.contain(

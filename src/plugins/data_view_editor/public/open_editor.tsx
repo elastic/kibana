@@ -80,7 +80,7 @@ export const getEditorOpener =
               showManagementLink={Boolean(editData && editData.isPersisted())}
             />
           </KibanaReactContextProvider>,
-          { theme: core.theme, i18n: core.i18n }
+          core
         ),
         {
           hideCloseButton: true,
