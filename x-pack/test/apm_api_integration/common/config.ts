@@ -9,7 +9,7 @@ import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_user
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import {
   ApmSynthtraceEsClient,
-  SynthtraceKibanaClient,
+  ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
   createLogger,
   LogLevel,
@@ -78,7 +78,7 @@ export interface CreateTest {
     apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
-    ) => Promise<SynthtraceKibanaClient>;
+    ) => Promise<ApmSynthtraceKibanaClient>;
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };

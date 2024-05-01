@@ -9,7 +9,7 @@ import {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-  SynthtraceKibanaClient,
+  ApmSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { ToolingLog } from '@kbn/tooling-log';
 import { isPromise } from 'util/types';
@@ -54,7 +54,7 @@ export async function setupSynthtrace({
       return result;
     },
   };
-  const kibanaClient = new SynthtraceKibanaClient({
+  const kibanaClient = new ApmSynthtraceKibanaClient({
     target,
     logger,
   });

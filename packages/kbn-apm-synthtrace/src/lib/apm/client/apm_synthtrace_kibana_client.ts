@@ -11,7 +11,7 @@ import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
 import { kibanaHeaders } from '../../shared/client_headers';
 
-export class SynthtraceKibanaClient {
+export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
   private target: string;
 

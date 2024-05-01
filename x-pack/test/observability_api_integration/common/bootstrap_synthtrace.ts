@@ -6,7 +6,7 @@
  */
 import {
   ApmSynthtraceEsClient,
-  SynthtraceKibanaClient,
+  ApmSynthtraceKibanaClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
@@ -16,7 +16,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export async function bootstrapApmSynthtraceEsClient(
   context: FtrProviderContext,
-  kibanaClient: SynthtraceKibanaClient
+  kibanaClient: ApmSynthtraceKibanaClient
 ) {
   const es = context.getService('es');
 
@@ -41,7 +41,7 @@ export function getSynthtraceKibanaClient(kibanaServerUrl: string) {
     })
     .slice(0, -1);
 
-  const kibanaClient = new SynthtraceKibanaClient({
+  const kibanaClient = new ApmSynthtraceKibanaClient({
     target: kibanaServerUrlWithAuth,
     logger: createLogger(LogLevel.debug),
   });

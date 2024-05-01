@@ -7,7 +7,7 @@
 
 import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
-import { SynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 
 const getKibanaServerUrlWithAuth = () => {
   const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
@@ -21,7 +21,7 @@ const getKibanaServerUrlWithAuth = () => {
 };
 export function ApmSynthtraceKibanaClientProvider() {
   const kibanaServerUrlWithAuth = getKibanaServerUrlWithAuth();
-  const kibanaClient = new SynthtraceKibanaClient({
+  const kibanaClient = new ApmSynthtraceKibanaClient({
     target: kibanaServerUrlWithAuth,
     logger: createLogger(LogLevel.debug),
   });

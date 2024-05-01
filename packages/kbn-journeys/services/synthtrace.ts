@@ -8,7 +8,7 @@
 
 import {
   ApmSynthtraceEsClient,
-  SynthtraceKibanaClient,
+  ApmSynthtraceKibanaClient,
   InfraSynthtraceEsClient,
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
@@ -103,7 +103,7 @@ async function initApmSynthtraceClient(options: SynthtraceClientOptions) {
     auth: `${auth.getUsername()}:${auth.getPassword()}`,
   });
 
-  const synthKbnClient = new SynthtraceKibanaClient({
+  const synthKbnClient = new ApmSynthtraceKibanaClient({
     logger,
     target: kibanaUrlWithAuth,
   });
