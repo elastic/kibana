@@ -26,6 +26,8 @@ import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
+import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 
@@ -76,6 +78,14 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
         './react_embeddables/data_table/data_table_react_embeddable'
       );
       return getDataTableFactory(core, deps);
+    });
+
+    registerCreateSavedBookAction(deps.uiActions, core);
+    registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
+      const { getSavedBookEmbeddableFactory } = await import(
+        './react_embeddables/saved_book/saved_book_react_embeddable'
+      );
+      return getSavedBookEmbeddableFactory(core);
     });
   }
 

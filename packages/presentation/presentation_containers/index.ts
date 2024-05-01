@@ -26,12 +26,13 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export {
-  canTrackContentfulRender,
-  type TrackContentfulRender,
-} from './interfaces/track_contentful_render';
-export {
   apiHasSerializableState,
   type HasSerializableState,
   type SerializedPanelState,
 } from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/track_contentful_render';
+export { apiHasChildState, type HasChildState } from './interfaces/child_state';

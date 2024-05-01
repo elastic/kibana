@@ -16,7 +16,6 @@ import {
   reactEmbeddableRegistryHasKey,
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
@@ -57,9 +56,13 @@ const renderReactEmbeddable = ({
     <ReactEmbeddableRenderer
       type={type}
       maybeId={uuid}
-      parentApi={container as unknown as PresentationContainer}
+      getParentApi={(): CanvasContainerApi => ({
+        ...container,
+        getStateForChild: () => ({
+          rawState: input,
+        }),
+      })}
       key={`${type}_${uuid}`}
-      state={{ rawState: input }}
       onAnyStateChange={(newState) => {
         const newExpression = embeddableInputToExpression(
           newState.rawState as unknown as EmbeddableInput,

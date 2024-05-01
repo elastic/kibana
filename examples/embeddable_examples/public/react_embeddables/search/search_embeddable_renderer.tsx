@@ -31,6 +31,7 @@ export function SearchEmbeddableRenderer(props: Props) {
   const parentApi = useMemo(() => {
     return {
       timeRange$: new BehaviorSubject(props.timeRange),
+      getStateForChild: () => initialState,
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,8 +45,7 @@ export function SearchEmbeddableRenderer(props: Props) {
     <div className="mapEmbeddableContainer">
       <ReactEmbeddableRenderer<State, Api>
         type={SEARCH_EMBEDDABLE_ID}
-        state={initialState}
-        parentApi={parentApi}
+        getParentApi={() => parentApi}
         hidePanelChrome={true}
       />
     </div>

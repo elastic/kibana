@@ -101,16 +101,14 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
         maybeId={'maybe_id'}
         type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
-        state={{
-          rawState,
-        }}
         onApiAvailable={onApiAvailable}
-        parentApi={{
+        getParentApi={() => ({
+          getStateForChild: () => ({ rawState }),
           executionContext: {
             type: 'dashboard',
             id: 'dashboard-id',
           },
-        }}
+        })}
       />
     );
 

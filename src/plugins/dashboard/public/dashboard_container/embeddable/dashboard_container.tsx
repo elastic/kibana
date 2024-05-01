@@ -35,7 +35,11 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { TrackContentfulRender } from '@kbn/presentation-containers';
+import {
+  HasChildState,
+  PublishesLastSavedState,
+  TrackContentfulRender,
+} from '@kbn/presentation-containers';
 import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -122,7 +126,11 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi, TrackContentfulRender
+  implements
+    DashboardExternallyAccessibleApi,
+    TrackContentfulRender,
+    HasChildState,
+    PublishesLastSavedState
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -566,7 +574,6 @@ export class DashboardContainer
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
-        version: serialized.version,
       };
     }
     return panel;
@@ -797,9 +804,18 @@ export class DashboardContainer
       },
     } = this.getState();
     const panel: DashboardPanelState | undefined = panels[childId];
+    if (!panel) return;
 
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
     return { rawState: panel?.explicitInput, version: panel?.version, references };
+  };
+
+  public getStateForChild = <SerializedState extends object = object>(childId: string) => {
+    const references = getReferencesForPanelId(childId, this.savedObjectReferences);
+    return {
+      rawState: this.getInput().panels[childId].explicitInput as SerializedState,
+      references,
+    };
   };
 
   public removePanel(id: string) {

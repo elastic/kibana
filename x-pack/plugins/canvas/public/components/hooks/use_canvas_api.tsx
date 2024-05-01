@@ -47,6 +47,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }) => {
         createNewEmbeddable(panelType, initialState);
       },
+      getStateForChild: () => undefined,
     } as CanvasContainerApi;
   }, [createNewEmbeddable]);
 

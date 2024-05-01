@@ -101,8 +101,6 @@ export {
   registerReactEmbeddableFactory,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
-  type ReactEmbeddableRegistration,
-  startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 
 export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
