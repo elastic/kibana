@@ -207,7 +207,7 @@ describe('duration anomaly alert', () => {
             'monitor.id': options.params.monitorId,
             'url.full': mockPing.url?.full,
             'anomaly.start': mockDate,
-            'anomaly.bucket_span.minutes': `${anomaly.source.bucket_span}`,
+            'anomaly.bucket_span.minutes': anomaly.source.bucket_span,
             'observer.geo.name': anomaly.entityValue,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
