@@ -210,4 +210,5 @@ export interface LLMModel {
   connectorName: string;
   icon: ComponentType;
   disabled: boolean;
+  promptTokenLimit?: number;
 }

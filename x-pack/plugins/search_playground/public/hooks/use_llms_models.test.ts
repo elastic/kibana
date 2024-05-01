@@ -43,16 +43,18 @@ describe('useLLMsModels Hook', () => {
         name: 'gpt-3.5-turbo ',
         showConnectorName: false,
         value: 'gpt-3.5-turbo',
+        promptTokenLimit: 16385,
       },
       {
         connectorId: 'connectorId1',
         connectorName: undefined,
         disabled: false,
         icon: expect.any(Function),
-        id: 'connectorId1gpt-4 ',
-        name: 'gpt-4 ',
+        id: 'connectorId1gpt-4-turbo ',
+        name: 'gpt-4-turbo ',
         showConnectorName: false,
-        value: 'gpt-4',
+        value: 'gpt-4-turbo',
+        promptTokenLimit: 128000,
       },
       {
         connectorId: 'connectorId2',
@@ -63,6 +65,7 @@ describe('useLLMsModels Hook', () => {
         name: 'Azure OpenAI ',
         showConnectorName: false,
         value: undefined,
+        promptTokenLimit: undefined,
       },
       {
         connectorId: 'connectorId2',
@@ -73,6 +76,7 @@ describe('useLLMsModels Hook', () => {
         name: 'Claude 3 Haiku',
         showConnectorName: false,
         value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
       },
       {
         connectorId: 'connectorId2',
@@ -83,6 +87,7 @@ describe('useLLMsModels Hook', () => {
         name: 'Claude 3 Sonnet',
         showConnectorName: false,
         value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
       },
     ]);
   });
