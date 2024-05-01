@@ -10,7 +10,6 @@ import { fireEvent, render, within } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import '../../../common/mock/match_media';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import type { AlertsTableComponentProps } from './alerts_grouping';
 import { GroupedAlertsTable } from './alerts_grouping';

@@ -75,7 +75,7 @@ describe('ReportingStore', () => {
         payload: {},
         meta: {},
       } as any);
-      expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
+      await expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
         `[Error: Report object from ES has missing fields!]`
       );
     });

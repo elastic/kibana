@@ -65,5 +65,6 @@ export interface ProfilingESClient {
     awsCostDiscountRate?: number;
     azureCostDiscountRate?: number;
     costPervCPUPerHour?: number;
+    durationSeconds: number;
   }): Promise<ESTopNFunctions>;
 }

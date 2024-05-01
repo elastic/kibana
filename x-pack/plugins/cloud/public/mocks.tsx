@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import type { CloudSetup, CloudStart } from './types';
 
@@ -35,7 +35,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
   };
 }
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <>{children}</>;
