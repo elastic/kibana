@@ -16,15 +16,15 @@ type GetPanelPlacementSettings<SerializedState extends object = object> = (
 const registry = new Map<string, GetPanelPlacementSettings<object>>();
 
 export const registerDashboardPanelPlacementSetting = (
-  panelType: string,
+  embeddableType: string,
   getPanelPlacementSettings: GetPanelPlacementSettings
 ) => {
-  if (registry.has(panelType)) {
-    throw new Error(panelPlacementStrings.getPanelPlacementSettingsExistsError(panelType));
+  if (registry.has(embeddableType)) {
+    throw new Error(panelPlacementStrings.getPanelPlacementSettingsExistsError(embeddableType));
   }
-  registry.set(panelType, getPanelPlacementSettings);
+  registry.set(embeddableType, getPanelPlacementSettings);
 };
 
-export const getDashboardPanelPlacementSetting = (panelType: string) => {
-  return registry.get(panelType);
+export const getDashboardPanelPlacementSetting = (embeddableType: string) => {
+  return registry.get(embeddableType);
 };

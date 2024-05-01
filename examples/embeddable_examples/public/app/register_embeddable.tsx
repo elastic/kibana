@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
 import registerSearchEmbeddableSource from '!!raw-loader!../react_embeddables/search/register_search_embeddable';
 // @ts-ignore
@@ -62,18 +62,12 @@ export const RegisterEmbeddable = () => {
       <EuiSpacer size="l" />
 
       <EuiText>
-        <h2>Specify panel placement settings (optional)</h2>
+        <h2>Configure initial dashboard placement (optional)</h2>
         <p>
-          Embeddable factories can specify placement settings for their embeddables. This is done by
-          registering an embeddable type with a <em>getPanelPlacementSettings</em> function using{' '}
-          <strong>registerDashboardPanelPlacementSetting</strong>. The{' '}
-          <em>getPanelPlacementSettings</em> function that takes the serialized state of the
-          embeddable and returns an object with optional width, height, and strategy properties. The
-          width and height properties are numbers that specify the dimensions of the panel in the
-          Dashboard where the max width is <EuiCode>48</EuiCode> and the max height is virtually
-          unlimited. The strategy property is an enum that specifies the placement strategy to use.
-          The example below shows how the Field List embeddable developer example specificies its
-          placement settings on a Dashboard.
+          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> to configure
+          initial dashboard placement. Panel placement lets you configure the width, height, and
+          placement strategy when panels get added to a dashboard. In the example below, the Field
+          List embeddable will be added to dashboards as a narrow and tall panel.
         </p>
       </EuiText>
       <EuiSpacer size="s" />

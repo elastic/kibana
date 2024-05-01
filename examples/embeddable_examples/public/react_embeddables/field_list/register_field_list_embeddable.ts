@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   registerDashboardPanelPlacementSetting,
   PanelPlacementStrategy,
 } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
-import { FieldListSerializedStateState, Services } from './types';
+import { FieldListSerializedStateState } from './types';
 
-const getPanelPlacementSettings = (serializedState?: FieldListSerializedStateState) => {
+const getPanelPlacementSetting = (serializedState?: FieldListSerializedStateState) => {
   // Consider using the serialized state to determine the width, height, and strategy
   return {
     width: 12,
@@ -24,10 +22,6 @@ const getPanelPlacementSettings = (serializedState?: FieldListSerializedStateSta
   };
 };
 
-export function registerFieldListEmbeddable(core: CoreStart, services: Services) {
-  registerDashboardPanelPlacementSetting(FIELD_LIST_ID, getPanelPlacementSettings);
-  registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
-    const { getFieldListFactory } = await import('./field_list_react_embeddable');
-    return getFieldListFactory(core, services);
-  });
+export function registerFieldListPanelPlacementSetting() {
+  registerDashboardPanelPlacementSetting(FIELD_LIST_ID, getPanelPlacementSetting);
 }
