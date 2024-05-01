@@ -36,6 +36,22 @@ const validateLogFunctions = (fnDef: ESQLFunction) => {
   return messages;
 };
 
+const dateDiffOptions = [
+  'year',
+  'quarter',
+  'month',
+  'dayofyear',
+  'day',
+  'week',
+  'weekday',
+  'hour',
+  'minute',
+  'second',
+  'millisecond',
+  'microsecond',
+  'nanosecond',
+];
+
 export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
     name: 'round',
@@ -520,6 +536,66 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         examples: [
           `ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06") | EVAL year = DATE_EXTRACT("year", date)`,
         ],
+      },
+    ],
+  },
+  {
+    name: 'date_diff',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dateDiffDoc', {
+      defaultMessage: `Subtracts the startTimestamp from the endTimestamp and returns the difference in multiples of unit. If startTimestamp is later than the endTimestamp, negative values are returned.`,
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'unit',
+            type: 'string',
+            literalOptions: dateDiffOptions,
+          },
+          { name: 'startTimestamp', type: 'date' },
+          { name: 'endTimestamp', type: 'date' },
+        ],
+        returnType: 'number',
+        examples: [],
+      },
+      {
+        params: [
+          {
+            name: 'unit',
+            type: 'string',
+            literalOptions: dateDiffOptions,
+          },
+          { name: 'startTimestamp', type: 'string', constantOnly: true },
+          { name: 'endTimestamp', type: 'date' },
+        ],
+        returnType: 'number',
+        examples: [],
+      },
+      {
+        params: [
+          {
+            name: 'unit',
+            type: 'string',
+            literalOptions: dateDiffOptions,
+          },
+          { name: 'startTimestamp', type: 'date' },
+          { name: 'endTimestamp', type: 'string', constantOnly: true },
+        ],
+        returnType: 'number',
+        examples: [],
+      },
+      {
+        params: [
+          {
+            name: 'unit',
+            type: 'string',
+            literalOptions: dateDiffOptions,
+          },
+          { name: 'startTimestamp', type: 'string', constantOnly: true },
+          { name: 'endTimestamp', type: 'string', constantOnly: true },
+        ],
+        returnType: 'number',
+        examples: [],
       },
     ],
   },

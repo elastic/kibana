@@ -943,6 +943,102 @@
       "warning": []
     },
     {
+      "query": "row var = date_diff(\"year\", now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row date_diff(\"year\", now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", to_datetime(\"a\"), to_datetime(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(5, 5, 5)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row date_diff(\"year\", \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", to_string(\"a\"), to_datetime(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(5, 5, 5)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row date_diff(\"year\", now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", to_datetime(\"a\"), to_string(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(5, 5, 5)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row date_diff(\"year\", \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(\"year\", to_string(\"a\"), to_string(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = date_diff(5, 5, 5)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]",
+        "Argument of [date_diff] must be [date], found value [5] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", now())",
       "error": [],
       "warning": []
@@ -7098,6 +7194,62 @@
       "warning": []
     },
     {
+      "query": "from a_index | where date_diff(\"year\", dateField, dateField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(numberField, numberField, numberField) > 0",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(\"year\", stringField, dateField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(numberField, numberField, numberField) > 0",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(\"year\", dateField, stringField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(numberField, numberField, numberField) > 0",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(\"year\", stringField, stringField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where date_diff(numberField, numberField, numberField) > 0",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where e() > 0",
       "error": [],
       "warning": []
@@ -9118,6 +9270,130 @@
       "query": "from a_index | eval var = cosh(*)",
       "error": [
         "Using wildcards (*) in cosh is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_datetime(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, numberField, numberField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", stringField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", stringField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_string(stringField), to_datetime(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, numberField, numberField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", stringField, dateField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", dateField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_string(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, numberField, numberField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, stringField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_string(stringField), to_string(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, numberField, numberField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", stringField, stringField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
       ],
       "warning": []
     },

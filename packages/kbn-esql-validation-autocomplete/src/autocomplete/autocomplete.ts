@@ -1043,6 +1043,8 @@ async function getFieldsOrFunctionsSuggestions(
   return suggestions;
 }
 
+const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);
+
 async function getFunctionArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
@@ -1078,19 +1080,34 @@ async function getFunctionArgsSuggestions(
     argIndex -= 1;
   }
 
-  const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
-    const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
-    return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
-  }, [] as string[]);
-
-  if (literalOptions.length) {
-    return buildValueDefinitions(literalOptions);
-  }
-
   const arg = node.args[argIndex];
 
   // the first signature is used as reference
   const refSignature = fnDefinition.signatures[0];
+
+  const hasMoreMandatoryArgs =
+    (refSignature.params.length >= argIndex &&
+      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+        0) ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
+
+  const literalOptions = Array.from(
+    new Set(
+      fnDefinition.signatures.reduce<string[]>((acc, signature) => {
+        const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
+        return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
+      }, [] as string[])
+    )
+  );
+
+  if (literalOptions.length) {
+    return buildValueDefinitions(literalOptions).map((suggestion) => ({
+      ...suggestion,
+      text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', suggestion.text),
+    }));
+  }
 
   const suggestions = [];
   const noArgDefined = !arg;
@@ -1183,14 +1200,6 @@ async function getFunctionArgsSuggestions(
     );
   }
 
-  const hasMoreMandatoryArgs =
-    (refSignature.params.length >= argIndex &&
-      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-        0) ||
-    ('minParams' in refSignature && refSignature.minParams
-      ? refSignature.minParams - 1 > argIndex
-      : false);
-
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
@@ -1233,7 +1242,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ text, ...rest }) => ({
     ...rest,
-    text: hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${text},` : text,
+    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', text),
   }));
 }
 
