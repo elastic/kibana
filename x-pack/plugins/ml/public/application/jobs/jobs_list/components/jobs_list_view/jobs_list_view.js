@@ -26,7 +26,11 @@ import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_no
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
 
-import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import {
+  BLOCKED_JOBS_REFRESH_INTERVAL_MS,
+  BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS,
+  BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
+} from '../../../../../../common/constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
@@ -49,6 +53,7 @@ export class JobsListView extends Component {
       itemIdToExpandedRowMap: {},
       filterClauses: [],
       blockingJobIds: [],
+      blockingJobsFirstFoundMs: null,
       jobsAwaitingNodeCount: 0,
     };
 
@@ -350,14 +355,17 @@ export class JobsListView extends Component {
       });
 
       this.isDoneRefreshing();
-      if (
-        blockingJobsRefreshTimeout === null &&
-        jobsSummaryList.some((j) => j.blocked !== undefined)
-      ) {
+      if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
         // if there are some jobs in a deleting state, start polling for
         // deleting jobs so we can update the jobs list once the
         // deleting tasks are over
         this.checkBlockingJobTasks(true);
+        if (this.state.blockingJobsFirstFoundMs === null) {
+          // keep a record of when the first blocked job was found
+          this.setState({ blockingJobsFirstFoundMs: Date.now() });
+        }
+      } else {
+        this.setState({ blockingJobsFirstFoundMs: null });
       }
     } catch (error) {
       console.error(error);
@@ -366,7 +374,7 @@ export class JobsListView extends Component {
   }
 
   async checkBlockingJobTasks(forceRefresh = false) {
-    if (this._isMounted === false) {
+    if (this._isMounted === false || blockingJobsRefreshTimeout !== null) {
       return;
     }
 
@@ -384,12 +392,22 @@ export class JobsListView extends Component {
       this.refreshJobSummaryList();
     }
 
-    if (blockingJobIds.length > 0 && blockingJobsRefreshTimeout === null) {
+    if (this.state.blockingJobsFirstFoundMs !== null || blockingJobIds.length > 0) {
       blockingJobsRefreshTimeout = setTimeout(() => {
         blockingJobsRefreshTimeout = null;
         this.checkBlockingJobTasks();
-      }, DELETING_JOBS_REFRESH_INTERVAL_MS);
+      }, this.getBlockedJobsRefreshInterval());
     }
+  }
+
+  getBlockedJobsRefreshInterval() {
+    const runningTimeMs = Date.now() - this.state.blockingJobsFirstFoundMs;
+    if (runningTimeMs > BLOCKED_JOBS_REFRESH_THRESHOLD_MS) {
+      // if the jobs have been in a blocked state for more than a minute
+      // increase the polling interval
+      return BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS;
+    }
+    return BLOCKED_JOBS_REFRESH_INTERVAL_MS;
   }
 
   renderJobsListComponents() {

@@ -17,7 +17,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -32,7 +32,7 @@ const setupDeps = {
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
-  server = createHttpServer({ logger });
+  server = createHttpService({ logger });
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
@@ -333,15 +333,15 @@ describe('Options', () => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
-            request.write(body[i++]);
+            void request.write(body[i++]);
           } else {
             clearInterval(intervalId);
-            request.end((err, res) => {
+            void request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
-        request.on('error', (err) => {
+        void request.on('error', (err) => {
           clearInterval(intervalId);
           reject(err);
         });
@@ -1340,6 +1340,74 @@ describe('Response factory', () => {
               bar: schema.string(),
               baz: schema.number(),
             }),
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then((res) => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
+    });
+
+    it('@kbn/config-schema validation in request.body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      const runtimeValidation = schema.object({
+        bar: schema.string(),
+        baz: schema.number(),
+      });
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            request: {
+              body: runtimeValidation,
+            },
+            response: {
+              200: {
+                body: () => runtimeValidation,
+              },
+            },
           },
         },
         (context, req, res) => {

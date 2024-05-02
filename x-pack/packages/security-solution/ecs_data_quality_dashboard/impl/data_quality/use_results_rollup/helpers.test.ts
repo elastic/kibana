@@ -21,9 +21,8 @@ import {
   packetbeatNoResults,
   packetbeatWithSomeErrors,
 } from '../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { DataQualityCheckResult, PatternRollup } from '../types';
+import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../types';
 import { EMPTY_STAT } from '../helpers';
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { alertIndexWithAllResults } from '../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { EcsVersion } from '@elastic/ecs';
@@ -168,14 +167,14 @@ describe('helpers', () => {
   });
 
   describe('updateResultOnCheckCompleted', () => {
-    const packetbeatStats861: IndicesStatsIndicesStats =
+    const packetbeatStats861: MeteringStatsIndex =
       mockPacketbeatPatternRollup.stats != null
         ? mockPacketbeatPatternRollup.stats['.ds-packetbeat-8.6.1-2023.02.04-000001']
-        : {};
-    const packetbeatStats853: IndicesStatsIndicesStats =
+        : ({} as MeteringStatsIndex);
+    const packetbeatStats853: MeteringStatsIndex =
       mockPacketbeatPatternRollup.stats != null
         ? mockPacketbeatPatternRollup.stats['.ds-packetbeat-8.5.3-2023.02.04-000001']
-        : {};
+        : ({} as MeteringStatsIndex);
 
     test('it returns the updated rollups', () => {
       expect(

@@ -23,17 +23,17 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingFunctional.teardownEcommerce();
     });
 
-    describe('Dashboard: Download CSV file', () => {
+    describe('Dashboard: Generate CSV report', () => {
       it('does not allow user that does not have reporting privileges', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvNotAvailable('Ecommerce Data');
+        await reportingFunctional.tryDashboardGenerateCsvNotAvailable('Ecommerce Data');
       });
 
       it('does allow user with reporting privileges', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
+        await reportingFunctional.tryDashboardGenerateCsvSuccess('Ecommerce Data');
       });
     });
 

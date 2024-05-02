@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const defaultIsDuplicate = (oldItem: any, newItem: any) => {

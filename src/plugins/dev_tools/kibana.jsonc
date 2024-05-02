@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/dev-tools-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "devTools",
     "server": true,

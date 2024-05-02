@@ -22,15 +22,19 @@ import { useHealthContext } from '../../context/health_context';
 interface RuleAddFooterProps {
   isSaving: boolean;
   isFormLoading: boolean;
+  isRuleValid: boolean;
   onSave: () => void;
   onCancel: () => void;
+  onShowRequest: () => void;
 }
 
 export const RuleAddFooter = ({
   isSaving,
   onSave,
   onCancel,
+  onShowRequest,
   isFormLoading,
+  isRuleValid,
 }: RuleAddFooterProps) => {
   const { loadingHealthCheck } = useHealthContext();
 
@@ -53,21 +57,39 @@ export const RuleAddFooter = ({
           <></>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            color="success"
-            data-test-subj="saveRuleButton"
-            type="submit"
-            iconType="check"
-            isDisabled={loadingHealthCheck}
-            isLoading={isSaving}
-            onClick={onSave}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleAddFooter.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="primary"
+                data-test-subj="showRequestButton"
+                isDisabled={loadingHealthCheck || !isRuleValid}
+                onClick={onShowRequest}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleAddFooter.showRequestButtonLabel"
+                  defaultMessage="Show API request"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="success"
+                data-test-subj="saveRuleButton"
+                type="submit"
+                iconType="check"
+                isDisabled={loadingHealthCheck}
+                isLoading={isSaving}
+                onClick={onSave}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleAddFooter.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

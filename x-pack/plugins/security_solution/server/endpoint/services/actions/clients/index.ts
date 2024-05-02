@@ -8,5 +8,5 @@
 export * from './endpoint/endpoint_actions_client';
 export * from './sentinelone/sentinel_one_actions_client';
 export * from './get_response_actions_client';
-
 export * from './lib/types';
+export * from './lib/normalized_external_connector_client';

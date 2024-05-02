@@ -40,18 +40,14 @@ import {
   findSharedExceptionListItemsByName,
 } from '../../../../../tasks/exceptions_table';
 import { visitRuleDetailsPage } from '../../../../../tasks/rule_details';
-import {
-  deleteAlertsAndRules,
-  deleteEndpointExceptionList,
-  deleteExceptionLists,
-} from '../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { deleteExceptionLists } from '../../../../../tasks/api_calls/exceptions';
 
 describe('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
     deleteExceptionLists();
-    deleteEndpointExceptionList();
     createRule(getNewRule()).as('createdRule');
     visit(EXCEPTIONS_URL);
   });

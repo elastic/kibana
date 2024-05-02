@@ -6,8 +6,12 @@ echo '--- Log out of gcloud'
 ./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
 ./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
 
-echo '--- Agent Debug Info'
-ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
+if [[ "${SKIP_NODE_SETUP:-}" =~ ^(1|true)$ ]]; then
+  echo '--- Skipping Agent Debug Info'
+else
+  echo '--- Agent Debug Info'
+  ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
+fi
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
 

@@ -37,9 +37,12 @@ export const startBasicLicense =
       //messages coming back in arrays
       const messages = Object.values(acknowledge)
         .slice(1)
-        .map((item) => {
-          return item[0];
-        });
+        .reduce((acc, item) => {
+          item.forEach((message) => {
+            acc.push(message);
+          });
+          return acc;
+        }, []);
       const first = i18n.translate(
         'xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage',
         {

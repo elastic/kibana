@@ -121,6 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - Create drilldown panel', async () => {
       await dashboardPanelActions.toggleContextMenu(header);
+      await testSubjects.click('embeddablePanelMore-mainMenu');
       await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
       await a11y.testAppSnapshot();
       await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
@@ -136,6 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - manage drilldown', async () => {
       await dashboardPanelActions.toggleContextMenu(header);
+      await testSubjects.click('embeddablePanelMore-mainMenu');
       await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN');
       await a11y.testAppSnapshot();
       await testSubjects.click('euiFlyoutCloseButton');
@@ -148,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - save to library', async () => {
       await dashboardPanelActions.openContextMenuMorePanel(header);
-      await testSubjects.click('embeddablePanelAction-saveToLibrary');
+      await testSubjects.click('embeddablePanelAction-legacySaveToLibrary');
       await a11y.testAppSnapshot();
       await testSubjects.click('saveCancelButton');
     });

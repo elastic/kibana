@@ -30,7 +30,7 @@ describe('fetchAgentMetrics', () => {
   });
 
   it('should not fetch agent if .fleet-agents is not created', async () => {
-    esClient.indices.get.mockRejectedValue({ statusCode: 404 });
+    esClient.indices.exists.mockResolvedValue(false);
 
     const result = await fetchAgentMetrics(mockCore, abortController);
 
@@ -71,6 +71,22 @@ describe('fetchAgentMetrics', () => {
             },
           ],
         },
+        unhealthy_reason: {
+          buckets: [
+            {
+              key: 'input',
+              doc_count: 2,
+            },
+            {
+              key: 'output',
+              doc_count: 1,
+            },
+            {
+              key: 'other',
+              doc_count: 3,
+            },
+          ],
+        },
       },
     });
 
@@ -94,6 +110,11 @@ describe('fetchAgentMetrics', () => {
         rollback: 0,
         scheduled: 0,
         watching: 0,
+      },
+      unhealthy_reason: {
+        input: 2,
+        output: 1,
+        other: 3,
       },
     });
   });

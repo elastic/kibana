@@ -44,6 +44,7 @@ import {
   useRadioInput,
   sendPutOutput,
   useKeyValueInput,
+  useAuthz,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -155,6 +156,7 @@ function extractKafkaOutputSecrets(
 
 export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
   const fleetStatus = useFleetStatus();
+  const authz = useAuthz();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
@@ -173,6 +175,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   function isDisabled(
     field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
   ) {
+    if (!authz.fleet.allSettings) {
+      return true;
+    }
+
     if (!isPreconfigured) {
       return false;
     }

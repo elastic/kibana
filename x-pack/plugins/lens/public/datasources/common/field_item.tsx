@@ -22,7 +22,7 @@ import {
   FieldItemButton,
   type GetCustomFieldType,
 } from '@kbn/unified-field-list';
-import { DragDrop } from '@kbn/dom-drag-drop';
+import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DatasourceDataPanelProps } from '../../types';
@@ -200,19 +200,18 @@ export function InnerFieldItem(props: FieldItemProps) {
         closePopover={closePopover}
         panelClassName="lnsFieldItem__fieldPanel"
         initialFocus=".lnsFieldItem__fieldPanel"
-        className="lnsFieldItem__popoverAnchor"
         data-test-subj="lnsFieldListPanelField"
         panelProps={{
           'data-test-subj': 'lnsFieldListPanelFieldContent',
         }}
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
-          <DragDrop
-            draggable
-            order={order}
+          <Draggable
+            dragType="copy"
             value={value}
-            dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+            order={order}
             onDragStart={closePopover}
+            dataTestSubj={`lnsFieldListPanelField-${field.name}`}
           >
             {isTextBasedColumnField(field) ? (
               <FieldItemButton<DatatableColumn>
@@ -223,7 +222,7 @@ export function InnerFieldItem(props: FieldItemProps) {
             ) : (
               <FieldItemButton field={field} {...commonFieldItemButtonProps} />
             )}
-          </DragDrop>
+          </Draggable>
         }
         renderHeader={() => {
           return (

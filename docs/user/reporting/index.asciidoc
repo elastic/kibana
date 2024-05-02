@@ -15,7 +15,7 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *PNG Reports* &mdash; Generate and download PNG files of dashboards and visualizations. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *CSV Reports* &mdash; Generate and download CSV files of saved searches. <<csv-limitations,Certain limitations apply>>.
+* *CSV Reports* &mdash; Generate CSV reports of saved searches. <<csv-limitations,Certain limitations apply>>.
 
 * *CSV Download* &mdash; Generate and download CSV files of *Lens* visualizations.
 

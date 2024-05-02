@@ -12,7 +12,8 @@ The {es} query rule type runs a user-configured query, compares the number of
 matches to a configured threshold, and schedules actions to run when the 
 threshold condition is met.
 
-In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*, fill in the name and optional tags, then select *{es} query*.
+In *{stack-manage-app}* > *{rules-ui}*, click *Create rule*.
+Select the *{es} query* rule type then fill in the name and optional tags.
 An {es} query rule can be defined using {es} Query Domain Specific Language (DSL), {es} Query Language (ES|QL), {kib} Query Language (KQL), or Lucene.
 
 [float]
@@ -81,7 +82,10 @@ This option is not available when you use a grouping field.
 Generally this value should be set to a value that is smaller than the time window, to avoid gaps in 
 detection.
 
-7. Select a scope value, which affects the <<kibana-feature-privileges,{kib} feature privileges>> that are required to access the rule.
+7. In the advanced options, you can change the number of consecutive runs that must meet the rule conditions before an alert occurs.
+  The default value is `1`.
+
+8. Select a scope value, which affects the <<kibana-feature-privileges,{kib} feature privileges>> that are required to access the rule.
 For example when it's set to `Stack Rules`, you must have the appropriate *Management > {stack-rules-feature}* feature privileges to view or edit the rule.
 
 [float]

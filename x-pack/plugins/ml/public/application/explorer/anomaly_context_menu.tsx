@@ -38,6 +38,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { useTableSeverity } from '../components/controls/select_severity';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/anomaly_charts_embeddable';
@@ -51,7 +52,6 @@ import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
-import type { TimeRangeBounds } from '../util/time_buckets';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];

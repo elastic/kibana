@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
-import { mergeScan } from 'rxjs/operators';
+import { mergeScan } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';

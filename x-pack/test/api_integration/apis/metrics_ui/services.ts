@@ -7,26 +7,40 @@
 
 import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
-import { FtrProviderContext } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const SERVICES_ENDPOINT = '/api/infra/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const synthtrace = getService('apmSynthtraceEsClient');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const esClient = getService('es');
+
   describe('GET /infra/services', () => {
+    let synthtraceApmClient: ApmSynthtraceEsClient;
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
-    // FLAKY: https://github.com/elastic/kibana/issues/176950
-    describe.skip('with transactions', () => {
-      before(async () => {
-        await synthtrace.index(
-          generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
-        );
+    before(async () => {
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
+        client: esClient,
+        packageVersion: version,
       });
-      after(() => synthtrace.clean());
+    });
+    after(async () => apmSynthtraceKibanaClient.uninstallApmPackage());
+
+    describe('with transactions', () => {
+      before(async () =>
+        synthtraceApmClient.index(
+          generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
+        )
+      );
+      after(async () => synthtraceApmClient.clean());
+
       it('returns no services with no data', async () => {
         const filters = JSON.stringify({
           'host.name': 'some-host',
@@ -82,14 +96,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/176967
-    describe.skip('with logs only', () => {
-      before(async () => {
-        await synthtrace.index(
+    describe('with logs only', () => {
+      before(async () =>
+        synthtraceApmClient.index(
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
-        );
-      });
-      after(() => synthtrace.clean());
+        )
+      );
+      after(async () => synthtraceApmClient.clean());
       it('should return services with logs only data', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',

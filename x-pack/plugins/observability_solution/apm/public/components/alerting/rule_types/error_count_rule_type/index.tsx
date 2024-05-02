@@ -10,21 +10,14 @@ import { defaults, omit } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ForLastExpression,
-  TIME_UNITS,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
 import { SearchConfigurationType } from '../../../../../common/rules/schema';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -94,25 +87,22 @@ export function ErrorCountRuleType(props: Props) {
         windowUnit: params.windowUnit,
       });
       if (params.windowSize && start && end) {
-        return callApmApi(
-          'GET /internal/apm/rule_types/error_count/chart_preview',
-          {
-            params: {
-              query: {
-                environment: params.environment,
-                serviceName: params.serviceName,
-                errorGroupingKey: params.errorGroupingKey,
-                interval,
-                start,
-                end,
-                groupBy: params.groupBy,
-                searchConfiguration: params.searchConfiguration?.query?.query
-                  ? JSON.stringify(params.searchConfiguration)
-                  : undefined,
-              },
+        return callApmApi('GET /internal/apm/rule_types/error_count/chart_preview', {
+          params: {
+            query: {
+              environment: params.environment,
+              serviceName: params.serviceName,
+              errorGroupingKey: params.errorGroupingKey,
+              interval,
+              start,
+              end,
+              groupBy: params.groupBy,
+              searchConfiguration: params.searchConfiguration?.query?.query
+                ? JSON.stringify(params.searchConfiguration)
+                : undefined,
             },
-          }
-        );
+          },
+        });
       }
     },
     [
@@ -147,10 +137,7 @@ export function ErrorCountRuleType(props: Props) {
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) =>
-        setRuleParams(
-          'environment',
-          value !== '' ? value : ENVIRONMENT_ALL.value
-        )
+        setRuleParams('environment', value !== '' ? value : ENVIRONMENT_ALL.value)
       }
       serviceName={params.serviceName}
     />,
@@ -170,12 +157,8 @@ export function ErrorCountRuleType(props: Props) {
       onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(timeWindowSize) =>
-        setRuleParams('windowSize', timeWindowSize || '')
-      }
-      onChangeWindowUnit={(timeWindowUnit) =>
-        setRuleParams('windowUnit', timeWindowUnit)
-      }
+      onChangeWindowSize={(timeWindowSize) => setRuleParams('windowSize', timeWindowSize || '')}
+      onChangeWindowUnit={(timeWindowUnit) => setRuleParams('windowUnit', timeWindowUnit)}
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
@@ -185,10 +168,7 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  const fields = [
-    ...(!ruleParams.useKqlFilter ? filterFields : []),
-    ...criteriaFields,
-  ];
+  const fields = [...(!ruleParams.useKqlFilter ? filterFields : []), ...criteriaFields];
 
   const errorCountChartPreview = data?.errorCountChartPreview;
   const series = errorCountChartPreview?.series ?? [];
@@ -216,19 +196,13 @@ export function ErrorCountRuleType(props: Props) {
   const groupAlertsBy = (
     <>
       <EuiFormRow
-        label={i18n.translate(
-          'xpack.apm.ruleFlyout.errorCount.createAlertPerText',
-          {
-            defaultMessage: 'Group alerts by',
-          }
-        )}
-        helpText={i18n.translate(
-          'xpack.apm.ruleFlyout.errorCount.createAlertPerHelpText',
-          {
-            defaultMessage:
-              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',
-          }
-        )}
+        label={i18n.translate('xpack.apm.ruleFlyout.errorCount.createAlertPerText', {
+          defaultMessage: 'Group alerts by',
+        })}
+        helpText={i18n.translate('xpack.apm.ruleFlyout.errorCount.createAlertPerHelpText', {
+          defaultMessage:
+            'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',
+        })}
         fullWidth
         display="rowCompressed"
       >

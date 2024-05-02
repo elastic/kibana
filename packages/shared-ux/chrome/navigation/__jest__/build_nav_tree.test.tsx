@@ -129,11 +129,7 @@ describe('builds navigation tree', () => {
     ]);
 
     const navTree: NavigationTreeDefinitionUI = {
-      body: [
-        {
-          type: 'recentlyAccessed',
-        },
-      ],
+      body: [{ type: 'recentlyAccessed' }],
     };
 
     const { findByTestId } = renderNavigation({
@@ -145,5 +141,31 @@ describe('builds navigation tree', () => {
     expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
       'RecentThis is an exampleAnother example'
     );
+  });
+
+  test('should limit the number of recently accessed items to 5', async () => {
+    const recentlyAccessed$ = of([
+      { label: 'Item1', link: '/app/foo/1', id: '1' },
+      { label: 'Item2', link: '/app/foo/2', id: '2' },
+      { label: 'Item3', link: '/app/foo/3', id: '3' },
+      { label: 'Item4', link: '/app/foo/4', id: '4' },
+      { label: 'Item5', link: '/app/foo/5', id: '5' },
+      { label: 'Item6', link: '/app/foo/6', id: '6' },
+      { label: 'Item7', link: '/app/foo/7', id: '7' },
+    ]);
+
+    const navTree: NavigationTreeDefinitionUI = {
+      body: [{ type: 'recentlyAccessed' }],
+    };
+
+    const { queryAllByTestId } = renderNavigation({
+      navTreeDef: of(navTree),
+      services: { recentlyAccessed$ },
+    });
+
+    const items = await queryAllByTestId(/nav-recentlyAccessed-item/);
+    expect(items).toHaveLength(5);
+    const itemsText = items.map((item) => item.textContent);
+    expect(itemsText).toEqual(['Item1', 'Item2', 'Item3', 'Item4', 'Item5']);
   });
 });

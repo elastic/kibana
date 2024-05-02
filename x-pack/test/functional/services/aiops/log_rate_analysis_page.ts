@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { decode } from '@kbn/rison';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -108,6 +108,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(`aiopsSearchPanel`);
     },
 
+    async assertChangePointDetectedPromptExists() {
+      await testSubjects.existOrFail(`aiopsChangePointDetectedPrompt`);
+    },
+
     async assertNoWindowParametersEmptyPromptExists() {
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
     },
@@ -127,6 +131,16 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
         .perform();
 
       await this.assertHistogramBrushesExist();
+    },
+
+    async clickNoAutoRunButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
+      });
     },
 
     async clickRerunAnalysisButton(shouldRerun: boolean) {
@@ -244,6 +258,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
       );
+    },
+
+    async assertNoAutoRunButtonExists() {
+      await testSubjects.existOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
     },
 
     async assertProgressTitle(expectedProgressTitle: string) {

@@ -18,7 +18,7 @@ import {
   RULE_NAME_OVERRIDE_DETAILS,
 } from '../../../../screens/rule_details';
 
-import { ESQL_TYPE, ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
+import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
 import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
@@ -71,9 +71,6 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
-
-      // ensures ES|QL rule in technical preview on create page
-      cy.get(ESQL_TYPE).contains('Technical Preview');
 
       fillDefineEsqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
@@ -141,7 +138,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       cy.get(ESQL_QUERY_BAR).should('not.be.visible');
     });
 
-    it('shows error when non-aggregating ES|QL query does not [metadata] operator', function () {
+    it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
       workaroundForResizeObserver();
 
       const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
@@ -151,7 +148,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains(
-        'must include the [metadata _id, _version, _index] operator after the source command'
+        'must include the "metadata _id, _version, _index" operator after the source command'
       );
     });
 
@@ -159,7 +156,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       workaroundForResizeObserver();
 
       const invalidNonAggregatingQuery =
-        'from auditbeat* [metadata _id, _version, _index] | keep agent.* | limit 5';
+        'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
 
       selectEsqlRuleType();
       expandEsqlQueryBar();
@@ -167,14 +164,14 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       getDefineContinueButton().click();
 
       cy.get(ESQL_QUERY_BAR).contains(
-        'must include the [metadata _id, _version, _index] operator after the source command'
+        'must include the "metadata _id, _version, _index" operator after the source command'
       );
     });
 
     it('shows error when ES|QL query is invalid', function () {
       workaroundForResizeObserver();
       const invalidEsqlQuery =
-        'from auditbeat* [metadata _id, _version, _index] | not_existing_operator';
+        'from auditbeat* metadata _id, _version, _index | not_existing_operator';
       visit(CREATE_RULE_URL);
 
       selectEsqlRuleType();
@@ -194,7 +191,7 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
     it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
       const CUSTOM_ESQL_FIELD = '_custom_agent_name';
       const queryWithCustomFields = [
-        `from auditbeat* [metadata _id, _version, _index]`,
+        `from auditbeat* metadata _id, _version, _index`,
         `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
         `keep _id, _custom_agent_name`,
         `limit 5`,

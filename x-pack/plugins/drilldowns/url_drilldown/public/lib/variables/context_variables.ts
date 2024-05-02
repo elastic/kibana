@@ -15,7 +15,7 @@ import type {
   HasUniqueId,
   PublishesPanelTitle,
   PublishesSavedObjectId,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
   PublishesDataViews,
 } from '@kbn/presentation-publishing';
 import { getPanelTitle } from '@kbn/presentation-publishing';
@@ -68,9 +68,9 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
     HasUniqueId &
       PublishesPanelTitle &
       PublishesSavedObjectId &
-      PublishesLocalUnifiedSearch &
+      PublishesUnifiedSearch &
       PublishesDataViews &
-      HasParentApi<Partial<PublishesLocalUnifiedSearch>>
+      HasParentApi<Partial<PublishesUnifiedSearch>>
   >;
   const dataViewIds = api.dataViews?.value
     ? (api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
@@ -81,9 +81,9 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
       id: api.uuid,
       title: getPanelTitle(api),
       savedObjectId: api.savedObjectId?.value,
-      query: api.parentApi?.localQuery?.value,
-      timeRange: api.localTimeRange?.value ?? api.parentApi?.localTimeRange?.value,
-      filters: api.parentApi?.localFilters?.value,
+      query: api.parentApi?.query$?.value,
+      timeRange: api.timeRange$?.value ?? api.parentApi?.timeRange$?.value,
+      filters: api.parentApi?.filters$?.value,
       indexPatternIds: dataViewIds.length > 1 ? dataViewIds : undefined,
       indexPatternId: dataViewIds.length === 1 ? dataViewIds[0] : undefined,
     }),

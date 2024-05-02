@@ -7,7 +7,7 @@
 
 import { FormulaPublicApi, HeatmapVisualizationState } from '@kbn/lens-plugin/public';
 
-import { euiPaletteNegative } from '@elastic/eui';
+import { euiPaletteRed } from '@elastic/eui';
 import { ColorStop } from '@kbn/coloring';
 import { LayerConfig } from '../lens_attributes';
 import { SingleMetricLensAttributes } from './single_metric_attributes';
@@ -52,7 +52,7 @@ export class HeatMapLensAttributes extends SingleMetricLensAttributes {
   }
 
   getHeatmapState() {
-    const negativePalette = euiPaletteNegative(5);
+    const negativePalette = euiPaletteRed(5);
     const layerConfig = this.layerConfigs[0];
 
     return {

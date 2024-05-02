@@ -15,7 +15,7 @@ import {
   tap,
   BehaviorSubject,
 } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';

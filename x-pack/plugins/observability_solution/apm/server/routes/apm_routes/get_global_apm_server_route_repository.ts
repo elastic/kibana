@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  EndpointOf,
-  ReturnOf,
-  ServerRouteRepository,
-} from '@kbn/server-route-repository';
+import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
 import { agentExplorerRouteRepository } from '../agent_explorer/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';
+import { assistantRouteRepository } from '../assistant_functions/route';
 import { correlationsRouteRepository } from '../correlations/route';
+import { serviceDashboardsRouteRepository } from '../custom_dashboards/route';
 import { dataViewRouteRepository } from '../data_view/route';
 import { debugTelemetryRoute } from '../debug_telemetry/route';
 import { dependencisRouteRepository } from '../dependencies/route';
+import { diagnosticsRepository } from '../diagnostics/route';
 import { environmentsRouteRepository } from '../environments/route';
 import { errorsRouteRepository } from '../errors/route';
 import { eventMetadataRouteRepository } from '../event_metadata/route';
@@ -28,6 +27,8 @@ import { latencyDistributionRouteRepository } from '../latency_distribution/rout
 import { metricsRouteRepository } from '../metrics/route';
 import { mobileRouteRepository } from '../mobile/route';
 import { observabilityOverviewRouteRepository } from '../observability_overview/route';
+import { profilingHostsRouteRepository } from '../profiling/hosts/route';
+import { profilingRouteRepository } from '../profiling/route';
 import { serviceRouteRepository } from '../services/route';
 import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
@@ -35,7 +36,6 @@ import { agentConfigurationRouteRepository } from '../settings/agent_configurati
 import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
 import { apmIndicesRouteRepository } from '../settings/apm_indices/route';
 import { customLinkRouteRepository } from '../settings/custom_link/route';
-import { diagnosticsRepository } from '../diagnostics/route';
 import { labsRouteRepository } from '../settings/labs/route';
 import { sourceMapsRouteRepository } from '../source_maps/route';
 import { spanLinksRouteRepository } from '../span_links/route';
@@ -44,9 +44,6 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { assistantRouteRepository } from '../assistant_functions/route';
-import { profilingRouteRepository } from '../profiling/route';
-import { serviceDashboardsRouteRepository } from '../custom_dashboards/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
@@ -86,6 +83,7 @@ function getTypedGlobalApmServerRouteRepository() {
     ...diagnosticsRepository,
     ...assistantRouteRepository,
     ...profilingRouteRepository,
+    ...profilingHostsRouteRepository,
     ...serviceDashboardsRouteRepository,
   };
 
@@ -96,9 +94,7 @@ const getGlobalApmServerRouteRepository = (): ServerRouteRepository => {
   return getTypedGlobalApmServerRouteRepository();
 };
 
-export type APMServerRouteRepository = ReturnType<
-  typeof getTypedGlobalApmServerRouteRepository
->;
+export type APMServerRouteRepository = ReturnType<typeof getTypedGlobalApmServerRouteRepository>;
 
 // Ensure no APIs return arrays (or, by proxy, the any type),
 // to guarantee compatibility with _inspect.

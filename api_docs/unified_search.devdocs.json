@@ -27,15 +27,15 @@
             "section": "def-public.TimefilterContract",
             "text": "TimefilterContract"
           },
-          ", theme: ",
+          ", core: ",
           {
-            "pluginId": "@kbn/core-theme-browser",
+            "pluginId": "@kbn/core-lifecycle-browser",
             "scope": "common",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
+            "text": "CoreSetup"
           },
-          ", id: string, type: string) => ",
+          "<object, unknown>, id: string, type: string) => ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -104,16 +104,17 @@
             "id": "def-public.createFilterAction.$3",
             "type": "Object",
             "tags": [],
-            "label": "theme",
+            "label": "core",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/core-theme-browser",
+                "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
@@ -458,7 +459,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -466,7 +467,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -488,7 +489,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -496,7 +497,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -727,7 +728,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; hideTextBasedRunQueryLabel?: boolean | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",

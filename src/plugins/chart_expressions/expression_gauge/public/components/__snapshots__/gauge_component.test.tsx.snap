@@ -407,6 +407,13 @@ exports[`GaugeComponent renders the chart 1`] = `
           "spacingBuffer": 10,
           "verticalWidth": 200,
         },
+        "lineAnnotation": Object {
+          "line": Object {
+            "opacity": 1,
+            "stroke": "#69707D",
+            "strokeWidth": 1,
+          },
+        },
         "lineSeriesStyle": Object {
           "fit": Object {
             "line": Object {
@@ -505,6 +512,12 @@ exports[`GaugeComponent renders the chart 1`] = `
           "sectorLineStroke": "#FFF",
           "sectorLineWidth": 1.5,
         },
+        "rectAnnotation": Object {
+          "fill": "#69707D",
+          "opacity": 0.25,
+          "stroke": "#69707D",
+          "strokeWidth": 0,
+        },
         "scales": Object {
           "barsPadding": 0.25,
           "histogramPadding": 0.05,
@@ -546,28 +559,41 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
   />
-  <Goal
-    actual={3}
-    bandFillColor={[Function]}
-    bands={
+  <Bullet
+    colorBands={
       Array [
-        0,
-        4,
+        "#D3DAE6",
+        "#D3DAE6",
       ]
     }
-    base={0}
-    domain={
+    data={
+      Array [
+        Array [
+          Object {
+            "domain": Array [
+              0,
+              4,
+            ],
+            "subtitle": undefined,
+            "target": undefined,
+            "tickFormatter": [Function],
+            "ticks": undefined,
+            "title": "Count of records",
+            "value": 3,
+            "valueFormatter": [Function],
+          },
+        ],
+      ]
+    }
+    id="bullet"
+    subtype="vertical"
+    valueLabels={
       Object {
-        "max": 4,
-        "min": 0,
+        "active": "Current",
+        "target": "Goal",
+        "value": "Count of records",
       }
     }
-    id="goal"
-    labelMajor="Count of records   "
-    labelMinor=""
-    subtype="verticalBullet"
-    tickValueFormatter={[Function]}
-    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

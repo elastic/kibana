@@ -24,14 +24,14 @@
       "licensing",
       "observability",
       "observabilityShared",
-      "observabilityAIAssistant",
       "ruleRegistry",
       "security",
       "share",
       "taskManager",
       "triggersActionsUi",
       "usageCollection",
-      "bfetch"
+      "bfetch",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "cloud",
@@ -41,7 +41,9 @@
       "ml",
       "serverless",
       "spaces",
-      "telemetry"
+      "telemetry",
+      "licenseManagement",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "data",

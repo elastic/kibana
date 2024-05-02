@@ -14,8 +14,8 @@ import {
 } from '@kbn/core/server';
 import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
-import { tap, map, filter } from 'rxjs/operators';
-import { throttleTime } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs';
+import { throttleTime } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {

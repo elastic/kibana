@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
+
+import { of } from 'rxjs';
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -68,7 +70,16 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+  const {
+    charts,
+    cloud,
+    guidedOnboarding,
+    indexManagement: indexManagementPlugin,
+    lens,
+    security,
+    share,
+    ml,
+  } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -81,14 +92,14 @@ export const renderApp = (
   const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
   let user: AuthenticatedUser | null = null;
   try {
-    security.authc
+    security?.authc
       .getCurrentUser()
       .then((newUser) => {
         user = newUser;
@@ -99,6 +110,9 @@ export const renderApp = (
   } catch {
     user = null;
   }
+  const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
+
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -106,11 +120,13 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    connectorTypes,
     console: plugins.console,
-    esConfig,
     data: plugins.data,
+    esConfig,
     guidedOnboarding,
     history,
+    indexMappingComponent,
     isSidebarEnabled,
     lens,
     ml,
@@ -121,6 +137,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
@@ -131,7 +148,7 @@ export const renderApp = (
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
-    license$: plugins.licensing.license$,
+    license$: plugins.licensing?.license$ || of(undefined),
   });
   const unmountHttpLogic = mountHttpLogic({
     errorConnectingMessage,
@@ -172,7 +189,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
-    plugins.data.search.session.clear();
+    plugins.data?.search.session.clear();
   };
 };
 

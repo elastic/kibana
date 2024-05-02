@@ -104,10 +104,10 @@ const useTableListViewProps = (
       history,
       savedObjects,
       savedObjectsTagging,
-      overlays,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      ...startServices
     },
   } = useKibana<VisualizeServices>();
 
@@ -182,15 +182,15 @@ const useTableListViewProps = (
             tags: args.tags,
           },
           {
-            overlays,
             savedObjectsTagging,
             typesService: getTypes(),
             contentManagement,
+            ...startServices,
           }
         );
       }
     },
-    [overlays, savedObjectsTagging, contentManagement]
+    [savedObjectsTagging, contentManagement, startServices]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -213,7 +213,7 @@ const useTableListViewProps = (
                     false,
                     false,
                     () => {},
-                    { overlays }
+                    startServices
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -232,7 +232,7 @@ const useTableListViewProps = (
         },
       ],
     }),
-    [overlays]
+    [startServices]
   );
 
   const deleteItems = useCallback(
@@ -269,7 +269,7 @@ const useTableListViewProps = (
               reason: managed
                 ? i18n.translate('visualizations.managedLegacyVisMessage', {
                     defaultMessage:
-                      'This visualization is managed by Elastic and cannot be changed.',
+                      'Elastic manages this visualisation. Changing it is not possible.',
                   })
                 : i18n.translate('visualizations.readOnlyLegacyVisMessage', {
                     defaultMessage:

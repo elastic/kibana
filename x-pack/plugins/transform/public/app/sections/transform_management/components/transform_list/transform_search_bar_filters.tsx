@@ -14,7 +14,7 @@ import {
   TRANSFORM_FUNCTION,
   TRANSFORM_MODE,
   TRANSFORM_STATE,
-  TRANSFORM_HEALTH,
+  TRANSFORM_HEALTH_STATUS,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import type { TransformListRow } from '../../../../common';
@@ -53,7 +53,7 @@ export const transformFilters: SearchFilterConfig[] = [
     field: 'health',
     name: i18n.translate('xpack.transform.healthFilter', { defaultMessage: 'Health' }),
     multiSelect: false,
-    options: Object.values(TRANSFORM_HEALTH).map((val) => ({
+    options: Object.values(TRANSFORM_HEALTH_STATUS).map((val) => ({
       value: val,
       name: val,
       view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,

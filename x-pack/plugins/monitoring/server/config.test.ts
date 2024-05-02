@@ -61,6 +61,7 @@ describe('config schema', () => {
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",
+              "startupDelay": "PT0.5S",
             },
             "idleSocketTimeout": "PT1M",
             "ignoreVersionMismatch": false,

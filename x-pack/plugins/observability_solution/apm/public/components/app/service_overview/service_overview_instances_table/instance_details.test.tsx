@@ -30,16 +30,14 @@ describe('InstanceDetails', () => {
   });
 
   it('renders all sections', () => {
-    jest
-      .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
-      .mockReturnValue({
-        data: {
-          service: { node: { name: 'foo' } },
-          container: { id: 'baz' },
-          cloud: { provider: 'bar' },
-        } as ServiceInstanceDetails,
-        status: FETCH_STATUS.SUCCESS,
-      });
+    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+      data: {
+        service: { node: { name: 'foo' } },
+        container: { id: 'baz' },
+        cloud: { provider: 'bar' },
+      } as ServiceInstanceDetails,
+      status: FETCH_STATUS.SUCCESS,
+    });
     const component = renderWithTheme(
       <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
@@ -47,15 +45,13 @@ describe('InstanceDetails', () => {
   });
 
   it('hides service section', () => {
-    jest
-      .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
-      .mockReturnValue({
-        data: {
-          container: { id: 'baz' },
-          cloud: { provider: 'bar' },
-        } as ServiceInstanceDetails,
-        status: FETCH_STATUS.SUCCESS,
-      });
+    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+      data: {
+        container: { id: 'baz' },
+        cloud: { provider: 'bar' },
+      } as ServiceInstanceDetails,
+      status: FETCH_STATUS.SUCCESS,
+    });
     const component = renderWithTheme(
       <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
@@ -64,15 +60,13 @@ describe('InstanceDetails', () => {
   });
 
   it('hides container section', () => {
-    jest
-      .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
-      .mockReturnValue({
-        data: {
-          service: { node: { name: 'foo' } },
-          cloud: { provider: 'bar' },
-        } as ServiceInstanceDetails,
-        status: FETCH_STATUS.SUCCESS,
-      });
+    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+      data: {
+        service: { node: { name: 'foo' } },
+        cloud: { provider: 'bar' },
+      } as ServiceInstanceDetails,
+      status: FETCH_STATUS.SUCCESS,
+    });
     const component = renderWithTheme(
       <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );
@@ -81,15 +75,13 @@ describe('InstanceDetails', () => {
   });
 
   it('hides cloud section', () => {
-    jest
-      .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
-      .mockReturnValue({
-        data: {
-          service: { node: { name: 'foo' } },
-          container: { id: 'baz' },
-        } as ServiceInstanceDetails,
-        status: FETCH_STATUS.SUCCESS,
-      });
+    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+      data: {
+        service: { node: { name: 'foo' } },
+        container: { id: 'baz' },
+      } as ServiceInstanceDetails,
+      status: FETCH_STATUS.SUCCESS,
+    });
     const component = renderWithTheme(
       <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );

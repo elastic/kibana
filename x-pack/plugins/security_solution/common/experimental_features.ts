@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -47,11 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
-   */
-  assistantStreamingEnabled: false,
-
-  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
@@ -74,12 +68,39 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne
+   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
+   * response actions in Response Console.
+   *
+   * Release: v8.13.0
    */
-  responseActionsSentinelOneV1Enabled: false,
+  responseActionsSentinelOneV1Enabled: true,
+
+  /**
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
+   */
+  responseActionsSentinelOneV2Enabled: false,
+
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: false,
+
+  /**
+   * 8.15
+   * Enables use of agent status service to get agent status information
+   * for endpoint and third-party agents.
+   */
+  agentStatusClientEnabled: false,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -99,12 +120,23 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
+
+  /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: true,
+  /*
 
   /**
    * Enables new Set of filters on the Alerts page.
    */
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables the Attack discovery feature and API endpoint
+   */
+  attackDiscoveryEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -160,17 +192,14 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables alerts suppression for indicator match rules
-   */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
-
-  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
-  sentinelOneDataInAnalyzerEnabled: false,
+  sentinelOneDataInAnalyzerEnabled: true,
 
   /**
-   * Enables SentinelOne manual host manipulation actions
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
 
@@ -191,6 +220,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Feb 20, 2024
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+  /*
+   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineEnabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
 
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
@@ -204,14 +248,19 @@ export const allowedExperimentalValues = Object.freeze({
   perFieldPrebuiltRulesDiffingEnabled: true,
 
   /**
-   * Disables discover esql tab within timeline
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  timelineEsqlTabDisabled: false,
+  malwareOnWriteScanOptionAvailable: false,
 
   /**
-   * Disables date pickers and sourcerer in analyzer if needed.
+   *  Enables Security AI Assistant's Flyout mode
    */
-  analyzerDatePickersAndSourcererDisabled: false,
+  aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

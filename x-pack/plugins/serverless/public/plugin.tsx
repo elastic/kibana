@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { EuiButton } from '@elastic/eui';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
-import { SideNavComponent } from './navigation';
+import {
+  generateManageOrgMembersNavCard,
+  manageOrgMembersNavCardName,
+  SideNavComponent,
+} from './navigation';
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -65,25 +71,41 @@ export class ServerlessPlugin
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
     const { cloud } = dependencies;
-    if (cloud.projectsUrl) {
-      project.setProjectsUrl(cloud.projectsUrl);
-    }
+
     if (cloud.serverless.projectName) {
       project.setProjectName(cloud.serverless.projectName);
     }
-    if (cloud.deploymentUrl) {
-      project.setProjectUrl(cloud.deploymentUrl);
-    }
+    project.setCloudUrls(cloud);
 
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
+    core.chrome.navControls.registerRight({
+      order: 1,
+      mount: toMountPoint(
+        <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+          <EuiButton
+            href="https://ela.st/serverless-feedback"
+            size={'s'}
+            color={'warning'}
+            iconType={'popout'}
+            iconSide={'right'}
+            target={'_blank'}
+          >
+            {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
+              defaultMessage: 'Give feedback',
+            })}
+          </EuiButton>
+        </KibanaRenderContextProvider>,
+        { ...core }
+      ),
+    });
+
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
-        project.initNavigation(navigationTree$, { cloudUrls: cloud });
-
+      initNavigation: (id, navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+        project.initNavigation(id, navigationTree$);
         project.setSideNavComponent(() => (
           <SideNavComponent
             navProps={{
@@ -100,6 +122,16 @@ export class ServerlessPlugin
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
+        if (!roleManagementEnabled) return extendCardNavDefinitions;
+
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
+        if (extendCardNavDefinitions) {
+          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
+          return extendCardNavDefinitions;
+        }
+        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+      },
     };
   }
 
@@ -111,13 +143,11 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-            <ProjectSwitcher {...{ currentProjectType }} />
-          </ProjectSwitcherKibanaProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+          <ProjectSwitcher {...{ currentProjectType }} />
+        </ProjectSwitcherKibanaProvider>
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
 

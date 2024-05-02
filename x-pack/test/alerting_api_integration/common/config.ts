@@ -12,6 +12,7 @@ import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -52,6 +53,7 @@ const enabledActionTypes = [
   '.gen-ai',
   '.d3security',
   SENTINELONE_CONNECTOR_ID,
+  CROWDSTRIKE_CONNECTOR_ID,
   '.slack',
   '.slack_api',
   '.tines',
@@ -72,6 +74,7 @@ const enabledActionTypes = [
   'test.capped',
   'test.system-action',
   'test.system-action-kibana-privileges',
+  'test.system-action-connector-adapter',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -191,12 +194,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
-            'smtp.live.com',
+            'smtp-mail.outlook.com',
             'slack.com',
           ])}`,
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           '--xpack.alerting.rules.run.alerts.max=20',
@@ -347,7 +350,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--notifications.connectors.default.email=notification-email',
           '--xpack.task_manager.allow_reading_invalid_state=false',
-          '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
         ],

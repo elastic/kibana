@@ -32,9 +32,6 @@ export const registerAlertsTableConfiguration = (
   alertTableConfigRegistry.register(ruleDetailsAlertsTableConfig);
 
   // SLO
-  const sloAlertsTableConfig = getSloAlertsTableConfiguration(
-    observabilityRuleTypeRegistry,
-    config
-  );
+  const sloAlertsTableConfig = getSloAlertsTableConfiguration(observabilityRuleTypeRegistry);
   alertTableConfigRegistry.register(sloAlertsTableConfig);
 };

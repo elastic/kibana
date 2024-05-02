@@ -12,8 +12,8 @@ import {
   euiPaletteForTemperature,
   euiPaletteCool,
   euiPaletteWarm,
-  euiPaletteNegative,
-  euiPalettePositive,
+  euiPaletteRed,
+  euiPaletteGreen,
   euiPaletteGray,
   euiPaletteColorBlind,
   EuiColorPalettePickerPaletteProps,
@@ -59,9 +59,9 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
     value: 'Greens',
     getPalette: (steps: number) => {
-      return euiPalettePositive(steps);
+      return euiPaletteGreen(steps);
     },
-    palette: euiPalettePositive(8),
+    palette: euiPaletteGreen(8),
     type: 'gradient',
   },
   {
@@ -75,9 +75,9 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
     value: 'Reds',
     getPalette: (steps: number) => {
-      return euiPaletteNegative(steps);
+      return euiPaletteRed(steps);
     },
-    palette: euiPaletteNegative(8),
+    palette: euiPaletteRed(8),
     type: 'gradient',
   },
   {

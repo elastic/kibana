@@ -72,4 +72,35 @@ describe('textBasedQueryStateToAstWithValidation', () => {
       })
     );
   });
+
+  it('returns an object with the correct structure for ES|QL', async () => {
+    const dataView = createStubDataView({
+      spec: {
+        id: 'foo',
+        title: 'foo',
+        timeFieldName: '@timestamp',
+      },
+    });
+    const actual = await textBasedQueryStateToAstWithValidation({
+      filters: [],
+      query: { esql: 'from logs*' },
+      time: {
+        from: 'now',
+        to: 'now+7d',
+      },
+      dataView,
+      titleForInspector: 'Custom title',
+      descriptionForInspector: 'Custom desc',
+    });
+    expect(actual).toHaveProperty(
+      'chain.2.arguments',
+      expect.objectContaining({
+        query: ['from logs*'],
+        timeField: ['@timestamp'],
+        locale: ['en'],
+        titleForInspector: ['Custom title'],
+        descriptionForInspector: ['Custom desc'],
+      })
+    );
+  });
 });

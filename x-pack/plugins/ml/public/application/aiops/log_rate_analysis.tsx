@@ -39,6 +39,7 @@ export const LogRateAnalysisPage: FC = () => {
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',

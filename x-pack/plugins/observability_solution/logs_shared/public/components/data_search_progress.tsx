@@ -29,6 +29,7 @@ export const DataSearchProgress: React.FC<{
       {onCancel ? (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="logsSharedDataSearchProgressButton"
             color="danger"
             iconType="cross"
             onClick={onCancel}

@@ -23,8 +23,13 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+
+import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
+
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
+import { bulkInsert, updateTimestamps } from './helpers';
 import { TelemetryEventsSender } from '../../lib/telemetry/sender';
 import type {
   SecuritySolutionPluginStart,
@@ -33,9 +38,19 @@ import type {
 import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
+import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
 import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
+import fleetAgents from '../__mocks__/fleet-agents.json';
+import endpointMetrics from '../__mocks__/endpoint-metrics.json';
+import endpointMetadata from '../__mocks__/endpoint-metadata.json';
+import endpointPolicy from '../__mocks__/endpoint-policy.json';
+
+const fleetIndex = '.fleet-agents';
+const endpointMetricsIndex = '.ds-metrics-endpoint.metrics-1';
+const endpointMetricsMetadataIndex = '.ds-metrics-endpoint.metadata-1';
+const endpointMetricsPolicyIndex = '.ds-metrics-endpoint.policy-1';
 
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
@@ -86,6 +101,30 @@ export function getAsyncTelemetryEventSender(
   }
 }
 
+export function getTelemetryReceiver(
+  spy: jest.SpyInstance<
+    SecuritySolutionPluginStart,
+    [core: CoreStart, plugins: SecuritySolutionPluginStartDependencies]
+  >
+): ITelemetryReceiver {
+  const pluginInstances = spy.mock.instances;
+  if (pluginInstances.length === 0) {
+    throw new Error('security_solution plugin not started');
+  }
+  const plugin = pluginInstances[0];
+  if (plugin instanceof SecuritySolutionPlugin) {
+    /* eslint dot-notation: "off" */
+    const receiver = plugin['telemetryReceiver'];
+    if (receiver instanceof TelemetryReceiver) {
+      return receiver;
+    } else {
+      throw new Error('security_solution plugin not started');
+    }
+  } else {
+    throw new Error('security_solution plugin not started');
+  }
+}
+
 export function getTelemetryTask(
   tasks: SecurityTelemetryTask[],
   id: string
@@ -132,6 +171,45 @@ export async function createMockedAlert(
   });
 }
 
+export async function mockEndpointData(
+  esClient: ElasticsearchClient,
+  so: SavedObjectsServiceStart
+) {
+  await createAgentPolicy('policy-elastic-agent-on-cloud', esClient, so);
+  await bulkInsert(esClient, fleetIndex, fleetAgents, ['123', '456']);
+  await bulkInsert(esClient, endpointMetricsIndex, updateTimestamps(endpointMetrics));
+  await bulkInsert(esClient, endpointMetricsMetadataIndex, updateTimestamps(endpointMetadata));
+  await bulkInsert(esClient, endpointMetricsPolicyIndex, updateTimestamps(endpointPolicy));
+}
+
+export async function initEndpointIndices(esClient: ElasticsearchClient) {
+  const mappings: object = {
+    dynamic: false,
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+      agent: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+
+  await esClient.indices.create({ index: endpointMetricsIndex, mappings }).catch(() => {});
+  await esClient.indices.create({ index: endpointMetricsPolicyIndex, mappings }).catch(() => {});
+  await esClient.indices.create({ index: endpointMetricsMetadataIndex, mappings }).catch(() => {});
+}
+
+export async function dropEndpointIndices(esClient: ElasticsearchClient) {
+  await esClient.indices.delete({ index: endpointMetricsIndex }).catch(() => {});
+  await esClient.indices.delete({ index: endpointMetricsMetadataIndex }).catch(() => {});
+  await esClient.indices.delete({ index: endpointMetricsPolicyIndex }).catch(() => {});
+}
+
 export async function cleanupMockedEndpointAlerts(esClient: ElasticsearchClient) {
   const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
 
@@ -160,6 +238,51 @@ export async function cleanupMockedAlerts(
     .catch(() => {
       // ignore errors
     });
+}
+
+export async function createAgentPolicy(
+  id: string,
+  esClient: ElasticsearchClient,
+  so: SavedObjectsServiceStart
+) {
+  const soClient = so.getScopedClient(fakeKibanaRequest);
+  const packagePolicy = {
+    name: 'Endpoint Policy 1',
+    description: 'Endpoint policy 1',
+    namespace: 'default',
+    enabled: true,
+    policy_id: 'policy-elastic-agent-on-cloud',
+    package: { name: 'endpoint', title: 'Elastic Endpoint', version: '8.11.1' },
+    inputs: [
+      {
+        config: {
+          policy: {
+            value: {
+              linux: {
+                advanced: {
+                  agent: {
+                    connection_delay: 60,
+                  },
+                },
+              },
+            },
+          },
+        },
+        enabled: true,
+        type: 'endpoint',
+        streams: [],
+      },
+    ],
+  };
+
+  await soClient.create<unknown>(AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id }).catch(() => {});
+  await packagePolicyService
+    .create(soClient, esClient, packagePolicy, {
+      id,
+      spaceId: 'default',
+      bumpRevision: false,
+    })
+    .catch(() => {});
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {

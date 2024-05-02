@@ -6,7 +6,7 @@
  */
 
 import type { Type } from 'io-ts';
-import { decodeOrThrow } from '../../common/api';
+import { decodeOrThrow } from '../common/runtime_types';
 
 export const bulkDecodeSOAttributes = <T>(
   savedObjects: Array<{ id: string; attributes: T }>,

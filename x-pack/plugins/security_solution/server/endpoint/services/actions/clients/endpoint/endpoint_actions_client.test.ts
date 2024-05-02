@@ -171,6 +171,31 @@ describe('EndpointActionsClient', () => {
       { meta: true }
     );
   });
+  it('should create an action with error when agents are invalid', async () => {
+    // @ts-expect-error mocking this for testing purposes
+    endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+      isValid: false,
+      valid: [],
+      invalid: ['invalid-id'],
+      hosts: [{ agent: { id: 'invalid-id', name: '' }, host: { hostname: '' } }],
+    });
+
+    await endpointActionsClient.isolate(getCommonResponseActionOptions());
+
+    expect(
+      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+    ).not.toHaveBeenCalled();
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          error: {
+            message: 'The host does not have Elastic Defend integration installed',
+          },
+        }),
+      }),
+      { meta: true }
+    );
+  });
 
   it('should return ActionDetails for newly created action', async () => {
     const actionResponse = await endpointActionsClient.isolate(
@@ -204,8 +229,10 @@ describe('EndpointActionsClient', () => {
     ]);
   });
 
+  type ResponseActionsMethodsOnly = keyof Omit<ResponseActionsClient, 'processPendingActions'>;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const responseActionMethods: Record<keyof ResponseActionsClient, any> = {
+  const responseActionMethods: Record<ResponseActionsMethodsOnly, any> = {
     isolate: responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions()),
 
     release: responseActionsClientMock.createReleaseOptions(getCommonResponseActionOptions()),
@@ -229,7 +256,7 @@ describe('EndpointActionsClient', () => {
     upload: responseActionsClientMock.createUploadOptions(getCommonResponseActionOptions()),
   };
 
-  it.each(Object.keys(responseActionMethods) as Array<keyof ResponseActionsClient>)(
+  it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
     'should handle call to %s() method',
     async (methodName) => {
       await endpointActionsClient[methodName](responseActionMethods[methodName]);

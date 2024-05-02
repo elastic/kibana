@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';

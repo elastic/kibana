@@ -33,6 +33,7 @@ import {
 } from './types';
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
+import { recallRankingEvent } from './analytics/recall_ranking';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -106,21 +107,23 @@ export class ObservabilityAIAssistantPlugin
       };
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
+    // Using once to make sure the same model ID is used during service init and Knowledge base setup
     const getModelId = once(async () => {
-      // Using once to make sure the same model ID is used during service init and Knowledge base setup
+      const defaultModelId = '.elser_model_2';
+      const [_, pluginsStart] = await core.getStartServices();
+      const license = await firstValueFrom(pluginsStart.licensing.license$);
+
+      if (!license.hasAtLeast('enterprise')) {
+        return defaultModelId;
+      }
 
       try {
         // Wait for the ML plugin's dependency on the internal saved objects client to be ready
-        const [_, pluginsStart] = await core.getStartServices();
-
         const { ml } = await core.plugins.onSetup('ml');
 
         if (!ml.found) {
           throw new Error('Could not find ML plugin');
         }
-
-        // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
-        await firstValueFrom(pluginsStart.licensing.license$);
 
         const elserModelDefinition = await (
           ml.contract as {
@@ -136,9 +139,7 @@ export class ObservabilityAIAssistantPlugin
         return elserModelDefinition.model_id;
       } catch (error) {
         this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
-
-        // Fallback to ELSER v2
-        return '.elser_model_2';
+        return defaultModelId;
       }
     });
 
@@ -161,6 +162,8 @@ export class ObservabilityAIAssistantPlugin
         service: this.service,
       },
     });
+
+    core.analytics.registerEventType(recallRankingEvent);
 
     return {
       service,

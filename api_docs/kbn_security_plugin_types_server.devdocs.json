@@ -1092,7 +1092,7 @@
               "\nSaved object that was created, changed, deleted or accessed as part of this event."
             ],
             "signature": [
-              "{ type: string; id: string; } | undefined"
+              "{ type: string; id: string; name?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/audit/audit_events.ts",
             "deprecated": false,
@@ -1490,9 +1490,9 @@
               },
               "<unknown, unknown, unknown, any>) => ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -3114,11 +3114,11 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.UserProfileServiceStart",
-                "text": "UserProfileServiceStart"
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileService",
+                "text": "UserProfileService"
               }
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
@@ -3238,7 +3238,7 @@
         "description": [
           "\nParameters for the bulk get API."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+        "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3254,7 +3254,7 @@
             "signature": [
               "Set<string>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3270,7 +3270,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3286,7 +3286,7 @@
         "description": [
           "\nParameters for the get user profile for the current user API."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+        "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3309,7 +3309,7 @@
               },
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3325,7 +3325,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3341,7 +3341,7 @@
         "description": [
           "\nThe set of privileges that users associated with the suggested user profile should have for a specified space id."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+        "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3354,7 +3354,7 @@
             "description": [
               "\nThe id of the Kibana Space."
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3370,231 +3370,9 @@
             "signature": [
               "{ kibana: string[]; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-plugin-types-server",
-        "id": "def-server.UserProfileServiceStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "UserProfileServiceStart",
-        "description": [
-          "\nA set of methods to work with Kibana user profiles."
-        ],
-        "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-plugin-types-server",
-            "id": "def-server.UserProfileServiceStart.getCurrent",
-            "type": "Function",
-            "tags": [],
-            "label": "getCurrent",
-            "description": [
-              "\nRetrieves a user profile for the current user extracted from the specified request. If the profile isn't available,\ne.g. for the anonymous users or users authenticated via authenticating proxies, the `null` value is returned."
-            ],
-            "signature": [
-              "<D extends ",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              ", L extends ",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfileLabels",
-                "text": "UserProfileLabels"
-              },
-              ">(params: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.UserProfileGetCurrentParams",
-                "text": "UserProfileGetCurrentParams"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfileWithSecurity",
-                "text": "UserProfileWithSecurity"
-              },
-              "<D, L> | null>"
-            ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-plugin-types-server",
-                "id": "def-server.UserProfileServiceStart.getCurrent.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [
-                  "Get current user profile operation parameters."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.UserProfileGetCurrentParams",
-                    "text": "UserProfileGetCurrentParams"
-                  }
-                ],
-                "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-plugin-types-server",
-            "id": "def-server.UserProfileServiceStart.bulkGet",
-            "type": "Function",
-            "tags": [],
-            "label": "bulkGet",
-            "description": [
-              "\nRetrieves multiple user profiles by their identifiers."
-            ],
-            "signature": [
-              "<D extends ",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              ">(params: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.UserProfileBulkGetParams",
-                "text": "UserProfileBulkGetParams"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
-              "<D>[]>"
-            ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-plugin-types-server",
-                "id": "def-server.UserProfileServiceStart.bulkGet.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [
-                  "Bulk get operation parameters."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.UserProfileBulkGetParams",
-                    "text": "UserProfileBulkGetParams"
-                  }
-                ],
-                "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/security-plugin-types-server",
-            "id": "def-server.UserProfileServiceStart.suggest",
-            "type": "Function",
-            "tags": [],
-            "label": "suggest",
-            "description": [
-              "\nSuggests multiple user profiles by search criteria."
-            ],
-            "signature": [
-              "<D extends ",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              ">(params: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.UserProfileSuggestParams",
-                "text": "UserProfileSuggestParams"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.UserProfile",
-                "text": "UserProfile"
-              },
-              "<D>[]>"
-            ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/security-plugin-types-server",
-                "id": "def-server.UserProfileServiceStart.suggest.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "params",
-                "description": [
-                  "Suggest operation parameters."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.UserProfileSuggestParams",
-                    "text": "UserProfileSuggestParams"
-                  }
-                ],
-                "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3608,7 +3386,7 @@
         "description": [
           "\nParameters for the suggest API."
         ],
-        "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+        "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3624,7 +3402,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3640,7 +3418,7 @@
             "signature": [
               "{ uids: string[]; } | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3656,7 +3434,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3672,7 +3450,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3687,15 +3465,15 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.UserProfileRequiredPrivileges",
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileRequiredPrivileges",
                 "text": "UserProfileRequiredPrivileges"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_server/src/user_profile/user_profile_service.ts",
+            "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4164,6 +3942,29 @@
           "Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.UserProfileServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileServiceStart",
+        "description": [
+          "\nStart contract for Core's userProfile service.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-user-profile-server",
+            "scope": "common",
+            "docId": "kibKbnCoreUserProfileServerPluginApi",
+            "section": "def-common.UserProfileService",
+            "text": "UserProfileService"
+          }
+        ],
+        "path": "packages/core/user-profile/core-user-profile-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1380,6 +1380,17 @@ class AgentPolicyService {
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
 
+  public async getAllManagedAgentPolicies(soClient: SavedObjectsClientContract) {
+    const { saved_objects: agentPolicies } = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      filter: normalizeKuery(SAVED_OBJECT_TYPE, 'ingest-agent-policies.is_managed: true'),
+    });
+
+    return agentPolicies;
+  }
+
   public fetchAllAgentPolicyIds(
     soClient: SavedObjectsClientContract,
     { perPage = 1000, kuery = undefined }: FetchAllAgentPolicyIdsOptions = {}

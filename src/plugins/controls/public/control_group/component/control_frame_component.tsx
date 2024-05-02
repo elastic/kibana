@@ -19,11 +19,11 @@ import {
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
+import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import {
   controlGroupSelector,
   useControlGroupContainer,
 } from '../embeddable/control_group_container';
-import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { ControlError } from './control_error_component';
 
 export interface ControlFrameProps {
@@ -58,13 +58,15 @@ export const ControlFrame = ({
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {
+    let mounted = true;
     if (embeddableRoot.current) {
       embeddable?.render(embeddableRoot.current);
     }
-    const inputSubscription = embeddable
-      ?.getInput$()
-      .subscribe((newInput) => setTitle(newInput.title));
+    const inputSubscription = embeddable?.getInput$().subscribe((newInput) => {
+      if (mounted) setTitle(newInput.title);
+    });
     return () => {
+      mounted = false;
       inputSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);

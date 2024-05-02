@@ -86,6 +86,7 @@ const mockConfig: ConfigSchema = {
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
     profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
   },
   serverless: { enabled: false },
 };

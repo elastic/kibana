@@ -295,7 +295,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('when removing a panel', async function () {
         await PageObjects.dashboard.waitForRenderComplete();
-        const currentUrl = await getUrlFromShare();
+        const currentUrl = (await getUrlFromShare()) ?? '';
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.clearQuery();
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await enableNewChartLibraryDebug();
-          originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+          originalPieSliceStyle = (await pieChart.getPieSliceStyle(`80,000`)) ?? '';
         });
 
         it('updates a pie slice color on a hard refresh', async function () {

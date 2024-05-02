@@ -20,6 +20,7 @@ import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
+import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
 import { AwsCredentialsFormAgentless } from './aws_credentials_form/aws_credentials_form_agentless';
 import { EksCredentialsForm } from './eks_credentials_form';
@@ -103,6 +104,10 @@ export const PolicyTemplateVarsForm = ({
 
       return <GcpCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_azure':
+      if (isAgentless) {
+        return <AzureCredentialsFormAgentless {...props} input={input} />;
+      }
+
       return <AzureCredentialsForm {...props} input={input} />;
     default:
       return null;

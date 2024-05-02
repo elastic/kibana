@@ -116,6 +116,46 @@
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-common.DocLinksStart",
+                "text": "DocLinksStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeStart",
+                "text": "ChromeStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

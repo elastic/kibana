@@ -90,6 +90,12 @@ const randomAgentPolicyName = (() => {
   };
 })();
 
+/**
+ * Check if the given version string is a valid artifact version
+ * @param version Version string
+ */
+const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
+
 export const checkInFleetAgent = async (
   esClient: Client,
   agentId: string,
@@ -389,14 +395,30 @@ export const fetchIntegrationPolicyList = async (
  * Returns the Agent Version that matches the current stack version. Will use `SNAPSHOT` if
  * appropriate too.
  * @param kbnClient
+ * @param log
  */
 export const getAgentVersionMatchingCurrentStack = async (
-  kbnClient: KbnClient
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
 ): Promise<string> => {
   const kbnStatus = await fetchKibanaStatus(kbnClient);
+
+  log.debug(`Kibana status:\n`, kbnStatus);
+
+  if (!kbnStatus.version) {
+    throw new Error(
+      `Kibana status api response did not include 'version' information - possibly due to invalid credentials`
+    );
+  }
+
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+    .then((response) =>
+      map(
+        response.data.versions.filter(isValidArtifactVersion),
+        (version) => version.split('-SNAPSHOT')[0]
+      )
+    );
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
@@ -496,6 +518,24 @@ export const getAgentDownloadUrl = async (
 };
 
 /**
+ * Fetches the latest version of the Elastic Agent available for download
+ * @param kbnClient
+ */
+
+export const fetchFleetAvailableVersions = async (kbnClient: KbnClient): Promise<string> => {
+  return kbnClient
+    .request<{ items: string[] }>({
+      method: 'GET',
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+    })
+    .then((response) => response.data.items[0])
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
@@ -506,7 +546,7 @@ export const getLatestAgentDownloadVersion = async (
   log?: ToolingLog
 ): Promise<string> => {
   const artifactsUrl = 'https://artifacts-api.elastic.co/v1/versions';
-  const semverMatch = `<=${version}`;
+  const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await nodeFetch(artifactsUrl).then(
     (response) => {
       if (!response.ok) {
@@ -519,8 +559,9 @@ export const getLatestAgentDownloadVersion = async (
     }
   );
 
-  const stackVersionToArtifactVersion: Record<string, string> =
-    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+  const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
+    .filter(isValidArtifactVersion)
+    .reduce((acc, artifactVersion) => {
       const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
       acc[stackVersion] = artifactVersion;
       return acc;
@@ -538,6 +579,8 @@ export const getLatestAgentDownloadVersion = async (
     Object.keys(stackVersionToArtifactVersion),
     semverMatch
   );
+
+  log?.verbose(`Matched [${matchedVersion}] for .maxStatisfying(${semverMatch})`);
 
   if (!matchedVersion) {
     throw new Error(`Unable to find a semver version that meets ${semverMatch}`);

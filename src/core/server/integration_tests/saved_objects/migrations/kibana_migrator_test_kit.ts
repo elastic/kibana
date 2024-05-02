@@ -76,6 +76,7 @@ export interface KibanaMigratorTestKitParams {
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   defaultIndexTypesMap?: IndexTypesMap;
+  hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
   clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
@@ -122,7 +123,7 @@ export const getEsClient = async ({
 
   // configure logging system
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
-  loggingSystem.upgrade(loggingConf);
+  await loggingSystem.upgrade(loggingConf);
 
   return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
 };
@@ -131,6 +132,7 @@ export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
   defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
+  hashToVersionMap = {}, // allows testing the md5 => modelVersion transition
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
@@ -146,7 +148,7 @@ export const getKibanaMigratorTestKit = async ({
 
   // configure logging system
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
-  loggingSystem.upgrade(loggingConf);
+  await loggingSystem.upgrade(loggingConf);
 
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
@@ -163,6 +165,7 @@ export const getKibanaMigratorTestKit = async ({
     loggerFactory,
     kibanaIndex,
     defaultIndexTypesMap,
+    hashToVersionMap,
     kibanaVersion,
     kibanaBranch,
     nodeRoles,
@@ -275,6 +278,7 @@ interface GetMigratorParams {
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
@@ -288,6 +292,7 @@ const getMigrator = async ({
   kibanaIndex,
   typeRegistry,
   defaultIndexTypesMap,
+  hashToVersionMap,
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
@@ -314,6 +319,7 @@ const getMigrator = async ({
     kibanaIndex,
     typeRegistry,
     defaultIndexTypesMap,
+    hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
@@ -322,6 +328,17 @@ const getMigrator = async ({
     nodeRoles,
     esCapabilities,
   });
+};
+
+export const deleteSavedObjectIndices = async (
+  client: ElasticsearchClient,
+  index: string[] = ALL_SAVED_OBJECT_INDICES
+) => {
+  const indices = await client.indices.get({ index, allow_no_indices: true }, { ignore: [404] });
+  return await client.indices.delete(
+    { index: Object.keys(indices), allow_no_indices: true },
+    { ignore: [404] }
+  );
 };
 
 export const getAggregatedTypesCount = async (
@@ -417,15 +434,18 @@ export const createBaseline = async () => {
 };
 
 interface GetMutatedMigratorParams {
+  logFilePath?: string;
   kibanaVersion?: string;
   settings?: Record<string, any>;
 }
 
 export const getIdenticalMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types: baselineTypes,
     kibanaVersion,
     settings,
@@ -433,10 +453,12 @@ export const getIdenticalMappingsMigrator = async ({
 };
 
 export const getNonDeprecatedMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types: baselineTypes.filter((type) => type.name !== 'deprecated'),
     kibanaVersion,
     settings,
@@ -444,6 +466,7 @@ export const getNonDeprecatedMappingsMigrator = async ({
 };
 
 export const getCompatibleMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   filterDeprecated = false,
   kibanaVersion = nextMinor,
   settings = {},
@@ -458,9 +481,21 @@ export const getCompatibleMappingsMigrator = async ({
           ...type,
           mappings: {
             properties: {
-              name: { type: 'text' },
-              value: { type: 'integer' },
+              ...type.mappings.properties,
               createdAt: { type: 'date' },
+            },
+          },
+          modelVersions: {
+            ...type.modelVersions,
+            2: {
+              changes: [
+                {
+                  type: 'mappings_addition',
+                  addedMappings: {
+                    createdAt: { type: 'date' },
+                  },
+                },
+              ],
             },
           },
         };
@@ -470,6 +505,7 @@ export const getCompatibleMappingsMigrator = async ({
     });
 
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types,
     kibanaVersion,
     settings,
@@ -477,6 +513,7 @@ export const getCompatibleMappingsMigrator = async ({
 };
 
 export const getIncompatibleMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
@@ -486,9 +523,26 @@ export const getIncompatibleMappingsMigrator = async ({
         ...type,
         mappings: {
           properties: {
-            name: { type: 'keyword' },
-            value: { type: 'long' },
+            ...type.mappings.properties,
+            value: { type: 'text' }, // we're forcing an incompatible udpate (number => text)
             createdAt: { type: 'date' },
+          },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'data_removal', // not true (we're testing reindex migrations, and modelVersions do not support breaking changes)
+                removedAttributePaths: ['complex.properties.value'],
+              },
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  createdAt: { type: 'date' },
+                },
+              },
+            ],
           },
         },
       };
@@ -498,6 +552,7 @@ export const getIncompatibleMappingsMigrator = async ({
   });
 
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types,
     kibanaVersion,
     settings,
@@ -513,7 +568,7 @@ export const getCurrentVersionTypeRegistry = async ({
   await root.preboot();
   const coreSetup = await root.setup();
   const typeRegistry = coreSetup.savedObjects.getTypeRegistry();
-  root.shutdown(); // do not await for it, or we might block the tests
+  void root.shutdown(); // do not await for it, or we might block the tests
   return typeRegistry;
 };
 

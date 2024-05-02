@@ -209,10 +209,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesLocalUnifiedSearch",
-            "text": "PublishesLocalUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -225,8 +265,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesLocalUnifiedSearch",
-            "text": "PublishesLocalUnifiedSearch"
+            "section": "def-common.PublishesUnifiedSearch",
+            "text": "PublishesUnifiedSearch"
           },
           ">>>, options: ",
           {
@@ -263,10 +303,50 @@
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesLocalUnifiedSearch",
-                "text": "PublishesLocalUnifiedSearch"
+                "section": "def-common.PublishesTimeRange",
+                "text": "PublishesTimeRange"
               },
-              " & ",
+              " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>; query$: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined>; } & ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -279,8 +359,8 @@
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesLocalUnifiedSearch",
-                "text": "PublishesLocalUnifiedSearch"
+                "section": "def-common.PublishesUnifiedSearch",
+                "text": "PublishesUnifiedSearch"
               },
               ">>>"
             ],
@@ -539,10 +619,10 @@
             "signature": [
               "((dashboardId?: string | undefined) => ",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableAppContext",
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableAppContext",
                 "text": "EmbeddableAppContext"
               },
               ") | undefined"
@@ -689,10 +769,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesLocalUnifiedSearch",
-            "text": "PublishesLocalUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1721,6 +1841,7 @@
             "label": "executionContext",
             "description": [],
             "signature": [
+              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1728,7 +1849,7 @@
                 "section": "def-common.KibanaExecutionContext",
                 "text": "KibanaExecutionContext"
               },
-              " | undefined"
+              " | undefined; }"
             ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
@@ -2012,25 +2133,17 @@
         "label": "DashboardAttributes",
         "description": [],
         "signature": [
-          "{ controlGroupInput?: ",
+          "Omit<",
           {
-            "pluginId": "controls",
+            "pluginId": "dashboard",
             "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.RawControlGroupAttributes",
-            "text": "RawControlGroupAttributes"
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.DashboardAttributes",
+            "text": "DashboardAttributes"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; timeRestore: boolean; optionsJSON?: string | undefined; useMargins?: boolean | undefined; description: string; panelsJSON: string; timeFrom?: string | undefined; version: number; timeTo?: string | undefined; title: string; kibanaSavedObjectMeta: { searchSourceJSON: string; }; }"
+          ", \"controlGroupInput\"> & { controlGroupInput?: ControlGroupAttributesV2 | undefined; }"
         ],
-        "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+        "path": "src/plugins/dashboard/common/content_management/v2/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2074,7 +2187,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; version?: string | undefined; filters?: ",
+          " | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2082,7 +2195,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; description?: string | undefined; refreshInterval?: ",
+          "[] | undefined; description?: string | undefined; version?: string | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
             "scope": "common",

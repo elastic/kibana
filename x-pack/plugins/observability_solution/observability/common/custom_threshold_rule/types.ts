@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
@@ -58,6 +58,9 @@ export enum AlertStates {
 }
 
 // Types for the executor
+export interface CustomThresholdSearchSourceFields extends SerializedSearchSourceFields {
+  query?: Query;
+}
 
 export interface ThresholdParams {
   criteria: MetricExpressionParams[];
@@ -65,7 +68,7 @@ export interface ThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: CustomThresholdSearchSourceFields;
   groupBy?: string[];
 }
 
@@ -116,6 +119,11 @@ export interface Group {
   value: string;
 }
 
+export interface TimeRange {
+  from?: string;
+  to?: string;
+}
+
 export interface SearchConfigurationType {
   index: SerializedSearchSourceFields;
   query: {
@@ -138,7 +146,7 @@ export interface SearchConfigurationWithExtractedReferenceType {
 // Custom threshold alert types
 
 // Alert fields['kibana.alert.group] type
-export type GroupBy = Array<{ field: string; value: string }>;
+export type GroupBy = Group[];
 
 /*
  * Utils

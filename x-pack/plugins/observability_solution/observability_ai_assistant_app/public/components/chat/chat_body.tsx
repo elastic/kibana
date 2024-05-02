@@ -19,15 +19,13 @@ import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  MessageRole,
-  type Feedback,
-  VisualizeESQLUserIntention,
-  ObservabilityAIAssistantTelemetryEventType,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import {
   ChatActionClickType,
   ChatState,
+  MessageRole,
+  ObservabilityAIAssistantTelemetryEventType,
+  VisualizeESQLUserIntention,
   type ChatActionClickPayload,
+  type Feedback,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -38,12 +36,14 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { useSimulatedFunctionCalling } from '../../hooks/use_simulated_function_calling';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
-import { FlyoutWidthMode } from './chat_flyout';
+import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { SimulatedFunctionCallingCallout } from './simulated_function_calling_callout';
 import { WelcomeMessage } from './welcome_message';
 
 const fullHeightClassName = css`
@@ -92,30 +92,35 @@ const animClassName = css`
     ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
+const containerClassName = css`
+  min-width: 0;
+  max-height: 100%;
+`;
+
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
   connectors,
   currentUser,
-  flyoutWidthMode,
+  flyoutPositionMode,
   initialConversationId,
   initialMessages,
   initialTitle,
   knowledgeBase,
   showLinkToConversationsApp,
   onConversationUpdate,
-  onToggleFlyoutWidthMode,
+  onToggleFlyoutPositionMode,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  flyoutWidthMode?: FlyoutWidthMode;
+  flyoutPositionMode?: FlyoutPositionMode;
   initialTitle?: string;
   initialMessages?: Message[];
   initialConversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
-  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
+  onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -123,6 +128,8 @@ export function ChatBody({
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
   const chatService = useObservabilityAIAssistantChatService();
+
+  const { simulatedFunctionCallingEnabled } = useSimulatedFunctionCalling();
 
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
@@ -155,12 +162,6 @@ export function ChatBody({
       title = EMPTY_CONVERSATION_TITLE;
     }
   }
-
-  const containerClassName = css`
-    background: white;
-    min-width: 0;
-    max-height: 100%;
-  `;
 
   const headerContainerClassName = css`
     padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
@@ -223,7 +224,10 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const content = JSON.stringify({ title: initialTitle, messages });
+    const content = JSON.stringify({
+      title: initialTitle,
+      messages: conversation.value?.messages ?? messages,
+    });
 
     navigator.clipboard?.writeText(content || '');
   };
@@ -341,7 +345,20 @@ export function ChatBody({
               className={animClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
-                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+                <WelcomeMessage
+                  connectors={connectors}
+                  knowledgeBase={knowledgeBase}
+                  onSelectPrompt={(message) =>
+                    next(
+                      messages.concat([
+                        {
+                          '@timestamp': new Date().toISOString(),
+                          message: { content: message, role: MessageRole.User },
+                        },
+                      ])
+                    )
+                  }
+                />
               ) : (
                 <ChatTimeline
                   messages={messages}
@@ -362,15 +379,19 @@ export function ChatBody({
                   onSendTelemetry={(eventWithPayload) =>
                     chatService.sendAnalyticsEvent(eventWithPayload)
                   }
-                  onStopGenerating={() => {
-                    stop();
-                  }}
+                  onStopGenerating={stop}
                   onActionClick={handleActionClick}
                 />
               )}
             </EuiPanel>
           </div>
         </EuiFlexItem>
+
+        {simulatedFunctionCallingEnabled ? (
+          <EuiFlexItem grow={false}>
+            <SimulatedFunctionCallingCallout />
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem
           grow={false}
@@ -468,16 +489,15 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
-          flyoutWidthMode={flyoutWidthMode}
+          flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
-          showLinkToConversationsApp={showLinkToConversationsApp}
           title={title}
           onCopyConversation={handleCopyConversation}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
-          onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
+          onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

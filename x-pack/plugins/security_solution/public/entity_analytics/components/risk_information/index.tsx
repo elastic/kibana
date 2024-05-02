@@ -11,7 +11,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -32,7 +31,8 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
-import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   CriticalityLevels,
   CriticalityModifiers,
@@ -104,29 +104,6 @@ const getCriticalityLevelTableColumns = (): Array<
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
-
-export const RiskInformationButtonIcon = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
-
-  return (
-    <>
-      <EuiButtonIcon
-        size="xs"
-        iconSize="m"
-        iconType="iInCircle"
-        aria-label={i18n.INFORMATION_ARIA_LABEL}
-        onClick={handleOnOpen}
-        className={
-          riskEntity === RiskScoreEntity.host
-            ? HOST_RISK_INFO_BUTTON_CLASS
-            : USER_RISK_INFO_BUTTON_CLASS
-        }
-        data-test-subj="open-risk-information-flyout-trigger"
-      />
-      {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
-    </>
-  );
-};
 
 export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();

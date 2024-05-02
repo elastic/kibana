@@ -10,7 +10,11 @@
     "requiredPlugins": [
       "actions",
       "data",
-      "ml"
+      "ml",
+      "taskManager",
+      "licensing",
+      "spaces",
+      "security"
     ]
   }
 }

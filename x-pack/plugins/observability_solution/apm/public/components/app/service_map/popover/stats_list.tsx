@@ -5,38 +5,21 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React, { useMemo } from 'react';
-import {
-  asDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
+import { asDuration, asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-type ServiceNodeReturn =
-  APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
+type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 
 function LoadingSpinner() {
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceAround"
-      style={{ height: 170 }}
-    >
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ height: 170 }}>
       <EuiLoadingChart size="xl" />
     </EuiFlexGroup>
   );
@@ -68,8 +51,7 @@ interface Item {
 
 export function StatsList({ data, isLoading }: StatsListProps) {
   const { currentPeriod = {}, previousPeriod } = data;
-  const { cpuUsage, failedTransactionsRate, memoryUsage, transactionStats } =
-    currentPeriod;
+  const { cpuUsage, failedTransactionsRate, memoryUsage, transactionStats } = currentPeriod;
 
   const hasData = [
     cpuUsage?.value,
@@ -82,54 +64,35 @@ export function StatsList({ data, isLoading }: StatsListProps) {
   const items: Item[] = useMemo(
     () => [
       {
-        title: i18n.translate(
-          'xpack.apm.serviceMap.avgTransDurationPopoverStat',
-          {
-            defaultMessage: 'Latency (avg.)',
-          }
-        ),
+        title: i18n.translate('xpack.apm.serviceMap.avgTransDurationPopoverStat', {
+          defaultMessage: 'Latency (avg.)',
+        }),
         valueLabel: asDuration(currentPeriod?.transactionStats?.latency?.value),
         timeseries: currentPeriod?.transactionStats?.latency?.timeseries,
-        previousPeriodTimeseries:
-          previousPeriod?.transactionStats?.latency?.timeseries,
+        previousPeriodTimeseries: previousPeriod?.transactionStats?.latency?.timeseries,
         color: getTimeSeriesColor(ChartType.LATENCY_AVG).currentPeriodColor,
-        comparisonSeriesColor: getTimeSeriesColor(ChartType.LATENCY_AVG)
-          .previousPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.LATENCY_AVG).previousPeriodColor,
       },
       {
-        title: i18n.translate(
-          'xpack.apm.serviceMap.avgReqPerMinutePopoverMetric',
-          {
-            defaultMessage: 'Throughput (avg.)',
-          }
-        ),
-        valueLabel: asTransactionRate(
-          currentPeriod?.transactionStats?.throughput?.value
-        ),
+        title: i18n.translate('xpack.apm.serviceMap.avgReqPerMinutePopoverMetric', {
+          defaultMessage: 'Throughput (avg.)',
+        }),
+        valueLabel: asTransactionRate(currentPeriod?.transactionStats?.throughput?.value),
         timeseries: currentPeriod?.transactionStats?.throughput?.timeseries,
-        previousPeriodTimeseries:
-          previousPeriod?.transactionStats?.throughput?.timeseries,
+        previousPeriodTimeseries: previousPeriod?.transactionStats?.throughput?.timeseries,
         color: getTimeSeriesColor(ChartType.THROUGHPUT).currentPeriodColor,
-        comparisonSeriesColor: getTimeSeriesColor(ChartType.THROUGHPUT)
-          .previousPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.THROUGHPUT).previousPeriodColor,
       },
       {
         title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
           defaultMessage: 'Failed transaction rate (avg.)',
         }),
-        valueLabel: asPercent(
-          currentPeriod?.failedTransactionsRate?.value,
-          1,
-          ''
-        ),
+        valueLabel: asPercent(currentPeriod?.failedTransactionsRate?.value, 1, ''),
         timeseries: currentPeriod?.failedTransactionsRate?.timeseries,
-        previousPeriodTimeseries:
-          previousPeriod?.failedTransactionsRate?.timeseries,
-        color: getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE)
-          .currentPeriodColor,
-        comparisonSeriesColor: getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
-        ).previousPeriodColor,
+        previousPeriodTimeseries: previousPeriod?.failedTransactionsRate?.timeseries,
+        color: getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE).currentPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE)
+          .previousPeriodColor,
       },
       {
         title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
@@ -139,22 +102,17 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         timeseries: currentPeriod?.cpuUsage?.timeseries,
         previousPeriodTimeseries: previousPeriod?.cpuUsage?.timeseries,
         color: getTimeSeriesColor(ChartType.CPU_USAGE).currentPeriodColor,
-        comparisonSeriesColor: getTimeSeriesColor(ChartType.CPU_USAGE)
-          .previousPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.CPU_USAGE).previousPeriodColor,
       },
       {
-        title: i18n.translate(
-          'xpack.apm.serviceMap.avgMemoryUsagePopoverStat',
-          {
-            defaultMessage: 'Memory usage (avg.)',
-          }
-        ),
+        title: i18n.translate('xpack.apm.serviceMap.avgMemoryUsagePopoverStat', {
+          defaultMessage: 'Memory usage (avg.)',
+        }),
         valueLabel: asPercent(currentPeriod?.memoryUsage?.value, 1, ''),
         timeseries: currentPeriod?.memoryUsage?.timeseries,
         previousPeriodTimeseries: previousPeriod?.memoryUsage?.timeseries,
         color: getTimeSeriesColor(ChartType.MEMORY_USAGE).currentPeriodColor,
-        comparisonSeriesColor: getTimeSeriesColor(ChartType.MEMORY_USAGE)
-          .previousPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.MEMORY_USAGE).previousPeriodColor,
       },
     ],
     [currentPeriod, previousPeriod]

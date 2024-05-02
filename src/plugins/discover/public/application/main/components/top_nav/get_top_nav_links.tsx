@@ -129,7 +129,7 @@ export const getTopNavLinks = ({
         isTextBased
       );
 
-      const { locator } = services;
+      const { locator, notifications } = services;
       const appState = state.appState.getState();
       const { timefilter } = services.data.query.timefilter;
       const timeRange = timefilter.getTime();
@@ -198,6 +198,7 @@ export const getTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
+        toasts: notifications.toasts,
       });
     },
   };

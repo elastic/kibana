@@ -41,10 +41,12 @@ export {
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
+  PanelIncompatibleError,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
+  registerReactEmbeddableSavedObject,
   runEmbeddableFactoryMigrations,
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
@@ -60,7 +62,6 @@ export type {
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
-  EmbeddableAppContext,
   EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,
@@ -96,21 +97,11 @@ export type { EnhancementRegistryDefinition } from './types';
 export {
   ReactEmbeddableRenderer,
   reactEmbeddableRegistryHasKey,
-  RegisterReactEmbeddable,
   registerReactEmbeddableFactory,
-  useReactEmbeddableApiHandle,
   type DefaultEmbeddableApi,
-  type ReactEmbeddable,
   type ReactEmbeddableFactory,
   type ReactEmbeddableRegistration,
-  type ReactEmbeddableTitlesApi,
-  type SerializedReactEmbeddableTitles,
-  ReactEmbeddableParentContext,
-  useReactEmbeddableParentApi,
-  useReactEmbeddableUnsavedChanges,
-  initializeReactEmbeddableUuid,
-  initializeReactEmbeddableTitles,
-  serializeReactEmbeddableTitles,
+  startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 
 export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
@@ -118,3 +109,8 @@ export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_pan
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
+
+export {
+  embeddableInputToSubject,
+  embeddableOutputToSubject,
+} from './lib/embeddables/compatibility/embeddable_compatibility_utils';

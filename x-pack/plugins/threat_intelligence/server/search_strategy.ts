@@ -11,7 +11,7 @@ import {
   ISearchRequestParams,
 } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../common/constants';
 import { RawIndicatorFieldId } from '../common/types/indicator';
 import { calculateBarchartColumnTimeInterval } from './utils/calculate_barchart_time_interval';

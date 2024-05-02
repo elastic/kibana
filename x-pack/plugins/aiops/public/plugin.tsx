@@ -8,7 +8,7 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../common/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,

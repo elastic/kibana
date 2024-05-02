@@ -228,7 +228,7 @@ export interface UpdateTimeline {
   preventSettingQuery?: boolean;
 }
 
-export type DispatchUpdateTimeline = (args: UpdateTimeline) => () => void;
+export type DispatchUpdateTimeline = (args: UpdateTimeline) => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',

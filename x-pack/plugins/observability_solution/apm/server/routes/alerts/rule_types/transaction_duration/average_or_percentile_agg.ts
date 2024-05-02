@@ -7,9 +7,7 @@
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { getDurationFieldForTransactions } from '../../../../lib/helpers/transactions';
 
-type TransactionDurationField = ReturnType<
-  typeof getDurationFieldForTransactions
->;
+type TransactionDurationField = ReturnType<typeof getDurationFieldForTransactions>;
 
 /* eslint @typescript-eslint/consistent-type-definitions: ["error", "type"] */
 type AvgLatencyAgg = {

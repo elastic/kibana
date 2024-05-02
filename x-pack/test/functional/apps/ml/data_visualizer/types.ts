@@ -36,7 +36,9 @@ export interface TestData {
     size: number;
     expected: { field: string; docCountFormatted: string };
   }>;
+  query?: string;
   expected: {
+    initialLimitSize?: string;
     filters?: Array<{
       key: string;
       value: string;

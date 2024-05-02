@@ -12,12 +12,12 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import '../../../../common/mock/match_media';
 import '../../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import type { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { NotePreviews } from '../note_previews';
+import { TimelineId } from '../../../../../common/types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 
@@ -206,7 +206,9 @@ describe('#getCommonColumns', () => {
 
       expect(onToggleShowNotes).toBeCalledWith({
         abc: <div />,
-        'saved-timeline-11': <NotePreviews notes={hasNotes[0].notes} />,
+        'saved-timeline-11': (
+          <NotePreviews notes={hasNotes[0].notes} timelineId={TimelineId.active} />
+        ),
       });
     });
 

@@ -24,6 +24,8 @@ export const createMockConfig = (): ConfigType => {
     packagerTaskInterval: '60s',
     packagerTaskTimeout: '5m',
     packagerTaskPackagePolicyUpdateBatchSize: 10,
+    completeExternalResponseActionsTaskInterval: '60s',
+    completeExternalResponseActionsTaskTimeout: '20m',
     prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
@@ -32,6 +34,17 @@ export const createMockConfig = (): ConfigType => {
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
     enableUiSettingsValidations: false,
+    entityAnalytics: {
+      riskEngine: {
+        alertSampleSizePerShard: 10_000,
+      },
+      assetCriticality: {
+        csvUpload: {
+          errorRetries: 3,
+          maxBulkRequestBodySizeBytes: 10_485_760,
+        },
+      },
+    },
   };
 };
 

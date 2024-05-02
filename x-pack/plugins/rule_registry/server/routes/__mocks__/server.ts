@@ -6,6 +6,7 @@
  */
 
 import { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import { getRequestValidation } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { RacRequestHandlerContext } from '../../types';
 import { requestContextMock } from './request_context';
@@ -84,12 +85,14 @@ class MockServer {
       return request;
     }
 
+    const validationConfig = getRequestValidation(validations);
+
     const validatedRequest = requestMock.create({
       path: request.route.path,
       method: request.route.method,
-      body: this.maybeValidate(request.body, validations.body),
-      query: this.maybeValidate(request.query, validations.query),
-      params: this.maybeValidate(request.params, validations.params),
+      body: this.maybeValidate(request.body, validationConfig.body),
+      query: this.maybeValidate(request.query, validationConfig.query),
+      params: this.maybeValidate(request.params, validationConfig.params),
     });
 
     return validatedRequest;

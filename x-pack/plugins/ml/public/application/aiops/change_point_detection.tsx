@@ -51,6 +51,7 @@ export const ChangePointDetectionPage: FC = () => {
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={{
             ...pick(services, [
+              'analytics',
               'application',
               'cases',
               'charts',

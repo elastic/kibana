@@ -47,6 +47,11 @@ describe('createRule', () => {
             summary: false,
           },
         },
+        {
+          id: '.test-system-action',
+          params: {},
+          connector_type_id: '.system-action',
+        },
       ],
       scheduled_task_id: '1',
       execution_status: { status: 'pending', last_execution_date: '2021-04-01T21:33:13.250Z' },
@@ -56,6 +61,7 @@ describe('createRule', () => {
         active: 10,
       },
     };
+
     const ruleToCreate: Omit<
       RuleUpdates,
       'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
@@ -94,6 +100,11 @@ describe('createRule', () => {
             summary: false,
           },
         },
+        {
+          id: '.test-system-action',
+          params: {},
+          actionTypeId: '.system-action',
+        },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
@@ -121,6 +132,11 @@ describe('createRule', () => {
             throttle: null,
             summary: false,
           },
+        },
+        {
+          id: '.test-system-action',
+          params: {},
+          actionTypeId: '.system-action',
         },
       ],
       ruleTypeId: '.index-threshold',

@@ -119,7 +119,6 @@ export function ObservabilityLogsExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
-  const dataGrid = getService('dataGrid');
   const es = getService('es');
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -296,12 +295,19 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('dataViewsContextMenu');
     },
 
-    getDataViewsContextMenuTitle(panelTitleNode: WebElementWrapper) {
-      return panelTitleNode.getVisibleText().then((title) => title.split('\n')[0]);
-    },
-
     getDataViewsTab() {
       return testSubjects.find('dataSourceSelectorDataViewsTab');
+    },
+
+    async changeDataViewTypeFilter(type: 'All' | 'Logs') {
+      const menuButton = await testSubjects.find(
+        'logsExplorerDataSourceSelectorDataViewTypeButton'
+      );
+      await menuButton.click();
+      const targetOption = await testSubjects.find(
+        `logsExplorerDataSourceSelectorDataViewType${type}`
+      );
+      await targetOption.click();
     },
 
     getPanelTitle(contextMenu: WebElementWrapper) {
@@ -326,11 +332,6 @@ export function ObservabilityLogsExplorerPageObject({
 
     getUnmanagedDatasetsButton() {
       return testSubjects.find('unmanagedDatasets');
-    },
-
-    async getFlyoutDetail(rowIndex: number = 0) {
-      await dataGrid.clickRowToggle({ rowIndex });
-      return testSubjects.find('logsExplorerFlyoutDetail');
     },
 
     async getIntegrations() {
