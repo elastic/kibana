@@ -83,7 +83,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
-import { DocumentationPage } from './documentation';
+import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
 import './index.scss';
@@ -269,6 +269,12 @@ export function Detail() {
 
   // Only show config tab if package has `inputs`
   const showConfigTab = packageInfo ? packageToPackagePolicyInputs(packageInfo).length > 0 : false;
+
+  // Only show API references tab if it is allowed & has documentation to show
+  const showDocumentationTab =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
+    packageInfo &&
+    hasDocumentation({ packageInfo, integration });
 
   // Track install status state
   useEffect(() => {
@@ -677,7 +683,7 @@ export function Detail() {
       });
     }
 
-    if (!HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo.name)) {
+    if (showDocumentationTab) {
       tabs.push({
         id: 'api-reference',
         name: (
@@ -707,6 +713,7 @@ export function Detail() {
     canReadPackageSettings,
     showConfigTab,
     showCustomTab,
+    showDocumentationTab,
     numOfDeferredInstallations,
   ]);
 
