@@ -56,9 +56,9 @@ class ESDocLinks {
   public dataEnrichment: string = '';
   public dataFiltering: string = '';
   public arrayOrJson: string = '';
-  public dataTransformation : string = '';
-  public pipelineHandling : string = '';
-  public pipelines : string = '';
+  public dataTransformation: string = '';
+  public pipelineHandling: string = '';
+  public pipelines: string = '';
 
   constructor() {}
 
@@ -113,7 +113,7 @@ class ESDocLinks {
     this.gettingStartedExplore = newDocLinks.serverlessSearch.gettingStartedExplore;
 
     // Ingest processor
-    this.dataEnrichment= newDocLinks.ingest.dataEnrichment
+    this.dataEnrichment = newDocLinks.ingest.dataEnrichment;
     this.dataFiltering = newDocLinks.ingest.dataFiltering;
     this.arrayOrJson = newDocLinks.ingest.arrayOrJson;
     this.dataTransformation = newDocLinks.ingest.dataTransformation;
