@@ -455,7 +455,7 @@ describe('Put payload schema', () => {
   });
 
   // This is important for backwards compatibility
-  test('does not set default value for remote_indices when not specified', () => {
+  test('does not set default value for remote_indices/remote_cluster when not specified', () => {
     expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`
       Object {
         "elasticsearch": Object {},
