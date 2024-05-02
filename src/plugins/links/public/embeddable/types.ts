@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -19,10 +21,11 @@ import {
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { HasLibraryTransforms } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+
 import { CONTENT_ID } from '../../common';
 import { Link, LinksAttributes } from '../../common/content_management';
 
@@ -57,3 +60,8 @@ export type ResolvedLink = Link & {
   description?: string;
   error?: Error;
 };
+
+export interface DashboardItem {
+  id: string;
+  attributes: DashboardAttributes;
+}

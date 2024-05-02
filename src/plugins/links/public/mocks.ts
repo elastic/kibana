@@ -12,11 +12,10 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { BehaviorSubject } from 'rxjs';
 import { setKibanaServices } from './services/kibana_services';
 import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../common/content_management';
-import { LinksApi, ResolvedLink } from './embeddable/types';
+import { LinksApi, LinksParentApi, ResolvedLink } from './embeddable/types';
 
 export const setStubKibanaServices = () => {
   const mockCore = coreMock.createStart();
@@ -50,7 +49,7 @@ export const getMockLinksApi = ({
 }: {
   attributes?: LinksAttributes;
   savedObjectId?: string;
-  parentApi: PresentationContainer;
+  parentApi: LinksParentApi;
 }): LinksApi => {
   return {
     parentApi,

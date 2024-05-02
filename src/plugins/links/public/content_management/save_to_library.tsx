@@ -90,7 +90,10 @@ export const runSaveToLibrary = async (
       try {
         const {
           item: { id },
-        } = await linksClient.create({ data: attributes, options: { references } });
+        } = await linksClient.create({
+          data: { ...attributes, title: newTitle },
+          options: { references },
+        });
         resolve({ savedObjectId: id });
         return { id };
       } catch (error) {
