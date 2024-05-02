@@ -100,7 +100,7 @@ describe('ResultsDataStream', () => {
 
     it('should not install space if install not executed', async () => {
       const resultsDataStream = new ResultsDataStream({ kibanaVersion: '8.13.0' });
-      expect(resultsDataStream.installSpace('space1')).rejects.toThrowError();
+      await expect(resultsDataStream.installSpace('space1')).rejects.toThrowError();
     });
 
     it('should throw error if main install had error', async () => {
@@ -115,7 +115,7 @@ describe('ResultsDataStream', () => {
       (dataStreamSpacesAdapter.install as jest.Mock).mockRejectedValueOnce(error);
       await resultsDataStream.install(params);
 
-      expect(resultsDataStream.installSpace('space1')).rejects.toThrowError(error);
+      await expect(resultsDataStream.installSpace('space1')).rejects.toThrowError(error);
     });
   });
 });

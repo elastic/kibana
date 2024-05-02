@@ -1010,150 +1010,6 @@
       },
       {
         "parentPluginId": "@kbn/cell-actions",
-        "id": "def-common.CellActionsProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "CellActionsProps",
-        "description": [],
-        "path": "packages/kbn-cell-actions/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.data",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "CellActionsData",
-              " | ",
-              "CellActionsData",
-              "[]"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.triggerId",
-            "type": "string",
-            "tags": [],
-            "label": "triggerId",
-            "description": [
-              "\nThe trigger in which the actions are registered."
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.mode",
-            "type": "Enum",
-            "tags": [],
-            "label": "mode",
-            "description": [
-              "\nUI configuration. Possible options are `HOVER` and `INLINE`.\n\n`HOVER` shows the actions when the children component is hovered.\n\n`INLINE` always shows the actions."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/cell-actions",
-                "scope": "common",
-                "docId": "kibKbnCellActionsPluginApi",
-                "section": "def-common.CellActionsMode",
-                "text": "CellActionsMode"
-              }
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.showActionTooltips",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showActionTooltips",
-            "description": [
-              "\nIt displays a tooltip for every action button when `true`."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.visibleCellActions",
-            "type": "number",
-            "tags": [],
-            "label": "visibleCellActions",
-            "description": [
-              "\nIt shows 'more actions' button when the number of actions is bigger than this parameter."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.disabledActionTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "disabledActionTypes",
-            "description": [
-              "\nList of Actions ids that shouldn't be displayed inside cell actions."
-            ],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.metadata",
-            "type": "Object",
-            "tags": [],
-            "label": "metadata",
-            "description": [
-              "\nCustom set of properties used by some actions.\nAn action might require a specific set of metadata properties to render.\nThis data is sent directly to actions."
-            ],
-            "signature": [
-              "Metadata | undefined"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.className",
-            "type": "string",
-            "tags": [],
-            "label": "className",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cell-actions",
         "id": "def-common.UseDataGridColumnsCellActionsProps",
         "type": "Interface",
         "tags": [],
@@ -1347,6 +1203,33 @@
             "text": "Serializable"
           },
           " | null[]"
+        ],
+        "path": "packages/kbn-cell-actions/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cell-actions",
+        "id": "def-common.CellActionsProps",
+        "type": "Type",
+        "tags": [],
+        "label": "CellActionsProps",
+        "description": [],
+        "signature": [
+          "{ data: ",
+          "CellActionsData",
+          " | ",
+          "CellActionsData",
+          "[]; triggerId: string; mode: ",
+          {
+            "pluginId": "@kbn/cell-actions",
+            "scope": "common",
+            "docId": "kibKbnCellActionsPluginApi",
+            "section": "def-common.CellActionsMode",
+            "text": "CellActionsMode"
+          },
+          "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "packages/kbn-cell-actions/src/types.ts",
         "deprecated": false,

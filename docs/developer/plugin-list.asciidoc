@@ -462,8 +462,12 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/asset_manager/README.md[assetManager]
 |This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -659,7 +663,7 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/metrics_data_access/README.md[metricsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/metrics_data_access/README.md[metricsDataAccess]
 |Exposes utilities to access metrics data.
 
 
