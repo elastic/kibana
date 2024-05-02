@@ -136,29 +136,41 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
 
     registerSloUsageCollector(plugins.usageCollection);
 
-    core.getStartServices().then(([coreStart, pluginStart]) => {
-      registerRoutes({
-        core,
-        config,
-        dependencies: {
-          pluginsSetup: {
-            ...plugins,
-            core,
-          },
-          spaces: pluginStart.spaces,
-          ruleDataService,
-          getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+    registerRoutes({
+      core,
+      config,
+      dependencies: {
+        pluginsSetup: {
+          ...plugins,
+          core,
         },
-        logger: this.logger,
-        repository: getSloServerRouteRepository(config),
-      });
-
-      const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-
-      const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-      const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
-      sloInstaller.install();
+        getSpacesStart: async () => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.spaces;
+        },
+        ruleDataService,
+        getRulesClientWithRequest: async (request) => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.alerting.getRulesClientWithRequest(request);
+        },
+      },
+      logger: this.logger,
+      repository: getSloServerRouteRepository({
+        isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+      }),
     });
+
+    core
+      .getStartServices()
+      .then(async ([coreStart, pluginStart]) => {
+        const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+        const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
+        await sloInstaller.install();
+      })
+      .catch((error) => {
+        this.logger.error(`Failed to install the default SLOs: ${error}`);
+      });
 
     this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
       plugins.taskManager,
@@ -171,7 +183,9 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
-    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+    this.sloOrphanCleanupTask
+      ?.start(plugins.taskManager, internalSoClient, internalEsClient)
+      .catch(() => {});
   }
 
   public stop() {}
