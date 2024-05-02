@@ -34,6 +34,7 @@ import type {
   PackagePolicy,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestBodySchema,
 } from '../../types';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -55,6 +56,8 @@ import {
 } from '../../../common/services/simplified_package_policy_helper';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+
+import { isSimplifiedCreatePackagePolicyRequest, removeFieldsFromInputSchema } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -214,17 +217,6 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
   }
 };
 
-function isSimplifiedCreatePackagePolicyRequest(
-  body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
-): body is SimplifiedPackagePolicy {
-  // If `inputs` is not defined or if it's a non-array, the request body is using the new simplified API
-  if (body.inputs && Array.isArray(body.inputs)) {
-    return false;
-  }
-
-  return true;
-}
-
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.query>,
@@ -353,31 +345,30 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
     } else {
-      // removed fields not recognized by schema
-      const packagePolicyInputs = packagePolicy.inputs.map((input) => {
-        const newInput = {
-          ...input,
-          streams: input.streams.map((stream) => {
-            const newStream = { ...stream };
-            delete newStream.compiled_stream;
-            return newStream;
-          }),
-        };
-        delete newInput.compiled_input;
-        return newInput;
-      });
+      const { overrides, ...restOfBody } = body as TypeOf<
+        typeof UpdatePackagePolicyRequestBodySchema
+      >;
+      const packagePolicyInputs = removeFieldsFromInputSchema(packagePolicy.inputs);
+
       // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
       newData = {
-        ...body,
-        name: body.name ?? packagePolicy.name,
-        description: body.description ?? packagePolicy.description,
-        namespace: body.namespace ?? packagePolicy?.namespace,
-        policy_id: body.policy_id ?? packagePolicy.policy_id,
-        enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
+        ...restOfBody,
+        name: restOfBody.name ?? packagePolicy.name,
+        description: restOfBody.description ?? packagePolicy.description,
+        namespace: restOfBody.namespace ?? packagePolicy?.namespace,
+        policy_id: restOfBody.policy_id ?? packagePolicy.policy_id,
+        enabled:
+          'enabled' in restOfBody
+            ? restOfBody.enabled ?? packagePolicy.enabled
+            : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,
-        inputs: body.inputs ?? packagePolicyInputs,
-        vars: body.vars ?? packagePolicy.vars,
+        inputs: restOfBody.inputs ?? packagePolicyInputs,
+        vars: restOfBody.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
+
+      if (overrides) {
+        newData.overrides = overrides;
+      }
     }
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,

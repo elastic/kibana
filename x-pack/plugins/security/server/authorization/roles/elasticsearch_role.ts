@@ -18,7 +18,10 @@ import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
 
-export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_metadata'> & {
+export type ElasticsearchRole = Pick<
+  Role,
+  'name' | 'description' | 'metadata' | 'transient_metadata'
+> & {
   applications: Array<{
     application: string;
     privileges: string[];
@@ -48,6 +51,7 @@ export function transformElasticsearchRoleToRole(
   );
   return {
     name,
+    ...(elasticsearchRole.description && { description: elasticsearchRole.description }),
     metadata: elasticsearchRole.metadata,
     transient_metadata: elasticsearchRole.transient_metadata,
     elasticsearch: {
