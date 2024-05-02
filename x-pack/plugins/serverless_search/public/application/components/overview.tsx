@@ -68,6 +68,7 @@ export const ElasticsearchOverview = () => {
   }, [cloud]);
   const assetBasePath = useAssetBasePath();
   const { hash } = useLocation();
+
   useEffect(() => {
     if (hash) {
       const id = hash.replace('#', '');
@@ -260,7 +261,18 @@ export const ElasticsearchOverview = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          leftPanelContent={<PreprocessDataPanel docLinks={docLinks} />}
+          leftPanelContent={
+            <PreprocessDataPanel
+              docLinks={docLinks}
+              images={{
+                dataEnrichment: `${assetBasePath}/data_enrichment.svg`,
+                dataTransformation: `${assetBasePath}/data_transformation.svg`,
+                dataFiltering: `${assetBasePath}/data_filtering.svg`,
+                pipelineHandling: `${assetBasePath}/pipeline_handling.svg`,
+                arrayHandling: `${assetBasePath}/array_handling.svg`,
+              }}
+            />
+          }
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.preprocessData.title', {
             defaultMessage:

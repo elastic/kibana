@@ -12,12 +12,13 @@ import {
   EuiText,
   EuiThemeProvider,
   EuiTitle,
-  EuiToken,
   EuiPanel,
   EuiLink,
   EuiFlexGrid,
+  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 
 export const PreprocessDataPanel: React.FC<{
@@ -28,7 +29,15 @@ export const PreprocessDataPanel: React.FC<{
     dataTransformation: string;
     pipelineHandling: string;
   };
-}> = ({ docLinks }) => {
+  images: {
+    dataEnrichment: string;
+    dataTransformation: string;
+    dataFiltering: string;
+    pipelineHandling: string;
+    arrayHandling: string;
+  };
+}> = ({ docLinks, images }) => {
+  const color = euiThemeVars.euiColorVis0_behindText;
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
@@ -36,7 +45,7 @@ export const PreprocessDataPanel: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiToken iconType="sparkles" size="l" color="#466B8D" />
+                <EuiImage alt="" src={images.dataEnrichment} color={color} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -80,7 +89,7 @@ export const PreprocessDataPanel: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiToken iconType="logstashFilter" size="l" color="#466B8D" />
+                <EuiImage alt="" src={images.dataFiltering} color={color} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -116,7 +125,7 @@ export const PreprocessDataPanel: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiToken iconType="tokenArray" size="l" fill="none" color="#466B8D" />
+                <EuiImage alt="" src={images.arrayHandling} color={color} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -154,7 +163,7 @@ export const PreprocessDataPanel: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiToken iconType="cut" size="l" color="#466B8D" />
+                <EuiImage alt="" src={images.dataTransformation} color={color} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
@@ -193,7 +202,7 @@ export const PreprocessDataPanel: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <EuiToken iconType="controlsVertical" size="l" color="#466B8D" />
+                <EuiImage alt="" src={images.pipelineHandling} color={color} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
