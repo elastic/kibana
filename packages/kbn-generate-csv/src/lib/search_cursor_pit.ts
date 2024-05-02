@@ -77,10 +77,14 @@ export class SearchCursorPit extends SearchCursor {
   private async searchWithPit(searchBody: SearchRequest) {
     const { maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
+    // maxConcurrentShardRequests=0 is not supported
+    const effectiveMaxConcurrentShardRequests =
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
+
     const searchParamsPit = {
       params: {
         body: searchBody,
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
+        max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
 
