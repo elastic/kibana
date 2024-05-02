@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { SearchSourceSearchOptions } from '../../..';
 import { GetConfigFn } from '../../../types';
 import { IKibanaSearchResponse } from '../../types';
@@ -18,7 +19,10 @@ import { IKibanaSearchResponse } from '../../types';
  * where `ISearchRequestParams` is used externally instead.
  * FIXME: replace with estypes.SearchRequest?
  */
-export type SearchRequest = Record<string, any>;
+export interface SearchRequest {
+  index?: DataView;
+  [key: string]: any;
+}
 
 export interface FetchHandlers {
   getConfig: GetConfigFn;

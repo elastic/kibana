@@ -21,7 +21,8 @@ import type { ISearchSource } from '../../../../public';
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {
   const stats: RequestStatistics = {};
-  const index = searchSource.getField('index');
+  const index = searchSource.getDataViewLazy();
+
   const indexFilters = searchSource.getActiveIndexFilter();
 
   if (index) {

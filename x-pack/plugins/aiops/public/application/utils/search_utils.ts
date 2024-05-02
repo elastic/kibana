@@ -155,7 +155,7 @@ export function getEsQueryFromSavedSearch({
     // which might interfere with global time pickers so we need to remove
     const savedQuery =
       cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
-    const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
+    const timeField = savedSearch.searchSource.getDataViewLazy()?.timeFieldName;
 
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(

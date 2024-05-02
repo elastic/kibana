@@ -45,6 +45,7 @@ function removeMatchAll<T>(filters: T[]) {
  * @public
  */
 export function buildEsQuery(
+  // todo does this really work with DataViewLazy?
   indexPattern: DataViewBase | DataViewBase[] | undefined,
   queries: AnyQuery | AnyQuery[],
   filters: Filter | Filter[],

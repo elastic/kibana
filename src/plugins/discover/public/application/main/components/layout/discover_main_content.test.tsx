@@ -93,9 +93,7 @@ const mountComponent = async ({
     availableFields$,
   };
   stateContainer.dataState.data$ = savedSearchData$;
-  const dataView = stateContainer.savedSearchState
-    .getState()
-    .searchSource.getField('index') as DataView;
+  const dataView = (await stateContainer.savedSearchState.getState().searchSource.getDataView())!;
   stateContainer.appState.update({
     index: dataView?.id!,
     interval: 'auto',

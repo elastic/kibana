@@ -120,7 +120,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
     const latestState = getCombinedDiscoverSavedSearchState();
-    const index = latestState?.searchSource.getField('index');
+    const index = latestState?.searchSource.getDataViewLazy();
     /* when a new timeline is loaded, a new discover instance is loaded which first emits
      * discover's initial state which is then updated in the saved search. We want to avoid that.*/
     if (!index) return;
@@ -172,8 +172,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       }
 
       const finalAppState =
-        ((savedSearchAppState?.appState?.query &&
-          'esql' in savedSearchAppState?.appState?.query &&
+        (((await savedSearchAppState?.appState)?.query &&
+          'esql' in (await savedSearchAppState?.appState)?.query &&
           savedSearchAppState?.appState) ||
           discoverAppState) ??
         defaultDiscoverAppState;

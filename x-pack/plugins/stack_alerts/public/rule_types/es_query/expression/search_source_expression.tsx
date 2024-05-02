@@ -66,9 +66,9 @@ export const SearchSourceExpression = ({
       if (!searchConfiguration) {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
-        const defaultDataView = await data.dataViews.getDefaultDataView();
+        const defaultDataView = await data.dataViews.getDefaultDataViewLazy();
         if (defaultDataView) {
-          newSearchSource.setField('index', defaultDataView);
+          newSearchSource.setDataView(defaultDataView);
         }
         initialSearchConfiguration = newSearchSource.getSerializedFields();
       }
@@ -79,7 +79,7 @@ export const SearchSourceExpression = ({
         );
         setRuleProperty('params', {
           searchConfiguration: initialSearchConfiguration,
-          timeField: createdSearchSource.getField('index')?.timeFieldName,
+          timeField: createdSearchSource.getDataViewLazy()?.timeFieldName,
           searchType: SearchType.searchSource,
           timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
           timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,

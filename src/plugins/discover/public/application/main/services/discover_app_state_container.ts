@@ -79,7 +79,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * Get updated AppState when given a saved search
    *
    * */
-  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => Promise<DiscoverAppState>;
 }
 
 export interface DiscoverAppState {
@@ -158,7 +158,7 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param savedSearch
  * @param services
  */
-export const getDiscoverAppStateContainer = ({
+export const getDiscoverAppStateContainer = async ({
   stateStorage,
   savedSearch,
   services,
@@ -166,8 +166,8 @@ export const getDiscoverAppStateContainer = ({
   stateStorage: IKbnUrlStateStorage;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-}): DiscoverAppStateContainer => {
-  let initialState = getInitialState(stateStorage, savedSearch, services);
+}): Promise<DiscoverAppStateContainer> => {
+  let initialState = await getInitialState(stateStorage, savedSearch, services);
   let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
@@ -221,7 +221,7 @@ export const getDiscoverAppStateContainer = ({
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
     const { data } = services;
-    const dataView = currentSavedSearch.searchSource.getField('index');
+    const dataView = currentSavedSearch.searchSource.getDataViewLazy();
 
     if (appStateContainer.getState().index !== dataView?.id) {
       // used data view is different from the given by url/state which is invalid
@@ -293,13 +293,13 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   sort?: string[][] | [string, string];
 }
 
-export function getInitialState(
+export async function getInitialState(
   stateStorage: IKbnUrlStateStorage | undefined,
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
   const stateStorageURL = stateStorage?.get(APP_STATE_URL_KEY) as AppStateUrl;
-  const defaultAppState = getStateDefaults({
+  const defaultAppState = await getStateDefaults({
     savedSearch,
     services,
   });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewLazy } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { getDocId } from './get_doc_id';
@@ -19,7 +19,7 @@ import { getDocId } from './get_doc_id';
  */
 export function buildDataTableRecord(
   doc: EsHitRecord,
-  dataView?: DataView,
+  dataView?: DataViewLazy,
   isAnchor?: boolean
 ): DataTableRecord {
   return {
@@ -37,7 +37,7 @@ export function buildDataTableRecord(
  */
 export function buildDataTableRecordList(
   docs: EsHitRecord[],
-  dataView?: DataView
+  dataView?: DataViewLazy
 ): DataTableRecord[] {
   return docs.map((doc) => buildDataTableRecord(doc, dataView));
 }

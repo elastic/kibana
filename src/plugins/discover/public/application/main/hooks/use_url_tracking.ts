@@ -17,7 +17,7 @@ export function useUrlTracking(savedSearchContainer: DiscoverSavedSearchContaine
 
   useEffect(() => {
     const subscription = savedSearchContainer.getCurrent$().subscribe((savedSearch) => {
-      const dataView = savedSearch.searchSource.getField('index');
+      const dataView = savedSearch.searchSource.getDataViewLazy();
       if (!dataView) {
         return;
       }

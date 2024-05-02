@@ -9,7 +9,7 @@
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
+// import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import {
@@ -37,7 +37,7 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
+  const dataView = savedSearch?.searchSource?.getField('index');
 
   stateContainer.appState.update({
     index: dataView?.id,
@@ -45,6 +45,7 @@ function getStateContainer(savedSearch?: SavedSearch) {
     hideChart: false,
   });
 
+  // todo
   stateContainer.internalState.transitions.setDataView(dataView);
 
   return stateContainer;
@@ -62,7 +63,7 @@ const mountComponent = async ({
   savedSearch?: SavedSearch;
   searchSessionId?: string | null;
 } = {}) => {
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
+  const dataView = savedSearch?.searchSource?.getDataViewLazy();
 
   let services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -121,7 +122,7 @@ const mountComponent = async ({
 
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
-    dataView,
+    dataView: (await savedSearch?.searchSource?.getDataView())!,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],

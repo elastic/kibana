@@ -72,7 +72,7 @@ import {
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewLazy, AbstractDataView } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -80,7 +80,12 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import {
+  AggConfigSerialized,
+  DataViewField,
+  SerializedSearchSourceFields,
+  DataViewsContract,
+} from '../..';
 
 import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
@@ -123,6 +128,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
   scriptedFieldsEnabled: boolean;
+  dataViews: DataViewsContract;
 }
 
 interface ExpressionAstOptions {
@@ -133,6 +139,8 @@ interface ExpressionAstOptions {
    */
   asDatatable?: boolean;
 }
+
+const DATA_VIEW_KEY = 'index';
 
 /** @public **/
 export class SearchSource {
@@ -237,6 +245,32 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
+  }
+
+  /**
+   * Returns dataView as DataView instead of DataViewLazy
+   * @returns dataView
+   */
+
+  async getDataView() {
+    const dataView = this.getField(DATA_VIEW_KEY);
+    return dataView ? await this.dependencies.dataViews.toDataView(dataView) : undefined;
+  }
+
+  async setDataView(dataView: DataView | undefined) {
+    const dataViewLazy = dataView
+      ? await this.dependencies.dataViews.toDataViewLazy(dataView)
+      : undefined;
+    this.setField(DATA_VIEW_KEY, dataViewLazy);
+    return this;
+  }
+
+  getDataViewLazy() {
+    return this.getField(DATA_VIEW_KEY);
+  }
+
+  setDataViewLazy(dataView: DataViewLazy | undefined) {
+    return this.setField(DATA_VIEW_KEY, dataView);
   }
 
   getActiveIndexFilter() {
@@ -347,6 +381,7 @@ export class SearchSource {
     options: SearchSourceSearchOptions = {}
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
+      // todo todo todo
       switchMap(() => {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
@@ -604,11 +639,11 @@ export class SearchSource {
    * @param  {*} val - the value at `key`
    * @param  {*} key - The key of `val`
    */
-  private mergeProp<K extends keyof SearchSourceFields>(
+  private async mergeProp<K extends keyof SearchSourceFields>(
     data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
-  ): false | void {
+  ): Promise<false | void> {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
@@ -632,7 +667,7 @@ export class SearchSource {
       case 'filter':
         return addToRoot('filters', (data.filters || []).concat(val));
       case 'query':
-        return addToRoot(key, (data[key] || []).concat(val));
+        return addToRoot(key, (data.query || []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -643,7 +678,7 @@ export class SearchSource {
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const fields = [...new Set((data[key] || []).concat(val))];
+        const fields = [...new Set((data.fieldsFromSource || []).concat(val))];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -658,7 +693,8 @@ export class SearchSource {
       case 'sort':
         const sort = normalizeSortRequest(
           val,
-          this.getField('index'),
+          // todo - need all fields in the sort request
+          await this.getDataView(),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
@@ -690,7 +726,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: DataView) {
+  private getIndexType(index?: AbstractDataView) {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
@@ -705,6 +741,7 @@ export class SearchSource {
       return bodyFields;
     }
     const { fields } = index;
+    // const { fields } = (await this.getDataView())!;
     const sourceFilters = index.getSourceFiltering();
     if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
       return bodyFields;
@@ -725,7 +762,7 @@ export class SearchSource {
       );
     }
     // we need to get the list of fields from an index pattern
-    return fields
+    return (fields as DataViewField[])
       .filter((fld: DataViewField) => filterSourceFields(fld.name))
       .map((fld: DataViewField) => ({ field: fld.name }));
   }
@@ -747,6 +784,7 @@ export class SearchSource {
       return field;
     }
     const { fields } = index;
+    // TODO
     const dateFields = fields.getByType('date');
     const dateField = dateFields.find((indexPatternField) => indexPatternField.name === fieldName);
     if (!dateField) {
@@ -761,17 +799,21 @@ export class SearchSource {
     return field;
   }
 
+  // this may need to become async
   private flatten() {
     const { getConfig } = this.dependencies;
+    // todo I wonder whats in searchRequest
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
+    // I think this needs better typing
     const { body, index, query, filters, highlightAll, pit } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = index
-      ? index.getComputedFields()
+      ? // This is async for dataViewLazy, to get date fields for docvalue fields
+        index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
@@ -792,6 +834,7 @@ export class SearchSource {
     body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
+    // TODO there's probably a better place to apply these
     let filteredDocvalueFields = docvalueFields;
     if (index) {
       const sourceFilters = index.getSourceFiltering();
@@ -799,8 +842,10 @@ export class SearchSource {
         body._source = sourceFilters;
       }
 
-      const filter = fieldWildcardFilter(body._source.excludes, metaFields);
+      const filter = fieldWildcardFilter(body._source.excludes, metaFields); // todo take a closer look
       // also apply filters to provided fields & default docvalueFields
+      // todo THIS MIGHT NEED REFACTOR
+      // filtering body fields
       body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
       fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
         filter(this.getFieldName(fld))
@@ -812,6 +857,7 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
+      // todo
       const bodyFieldNames = body.fields.map((field: SearchFieldValue) => this.getFieldName(field));
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
@@ -866,6 +912,8 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        // todo this returns all fields minus sourceFiltered fields
+        // TODO
         const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
 
         const uniqueFieldNames = new Set();
@@ -882,7 +930,8 @@ export class SearchSource {
             uniqueFields.push(
               typeof field === 'string'
                 ? docvaluesIndex[field]
-                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
+                : // TODO
+                  this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
             );
           } else {
             uniqueFields.push(field);
@@ -902,6 +951,7 @@ export class SearchSource {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
     };
+    // TODO
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     // For testing shard failure messages in the UI, follow these steps:
@@ -1055,7 +1105,7 @@ export class SearchSource {
         buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
           size: body?.size,
           dsl: JSON.stringify({}),
-          index: index?.id,
+          index: index?.id!,
         }).toAst()
       );
     }
