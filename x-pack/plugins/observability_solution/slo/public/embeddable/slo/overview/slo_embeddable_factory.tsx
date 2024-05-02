@@ -21,7 +21,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createBrowserHistory } from 'history';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -58,6 +57,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       const groupFilters$ = new BehaviorSubject(state.groupFilters);
       const remoteName$ = new BehaviorSubject(state.remoteName);
       const reload$ = new Subject<boolean>();
+
       const api = buildApi(
         {
           ...titlesApi,
@@ -191,19 +191,17 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             <I18nContext>
               <Router history={createBrowserHistory()}>
                 <EuiThemeProvider darkMode={true}>
-                  <KibanaThemeProvider theme={deps.theme}>
-                    <KibanaContextProvider services={deps}>
-                      <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
-                        <QueryClientProvider client={queryClient}>
-                          {showAllGroupByInstances ? (
-                            <SloCardChartList sloId={sloId!} />
-                          ) : (
-                            renderOverview()
-                          )}
-                        </QueryClientProvider>
-                      </PluginContext.Provider>
-                    </KibanaContextProvider>
-                  </KibanaThemeProvider>
+                  <KibanaContextProvider services={deps}>
+                    <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
+                      <QueryClientProvider client={queryClient}>
+                        {showAllGroupByInstances ? (
+                          <SloCardChartList sloId={sloId!} />
+                        ) : (
+                          renderOverview()
+                        )}
+                      </QueryClientProvider>
+                    </PluginContext.Provider>
+                  </KibanaContextProvider>
                 </EuiThemeProvider>
               </Router>
             </I18nContext>
