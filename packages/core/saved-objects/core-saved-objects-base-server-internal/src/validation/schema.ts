@@ -37,6 +37,7 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
   typeMigrationVersion: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
   created_at: schema.maybe(schema.string()),
+  created_by: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
   originId: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),

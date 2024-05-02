@@ -48,6 +48,16 @@ const getStatCount = (stats: RuleStatsState, status: Status) => {
   return stats[status];
 };
 
+const disabledLabel = i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
+  defaultMessage: 'Disabled',
+});
+const snoozedLabel = i18n.translate('xpack.observability.alerts.ruleStats.muted', {
+  defaultMessage: 'Snoozed',
+});
+const errorsLabel = i18n.translate('xpack.observability.alerts.ruleStats.errors', {
+  defaultMessage: 'Errors',
+});
+
 export const renderRuleStats = (
   ruleStats: RuleStatsState,
   manageRulesHref: string,
@@ -76,6 +86,7 @@ export const renderRuleStats = (
       condition={ruleStats.disabled > 0}
       wrap={(wrappedChildren) => (
         <EuiButtonEmpty
+          aria-label={disabledLabel}
           data-test-subj="o11yDisabledStatsComponentButton"
           onClick={() => handleNavigateToRules(ruleStats, 'disabled')}
         >
@@ -85,9 +96,7 @@ export const renderRuleStats = (
     >
       <StyledStat
         title={ruleStats.disabled}
-        description={i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
-          defaultMessage: 'Disabled',
-        })}
+        description={disabledLabel}
         color="primary"
         titleColor={ruleStats.disabled > 0 ? 'primary' : ''}
         titleSize="xs"
@@ -102,6 +111,7 @@ export const renderRuleStats = (
       condition={ruleStats.muted + ruleStats.snoozed > 0}
       wrap={(wrappedChildren) => (
         <EuiButtonEmpty
+          aria-label={snoozedLabel}
           data-test-subj="o11ySnoozedStatsComponentButton"
           onClick={() => handleNavigateToRules(ruleStats, 'snoozed')}
         >
@@ -111,9 +121,7 @@ export const renderRuleStats = (
     >
       <StyledStat
         title={ruleStats.muted + ruleStats.snoozed}
-        description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
-          defaultMessage: 'Snoozed',
-        })}
+        description={snoozedLabel}
         color="primary"
         titleColor={ruleStats.muted + ruleStats.snoozed > 0 ? 'primary' : ''}
         titleSize="xs"
@@ -128,6 +136,7 @@ export const renderRuleStats = (
       condition={ruleStats.error > 0}
       wrap={(wrappedChildren) => (
         <EuiButtonEmpty
+          aria-label={errorsLabel}
           data-test-subj="o11yErrorStatsComponentButton"
           onClick={() => handleNavigateToRules(ruleStats, 'error')}
         >
@@ -137,9 +146,7 @@ export const renderRuleStats = (
     >
       <StyledStat
         title={ruleStats.error}
-        description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
-          defaultMessage: 'Errors',
-        })}
+        description={errorsLabel}
         color="primary"
         titleColor={ruleStats.error > 0 ? 'primary' : ''}
         titleSize="xs"

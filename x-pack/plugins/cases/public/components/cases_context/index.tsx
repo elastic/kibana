@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, ReactNode } from 'react';
+import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
 import React, { useCallback, useMemo, useReducer } from 'react';
@@ -62,7 +62,12 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
+export const CasesProvider: FC<
+  PropsWithChildren<{
+    value: CasesContextProps;
+    queryClient?: QueryClient;
+  }>
+> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,

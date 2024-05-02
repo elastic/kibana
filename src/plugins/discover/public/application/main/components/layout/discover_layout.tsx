@@ -51,7 +51,6 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 
@@ -72,7 +71,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     filterManager,
     history,
     spaces,
-    docLinks,
+    observabilityAIAssistant,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -133,6 +132,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     columns,
     sort,
   });
+
+  // The assistant is getting the state from the url correctly
+  // expect from the index pattern where we have only the dataview id
+  useEffect(() => {
+    return observabilityAIAssistant?.service.setScreenContext({
+      screenDescription: `The user is looking at the Discover view on the ${
+        isPlainRecord ? 'ES|QL' : 'dataView'
+      } mode. The index pattern is the ${dataView.getIndexPattern()}`,
+    });
+  }, [dataView, isPlainRecord, observabilityAIAssistant?.service]);
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -219,8 +228,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
-        {/* Temporarily display a tech preview callout for ES|QL*/}
-        {isPlainRecord && <ESQLTechPreviewCallout docLinks={docLinks} />}
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
@@ -239,7 +246,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [
     currentColumns,
     dataView,
-    docLinks,
     isPlainRecord,
     mainContainer,
     onAddFilter,

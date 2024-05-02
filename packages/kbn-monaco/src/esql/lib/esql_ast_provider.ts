@@ -89,6 +89,7 @@ export class ESQLAstAdapter {
       model.getValue(),
       context.markers as EditorError[],
       getAstFn,
+      undefined,
       this.callbacks
     );
     return codeActions;

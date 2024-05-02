@@ -62,8 +62,8 @@ export const ControlsContent: React.FC<Props> = ({
 
       controlGroup.untilAllChildrenReady().then(() => {
         controlGroup.getChildIds().map((id) => {
-          const embeddable: ControlEmbeddable<ControlInput, ControlOutput> =
-            controlGroup.children[id];
+          const embeddable =
+            controlGroup.getChild<ControlEmbeddable<ControlInput, ControlOutput>>(id);
           embeddable.renderPrepend = () => (
             <ControlTitle title={embeddable.getTitle()} embeddableId={id} />
           );

@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -45,11 +44,6 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
-
-  /**
-   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
-   */
-  assistantStreamingEnabled: false,
 
   /**
    * Enables the SOC trends timerange and stats on D&R page
@@ -86,10 +80,27 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV1Enabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously as well as support
-   * for more response actions.
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: false,
+
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: false,
+
+  /**
+   * 8.15
+   * Enables use of agent status service to get agent status information
+   * for endpoint and third-party agents.
+   */
+  agentStatusClientEnabled: false,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -109,18 +120,23 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
 
   /**
    * Enables expandable flyout in timeline
    */
-  expandableTimelineFlyoutEnabled: false,
+  expandableTimelineFlyoutEnabled: true,
   /*
 
   /**
    * Enables new Set of filters on the Alerts page.
    */
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables the Attack discovery feature and API endpoint
+   */
+  attackDiscoveryEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -181,7 +197,9 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneDataInAnalyzerEnabled: true,
 
   /**
-   * Enables SentinelOne manual host manipulation actions
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
 
@@ -233,6 +251,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: false,
+
+  /**
+   *  Enables Security AI Assistant's Flyout mode
+   */
+  aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

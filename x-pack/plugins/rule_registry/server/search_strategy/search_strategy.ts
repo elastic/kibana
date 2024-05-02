@@ -121,6 +121,7 @@ export const ruleRegistrySearchStrategyProvider = (
               ? { ids: request.query?.ids }
               : {
                   bool: {
+                    ...request.query?.bool,
                     filter,
                   },
                 }),
@@ -198,8 +199,8 @@ export const ruleRegistrySearchStrategyProvider = (
       );
     },
     cancel: async (id, options, deps) => {
-      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps);
-      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps);
+      if (internalUserEs.cancel) internalUserEs.cancel(id, options, deps).catch(() => {});
+      if (requestUserEs.cancel) requestUserEs.cancel(id, options, deps).catch(() => {});
     },
   };
 };

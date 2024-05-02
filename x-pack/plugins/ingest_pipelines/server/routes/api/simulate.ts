@@ -37,7 +37,6 @@ export const registerSimulateRoute = ({
         const response = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
           body: {
-            // @ts-expect-error pipeline._meta defined as mandatory
             pipeline,
             docs: documents as estypes.IngestSimulateDocument[],
           },

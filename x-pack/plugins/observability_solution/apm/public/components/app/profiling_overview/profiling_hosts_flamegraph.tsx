@@ -10,10 +10,7 @@ import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { HOST_NAME } from '../../../../common/es_fields/apm';
-import {
-  mergeKueries,
-  toKueryFilterFormat,
-} from '../../../../common/utils/kuery_utils';
+import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { FlamegraphChart } from '../../shared/charts/flamegraph';
 import { ProfilingFlamegraphLink } from '../../shared/profiling/flamegraph/flamegraph_link';
@@ -45,31 +42,25 @@ export function ProfilingHostsFlamegraph({
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (dataSource) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                start,
-                end,
-                environment,
-                documentType: dataSource.documentType,
-                rollupInterval: dataSource.rollupInterval,
-                kuery,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph', {
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              environment,
+              documentType: dataSource.documentType,
+              rollupInterval: dataSource.rollupInterval,
+              kuery,
             },
-          }
-        );
+          },
+        });
       }
     },
     [dataSource, serviceName, start, end, environment, kuery]
   );
 
-  const hostNamesKueryFormat = toKueryFilterFormat(
-    HOST_NAME,
-    data?.hostNames || []
-  );
+  const hostNamesKueryFormat = toKueryFilterFormat(HOST_NAME, data?.hostNames || []);
 
   return (
     <>

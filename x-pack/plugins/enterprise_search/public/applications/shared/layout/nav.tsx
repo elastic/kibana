@@ -23,10 +23,13 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
+import {
+  SEARCH_APPLICATIONS_PATH,
+  SearchApplicationViewTabs,
+  PLAYGROUND_PATH,
+} from '../../applications/routes';
 import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 import {
-  PLAYGROUND_PATH,
   CONNECTORS_PATH,
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
@@ -93,6 +96,14 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
           }),
         },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
+        defaultMessage: 'Content',
+      }),
+    },
+    {
+      id: 'build',
+      items: [
         {
           id: 'playground',
           name: i18n.translate('xpack.enterpriseSearch.nav.PlaygroundTitle', {
@@ -101,17 +112,9 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH,
+            to: APPLICATIONS_PLUGIN.URL + PLAYGROUND_PATH,
           }),
         },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
-        defaultMessage: 'Content',
-      }),
-    },
-    {
-      id: 'applications',
-      items: [
         {
           id: 'searchApplications',
           name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
@@ -134,7 +137,7 @@ export const useEnterpriseSearchNav = () => {
         },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
-        defaultMessage: 'Applications',
+        defaultMessage: 'Build',
       }),
     },
     {
@@ -226,7 +229,7 @@ export const useEnterpriseSearchApplicationNav = (
   const navItems = useEnterpriseSearchNav();
   if (!navItems) return undefined;
   if (!searchApplicationName) return navItems;
-  const applicationsItem = navItems.find((item) => item.id === 'applications');
+  const applicationsItem = navItems.find((item) => item.id === 'build');
   if (!applicationsItem || !applicationsItem.items) return navItems;
   const searchApplicationsItem = applicationsItem.items?.find(
     (item) => item.id === 'searchApplications'
@@ -320,7 +323,7 @@ export const useEnterpriseSearchAnalyticsNav = (
 
   if (!navItems) return undefined;
 
-  const applicationsNav = navItems.find((item) => item.id === 'applications');
+  const applicationsNav = navItems.find((item) => item.id === 'build');
   const analyticsNav = applicationsNav?.items?.find((item) => item.id === 'analyticsCollections');
 
   if (!name || !paths || !analyticsNav) return navItems;

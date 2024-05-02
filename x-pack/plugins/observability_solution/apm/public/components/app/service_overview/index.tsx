@@ -50,14 +50,12 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const router = useApmRouter();
-  const { serviceName, fallbackToTransactions, agentName, serverlessType } =
-    useApmServiceContext();
+  const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
-    return setScreenContext({
+    return setScreenContext?.({
       screenDescription: `The user is looking at the service overview page for ${serviceName}.`,
       data: [
         {
@@ -92,12 +90,8 @@ export function ServiceOverview() {
   const isSingleColumn = isLarge;
 
   const latencyChartHeight = 200;
-  const nonLatencyChartHeight = isSingleColumn
-    ? latencyChartHeight
-    : chartHeight;
-  const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
-    ? 'column'
-    : 'row';
+  const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
+  const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
@@ -135,16 +129,9 @@ export function ServiceOverview() {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               <EuiFlexItem grow={3}>
-                <ServiceOverviewThroughputChart
-                  height={nonLatencyChartHeight}
-                  kuery={kuery}
-                />
+                <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
@@ -163,11 +150,7 @@ export function ServiceOverview() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               {!isRumAgent && (
                 <EuiFlexItem grow={3}>
                   <FailedTransactionRateChart
@@ -185,11 +168,7 @@ export function ServiceOverview() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               {isServerless ? (
                 <EuiFlexItem grow={3}>
                   <TransactionColdstartRateChart
@@ -220,10 +199,9 @@ export function ServiceOverview() {
                           data-test-subj="apmServiceOverviewViewDependenciesLink"
                           href={dependenciesLink}
                         >
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                            { defaultMessage: 'View dependencies' }
-                          )}
+                          {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTabLink', {
+                            defaultMessage: 'View dependencies',
+                          })}
                         </EuiLink>
                       }
                       showSparkPlots={!isSingleColumn}
@@ -235,11 +213,7 @@ export function ServiceOverview() {
           </EuiFlexItem>
           {!isRumAgent && !isServerless && (
             <EuiFlexItem>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="s"
-                responsive={false}
-              >
+              <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
                 <ServiceOverviewInstancesChartAndTable
                   chartHeight={nonLatencyChartHeight}
                   serviceName={serviceName}

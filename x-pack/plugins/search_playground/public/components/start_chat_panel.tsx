@@ -14,16 +14,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface StartChatPanelProps {
+  children: React.ReactNode;
   title: string;
   description: string | React.ReactNode;
   isValid?: boolean;
 }
 
-export const StartChatPanel: React.FC<StartChatPanelProps> = ({
+export const StartChatPanel: FC<PropsWithChildren<StartChatPanelProps>> = ({
   title,
   description,
   children,
@@ -55,7 +56,7 @@ export const StartChatPanel: React.FC<StartChatPanelProps> = ({
 
     <EuiSpacer size="s" />
 
-    <EuiFlexGroup direction="column" gutterSize="xl">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiText size="s">
         <p>{description}</p>
       </EuiText>

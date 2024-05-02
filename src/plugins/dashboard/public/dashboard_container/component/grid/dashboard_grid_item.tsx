@@ -118,8 +118,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
             maybeId={id}
             parentApi={container}
             key={`${type}_${id}`}
-            state={{ rawState: panel.explicitInput, version: panel.version, references }}
             panelProps={panelProps}
+            onApiAvailable={(api) => container.registerChildApi(api)}
+            state={{ rawState: panel.explicitInput as object, references }}
           />
         );
       }
@@ -133,16 +134,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           {...panelProps}
         />
       );
-    }, [
-      id,
-      container,
-      type,
-      index,
-      useMargins,
-      onPanelStatusChange,
-      panel.explicitInput,
-      panel.version,
-    ]);
+    }, [id, container, type, index, useMargins, onPanelStatusChange, panel.explicitInput]);
 
     return (
       <div

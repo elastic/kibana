@@ -5,22 +5,6 @@
  * 2.0.
  */
 
-export {
-  ruleParamsSchema,
-  snoozeScheduleSchema,
-  ruleExecutionStatusSchema,
-  ruleLastRunSchema,
-  monitoringSchema,
-  ruleSchema,
-  ruleDomainSchema,
-  alertDelaySchema,
-} from './rule_schemas';
-
-export {
-  actionParamsSchema,
-  defaultActionDomainSchema,
-  systemActionDomainSchema,
-  actionAlertsFilterSchema,
-} from './action_schemas';
-
-export { notifyWhenSchema } from './notify_when_schema';
+export * from './rule_schemas';
+export * from './action_schemas';
+export * from './notify_when_schema';

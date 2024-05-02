@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { ProtectionModes } from '../types';
+import { ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -80,6 +80,7 @@ export const policyFactory = (
         file: 'info',
       },
       antivirus_registration: {
+        mode: AntivirusRegistrationModes.disabled,
         enabled: false,
       },
       attack_surface_reduction: {

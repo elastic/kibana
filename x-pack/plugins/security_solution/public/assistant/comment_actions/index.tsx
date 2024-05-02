@@ -7,12 +7,12 @@
 
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { Message } from '@kbn/elastic-assistant';
+import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
-import { useBasePath, useKibana, useToasts } from '../../common/lib/kibana';
+import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
 import { TimelineId } from '../../../common/types';
@@ -22,17 +22,17 @@ import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface Props {
-  message: Message;
+  message: ClientMessage;
+  isFlyoutMode: boolean;
 }
 
-const CommentActionsComponent: React.FC<Props> = ({ message }) => {
+const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => {
   const toasts = useToasts();
-  const basePath = useBasePath();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
 
-  const { showAssistantOverlay } = useAssistantContext();
+  const { showAssistantOverlay, traceOptions } = useAssistantContext();
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: TimelineId.active, noteId })),
@@ -65,7 +65,9 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   });
 
   const onAddToExistingCase = useCallback(() => {
-    showAssistantOverlay({ showOverlay: false });
+    if (!isFlyoutMode) {
+      showAssistantOverlay({ showOverlay: false });
+    }
 
     selectCaseModal.open({
       getAttachments: () => [
@@ -76,7 +78,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
         },
       ],
     });
-  }, [content, selectCaseModal, showAssistantOverlay]);
+  }, [content, isFlyoutMode, selectCaseModal, showAssistantOverlay]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
@@ -84,8 +86,8 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   // Note: There's a bug with URL params being rewritten, so must specify 'query' to filter on transaction id
   // See: https://github.com/elastic/kibana/issues/171368
   const apmTraceLink =
-    message.traceData != null
-      ? `${basePath}/app/apm/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
+    message.traceData != null && Object.keys(message.traceData).length > 0
+      ? `${traceOptions.apmUrl}/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
       : undefined;
 
   // Use this link for routing to the services/transactions view which provides a slightly different view

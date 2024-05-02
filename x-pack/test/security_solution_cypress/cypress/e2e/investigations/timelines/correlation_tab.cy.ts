@@ -6,8 +6,6 @@
  */
 
 import { openTimeline } from '../../../tasks/timelines';
-import { getTimeline } from '../../../objects/timeline';
-
 import {
   SERVER_SIDE_EVENT_COUNT,
   TIMELINE_TAB_CONTENT_EQL,
@@ -30,7 +28,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
     login();
     deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       visit(TIMELINES_URL);
       openTimeline(response.body.data.persistTimeline.timeline.savedObjectId);
       addEqlToTimeline(eql);

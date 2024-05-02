@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AIMessage, BaseMessage, HumanMessage } from 'langchain/schema';
+import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
 
 export const langChainMessages: BaseMessage[] = [
   new HumanMessage('What is my name?'),

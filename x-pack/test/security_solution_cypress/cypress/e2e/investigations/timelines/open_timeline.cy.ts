@@ -27,12 +27,14 @@ import {
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
+const mockTimeline = getTimeline();
+
 describe('Open timeline modal', { tags: ['@serverless', '@ess'] }, () => {
   beforeEach(function () {
     deleteTimelines();
     login();
     visit(TIMELINES_URL);
-    createTimeline(getTimeline())
+    createTimeline()
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
@@ -42,7 +44,7 @@ describe('Open timeline modal', { tags: ['@serverless', '@ess'] }, () => {
           // eslint-disable-next-line cypress/no-unnecessary-waiting
           .then(() => cy.wait(1000))
           .then(() =>
-            addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
+            addNoteToTimeline(mockTimeline.notes, timelineId).should((response) =>
               expect(response.status).to.equal(200)
             )
           )
@@ -55,11 +57,11 @@ describe('Open timeline modal', { tags: ['@serverless', '@ess'] }, () => {
   it('should display timeline info in the open timeline modal', () => {
     openTimelineFromSettings();
     cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
-    cy.contains(getTimeline().title).should('exist');
-    cy.get(TIMELINES_DESCRIPTION).last().should('have.text', getTimeline().description);
+    cy.contains(mockTimeline.title).should('exist');
+    cy.get(TIMELINES_DESCRIPTION).last().should('have.text', mockTimeline.description);
     cy.get(TIMELINES_PINNED_EVENT_COUNT).last().should('have.text', '1');
     cy.get(TIMELINES_NOTES_COUNT).last().should('have.text', '1');
     cy.get(TIMELINES_FAVORITE).last().should('exist');
-    cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
+    cy.get(TIMELINE_TITLE).should('have.text', mockTimeline.title);
   });
 });

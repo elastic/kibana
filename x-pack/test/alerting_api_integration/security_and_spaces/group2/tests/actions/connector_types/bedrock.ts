@@ -443,6 +443,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
                 .on('error', reject)
                 .send({
+                  actionTypeId: '.bedrock',
                   subAction: 'invokeStream',
                   message: 'Hello world',
                   isEnabledKnowledgeBase: false,

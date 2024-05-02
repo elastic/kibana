@@ -116,7 +116,7 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -143,7 +143,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -357,7 +357,7 @@ export class Plugin
                 : [];
 
               const isAiAssistantEnabled =
-                pluginsStart.observabilityAIAssistant.service.isEnabled();
+                pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
               const aiAssistantLink =
                 isAiAssistantEnabled &&

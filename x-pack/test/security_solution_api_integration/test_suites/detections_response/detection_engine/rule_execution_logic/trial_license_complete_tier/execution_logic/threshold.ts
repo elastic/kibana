@@ -27,7 +27,7 @@ import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solut
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Threshold type rules', () => {
+  describe('@ess @serverless @serverlessQA Threshold type rules', () => {
     before(async () => {
       await esArchiver.load(path);
     });
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
@@ -332,7 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
     });
 

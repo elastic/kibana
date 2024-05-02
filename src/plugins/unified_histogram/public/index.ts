@@ -8,6 +8,9 @@
 
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
+export type { BreakdownFieldSelectorProps } from './chart/lazy';
+export { UnifiedBreakdownFieldSelector } from './chart/lazy';
+
 export type {
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
@@ -28,7 +31,10 @@ export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
+  UnifiedHistogramVisContext,
 } from './types';
-export { UnifiedHistogramFetchStatus } from './types';
+export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
+export { canImportVisContext } from './utils/external_vis_context';
+export { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

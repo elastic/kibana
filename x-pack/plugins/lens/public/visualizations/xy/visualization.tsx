@@ -60,15 +60,11 @@ import {
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
-  type PersistedState,
   visualizationTypes,
 } from './types';
 import {
-  getPersistableState,
   getAnnotationLayerErrors,
-  injectReferences,
   isHorizontalChart,
-  isPersistedState,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
 } from './state_helpers';
@@ -122,6 +118,7 @@ import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
 
 const XY_ID = 'lnsXY';
 
@@ -151,7 +148,7 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, PersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -208,20 +205,20 @@ export const getXyVisualization = ({
     return state;
   },
 
-  appendLayer(state, layerId, layerType, indexPatternId, extraArg) {
+  appendLayer(state, layerId, layerType, indexPatternId, extraArg, seriesType) {
     if (layerType === 'metricTrendline') {
       return state;
     }
 
-    const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
       layers: [
         ...state.layers,
         newLayerState({
-          seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
+          seriesType:
+            seriesType || getDataLayers(state.layers)?.[0]?.seriesType || state.preferredSeriesType,
           indexPatternId,
           extraArg,
         }),
@@ -245,7 +242,7 @@ export const getXyVisualization = ({
   },
 
   getPersistableState(state) {
-    return getPersistableState(state);
+    return convertToPersistable(state);
   },
 
   getDescription,
@@ -273,31 +270,28 @@ export const getXyVisualization = ({
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
-    const finalState =
-      state && isPersistedState(state)
-        ? injectReferences(state, annotationGroups!, references)
-        : state;
-    return (
-      finalState || {
-        title: 'Empty XY chart',
-        legend: { isVisible: true, position: Position.Right },
-        valueLabels: 'hide',
-        preferredSeriesType: defaultSeriesType,
-        layers: [
-          {
-            layerId: addNewLayer(),
-            accessors: [],
-            position: Position.Top,
-            seriesType: defaultSeriesType,
-            showGridlines: false,
-            layerType: LayerTypes.DATA,
-            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-            colorMapping:
-              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
-          },
-        ],
-      }
-    );
+    if (state) {
+      return convertToRuntime(state, annotationGroups!, references);
+    }
+    return {
+      title: 'Empty XY chart',
+      legend: { isVisible: true, position: Position.Right },
+      valueLabels: 'hide',
+      preferredSeriesType: defaultSeriesType,
+      layers: [
+        {
+          layerId: addNewLayer(),
+          accessors: [],
+          position: Position.Top,
+          seriesType: defaultSeriesType,
+          showGridlines: false,
+          layerType: LayerTypes.DATA,
+          palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+          colorMapping:
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
+        },
+      ],
+    };
   },
 
   getLayerType(layerId, state) {
@@ -334,7 +328,7 @@ export const getXyVisualization = ({
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
-          kibanaTheme,
+          startServices: core,
         })
       );
     }
@@ -734,7 +728,7 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo) => {
+        addLayer={async (type, loadedGroupInfo, _, seriesType) => {
           if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
             await props.ensureIndexPattern(
               loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
@@ -745,13 +739,12 @@ export const getXyVisualization = ({
               group: loadedGroupInfo,
             });
           }
-
-          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo);
+          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
         }}
       />
     );
   },
-  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+  toExpression: (state, layers, _attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
       layers,
@@ -826,7 +819,6 @@ export const getXyVisualization = ({
     const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
       accessors == null || accessors.length === 0;
 
-    const dataLayers = getDataLayers(state.layers);
     const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
 
@@ -838,13 +830,8 @@ export const getXyVisualization = ({
         ['Break down', hasNoSplitAccessor],
       ];
 
-      // filter out those layers with no accessors at all
-      const filteredLayers = dataLayers.filter(
-        ({ accessors, xAccessor, splitAccessor, layerType }) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
-      );
       for (const [dimension, criteria] of checks) {
-        const result = validateLayersForDimension(dimension, filteredLayers, criteria);
+        const result = validateLayersForDimension(dimension, state.layers, criteria);
         if (!result.valid) {
           errors.push({
             severity: 'error',
@@ -991,8 +978,8 @@ export const getXyVisualization = ({
   },
 
   isEqual(state1, references1, state2, references2, annotationGroups) {
-    const injected1 = injectReferences(state1, annotationGroups, references1);
-    const injected2 = injectReferences(state2, annotationGroups, references2);
+    const injected1 = convertToRuntime(state1, annotationGroups, references1);
+    const injected2 = convertToRuntime(state2, annotationGroups, references2);
     return isEqual(injected1, injected2);
   },
 

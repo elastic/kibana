@@ -42,40 +42,23 @@ export interface TelemetryClient {
     // so we cannot use its ReturnType
   ): Promise<IndicesStatsResponse>;
 
-  transportRequest: (params: {
-    path: string;
-    method: 'get';
-  }) => Promise<unknown>;
+  transportRequest: (params: { path: string; method: 'get' }) => Promise<unknown>;
 
-  fieldCaps(
-    params: estypes.FieldCapsRequest
-  ): Promise<estypes.FieldCapsResponse>;
+  fieldCaps(params: estypes.FieldCapsRequest): Promise<estypes.FieldCapsResponse>;
 }
 
-export async function getTelemetryClient({
-  core,
-}: {
-  core: CoreSetup;
-}): Promise<TelemetryClient> {
+export async function getTelemetryClient({ core }: { core: CoreSetup }): Promise<TelemetryClient> {
   const [{ elasticsearch }] = await core.getStartServices();
   const esClient = elasticsearch.client;
 
   return {
     search: (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.search(params, { meta: true })
-      ) as any,
+      unwrapEsResponse(esClient.asInternalUser.search(params, { meta: true })) as any,
     indicesStats: (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.indices.stats(params, { meta: true })
-      ),
+      unwrapEsResponse(esClient.asInternalUser.indices.stats(params, { meta: true })),
     transportRequest: (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.transport.request(params, { meta: true })
-      ),
+      unwrapEsResponse(esClient.asInternalUser.transport.request(params, { meta: true })),
     fieldCaps: (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.fieldCaps(params, { meta: true })
-      ),
+      unwrapEsResponse(esClient.asInternalUser.fieldCaps(params, { meta: true })),
   };
 }

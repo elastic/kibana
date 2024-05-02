@@ -60,9 +60,7 @@ async function getServiceNodes({
     end,
   });
 
-  const serviceNodeFunc = useOTelMetrics
-    ? getOTelServiceNodes
-    : getElasticServiceNodes;
+  const serviceNodeFunc = useOTelMetrics ? getOTelServiceNodes : getElasticServiceNodes;
 
   return serviceNodeFunc({
     kuery,
@@ -159,10 +157,7 @@ async function getElasticServiceNodes({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
-      hostName: bucket.latest.top?.[0]?.metrics?.[HOST_NAME] as
-        | string
-        | null
-        | undefined,
+      hostName: bucket.latest.top?.[0]?.metrics?.[HOST_NAME] as string | null | undefined,
       nonHeapMemory: bucket.nonHeapMemory.value,
       threadCount: bucket.threadCount.value,
     }))
@@ -263,10 +258,7 @@ async function getOTelServiceNodes({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_otel_service_nodes',
-    params
-  );
+  const response = await apmEventClient.search('get_otel_service_nodes', params);
 
   if (!response.aggregations) {
     return [];
@@ -277,10 +269,7 @@ async function getOTelServiceNodes({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.usage.value,
-      hostName: bucket.latest.top?.[0]?.metrics?.[HOST_NAME] as
-        | string
-        | null
-        | undefined,
+      hostName: bucket.latest.top?.[0]?.metrics?.[HOST_NAME] as string | null | undefined,
       nonHeapMemory: bucket.nonHeapMemory.usage.value,
       threadCount: bucket.threadCount.value,
     }))

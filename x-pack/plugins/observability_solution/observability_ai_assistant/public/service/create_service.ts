@@ -13,6 +13,7 @@ import { createFunctionRequestMessage } from '../../common/utils/create_function
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
+import { defaultStarterPrompts } from './default_starter_prompts';
 
 export function createService({
   analytics,
@@ -27,7 +28,9 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
-  const screenContexts$ = new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([]);
+  const screenContexts$ = new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([
+    { starterPrompts: defaultStarterPrompts },
+  ]);
   const predefinedConversation$ = new Subject<{ messages: Message[]; title?: string }>();
 
   return {

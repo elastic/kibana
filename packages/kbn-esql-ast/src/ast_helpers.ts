@@ -113,14 +113,25 @@ export function createLiteral(
     return;
   }
   const text = node.getText();
-  return {
+
+  const partialLiteral: Omit<ESQLLiteral, 'literalType' | 'value'> = {
     type: 'literal',
-    literalType: type,
     text,
     name: text,
-    value: type === 'number' ? Number(text) : text,
     location: getPosition(node.symbol),
-    incomplete: isMissingText(node.getText()),
+    incomplete: isMissingText(text),
+  };
+  if (type === 'number') {
+    return {
+      ...partialLiteral,
+      literalType: type,
+      value: Number(text),
+    };
+  }
+  return {
+    ...partialLiteral,
+    literalType: type,
+    value: text,
   };
 }
 

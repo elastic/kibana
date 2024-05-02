@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
+import { createFileServiceFactoryMock, createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -48,6 +48,7 @@ describe('Cases Plugin', () => {
     coreStart = coreMock.createStart();
 
     pluginsSetup = {
+      alerting: alertsMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
       actions: actionsMock.createSetup(),
       files: createFilesSetupMock(),
@@ -68,7 +69,7 @@ describe('Cases Plugin', () => {
     pluginsStart = {
       licensing: licensingMock.createStart(),
       actions: actionsMock.createStart(),
-      files: { fileServiceFactory: { asScoped: jest.fn(), asInternal: jest.fn() } },
+      files: { fileServiceFactory: createFileServiceFactoryMock() },
       features: featuresPluginMock.createStart(),
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),

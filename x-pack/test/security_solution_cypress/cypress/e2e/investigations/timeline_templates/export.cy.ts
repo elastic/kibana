@@ -8,10 +8,7 @@
 import { exportTimeline } from '../../../tasks/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import {
-  expectedExportedTimelineTemplate,
-  getTimeline as getTimelineTemplate,
-} from '../../../objects/timeline';
+import { expectedExportedTimelineTemplate } from '../../../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
@@ -20,7 +17,7 @@ import { searchByTitle } from '../../../tasks/table_pagination';
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
-    createTimelineTemplate(getTimelineTemplate()).then((response) => {
+    createTimelineTemplate().then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
       cy.wrap(response.body.data.persistTimeline.timeline.title).as('templateTitle');

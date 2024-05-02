@@ -29,6 +29,7 @@ import {
   isPackageVersionOrLaterInstalled,
 } from './install';
 import * as install from './_install_package';
+import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
 import { getInstalledPackageWithAssets, getInstallationObject } from './get';
@@ -57,6 +58,7 @@ jest.mock('../../app_context', () => {
       getConfig: jest.fn(() => ({})),
       getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
       getInternalUserSOClientForSpaceId: jest.fn(),
+      getExperimentalFeatures: jest.fn(),
     },
   };
 });
@@ -77,6 +79,11 @@ jest.mock('./bundled_packages');
 jest.mock('./_install_package', () => {
   return {
     _installPackage: jest.fn(() => Promise.resolve()),
+  };
+});
+jest.mock('./install_state_machine/_state_machine_package_install', () => {
+  return {
+    _stateMachineInstallPackage: jest.fn(() => Promise.resolve()),
   };
 });
 jest.mock('../kibana/index_pattern/install', () => {
@@ -161,246 +168,504 @@ describe('install', () => {
     jest.mocked(Registry.getPackage).mockImplementation(() =>
       Promise.resolve({
         packageInfo: { license: 'basic', conditions: { elastic: { subscription: 'basic' } } },
+        paths: [],
       } as any)
     );
 
     mockGetBundledPackageByPkgKey.mockReset();
     (install._installPackage as jest.Mock).mockClear();
+    (installStateMachine._stateMachineInstallPackage as jest.Mock).mockClear();
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReset();
   });
 
   describe('registry', () => {
-    beforeEach(() => {
-      mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
-    });
-
-    it('should send telemetry on install failure, out of date', async () => {
-      await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'apache-1.1.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
+    describe('with enablePackagesStateMachine = false', () => {
+      beforeEach(() => {
+        mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
+        jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+          enablePackagesStateMachine: false,
+        } as any);
       });
 
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-        currentVersion: 'not_installed',
-        dryRun: false,
-        errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
-        eventType: 'package-install',
-        installType: 'install',
-        newVersion: '1.1.0',
-        packageName: 'apache',
-        status: 'failure',
-      });
-    });
+      it('should send telemetry on install failure, out of date', async () => {
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.1.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
 
-    it('should send telemetry on install failure, license error', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
-      await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-      });
-
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-        currentVersion: 'not_installed',
-        dryRun: false,
-        errorMessage: 'Installation requires basic license',
-        eventType: 'package-install',
-        installType: 'install',
-        newVersion: '1.3.0',
-        packageName: 'apache',
-        status: 'failure',
-      });
-    });
-
-    it('should send telemetry on install success', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.1.0',
+          packageName: 'apache',
+          status: 'failure',
+        });
       });
 
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-        currentVersion: 'not_installed',
-        dryRun: false,
-        eventType: 'package-install',
-        installType: 'install',
-        newVersion: '1.3.0',
-        packageName: 'apache',
-        status: 'success',
-      });
-    });
+      it('should send telemetry on install failure, license error', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
 
-    it('should send telemetry on update success', async () => {
-      jest
-        .mocked(getInstallationObject)
-        .mockResolvedValueOnce({ attributes: { version: '1.2.0' } } as any);
-
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-      });
-
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-        currentVersion: '1.2.0',
-        dryRun: false,
-        eventType: 'package-install',
-        installType: 'update',
-        newVersion: '1.3.0',
-        packageName: 'apache',
-        status: 'success',
-      });
-    });
-
-    it('should send telemetry on install failure, async error', async () => {
-      jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-
-      await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-      });
-
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
-        currentVersion: 'not_installed',
-        dryRun: false,
-        errorMessage: 'error',
-        eventType: 'package-install',
-        installType: 'install',
-        newVersion: '1.3.0',
-        packageName: 'apache',
-        status: 'failure',
-      });
-    });
-
-    it('should install from bundled package if one exists', async () => {
-      (install._installPackage as jest.Mock).mockResolvedValue({});
-      mockGetBundledPackageByPkgKey.mockResolvedValue({
-        name: 'test_package',
-        version: '1.0.0',
-        getBuffer: async () => Buffer.from('test_package'),
-      });
-
-      const response = await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'test_package-1.0.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-      });
-
-      expect(response.error).toBeUndefined();
-
-      expect(install._installPackage).toHaveBeenCalledWith(
-        expect.objectContaining({ installSource: 'bundled' })
-      );
-    });
-
-    it('should fetch latest version if version not provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      const response = await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'test_package',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-      });
-
-      expect(response.status).toEqual('installed');
-
-      expect(sendTelemetryEvents).toHaveBeenCalledWith(
-        expect.anything(),
-        undefined,
-        expect.objectContaining({
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          errorMessage: 'Installation requires basic license',
+          eventType: 'package-install',
+          installType: 'install',
           newVersion: '1.3.0',
-        })
-      );
-    });
-
-    it('should do nothing if same version is installed', async () => {
-      jest.mocked(getInstallationObject).mockResolvedValueOnce({
-        attributes: {
-          version: '1.2.0',
-          install_status: 'installed',
-          installed_es: [],
-          installed_kibana: [],
-        },
-      } as any);
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      const response = await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'apache-1.2.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
+          packageName: 'apache',
+          status: 'failure',
+        });
       });
 
-      expect(response.status).toEqual('already_installed');
-    });
+      it('should send telemetry on install success', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
 
-    it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
-      jest.mocked(appContextService.getConfig).mockReturnValueOnce({
-        internal: {
-          fleetServerStandalone: true,
-        },
-      } as any);
-
-      const response = await installPackage({
-        spaceId: DEFAULT_SPACE_ID,
-        installSource: 'registry',
-        pkgkey: 'fleet_server-2.0.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'success',
+        });
       });
 
-      expect(response.status).toEqual('installed');
-    });
+      it('should send telemetry on update success', async () => {
+        jest
+          .mocked(getInstallationObject)
+          .mockResolvedValueOnce({ attributes: { version: '1.2.0' } } as any);
 
-    it('should use a scopped to package space soClient for tagging', async () => {
-      const mockedTaggingSo = savedObjectsClientMock.create();
-      jest
-        .mocked(appContextService.getInternalUserSOClientForSpaceId)
-        .mockReturnValue(mockedTaggingSo);
-      jest
-        .mocked(getInstallationObject)
-        .mockResolvedValueOnce({ attributes: { version: '1.2.0' } } as any);
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
 
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      await installPackage({
-        spaceId: 'test',
-        installSource: 'registry',
-        pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: '1.2.0',
+          dryRun: false,
+          eventType: 'package-install',
+          installType: 'update',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'success',
+        });
       });
 
-      expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
-      expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
-        expect.objectContaining({
-          client: mockedTaggingSo,
-        })
-      );
-      expect(
-        appContextService.getSavedObjectsTagging().createInternalAssignmentService
-      ).toBeCalledWith(
-        expect.objectContaining({
-          client: mockedTaggingSo,
-        })
-      );
+      it('should send telemetry on install failure, async error', async () => {
+        jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          errorMessage: 'error',
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'failure',
+        });
+      });
+
+      it('should install from bundled package if one exists', async () => {
+        (install._installPackage as jest.Mock).mockResolvedValue({});
+        mockGetBundledPackageByPkgKey.mockResolvedValue({
+          name: 'test_package',
+          version: '1.0.0',
+          getBuffer: async () => Buffer.from('test_package'),
+        });
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package-1.0.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.error).toBeUndefined();
+
+        expect(install._installPackage).toHaveBeenCalledWith(
+          expect.objectContaining({ installSource: 'bundled' })
+        );
+      });
+
+      it('should fetch latest version if version not provided', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.status).toEqual('installed');
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          expect.objectContaining({
+            newVersion: '1.3.0',
+          })
+        );
+      });
+
+      it('should do nothing if same version is installed', async () => {
+        jest.mocked(getInstallationObject).mockResolvedValueOnce({
+          attributes: {
+            version: '1.2.0',
+            install_status: 'installed',
+            installed_es: [],
+            installed_kibana: [],
+          },
+        } as any);
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.2.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.status).toEqual('already_installed');
+      });
+
+      it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+        jest.mocked(appContextService.getConfig).mockReturnValueOnce({
+          internal: {
+            fleetServerStandalone: true,
+          },
+        } as any);
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'fleet_server-2.0.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.status).toEqual('installed');
+      });
+
+      it('should use a scoped to package space soClient for tagging', async () => {
+        const mockedTaggingSo = savedObjectsClientMock.create();
+        jest
+          .mocked(appContextService.getInternalUserSOClientForSpaceId)
+          .mockReturnValue(mockedTaggingSo);
+        jest
+          .mocked(getInstallationObject)
+          .mockResolvedValueOnce({ attributes: { version: '1.2.0' } } as any);
+
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        await installPackage({
+          spaceId: 'test',
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
+        expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
+          expect.objectContaining({
+            client: mockedTaggingSo,
+          })
+        );
+        expect(
+          appContextService.getSavedObjectsTagging().createInternalAssignmentService
+        ).toBeCalledWith(
+          expect.objectContaining({
+            client: mockedTaggingSo,
+          })
+        );
+      });
+    });
+
+    describe('with enablePackagesStateMachine = true', () => {
+      beforeEach(() => {
+        mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
+        jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+          enablePackagesStateMachine: true,
+        } as any);
+      });
+      afterEach(() => {
+        (install._installPackage as jest.Mock).mockClear();
+        // jest.resetAllMocks();
+      });
+      afterAll(() => {
+        jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+          enablePackagesStateMachine: false,
+        } as any);
+      });
+
+      it('should send telemetry on install failure, out of date', async () => {
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.1.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          errorMessage: 'apache-1.1.0 is out-of-date and cannot be installed or updated',
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.1.0',
+          packageName: 'apache',
+          status: 'failure',
+        });
+      });
+
+      it('should send telemetry on install failure, license error', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          errorMessage: 'Installation requires basic license',
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'failure',
+        });
+      });
+
+      it('should send telemetry on install success', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'success',
+        });
+      });
+
+      it('should send telemetry on update success', async () => {
+        jest
+          .mocked(getInstallationObject)
+          .mockResolvedValueOnce({ attributes: { version: '1.2.0', installed_kibana: [] } } as any);
+
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: '1.2.0',
+          dryRun: false,
+          eventType: 'package-install',
+          installType: 'update',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'success',
+        });
+      });
+
+      it('should send telemetry on install failure, async error', async () => {
+        jest
+          .mocked(installStateMachine._stateMachineInstallPackage)
+          .mockRejectedValue(new Error('error'));
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+          currentVersion: 'not_installed',
+          dryRun: false,
+          errorMessage: 'error',
+          eventType: 'package-install',
+          installType: 'install',
+          newVersion: '1.3.0',
+          packageName: 'apache',
+          status: 'failure',
+        });
+      });
+
+      it('should install from bundled package if one exists', async () => {
+        (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        mockGetBundledPackageByPkgKey.mockResolvedValue({
+          name: 'test_package',
+          version: '1.0.0',
+          getBuffer: async () => Buffer.from('test_package'),
+        });
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package-1.0.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.error).toBeUndefined();
+
+        expect(install._installPackage).toHaveBeenCalledWith(
+          expect.objectContaining({ installSource: 'bundled' })
+        );
+      });
+
+      it('should fetch latest version if version not provided', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.status).toEqual('installed');
+
+        expect(sendTelemetryEvents).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          expect.objectContaining({
+            newVersion: '1.3.0',
+          })
+        );
+      });
+
+      it('should do nothing if same version is installed', async () => {
+        jest.mocked(getInstallationObject).mockResolvedValueOnce({
+          attributes: {
+            version: '1.2.0',
+            install_status: 'installed',
+            installed_es: [],
+            installed_kibana: [],
+          },
+        } as any);
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.2.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.status).toEqual('already_installed');
+      });
+
+      // failing
+      it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+        jest.mocked(appContextService.getConfig).mockReturnValueOnce({
+          internal: {
+            fleetServerStandalone: true,
+          },
+        } as any);
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'fleet_server-2.0.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.status).toEqual('installed');
+      });
+
+      it('should use a scoped to package space soClient for tagging', async () => {
+        const mockedTaggingSo = savedObjectsClientMock.create();
+        jest
+          .mocked(appContextService.getInternalUserSOClientForSpaceId)
+          .mockReturnValue(mockedTaggingSo);
+        jest
+          .mocked(getInstallationObject)
+          .mockResolvedValueOnce({ attributes: { version: '1.2.0', installed_kibana: [] } } as any);
+
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        await installPackage({
+          spaceId: 'test',
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
+        expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
+          expect.objectContaining({
+            client: mockedTaggingSo,
+          })
+        );
+        expect(
+          appContextService.getSavedObjectsTagging().createInternalAssignmentService
+        ).toBeCalledWith(
+          expect.objectContaining({
+            client: mockedTaggingSo,
+          })
+        );
+      });
     });
   });
 
@@ -453,6 +718,7 @@ describe('install', () => {
 
     it('should send telemetry on install failure, async error', async () => {
       jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',

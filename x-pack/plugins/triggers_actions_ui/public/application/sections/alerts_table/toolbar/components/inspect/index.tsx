@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { GetInspectQuery } from '../../../../../../types';
 
 import { HoverVisibilityContainer } from './hover_visibility_container';
@@ -15,19 +15,19 @@ import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
+const VISIBILITY_CLASSES = [BUTTON_CLASS];
 
 interface InspectButtonContainerProps {
   hide?: boolean;
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
-  children,
-  hide,
-}) => (
-  <HoverVisibilityContainer hide={hide} targetClassNames={[BUTTON_CLASS]}>
-    {children}
-  </HoverVisibilityContainer>
+export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = memo(
+  ({ children, hide }) => (
+    <HoverVisibilityContainer hide={hide} targetClassNames={VISIBILITY_CLASSES}>
+      {children}
+    </HoverVisibilityContainer>
+  )
 );
 
 interface InspectButtonProps {
@@ -43,13 +43,13 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 }) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
-  const onOpenModal = () => {
+  const onOpenModal = useCallback(() => {
     setIsShowingModal(true);
-  };
+  }, []);
 
-  const onCloseModal = () => {
+  const onCloseModal = useCallback(() => {
     setIsShowingModal(false);
-  };
+  }, []);
 
   return (
     <>

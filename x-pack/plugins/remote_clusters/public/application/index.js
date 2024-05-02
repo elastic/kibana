@@ -9,7 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { KibanaThemeProvider, useExecutionContext } from '../shared_imports';
+import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
 import { App } from './app';
 import { remoteClustersStore } from './store';
 import { AppContextProvider } from './app_context';
@@ -25,20 +25,18 @@ const AppWithExecutionContext = ({ history, executionContext }) => {
   return <App history={history} />;
 };
 
-export const renderApp = (elem, I18nContext, appDependencies, history, theme$) => {
+export const renderApp = (elem, appDependencies, history, startServices) => {
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <Provider store={remoteClustersStore}>
-          <AppContextProvider context={appDependencies}>
-            <AppWithExecutionContext
-              history={history}
-              executionContext={appDependencies.executionContext}
-            />
-          </AppContextProvider>
-        </Provider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...startServices}>
+      <Provider store={remoteClustersStore}>
+        <AppContextProvider context={appDependencies}>
+          <AppWithExecutionContext
+            history={history}
+            executionContext={appDependencies.executionContext}
+          />
+        </AppContextProvider>
+      </Provider>
+    </KibanaRenderContextProvider>,
     elem
   );
   return () => unmountComponentAtNode(elem);

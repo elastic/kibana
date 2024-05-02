@@ -123,7 +123,7 @@ export const getEsClient = async ({
 
   // configure logging system
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
-  loggingSystem.upgrade(loggingConf);
+  await loggingSystem.upgrade(loggingConf);
 
   return await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
 };
@@ -148,7 +148,7 @@ export const getKibanaMigratorTestKit = async ({
 
   // configure logging system
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
-  loggingSystem.upgrade(loggingConf);
+  await loggingSystem.upgrade(loggingConf);
 
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
@@ -434,15 +434,18 @@ export const createBaseline = async () => {
 };
 
 interface GetMutatedMigratorParams {
+  logFilePath?: string;
   kibanaVersion?: string;
   settings?: Record<string, any>;
 }
 
 export const getIdenticalMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types: baselineTypes,
     kibanaVersion,
     settings,
@@ -450,10 +453,12 @@ export const getIdenticalMappingsMigrator = async ({
 };
 
 export const getNonDeprecatedMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types: baselineTypes.filter((type) => type.name !== 'deprecated'),
     kibanaVersion,
     settings,
@@ -461,6 +466,7 @@ export const getNonDeprecatedMappingsMigrator = async ({
 };
 
 export const getCompatibleMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   filterDeprecated = false,
   kibanaVersion = nextMinor,
   settings = {},
@@ -499,6 +505,7 @@ export const getCompatibleMappingsMigrator = async ({
     });
 
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types,
     kibanaVersion,
     settings,
@@ -506,6 +513,7 @@ export const getCompatibleMappingsMigrator = async ({
 };
 
 export const getIncompatibleMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
@@ -544,6 +552,7 @@ export const getIncompatibleMappingsMigrator = async ({
   });
 
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types,
     kibanaVersion,
     settings,
@@ -559,7 +568,7 @@ export const getCurrentVersionTypeRegistry = async ({
   await root.preboot();
   const coreSetup = await root.setup();
   const typeRegistry = coreSetup.savedObjects.getTypeRegistry();
-  root.shutdown(); // do not await for it, or we might block the tests
+  void root.shutdown(); // do not await for it, or we might block the tests
   return typeRegistry;
 };
 

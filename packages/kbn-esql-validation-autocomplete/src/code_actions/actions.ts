@@ -7,7 +7,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import levenshtein from 'js-levenshtein';
-import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError } from '@kbn/esql-ast';
+import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError, ESQLMessage } from '@kbn/esql-ast';
+import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
   getPolicyHelper,
@@ -16,13 +17,16 @@ import {
 import {
   getAllFunctions,
   getCommandDefinition,
+  isColumnItem,
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import type { CodeAction, Callbacks } from './types';
+import type { CodeAction, Callbacks, CodeActionOptions } from './types';
+import { getAstContext } from '../shared/context';
+import { wrapAsEditorMessage } from './utils';
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
@@ -113,9 +117,13 @@ async function getSpellingActionForColumns(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  { getFieldsByType, getPolicies, getPolicyFields }: Callbacks
+  options: CodeActionOptions,
+  { getFieldsByType, getPolicies, getPolicyFields }: Partial<Callbacks>
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
+  if (!getFieldsByType || !getPolicyFields) {
+    return [];
+  }
   // @TODO add variables support
   const possibleFields = await getSpellingPossibilities(async () => {
     const availableFields = await getFieldsByType('any');
@@ -132,14 +140,38 @@ async function getSpellingActionForColumns(
   return wrapIntoSpellingChangeAction(error, possibleFields);
 }
 
+function extractUnquotedFieldText(
+  query: string,
+  errorType: string,
+  ast: ESQLAst,
+  possibleStart: number,
+  end: number
+) {
+  if (errorType === 'syntaxError') {
+    // scope it down to column items for now
+    const { node } = getAstContext(query, ast, possibleStart - 1);
+    if (node && isColumnItem(node)) {
+      return {
+        start: node.location.min + 1,
+        name: query.substring(node.location.min, end).trimEnd(),
+      };
+    }
+  }
+  return { start: possibleStart + 1, name: query.substring(possibleStart, end - 1).trimEnd() };
+}
+
 async function getQuotableActionForColumns(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  { getFieldsByType }: Callbacks
+  options: CodeActionOptions,
+  { getFieldsByType }: Partial<Callbacks>
 ): Promise<CodeAction[]> {
-  const commandEndIndex = ast.find((command) => command.location.max > error.endColumn)?.location
-    .max;
+  const commandEndIndex = ast.find(
+    (command) =>
+      error.startColumn > command.location.min && error.startColumn < command.location.max
+  )?.location.max;
+
   // the error received is unknwonColumn here, but look around the column to see if there's more
   // which broke the grammar and the validation code couldn't identify as unquoted column
   const remainingCommandText = queryString.substring(
@@ -147,8 +179,10 @@ async function getQuotableActionForColumns(
     commandEndIndex ? commandEndIndex + 1 : undefined
   );
   const stopIndex = Math.max(
-    /,/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(',')
+    /[()]/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(')')
+      : /,/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(',') - 1
       : /\s/.test(remainingCommandText)
       ? remainingCommandText.indexOf(' ')
       : remainingCommandText.length,
@@ -158,14 +192,24 @@ async function getQuotableActionForColumns(
     error.endColumn - 1,
     error.endColumn + stopIndex
   );
-  const errorText = queryString
-    .substring(error.startColumn - 1, error.endColumn + possibleUnquotedText.length)
-    .trimEnd();
+  const { start, name: errorText } = extractUnquotedFieldText(
+    queryString,
+    error.code || 'syntaxError',
+    ast,
+    error.startColumn - 1,
+    error.endColumn + possibleUnquotedText.length - 1
+  );
   const actions: CodeAction[] = [];
   if (shouldBeQuotedText(errorText)) {
-    const availableFields = new Set(await getFieldsByType('any'));
     const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
-    if (availableFields.has(errorText) || availableFields.has(solution)) {
+    if (!getFieldsByType) {
+      if (!options.relaxOnMissingCallbacks) {
+        return [];
+      }
+      const textHasAlreadyQuotes = /`/.test(errorText);
+      if (textHasAlreadyQuotes) {
+        return [];
+      }
       actions.push(
         createAction(
           i18n.translate('kbn-esql-validation-autocomplete.esql.quickfix.replaceWithSolution', {
@@ -175,9 +219,25 @@ async function getQuotableActionForColumns(
             },
           }),
           solution,
-          { ...error, endColumn: error.startColumn + errorText.length } // override the location
+          { ...error, startColumn: start, endColumn: start + errorText.length } // override the location
         )
       );
+    } else {
+      const availableFields = new Set(await getFieldsByType('any'));
+      if (availableFields.has(errorText) || availableFields.has(solution)) {
+        actions.push(
+          createAction(
+            i18n.translate('kbn-esql-validation-autocomplete.esql.quickfix.replaceWithSolution', {
+              defaultMessage: 'Did you mean {solution} ?',
+              values: {
+                solution,
+              },
+            }),
+            solution,
+            { ...error, startColumn: start, endColumn: start + errorText.length } // override the location
+          )
+        );
+      }
     }
   }
   return actions;
@@ -187,8 +247,12 @@ async function getSpellingActionForIndex(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  { getSources }: Callbacks
+  options: CodeActionOptions,
+  { getSources }: Partial<Callbacks>
 ) {
+  if (!getSources) {
+    return [];
+  }
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   const possibleSources = await getSpellingPossibilities(async () => {
     // Handle fuzzy names via truncation to test levenstein distance
@@ -207,8 +271,12 @@ async function getSpellingActionForPolicies(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  { getPolicies }: Callbacks
+  options: CodeActionOptions,
+  { getPolicies }: Partial<Callbacks>
 ) {
+  if (!getPolicies) {
+    return [];
+  }
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   const possiblePolicies = await getSpellingPossibilities(getPolicies, errorText);
   return wrapIntoSpellingChangeAction(error, possiblePolicies);
@@ -222,7 +290,10 @@ async function getSpellingActionForFunctions(
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   // fallback to the last command if not found
   const commandContext =
-    ast.find((command) => command.location.max > error.endColumn) || ast[ast.length - 1];
+    ast.find(
+      (command) =>
+        error.startColumn > command.location.min && error.startColumn < command.location.max
+    ) || ast[ast.length - 1];
   if (!commandContext) {
     return [];
   }
@@ -244,8 +315,12 @@ async function getSpellingActionForMetadata(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  { getMetaFields }: Callbacks
+  options: CodeActionOptions,
+  { getMetaFields }: Partial<Callbacks>
 ) {
+  if (!getMetaFields) {
+    return [];
+  }
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   const possibleMetafields = await getSpellingPossibilities(getMetaFields, errorText);
   return wrapIntoSpellingChangeAction(error, possibleMetafields);
@@ -255,7 +330,8 @@ async function getSpellingActionForEnrichMode(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  _callbacks: Callbacks
+  options: CodeActionOptions,
+  _callbacks: Partial<Callbacks>
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   const commandContext =
@@ -299,23 +375,34 @@ function extractQuotedText(rawText: string, error: EditorError) {
   return rawText.substring(error.startColumn - 2, error.endColumn);
 }
 
-function inferCodeFromError(error: EditorError & { owner?: string }, rawText: string) {
+function inferCodeFromError(
+  error: EditorError & { owner?: string },
+  ast: ESQLAst,
+  rawText: string
+) {
   if (error.message.endsWith('expecting QUOTED_STRING')) {
     const value = extractQuotedText(rawText, error);
     return /^'(.)*'$/.test(value) ? 'wrongQuotes' : undefined;
+  }
+  if (error.message.startsWith('SyntaxError: token recognition error at:')) {
+    // scope it down to column items for now
+    const { node } = getAstContext(rawText, ast, error.startColumn - 2);
+    return node && isColumnItem(node) ? 'quotableFields' : undefined;
   }
 }
 
 export async function getActions(
   innerText: string,
-  markers: EditorError[],
+  markers: Array<ESQLMessage | EditorError>,
   astProvider: AstProviderFn,
+  options: CodeActionOptions = {},
   resourceRetriever?: ESQLCallbacks
 ): Promise<CodeAction[]> {
   const actions: CodeAction[] = [];
   if (markers.length === 0) {
     return actions;
   }
+  const editorMarkers = wrapAsEditorMessage('error', markers);
   const { ast } = await astProvider(innerText);
 
   const queryForFields = buildQueryForFieldsFromSource(innerText, ast);
@@ -325,28 +412,46 @@ export async function getActions(
   const getMetaFields = getMetaFieldsRetriever(innerText, ast, resourceRetriever);
 
   const callbacks = {
-    getFieldsByType,
-    getSources,
-    getPolicies,
-    getPolicyFields,
-    getMetaFields,
+    getFieldsByType: resourceRetriever?.getFieldsFor ? getFieldsByType : undefined,
+    getSources: resourceRetriever?.getSources ? getSources : undefined,
+    getPolicies: resourceRetriever?.getPolicies ? getPolicies : undefined,
+    getPolicyFields: resourceRetriever?.getPolicies ? getPolicyFields : undefined,
+    getMetaFields: resourceRetriever?.getMetaFields ? getMetaFields : undefined,
   };
 
   // Markers are sent only on hover and are limited to the hovered area
   // so unless there are multiple error/markers for the same area, there's just one
   // in some cases, like syntax + semantic errors (i.e. unquoted fields eval field-1 ), there might be more than one
-  for (const error of markers) {
-    const code = error.code ?? inferCodeFromError(error, innerText);
+  for (const error of editorMarkers) {
+    const code = error.code ?? inferCodeFromError(error, ast, innerText);
     switch (code) {
-      case 'unknownColumn':
+      case 'unknownColumn': {
         const [columnsSpellChanges, columnsQuotedChanges] = await Promise.all([
-          getSpellingActionForColumns(error, innerText, ast, callbacks),
-          getQuotableActionForColumns(error, innerText, ast, callbacks),
+          getSpellingActionForColumns(error, innerText, ast, options, callbacks),
+          getQuotableActionForColumns(error, innerText, ast, options, callbacks),
         ]);
         actions.push(...(columnsQuotedChanges.length ? columnsQuotedChanges : columnsSpellChanges));
         break;
+      }
+      case 'quotableFields': {
+        const columnsQuotedChanges = await getQuotableActionForColumns(
+          error,
+          innerText,
+          ast,
+          options,
+          callbacks
+        );
+        actions.push(...columnsQuotedChanges);
+        break;
+      }
       case 'unknownIndex':
-        const indexSpellChanges = await getSpellingActionForIndex(error, innerText, ast, callbacks);
+        const indexSpellChanges = await getSpellingActionForIndex(
+          error,
+          innerText,
+          ast,
+          options,
+          callbacks
+        );
         actions.push(...indexSpellChanges);
         break;
       case 'unknownPolicy':
@@ -354,6 +459,7 @@ export async function getActions(
           error,
           innerText,
           ast,
+          options,
           callbacks
         );
         actions.push(...policySpellChanges);
@@ -367,6 +473,7 @@ export async function getActions(
           error,
           innerText,
           ast,
+          options,
           callbacks
         );
         actions.push(...metadataSpellChanges);
@@ -394,6 +501,7 @@ export async function getActions(
           error,
           innerText,
           ast,
+          options,
           callbacks
         );
         actions.push(...enrichModeSpellChanges);
@@ -402,5 +510,5 @@ export async function getActions(
         break;
     }
   }
-  return actions;
+  return uniqBy(actions, ({ edits }) => edits[0].text);
 }

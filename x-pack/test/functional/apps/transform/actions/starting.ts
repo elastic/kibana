@@ -7,7 +7,7 @@
 
 import {
   TRANSFORM_STATE,
-  TRANSFORM_HEALTH,
+  TRANSFORM_HEALTH_STATUS,
   TRANSFORM_HEALTH_LABEL,
   TRANSFORM_HEALTH_DESCRIPTION,
 } from '@kbn/transform-plugin/common/constants';
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
+          healthStatus: TRANSFORM_HEALTH_STATUS.green,
         },
       },
       {
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
+          healthStatus: TRANSFORM_HEALTH_STATUS.green,
         },
       },
       {
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.yellow,
           healthLabel: TRANSFORM_HEALTH_LABEL.yellow,
-          healthStatus: TRANSFORM_HEALTH.yellow,
+          healthStatus: TRANSFORM_HEALTH_STATUS.yellow,
         },
       },
       {
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
+          healthStatus: TRANSFORM_HEALTH_STATUS.green,
         },
       },
       {
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
+          healthStatus: TRANSFORM_HEALTH_STATUS.green,
         },
       },
     ];
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       for (const testData of testDataList) {
         if (
-          testData.expected.healthStatus === TRANSFORM_HEALTH.yellow &&
+          testData.expected.healthStatus === TRANSFORM_HEALTH_STATUS.yellow &&
           testData.type === 'pivot'
         ) {
           testData.originalConfig.pivot.aggregations['products.base_price.fail'] = {
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
         }
         await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig, {
-          deferValidation: testData.expected.healthStatus === TRANSFORM_HEALTH.yellow,
+          deferValidation: testData.expected.healthStatus === TRANSFORM_HEALTH_STATUS.yellow,
         });
       }
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.table.assertTransformExpandedRowHealth(
             testData.expected.healthDescription,
-            testData.expected.healthStatus !== TRANSFORM_HEALTH.green
+            testData.expected.healthStatus !== TRANSFORM_HEALTH_STATUS.green
           );
 
           await transform.table.clearSearchString(testDataList.length);

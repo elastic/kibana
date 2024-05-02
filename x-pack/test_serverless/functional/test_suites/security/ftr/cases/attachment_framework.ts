@@ -21,7 +21,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const toasts = getService('toasts');
 
-  describe('Cases persistable attachments', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180295
+  describe.skip('Cases persistable attachments', () => {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
@@ -50,7 +51,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await testSubjects.click('cases-table-add-case-filter-bar');
 
         await testSubjects.existOrFail('create-case-flyout');
 

@@ -37,7 +37,6 @@ export const indexInfoHandlerFactory =
 
     const textFieldCandidates: string[] = [];
 
-    let totalDocCount = 0;
     let zeroDocsFallback = false;
 
     if (!requestBody.overrides?.remainingFieldCandidates) {
@@ -63,10 +62,12 @@ export const indexInfoHandlerFactory =
           abortSignal
         );
 
+        logDebugMessage(`Baseline document count: ${indexInfo.baselineTotalDocCount}`);
+        logDebugMessage(`Deviation document count: ${indexInfo.deviationTotalDocCount}`);
+
         fieldCandidates.push(...indexInfo.fieldCandidates);
         fieldCandidatesCount = fieldCandidates.length;
         textFieldCandidates.push(...indexInfo.textFieldCandidates);
-        totalDocCount = indexInfo.deviationTotalDocCount;
         zeroDocsFallback = indexInfo.zeroDocsFallback;
       } catch (e) {
         if (!isRequestAbortedError(e)) {
@@ -76,8 +77,6 @@ export const indexInfoHandlerFactory =
         responseStream.end();
         return;
       }
-
-      logDebugMessage(`Total document count: ${totalDocCount}`);
 
       stateHandler.loaded(LOADED_FIELD_CANDIDATES, false);
 

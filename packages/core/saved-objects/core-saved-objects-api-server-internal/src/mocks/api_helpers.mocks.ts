@@ -15,6 +15,7 @@ import type {
   PreflightCheckHelper,
   SerializerHelper,
   MigrationHelper,
+  UserHelper,
 } from '../lib/apis/helpers';
 
 export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;
@@ -104,6 +105,16 @@ const createPreflightCheckHelperMock = (): PreflightCheckHelperMock => {
   return mock;
 };
 
+export type UserHelperMock = jest.Mocked<PublicMethodsOf<UserHelper>>;
+
+const createUserHelperMock = (): UserHelperMock => {
+  const mock: UserHelperMock = {
+    getCurrentUserProfileUid: jest.fn(),
+  };
+
+  return mock;
+};
+
 export interface RepositoryHelpersMock {
   common: CommonHelperMock;
   encryption: EncryptionHelperMock;
@@ -111,6 +122,7 @@ export interface RepositoryHelpersMock {
   preflight: PreflightCheckHelperMock;
   serializer: SerializerHelperMock;
   migration: MigrationHelperMock;
+  user: UserHelperMock;
 }
 
 const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
@@ -121,6 +133,7 @@ const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
     preflight: createPreflightCheckHelperMock(),
     serializer: createSerializerHelperMock(),
     migration: createMigrationHelperMock(),
+    user: createUserHelperMock(),
   };
 };
 

@@ -25,7 +25,7 @@ export interface LogsSharedClientSetupExports {
 
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
-  LogAIAssistant: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
+  LogAIAssistant?: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
 }
 
 export interface LogsSharedClientSetupDeps {
@@ -35,7 +35,7 @@ export interface LogsSharedClientSetupDeps {
 export interface LogsSharedClientStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   uiActions: UiActionsStart;
 }
 

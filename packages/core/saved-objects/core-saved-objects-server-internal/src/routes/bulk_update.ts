@@ -52,24 +52,25 @@ export const registerBulkUpdateRoute = (
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'put',
         path: '/api/saved_objects/_bulk_update',
-        req,
+        request,
         logger,
       });
+      const types = [...new Set(request.body.map(({ type }) => type))];
+
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkUpdate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkUpdate({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
-      const savedObject = await savedObjects.client.bulkUpdate(req.body);
-      return res.ok({ body: savedObject });
+      const savedObject = await savedObjects.client.bulkUpdate(request.body);
+      return response.ok({ body: savedObject });
     })
   );
 };

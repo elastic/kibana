@@ -15,4 +15,5 @@ export const getImportListItemQuerySchemaMock = (): ImportListItemQuerySchema =>
   list_id: LIST_ID,
   serializer: undefined,
   type: TYPE,
+  refresh: 'false',
 });

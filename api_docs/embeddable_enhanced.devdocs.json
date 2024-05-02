@@ -11,14 +11,39 @@
         "label": "apiHasDynamicActions",
         "description": [],
         "signature": [
-          "(api: unknown) => api is ",
+          "(api: unknown) => api is Required<Partial<{ enhancements: { dynamicActions: ",
           {
-            "pluginId": "embeddableEnhanced",
+            "pluginId": "uiActionsEnhanced",
             "scope": "public",
-            "docId": "kibEmbeddableEnhancedPluginApi",
-            "section": "def-public.HasDynamicActions",
-            "text": "HasDynamicActions"
-          }
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; }; setDynamicActions: (newState: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined) => void; dynamicActionsState$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined>; }>>"
         ],
         "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
         "deprecated": false,
@@ -90,42 +115,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ", any> & ",
-              {
-                "pluginId": "embeddableEnhanced",
-                "scope": "public",
-                "docId": "kibEmbeddableEnhancedPluginApi",
-                "section": "def-public.HasDynamicActions",
-                "text": "HasDynamicActions"
-              }
-            ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddableEnhanced",
-        "id": "def-public.HasDynamicActions",
-        "type": "Interface",
-        "tags": [],
-        "label": "HasDynamicActions",
-        "description": [],
-        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddableEnhanced",
-            "id": "def-public.HasDynamicActions.enhancements",
-            "type": "Object",
-            "tags": [],
-            "label": "enhancements",
-            "description": [],
-            "signature": [
-              "{ dynamicActions: ",
+              ", any> & Partial<{ enhancements: { dynamicActions: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",
@@ -133,421 +123,33 @@
                 "section": "def-public.DynamicActionManager",
                 "text": "DynamicActionManager"
               },
-              "; }"
+              "; }; setDynamicActions: (newState: { dynamicActions: ",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "common",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-common.DynamicActionsState",
+                "text": "DynamicActionsState"
+              },
+              "; } | undefined) => void; dynamicActionsState$: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<{ dynamicActions: ",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "common",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-common.DynamicActionsState",
+                "text": "DynamicActionsState"
+              },
+              "; } | undefined>; }>"
             ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddableEnhanced",
-            "id": "def-public.HasDynamicActions.setDynamicActions",
-            "type": "Function",
-            "tags": [],
-            "label": "setDynamicActions",
-            "description": [],
-            "signature": [
-              "(newState: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined) => void"
-            ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddableEnhanced",
-                "id": "def-public.HasDynamicActions.setDynamicActions.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "newState",
-                "description": [],
-                "signature": [
-                  "{ dynamicActions: ",
-                  {
-                    "pluginId": "uiActionsEnhanced",
-                    "scope": "common",
-                    "docId": "kibUiActionsEnhancedPluginApi",
-                    "section": "def-common.DynamicActionsState",
-                    "text": "DynamicActionsState"
-                  },
-                  "; } | undefined"
-                ],
-                "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddableEnhanced",
-            "id": "def-public.HasDynamicActions.dynamicActionsState$",
-            "type": "Object",
-            "tags": [],
-            "label": "dynamicActionsState$",
-            "description": [],
-            "signature": [
-              "{ source: ",
-              "Observable",
-              "<any> | undefined; readonly value: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined; error: (err: any) => void; forEach: { (next: (value: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined) => void): Promise<void>; (next: (value: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined; pipe: { (): ",
-              "Observable",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>; <A>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>): ",
-              "Observable",
-              "<A>; <A, B>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>): ",
-              "Observable",
-              "<B>; <A, B, C>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>): ",
-              "Observable",
-              "<C>; <A, B, C, D>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>): ",
-              "Observable",
-              "<D>; <A, B, C, D, E>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>): ",
-              "Observable",
-              "<E>; <A, B, C, D, E, F>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>): ",
-              "Observable",
-              "<F>; <A, B, C, D, E, F, G>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>): ",
-              "Observable",
-              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>): ",
-              "Observable",
-              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>): ",
-              "Observable",
-              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>, ...operations: ",
-              "OperatorFunction",
-              "<any, any>[]): ",
-              "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
-              "Observer",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
-              "Operator",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined, R>) => ",
-              "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>; operator: ",
-              "Operator",
-              "<any, { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
-              "Observer",
-              "<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>> | ((value: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: { dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ dynamicActions: ",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.DynamicActionsState",
-                "text": "DynamicActionsState"
-              },
-              "; } | undefined>; }; }"
-            ],
-            "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
+            "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -695,16 +297,88 @@
         "label": "EnhancedEmbeddable",
         "description": [],
         "signature": [
-          "E & ",
+          "E & Partial<{ enhancements: { dynamicActions: ",
           {
-            "pluginId": "embeddableEnhanced",
+            "pluginId": "uiActionsEnhanced",
             "scope": "public",
-            "docId": "kibEmbeddableEnhancedPluginApi",
-            "section": "def-public.HasDynamicActions",
-            "text": "HasDynamicActions"
-          }
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; }; setDynamicActions: (newState: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined) => void; dynamicActionsState$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined>; }>"
         ],
         "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddableEnhanced",
+        "id": "def-public.HasDynamicActions",
+        "type": "Type",
+        "tags": [],
+        "label": "HasDynamicActions",
+        "description": [],
+        "signature": [
+          "{ enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; } | undefined; setDynamicActions?: ((newState: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined) => void) | undefined; dynamicActionsState$?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined> | undefined; }"
+        ],
+        "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/interfaces/has_dynamic_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -746,27 +420,8 @@
           "signature": [
             "(uuid: string, getTitle: () => string | undefined, state: ",
             "DynamicActionsSerializedState",
-            ") => { dynamicActionsApi: ",
-            {
-              "pluginId": "embeddableEnhanced",
-              "scope": "public",
-              "docId": "kibEmbeddableEnhancedPluginApi",
-              "section": "def-public.HasDynamicActions",
-              "text": "HasDynamicActions"
-            },
-            "; dynamicActionsComparator: ",
-            {
-              "pluginId": "@kbn/presentation-publishing",
-              "scope": "common",
-              "docId": "kibKbnPresentationPublishingPluginApi",
-              "section": "def-common.StateComparators",
-              "text": "StateComparators"
-            },
-            "<",
-            "DynamicActionsSerializedState",
-            ">; serializeDynamicActions: () => ",
-            "DynamicActionsSerializedState",
-            "; }"
+            ") => ",
+            "ReactEmbeddableDynamicActionsApi"
           ],
           "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
           "deprecated": false,

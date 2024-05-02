@@ -8,11 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   noMetricIndicesPromptDescription,
   noMetricIndicesPromptPrimaryActionTitle,
 } from '../../components/empty_states';
+import { useSourceContext } from '../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
@@ -26,12 +27,15 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
 }) => {
   const {
     services: {
+      observabilityAIAssistant,
       observabilityShared: {
         navigation: { PageTemplate },
       },
       docLinks,
     },
   } = useKibanaContextForPlugin();
+
+  const { source } = useSourceContext();
 
   const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
@@ -47,6 +51,41 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         },
         docsLink: docLinks.links.observability.guide,
       };
+
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  useEffect(() => {
+    return setScreenContext?.({
+      data: [
+        {
+          name: 'Metrics configuration',
+          value: source,
+          description: 'The configuration of the Metrics app',
+        },
+      ],
+      starterPrompts: [
+        ...(!hasData
+          ? [
+              {
+                title: i18n.translate(
+                  'xpack.infra.metrics.aiAssistant.starterPrompts.explainNoData.title',
+                  {
+                    defaultMessage: 'Explain',
+                  }
+                ),
+                prompt: i18n.translate(
+                  'xpack.infra.metrics.aiAssistant.starterPrompts.explainNoData.prompt',
+                  {
+                    defaultMessage: "Why don't I see any data?",
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
+    });
+  }, [hasData, setScreenContext, source]);
 
   return (
     <PageTemplate

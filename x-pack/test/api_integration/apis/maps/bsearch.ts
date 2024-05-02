@@ -8,6 +8,7 @@
 import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import expect from '@kbn/expect';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -37,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
                 request: {
                   params: {
                     query: 'from logstash-* | keep geo.coordinates | limit 0',
+                    version: ESQL_LATEST_VERSION,
                   },
                 },
                 options: {
@@ -72,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
                     dropNullColumns: true,
                     query:
                       'from logstash-* | keep geo.coordinates, @timestamp | sort @timestamp | limit 1',
+                    version: ESQL_LATEST_VERSION,
                   },
                 },
                 options: {

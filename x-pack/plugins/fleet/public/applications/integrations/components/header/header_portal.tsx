@@ -13,6 +13,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export interface Props {
+  children: React.ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
 }

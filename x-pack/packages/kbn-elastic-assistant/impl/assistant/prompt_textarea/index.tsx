@@ -6,10 +6,9 @@
  */
 
 import { EuiTextArea } from '@elastic/eui';
-import React, { useCallback, useEffect, forwardRef } from 'react';
+import React, { useCallback, forwardRef } from 'react';
+import { css } from '@emotion/react';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -17,15 +16,11 @@ export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement>
   isDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
+  isFlyoutMode: boolean;
 }
 
-const StyledTextArea = styled(EuiTextArea)`
-  min-height: 125px;
-  padding-right: 42px;
-`;
-
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
+  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, isFlyoutMode }, ref) => {
     const onChangeCallback = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         handlePromptChange(event.target.value);
@@ -47,23 +42,26 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
       [value, onPromptSubmit, handlePromptChange]
     );
 
-    useEffect(() => {
-      handlePromptChange(value);
-    }, [handlePromptChange, value]);
-
     return (
-      <StyledTextArea
+      <EuiTextArea
+        css={css`
+          padding-right: 64px !important;
+          min-height: ${!isFlyoutMode ? '125px' : '64px'};
+          max-height: ${!isFlyoutMode ? 'auto' : '350px'};
+        `}
         className="eui-scrollBar"
         inputRef={ref}
         id={'prompt-textarea'}
         data-test-subj={'prompt-textarea'}
         fullWidth
         autoFocus
+        resize="none"
         disabled={isDisabled}
         placeholder={i18n.PROMPT_PLACEHOLDER}
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}
+        rows={isFlyoutMode ? 1 : 6}
       />
     );
   }
