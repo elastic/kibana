@@ -16,6 +16,7 @@ import {
   type EvalCommandContext,
   type StatsCommandContext,
   type LimitCommandContext,
+  type DedupCommandContext,
   type SortCommandContext,
   type KeepCommandContext,
   type DropCommandContext,
@@ -188,6 +189,16 @@ export class AstListener implements ESQLParserListener {
    */
   exitSortCommand(ctx: SortCommandContext) {
     const command = createCommand('sort', ctx);
+    this.ast.push(command);
+    command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.sortCommand`.
+   * @param ctx the parse tree
+   */
+  exitDedupCommand(ctx: DedupCommandContext) {
+    const command = createCommand('dedup', ctx);
     this.ast.push(command);
     command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
   }

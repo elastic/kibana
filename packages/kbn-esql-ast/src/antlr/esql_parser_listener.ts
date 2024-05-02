@@ -55,6 +55,7 @@ import { NumericArrayLiteralContext } from "./esql_parser";
 import { BooleanArrayLiteralContext } from "./esql_parser";
 import { StringArrayLiteralContext } from "./esql_parser";
 import { LimitCommandContext } from "./esql_parser";
+import { DedupCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
 import { KeepCommandContext } from "./esql_parser";
@@ -649,6 +650,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLimitCommand?: (ctx: LimitCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.dedupCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterDedupCommand?: (ctx: DedupCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.dedupCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitDedupCommand?: (ctx: DedupCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.sortCommand`.
 	 * @param ctx the parse tree

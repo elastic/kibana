@@ -69,6 +69,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'rename',
         'drop',
         'eval',
+        'dedup',
         'sort',
         'by',
         'where',

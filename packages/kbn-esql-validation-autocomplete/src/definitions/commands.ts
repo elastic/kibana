@@ -343,6 +343,20 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
+    name: 'dedup',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dedupDoc', {
+      defaultMessage:
+        'Removes the events that contain an identical combination of values for the fields that you specify.',
+    }),
+    examples: ['… | dedup a', '… | dedup b, a'],
+    options: [],
+    modes: [],
+    signature: {
+      multipleParams: true,
+      params: [{ name: 'column', type: 'column' }],
+    },
+  },
+  {
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.whereDoc', {
       defaultMessage:
