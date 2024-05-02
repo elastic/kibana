@@ -2,23 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/rule-data-utils",
-    "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/rrule",
     "@kbn/core-application-common",
@@ -33,6 +23,11 @@
     "@kbn/embeddable-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/kibana-utils-plugin",
+    "@kbn/core-doc-links-browser",
+    "@kbn/router-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/kibana-utils-plugin"
   ]
 }

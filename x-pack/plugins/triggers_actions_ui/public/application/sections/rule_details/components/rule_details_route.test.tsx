@@ -24,6 +24,11 @@ jest.mock('../../../../common/lib/config_api', () => ({
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 describe('rule_details_route', () => {
   beforeEach(() => {
     jest.clearAllMocks();

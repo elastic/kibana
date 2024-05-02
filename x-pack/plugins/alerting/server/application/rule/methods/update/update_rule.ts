@@ -320,6 +320,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     ...updatedRule,
     ...omit(updateRuleData, 'actions', 'systemActions'),
     ...apiKeyAttributes,
+    alertDelay: updateRuleData.alertDelay === null ? undefined : updateRuleData.alertDelay,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,
@@ -327,6 +328,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });
+
+  if (typeof updatedRuleAttributes.alertDelay === 'undefined')
+    delete updatedRuleAttributes.alertDelay;
 
   const mappedParams = getMappedParams(updatedParams);
 

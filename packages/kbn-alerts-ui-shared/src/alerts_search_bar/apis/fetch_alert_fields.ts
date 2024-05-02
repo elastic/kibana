@@ -7,7 +7,7 @@
  */
 
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 

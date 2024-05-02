@@ -9,7 +9,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart, HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { EMPTY_AAD_FIELDS } from '../constants';
 import { fetchAadFields } from '../apis/fetch_aad_fields';

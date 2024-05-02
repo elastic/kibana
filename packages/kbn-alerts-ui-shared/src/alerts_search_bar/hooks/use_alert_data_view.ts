@@ -10,7 +10,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
-import type { ToastsStart, HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchAlertIndexNames } from '../apis/fetch_alert_index_names';
