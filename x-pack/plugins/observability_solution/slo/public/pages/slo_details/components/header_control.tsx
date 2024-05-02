@@ -19,9 +19,11 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { useResetSlo } from '../../../hooks/use_reset_slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
@@ -44,12 +46,16 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
 
-  const { isDeletingSlo, removeDeleteQueryParam } = useGetQueryParams();
+  const { isDeletingSlo, isResettingSlo, removeDeleteQueryParam, removeResetQueryParam } =
+    useGetQueryParams();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
+
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: slo ? [slo.id] : undefined,
@@ -64,7 +70,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
     if (isDeletingSlo) {
       setDeleteConfirmationModalOpen(true);
     }
-  }, [isDeletingSlo]);
+    if (isResettingSlo) {
+      setResetConfirmationModalOpen(true);
+    }
+  }, [isDeletingSlo, isResettingSlo]);
 
   const onCloseRuleFlyout = () => {
     setRuleFlyoutVisibility(false);
@@ -75,7 +84,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl } = useSloActions({
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -120,6 +129,27 @@ export function HeaderControl({ isLoading, slo }: Props) {
     removeDeleteQueryParam();
     setDeleteConfirmationModalOpen(false);
     navigate(basePath.prepend(paths.slos));
+  };
+
+  const handleReset = () => {
+    if (!!remoteResetUrl) {
+      window.open(remoteResetUrl, '_blank');
+    } else {
+      setResetConfirmationModalOpen(true);
+    }
+  };
+
+  const handleResetConfirm = async () => {
+    if (slo) {
+      await resetSlo({ id: slo.id, name: slo.name });
+      removeResetQueryParam();
+      setResetConfirmationModalOpen(false);
+    }
+  };
+
+  const handleResetCancel = () => {
+    removeResetQueryParam();
+    setResetConfirmationModalOpen(false);
   };
 
   const navigate = useCallback(
@@ -259,6 +289,21 @@ export function HeaderControl({ isLoading, slo }: Props) {
                   defaultMessage: 'Delete',
                 })}
                 {showRemoteLinkIcon}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="reset"
+                icon="refresh"
+                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+                onClick={handleReset}
+                data-test-subj="sloDetailsHeaderControlPopoverReset"
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
+              >
+                {i18n.translate('xpack.slo.slo.item.actions.reset', {
+                  defaultMessage: 'Reset',
+                })}
+                {showRemoteLinkIcon}
               </EuiContextMenuItem>
             )}
         />
@@ -283,6 +328,15 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
       {slo && isDeleteConfirmationModalOpen ? (
         <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
+      ) : null}
+
+      {slo && isResetConfirmationModalOpen ? (
+        <SloResetConfirmationModal
+          slo={slo}
+          onCancel={handleResetCancel}
+          onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
+        />
       ) : null}
     </>
   );

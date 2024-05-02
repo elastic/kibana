@@ -25,6 +25,8 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
@@ -76,7 +78,9 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
+
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   const { handleCreateRule, handleAttachToDashboardSave } = useSloListActions({
@@ -87,6 +91,17 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
 
   const closeDeleteModal = () => {
     setDeleteConfirmationModalOpen(false);
+  };
+
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+
+  const handleResetConfirm = async () => {
+    await resetSlo({ id: slo.id, name: slo.name });
+    setResetConfirmationModalOpen(false);
+  };
+
+  const handleResetCancel = () => {
+    setResetConfirmationModalOpen(false);
   };
 
   return (
@@ -134,6 +149,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
             setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
+            setResetConfirmationModalOpen={setResetConfirmationModalOpen}
           />
         )}
       </EuiPanel>
@@ -154,6 +170,16 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       {isDeleteConfirmationModalOpen ? (
         <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
       ) : null}
+
+      {isResetConfirmationModalOpen ? (
+        <SloResetConfirmationModal
+          slo={slo}
+          onCancel={handleResetCancel}
+          onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
+        />
+      ) : null}
+
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           objectType={i18n.translate('xpack.slo.item.actions.addToDashboard.objectTypeLabel', {

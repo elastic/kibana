@@ -905,9 +905,9 @@
         "label": "AllowedGaugeOverrides",
         "description": [],
         "signature": [
-          "{ gauge?: { id: string; target?: number | undefined; subtype: ",
+          "{ gauge?: { id: string; subtype: ",
           "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
+          "; target?: number | undefined; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1191,9 +1191,9 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          "; overrides?: (Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          "; overrides?: (Partial<Record<\"gauge\", { id: string; subtype: ",
           "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
+          "; target?: number | undefined; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",

@@ -22,11 +22,11 @@ export const dataConfig = {
 };
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
 }) {
@@ -35,7 +35,7 @@ export async function generateData({
     .instance('instance-a');
   const { rate, transaction, span } = dataConfig;
 
-  await synthtraceEsClient.index(
+  await apmSynthtraceEsClient.index(
     timerange(start, end)
       .interval('1m')
       .rate(rate)
