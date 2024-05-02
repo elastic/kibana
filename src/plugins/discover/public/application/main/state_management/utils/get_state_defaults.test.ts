@@ -28,12 +28,15 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
+        "dataSource": Object {
+          "dataViewId": "index-pattern-with-timefield-id",
+          "type": "dataView",
+        },
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,
@@ -64,12 +67,15 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
+        "dataSource": Object {
+          "dataViewId": "the-data-view-id",
+          "type": "dataView",
+        },
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "index": "the-data-view-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,

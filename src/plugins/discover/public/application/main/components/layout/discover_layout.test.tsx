@@ -106,7 +106,11 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({ index: dataView.id, interval: 'auto', query });
+  stateContainer.appState.update({
+    dataSource: { type: 'dataView', dataViewId: dataView.id! },
+    interval: 'auto',
+    query,
+  });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {

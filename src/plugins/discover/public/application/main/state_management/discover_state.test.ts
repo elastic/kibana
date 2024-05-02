@@ -107,7 +107,7 @@ describe('Test discover state', () => {
     });
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+      `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
     );
   });
 
@@ -204,7 +204,7 @@ describe('Test discover state with overridden state storage', () => {
     await jest.runAllTimersAsync();
 
     expect(history.createHref(history.location)).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+      `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
     );
   });
 
@@ -441,7 +441,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     const { searchSource, ...savedSearch } = state.savedSearchState.getState();
@@ -474,7 +474,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
@@ -489,7 +489,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
@@ -504,7 +504,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(bytes),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
@@ -518,7 +518,7 @@ describe('Test discover state actions', () => {
     await new Promise(process.nextTick);
     expect(newSavedSearch?.id).toBe('the-saved-search-id');
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
@@ -533,7 +533,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
@@ -766,7 +766,7 @@ describe('Test discover state actions', () => {
     // test changed state, fetch should be called once and URL should be updated
     expect(dataState.fetch).toHaveBeenCalledTimes(1);
     expect(
-      (state.appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+      (appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
         .dataViewId
     ).toBe(dataViewComplexMock.id);
     expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(
@@ -960,7 +960,7 @@ describe('Test discover state with embedded mode', () => {
     });
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+      `"/?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
     );
   });
 
