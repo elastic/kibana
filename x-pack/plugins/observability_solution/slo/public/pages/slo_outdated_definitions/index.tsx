@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useKibana } from '../../utils/kibana_react';
-import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 import { SloListEmpty } from '../slos/components/slo_list_empty';
 import { OutdatedSlo } from './outdated_slo';
 import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
@@ -27,14 +25,9 @@ export function SlosOutdatedDefinitions() {
     http: { basePath },
   } = useKibana().services;
 
-  const { data: permissions, isLoading: arePermissionsLoading } = usePermissions();
-
-  const { hasWriteCapabilities } = useCapabilities();
-  const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
-
   const { hasAtLeast } = useLicense();
-  const hasPlatinumLicense = hasAtLeast('platinum') === true;
 
   useBreadcrumbs([
     {
@@ -68,10 +61,8 @@ export function SlosOutdatedDefinitions() {
   });
   const { total } = data ?? { total: 0 };
 
-  const hasRequiredWritePrivileges =
-    !!globalDiagnosis?.userPrivileges.write.has_all_requested && hasWriteCapabilities;
-
-  const hasSlosAndHasPermissions = hasPlatinumLicense && hasRequiredWritePrivileges;
+  const hasRequiredWritePrivileges = permissions?.hasAllWriteRequested === true;
+  const hasPlatinumLicense = hasAtLeast('platinum') === true;
 
   const errors = !hasRequiredWritePrivileges ? (
     <EuiText>
@@ -98,7 +89,7 @@ export function SlosOutdatedDefinitions() {
     >
       <HeaderMenu />
 
-      {!hasSlosAndHasPermissions ? (
+      {!!errors ? (
         errors
       ) : (
         <>
