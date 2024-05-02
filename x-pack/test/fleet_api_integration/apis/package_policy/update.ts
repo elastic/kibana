@@ -529,11 +529,7 @@ export default function (providerContext: FtrProviderContext) {
           overrides: {
             inputs: {
               'policy-id': {
-                agent: {
-                  logging: {
-                    level: 'debug',
-                  },
-                },
+                log_level: 'debug',
               },
             },
           },

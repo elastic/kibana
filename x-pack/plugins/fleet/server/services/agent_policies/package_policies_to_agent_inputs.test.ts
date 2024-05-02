@@ -564,11 +564,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             overrides: {
               inputs: {
                 'test-logs-some-uuid': {
-                  agent: {
-                    logging: {
-                      level: 'debug',
-                    },
-                  },
+                  log_level: 'debug',
                 },
               },
             },
@@ -587,11 +583,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         type: 'test-logs',
         data_stream: { namespace: 'agentpolicyspace' },
         use_output: 'default',
-        agent: {
-          logging: {
-            level: 'debug',
-          },
-        },
+        log_level: 'debug',
         streams: [
           {
             id: 'test-logs-foo',
@@ -627,11 +619,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             overrides: {
               inputs: {
                 'test-logs-some-uuid': {
-                  agent: {
-                    logging: {
-                      level: 'debug',
-                    },
-                  },
+                  log_level: 'debug',
                 },
               },
             },
@@ -642,11 +630,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
-        agent: {
-          logging: {
-            level: 'debug',
-          },
-        },
+        log_level: 'debug',
         data_stream: {
           namespace: 'default',
         },
