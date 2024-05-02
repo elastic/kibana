@@ -26,6 +26,7 @@ import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
 import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
@@ -60,6 +61,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       );
       return getFieldListFactory(core, deps);
     });
+    registerFieldListPanelPlacementSetting();
 
     registerCreateEuiMarkdownAction(deps.uiActions);
     registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
