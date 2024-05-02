@@ -79,6 +79,7 @@ export class ManagementSectionsService {
             sectionCapabilities.hasOwnProperty(capabilitiesId) &&
             sectionCapabilities[capabilitiesId] !== true
           ) {
+            console.log(sectionCapabilities)
             app.disable();
           }
         });
