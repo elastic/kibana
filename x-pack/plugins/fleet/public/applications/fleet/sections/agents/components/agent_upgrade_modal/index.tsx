@@ -255,7 +255,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
     ) {
       return i18n.translate('xpack.fleet.upgradeAgents.notUpgradable.singleAgentMessage', {
-        defaultMessage: 'The selected agent is not upgradeable: ${reason}',
+        defaultMessage: 'The selected agent is not upgradeable: {reason}',
         values: {
           reason: getAgentNotUpgradeableMessage(
             agents[0],
@@ -267,7 +267,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     }
     if (isListOfAgents && !areAgentsUpgradeableToVersion(agents, selectedVersion[0].value)) {
       return i18n.translate('xpack.fleet.upgradeAgents.notUpgradable.multipleAgentsMessage', {
-        defaultMessage: 'The selected agents are not upgradeable: ${reason}',
+        defaultMessage: 'The selected agents are not upgradeable: {reason}',
         values: {
           reason: getAgentsNotUpgradeableMessage(
             agents,
@@ -282,7 +282,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)
     ) {
       return i18n.translate('xpack.fleet.upgradeAgents.notUpgradable.fleetServerVersionMessage', {
-        defaultMessage: 'Please choose another version. ${reason}',
+        defaultMessage: 'Please choose another version. {reason}',
         values: {
           reason: getFleetServerVersionMessage(selectedVersion[0].value, fleetServerAgents),
         },
