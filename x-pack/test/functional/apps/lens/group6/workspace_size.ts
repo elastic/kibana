@@ -16,6 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
+  function within(actualSize: number, expectedSize: number) {
+    const tolerance = 50; // 50 px tolerance
+    return actualSize > expectedSize - tolerance && actualSize < expectedSize + tolerance;
+  }
+
   describe('lens workspace size', () => {
     let originalWindowSize: {
       height: number;
@@ -24,9 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       y: number;
     };
 
-    const DEFAULT_WINDOW_SIZE = [1400, 950];
+    const DEFAULT_WINDOW_SIZE = [1400, 900];
     const VERTICAL_16_9 = 16 / 9;
-    const outerWorkspaceDimensions = { width: 690, height: 420 };
+    const outerWorkspaceDimensions = { width: 700, height: 400 };
     let UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
 
     before(async () => {
@@ -42,13 +47,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
       // Detect here if the Chrome bug is present, and adjust the aspect ratio accordingly if not
-      if (width !== DEFAULT_WINDOW_SIZE[0] || height !== DEFAULT_WINDOW_SIZE[1]) {
+      if (!within(width, DEFAULT_WINDOW_SIZE[0]) || !within(height, DEFAULT_WINDOW_SIZE[1])) {
         const { width: containerWidth, height: containerHeight } =
           await PageObjects.lens.getWorkspaceVisContainerDimensions();
 
         const newRatio = pxToN(containerWidth) / pxToN(containerHeight);
         log.debug(
-          `Detected Chrome bug, adjusting aspect ratio from ${UNCONSTRAINED} to ${newRatio}`
+          `Detected Chrome bug () adjusting aspect ratio from ${UNCONSTRAINED} to ${newRatio}`
         );
         UNCONSTRAINED = newRatio;
       }
@@ -85,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.tryForTime(2000, async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
         log.debug(
-          `Checking workspace dimensions: ${width}x${height} against ${expectedMaxWidth}x${expectedMaxHeight}`
+          `Checking workspace dimensions: ${width} x ${height} against ${expectedMaxWidth}x${expectedMaxHeight}`
         );
 
         // Make sure size didn't go past the max passed
@@ -113,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
         log.debug(
-          `Checking workspace dimensions: ${width}x${height} with ratio ${
+          `Checking workspace dimensions: ${pxToN(width)} x ${pxToN(height)} with ratio ${
             pxToN(width) / pxToN(height)
           } vs ${expectedRatio}`
         );
