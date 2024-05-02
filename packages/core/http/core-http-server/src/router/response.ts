@@ -55,6 +55,10 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
   readonly options: HttpResponseOptions;
 }
 
+export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
+  return typeof response.status === 'number' && typeof response.options === 'object';
+}
+
 /**
  * HTTP response parameters for a response with adjustable status code.
  * @public
