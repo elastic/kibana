@@ -45,7 +45,6 @@
   file:
     path: "{{ kibana_dist_path }}"
     state: directory
-    mode: "0777"
 
 - name: find kibana distribution
   find:
@@ -92,6 +91,14 @@
   template:
     src: templates/fips/nodejs.cnf
     dest: "{{ kibana_dist_path }}/config/nodejs.cnf"
+
+- name: "change owner of {{ kibana_dist_path }} to vagrant"
+  become: yes
+  file:
+    path: "{{ kibana_dist_path }}"
+    owner: vagrant
+    group: vagrant
+    recurse: yes
 
 - name: download FIPS certified OpenSSL
   become: yes
