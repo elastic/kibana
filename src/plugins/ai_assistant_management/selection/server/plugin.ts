@@ -104,16 +104,25 @@ export class AIAssistantManagementSelectionPlugin
         defaultMessage: 'AI Assistant',
       }),
       order: 8600,
-      app: ['aiAssistantManagementSelection', 'kibana'],
+      app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      catalogue: ['aiAssistantManagementSelection'],
       management: {
-        kibana: ['aiAssistantManagementSelection'],
+        kibana: [
+          'aiAssistantManagementSelection',
+          'securityAiAssistantManagement',
+          'observabilityAiAssistantManagement',
+        ],
       },
       minimumLicense: 'enterprise',
-      // see x-pack/plugins/features/common/feature_kibana_privileges.ts
       privileges: {
         all: {
+          management: {
+            kibana: [
+              'aiAssistantManagementSelection',
+              'securityAiAssistantManagement',
+              'observabilityAiAssistantManagement',
+            ],
+          },
           savedObject: {
             all: [],
             read: [],
@@ -121,6 +130,13 @@ export class AIAssistantManagementSelectionPlugin
           ui: [],
         },
         read: {
+          management: {
+            kibana: [
+              'aiAssistantManagementSelection',
+              'securityAiAssistantManagement',
+              'observabilityAiAssistantManagement',
+            ],
+          },
           savedObject: {
             all: [],
             read: [],
