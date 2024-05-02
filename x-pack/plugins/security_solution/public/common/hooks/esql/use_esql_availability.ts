@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useKibana } from '../../lib/kibana';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 /**
@@ -16,7 +17,7 @@ import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
  */
 export const useEsqlAvailability = () => {
   const { uiSettings } = useKibana().services;
-  const isEsqlAdvancedSettingEnabled = uiSettings?.get('enableESQL');
+  const isEsqlAdvancedSettingEnabled = uiSettings?.get(ENABLE_ESQL);
   const isEsqlRuleTypeEnabled =
     !useIsExperimentalFeatureEnabled('esqlRulesDisabled') && isEsqlAdvancedSettingEnabled;
   const isESQLTabInTimelineEnabled =
