@@ -23,7 +23,7 @@ function measureInteraction() {
       // Time To First Meaningful Paint (ttfmp)
       if (!trackedRoutes.includes(pathname)) {
         performance.measure(pathname, {
-          detail: { eventName: 'time_to_first_meaninful_paint' },
+          detail: { eventName: 'time_to_first_meaningful_paint' },
           start: ttfmpPerfomanceMarkers.startPageChange,
           end: ttfmpPerfomanceMarkers.endPageReady,
         });
