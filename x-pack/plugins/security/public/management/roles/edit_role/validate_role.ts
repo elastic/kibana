@@ -306,7 +306,7 @@ export class RoleValidator {
     if (!remoteClusterPrivilege.privileges.length) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
+          'xpack.security.management.editRole.validateRole.oneRemoteClusterPrivilegeRequiredWarningMessage',
           {
             defaultMessage: 'Enter or select at least one privilege',
           }
