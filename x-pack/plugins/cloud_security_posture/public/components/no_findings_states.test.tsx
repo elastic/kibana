@@ -12,8 +12,8 @@ import { NoFindingsStates } from './no_findings_states';
 import {
   cspmStatusNotInstalled,
   cspmStatusCspmNotDeployed,
-} from '../test/handlers/cspmStatusHandlers';
-import { getMockServerCoreSetup, setupMockServiceWorker } from '../test/mockServer';
+} from '../test/handlers/cspm_status_handlers';
+import { getMockServerCoreSetup, setupMockServiceWorker } from '../test/mock_server';
 
 const server = setupMockServiceWorker();
 

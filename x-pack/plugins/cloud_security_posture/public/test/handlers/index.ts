@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { http, HttpResponse } from 'msw';
-import { defaultStatusInstalled } from './cspmStatusHandlers';
-import { defaultBenchmarks } from './benchmarkHandlers';
+import { defaultStatusInstalled } from './cspm_status_handlers';
+import { defaultBenchmarks } from './benchmark_handlers';
 
 export const defaultHandlers = [
   defaultStatusInstalled,
