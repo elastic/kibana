@@ -242,7 +242,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                               >
                                 <FormattedMessage
                                   id="xpack.searchPlayground.viewQuery.flyout.learnMoreLink"
-                                  defaultMessage=" Learn more."
+                                  defaultMessage="Learn more."
                                 />
                               </EuiLink>
                             </EuiFlexItem>
