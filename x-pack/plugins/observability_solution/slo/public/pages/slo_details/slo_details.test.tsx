@@ -143,7 +143,7 @@ describe('SLO Details Page', () => {
   });
 
   describe('when the incorrect license is found', () => {
-    it('navigates to the SLO List page', async () => {
+    it('navigates to the SLO welcome page', async () => {
       const slo = buildSlo();
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
@@ -151,7 +151,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
     });
   });
 
@@ -168,7 +168,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
     });
   });
 
