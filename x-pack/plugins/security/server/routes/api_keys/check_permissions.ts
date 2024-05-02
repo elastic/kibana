@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-
 import type { RouteDefinitionParams } from '..';
 import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
@@ -14,15 +12,6 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export interface ValidPermissionsResult {
   apiKeys: ApiKey[];
-}
-
-export function ValidPermissionsFactory(req: KibanaRequest, keys?: ApiKey[]) {
-  const validPermissionsRequestCache = new WeakMap<KibanaRequest, ApiKey[]>();
-  if (validPermissionsRequestCache.has(req)) {
-    return validPermissionsRequestCache.get(req);
-  } else if (keys) {
-    validPermissionsRequestCache.set(req, keys);
-  }
 }
 
 /**
@@ -65,10 +54,6 @@ export function defineValidPermissionRoutes({
           });
         }
 
-        if (ValidPermissionsFactory(request)) {
-          return ValidPermissionsFactory(request);
-        }
-
         const apiResponse = await esClient.asCurrentUser.security.getApiKey({
           owner: !clusterPrivileges.manage_api_key && !clusterPrivileges.read_security,
         });
@@ -91,7 +76,6 @@ export function defineValidPermissionRoutes({
           },
         });
 
-        ValidPermissionsFactory(request, validKeysResponse.payload?.apiKeys);
         return validKeysResponse;
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
