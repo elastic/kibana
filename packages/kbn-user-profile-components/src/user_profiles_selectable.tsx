@@ -340,7 +340,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               gutterSize="s"
               responsive={false}
             >
-              <EuiFlexItem css={{ minWidth: 0, flexBasis: 'auto' }}>
+              <EuiFlexItem css={{ maxWidth: '100%' }}>
                 <EuiHighlight className="eui-textTruncate" search={searchValue}>
                   {option.label}
                 </EuiHighlight>
