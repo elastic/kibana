@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { securityServiceMock } from './src/security_service.mock';
-export type { InternalSecurityStartMock, SecurityStartMock } from './src/security_service.mock';
-export { auditLoggerMock } from './src/audit.mock';
+import { AuditLogger } from '@kbn/core-security-server';
+
+export type MockedAuditLogger = jest.Mocked<AuditLogger>;
+
+export const createAuditLoggerMock = {
+  create(): MockedAuditLogger {
+    return {
+      log: jest.fn(),
+      enabled: true,
+    };
+  },
+};
