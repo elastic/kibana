@@ -55,7 +55,6 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
                   defaultMessage="See container-related {link} for more information"
                   values={{
                     link: (
-                      // link not working
                       <EuiLink
                         data-test-subj="infraAssetDetailsViewContainerMetricsDocumentationLink"
                         href={`${CONTAINER_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
