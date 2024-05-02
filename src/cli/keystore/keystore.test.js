@@ -116,14 +116,14 @@ describe('Keystore', () => {
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
     });
 
-    it('can load a valid password protected keystore from env KBN_KEYSTORE_PASSWORD', async () => {
-      process.env.KBN_KEYSTORE_PASSWORD = 'changeme';
+    it('can load a valid password protected keystore from env KEYSTORE_PASSWORD', async () => {
+      process.env.KEYSTORE_PASSWORD = 'changeme';
       const keystore = await Keystore.initialize('/data/protected.keystore');
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
     });
 
-    it('can not load a password protected keystore from env KBN_KEYSTORE_PASSWORD with the wrong password', async () => {
-      process.env.KBN_KEYSTORE_PASSWORD = 'wrongpassword';
+    it('can not load a password protected keystore from env KEYSTORE_PASSWORD with the wrong password', async () => {
+      process.env.KEYSTORE_PASSWORD = 'wrongpassword';
       expect.assertions(1);
       try {
         await Keystore.initialize('/data/protected.keystore');
@@ -132,14 +132,14 @@ describe('Keystore', () => {
       }
     });
 
-    it('can load a password protected keystore from env KBN_KEYSTORE_PASSWORD_FILE', async () => {
-      process.env.KBN_KEYSTORE_PASSWORD_FILE = 'keystore_correct_password_file';
+    it('can load a password protected keystore from env KBN_KEYSTORE_PASSPHRASE_FILE', async () => {
+      process.env.KBN_KEYSTORE_PASSPHRASE_FILE = 'keystore_correct_password_file';
       const keystore = await Keystore.initialize('/data/protected.keystore');
       expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
     });
 
-    it('can not load a password protected keystore from env KBN_KEYSTORE_PASSWORD_FILE with the wrong password', async () => {
-      process.env.KBN_KEYSTORE_PASSWORD_FILE = 'keystore_incorrect_password_file';
+    it('can not load a password protected keystore from env KBN_KEYSTORE_PASSPHRASE_FILE with the wrong password', async () => {
+      process.env.KBN_KEYSTORE_PASSPHRASE_FILE = 'keystore_incorrect_password_file';
       expect.assertions(1);
       try {
         await Keystore.initialize('/data/protected.keystore');

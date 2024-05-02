@@ -79,12 +79,12 @@ export class Keystore {
   async load() {
     try {
       if (this.hasPassword() && !this.password) {
-        if (process.env.KBN_KEYSTORE_PASSWORD_FILE) {
-          this.password = readFileSync(process.env.KBN_KEYSTORE_PASSWORD_FILE, {
+        if (process.env.KBN_KEYSTORE_PASSPHRASE_FILE) {
+          this.password = readFileSync(process.env.KBN_KEYSTORE_PASSPHRASE_FILE, {
             encoding: 'utf8',
           }).trim();
-        } else if (process.env.KBN_KEYSTORE_PASSWORD) {
-          this.password = process.env.KBN_KEYSTORE_PASSWORD;
+        } else if (process.env.KEYSTORE_PASSWORD) {
+          this.password = process.env.KEYSTORE_PASSWORD;
         } else {
           this.password = await question('Enter password for the kibana keystore', {
             mask: '*',
