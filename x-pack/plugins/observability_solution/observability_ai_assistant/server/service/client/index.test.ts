@@ -236,7 +236,8 @@ describe('Observability AI Assistant client', () => {
                     status: 'ok',
                     data: titleLlmSimulator.stream,
                   });
-                });
+                })
+                .catch(reject);
             };
             titleLlmPromiseReject = (error: Error) => {
               reject(error);
