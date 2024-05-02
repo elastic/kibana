@@ -112,6 +112,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+        log.debug(
+          `Checking workspace dimensions: ${width}x${height} with ratio ${
+            pxToN(width) / pxToN(height)
+          } vs ${expectedRatio}`
+        );
 
         expect(pxToN(width) / pxToN(height)).to.within(
           expectedRatio - tolerance,
