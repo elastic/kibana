@@ -68,7 +68,7 @@ export const PreprocessDataPanel: React.FC<{
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataEnrichment.learnMore',
                         {
-                          defaultMessage: 'Learn More',
+                          defaultMessage: 'Learn more',
                         }
                       )}
                     </EuiLink>
@@ -94,7 +94,7 @@ export const PreprocessDataPanel: React.FC<{
                 <EuiText size="s">
                   {i18n.translate('searchApiPanels.pipeline.overview.dataFiltering.description', {
                     defaultMessage:
-                      'Remove fields from documents like sensitive information from documents before indexing.',
+                      'Remove specific fields from documents before indexing, to exclude unnecessary or sensitive information.',
                   })}
                 </EuiText>
                 <EuiSpacer size="s" />
@@ -104,7 +104,7 @@ export const PreprocessDataPanel: React.FC<{
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataFiltering.learnMore',
                         {
-                          defaultMessage: 'Learn More',
+                          defaultMessage: 'Learn more',
                         }
                       )}
                     </EuiLink>
@@ -131,7 +131,7 @@ export const PreprocessDataPanel: React.FC<{
                   {i18n.translate(
                     'searchApiPanels.pipeline.overview.arrayJsonHandling.description',
                     {
-                      defaultMessage: 'Run batch processors,  parse JSON data and sort elements.',
+                      defaultMessage: 'Run batch processors, parse JSON data and sort elements.',
                     }
                   )}
                 </EuiText>
@@ -142,7 +142,7 @@ export const PreprocessDataPanel: React.FC<{
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.arrayJsonHandling.learnMore',
                         {
-                          defaultMessage: 'Learn More',
+                          defaultMessage: 'Learn more',
                         }
                       )}
                     </EuiLink>
@@ -181,7 +181,7 @@ export const PreprocessDataPanel: React.FC<{
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataTransformation.learnMore',
                         {
-                          defaultMessage: 'Learn More',
+                          defaultMessage: 'Learn more',
                         }
                       )}
                     </EuiLink>
@@ -209,7 +209,7 @@ export const PreprocessDataPanel: React.FC<{
                     'searchApiPanels.pipeline.overview.pipelineHandling.description',
                     {
                       defaultMessage:
-                        'Handle error exceptions, execute another pipeline or reroute document to another index',
+                        'Handle error exceptions, execute another pipeline, or reroute documents to another index',
                     }
                   )}
                 </EuiText>
@@ -220,7 +220,7 @@ export const PreprocessDataPanel: React.FC<{
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.pipelineHandling.learnMore',
                         {
-                          defaultMessage: 'Learn More',
+                          defaultMessage: 'Learn more',
                         }
                       )}
                     </EuiLink>

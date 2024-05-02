@@ -255,7 +255,7 @@ export const ElasticsearchOverview = () => {
               <EuiFlexItem>
                 {i18n.translate('xpack.serverlessSearch.preprocessData.description', {
                   defaultMessage:
-                    "Use ingest pipelines to preprocess your data before it's indexed into Elasticsearch, which is often much easier and cheaper than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.",
+                    'Use ingest pipelines to preprocess your data before indexing into Elasticsearch. This is often much easier and cheaper than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.',
                 })}
               </EuiFlexItem>
             </EuiFlexGroup>

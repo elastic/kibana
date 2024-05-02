@@ -106,7 +106,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
               <p>
                 <FormattedMessage
                   id="xpack.serverlessSearch.connectors.config.preprocessData.description"
-                  defaultMessage="You can use ingest pipelines to preprocess data before indexing into Elasticseearch. Connectors clients use {clientIngestionPipeline} pipeline before indexing data into Elasticsearch"
+                  defaultMessage="Use ingest pipelines to preprocess data before indexing into Elasticsearch. Note that connector clients use the {clientIngestionPipeline} pipeline for preprocessing."
                   values={{
                     clientIngestionPipeline: (
                       <strong>
