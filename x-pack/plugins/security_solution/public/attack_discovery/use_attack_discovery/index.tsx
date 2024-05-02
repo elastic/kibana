@@ -11,7 +11,7 @@ import {
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import { uniq } from 'lodash';
+import { uniq } from 'lodash/fp';
 import type { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,

@@ -28,7 +28,7 @@ export const insightsGeneratedEvent: TelemetryEvent = {
     alertsCount: {
       type: 'integer',
       _meta: {
-        description: 'Number of alerts evaluated',
+        description: 'Number of unique alerts referenced in the attack discoveries',
         optional: false,
       },
     },
