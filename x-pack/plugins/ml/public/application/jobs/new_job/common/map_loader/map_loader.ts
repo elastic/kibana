@@ -30,7 +30,6 @@ export class MapLoader extends ChartLoader {
     geoField: Field,
     splitField: SplitField,
     fieldValues: string[],
-    filters?: any[],
     savedSearchQuery?: Query
   ) {
     const layerList: LayerDescriptor[] = [];
