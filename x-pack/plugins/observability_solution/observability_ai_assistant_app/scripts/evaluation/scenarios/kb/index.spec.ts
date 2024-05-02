@@ -8,8 +8,8 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { chatClient, esClient } from '../../services';
-import { MessageRole } from '../../../../common';
 
 describe('kb functions', () => {
   it('summarizes and recalls information', async () => {
