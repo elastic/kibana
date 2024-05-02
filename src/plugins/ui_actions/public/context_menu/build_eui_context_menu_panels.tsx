@@ -69,17 +69,11 @@ const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, 
   const maxItemsBeforeWrapping = 4;
   if (!panel.items) return;
   if (panel.items.length <= maxItemsBeforeWrapping) return;
-  const visibleItems = panel.items.slice(0, 3) as ItemDescriptor[];
-  const itemsInSubmenu = panel.items.slice(3) as ItemDescriptor[];
+  const visibleItems = panel.items.slice(0, maxItemsBeforeWrapping - 1) as ItemDescriptor[];
+  const itemsInSubmenu = panel.items.slice(maxItemsBeforeWrapping - 1) as ItemDescriptor[];
   const morePanelId = panel.id + '__more';
-  const more: ItemDescriptor = {
-    name: txtMore,
-    panel: morePanelId,
-    icon: 'boxesHorizontal',
-    'data-test-subj': `embeddablePanelMore-${id}`,
-    _order: -1,
-  };
-  panel.items = [...visibleItems, more];
+
+  panel.items = visibleItems;
   const subPanel: PanelDescriptor = {
     id: morePanelId,
     title: panel.title || defaultTitle,
@@ -130,8 +124,6 @@ export async function buildContextMenuForActions({
   const promises = actions.map(async (item) => {
     const { action } = item;
     const context: ActionExecutionContext<object> = { ...item.context, trigger: item.trigger };
-    const isCompatible = await item.action.isCompatible(context);
-    if (!isCompatible) return;
     let parentPanel = '';
     let currentPanel = '';
     if (action.grouping) {

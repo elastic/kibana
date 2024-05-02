@@ -43,19 +43,18 @@ export const PresentationPanelHeader = <
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
-  const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
-    showNotifications,
-    showBadges,
-    api,
-    getActions
-  );
+  // const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
+  //   showNotifications,
+  //   showBadges,
+  //   api,
+  //   getActions
+  // );
 
-  const showPanelBar =
-    !hideTitle ||
-    panelDescription ||
-    viewMode !== 'view' ||
-    badgeElements.length > 0 ||
-    notificationElements.length > 0;
+  console.log({ panelTitle });
+  const showPanelBar = !hideTitle || !panelTitle || panelDescription || viewMode !== 'view';
+  // ||
+  // badgeElements.length > 0 ||
+  // notificationElements.length > 0;
 
   const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
   const ariaLabelElement = (
@@ -68,18 +67,11 @@ export const PresentationPanelHeader = <
     'embPanel__header--floater': !showPanelBar,
   });
 
-  const titleClasses = classNames('embPanel__title', {
-    'embPanel--dragHandle': viewMode === 'edit',
-  });
-
-  const contextMenuElement = (
-    <PresentationPanelContextMenu {...{ index, api, getActions, actionPredicate }} />
-  );
+  const titleClasses = classNames('embPanel__title');
 
   if (!showPanelBar) {
     return (
       <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
-        {contextMenuElement}
         {ariaLabelElement}
       </div>
     );
@@ -99,10 +91,9 @@ export const PresentationPanelHeader = <
           panelTitle={panelTitle}
           panelDescription={panelDescription}
         />
-        {showBadges && badgeElements}
+        {/* {showBadges && badgeElements} */}
       </h2>
-      {showNotifications && notificationElements}
-      {contextMenuElement}
+      {/* {showNotifications && notificationElements} */}
     </figcaption>
   );
 };

@@ -44,6 +44,7 @@
   display: flex;
   // ensure menu button is on the right even if the title doesn't exist
   justify-content: flex-end;
+  height: $euiSizeL;
 }
 
 .embPanel__title {
@@ -183,4 +184,62 @@
   position: absolute;
   padding-left: $euiSizeS;
   z-index: $euiZLevel1;
+}
+
+.embPanel__floatingActionsWrapper {
+  position: relative;
+  height: 100%;
+
+  .embPanel__floatingActions {
+    opacity: 0;
+    visibility: hidden;
+    // slower transition on hover leave in case the user accidentally stops hover
+    transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
+
+    position: absolute;
+    padding: $euiSizeXS;
+    
+    // OVER PANEL
+    // border-radius: $euiBorderRadius;
+    // z-index: $euiZLevel9; 
+    // top: (-$euiSizeL);
+    
+    // UNDER PANEL
+    z-index: -1;
+    border-top-right-radius: $euiBorderRadius;
+    border-top-left-radius: $euiBorderRadius;
+    top: (-$euiSizeXL);
+
+    background-color: $euiColorEmptyShade;
+    box-shadow: 0 0 0 1px $euiColorLightShade;
+    height: $euiSizeXL;
+  }
+
+  &:hover, &:focus-within {
+    .embPanel__floatingActions {
+      opacity: 1;
+      visibility: visible;
+      transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
+    }
+  }
+
+  .embPanel__floatingActionsLeft {
+    left: $euiSizeS;
+
+    padding: $euiSizeS;
+
+    &:hover {
+      cursor: move;
+    }
+
+    img {
+      pointer-events: all !important;
+      -webkit-user-select: all !important;
+      user-select: all !important;
+    }
+  }
+
+  .embPanel__floatingActionsRight {
+    right: $euiSizeS;
+  }
 }
