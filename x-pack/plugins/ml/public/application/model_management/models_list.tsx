@@ -767,7 +767,6 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
-          responsiveBreakpoint={'xl'}
           isSelectable={true}
           isExpandable={true}
           hasActions={true}
