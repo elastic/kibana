@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
@@ -26,82 +26,36 @@ interface Props {
   editable?: boolean;
 }
 
-export class RemoteClusterPrivileges extends Component<Props> {
-  static defaultProps: Partial<Props> = {
-    editable: true,
-  };
+export const RemoteClusterPrivileges: React.FunctionComponent<Props> = ({
+  remoteClusters,
+  license,
+  availableRemoteClusterPrivileges,
+  role,
+  editable = true,
+  onChange,
+  validator,
+}) => {
+  const remoteClusterPrivileges = useMemo(() => role.elasticsearch.remote_cluster ?? [], [role]);
+  const { allowRoleRemoteIndexPrivileges, allowRemoteClusterPrivileges } = license.getFeatures();
+  const remoteClusterPrivilegesDisabled = !allowRoleRemoteIndexPrivileges;
+  const isReadOnly = !editable || isRoleReadOnly(role) || !allowRemoteClusterPrivileges;
 
-  constructor(props: Props) {
-    super(props);
-  }
+  const onRoleChange = useCallback(
+    (remoteCluster: RoleRemoteClusterPrivilege[]) => {
+      const roleDraft = {
+        ...role,
+        elasticsearch: {
+          ...role.elasticsearch,
+          remote_cluster: remoteCluster,
+        },
+      };
 
-  public render() {
-    const remoteClusterPrivileges = this.props.role.elasticsearch.remote_cluster ?? [];
-    const { remoteClusters, license, availableRemoteClusterPrivileges } = this.props;
-    const { allowRoleRemoteIndexPrivileges, allowRemoteClusterPrivileges } = license.getFeatures();
+      onChange(roleDraft);
+    },
+    [onChange, role]
+  );
 
-    const remoteClusterPrivilegesDisabled = !allowRoleRemoteIndexPrivileges;
-
-    const props = {
-      isRoleReadOnly:
-        !this.props.editable || isRoleReadOnly(this.props.role) || !allowRemoteClusterPrivileges,
-    };
-
-    return (
-      <Fragment>
-        {remoteClusterPrivileges.map((remoteClusterPrivilege, i) => (
-          <RemoteClusterPrivilegesForm
-            key={i}
-            {...props}
-            formIndex={i}
-            validator={this.props.validator}
-            availableRemoteClusterPrivileges={availableRemoteClusterPrivileges}
-            remoteClusterPrivilege={remoteClusterPrivilege}
-            remoteClusters={remoteClusters}
-            onChange={this.onIndexPrivilegeChange(i)}
-            onDelete={this.onIndexPrivilegeDelete(i)}
-          />
-        ))}
-        {this.props.editable && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="plusInCircle"
-                  onClick={this.addIndexPrivilege}
-                  disabled={remoteClusterPrivilegesDisabled}
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.elasticSearchPrivileges.addRemoteClusterPrivilegesButtonLabel"
-                    defaultMessage="Add remote cluster privilege"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-              {remoteClusterPrivilegesDisabled && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.elasticSearchPrivileges.remoteClusterPrivilegesLicenseMissing"
-                        defaultMessage="Your license does not allow configuring remote cluster privileges"
-                      />
-                    }
-                    position="right"
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </>
-        )}
-      </Fragment>
-    );
-  }
-
-  public addIndexPrivilege = () => {
-    const { role } = this.props;
-    const remoteClusterPrivileges = role.elasticsearch.remote_cluster ?? [];
-
+  const addRemoteClusterPrivilege = useCallback(() => {
     const newRemoteClusterPrivileges = [
       ...remoteClusterPrivileges,
       {
@@ -110,40 +64,76 @@ export class RemoteClusterPrivileges extends Component<Props> {
       },
     ];
 
-    this.props.onChange(this.getRoleDraft(newRemoteClusterPrivileges));
-  };
+    onRoleChange(newRemoteClusterPrivileges);
+  }, [onRoleChange, remoteClusterPrivileges]);
 
-  public onIndexPrivilegeChange = (privilegeIndex: number) => {
-    return (updatedPrivilege: RoleRemoteClusterPrivilege) => {
-      const { role } = this.props;
-      const remoteClusterPrivileges = role.elasticsearch.remote_cluster ?? [];
-
+  const onRemoteClusterPrivilegeChange = useCallback(
+    (privilegeIndex: number) => (updatedPrivilege: RoleRemoteClusterPrivilege) => {
       const newRemoteClusterPrivileges = [...remoteClusterPrivileges];
       newRemoteClusterPrivileges[privilegeIndex] = updatedPrivilege;
 
-      this.props.onChange(this.getRoleDraft(newRemoteClusterPrivileges));
-    };
-  };
+      onRoleChange(newRemoteClusterPrivileges);
+    },
+    [onRoleChange, remoteClusterPrivileges]
+  );
 
-  public onIndexPrivilegeDelete = (privilegeIndex: number) => {
-    return () => {
-      const { role } = this.props;
-
-      const remoteClusterPrivileges = role.elasticsearch.remote_cluster ?? [];
+  const onRemoteClusterPrivilegeDelete = useCallback(
+    (privilegeIndex: number) => () => {
       const newRemoteClusterPrivileges = [...remoteClusterPrivileges];
       newRemoteClusterPrivileges.splice(privilegeIndex, 1);
 
-      this.props.onChange(this.getRoleDraft(newRemoteClusterPrivileges));
-    };
-  };
+      onRoleChange(newRemoteClusterPrivileges);
+    },
+    [onRoleChange, remoteClusterPrivileges]
+  );
 
-  private getRoleDraft = (remoteCluster: RoleRemoteClusterPrivilege) => {
-    return {
-      ...this.props.role,
-      elasticsearch: {
-        ...this.props.role.elasticsearch,
-        remote_cluster: remoteCluster,
-      },
-    };
-  };
-}
+  return (
+    <>
+      {remoteClusterPrivileges.map((remoteClusterPrivilege, i) => (
+        <RemoteClusterPrivilegesForm
+          key={i}
+          isRoleReadOnly={isReadOnly}
+          formIndex={i}
+          validator={validator}
+          availableRemoteClusterPrivileges={availableRemoteClusterPrivileges}
+          remoteClusterPrivilege={remoteClusterPrivilege}
+          remoteClusters={remoteClusters}
+          onChange={onRemoteClusterPrivilegeChange(i)}
+          onDelete={onRemoteClusterPrivilegeDelete(i)}
+        />
+      ))}
+      {editable && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="plusInCircle"
+                onClick={addRemoteClusterPrivilege}
+                disabled={remoteClusterPrivilegesDisabled}
+              >
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.addRemoteClusterPrivilegesButtonLabel"
+                  defaultMessage="Add remote cluster privilege"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            {remoteClusterPrivilegesDisabled && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.elasticSearchPrivileges.remoteClusterPrivilegesLicenseMissing"
+                      defaultMessage="Your license does not allow configuring remote cluster privileges"
+                    />
+                  }
+                  position="right"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
+};

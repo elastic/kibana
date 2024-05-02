@@ -30,6 +30,7 @@ function getProps() {
       name: '',
       elasticsearch: {
         cluster: [],
+        remote_cluster: [],
         indices: [],
         run_as: [],
       },
@@ -43,6 +44,7 @@ function getProps() {
     builtinESPrivileges: {
       cluster: ['all', 'manage', 'monitor'],
       index: ['all', 'read', 'write', 'index'],
+      remote_cluster: [],
     },
     indicesAPIClient: indicesAPIClientMock.create(),
     docLinks,

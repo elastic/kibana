@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,6 +24,8 @@ import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 
 import type { RoleRemoteClusterPrivilege } from '../../../../../../common';
 import type { RoleValidator } from '../../validate_role';
+
+const API_KEY_SECURITY_MODEL = 'api_key';
 
 const fromOption = (option: EuiComboBoxOptionOption) => option.label;
 const toOption = (value: string): EuiComboBoxOptionOption => ({ label: value });
@@ -39,179 +41,189 @@ interface Props {
   validator: RoleValidator;
 }
 
-export class RemoteClusterPrivilegesForm extends Component<Props> {
-  constructor(props: Props) {
-    super(props);
-  }
+export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
+  isRoleReadOnly,
+  remoteClusters = [],
+  formIndex,
+  validator,
+  remoteClusterPrivilege,
+  availableRemoteClusterPrivileges,
+  onChange,
+  onDelete,
+}) => {
+  const remoteClusterOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
+    const { incompatible, remote } = remoteClusters.reduce<{
+      remote: EuiComboBoxOptionOption[];
+      incompatible: EuiComboBoxOptionOption[];
+    }>(
+      (data, item) => {
+        const disabled = item.securityModel !== API_KEY_SECURITY_MODEL;
 
-  public componentDidMount() {}
-
-  public render() {
-    return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
-          <EuiFlexItem>
-            <EuiPanel color="subdued">{this.getPrivilegeForm()}</EuiPanel>
-          </EuiFlexItem>
-          {!this.props.isRoleReadOnly && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'xpack.security.management.editRole.remoteClusterPrivilegeForm.deleteRemoteClusterPrivilegeAriaLabel',
-                  { defaultMessage: 'Delete remote cluster privilege' }
-                )}
-                color={'danger'}
-                onClick={this.props.onDelete}
-                iconType={'trash'}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </Fragment>
-    );
-  }
-
-  private getPrivilegeForm = () => {
-    const remoteClusterOptions: EuiComboBoxOptionOption[] = [];
-    if (this.props.remoteClusters) {
-      const incompatibleOptions: EuiComboBoxOptionOption[] = [];
-      this.props.remoteClusters.forEach((item, i) => {
-        const disabled = item.securityModel !== 'api_key';
         if (!disabled) {
-          remoteClusterOptions.push({
-            label: item.name,
-          });
-        } else {
-          incompatibleOptions.push({
-            label: item.name,
-            disabled,
-            append: disabled ? (
-              <EuiIconTip
-                type="warning"
-                color="inherit"
-                content={
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.remoteClusterPrivilegeForm.remoteIndicesSecurityModelWarning"
-                    defaultMessage="This cluster is configured with the certificate based security model and does not support remote index privileges. Connect this cluster with the API key based security model instead to use remote index privileges."
-                  />
-                }
-              />
-            ) : undefined,
-          });
+          data.remote.push({ label: item.name });
+
+          return data;
         }
-      });
-      if (incompatibleOptions.length) {
-        remoteClusterOptions.push(
-          {
-            label: 'Incompatible clusters',
-            isGroupLabelOption: true,
-          },
-          ...incompatibleOptions
-        );
+
+        data.incompatible.push({
+          label: item.name,
+          disabled,
+          append: disabled ? (
+            <EuiIconTip
+              type="warning"
+              color="inherit"
+              content={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.remoteClusterPrivilegeForm.remoteClusterSecurityModelWarning"
+                  defaultMessage="This cluster is configured with the certificate based security model and does not support remote cluster privileges. Connect this cluster with the API key based security model instead to use remote cluster privileges."
+                />
+              }
+            />
+          ) : undefined,
+        });
+
+        return data;
+      },
+      {
+        incompatible: [],
+        remote: [],
       }
+    );
+
+    if (incompatible.length) {
+      remote.push(
+        {
+          label: 'Incompatible clusters',
+          isGroupLabelOption: true,
+        },
+        ...incompatible
+      );
     }
 
-    return (
-      <>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersFormRowLabel"
-                  defaultMessage="Remote clusters"
-                />
-              }
-              fullWidth
-              {...this.props.validator.validateRemoteClusterPrivilegeClusterField(
-                this.props.remoteClusterPrivilege as RoleRemoteClusterPrivilege
+    return remote;
+  }, [remoteClusters]);
+
+  const onCreateClusterOption = useCallback(
+    (option: string) => {
+      const nextClusters = (remoteClusterPrivilege.clusters ?? []).concat([option]);
+
+      onChange({
+        ...remoteClusterPrivilege,
+        clusters: nextClusters,
+      });
+    },
+    [remoteClusterPrivilege, onChange]
+  );
+
+  const onClustersChange = useCallback(
+    (nextOptions: EuiComboBoxOptionOption[]) => {
+      const clusters = nextOptions.map(fromOption);
+      onChange({
+        ...remoteClusterPrivilege,
+        clusters,
+      });
+    },
+    [onChange, remoteClusterPrivilege]
+  );
+
+  const onPrivilegeChange = useCallback(
+    (newPrivileges: EuiComboBoxOptionOption[]) => {
+      onChange({
+        ...remoteClusterPrivilege,
+        privileges: newPrivileges.map(fromOption),
+      });
+    },
+    [remoteClusterPrivilege, onChange]
+  );
+
+  const onCreateCustomPrivilege = useCallback(
+    (customPrivilege: string) => {
+      onChange({
+        ...remoteClusterPrivilege,
+        privileges: [...remoteClusterPrivilege.privileges, customPrivilege],
+      });
+    },
+    [remoteClusterPrivilege, onChange]
+  );
+
+  return (
+    <Fragment>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
+        <EuiFlexItem>
+          <EuiPanel color="subdued">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersFormRowLabel"
+                      defaultMessage="Remote clusters"
+                    />
+                  }
+                  fullWidth
+                  {...validator.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege)}
+                >
+                  <EuiComboBox
+                    data-test-subj={`clustersInput${formIndex}`}
+                    options={remoteClusterOptions}
+                    selectedOptions={(remoteClusterPrivilege.clusters ?? []).map(toOption)}
+                    onCreateOption={onCreateClusterOption}
+                    onChange={onClustersChange}
+                    isDisabled={isRoleReadOnly}
+                    placeholder={i18n.translate(
+                      'xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersPlaceholder',
+                      { defaultMessage: 'Add a remote cluster…' }
+                    )}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesFormRowLabel"
+                      defaultMessage="Privileges"
+                    />
+                  }
+                  fullWidth
+                  {...validator.validateRemoteClusterPrivilegePrivilegesField(
+                    remoteClusterPrivilege
+                  )}
+                >
+                  <EuiComboBox
+                    data-test-subj={`privilegesInput${formIndex}`}
+                    options={availableRemoteClusterPrivileges.map(toOption)}
+                    selectedOptions={remoteClusterPrivilege.privileges.map(toOption)}
+                    onChange={onPrivilegeChange}
+                    onCreateOption={onCreateCustomPrivilege}
+                    isDisabled={isRoleReadOnly}
+                    placeholder={i18n.translate(
+                      'xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesPlaceholder',
+                      { defaultMessage: 'Add an action…' }
+                    )}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        {!isRoleReadOnly && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'xpack.security.management.editRole.remoteClusterPrivilegeForm.deleteRemoteClusterPrivilegeAriaLabel',
+                { defaultMessage: 'Delete remote cluster privilege' }
               )}
-            >
-              <EuiComboBox
-                data-test-subj={`clustersInput${this.props.formIndex}`}
-                options={remoteClusterOptions}
-                selectedOptions={('clusters' in this.props.remoteClusterPrivilege &&
-                this.props.remoteClusterPrivilege.clusters
-                  ? this.props.remoteClusterPrivilege.clusters
-                  : []
-                ).map(toOption)}
-                onCreateOption={this.onCreateClusterOption}
-                onChange={this.onClustersChange}
-                isDisabled={this.props.isRoleReadOnly}
-                placeholder={i18n.translate(
-                  'xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersPlaceholder',
-                  { defaultMessage: 'Add a remote cluster…' }
-                )}
-                fullWidth
-              />
-            </EuiFormRow>
+              color="danger"
+              onClick={onDelete}
+              iconType="trash"
+            />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesFormRowLabel"
-                  defaultMessage="Privileges"
-                />
-              }
-              fullWidth
-              {...this.props.validator.validateRemoteClusterPrivilegePrivilegesField(
-                this.props.remoteClusterPrivilege
-              )}
-            >
-              <EuiComboBox
-                data-test-subj={`privilegesInput${this.props.formIndex}`}
-                options={this.props.availableRemoteClusterPrivileges.map(toOption)}
-                selectedOptions={this.props.remoteClusterPrivilege.privileges.map(toOption)}
-                onChange={this.onPrivilegeChange}
-                onCreateOption={this.onCreateCustomPrivilege}
-                isDisabled={this.props.isRoleReadOnly}
-                placeholder={i18n.translate(
-                  'xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesPlaceholder',
-                  { defaultMessage: 'Add an action…' }
-                )}
-                fullWidth
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  };
-
-  private onCreateClusterOption = (option: any) => {
-    const nextClusters = (
-      'clusters' in this.props.remoteClusterPrivilege && this.props.remoteClusterPrivilege.clusters
-        ? this.props.remoteClusterPrivilege.clusters
-        : []
-    ).concat([option]);
-
-    this.props.onChange({
-      ...this.props.remoteClusterPrivilege,
-      clusters: nextClusters,
-    });
-  };
-
-  private onClustersChange = (nextOptions: EuiComboBoxOptionOption[]) => {
-    const clusters = nextOptions.map(fromOption);
-    this.props.onChange({
-      ...this.props.remoteClusterPrivilege,
-      clusters,
-    });
-  };
-
-  private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionOption[]) => {
-    this.props.onChange({
-      ...this.props.remoteClusterPrivilege,
-      privileges: newPrivileges.map(fromOption),
-    });
-  };
-
-  private onCreateCustomPrivilege = (customPrivilege: string) => {
-    this.props.onChange({
-      ...this.props.remoteClusterPrivilege,
-      privileges: [...this.props.remoteClusterPrivilege.privileges, customPrivilege],
-    });
-  };
-}
+        )}
+      </EuiFlexGroup>
+    </Fragment>
+  );
+};

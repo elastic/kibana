@@ -86,6 +86,27 @@ export class RoleValidator {
     return valid();
   }
 
+  public validateRemoteClusterPrivileges(role: Role): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    const areRemoteClustersInvalid = role.elasticsearch.remote_cluster.some(
+      (remoteClusterPrivilege) => {
+        return (
+          this.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege).isInvalid ||
+          this.validateRemoteClusterPrivilegePrivilegesField(remoteClusterPrivilege).isInvalid
+        );
+      }
+    );
+
+    if (areRemoteClustersInvalid) {
+      return invalid();
+    }
+
+    return valid();
+  }
+
   public validateIndexPrivileges(role: Role): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
@@ -252,7 +273,7 @@ export class RoleValidator {
     }
 
     // Ignore if all other fields are empty
-    if (!remoteClusterPrivilege.privileges.length && !remoteClusterPrivilege.clusters.length) {
+    if (!remoteClusterPrivilege.privileges.length) {
       return valid();
     }
 
@@ -278,7 +299,7 @@ export class RoleValidator {
     }
 
     // Ignore if all other fields are empty
-    if (!remoteClusterPrivilege.privileges.length && !remoteClusterPrivilege.clusters.length) {
+    if (!remoteClusterPrivilege.clusters.length) {
       return valid();
     }
 
@@ -370,12 +391,15 @@ export class RoleValidator {
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
     const { isInvalid: areRemoteIndicesInvalid } = this.validateRemoteIndexPrivileges(role);
     const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
+    const { isInvalid: areRemoteClusterPrivilegesInvalid } =
+      this.validateRemoteClusterPrivileges(role);
 
     if (
       isNameInvalid ||
       areIndicesInvalid ||
       areRemoteIndicesInvalid ||
-      areSpacePrivilegesInvalid
+      areSpacePrivilegesInvalid ||
+      areRemoteClusterPrivilegesInvalid
     ) {
       return invalid();
     }
