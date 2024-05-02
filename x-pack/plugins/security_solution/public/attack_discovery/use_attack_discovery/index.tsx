@@ -11,13 +11,12 @@ import {
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import { uniq } from 'lodash/fp';
 import type { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, uniq } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocalStorage, useSessionStorage } from 'react-use';
