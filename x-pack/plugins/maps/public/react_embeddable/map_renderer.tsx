@@ -49,8 +49,7 @@ export function MapRenderer(props: Props) {
           layerListJSON: JSON.stringify(getLayers()),
         },
         hidePanelTitles: !Boolean(props.title),
-        isLayerTOCOpen:
-          typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
+        isLayerTOCOpen: typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
         hideFilterActions:
           typeof props.hideFilterActions === 'boolean' ? props.hideFilterActions : false,
         mapCenter: props.mapCenter,

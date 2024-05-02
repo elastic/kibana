@@ -19,7 +19,11 @@ import { inject } from '../../common/embeddable';
 import type { MapApi, MapSerializedState } from './types';
 import { SavedMap } from '../routes/map_page';
 import { initializeReduxSync } from './initialize_redux_sync';
-import { getByReferenceState, getByValueState, initializeLibraryTransforms } from './library_transforms';
+import {
+  getByReferenceState,
+  getByValueState,
+  initializeLibraryTransforms,
+} from './library_transforms';
 import { getEmbeddableEnhanced, getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';

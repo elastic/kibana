@@ -129,7 +129,9 @@ export class SavedMap {
     await whenLicenseInitialized();
 
     if (this._mapSerializedState?.savedObjectId) {
-      const { attributes, managed, references, sharingSavedObjectProps } = await loadFromLibrary(this._mapSerializedState.savedObjectId);
+      const { attributes, managed, references, sharingSavedObjectProps } = await loadFromLibrary(
+        this._mapSerializedState.savedObjectId
+      );
       this._attributes = attributes;
       if (sharingSavedObjectProps) {
         this._sharingSavedObjectProps = sharingSavedObjectProps;
@@ -141,10 +143,10 @@ export class SavedMap {
       }
     } else {
       this._attributes = this._mapSerializedState?.attributes
-      ? this._mapSerializedState.attributes
-      : {
-          title: '',
-        };
+        ? this._mapSerializedState.attributes
+        : {
+            title: '',
+          };
     }
 
     this._reportUsage();
@@ -407,9 +409,7 @@ export class SavedMap {
   }
 
   public getAutoFitToBounds(): boolean {
-    if (
-      this._mapSerializedState?.mapSettings?.autoFitToDataBounds !== undefined
-    ) {
+    if (this._mapSerializedState?.mapSettings?.autoFitToDataBounds !== undefined) {
       return this._mapSerializedState.mapSettings.autoFitToDataBounds;
     }
 
@@ -477,13 +477,11 @@ export class SavedMap {
         const savedObjectsTagging = getSavedObjectsTagging();
         // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
         const tagReferences =
-          savedObjectsTagging && tags
-            ? savedObjectsTagging.ui.updateTagsReferences([], tags)
-            : [];
+          savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
         const { id: savedObjectId } = await saveToLibrary(
           attributes,
           [...references, ...tagReferences],
-          newCopyOnSave ? undefined : this._mapSerializedState?.savedObjectId,
+          newCopyOnSave ? undefined : this._mapSerializedState?.savedObjectId
         );
         mapSerializedState = getByReferenceState(this._mapSerializedState, savedObjectId);
       } catch (e) {

@@ -11,9 +11,9 @@ import { getEmbeddableService, getHttp, getMapsCapabilities } from '../kibana_se
 import { MapSerializedState } from './types';
 
 export function initializeEditApi(
-  uuid: string, 
-  getState: () => MapSerializedState, 
-  parentApi?: unknown, 
+  uuid: string,
+  getState: () => MapSerializedState,
+  parentApi?: unknown,
   savedObjectId?: string
 ) {
   if (!parentApi || !apiHasAppContext(parentApi)) {
@@ -44,5 +44,5 @@ export function initializeEditApi(
     getEditHref: async () => {
       return getHttp().basePath.prepend(getFullPath(savedObjectId));
     },
-  }
+  };
 }

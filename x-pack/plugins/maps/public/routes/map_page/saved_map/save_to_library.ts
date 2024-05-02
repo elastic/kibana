@@ -9,7 +9,11 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import type { MapAttributes } from '../../../../common/content_management';
 import { getMapClient } from '../../../content_management';
 
-export async function saveToLibrary(attributes: MapAttributes, references: SavedObjectReference[], savedObjectId?: string) {
+export async function saveToLibrary(
+  attributes: MapAttributes,
+  references: SavedObjectReference[],
+  savedObjectId?: string
+) {
   const {
     item: { id },
   } = await (savedObjectId
