@@ -683,9 +683,9 @@
             "GetCasesProps",
             ") => React.ReactElement<",
             "GetCasesProps",
-            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<React.PropsWithChildren<",
+            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<",
             "GetCasesContextProps",
-            ">>; getAllCasesSelectorModal: (props: ",
+            ">; getAllCasesSelectorModal: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",

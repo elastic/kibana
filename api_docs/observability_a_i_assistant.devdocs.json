@@ -245,7 +245,7 @@
         "label": "createFunctionRequestMessage",
         "description": [],
         "signature": [
-          "({\n  name,\n  args,\n}: { name: string; args?: Record<string, any> | undefined; }) => ",
+          "({\n  name,\n  args,\n}: { name: string; args: unknown; }) => ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
@@ -283,12 +283,12 @@
               {
                 "parentPluginId": "observabilityAIAssistant",
                 "id": "def-public.createFunctionRequestMessage.$1.args",
-                "type": "Object",
+                "type": "Unknown",
                 "tags": [],
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "Record<string, any> | undefined"
+                  "unknown"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/create_function_request_message.ts",
                 "deprecated": false,
@@ -4166,7 +4166,15 @@
                 "section": "def-public.ChatActionClickType",
                 "text": "ChatActionClickType"
               },
-              "; } & { query: string; userOverrides?: unknown; }"
+              "; } & { query: string; userOverrides?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TypedLensByValueInput",
+                "text": "TypedLensByValueInput"
+              },
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
             "deprecated": false,
@@ -4191,7 +4199,15 @@
             "section": "def-public.ChatActionClickType",
             "text": "ChatActionClickType"
           },
-          "; } & { query: string; userOverrides?: unknown; }"
+          "; } & { query: string; userOverrides?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TypedLensByValueInput",
+            "text": "TypedLensByValueInput"
+          },
+          " | undefined; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
         "deprecated": false,
@@ -5519,45 +5535,7 @@
   },
   "server": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-server.streamIntoObservable",
-        "type": "Function",
-        "tags": [],
-        "label": "streamIntoObservable",
-        "description": [],
-        "signature": [
-          "(readable: ",
-          "Readable",
-          ") => ",
-          "Observable",
-          "<any>"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/util/stream_into_observable.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-server.streamIntoObservable.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "readable",
-            "description": [],
-            "signature": [
-              "Readable"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/util/stream_into_observable.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -6428,37 +6406,6 @@
       }
     ],
     "functions": [
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.concatenateChatCompletionChunks",
-        "type": "Function",
-        "tags": [],
-        "label": "concatenateChatCompletionChunks",
-        "description": [],
-        "signature": [
-          "() => (source: ",
-          "Observable",
-          "<",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
-          },
-          ">) => ",
-          "Observable",
-          "<",
-          "ConcatenatedMessage",
-          ">"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/concatenate_chat_completion_chunks.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.createConversationNotFoundError",
@@ -7540,9 +7487,7 @@
             "docId": "kibObservabilityAIAssistantPluginApi",
             "section": "def-common.ChatCompletionErrorEvent",
             "text": "ChatCompletionErrorEvent"
-          },
-          " | ",
-          "TokenCountEvent"
+          }
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -7587,9 +7532,7 @@
             "docId": "kibObservabilityAIAssistantPluginApi",
             "section": "def-common.ChatCompletionChunkEvent",
             "text": "ChatCompletionChunkEvent"
-          },
-          " | ",
-          "TokenCountEvent"
+          }
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
