@@ -12,9 +12,10 @@ import {
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import { v4 as uuidv4 } from 'uuid';
 import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { Prompt } from '../../common/prompt';
 
 export const getChatParams = async (
@@ -33,7 +34,7 @@ export const getChatParams = async (
     logger: Logger;
     request: KibanaRequest;
   }
-): Promise<{ chatModel: BaseLanguageModel; chatPrompt: string }> => {
+): Promise<{ chatModel: BaseLanguageModel; chatPrompt: string; connector: Connector }> => {
   const abortController = new AbortController();
   const abortSignal = abortController.signal;
   const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -84,5 +85,5 @@ export const getChatParams = async (
     throw new Error('Invalid connector id');
   }
 
-  return { chatModel, chatPrompt };
+  return { chatModel, chatPrompt, connector };
 };
