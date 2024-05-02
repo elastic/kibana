@@ -143,10 +143,12 @@ export function getEsQueryFromSavedSearch({
   // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchSource) {
-    // FIXME: Add support for AggregateQuery type #150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     if (savedSearchSource.getField('filter')) {
-      filterManager?.addFilters(savedSearchSource.getField('filter') as Filter[]);
+      // Rehydrate filter from saved search object into filter manager's store
+      if (filterManager) {
+        filterManager.setFilters(savedSearchSource.getField('filter') as Filter[]);
+      }
     }
     const combinedQuery = buildEsQuery(
       dataView,
