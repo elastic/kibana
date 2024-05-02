@@ -94,8 +94,8 @@ export const createBatcher = <Data, Query, R = Data>(
       return req;
     };
 
-    // wait 10 ms before fetching the batch, reset on every new query;
-    mem.timer = setTimeout(fetchBatch, 10);
+    // wait 50 ms max before fetching the batch
+    mem.timer = setTimeout(fetchBatch, 50 - (mem.latest - mem.start));
     return mem.currentRequest.value.then((items) => config.resolver(items, query));
   };
 
