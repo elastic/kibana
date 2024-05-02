@@ -48,6 +48,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
   describe('@ess perform_bulk_action - ESS specific logic', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -95,8 +103,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should enable rules and migrate actions', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-
       const ruleId = 'ruleId';
       const [connector, rule1] = await Promise.all([
         supertest
