@@ -1581,7 +1581,7 @@
     "date-fns": "^2.29.3",
     "debug": "^2.6.9",
     "dependency-check": "^4.1.0",
-    "ejs": "^3.1.8",
+    "ejs": "^3.1.10",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
     "eslint": "^8.46.0",
