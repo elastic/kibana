@@ -613,6 +613,7 @@ export class VisualizeEmbeddable
     const abortController = this.abortController;
 
     try {
+      console.log('VIS', this.vis);
       this.expression = await toExpressionAst(this.vis, {
         timefilter: this.timefilter,
         timeRange: this.timeRange,

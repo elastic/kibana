@@ -160,6 +160,7 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
+    console.log('Expression loader: render', data, this.params.uiState);
     this.renderHandler.render(data as SerializableRecord, this.params.uiState);
   }
 

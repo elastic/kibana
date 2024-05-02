@@ -122,6 +122,7 @@ export class ExpressionRenderHandler {
   }
 
   render = async (value: SerializableRecord, uiState?: unknown) => {
+    console.log('Expression render handler', value, this.element);
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -140,6 +141,8 @@ export class ExpressionRenderHandler {
       return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
+    console.log('Successfully loaded renderer');
+
     try {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
@@ -149,6 +152,7 @@ export class ExpressionRenderHandler {
           uiState,
         });
     } catch (e) {
+      console.error('RENDER ERROR', e);
       return this.handleRenderError(e as ExpressionRenderError);
     }
   };

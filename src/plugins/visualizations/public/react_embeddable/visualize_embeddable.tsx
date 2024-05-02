@@ -7,23 +7,22 @@
  */
 
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
+  apiHasExecutionContext,
   apiPublishesUnifiedSearch,
   fetch$,
   initializeTitles,
   useInheritedViewMode,
-  usePublishingSubject,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import React, { useRef, useEffect, useState } from 'react';
+import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import React, { useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { createVisAsync } from '../vis_async';
-import { getExecutionContext, getTimeFilter } from '../services';
 import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 import { useExpressionHandler } from './use_expression_handler';
-import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
 
 export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
@@ -45,17 +44,22 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
      * initialize state (source of truth)
      */
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-    const vis = await createVisAsync(state.savedVis.type, state.savedVis);
-    const timerange = state.timeRange;
+    const visFromState = state.savedVis ?? {
+      ...state.vis,
+      type: state.vis.type.name,
+    };
+    const vis = await createVisAsync(visFromState.type, visFromState);
 
-    const content$ = new BehaviorSubject(state);
     const vis$ = new BehaviorSubject(vis);
-    const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+    const searchSessionId$ = new BehaviorSubject<string | null>(undefined);
     const unifiedSearch$ = new BehaviorSubject<{
       timeRange: TimeRange;
       query: Query;
       filter: Filter;
     }>(undefined);
+    const executionContext = apiHasExecutionContext(parentApi)
+      ? parentApi.executionContext
+      : undefined;
 
     /**
      * Register the API for this embeddable. This API will be published into the imperative handle
@@ -95,7 +99,6 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
     );
 
     fetch$(api).subscribe((data) => {
-      console.log(data, apiPublishesUnifiedSearch(parentApi), apiPublishesSearchSession(parentApi));
       if (apiPublishesUnifiedSearch(parentApi)) {
         unifiedSearch$.next({
           query: data.query,
@@ -123,22 +126,19 @@ export const visualizeEmbeddableFactory: ReactEmbeddableFactory<
           vis: currentVis,
           unifiedSearch,
           searchSessionId,
+          parentExecutionContext: executionContext,
         });
 
-        return <div ref={nodeRef}>{JSON.stringify(currentVis)}</div>;
+        return (
+          <div
+            ref={nodeRef}
+            data-description={currentVis.description}
+            data-test-subj="reactVisualizeEmbeddableContainer"
+          >
+            {JSON.stringify(currentVis)}
+          </div>
+        );
       },
     };
   },
-};
-
-const useApiData = (api) => {
-  const [value, setValue] = useState(null);
-  useEffect(() => {
-    const subscription = fetch$(api).subscribe((data) => {
-      console.log('FETCH DATA', data);
-      setValue(data);
-    });
-    return () => subscription.unsubscribe();
-  }, [api]);
-  return value;
 };

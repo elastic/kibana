@@ -12,16 +12,17 @@ import { useExecutionContext } from './use_execution_context';
 
 export const useExpressionUpdater = ({
   unifiedSearch: { timeRange, query, filters },
+  parentExecutionContext,
   searchSessionId,
   vis,
 }) => {
   const [storedAbortController, setStoredAbortController] = useState<AbortController | null>(null);
-  const executionContext = useExecutionContext(vis);
+  const executionContext = useExecutionContext(vis, parentExecutionContext);
 
   return useCallback(
     async (expressionHandler) => {
-      console.log('EXPRESSION UPDATER', expressionHandler);
       if (expressionHandler) {
+        console.log('EXECUTION CONTEXT', executionContext);
         const timefilter = getTimeFilter();
         const expressionVariables = await vis.type.getExpressionVariables?.(vis, timefilter);
         const expressionParams = {
@@ -58,7 +59,11 @@ export const useExpressionUpdater = ({
             timeRange,
             abortSignal: abortController.signal,
           });
-          await expressionHandler.update(expression, expressionParams);
+          console.log('EXPRESSION', expression);
+          if (!abortController.signal.aborted) {
+            console.log('CALL UPDATE');
+            await expressionHandler.update(expression, expressionParams);
+          }
         } catch (e) {
           // this.onContainerError(e);
         }
