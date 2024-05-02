@@ -39,16 +39,16 @@ export class RollingFileContext {
     }
   }
 
-  private orderedRolledFileFn?: GetOrderedRolledFileFn;
+  #orderedRolledFileFn?: GetOrderedRolledFileFn;
 
   public async getOrderedRolledFiles(): Promise<string[]> {
-    if (this.orderedRolledFileFn) {
-      return this.orderedRolledFileFn();
+    if (this.#orderedRolledFileFn) {
+      return this.#orderedRolledFileFn();
     }
     throw new Error('orderedRolledFileFn not registered on the context');
   }
 
   public setOrderedRolledFileFn(fn: GetOrderedRolledFileFn) {
-    this.orderedRolledFileFn = fn;
+    this.#orderedRolledFileFn = fn;
   }
 }
