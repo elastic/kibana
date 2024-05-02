@@ -38,6 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const es = getService('es');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   const createConnector = async (payload: Record<string, unknown>) =>
     (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
@@ -46,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
-  // Failing: See https://github.com/elastic/kibana/issues/182512
-  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
+  describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -95,6 +95,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should enable rules and migrate actions', async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+
       const ruleId = 'ruleId';
       const [connector, rule1] = await Promise.all([
         supertest
