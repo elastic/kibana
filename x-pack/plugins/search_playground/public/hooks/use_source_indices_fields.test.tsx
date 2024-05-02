@@ -43,6 +43,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
         dense_vector_query_fields: [],
         bm25_query_fields: [],
         source_fields: ['field1'],
+        skipped_fields: 0,
       },
     };
 
