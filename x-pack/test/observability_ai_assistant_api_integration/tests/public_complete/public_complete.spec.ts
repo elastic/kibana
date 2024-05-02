@@ -11,7 +11,7 @@ import {
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { last, pick } from 'lodash';
+import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import { Response } from 'supertest';
 import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
