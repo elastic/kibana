@@ -11,7 +11,7 @@ import {
   getRecentUpgradeInfoForAgent,
   isAgentUpgradeable,
   isAgentUpgrading,
-  getNotUpgradeableMessage,
+  getAgentNotUpgradeableMessage,
   isAgentUpgradeAvailable,
   isAgentUpgradeableToVersion,
 } from './is_agent_upgradeable';
@@ -249,38 +249,38 @@ describe('Fleet - isAgentUpgradeableToVersion', () => {
 
 describe('Fleet - getNotUpgradeableMessage', () => {
   it('if agent reports not upgradeable with agent version < latest agent version', () => {
-    expect(getNotUpgradeableMessage(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(
+    expect(getAgentNotUpgradeableMessage(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(
       'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
     );
   });
 
   it('if agent reports not upgradeable with agent version > latest agent version', () => {
-    expect(getNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '7.9.0')).toBe(
+    expect(getAgentNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '7.9.0')).toBe(
       'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
     );
   });
 
   it('returns false if agent reports not upgradeable with agent version === latest agent version', () => {
-    expect(getNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '8.0.0')).toBe(
+    expect(getAgentNotUpgradeableMessage(getAgent({ version: '8.0.0' }), '8.0.0')).toBe(
       'agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service.'
     );
   });
 
   it('if agent reports upgradeable, with agent version === latest agent version', () => {
     expect(
-      getNotUpgradeableMessage(getAgent({ version: '8.0.0', upgradeable: true }), '8.0.0')
+      getAgentNotUpgradeableMessage(getAgent({ version: '8.0.0', upgradeable: true }), '8.0.0')
     ).toBe(undefined);
   });
 
   it('if agent reports upgradeable, with agent version > latest agent version', () => {
     expect(
-      getNotUpgradeableMessage(getAgent({ version: '8.0.0', upgradeable: true }), '7.9.0')
+      getAgentNotUpgradeableMessage(getAgent({ version: '8.0.0', upgradeable: true }), '7.9.0')
     ).toBe('agent is running on a version greater than the latest available version.');
   });
 
   it('if agent reports upgradeable, but agent is unenrolling', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({ version: '7.9.0', upgradeable: true, unenrolling: true }),
         '8.0.0'
       )
@@ -289,7 +289,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('if agent reports upgradeable, but agent is unenrolled', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({ version: '7.9.0', upgradeable: true, unenrolled: true }),
         '8.0.0'
       )
@@ -298,19 +298,22 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('Returns no error message if agent reports upgradeable, with agent version < latest agent version', () => {
     expect(
-      getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0')
+      getAgentNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0')
     ).toBeUndefined();
   });
 
   it('if agent reports upgradeable, with agent snapshot version === latest agent version', () => {
     expect(
-      getNotUpgradeableMessage(getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }), '7.9.0')
+      getAgentNotUpgradeableMessage(
+        getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }),
+        '7.9.0'
+      )
     ).toBe(undefined);
   });
 
   it('it does not return message if agent reports upgradeable, with upgrade to agent snapshot version newer than latest agent version', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({ version: '8.10.2', upgradeable: true }),
         '8.10.2',
         '8.11.0-SNAPSHOT'
@@ -320,19 +323,27 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('if agent reports upgradeable, with target version < current agent version ', () => {
     expect(
-      getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.8.0')
+      getAgentNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true }),
+        '8.0.0',
+        '7.8.0'
+      )
     ).toBe('agent does not support downgrades.');
   });
 
   it('if agent reports upgradeable, with target version == current agent version ', () => {
     expect(
-      getNotUpgradeableMessage(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.9.0')
+      getAgentNotUpgradeableMessage(
+        getAgent({ version: '7.9.0', upgradeable: true }),
+        '8.0.0',
+        '7.9.0'
+      )
     ).toBe('agent is already running on the selected version.');
   });
 
   it('if agent with no upgrade details reports upgradeable, but is already upgrading', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({ version: '7.9.0', upgradeable: true, upgrading: true }),
         '8.0.0'
       )
@@ -341,7 +352,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('if agent reports upgradeable, but has an upgrade status other than failed', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({
           version: '7.9.0',
           upgradeable: true,
@@ -358,7 +369,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('it does not return a message if agent reports upgradeable and has a failed upgrade status', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({
           version: '7.9.0',
           upgradeable: true,
@@ -378,7 +389,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('if the agent reports upgradeable but was upgraded less than 10 minutes ago', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 9 }),
         '8.0.0'
       )
@@ -387,7 +398,7 @@ describe('Fleet - getNotUpgradeableMessage', () => {
 
   it('if agent reports upgradeable and was upgraded more than 10 minutes ago', () => {
     expect(
-      getNotUpgradeableMessage(
+      getAgentNotUpgradeableMessage(
         getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 11 }),
         '8.0.0'
       )

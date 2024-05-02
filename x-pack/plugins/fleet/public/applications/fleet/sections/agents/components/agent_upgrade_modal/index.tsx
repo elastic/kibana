@@ -57,8 +57,10 @@ import {
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
   differsOnlyInPatch,
-  getNotUpgradeableMessage,
+  getAgentNotUpgradeableMessage,
+  getAgentsNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
+  areAgentsUpgradeableToVersion,
 } from '../../../../../../../common/services/is_agent_upgradeable';
 
 import {
@@ -101,6 +103,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   const [availableVersions, setVersions] = useState<string[]>([]);
 
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
+  const isListOfAgents = Array.isArray(agents) && agents.length > 1;
   const isSmallBatch = agentCount <= 10;
   const isAllAgents = agents === '';
 
@@ -251,22 +254,48 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       selectedVersion[0]?.value &&
       !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
     ) {
-      return `The selected agent is not upgradeable: ${getNotUpgradeableMessage(
-        agents[0],
-        latestAgentVersion,
-        selectedVersion[0].value
-      )}`;
+      return i18n.translate('xpack.fleet.upgradeAgents.notUpgradable.singleAgentMessage', {
+        defaultMessage: 'The selected agent is not upgradeable: ${reason}',
+        values: {
+          reason: getAgentNotUpgradeableMessage(
+            agents[0],
+            latestAgentVersion,
+            selectedVersion[0].value
+          ),
+        },
+      });
+    }
+    if (isListOfAgents && !areAgentsUpgradeableToVersion(agents, selectedVersion[0].value)) {
+      return i18n.translate('xpack.fleet.upgradeAgents.notUpgradable.multipleAgentsMessage', {
+        defaultMessage: 'The selected agents are not upgradeable: ${reason}',
+        values: {
+          reason: getAgentsNotUpgradeableMessage(
+            agents,
+            latestAgentVersion,
+            selectedVersion[0].value
+          ),
+        },
+      });
     }
     if (
       selectedVersion[0]?.value &&
       !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)
     ) {
-      return `Please choose another version. ${getFleetServerVersionMessage(
-        selectedVersion[0].value,
-        fleetServerAgents
-      )}`;
+      return i18n.translate('xpack.fleet.upgradeAgents.notUpgradable.fleetServerVersionMessage', {
+        defaultMessage: 'Please choose another version. ${reason}',
+        values: {
+          reason: getFleetServerVersionMessage(selectedVersion[0].value, fleetServerAgents),
+        },
+      });
     }
-  }, [agents, fleetServerAgents, isSingleAgent, latestAgentVersion, selectedVersion]);
+  }, [
+    agents,
+    fleetServerAgents,
+    isListOfAgents,
+    isSingleAgent,
+    latestAgentVersion,
+    selectedVersion,
+  ]);
 
   const semverErrors = useMemo(() => {
     if (!selectedVersion[0].value) return undefined;
@@ -298,16 +327,18 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)) ||
       (isSingleAgent &&
         !isSingleAgentFleetServer &&
-        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)),
+        !isAgentVersionLessThanFleetServer(selectedVersion[0].value, fleetServerAgents)) ||
+      (isListOfAgents && !areAgentsUpgradeableToVersion(agents, selectedVersion[0].value)),
     [
-      agents,
-      fleetServerAgents,
-      isSingleAgent,
       isSubmitting,
       isUpdating,
-      selectedVersion,
       updatingAgents,
+      selectedVersion,
+      isSingleAgent,
+      agents,
       isSingleAgentFleetServer,
+      fleetServerAgents,
+      isListOfAgents,
     ]
   );
 

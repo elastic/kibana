@@ -24,7 +24,7 @@ import {
   getRecentUpgradeInfoForAgent,
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
   isAgentUpgrading,
-  getNotUpgradeableMessage,
+  getAgentNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
   differsOnlyInPatch,
 } from '../../../common/services';
@@ -115,7 +115,9 @@ export const postAgentUpgradeHandler: RequestHandler<
       return response.customError({
         statusCode: 400,
         body: {
-          message: `Agent ${request.params.agentId} is not upgradeable: ${getNotUpgradeableMessage(
+          message: `Agent ${
+            request.params.agentId
+          } is not upgradeable: ${getAgentNotUpgradeableMessage(
             agent,
             latestAgentVersion,
             version

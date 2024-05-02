@@ -12,7 +12,7 @@ import moment from 'moment';
 
 import {
   getRecentUpgradeInfoForAgent,
-  getNotUpgradeableMessage,
+  getAgentNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
 } from '../../../common/services';
 
@@ -95,7 +95,7 @@ export async function upgradeBatch(
           !isAgentUpgradeableToVersion(agent, options.version));
       if (isNotAllowed) {
         throw new FleetError(
-          `Agent ${agent.id} is not upgradeable: ${getNotUpgradeableMessage(
+          `Agent ${agent.id} is not upgradeable: ${getAgentNotUpgradeableMessage(
             agent,
             latestAgentVersion,
             options.version

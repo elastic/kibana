@@ -18,6 +18,7 @@ export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
 export const AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION = '8.12.0';
 
 // Error messages for agent not upgradeable
+// TODO: localize
 export const VERSION_MISSING_ERROR = `agent version is missing.`;
 export const UNENROLLED_ERROR = `agent has been unenrolled.`;
 export const ONGOING_UNEROLLMENT_ERROR = `agent is being unenrolled.`;
@@ -59,6 +60,10 @@ export function isAgentUpgradeable(agent: Agent): boolean {
   return true;
 }
 
+export function areAgentsUpgradeableToVersion(agents: Agent[], versionToUpgrade?: string): boolean {
+  return agents.every((agent) => isAgentUpgradeableToVersion(agent, versionToUpgrade));
+}
+
 export function isAgentUpgradeableToVersion(agent: Agent, versionToUpgrade?: string): boolean {
   const isAgentUpgradeableCheck = isAgentUpgradeable(agent);
   if (!isAgentUpgradeableCheck) return false;
@@ -88,7 +93,7 @@ export const isAgentVersionLessThanLatest = (
 };
 
 // Based on the previous, returns a detailed message explaining why the agent is not upgradeable
-export const getNotUpgradeableMessage = (
+export const getAgentNotUpgradeableMessage = (
   agent: Agent,
   latestAgentVersion?: string,
   versionToUpgrade?: string
@@ -138,6 +143,20 @@ export const getNotUpgradeableMessage = (
 
   // in all the other cases, the agent is upgradeable; don't return any message.
   return undefined;
+};
+
+// Returns the first not upgradable message found
+export const getAgentsNotUpgradeableMessage = (
+  agents: Agent[],
+  latestAgentVersion?: string,
+  versionToUpgrade?: string
+): string | undefined => {
+  for (const agent of agents) {
+    const message = getAgentNotUpgradeableMessage(agent, latestAgentVersion, versionToUpgrade);
+    if (message) {
+      return message;
+    }
+  }
 };
 
 const isNotDowngrade = (agentVersion: string, versionToUpgrade: string): boolean => {

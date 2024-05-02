@@ -34,7 +34,7 @@ export {
   isValidNamespace,
   LicenseService,
   isAgentUpgradeable,
-  getNotUpgradeableMessage,
+  getAgentNotUpgradeableMessage,
   doesPackageHaveIntegrations,
   validatePackagePolicy,
   validatePackagePolicyConfig,

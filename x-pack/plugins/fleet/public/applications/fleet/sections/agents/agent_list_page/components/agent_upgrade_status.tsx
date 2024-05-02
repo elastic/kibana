@@ -13,7 +13,7 @@ import moment from 'moment';
 import type { Agent } from '../../../../types';
 import type { AgentUpgradeDetails } from '../../../../../../../common/types';
 import {
-  getNotUpgradeableMessage,
+  getAgentNotUpgradeableMessage,
   isAgentUpgradeAvailable,
 } from '../../../../../../../common/services';
 
@@ -281,7 +281,7 @@ export const AgentUpgradeStatus: React.FC<{
   );
   const status = useMemo(() => getStatusComponents(agent.upgrade_details), [agent.upgrade_details]);
   const minVersion = '8.12';
-  const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
+  const notUpgradeableMessage = getAgentNotUpgradeableMessage(agent, latestAgentVersion);
 
   if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
     return (
