@@ -20,7 +20,17 @@ export function appendWhereClauseToESQLQuery(
   operation: '+' | '-' | '_exists_',
   fieldType?: string
 ): string {
-  let operator = operation === '+' ? '==' : '!=';
+  let operator;
+  switch (operation) {
+    case '_exists_':
+      operator = ' is not null';
+      break;
+    case '-':
+      operator = '!=';
+      break;
+    default:
+      operator = '==';
+  }
   let filterValue = typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
   // Adding the backticks here are they are needed for special char fields
   let fieldName = `\`${field}\``;
@@ -36,7 +46,6 @@ export function appendWhereClauseToESQLQuery(
   // this is the existence filter
   if (operation === '_exists_') {
     fieldName = `\`${String(field)}\``;
-    operator = ' is not null';
     filterValue = '';
   }
 
@@ -57,12 +66,12 @@ export function appendWhereClauseToESQLQuery(
 
       const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
       if (matches) {
-        const existingOperator = matches[1]?.trim().replace('`', '');
-        if (!['==', '!='].includes(existingOperator.trim())) {
+        const existingOperator = matches[1]?.trim().replace('`', '').toLowerCase();
+        if (!['==', '!=', 'is not null'].includes(existingOperator.trim())) {
           return appendToESQLQuery(baseESQLQuery, `and ${fieldName}${operator}${filterValue}`);
         }
         // the filter is the same
-        if (existingOperator === operator) {
+        if (existingOperator === operator.trim()) {
           return baseESQLQuery;
           // the filter has different operator
         } else {

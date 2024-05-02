@@ -101,6 +101,18 @@ and \`dest\`=="Crete"`
       ).toBe(`from logstash-* | where country == "GR"`);
     });
 
+    it('doesnt append anything in an existing query with where command as the last pipe if the _exists_ filter preexists', () => {
+      expect(
+        appendWhereClauseToESQLQuery(
+          'from logstash-* | where country IS NOT NULL',
+          'country',
+          undefined,
+          '_exists_',
+          'string'
+        )
+      ).toBe(`from logstash-* | where country IS NOT NULL`);
+    });
+
     it('changes the operator in an existing query with where command as the last pipe if the filter preexists but has the opposite operator', () => {
       expect(
         appendWhereClauseToESQLQuery(
