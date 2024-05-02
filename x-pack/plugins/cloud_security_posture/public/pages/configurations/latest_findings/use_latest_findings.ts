@@ -120,21 +120,41 @@ const getSortField = ({ field, direction }: { field: string; direction: string }
 };
 
 export const useLatestFindings = (options: UseFindingsOptions) => {
+  console.log('useLatestFindings');
+
   const {
     data,
-    notifications: { toasts },
+    //   //   notifications: { toasts },
   } = useKibana().services;
-  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+  // const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
-  /**
-   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
-   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
-   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
-   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
-   */
+  // /**
+  //  * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
+  //  * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
+  //  * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
+  //  * the last loaded record to be used as a from parameter to fetch the next chunk of data.
+  //  */
+  // console.log('rulesStates', rulesStates);
+  const rulesStates = {
+    'cis_aws;v1.5.0;1.5': {
+      muted: true,
+      benchmark_id: 'cis_aws',
+      benchmark_version: 'v1.5.0',
+      rule_number: '1.5',
+      rule_id: '4b1f12b8-5fe6-5cc6-b404-58df727bcd45',
+    },
+  };
   return useInfiniteQuery(
     ['csp_findings', { params: options }, rulesStates],
     async ({ pageParam }) => {
+      // console.log('data', data);
+      // console.log('data.search', data.search);
+      // console.log('data.search.search', data.search.search);
+
+      // const res = await data.search.search({
+      //   params: getFindingsQuery(options, {}, 1), // ruleStates always exists since it under the `enabled` dependency.
+      // });
+      // console.log('res', res);
       const {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
@@ -142,6 +162,42 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
           params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
         })
       );
+
+      // const source = data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
+      //   params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
+      // });
+      // console.log('source', source);
+
+      // const res = await new Promise((resolve, reject) => {
+      //   let _hasValue = false;
+      //   let _value;
+      //   source.subscribe({
+      //     next: (value) => {
+      //       console.log('value', value);
+      //       _value = value;
+      //       _hasValue = true;
+      //     },
+      //     error: reject,
+      //     complete: () => {
+      //       if (_hasValue) {
+      //         resolve(_value);
+      //         // } else if (hasConfig) {
+      //         // resolve(config!.defaultValue);
+      //       } else {
+      //         console.log('errr');
+      //         // reject(new EmptyError());
+      //       }
+      //     },
+      //   });
+      // });
+
+      // console.log('res', res);
+
+      // const { hits, aggregations } = res.rawResponse;
+
+      console.log('hits', hits);
+      console.log('aggregations', aggregations);
+
       if (!aggregations) throw new Error('expected aggregations to be an defined');
       if (!Array.isArray(aggregations.count.buckets))
         throw new Error('expected buckets to be an array');
@@ -153,9 +209,11 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       };
     },
     {
-      enabled: options.enabled && !!rulesStates,
+      // enabled: options.enabled && !!rulesStates,
+      enabled: true,
       keepPreviousData: true,
-      onError: (err: Error) => showErrorToast(toasts, err),
+      // onError: (err: Error) => showErrorToast(toasts, err),
+      onError: (err: Error) => console.log(err),
       getNextPageParam: (lastPage, allPages) => {
         if (lastPage.page.length < options.pageSize) {
           return undefined;

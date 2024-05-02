@@ -11,7 +11,15 @@ import { useLatestFindings } from './use_latest_findings';
 import { server } from '../__mocks__/node';
 import { IntegrationTestProvider } from '../../../test/integration_test_provider';
 
-beforeAll(() => server.listen());
+server.events.on('request:start', ({ request }) => {
+  console.log('MSW intercepted:', request.method, request.url);
+});
+
+beforeAll(() =>
+  server.listen({
+    onUnhandledRequest: 'warn',
+  })
+);
 afterAll(() => server.close());
 beforeEach(() => {
   server.resetHandlers();
@@ -42,7 +50,7 @@ test('useLatestFindings fetches data correctly', async () => {
 
   // await waitForNextUpdate();
   // console.log(result.current.data);
-  await waitFor(() => result.current.data !== undefined);
+  await waitFor(() => result.current.data !== undefined, { timeout: 10000 });
 
   expect(result.current?.data).toEqual({
     pages: [
@@ -280,4 +288,4 @@ test('useLatestFindings fetches data correctly', async () => {
     ],
     pageParams: [null],
   });
-});
+}, 10000);

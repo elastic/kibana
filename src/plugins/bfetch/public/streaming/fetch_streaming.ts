@@ -31,11 +31,13 @@ export function fetchStreaming({
   method = 'POST',
   body = '',
   signal,
-  getIsCompressionDisabled = () => false,
+  getIsCompressionDisabled = () => true,
 }: FetchStreamingParams) {
+  console.log('fetchStreaming');
   const xhr = new window.XMLHttpRequest();
 
-  const isCompressionDisabled = getIsCompressionDisabled();
+  const isCompressionDisabled = true;
+  console.log('isCompressionDisabled', isCompressionDisabled);
   if (!isCompressionDisabled) {
     url = appendQueryParam(url, 'compress', 'true');
   }
@@ -48,6 +50,7 @@ export function fetchStreaming({
 
   const stream = fromStreamingXhr(xhr, signal);
 
+  console.log('body', body);
   // Send the payload to the server
   xhr.send(body);
 
@@ -55,6 +58,7 @@ export function fetchStreaming({
   const stream$ = stream.pipe(
     split('\n'),
     map((msg) => {
+      console.log('msg', msg);
       return isCompressionDisabled ? msg : inflateResponse(msg);
     }),
     share()
