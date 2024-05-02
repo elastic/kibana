@@ -37,6 +37,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 export interface TaskManagerSetupContract {
   /**
@@ -257,6 +258,12 @@ export class TaskManagerPlugin
         logger: this.logger,
         store: taskStore,
       });
+      // TODO: Pass the namespace and selectors in the config
+      const taskPartitioner = new TaskPartitioner(
+        this.config.k8s_task_partitioning_enabled,
+        'serverless',
+        'kibana.k8s.elastic.co/name=kb'
+      );
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -267,6 +274,7 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        taskPartitioner,
         ...managedConfiguration,
       });
 

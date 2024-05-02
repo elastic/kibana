@@ -14,6 +14,7 @@ import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { claimAvailableTasksDefault } from './strategy_default';
 import { CLAIM_STRATEGY_DEFAULT } from '../config';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
   getCapacity: (taskType?: string | undefined) => number;
@@ -25,6 +26,7 @@ export interface TaskClaimerOpts {
   unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
+  taskPartitioner: TaskPartitioner;
 }
 
 export interface ClaimOwnershipResult {

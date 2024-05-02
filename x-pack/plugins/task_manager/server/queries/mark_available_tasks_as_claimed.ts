@@ -38,6 +38,18 @@ export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer
   };
 }
 
+export function tasksWithPartition(partitions: number[]): estypes.QueryDslQueryContainer {
+  return {
+    bool: {
+      must: {
+        terms: {
+          'task.partition': partitions,
+        },
+      },
+    },
+  };
+}
+
 export function tasksClaimedByOwner(
   taskManagerId: string,
   ...taskFilters: estypes.QueryDslQueryContainer[]

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const taskSchemaV1 = schema.object({
   taskType: schema.string(),
+  partition: schema.number(),
   scheduledAt: schema.string(),
   startedAt: schema.nullable(schema.string()),
   retryAt: schema.nullable(schema.string()),

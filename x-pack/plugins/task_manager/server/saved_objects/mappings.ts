@@ -13,6 +13,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     taskType: {
       type: 'keyword',
     },
+    partition: {
+      type: 'integer',
+    },
     scheduledAt: {
       type: 'date',
     },

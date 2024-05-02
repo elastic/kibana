@@ -15,6 +15,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 import {
   TaskMarkRunning,
@@ -58,6 +59,7 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
+  taskPartitioner: TaskPartitioner;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -109,6 +111,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     unusedTypes,
     executionContext,
     usageCounter,
+    taskPartitioner,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -139,6 +142,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions,
       unusedTypes,
       logger: this.logger,
+      taskPartitioner,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency
           ? Math.max(

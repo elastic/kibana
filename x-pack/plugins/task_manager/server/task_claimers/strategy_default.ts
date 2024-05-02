@@ -33,6 +33,7 @@ import {
   tasksClaimedByOwner,
   tasksOfType,
   EnabledTask,
+  tasksWithPartition,
 } from '../queries/mark_available_tasks_as_claimed';
 
 import {
@@ -41,6 +42,7 @@ import {
   UpdateByQueryResult,
   SearchOpts,
 } from '../task_store';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -52,13 +54,24 @@ interface OwnershipClaimingOpts {
   unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
+  taskPartitioner: TaskPartitioner;
 }
 
 export function claimAvailableTasksDefault(
   opts: TaskClaimerOpts
 ): Observable<ClaimOwnershipResult> {
-  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
-  const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
+  const {
+    getCapacity,
+    claimOwnershipUntil,
+    batches,
+    events$,
+    taskStore,
+    definitions,
+    unusedTypes,
+    excludedTaskTypes,
+    taskMaxAttempts,
+    taskPartitioner,
+  } = opts;
   const initialCapacity = getCapacity();
   return from(batches).pipe(
     mergeScan(
@@ -83,6 +96,7 @@ export function claimAvailableTasksDefault(
             unusedTypes,
             excludedTaskTypes,
             taskMaxAttempts,
+            taskPartitioner,
           }).then((result) => {
             const { stats, docs } = accumulateClaimOwnershipResults(accumulatedResult, result);
             stats.tasksConflicted = correctVersionConflictsForContinuation(
@@ -110,7 +124,9 @@ async function executeClaimAvailableTasks(
     await markAvailableTasksAsClaimed(opts);
 
   const docs =
-    tasksUpdated > 0 ? await sweepForClaimedTasks(taskStore, taskTypes, size, definitions) : [];
+    tasksUpdated > 0
+      ? await sweepForClaimedTasks(taskStore, taskTypes, size, definitions, opts.taskPartitioner)
+      : [];
 
   emitEvents(
     events$,
@@ -152,7 +168,10 @@ async function markAvailableTasksAsClaimed({
   taskTypes,
   unusedTypes,
   taskMaxAttempts,
+  taskPartitioner,
 }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
+  const partitions = await taskPartitioner.getPartitions();
+
   const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
     definitions.getAllTypes(),
     (type) =>
@@ -169,7 +188,10 @@ async function markAvailableTasksAsClaimed({
   );
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
-  const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
+  const query = matchesClauses(
+    queryForScheduledTasks,
+    filterDownBy(InactiveTasks, tasksWithPartition(partitions))
+  );
   const script = updateFieldsAndMarkAsFailed({
     fieldUpdates: {
       ownerId: taskStore.taskManagerId,
@@ -187,11 +209,13 @@ async function markAvailableTasksAsClaimed({
   );
 
   try {
+    const routingNumbers = await taskPartitioner.getRoutingNumbers();
     const result = await taskStore.updateByQuery(
       {
         query,
         script,
         sort,
+        routing: routingNumbers,
       },
       {
         max_docs: size,
@@ -209,17 +233,20 @@ async function sweepForClaimedTasks(
   taskStore: TaskStore,
   taskTypes: Set<string>,
   size: number,
-  definitions: TaskTypeDictionary
+  definitions: TaskTypeDictionary,
+  taskPartitioner: TaskPartitioner
 ): Promise<ConcreteTaskInstance[]> {
   const claimedTasksQuery = tasksClaimedByOwner(
     taskStore.taskManagerId,
     tasksOfType([...taskTypes])
   );
+  const routingNumbers = await taskPartitioner.getRoutingNumbers();
   const { docs } = await taskStore.fetch({
     query: claimedTasksQuery,
     size,
     sort: getClaimSort(definitions),
     seq_no_primary_term: true,
+    routing: routingNumbers,
   });
 
   return docs;

@@ -8,6 +8,8 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import murmurhash from 'murmurhash';
+import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -58,6 +60,7 @@ export interface SearchOpts {
   sort?: estypes.Sort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
+  routing?: string[];
 }
 
 export interface AggregationOpts {
@@ -92,6 +95,10 @@ export interface UpdateByQueryResult {
   updated: number;
   version_conflicts: number;
   total: number;
+}
+
+interface SerializedConcreteTaskInstanceWithPartition extends SerializedConcreteTaskInstance {
+  partition: number;
 }
 
 /**
@@ -163,13 +170,18 @@ export class TaskStore {
 
     let savedObject;
     try {
+      const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
-      savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
-        'task',
-        taskInstanceToAttributes(validatedTaskInstance),
-        { id: taskInstance.id, refresh: false }
-      );
+      savedObject =
+        await this.savedObjectsRepository.create<SerializedConcreteTaskInstanceWithPartition>(
+          'task',
+          {
+            ...taskInstanceToAttributes(validatedTaskInstance),
+            partition: murmurhash.v3(id) % 360,
+          },
+          { id, refresh: false }
+        );
       if (get(taskInstance, 'schedule.interval', null) == null) {
         this.adHocTaskCounter.increment();
       }
@@ -190,21 +202,26 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
+      const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(validatedTaskInstance),
-        id: taskInstance.id,
+        attributes: {
+          ...taskInstanceToAttributes(validatedTaskInstance),
+          partition: murmurhash.v3(id) % 360,
+        },
+        id,
       };
     });
 
     let savedObjects;
     try {
-      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
-        objects,
-        { refresh: false }
-      );
+      savedObjects =
+        await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstanceWithPartition>(
+          objects,
+          { refresh: false }
+        );
       this.adHocTaskCounter.increment(
         taskInstances.filter((task) => {
           return get(task, 'schedule.interval', null) == null;
@@ -433,7 +450,7 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  public async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
@@ -442,8 +459,9 @@ export class TaskStore {
       } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
+        ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
         body: {
-          ...opts,
+          ...omit(opts, 'routing'),
           query,
         },
       });
@@ -502,8 +520,9 @@ export class TaskStore {
             ignore_unavailable: true,
             refresh: true,
             conflicts: 'proceed',
+            ...(opts.routing ? { routing: opts.routing.join(',') } : {}),
             body: {
-              ...opts,
+              ...omit(opts, 'routing'),
               max_docs,
               query,
             },
