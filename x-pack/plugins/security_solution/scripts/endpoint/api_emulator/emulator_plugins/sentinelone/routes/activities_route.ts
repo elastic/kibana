@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import { buildSentinelOneRoutePath } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
+
+const generator = new SentinelOneDataGenerator();
 
 export const getActivitiesRouteDefinition = (): EmulatorServerRouteDefinition => {
   return {
@@ -18,5 +21,5 @@ export const getActivitiesRouteDefinition = (): EmulatorServerRouteDefinition =>
 };
 
 const activitiesRouteHandler: ExternalEdrServerEmulatorRouteHandlerMethod = async (request) => {
-  return { message: 'Live. But not implemented!' };
+  return generator.generateSentinelOneApiActivityResponse();
 };

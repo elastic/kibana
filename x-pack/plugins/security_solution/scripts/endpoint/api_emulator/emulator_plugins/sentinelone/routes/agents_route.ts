@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+import type {
+  SentinelOneGetAgentsParams,
+  SentinelOneGetAgentsResponse,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { DeepPartial, Mutable } from 'utility-types';
+import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 import { buildSentinelOneRoutePath } from './utils';
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../../external_edr_server_emulator.types';
 import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
+
+const generator = new SentinelOneDataGenerator();
 
 export const getAgentsRouteDefinition = (): EmulatorServerRouteDefinition => {
   return {
@@ -17,6 +25,20 @@ export const getAgentsRouteDefinition = (): EmulatorServerRouteDefinition => {
   };
 };
 
-const agentsRouteHandler: ExternalEdrServerEmulatorRouteHandlerMethod = async (request) => {
-  return { message: 'Live. But not implemented!' };
+const agentsRouteHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
+  {},
+  SentinelOneGetAgentsParams
+> = async (request) => {
+  const queryParams = request.query;
+  const agent: Mutable<DeepPartial<SentinelOneGetAgentsResponse['data'][number]>> = {};
+
+  if (queryParams.uuid) {
+    agent.uuid = queryParams.uuid;
+  }
+
+  if (queryParams.ids) {
+    agent.id = queryParams.ids.split(',').at(0);
+  }
+
+  return generator.generateSentinelOneApiAgentsResponse(agent);
 };
