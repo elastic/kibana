@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { PLUGIN_ID } from './constants';
+import { PLUGIN_ID } from '../../constants';
 
 interface Props {
   data: DataPublicPluginStart;

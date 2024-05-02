@@ -32,15 +32,15 @@ export class ControlsExamplePlugin
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app/app');
         return renderApp(depsStart, params);
       },
     });
 
     developerExamples.register({
       appId: 'controlsExamples',
-      title: 'Controls as a Building Block',
-      description: `Showcases different ways to embed a control group into your app`,
+      title: 'Controls',
+      description: `Learn how to create new control types and use controls in your application`,
       image: img,
     });
   }
