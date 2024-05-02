@@ -242,6 +242,7 @@ const ContextsSection: React.FC<{
       <EuiInMemoryTable
         compressed={true}
         loading={loading}
+        data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
         items={[
           {
@@ -346,5 +347,17 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
   );
 };
 
-const formatContribution = (value: number) =>
-  value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
+const formatContribution = (value: number): string => {
+  const fixedValue = value.toFixed(2);
+
+  if (value > 0) {
+    return `+${fixedValue}`;
+  }
+
+  // very small negative decimal values like -0.0000001 are displayed as -0.00
+  if (fixedValue === '-0.00') {
+    return '0.00';
+  }
+
+  return fixedValue;
+};
