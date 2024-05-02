@@ -1127,10 +1127,12 @@ describe('autocomplete', () => {
               const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
                 Array.from(new Set(paramDefs.map((p) => p.type)));
 
+              const suggestedConstants = param.literalSuggestions || param.literalOptions;
+
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
-                param.literalOptions?.length
-                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (canHaveMoreArgs ? `${f},` : f)
@@ -1151,8 +1153,8 @@ describe('autocomplete', () => {
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
                   i ? ',' : ''
                 } )`,
-                param.literalOptions?.length
-                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
                         (f) => (canHaveMoreArgs ? `${f},` : f)

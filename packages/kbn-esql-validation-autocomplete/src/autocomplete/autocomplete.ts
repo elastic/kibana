@@ -1102,17 +1102,23 @@ async function getFunctionArgsSuggestions(
       ? refSignature.minParams - 1 > argIndex
       : false);
 
-  const literalOptions = Array.from(
+  const suggestedConstants = Array.from(
     new Set(
       fnDefinition.signatures.reduce<string[]>((acc, signature) => {
-        const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
-        return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
+        const p = signature.params[argIndex];
+        const _suggestions: string[] =
+          p && p.literalSuggestions
+            ? p.literalSuggestions
+            : p && p.literalOptions
+            ? p.literalOptions
+            : [];
+        return acc.concat(_suggestions);
       }, [] as string[])
     )
   );
 
-  if (literalOptions.length) {
-    return buildValueDefinitions(literalOptions).map((suggestion) => ({
+  if (suggestedConstants.length) {
+    return buildValueDefinitions(suggestedConstants).map((suggestion) => ({
       ...suggestion,
       text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', suggestion.text),
     }));
