@@ -8,6 +8,7 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import {
@@ -18,6 +19,7 @@ import {
 } from '../../../../../../common/utils/security_solution';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
 
@@ -61,6 +63,27 @@ export default ({ getService }: FtrProviderContext): void => {
         const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
         expect(exportedRule).toMatchObject(ruleToExport);
+      });
+
+      it('should export defaultable fields when values are set', async () => {
+        const defaultableFields: BaseDefaultableFields = {
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
+        };
+        const ruleToExport = getCustomQueryRuleParams(defaultableFields);
+
+        await securitySolutionApi.createRule({ body: ruleToExport });
+
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule).toMatchObject(defaultableFields);
       });
 
       it('should have export summary reflecting a number of rules', async () => {

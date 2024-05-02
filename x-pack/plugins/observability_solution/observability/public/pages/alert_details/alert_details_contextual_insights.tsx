@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import dedent from 'dedent';
+import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
 import { AlertData } from '../../hooks/use_fetch_alert_detail';
 
@@ -21,16 +22,16 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
   const ObservabilityAIAssistantContextualInsight =
     observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
 
-  const getPromptMessages = useCallback(async () => {
+  const getAlertContextMessages = useCallback(async () => {
     const fields = alert?.formatted.fields as Record<string, string> | undefined;
     if (!observabilityAIAssistant || !fields || !alert) {
       return [];
     }
 
     try {
-      const { context } = await http.get<{
-        context: Array<{ description: string; data: unknown }>;
-      }>('/internal/apm/assistant/alert_details_contextual_insights', {
+      const { alertContext } = await http.get<{
+        alertContext: AlertDetailsContextualInsight[];
+      }>('/internal/observability/assistant/alert_details_contextual_insights', {
         query: {
           alert_started_at: new Date(alert.formatted.start).toISOString(),
 
@@ -47,26 +48,28 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         },
       });
 
-      const obsAlertContext = context
+      const obsAlertContext = alertContext
         .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
         .join('\n\n');
 
       return observabilityAIAssistant.getContextualInsightMessages({
         message: `I'm looking at an alert and trying to understand why it was triggered`,
         instructions: dedent(
-          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.        
+          `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
 
-        The following contextual information is available to help me understand the alert:
+        The following contextual information is available to help you understand the alert:
         ${obsAlertContext}
 
         Be brief and to the point.
         Do not list the alert details as bullet points.
         Refer to the contextual information provided above when relevant.
-        Pay specific attention to why the alert happened and what may have contributed to it.
+        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate
+        Suggest reasons why the alert happened and what may have contributed to it.
         `
         ),
       });
     } catch (e) {
+      console.error('An error occurred while fetching alert context', e);
       return observabilityAIAssistant.getContextualInsightMessages({
         message: `I'm looking at an alert and trying to understand why it was triggered`,
         instructions: dedent(
@@ -88,7 +91,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
             'xpack.observability.alertDetailContextualInsights.InsightButtonLabel',
             { defaultMessage: 'Help me understand this alert' }
           )}
-          messages={getPromptMessages}
+          messages={getAlertContextMessages}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
