@@ -98,7 +98,7 @@ export class AIAssistantManagementSelectionPlugin
       };
     });
 
-    plugins.features.registerKibanaFeature({
+    plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
         defaultMessage: 'AI Assistant',

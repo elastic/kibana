@@ -11,7 +11,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 export interface AIAssistantManagementSelectionPluginServerDependenciesStart {}
 
 export interface AIAssistantManagementSelectionPluginServerDependenciesSetup {
-  features: FeaturesPluginSetup;
+  features?: FeaturesPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
