@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiListGroup, EuiPanel } from '@elastic/eui';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-
-import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
 import React, { createContext, useMemo } from 'react';
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
+
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  getUnchangingComparator,
+  initializeTitles,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import {
@@ -99,6 +103,8 @@ export const getLinksEmbeddableFactory = () => {
         {
           ...linksComparators,
           ...titleComparators,
+          enhancements: getUnchangingComparator(),
+          disabledActions: getUnchangingComparator(),
         }
       );
 

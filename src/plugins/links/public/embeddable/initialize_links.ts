@@ -8,18 +8,26 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, distinctUntilKeyChanged, filter, switchMap } from 'rxjs';
-import { StateComparators } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  apiPublishesPanelDescription,
+  apiPublishesPanelTitle,
+  apiPublishesSavedObjectId,
+  StateComparators,
+} from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { PanelIncompatibleError, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LinksAttributes } from '../../common/content_management';
-import { LinksSerializedState, ResolvedLink } from './types';
+import { LinksParentApi, LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
 import { loadFromLibrary } from '../content_management';
 import { CONTENT_ID } from '../../common';
 
-const isParentApiCompatible = (parentApi: unknown): parentApi is PresentationContainer =>
-  apiIsPresentationContainer(parentApi);
+const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
+  apiIsPresentationContainer(parentApi) &&
+  apiPublishesSavedObjectId(parentApi) &&
+  apiPublishesPanelTitle(parentApi) &&
+  apiPublishesPanelDescription(parentApi);
 
 export async function initializeLinks(
   state: LinksSerializedState,
@@ -70,7 +78,7 @@ export async function initializeLinks(
           panelType: CONTENT_ID,
           initialState: newState,
         })
-        .catch((e) => {
+        .catch((e: Error) => {
           error$.next(e);
         });
     } catch {
@@ -78,19 +86,17 @@ export async function initializeLinks(
     }
   };
 
-  const getLinksComparators = (): StateComparators<LinksSerializedState> => {
-    if (savedObjectId$.value) {
-      return {
-        savedObjectId: [
-          savedObjectId$,
-          (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
-        ],
-      };
-    }
+  const getLinksComparators = (): StateComparators<
+    Pick<LinksSerializedState, 'attributes' | 'savedObjectId'>
+  > => {
     return {
+      savedObjectId: [
+        savedObjectId$,
+        (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
+      ],
       attributes: [
         attributes$,
-        (nextAttributes?: LinksAttributes) => attributes$.next(nextAttributes ?? {}),
+        (nextAttributes?: LinksAttributes) => attributes$.next(nextAttributes),
         fastIsEqual,
       ],
     };

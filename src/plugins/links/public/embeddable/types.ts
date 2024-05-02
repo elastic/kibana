@@ -10,6 +10,10 @@ import {
   HasEditCapabilities,
   HasParentApi,
   HasType,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
+  PublishesUnifiedSearch,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -17,12 +21,22 @@ import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/p
 import { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { CONTENT_ID } from '../../common';
 import { Link, LinksAttributes } from '../../common/content_management';
 
+export type LinksParentApi = PresentationContainer &
+  PublishesSavedObjectId &
+  PublishesPanelTitle &
+  PublishesPanelDescription &
+  PublishesUnifiedSearch & {
+    locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  };
+
 export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi<LinksSerializedState> &
-  HasParentApi<Pick<PresentationContainer, 'replacePanel'>> &
+  HasParentApi<LinksParentApi> &
   HasEditCapabilities &
   HasLibraryTransforms<LinksSerializedState> & {
     attributes$: BehaviorSubject<LinksAttributes | undefined>;
