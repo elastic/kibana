@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -110,7 +111,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 });
 PolicySettingsForm.displayName = 'PolicySettingsForm';
 
-const FormSectionTitle = memo(({ children }) => {
+const FormSectionTitle = memo<PropsWithChildren<unknown>>(({ children }) => {
   return (
     <EuiText size="xs" color="subdued">
       <h4>{children}</h4>

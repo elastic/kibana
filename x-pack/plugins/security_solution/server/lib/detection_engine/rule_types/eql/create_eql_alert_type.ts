@@ -103,7 +103,6 @@ export const createEqlAlertType = (
         });
       const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
-        isFeatureDisabled: !experimentalFeatures.alertSuppressionForNonSequenceEqlRuleEnabled,
         licensing,
       });
       const result = await eqlExecutor({

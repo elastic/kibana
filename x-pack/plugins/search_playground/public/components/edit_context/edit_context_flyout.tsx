@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiPanel,
@@ -26,15 +27,19 @@ import {
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface EditContextFlyoutProps {
   onClose: () => void;
 }
 
 export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
+  const usageTracker = useUsageTracker();
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);
@@ -62,13 +67,23 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
+    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
+    usageTracker.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
+  const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
+    setDocSize(Number(e.target.value));
+  };
+
+  useEffect(() => {
+    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
+  }, [usageTracker]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} size="s">
@@ -77,7 +92,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.title"
-              defaultMessage="Edit Context"
+              defaultMessage="Edit context"
             />
           </h2>
         </EuiTitle>
@@ -86,8 +101,18 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.description"
-              defaultMessage="Documents retrieved and selected fields will be used to build the context."
+              defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
+            <EuiLink
+              href={docLinks.chatPlayground}
+              target="_blank"
+              data-test-subj="context-optimization-documentation-link"
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.editContext.flyout.learnMoreLink"
+                defaultMessage=" Learn more."
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </EuiFlyoutHeader>
@@ -100,7 +125,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                   prepend={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Retrieved Documents',
+                      defaultMessage: 'Retrieved documents',
                     }
                   )}
                   options={[
@@ -118,14 +143,14 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                     },
                   ]}
                   value={docSize}
-                  onChange={(e) => setDocSize(Number(e.target.value))}
+                  onChange={handleDocSizeChange}
                 />
               </EuiFlexItem>
               <EuiText>
                 <h5>
                   <FormattedMessage
                     id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected Fields"
+                    defaultMessage="Selected fields"
                   />
                 </h5>
               </EuiText>
