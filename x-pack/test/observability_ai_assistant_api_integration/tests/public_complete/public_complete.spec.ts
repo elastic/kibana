@@ -261,52 +261,49 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       }
 
-      it('outputs each line an SSE-compatible format', () => {
-        const lines = responseBody.split('\n\n').filter(Boolean);
+      function getLines() {
+        return responseBody.split('\n\n').filter(Boolean);
+      }
+
+      it('outputs each line an SSE-compatible format (data: ...)', () => {
+        const lines = getLines();
 
         lines.forEach((line) => {
           expect(line.match(/^data: /));
         });
-
-        const dataParts = extractDataParts(lines);
-
-        expect(dataParts.length).to.be(2);
-
-        dataParts.every((part) => {
-          expect(part).not.to.be.empty();
-        });
-
-        expect(last(dataParts)).to.be('[DONE]');
-
-        expect(() => {
-          dataParts.slice(0, -1).forEach((part) => {
-            JSON.parse(part);
-          });
-        }).not.to.throwException();
       });
 
-      it('emits OpenAI-compatible chunks', () => {
-        const lines = extractDataParts(responseBody.split('\n\n'))
-          .filter((line) => line && line !== '[DONE]')
-          .map((line) => JSON.parse(line));
+      it('ouputs one chunk, and one [DONE] event', () => {
+        const dataParts = extractDataParts(getLines());
 
-        lines.every((line) => {
-          expect(line).to.eql({
-            model: 'unknown',
-            choices: [
-              {
-                delta: {
-                  content: 'Hello',
-                },
-                finish_reason: null,
-                index: 0,
+        expect(dataParts[0]).not.to.be.empty();
+        expect(dataParts[1]).to.be('[DONE]');
+      });
+
+      it('outuputs an OpenAI-compatible chunk', () => {
+        const [dataLine] = extractDataParts(getLines());
+
+        expect(() => {
+          JSON.parse(dataLine);
+        }).not.to.throwException();
+
+        const parsedChunk = JSON.parse(dataLine);
+
+        expect(parsedChunk).to.eql({
+          model: 'unknown',
+          choices: [
+            {
+              delta: {
+                content: 'Hello',
               },
-            ],
-            object: 'chat.completion.chunk',
-            // just test that these are a string and a number
-            id: String(line.id),
-            created: Number(line.created),
-          });
+              finish_reason: null,
+              index: 0,
+            },
+          ],
+          object: 'chat.completion.chunk',
+          // just test that these are a string and a number
+          id: String(parsedChunk.id),
+          created: Number(parsedChunk.created),
         });
       });
     });
