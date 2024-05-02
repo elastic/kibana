@@ -225,7 +225,7 @@ const findTestUtils = (
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.equal(perPage);
-              expect(response.body.total).to.be.equal(8);
+              expect(response.body.total).to.be.equal(9);
 
               {
                 const [firstPage, secondPage] = chunk(
