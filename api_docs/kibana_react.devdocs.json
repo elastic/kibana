@@ -410,7 +410,7 @@
         "label": "KibanaContextProvider",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ services?: {} | undefined; }>"
+          "React.FunctionComponent<React.PropsWithChildren<{ services?: {} | undefined; }>>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
@@ -684,18 +684,6 @@
             "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
           },
           {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
           },
@@ -790,6 +778,18 @@
           {
             "plugin": "searchprofiler",
             "path": "x-pack/plugins/searchprofiler/public/application/index.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
           },
           {
             "plugin": "apm",
@@ -1333,46 +1333,6 @@
             "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "observabilityShared",
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
             "plugin": "timelines",
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
           },
@@ -1439,6 +1399,14 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
+          },
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "fleet",
@@ -1519,30 +1487,6 @@
           {
             "plugin": "indexManagement",
             "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "eventAnnotationListing",
-            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "eventAnnotationListing",
-            "path": "src/plugins/event_annotation_listing/public/get_table_list.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "filesManagement",
-            "path": "src/plugins/files_management/public/mount_management_section.tsx"
           }
         ],
         "children": [
@@ -2140,7 +2084,7 @@
             "label": "Provider",
             "description": [],
             "signature": [
-              "React.FunctionComponent<{ services?: T | undefined; }>"
+              "React.FunctionComponent<React.PropsWithChildren<{ services?: T | undefined; }>>"
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,

@@ -75,7 +75,7 @@ export interface CreateTest {
     logSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
-    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
     ) => Promise<ApmSynthtraceKibanaClient>;
@@ -112,7 +112,7 @@ export function createTestConfig(
         ...services,
         apmFtrConfig: () => config,
         registry: RegistryProvider,
-        synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+        apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
           return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
         },
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>

@@ -202,17 +202,9 @@ Object {
                   "type": "object",
                 },
               },
-              "application/json; Elastic-Api-Version=oas-test-version-2": Object {
+              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
                 "schema": Object {
-                  "additionalProperties": false,
-                  "properties": Object {
-                    "fooResponse": Object {
-                      "type": "string",
-                    },
-                  },
-                  "required": Array [
-                    "fooResponse",
-                  ],
+                  "description": "stream response",
                   "type": "object",
                 },
               },

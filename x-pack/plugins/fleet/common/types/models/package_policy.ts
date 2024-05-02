@@ -86,6 +86,7 @@ export interface NewPackagePolicy {
       cluster?: string[];
     };
   };
+  overrides?: { inputs?: { [key: string]: any } } | null;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

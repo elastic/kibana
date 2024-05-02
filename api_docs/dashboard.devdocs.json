@@ -619,10 +619,10 @@
             "signature": [
               "((dashboardId?: string | undefined) => ",
               {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableAppContext",
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableAppContext",
                 "text": "EmbeddableAppContext"
               },
               ") | undefined"
@@ -2187,7 +2187,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; version?: string | undefined; filters?: ",
+          " | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2195,7 +2195,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; description?: string | undefined; refreshInterval?: ",
+          "[] | undefined; description?: string | undefined; version?: string | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
             "scope": "common",
