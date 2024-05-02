@@ -133,7 +133,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
       }
 
       // Do not call this using `await` so it will run asynchronously while we return the stream already.
-      runAnalysis();
+      void runAnalysis();
 
       return response.ok(responseWithHeaders);
     });
