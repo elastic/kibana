@@ -8,14 +8,13 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { getChangePointDetectionComponent } from './shared_components';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { getEmbeddableChangePointChart } from './embeddable/change_point_chart/embeddable_change_point_chart_component';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -59,11 +58,7 @@ export class AiopsPlugin
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
-      EmbeddableChangePointChart: getEmbeddableChangePointChart(
-        EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-        core,
-        plugins
-      ),
+      ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
     };
   }
 

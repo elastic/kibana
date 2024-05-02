@@ -7,17 +7,20 @@
 
 import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { FC } from 'react';
 import React from 'react';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import type { ChangePointDetectionSharedComponent } from '../shared_components/change_point_detection';
 import type { EmbeddableChangePointChartProps } from '../embeddable';
 
 export const initComponent = memoize(
-  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<EmbeddableChangePointChartProps>) => {
+  (
+    fieldFormats: FieldFormatsStart,
+    ChangePointDetectionComponent: ChangePointDetectionSharedComponent
+  ) => {
     return React.memo(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState } = props;
@@ -46,7 +49,7 @@ export const initComponent = memoize(
         return (
           <>
             <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
-            <EmbeddableComponent {...inputProps} embeddingOrigin={'cases'} />
+            <ChangePointDetectionComponent {...inputProps} embeddingOrigin={'cases'} />
           </>
         );
       },
