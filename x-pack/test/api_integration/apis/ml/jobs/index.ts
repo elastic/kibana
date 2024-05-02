@@ -29,5 +29,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./category_results'));
     loadTestFile(require.resolve('./jobs_with_time_range'));
     loadTestFile(require.resolve('./bulk_create_jobs'));
+    loadTestFile(require.resolve('./all_jobs_and_group_ids'));
   });
 }

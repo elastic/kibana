@@ -36,7 +36,10 @@
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics-client"
   ],
   "exclude": [
     "target/**/*",
