@@ -26,7 +26,6 @@ import { readRuleRoute } from './rules/read_rule/route';
 import { updateRuleRoute } from './rules/update_rule/route';
 import { readTagsRoute } from './tags/read_tags/route';
 import { getCoverageOverviewRoute } from './rules/coverage_overview/route';
-import { performBulkGetRulesSourcesRoute } from './rules/bulk_get_sources/route';
 
 export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -49,9 +48,6 @@ export const registerRuleManagementRoutes = (
 
   // Rules bulk actions
   performBulkActionRoute(router, config, ml, logger);
-
-  // Rules bulk get sources
-  performBulkGetRulesSourcesRoute(router, ml, logger);
 
   // Rules export/import
   exportRulesRoute(router, config, logger);

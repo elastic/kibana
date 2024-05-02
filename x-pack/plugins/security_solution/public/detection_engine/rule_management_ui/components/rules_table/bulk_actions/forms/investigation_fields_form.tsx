@@ -9,8 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
-import { useBulkGetRulesSources } from '../../../../../rule_management/api/hooks/use_bulk_get_sources';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 
@@ -31,7 +32,6 @@ import {
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { useRulesTableContext } from '../../rules_table/rules_table_context';
-import { useGetAllIndexPatternsFromSources } from '../use_get_all_index_patterns_from_sources';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -108,8 +108,9 @@ const InvestigationFieldsFormComponent = ({
       isAllSelected ? { query: convertRulesFilterToKQL(filterOptions) } : { ids: selectedRuleIds },
     [filterOptions, isAllSelected, selectedRuleIds]
   );
-  const { data: sources } = useBulkGetRulesSources(queryOrIds);
-  const { indexPatterns: sourcePatterns } = useGetAllIndexPatternsFromSources(sources);
+
+  const { uiSettings } = useKibana().services;
+  const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
   const { indexHelpText, indexLabel, formTitle } = getFormConfig(editAction);
 
@@ -117,7 +118,7 @@ const InvestigationFieldsFormComponent = ({
     form,
     watch: ['overwrite'],
   });
-  const [_, { indexPatterns }] = useFetchIndex(sourcePatterns, false);
+  const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
   const fieldOptions = indexPatterns.fields.map((field) => ({
     label: field.name,
   }));

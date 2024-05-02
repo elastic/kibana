@@ -247,12 +247,6 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-/**
- * Internal detection engine routes
- */
-export const DETECTION_ENGINE_RULES_BULK_GET_SOURCES =
-  `/internal${DETECTION_ENGINE_RULES_URL}/_bulk_get_sources` as const;
-
 export * from './entity_analytics/constants';
 
 export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
