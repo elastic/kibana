@@ -158,6 +158,9 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
       margin-top: 0;
     }
   }
+  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
+    padding: 0;
+  }
 `;
 
 type CustomTimelineDataGridSingleRowProps = {

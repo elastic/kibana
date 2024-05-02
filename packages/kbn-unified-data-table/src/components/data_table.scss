@@ -60,10 +60,6 @@
     padding-right: 0;
   }
 
-  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
-    padding: 0;
-  }
-
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }

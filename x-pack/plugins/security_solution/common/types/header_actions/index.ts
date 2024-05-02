@@ -115,7 +115,6 @@ interface AdditionalControlColumnProps {
   checked: boolean;
   onRowSelected: OnRowSelected;
   eventId: string;
-  // id: string;
   columnId: string;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
