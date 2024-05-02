@@ -71,6 +71,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     itemHasTags: () => true,
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
+    bulkGetUserProfiles: () => Promise.resolve([]),
     ...params,
   };
 
