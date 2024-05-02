@@ -54,6 +54,7 @@ export function OutdatedSlo({ slo, onReset, onDelete }: OutdatedSloProps) {
   const handleResetCancel = () => {
     setResetConfirmationModalOpen(false);
   };
+
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s">

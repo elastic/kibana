@@ -289,7 +289,7 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
   },
 });
 
-function getUnitDuration(unit: number = 1) {
+export function getUnitDuration(unit: number = 1) {
   const filteredTimeLiteral = timeLiterals.filter(({ name }) => {
     const result = /s$/.test(name);
     return unit > 1 ? result : !result;
@@ -297,6 +297,19 @@ function getUnitDuration(unit: number = 1) {
   return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
 }
 
+/**
+ * Given information about the current command and the parameter type, suggest
+ * some literals that may make sense.
+ *
+ * TODO — this currently tries to cover both command-specific suggestions and type
+ * suggestions. We could consider separating the two... or just using parameter types
+ * and forgetting about command-specific suggestions altogether.
+ *
+ * Another thought... should literal suggestions be defined in the definitions file?
+ * That approach might allow for greater specificity in the suggestions and remove some
+ * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
+ * definition property...
+ */
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.includes('number')) {
