@@ -125,6 +125,9 @@ export const EQL_OPTIONS_TIMESTAMP_INPUT =
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 
+export const RELATED_INTEGRATION_COMBO_BOX_INPUT =
+  '[data-test-subj="relatedIntegrationComboBox"] [data-test-subj="comboBoxSearchInput"]';
+
 export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
 
 export const INPUT = '[data-test-subj="input"]';

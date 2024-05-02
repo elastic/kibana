@@ -129,9 +129,53 @@ describe('helpers', () => {
         type: 'query',
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('filters out empty related integrations', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        relatedIntegrations: [
+          { package: '', version: '' },
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          { package: '', version: '' },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+      });
     });
 
     describe('saved_query and query rule types', () => {
@@ -308,6 +352,17 @@ describe('helpers', () => {
         machine_learning_job_id: ['some_jobert_id'],
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
       };
 
       expect(result).toEqual(expected);
@@ -501,6 +556,17 @@ describe('helpers', () => {
         threat_index: mockStepData.threatIndex,
         index: mockStepData.index,
         threat_filters: threatFilters,
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
       };
 
       expect(result).toEqual(expected);

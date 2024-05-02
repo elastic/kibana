@@ -72,6 +72,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const expectedRule = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
         });
 
         const { body: createdRulesBulkResponse } = await securitySolutionApi

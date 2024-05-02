@@ -20,9 +20,9 @@ import {
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const securitySolutionApi = getService('securitySolutionApi');
 
   describe('@ess @serverless import_rules', () => {
     describe('importing rules with an index', () => {
@@ -140,6 +140,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should be able to import rules with defaultable fields', async () => {
         const defaultableFields: BaseDefaultableFields = {
           max_signals: 100,
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
         };
         const ruleToImport = getCustomQueryRuleParams({
           ...defaultableFields,

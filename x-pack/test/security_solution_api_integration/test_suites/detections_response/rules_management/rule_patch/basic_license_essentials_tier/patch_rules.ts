@@ -11,11 +11,11 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
+  getCustomQueryRuleParams,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
   updateUsername,
-  getCustomQueryRuleParams,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -64,6 +64,10 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
         });
 
         await securitySolutionApi.createRule({
@@ -75,6 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
             body: {
               rule_id: 'rule-1',
               max_signals: expectedRule.max_signals,
+              related_integrations: expectedRule.related_integrations,
             },
           })
           .expect(200);
