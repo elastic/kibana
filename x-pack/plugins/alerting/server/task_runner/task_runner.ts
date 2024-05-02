@@ -17,7 +17,7 @@ import {
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import {
   RuleRunnerErrorStackTraceLog,
@@ -686,8 +686,10 @@ export class TaskRunner<
 
       const { errors: errorsFromLastRun } = this.ruleResult.getLastRunResults();
       if (errorsFromLastRun.length > 0) {
-        const isUserError = !errorsFromLastRun.some((lastRunError) => !lastRunError.userError);
-        const errorSource = isUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
+        const isLastRunUserError = !errorsFromLastRun.some(
+          (lastRunError) => !lastRunError.userError
+        );
+        const errorSource = isLastRunUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
         const lasRunErrorMessages = errorsFromLastRun
           .map((lastRunError) => lastRunError.message)
           .join(',');
@@ -709,14 +711,15 @@ export class TaskRunner<
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
-          const errorSource = `${getErrorSource(err)}-error`;
+          const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
+          const errorSourceTag = `${errorSource}-error`;
 
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             const message = `Executing Rule ${spaceId}:${
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
             });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
@@ -725,7 +728,7 @@ export class TaskRunner<
               this.ruleType.id
             }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSource],
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
               error: { stack_trace: stack },
             });
           }
