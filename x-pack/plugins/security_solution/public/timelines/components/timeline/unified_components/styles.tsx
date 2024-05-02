@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled, { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle, css } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -54,6 +54,19 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
   display: flex;
   flex-direction: column;
   height: 100%;
+`;
+
+const dataGridStyleWithRowRenderer = css`
+  /*
+    *   removes the bottom border of a cell when event detail row / rew renderer
+    *   is present
+    *
+    */
+  .udtTimeline
+    .unifiedTimeline__dataGridRow:has(.unifiedTimeline__eventDetailRow)
+    .euiDataGridRowCell:not(.euiDataGridRowCell--lastColumn) {
+    border-bottom: none;
+  }
 `;
 
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
@@ -153,6 +166,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
   }
+
+  ${dataGridStyleWithRowRenderer}
 `;
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`

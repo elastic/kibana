@@ -10,11 +10,12 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+import { UNIFIED_TIMELINE_CONFIG } from '../utils';
 import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
 
 const IS_ROW_RENDERER_LAZY_LOADING_ENABLED = true;
@@ -22,6 +23,7 @@ const IS_ROW_RENDERER_LAZY_LOADING_ENABLED = true;
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
+  rowHeight?: number;
 };
 
 /**
@@ -57,6 +59,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               visibleColumns={visibleColumns}
               Cell={Cell}
               enabledRowRenderers={enabledRowRenderers}
+              rowHeight={props.rowHeight}
             />
           );
         })}
@@ -73,17 +76,28 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
 const CustomGridRow = styled.div.attrs<{
   className?: string;
 }>((props) => ({
-  className: `euiDataGridRow ${props.className ?? ''}`,
+  className: `unifiedTimeline__dataGridRow euiDataGridRow ${props.className ?? ''}`,
   role: 'row',
-}))`
-  width: fit-content;
+}))<{
+  isRowLoading$: boolean;
+}>`
+  ${(props) => (props.isRowLoading$ ? 'width: 100%;' : 'width: fit-content;')}
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
 `;
 
 const CustomLazyRowPlaceholder = styled.div.attrs({
   className: 'customlazyGridRowPlaceholder',
-})`
-  height: 80px;
+})<{
+  rowHeight: number;
+}>`
+  width: 100%;
+  ${(props) =>
+    props.rowHeight === -1
+      ? `height: ${UNIFIED_TIMELINE_CONFIG.DEFAULT_TIMELINE_ROW_HEIGHT_WITH_EVENT_DETAIL_ROW};`
+      : `height: ${
+          UNIFIED_TIMELINE_CONFIG.DEFAULT_TIMELINE_ROW_HEIGHT_WITH_EVENT_DETAIL_ROW +
+          props.rowHeight * UNIFIED_TIMELINE_CONFIG.DEFAULT_TIMELINE_ROW_HEIGHT
+        }px;`};
 `;
 
 /**
@@ -101,6 +115,7 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
+  rowHeight?: number;
 } & Pick<CustomTimelineDataGridBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
 
 /**
@@ -111,11 +126,11 @@ type CustomTimelineDataGridSingleRowProps = {
 const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   props: CustomTimelineDataGridSingleRowProps
 ) {
-  const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
+  const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell, rowHeight = -1 } = props;
 
   const [intersectionEntry, setIntersectionEntry] = useState<IntersectionObserverEntry>({
-    isIntersecting: false,
-    intersectionRatio: 0,
+    isIntersecting: rowIndex < UNIFIED_TIMELINE_CONFIG.DEFAULT_PRELOADED_ROWS + 1 ? true : false,
+    intersectionRatio: rowIndex < UNIFIED_TIMELINE_CONFIG.DEFAULT_PRELOADED_ROWS + 1 ? 1 : 0,
   } as IntersectionObserverEntry);
 
   const intersectionRef = useRef<HTMLDivElement | null>(null);
@@ -127,13 +142,18 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
+  const onIntersectionChange = useCallback((entries: IntersectionObserverEntry[]) => {
+    entries.forEach((entry) => {
+      setIntersectionEntry(entry);
+    });
+  }, []);
+
   useEffect(() => {
     if (intersectionRef.current && !observer.current) {
-      observer.current = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          setIntersectionEntry(entry);
-        });
+      observer.current = new IntersectionObserver(onIntersectionChange, {
+        rootMargin: '250px',
       });
+
       observer.current.observe(intersectionRef.current);
     }
 
@@ -142,37 +162,26 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         observer.current.disconnect();
       }
     };
-  }, []);
+  }, [onIntersectionChange]);
 
-  /**
-   * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
-   * which renders the row-renderer, notes and notes editor
-   *
-   */
-  const cellCustomStyle = useMemo(
-    () =>
-      canShowRowRenderer
-        ? {
-            borderBottom: 'none',
-          }
-        : {},
-    [canShowRowRenderer]
-  );
   const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
 
   const isRowIntersecting =
     intersectionEntry.isIntersecting && intersectionEntry.intersectionRatio > 0;
 
-  const isRowLoading = IS_ROW_RENDERER_LAZY_LOADING_ENABLED && !isRowIntersecting;
+  const isRowLoading =
+    UNIFIED_TIMELINE_CONFIG.IS_CUSTOM_TIMELINE_DATA_GRID_ROW_LAZY_LOADING_ENABLED &&
+    !isRowIntersecting;
 
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 && !isRowLoading ? 'euiDataGridRow--striped' : ''}`}
+      isRowLoading$={isRowLoading}
       key={rowIndex}
       ref={intersectionRef}
     >
       {isRowLoading ? (
-        <CustomLazyRowPlaceholder />
+        <CustomLazyRowPlaceholder rowHeight={rowHeight} />
       ) : (
         <>
           <CustomGridRowCellWrapper className={eventTypeRowClassName}>
@@ -182,11 +191,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
                   {
                     // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
                     column.id !== TIMELINE_EVENT_DETAIL_ROW_ID ? (
-                      <Cell
-                        style={cellCustomStyle}
-                        colIndex={colIndex}
-                        visibleRowIndex={rowIndex}
-                      />
+                      <Cell colIndex={colIndex} visibleRowIndex={rowIndex} />
                     ) : null
                   }
                 </React.Fragment>

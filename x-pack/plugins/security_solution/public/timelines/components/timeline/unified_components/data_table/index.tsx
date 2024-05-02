@@ -341,9 +341,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           visibleRowData={visibleRowData}
           setCustomGridBodyProps={setCustomGridBodyProps}
           enabledRowRenderers={enabledRowRenderers}
+          rowHeight={rowHeight}
         />
       ),
-      [tableRows, enabledRowRenderers]
+      [tableRows, enabledRowRenderers, rowHeight]
     );
 
     return (
@@ -391,7 +392,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             consumer="timeline"
             totalHits={totalCount}
             onFetchMoreRecords={handleFetchMoreRecords}
-            configRowHeight={3}
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
