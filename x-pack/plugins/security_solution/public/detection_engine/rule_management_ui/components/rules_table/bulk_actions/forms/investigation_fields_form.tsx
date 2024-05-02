@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
-import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 
 import { useFetchIndex } from '../../../../../../common/containers/source';
@@ -31,7 +30,6 @@ import {
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
-import { useRulesTableContext } from '../../rules_table/rules_table_context';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -98,16 +96,6 @@ const InvestigationFieldsFormComponent = ({
     defaultValue: initialFormData,
     schema,
   });
-
-  const rulesTableContext = useRulesTableContext();
-  const {
-    state: { filterOptions, isAllSelected, selectedRuleIds },
-  } = rulesTableContext;
-  const queryOrIds = useMemo(
-    () =>
-      isAllSelected ? { query: convertRulesFilterToKQL(filterOptions) } : { ids: selectedRuleIds },
-    [filterOptions, isAllSelected, selectedRuleIds]
-  );
 
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
