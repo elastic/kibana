@@ -84,6 +84,7 @@
     "**/@typescript-eslint/utils": "5.62.0",
     "**/axios": "1.6.3",
     "**/chokidar": "^3.5.3",
+    "**/d3-color": "^3.1.0",
     "**/follow-redirects": "1.15.2",
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
