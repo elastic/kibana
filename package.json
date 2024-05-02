@@ -79,7 +79,6 @@
   },
   "resolutions": {
     "**/@bazel/typescript/protobufjs": "6.11.4",
-    "**/@grpc/proto-loader/protobufjs": "7.2.5",
     "**/@hello-pangea/dnd": "16.2.0",
     "**/@langchain/core": "0.1.53",
     "**/@types/node": "20.10.5",
