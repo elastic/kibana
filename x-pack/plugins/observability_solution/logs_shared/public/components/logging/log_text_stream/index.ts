@@ -17,3 +17,4 @@ export { LogEntryMessageColumn } from './log_entry_message_column';
 export { LogEntryRowWrapper } from './log_entry_row_wrapper';
 export { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 export { ScrollableLogTextStreamView } from './scrollable_log_text_stream_view';
+export type { UpdatedDateRange, VisibleInterval } from './scrollable_log_text_stream_view';
