@@ -6,8 +6,7 @@
  */
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 enum OpenAiProviderType {
@@ -43,11 +42,6 @@ export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiCon
   }
 
   return undefined; // the connector is neither available nor editable
-};
-
-export const getActionTypeTitle = (actionType: ActionTypeModel): string => {
-  // This is for types, it is always defined for the AI connectors
-  return actionType.actionTypeTitle ?? actionType.id;
 };
 
 const getAzureApiVersionParameter = (url: string): string | undefined => {
