@@ -7,51 +7,35 @@
 
 import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getCustomQueryRuleParams, combineToNdJson, fetchRule } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../common/utils/security_solution';
+import { getCustomQueryRuleParams, combineToNdJson } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
-  const es = getService('es');
 
   describe('@ess @serverless import_rules', () => {
     describe('importing rules with an index', () => {
-      beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
       });
 
       it('should reject with an error if the file type is not that of a ndjson', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(''), 'rules.txt')
           .expect(400);
 
@@ -64,10 +48,8 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should report that it imported a simple rule successfully', async () => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -83,14 +65,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleToImport = getCustomQueryRuleParams({ rule_id: 'rule-to-import' });
         const ndjson = combineToNdJson(ruleToImport);
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const importedRule = await fetchRule(supertest, { ruleId: 'rule-to-import' });
+        const { body: importedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-to-import' },
+          })
+          .expect(200);
 
         expect(importedRule).toMatchObject(ruleToImport);
       });
@@ -103,10 +87,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -125,10 +107,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -139,6 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should be able to import rules with defaultable fields', async () => {
         const defaultableFields: BaseDefaultableFields = {
+          setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
@@ -174,10 +155,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -201,10 +180,8 @@ export default ({ getService }: FtrProviderContext): void => {
             })
           )
         );
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -242,10 +219,8 @@ export default ({ getService }: FtrProviderContext): void => {
           )
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(500);
 
@@ -265,10 +240,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -298,10 +271,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -318,14 +289,12 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-1',
         });
 
-        await createRule(supertest, log, ruleToImport);
+        await securitySolutionApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -350,14 +319,12 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-1',
         });
 
-        await createRule(supertest, log, ruleToImport);
+        await securitySolutionApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -370,13 +337,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should overwrite an existing rule if overwrite is set to true', async () => {
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-to-overwrite',
-          })
-        );
+        const ruleToImport = getCustomQueryRuleParams({
+          rule_id: 'rule-to-overwrite',
+        });
+
+        await securitySolutionApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -385,14 +350,16 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        await securitySolutionApi
+          .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const importedRule = await fetchRule(supertest, { ruleId: 'rule-to-overwrite' });
+        const { body: importedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-to-overwrite' },
+          })
+          .expect(200);
 
         expect(importedRule).toMatchObject({
           name: 'some other name',
@@ -400,15 +367,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should bump a revision when overwriting a rule', async () => {
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-to-overwrite',
-          })
-        );
+        const ruleToImport = getCustomQueryRuleParams({
+          rule_id: 'rule-to-overwrite',
+        });
 
-        const ruleBeforeOverwriting = await fetchRule(supertest, { ruleId: 'rule-to-overwrite' });
+        await securitySolutionApi.createRule({ body: ruleToImport });
+
+        const { body: ruleBeforeOverwriting } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-to-overwrite' },
+          })
+          .expect(200);
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -417,14 +386,16 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        await securitySolutionApi
+          .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const ruleAfterOverwriting = await fetchRule(supertest, { ruleId: 'rule-to-overwrite' });
+        const { body: ruleAfterOverwriting } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-to-overwrite' },
+          })
+          .expect(200);
 
         expect(ruleBeforeOverwriting).toMatchObject({
           revision: 0,
@@ -435,13 +406,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'existing-rule',
-          })
-        );
+        const ruleToImport = getCustomQueryRuleParams({
+          rule_id: 'existing-rule',
+        });
+
+        await securitySolutionApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -455,10 +424,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -479,20 +446,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report a mix of conflicts and a mix of successes', async () => {
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({
             rule_id: 'existing-rule-1',
-          })
-        );
-        await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
+          }),
+        });
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({
             rule_id: 'existing-rule-2',
-          })
-        );
+          }),
+        });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -506,10 +469,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
@@ -547,21 +508,33 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'non-existing-rule',
         });
 
-        await createRule(supertest, log, existingRule1);
-        await createRule(supertest, log, existingRule2);
+        await securitySolutionApi.createRule({ body: existingRule1 });
+        await securitySolutionApi.createRule({ body: existingRule2 });
 
         const ndjson = combineToNdJson(existingRule1, existingRule2, ruleToImportSuccessfully);
 
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        await securitySolutionApi
+          .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const rule1 = await fetchRule(supertest, { ruleId: 'existing-rule-1' });
-        const rule2 = await fetchRule(supertest, { ruleId: 'existing-rule-2' });
-        const rule3 = await fetchRule(supertest, { ruleId: 'non-existing-rule' });
+        const { body: rule1 } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'existing-rule-1' },
+          })
+          .expect(200);
+
+        const { body: rule2 } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'existing-rule-2' },
+          })
+          .expect(200);
+
+        const { body: rule3 } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'non-existing-rule' },
+          })
+          .expect(200);
 
         expect(rule1).toMatchObject(existingRule1);
         expect(rule2).toMatchObject(existingRule2);
