@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-
 import { i18n } from '@kbn/i18n';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useKibana } from '../../utils/kibana_react';
-import { FeedbackButton } from './components/common/feedback_button';
-import { CreateSloBtn } from './components/common/create_slo_btn';
-import { SloListSearchBar } from './components/slo_list_search_bar';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useLicense } from '../../hooks/use_license';
-import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
-import { SloList } from './components/slo_list';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
+import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
+import { CreateSloBtn } from './components/common/create_slo_btn';
+import { FeedbackButton } from './components/common/feedback_button';
+import { SloList } from './components/slo_list';
+import { SloListSearchBar } from './components/slo_list_search_bar';
 
 export const SLO_PAGE_ID = 'slo-page-container';
 
@@ -30,6 +30,7 @@ export function SlosPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
+  const { data: permissions } = usePermissions();
 
   const {
     isLoading,
@@ -54,7 +55,11 @@ export function SlosPage() {
     if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
       navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
+
+    if (permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
 
   return (
     <ObservabilityPageTemplate
