@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
+import type { AssigneesApplyPanelProps } from '../../../../common/components/assignees/assignees_apply_panel';
 import { AssigneesApplyPanel } from '../../../../common/components/assignees/assignees_apply_panel';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -98,7 +99,7 @@ export const Assignees: FC<AssigneesProps> = memo(
       setIsPopoverOpen((value) => !value);
     }, []);
 
-    const handleApplyAssignees = useCallback(
+    const handleApplyAssignees = useCallback<AssigneesApplyPanelProps['onApply']>(
       async (assignees) => {
         setIsPopoverOpen(false);
         if (setAlertAssignees) {

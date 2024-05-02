@@ -384,7 +384,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     valign: 'top',
   });
 
-  const onChange = useCallback((tableSettings) => {
+  const onChange = useCallback((tableSettings: any) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);

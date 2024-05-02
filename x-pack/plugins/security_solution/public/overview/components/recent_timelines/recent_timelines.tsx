@@ -21,6 +21,7 @@ import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
+import type { WithHoverActionsProps } from '../../../common/components/with_hover_actions';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
 import { TimelineType } from '../../../../common/api/timeline';
 
@@ -53,7 +54,7 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
       [onOpenTimeline, timeline.savedObjectId]
     );
 
-    const render = useCallback(
+    const render = useCallback<WithHoverActionsProps['render']>(
       (showHoverContent) => (
         <EuiFlexGroup
           gutterSize="none"

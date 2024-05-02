@@ -20,7 +20,7 @@ import {
 } from '../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
-import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type { Criteria, ItemsPerRow, SiemTables } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getCountriesColumnsCurated } from './columns';
@@ -100,7 +100,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
       ? `node.network.${sort.field}`
       : `node.${flowTargeted}.${sort.field}`;
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>
       dispatch(
         networkActions.updateNetworkTable({
@@ -112,7 +112,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
     [dispatch, type, tableType]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) =>
       dispatch(
         networkActions.updateNetworkTable({

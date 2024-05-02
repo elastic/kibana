@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiInlineEditTextProps } from '@elastic/eui';
 import { EuiInlineEditText } from '@elastic/eui';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { usePatchListItemMutation } from '@kbn/securitysolution-list-hooks';
@@ -33,14 +34,14 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
       });
     },
   });
-  const onChange = useCallback((e) => {
+  const onChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>((e) => {
     setValue(e.target.value);
   }, []);
   const onCancel = useCallback(() => {
     setValue(listItem.value);
   }, [listItem]);
 
-  const onSave = useCallback(
+  const onSave = useCallback<NonNullable<EuiInlineEditTextProps['onSave']>>(
     async (newValue) => {
       track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.EDIT_VALUE_LIST_ITEM);
       await patchListItemMutation.mutateAsync({

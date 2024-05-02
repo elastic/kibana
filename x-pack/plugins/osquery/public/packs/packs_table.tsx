@@ -86,18 +86,18 @@ const PacksTableComponent = () => {
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
-    (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
+    (agentPolicyIds: any) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
     []
   );
 
   const renderQueries = useCallback(
-    (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
+    (queries: any) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
     []
   );
 
-  const renderActive = useCallback((_, item) => <ActiveStateSwitch item={item} />, []);
+  const renderActive = useCallback((_: any, item: any) => <ActiveStateSwitch item={item} />, []);
 
-  const renderUpdatedAt = useCallback((updatedAt, item) => {
+  const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
     const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
@@ -122,7 +122,7 @@ const PacksTableComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item, enabled) => {
+    (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
         defaultMessage: 'Run {packName}',
         values: {

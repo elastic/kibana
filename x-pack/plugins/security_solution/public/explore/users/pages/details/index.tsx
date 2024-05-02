@@ -63,6 +63,7 @@ import { LastEventTime } from '../../../../common/components/last_event_time';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import type { UserSummaryProps } from '../../../../overview/components/user_overview';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
@@ -156,7 +157,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

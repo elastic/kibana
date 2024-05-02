@@ -34,7 +34,7 @@ describe('<RequestBodyField />', () => {
           type: config.type,
         }}
         onChange={useCallback(
-          (code) => setConfig({ type: code.type as CodeEditorMode, value: code.value }),
+          (code: any) => setConfig({ type: code.type as CodeEditorMode, value: code.value }),
           [setConfig]
         )}
         readOnly={readOnly}

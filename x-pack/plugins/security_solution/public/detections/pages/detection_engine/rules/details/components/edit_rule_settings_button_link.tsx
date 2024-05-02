@@ -29,7 +29,7 @@ export function EditRuleSettingButtonLink({
     application: { navigateToApp },
   } = useKibana().services;
   const goToEditRule = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,

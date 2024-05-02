@@ -76,7 +76,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: any, value: any) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]

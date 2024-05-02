@@ -109,21 +109,20 @@ export const CreateSharedListFlyout = memo(
       http,
     ]);
 
-    const handleCreateSuccess = useCallback(
-      (response) => {
-        addSuccess({
-          text: getSuccessText(newListDetails.name),
-          title: SUCCESS_TITLE,
-        });
-        handleRefresh();
+    const handleCreateSuccess = useCallback(() => {
+      addSuccess({
+        text: getSuccessText(newListDetails.name),
+        title: SUCCESS_TITLE,
+      });
+      handleRefresh();
 
-        handleCloseFlyout();
-      },
-      [addSuccess, handleCloseFlyout, handleRefresh, newListDetails]
-    );
+      handleCloseFlyout();
+    }, [addSuccess, handleCloseFlyout, handleRefresh, newListDetails]);
 
     const handleCreateError = useCallback(
-      (error) => {
+      // error: unknown
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (error: any) => {
         if (!error.message.includes('AbortError') && !error?.body?.message.includes('AbortError')) {
           addError(error, {
             title: translate.translate(
@@ -141,7 +140,7 @@ export const CreateSharedListFlyout = memo(
     useEffect(() => {
       if (!createSharedExceptionListState.loading) {
         if (createSharedExceptionListState?.result) {
-          handleCreateSuccess(createSharedExceptionListState.result);
+          handleCreateSuccess();
         } else if (createSharedExceptionListState?.error) {
           handleCreateError(createSharedExceptionListState?.error);
         }

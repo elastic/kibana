@@ -8,6 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { DraggableChildrenFn } from '@hello-pangea/dnd';
 import { Draggable } from '@hello-pangea/dnd';
 import type { ResizeCallback } from 're-resizable';
 import { Resizable } from 're-resizable';
@@ -215,7 +216,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
     [header, onFilterChange, sort, timelineId]
   );
 
-  const DraggableContent = useCallback(
+  const DraggableContent = useCallback<DraggableChildrenFn>(
     (dragProvided) => (
       <EventsTh
         data-test-subj="draggable-header"

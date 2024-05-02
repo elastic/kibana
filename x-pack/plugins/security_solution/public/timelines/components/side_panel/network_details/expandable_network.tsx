@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
@@ -83,7 +84,7 @@ export const ExpandableNetworkDetails = ({
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const type = networkModel.NetworkType.details;
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

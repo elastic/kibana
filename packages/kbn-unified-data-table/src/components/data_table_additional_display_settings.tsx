@@ -64,7 +64,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   );
 
   const onChangeActiveSampleSize = useCallback(
-    (event) => {
+    (event: any) => {
       if (!event.target.value) {
         setActiveSampleSize('');
         return;

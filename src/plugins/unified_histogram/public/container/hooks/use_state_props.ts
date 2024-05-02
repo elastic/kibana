@@ -159,7 +159,7 @@ export const useStateProps = ({
   );
 
   const onSuggestionContextChange = useCallback(
-    (suggestionContext) => {
+    (suggestionContext: any) => {
       stateService?.setCurrentSuggestionContext(suggestionContext);
     },
     [stateService]

@@ -30,7 +30,8 @@ export const useSetFieldValueWithCallback = ({
   }, [value, callback]);
 
   return useCallback(
-    (v, cb) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (v: any, cb: any) => {
       setFieldValue(field, v);
 
       setCallback(() => cb);

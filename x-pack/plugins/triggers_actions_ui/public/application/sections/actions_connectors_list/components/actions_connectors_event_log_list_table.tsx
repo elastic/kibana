@@ -262,7 +262,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -272,7 +272,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }

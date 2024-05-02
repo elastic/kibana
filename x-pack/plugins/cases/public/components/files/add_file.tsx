@@ -47,7 +47,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const showModal = () => setIsModalVisible(true);
 
   const onError = useCallback(
-    (error) => {
+    (error: Parameters<typeof showErrorToast>[0]) => {
       showErrorToast(error, {
         title: i18n.FAILED_UPLOAD,
       });

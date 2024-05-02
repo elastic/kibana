@@ -26,7 +26,10 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import {
+  TextBasedLangEditor,
+  TextBasedLanguagesEditorProps,
+} from '@kbn/text-based-languages/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -281,10 +284,10 @@ export function LensEditConfigurationFlyout({
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
-  const runQuery = useCallback(
+  const runQuery = useCallback<TextBasedLanguagesEditorProps['onTextLangQuerySubmit']>(
     async (q, abortController) => {
       const attrs = await getSuggestions(
-        q,
+        q as AggregateQuery,
         startDependencies,
         datasourceMap,
         visualizationMap,

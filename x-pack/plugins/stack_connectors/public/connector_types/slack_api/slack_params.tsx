@@ -225,7 +225,7 @@ const SlackParamsFields: React.FunctionComponent<
   }, [editAction, index, tempChannelId, text]);
 
   const onChangeTextField = useCallback(
-    (evt) => {
+    (evt: any) => {
       editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
       setTempChannelId(evt.target.value);
     },

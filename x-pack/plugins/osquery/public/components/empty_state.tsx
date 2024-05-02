@@ -35,7 +35,7 @@ const OsqueryAppEmptyStateComponent = () => {
   );
 
   const integrationClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
 

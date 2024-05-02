@@ -16,6 +16,7 @@ import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import type { ExpandedDetailType } from '../../../../../../common/types';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
+import type { HostDetailsLinkProps } from '../../../../../common/components/links';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -61,7 +62,7 @@ const HostNameComponent: React.FC<Props> = ({
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
 
-  const openHostDetailsSidePanel = useCallback(
+  const openHostDetailsSidePanel = useCallback<NonNullable<HostDetailsLinkProps['onClick']>>(
     (e) => {
       e.preventDefault();
 

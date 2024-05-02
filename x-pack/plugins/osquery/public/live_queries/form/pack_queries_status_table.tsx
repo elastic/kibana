@@ -157,7 +157,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   } | null>(null);
 
   const handleQueryFlyoutOpen = useCallback(
-    (item) => () => {
+    (item: any) => () => {
       setQueryDetailsFlyoutOpen(item);
     },
     []
@@ -179,7 +179,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderQueryColumn = useCallback(
-    (query: string, item) => {
+    (query: string, item: any) => {
       const singleLine = removeMultilines(query);
       const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
@@ -201,7 +201,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     return <DocsColumnResults count={item?.docs ?? 0} isLive={isLive} />;
   }, []);
 
-  const renderAgentsColumn = useCallback((item) => {
+  const renderAgentsColumn = useCallback((item: any) => {
     if (!item.action_id) return;
 
     return (
@@ -214,14 +214,17 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => <PackViewInDiscoverAction item={item} />,
+    (item: any) => <PackViewInDiscoverAction item={item} />,
     []
   );
 
-  const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
+  const renderLensResultsAction = useCallback(
+    (item: any) => <PackViewInLensAction item={item} />,
+    []
+  );
 
   const getHandleErrorsToggle = useCallback(
-    (item) => () => {
+    (item: any) => () => {
       setItemIdToExpandedRowMap((prevValue) => {
         const itemIdToExpandedRowMapValues = { ...prevValue };
         if (itemIdToExpandedRowMapValues[item.id]) {
@@ -252,7 +255,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderToggleResultsAction = useCallback(
-    (item) =>
+    (item: any) =>
       item?.action_id && data?.length && data.length > 1 ? (
         <EuiButtonIcon
           data-test-subj={`toggleIcon-${item.id}`}

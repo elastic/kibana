@@ -56,7 +56,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(-1), []);
 
   const handleDeleteClick = useCallback(
-    (query) => {
+    (query: any) => {
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       if (streamIndex > -1) {
@@ -67,7 +67,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleEditClick = useCallback(
-    (query) => {
+    (query: any) => {
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       setShowEditQueryFlyout(streamIndex);
@@ -76,7 +76,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleEditQuery = useCallback(
-    (updatedQuery) =>
+    (updatedQuery: any) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
           update(
@@ -114,7 +114,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleAddQuery = useCallback(
-    (newQuery) =>
+    (newQuery: any) =>
       new Promise<void>((resolve) => {
         append(newQuery);
         handleHideAddFlyout();
@@ -132,7 +132,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   }, [fieldValue, remove, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
-    (parsedContent, uploadedPackName) => {
+    (parsedContent: any, uploadedPackName: any) => {
       replace(
         map(parsedContent.queries, (newQuery, newQueryId) =>
           pickBy(

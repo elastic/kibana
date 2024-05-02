@@ -59,7 +59,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   );
 
   const onSelectionChange = useCallback(
-    (newOptions) => {
+    (newOptions: any) => {
       const chosenOption = newOptions.find(({ checked }: SelectableEntry) => checked === 'on');
 
       onChange?.(

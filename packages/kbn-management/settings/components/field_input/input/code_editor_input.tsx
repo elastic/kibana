@@ -53,7 +53,7 @@ export const CodeEditorInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn) => {
+    async (newValue: string, onUpdateFn: any) => {
       const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
       const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
 

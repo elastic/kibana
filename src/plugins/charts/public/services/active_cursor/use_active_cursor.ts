@@ -27,7 +27,7 @@ export const useActiveCursor = (
 ) => {
   const { accessors, isDateHistogram } = parseSyncOptions(syncOptions);
   const handleCursorUpdate = useCallback(
-    (cursor) => {
+    (cursor: any) => {
       activeCursor.activeCursor$?.next({
         cursor,
         isDateHistogram,

@@ -27,7 +27,7 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
@@ -151,7 +151,7 @@ export function ContextAppContent({
     [addFilter, dataView, onAddColumn, onRemoveColumn]
   );
 
-  const onResize = useCallback(
+  const onResize: NonNullable<UnifiedDataTableProps['onResize']> = useCallback(
     (colSettings) => {
       setGridSettings((currentGridSettings) =>
         onResizeGridColumn(colSettings, currentGridSettings)
@@ -242,7 +242,7 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC<PropsWithChildren<unknown>> = ({ children }) => {
+const WrapperWithPadding: FC<PropsWithChildren<{}>> = ({ children }) => {
   const padding = useEuiPaddingSize('s');
 
   return (

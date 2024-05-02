@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
  */
 const HOVER_INTENT_DELAY = 100; // ms
 
-interface Props {
+export interface WithHoverActionsProps {
   /**
    * Always show the hover menu contents (default: false)
    */
@@ -69,7 +69,7 @@ interface Props {
  * otherwise it will be difficult for keyboard-only and screen
  * reader users to navigate to and from your popover.
  */
-export const WithHoverActions = React.memo<Props>(
+export const WithHoverActions = React.memo<WithHoverActionsProps>(
   ({ alwaysShow = false, closePopOverTrigger, hoverContent, onCloseRequested, render }) => {
     const [isOpen, setIsOpen] = useState(hoverContent != null && alwaysShow);
     const [showHoverContent, setShowHoverContent] = useState(false);

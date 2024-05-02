@@ -285,9 +285,7 @@ export const EsQueryExpression: React.FC<
           }}
         />
       </EuiFormRow>
-
       <EuiSpacer size="s" />
-
       <RuleCommonExpressions
         threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
@@ -357,7 +355,6 @@ export const EsQueryExpression: React.FC<
         )}
         sourceFields={sourceFields}
       />
-
       <EuiSpacer />
     </Fragment>
   );

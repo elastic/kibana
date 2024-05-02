@@ -9,7 +9,14 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
-import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
+import type {
+  OnTimeChangeProps,
+  OnRefreshProps,
+  OnRefreshChangeProps,
+  EuiBasicTableProps,
+  CriteriaWithPagination,
+  Criteria,
+} from '@elastic/eui';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -211,15 +218,19 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   }, [indexPattern]);
 
   // Callbacks
-  const onTableChangeCallback = useCallback(
-    ({ page = {}, sort = {} }) => {
-      const { index, size } = page;
-      const { field, direction } = sort;
+  const onTableChangeCallback = useCallback<
+    NonNullable<EuiBasicTableProps<RuleExecutionResult>['onChange']>
+  >(
+    (criteria?: Criteria<RuleExecutionResult> | CriteriaWithPagination<RuleExecutionResult>) => {
+      if (criteria?.page && criteria?.sort) {
+        const { index, size } = criteria.page;
+        const { field, direction } = criteria.sort;
 
-      setPageIndex(index + 1);
-      setPageSize(size);
-      setSortField(field);
-      setSortDirection(direction);
+        setPageIndex(index + 1);
+        setPageSize(size);
+        setSortField(field);
+        setSortDirection(direction);
+      }
     },
     [setPageIndex, setPageSize, setSortDirection, setSortField]
   );

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { CaseSeverity } from '../../../common/types/domain';
@@ -76,7 +77,9 @@ export const FormContext: React.FC<Props> = ({
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
   const availableOwners = useAvailableCasesOwners();
 
-  const trimUserFormData = (userFormData: CaseUI) => {
+  const trimUserFormData = (
+    userFormData: Omit<FormProps, 'connectorId' | 'fields' | 'syncAlerts' | 'customFields'>
+  ) => {
     let formData = {
       ...userFormData,
       title: userFormData.title.trim(),
@@ -123,7 +126,7 @@ export const FormContext: React.FC<Props> = ({
     []
   );
 
-  const submitCase = useCallback(
+  const submitCase = useCallback<FormSubmitHandler<FormProps>>(
     async (
       {
         connectorId: dataConnectorId,

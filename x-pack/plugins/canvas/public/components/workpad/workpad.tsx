@@ -74,7 +74,7 @@ export const Workpad: FC<ContainerProps> = (props) => {
   );
 
   const getAnimation = useCallback(
-    (pageNumber) => {
+    (pageNumber: any) => {
       if (!transition || !transition.name) {
         return null;
       }
@@ -94,7 +94,7 @@ export const Workpad: FC<ContainerProps> = (props) => {
   const onTransitionEnd = useCallback(() => setTransition(null), [setTransition]);
 
   const setFullscreenWithEffect = useCallback(
-    (fullscreen) => {
+    (fullscreen: any) => {
       setFullscreen(fullscreen);
       if (fullscreen === true) {
         trackCanvasUiMetric(

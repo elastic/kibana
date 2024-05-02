@@ -69,7 +69,7 @@ const SearchIssuesComponent: React.FC<Props> = ({
   }, []);
 
   const onChangeComboBox = useCallback(
-    (changedOptions) => {
+    (changedOptions: any) => {
       setSelectedOptions(changedOptions);
       onChange(changedOptions[0].value);
     },

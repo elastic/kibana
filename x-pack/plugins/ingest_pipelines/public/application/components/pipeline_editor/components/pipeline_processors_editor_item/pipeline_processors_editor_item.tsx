@@ -98,7 +98,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     );
 
     const onDescriptionChange = useCallback(
-      (nextDescription) => {
+      (nextDescription: any) => {
         let nextOptions: Record<string, any>;
         if (!nextDescription) {
           const { description: _description, ...restOptions } = processor.options;

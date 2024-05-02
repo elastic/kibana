@@ -65,12 +65,15 @@ const useHostIsolationTools = () => {
     });
   }, []);
 
-  const showHostIsolationPanel = useCallback((action) => {
-    if (action === 'isolateHost' || action === 'unisolateHost') {
-      dispatch({ type: 'setIsHostIsolationPanel', isHostIsolationPanelOpen: true });
-      dispatch({ type: 'setIsolateAction', isolateAction: action });
-    }
-  }, []);
+  const showHostIsolationPanel = useCallback(
+    (action: HostIsolationStateReducer['isolateAction'] | undefined) => {
+      if (action === 'isolateHost' || action === 'unisolateHost') {
+        dispatch({ type: 'setIsHostIsolationPanel', isHostIsolationPanelOpen: true });
+        dispatch({ type: 'setIsolateAction', isolateAction: action });
+      }
+    },
+    []
+  );
 
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 

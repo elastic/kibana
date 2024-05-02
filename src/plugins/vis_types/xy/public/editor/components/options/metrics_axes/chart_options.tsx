@@ -47,7 +47,7 @@ function ChartOptions({
   );
 
   const setValueAxis = useCallback(
-    (paramName, value) => {
+    (paramName: any, value: any) => {
       changeValueAxis(index, paramName, value);
     },
     [changeValueAxis, index]

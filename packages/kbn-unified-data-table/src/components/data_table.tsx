@@ -787,7 +787,7 @@ export const UnifiedDataTable = ({
   );
 
   const onTableSort = useCallback(
-    (sortingColumnsData) => {
+    (sortingColumnsData: any) => {
       if (isSortEnabled) {
         if (onSort) {
           onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));

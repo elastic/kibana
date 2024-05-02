@@ -187,7 +187,7 @@ export const percentileRanksOperation: OperationDefinition<
         defaultMessage: 'Percentile ranks value',
       });
     const onChange = useCallback(
-      (value) => {
+      (value: string | undefined) => {
         if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }

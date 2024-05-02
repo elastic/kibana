@@ -139,13 +139,13 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: any) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -155,7 +155,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const updateWarningThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
@@ -186,7 +186,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   ]);
 
   const handleCustomMetricChange = useCallback(
-    (exp) => {
+    (exp: any) => {
       setRuleParams(expressionId, exp);
     },
     [expressionId, setRuleParams]

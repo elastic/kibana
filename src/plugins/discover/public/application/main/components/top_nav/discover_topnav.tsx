@@ -12,6 +12,7 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   useSavedSearch,
   useSavedSearchHasChanged,
@@ -157,18 +158,19 @@ export const DiscoverTopNav = ({
     }
   };
 
-  const onTextBasedSavedAndExit = useCallback(
-    ({ onSave, onCancel }) => {
-      onSaveSearch({
-        savedSearch: stateContainer.savedSearchState.getState(),
-        services,
-        state: stateContainer,
-        onClose: onCancel,
-        onSaveCb: onSave,
-      });
-    },
-    [services, stateContainer]
-  );
+  const onTextBasedSavedAndExit: TopNavMenuProps<AggregateQuery>['onTextBasedSavedAndExit'] =
+    useCallback(
+      ({ onSave, onCancel }) => {
+        onSaveSearch({
+          savedSearch: stateContainer.savedSearchState.getState(),
+          services,
+          state: stateContainer,
+          onClose: onCancel,
+          onSaveCb: onSave,
+        });
+      },
+      [services, stateContainer]
+    );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
   const topNavProps = useMemo(() => {

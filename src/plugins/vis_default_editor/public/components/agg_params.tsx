@@ -124,7 +124,7 @@ function DefaultEditorAggParams({
     !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
-    (value) => {
+    (value: any) => {
       if (agg.type !== value) {
         onAggTypeChange(agg.id, value);
         // reset touched and valid of params

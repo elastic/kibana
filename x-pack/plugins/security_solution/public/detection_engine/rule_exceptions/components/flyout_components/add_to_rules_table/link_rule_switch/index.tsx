@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 
@@ -22,7 +23,7 @@ export const LinkRuleSwitch = memo(
       () => Boolean(linkedRules.find((r) => r.id === rule.id)),
       [linkedRules, rule.id]
     );
-    const onLinkOrUnlinkRule = useCallback(
+    const onLinkOrUnlinkRule = useCallback<EuiSwitchProps['onChange']>(
       ({ target: { checked } }) => {
         const newLinkedRules = !checked
           ? linkedRules?.filter((item) => item.id !== rule.id)

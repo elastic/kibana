@@ -53,7 +53,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
   );
 
   const onQueryChange = useCallback(
-    ({ query: newQuery }) => updateQuery({ kql: newQuery }),
+    ({ query: newQuery }: any) => updateQuery({ kql: newQuery }),
     [updateQuery]
   );
 

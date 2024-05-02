@@ -39,7 +39,7 @@ const ShardsFormComponent = ({
   }, [index, onDelete]);
 
   const buttonWrapperCss = useCallback(
-    ({ euiTheme }) => (index === 0 ? { marginTop: euiTheme.size.base } : {}),
+    ({ euiTheme }: any) => (index === 0 ? { marginTop: euiTheme.size.base } : {}),
     [index]
   );
 

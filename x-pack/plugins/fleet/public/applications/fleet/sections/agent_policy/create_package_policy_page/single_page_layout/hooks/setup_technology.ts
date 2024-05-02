@@ -61,7 +61,7 @@ export function useSetupTechnology({
   }, [isAgentlessEnabled]);
 
   const handleSetupTechnologyChange = useCallback(
-    (setupTechnology) => {
+    (setupTechnology: any) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }

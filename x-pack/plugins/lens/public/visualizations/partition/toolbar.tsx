@@ -85,36 +85,36 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onCategoryDisplayChange = useCallback(
-    (option) => onStateChange({ categoryDisplay: option }),
+    (option: unknown) => onStateChange({ categoryDisplay: option }),
     [onStateChange]
   );
 
   const onNumberDisplayChange = useCallback(
-    (option) => onStateChange({ numberDisplay: option }),
+    (option: unknown) => onStateChange({ numberDisplay: option }),
     [onStateChange]
   );
 
   const onPercentDecimalsChange = useCallback(
-    (option) => {
+    (option: unknown) => {
       onStateChange({ percentDecimals: option });
     },
     [onStateChange]
   );
 
   const onLegendDisplayChange = useCallback(
-    (optionId) => {
+    (optionId: unknown) => {
       onStateChange({ legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value });
     },
     [onStateChange]
   );
 
   const onLegendPositionChange = useCallback(
-    (id) => onStateChange({ legendPosition: id as Position }),
+    (id: unknown) => onStateChange({ legendPosition: id as Position }),
     [onStateChange]
   );
 
   const onNestedLegendChange = useCallback(
-    (id) => onStateChange({ nestedLegend: !layer.nestedLegend }),
+    () => onStateChange({ nestedLegend: !layer.nestedLegend }),
     [layer, onStateChange]
   );
 
@@ -124,17 +124,17 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   }, [layer, onStateChange]);
 
   const onLegendMaxLinesChange = useCallback(
-    (val) => onStateChange({ legendMaxLines: val }),
+    (val: unknown) => onStateChange({ legendMaxLines: val }),
     [onStateChange]
   );
 
   const onLegendSizeChange = useCallback(
-    (val) => onStateChange({ legendSize: val }),
+    (val: unknown) => onStateChange({ legendSize: val }),
     [onStateChange]
   );
 
   const onLegendStatsChange = useCallback(
-    (legendStats) => {
+    (legendStats: unknown) => {
       onStateChange({
         legendStats,
       });
@@ -143,7 +143,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onEmptySizeRatioChange = useCallback(
-    (sizeId) => {
+    (sizeId: unknown) => {
       const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
       onStateChange({ emptySizeRatio });
     },

@@ -18,7 +18,7 @@ import {
 import * as i18n from '../translations';
 import { MaintenanceWindowStatus } from '../../../../common';
 
-interface TableActionsPopoverProps {
+export interface TableActionsPopoverProps {
   id: string;
   status: MaintenanceWindowStatus;
   onEdit: (id: string) => void;

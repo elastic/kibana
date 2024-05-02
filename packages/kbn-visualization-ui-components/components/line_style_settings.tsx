@@ -46,7 +46,7 @@ export const LineStyleSettings = ({
               value={currentConfig?.lineWidth || 1}
               // Without this memoization, EuiFieldNumber rerenders too often
               // which somehow causes the annotation query to fall out of sync
-              onChange={useCallback((value) => {
+              onChange={useCallback((value: any) => {
                 setConfig({ lineWidth: value });
                 // eslint-disable-next-line react-hooks/exhaustive-deps
               }, [])}

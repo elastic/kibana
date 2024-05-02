@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
 import { xor } from 'lodash';
+import { EuiSelectProps } from '@elastic/eui';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import {
@@ -56,7 +57,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     }),
   };
 
-  const handleChange = useCallback(
+  const handleChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const aggregation =
         (metricsExplorerAggregationRT.is(e.target.value) && e.target.value) || 'avg';

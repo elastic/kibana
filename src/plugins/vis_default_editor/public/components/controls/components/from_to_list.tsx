@@ -68,7 +68,7 @@ const defaultConfig = {
 
 function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
   const renderInputRow = useCallback(
-    (item: FromToModel, index, onChangeValue) => (
+    (item: FromToModel, index: any, onChangeValue: any) => (
       <>
         <EuiFlexItem>
           <EuiFieldText

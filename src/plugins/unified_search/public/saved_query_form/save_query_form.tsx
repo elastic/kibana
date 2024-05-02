@@ -117,7 +117,7 @@ export function SaveQueryForm({
     shouldIncludeTimefilter,
   ]);
 
-  const onInputChange = useCallback((event) => {
+  const onInputChange = useCallback((event: any) => {
     setFormErrors([]);
     setTitle(event.target.value);
   }, []);

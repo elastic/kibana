@@ -88,7 +88,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     });
 
     const handleSubmit = useCallback(
-      (titleAndDescription, isValid) => {
+      (titleAndDescription: { title: string; description: string }, isValid: boolean) => {
         if (isValid) {
           dispatch(
             timelineActions.updateTitleAndDescription({

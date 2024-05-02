@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -106,7 +107,7 @@ export const ScheduleItem = ({
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
 
-  const onChangeTimeType = useCallback(
+  const onChangeTimeType = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       setTimeType(e.target.value);
       setValue(`${timeVal}${e.target.value}`);
@@ -114,7 +115,7 @@ export const ScheduleItem = ({
     [setValue, timeVal]
   );
 
-  const onChangeTimeVal = useCallback(
+  const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
       const sanitizedValue = getNumberFromUserInput(e.target.value, minimumValue);
       setTimeVal(sanitizedValue);

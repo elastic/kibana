@@ -120,7 +120,7 @@ export const TimelionVisComponent = ({
   });
 
   const brushEndListener = useCallback(
-    ({ x }) => {
+    ({ x }: any) => {
       if (!x) {
         return;
       }

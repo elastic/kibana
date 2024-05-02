@@ -57,7 +57,7 @@ export const LogColumnsConfigurationPanel = React.memo<{
   );
 
   const moveLogColumn = useCallback(
-    (sourceIndex, destinationIndex) => {
+    (sourceIndex: any, destinationIndex: any) => {
       logColumnsFormElement.updateValue((logColumns) => {
         if (destinationIndex >= 0 && sourceIndex <= logColumnsFormElement.value.length - 1) {
           const newLogColumns = [...logColumnsFormElement.value];
@@ -189,7 +189,14 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
         id="xpack.infra.sourceConfiguration.timestampLogColumnDescription"
         defaultMessage="This system field shows the log entry's time as determined by the {timestampSetting} field setting."
         values={{
-          timestampSetting: <code>timestamp</code>,
+          timestampSetting: (
+            <code>
+              {i18n.translate(
+                'xpack.infra.timestampLogColumnConfigurationPanel.code.timestampLabel',
+                { defaultMessage: 'timestamp' }
+              )}
+            </code>
+          ),
         }}
       />
     }

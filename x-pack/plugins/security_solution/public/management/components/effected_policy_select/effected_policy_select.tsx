@@ -190,7 +190,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     );
 
     const handleGlobalButtonChange = useCallback(
-      (selectedId) => {
+      (selectedId: string) => {
         onChange({
           isGlobal: selectedId === 'globalPolicy',
           selected,

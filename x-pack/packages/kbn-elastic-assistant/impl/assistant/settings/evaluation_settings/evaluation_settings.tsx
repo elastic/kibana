@@ -23,6 +23,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
+  EuiFieldTextProps,
+  EuiTextAreaProps,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -70,16 +72,16 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
 
   // Run Details
   // Project Name
-  const [projectName, setProjectName] = useState();
-  const onProjectNameChange = useCallback(
+  const [projectName, setProjectName] = useState<string>();
+  const onProjectNameChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setProjectName(e.target.value);
     },
     [setProjectName]
   );
   // Run Name
-  const [runName, setRunName] = useState();
-  const onRunNameChange = useCallback(
+  const [runName, setRunName] = useState<string>();
+  const onRunNameChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setRunName(e.target.value);
     },
@@ -87,7 +89,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   );
   // Local Output Index
   const [outputIndex, setOutputIndex] = useState(DEFAULT_OUTPUT_INDEX);
-  const onOutputIndexChange = useCallback(
+  const onOutputIndexChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setOutputIndex(e.target.value);
     },
@@ -95,19 +97,19 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   );
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
-  const onApmUrlChange = useCallback(
+  const onApmUrlChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
-  const onLangSmithProjectChange = useCallback(
+  const onLangSmithProjectChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
-  const onLangSmithApiKeyChange = useCallback(
+  const onLangSmithApiKeyChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
@@ -143,7 +145,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     );
   }, [useLangSmithDataset]);
   const [datasetName, setDatasetName] = useState<string>();
-  const onDatasetNameChange = useCallback(
+  const onDatasetNameChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback(
     (e) => {
       setDatasetName(e.target.value);
     },
@@ -159,7 +161,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     },
   ];
   const [datasetText, setDatasetText] = useState<string>(JSON.stringify(sampleDataset, null, 2));
-  const onDatasetTextChange = useCallback(
+  const onDatasetTextChange: NonNullable<EuiTextAreaProps['onChange']> = useCallback(
     (e) => {
       setDatasetText(e.target.value);
     },
@@ -261,7 +263,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   // Eval Prompt
   const sampleEvalPrompt: string = `For the below input: \n\n{{input}} \n\na prediction: \n\n{{prediction}} \n\nwas made. How's it stack up against this reference: \n\n{{reference}} \n\nReturn output in a succinct sentence ranking on a simple grading rubric focused on correctness.`;
   const [evalPrompt, setEvalPrompt] = useState<string>(sampleEvalPrompt);
-  const onEvalPromptChange = useCallback(
+  const onEvalPromptChange: NonNullable<EuiTextAreaProps['onChange']> = useCallback(
     (e) => {
       setEvalPrompt(e.target.value);
     },

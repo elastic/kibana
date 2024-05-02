@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
@@ -83,7 +84,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

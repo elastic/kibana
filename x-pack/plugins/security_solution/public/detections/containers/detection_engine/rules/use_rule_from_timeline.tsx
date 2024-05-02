@@ -31,7 +31,7 @@ export interface RuleFromTimeline {
   onOpenTimeline: (timeline: TimelineModel) => void;
 }
 
-type SetRuleQuery = ({
+export type SetRuleQuery = ({
   index,
   queryBar,
   eqlOptions,

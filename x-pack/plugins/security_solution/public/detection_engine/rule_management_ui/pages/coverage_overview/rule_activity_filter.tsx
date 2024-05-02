@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiPopover,
   EuiFilterButton,
@@ -50,7 +50,9 @@ const RuleActivityFilterComponent = ({
 
   const options = populateSelected(ruleActivityFilterDefaultOptions, selected);
 
-  const handleSelectableOnChange = useCallback(
+  const handleSelectableOnChange = useCallback<
+    NonNullable<EuiSelectableProps<{ label: CoverageOverviewRuleActivity }>['onChange']>
+  >(
     (newOptions) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleActivity>(newOptions);
       onChange(formattedOptions);
@@ -95,7 +97,7 @@ const RuleActivityFilterComponent = ({
         panelPaddingSize="none"
       >
         <EuiPopoverTitle paddingSize="s">{i18n.CoverageOverviewFilterPopoverTitle}</EuiPopoverTitle>
-        <EuiSelectable
+        <EuiSelectable<{ label: CoverageOverviewRuleActivity }>
           data-test-subj="coverageOverviewFilterList"
           options={options}
           onChange={handleSelectableOnChange}

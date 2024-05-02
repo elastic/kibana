@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -77,7 +78,7 @@ export const ExpandableHostDetails = ({
     indexNames: selectedPatterns,
     startDate: from,
   });
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

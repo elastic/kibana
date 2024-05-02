@@ -102,7 +102,7 @@ const LinksEditor = ({
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
-    ({ source, destination }) => {
+    ({ source, destination }: any) => {
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {

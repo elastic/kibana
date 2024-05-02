@@ -26,8 +26,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  LensEmbeddableInput,
+  LensSavedObjectAttributes,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
@@ -86,7 +91,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes, timerange) => {
+    (
+      attributes: TypedLensByValueInput['attributes'],
+      timerange: TypedLensByValueInput['timeRange']
+    ) => {
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: timerange,
@@ -103,7 +111,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleUpdate = useCallback(
-    (attributes, timerange, position) => {
+    (
+      attributes: TypedLensByValueInput['attributes'],
+      timerange: TypedLensByValueInput['timeRange'],
+      position: EuiMarkdownAstNodePosition
+    ) => {
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -151,7 +163,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   ]);
 
   const handleEditInLensClick = useCallback(
-    (lensAttributes?, timeRange = DEFAULT_TIMERANGE) => {
+    (lensAttributes?: Partial<LensSavedObjectAttributes>, timeRange = DEFAULT_TIMERANGE) => {
       storage.set(DRAFT_COMMENT_STORAGE_ID, {
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
@@ -162,11 +174,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       lens?.navigateToPrefilledEditor(
         lensAttributes || node?.attributes
-          ? {
+          ? ({
               id: '',
               timeRange,
               attributes: lensAttributes || node?.attributes,
-            }
+            } as LensEmbeddableInput)
           : undefined,
         {
           originatingApp: currentAppId,
@@ -188,7 +200,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     ]
   );
 
-  const handleChooseLensSO = useCallback(
+  const handleChooseLensSO = useCallback<NonNullable<SavedObjectFinderProps['onChoose']>>(
     (savedObjectId, savedObjectType, fullName, savedObject) => {
       handleEditInLensClick({
         ...savedObject.attributes,

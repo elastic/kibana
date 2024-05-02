@@ -29,7 +29,7 @@ interface MultipleAlertsProps extends SingleAlertProps {
 const RuleLink: React.FC<SingleAlertProps> = memo(
   ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData, actionId }) => {
     const onLinkClick = useCallback(
-      (ev) => {
+      (ev: React.MouseEvent) => {
         ev.preventDefault();
         if (onRuleDetailsClick) onRuleDetailsClick(ruleId, ev);
       },

@@ -26,7 +26,7 @@ export const useNavigateByRouterEventHandler = (
   onClick?: EventHandlerCallback
 ): EventHandlerCallback => {
   const history = useHistory();
-  return useCallback(
+  return useCallback<EventHandlerCallback>(
     (ev) => {
       try {
         if (onClick) {

@@ -12,6 +12,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
+import type { UserSummaryProps } from '../../../../overview/components/user_overview';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -71,7 +72,7 @@ export const ExpandableUserDetails = ({
     skip: isInitializing,
   });
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

@@ -9,8 +9,9 @@ import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { OperatorFieldIds } from '../../../../../../../common/endpoint/types';
@@ -73,11 +74,13 @@ const InputItem = styled.div<{ gridArea: string }>`
   vertical-align: baseline;
 `;
 
-const operatorOptions = (Object.keys(OperatorFieldIds) as OperatorFieldIds[]).map((value) => ({
-  dropdownDisplay: OPERATOR_TITLES[value],
-  inputDisplay: OPERATOR_TITLES[value],
-  value: value === 'matches' ? 'wildcard' : 'match',
-}));
+const operatorOptions = (Object.keys(OperatorFieldIds) as OperatorFieldIds[]).map(
+  (value): EuiSuperSelectOption<TrustedAppEntryTypes> => ({
+    dropdownDisplay: OPERATOR_TITLES[value],
+    inputDisplay: OPERATOR_TITLES[value],
+    value: value === 'matches' ? 'wildcard' : 'match',
+  })
+);
 
 export const ConditionEntryInput = memo<ConditionEntryInputProps>(
   ({
@@ -101,7 +104,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       }
     }, [entry, isVisited, onVisited]);
 
-    const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+    const fieldOptions = useMemo<Array<EuiSuperSelectOption<ConditionEntryField>>>(() => {
       const getDropdownDisplay = (field: ConditionEntryField) => (
         <>
           {CONDITION_FIELD_TITLE[field]}
@@ -148,7 +151,9 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       [entry, onChange]
     );
 
-    const handleFieldUpdate = useCallback(
+    const handleFieldUpdate = useCallback<
+      NonNullable<EuiSuperSelectProps<ConditionEntryField>['onChange']>
+    >(
       (newField) => {
         onChange({ ...entry, field: newField }, entry);
 
@@ -159,10 +164,9 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       [handleVisited, entry, onChange]
     );
 
-    const handleOperatorUpdate = useCallback(
-      (newOperator) => onChange({ ...entry, type: newOperator }, entry),
-      [entry, onChange]
-    );
+    const handleOperatorUpdate = useCallback<
+      NonNullable<EuiSuperSelectProps<TrustedAppEntryTypes>['onChange']>
+    >((newOperator) => onChange({ ...entry, type: newOperator }, entry), [entry, onChange]);
 
     const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 

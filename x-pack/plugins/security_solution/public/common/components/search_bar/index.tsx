@@ -20,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -304,8 +305,8 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       }
     }, [sourcererDataView, fieldFormats]);
 
-    const onTimeRangeChange = useCallback(
-      ({ query, dateRange }) => {
+    const onTimeRangeChange = useCallback<NonNullable<StatefulSearchBarProps['onTimeRangeChange']>>(
+      ({ dateRange }) => {
         const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
         updateSearch({
           end: dateRange.to,
@@ -313,7 +314,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           id,
           isInvalid: false,
           isQuickSelection,
-          query,
           setTablesActivePageToZero,
           start: dateRange.from,
           updateTime: true,

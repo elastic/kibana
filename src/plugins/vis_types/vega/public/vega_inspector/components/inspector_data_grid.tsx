@@ -19,12 +19,12 @@ interface InspectorDataGridProps extends VegaRuntimeData {
 export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: InspectorDataGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
-    (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
+    (pageSize: any) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
     [setPagination]
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    (pageIndex: any) => setPagination((p) => ({ ...p, pageIndex })),
     [setPagination]
   );
 
