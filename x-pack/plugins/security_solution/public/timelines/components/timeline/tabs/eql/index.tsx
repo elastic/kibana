@@ -76,6 +76,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   start,
   timerangeKind,
+  pinnedEventIds,
+  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
@@ -200,6 +202,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 isTextBasedQuery={false}
                 pageInfo={pageInfo}
                 leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+                pinnedEventIds={pinnedEventIds}
+                eventIdToNoteIds={eventIdToNoteIds}
               />
             </ScrollableFlexItem>
           </FullWidthFlexGroup>
@@ -298,8 +302,16 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const { activeTab, columns, eqlOptions, expandedDetail, itemsPerPage, itemsPerPageOptions } =
-      timeline;
+    const {
+      activeTab,
+      columns,
+      eqlOptions,
+      expandedDetail,
+      itemsPerPage,
+      itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
+    } = timeline;
 
     return {
       activeTab,
@@ -311,6 +323,8 @@ const makeMapStateToProps = () => {
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
       showExpandedDetails:
         !!expandedDetail[TimelineTabs.eql] && !!expandedDetail[TimelineTabs.eql]?.panelView,
 
@@ -343,6 +357,8 @@ const EqlTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )
 );
