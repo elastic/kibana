@@ -149,7 +149,11 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
   return (
     <Fragment>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+        className="remote-cluster-privilege-form"
+      >
         <EuiFlexItem>
           <EuiPanel color="subdued">
             <EuiFlexGroup>
@@ -165,7 +169,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                   {...validator.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege)}
                 >
                   <EuiComboBox
-                    data-test-subj={`clustersInput${formIndex}`}
+                    data-test-subj={`remoteClusterClustersInput${formIndex}`}
                     options={remoteClusterOptions}
                     selectedOptions={(remoteClusterPrivilege.clusters ?? []).map(toOption)}
                     onCreateOption={onCreateClusterOption}
@@ -193,7 +197,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                   )}
                 >
                   <EuiComboBox
-                    data-test-subj={`privilegesInput${formIndex}`}
+                    data-test-subj={`remoteClusterPrivilegesInput${formIndex}`}
                     options={availableRemoteClusterPrivileges.map(toOption)}
                     selectedOptions={remoteClusterPrivilege.privileges.map(toOption)}
                     onChange={onPrivilegeChange}
