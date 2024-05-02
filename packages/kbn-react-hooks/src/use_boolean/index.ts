@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { useBoolean } from './use_boolean';
+export * from './use_boolean';
