@@ -126,7 +126,9 @@ const CustomGridRow = styled.div.attrs<{
 }))`
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
-
+  . euiDataGridRowCell--controlColumn {
+    height: 40px;
+  }
   .udt--customRow {
     border-radius: 0;
     padding: ${(props) => (props.theme as EuiTheme).eui.euiDataGridCellPaddingM};
@@ -149,6 +151,13 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   display: flex;
   align-items: center;
   height: 36px;
+  .euiDataGridRowCell,
+  .euiDataGridRowCell__content {
+    height: 100%;
+    .unifiedDataTable__rowControl {
+      margin-top: 0;
+    }
+  }
 `;
 
 type CustomTimelineDataGridSingleRowProps = {
