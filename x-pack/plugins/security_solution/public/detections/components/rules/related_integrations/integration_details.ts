@@ -8,10 +8,7 @@
 import { capitalize } from 'lodash';
 import semver from 'semver';
 
-import type {
-  InstalledIntegration,
-  InstalledIntegrationArray,
-} from '../../../../../common/api/detection_engine/fleet_integrations';
+import type { Integration } from '../../../../../common/api/detection_engine/fleet_integrations';
 import type {
   RelatedIntegration,
   RelatedIntegrationArray,
@@ -42,57 +39,60 @@ export interface UnknownInstallationStatus {
 }
 
 /**
- * Given an array of integrations and an array of installed integrations this will return an
- * array of integrations augmented with install details like targetVersion, and `version_satisfied`
+ * Given an array of integrations and an array of all known integrations this will return an
+ * array of integrations augmented with details like targetVersion, and `version_satisfied`
  * has.
  */
 export const calculateIntegrationDetails = (
   relatedIntegrations: RelatedIntegrationArray,
-  installedIntegrations: InstalledIntegrationArray | undefined
+  knownIntegrations: Integration[] | undefined
 ): IntegrationDetails[] => {
-  const integrationMatches = findIntegrationMatches(relatedIntegrations, installedIntegrations);
-  const integrationDetails = integrationMatches.map((integration) => {
-    return createIntegrationDetails(integration);
-  });
+  const integrationMatches = findIntegrationMatches(relatedIntegrations, knownIntegrations);
+  const integrationDetails = integrationMatches.map((integration) =>
+    createIntegrationDetails(integration)
+  );
 
-  return integrationDetails.sort((a, b) => {
-    return a.integrationTitle.localeCompare(b.integrationTitle);
-  });
+  return integrationDetails.sort((a, b) => a.integrationTitle.localeCompare(b.integrationTitle));
 };
 
 interface IntegrationMatch {
   related: RelatedIntegration;
-  installed: InstalledIntegration | null;
+  found?: Integration;
   isLoaded: boolean;
 }
 
 const findIntegrationMatches = (
   relatedIntegrations: RelatedIntegrationArray,
-  installedIntegrations: InstalledIntegrationArray | undefined
+  integrations: Integration[] | undefined
 ): IntegrationMatch[] => {
+  const integrationsMap = new Map(
+    (integrations ?? []).map((integration) => [
+      `${integration.package_name}${integration.integration_name ?? ''}`,
+      integration,
+    ])
+  );
+
   return relatedIntegrations.map((ri: RelatedIntegration) => {
-    if (installedIntegrations == null) {
+    const key = `${ri.package}${ri.integration ?? ''}`;
+    const matchIntegration = integrationsMap.get(key);
+
+    if (!matchIntegration) {
       return {
         related: ri,
-        installed: null,
         isLoaded: false,
       };
-    } else {
-      const match = installedIntegrations.find(
-        (ii: InstalledIntegration) =>
-          ii.package_name === ri.package && ii?.integration_name === ri?.integration
-      );
-      return {
-        related: ri,
-        installed: match ?? null,
-        isLoaded: true,
-      };
     }
+
+    return {
+      related: ri,
+      found: matchIntegration,
+      isLoaded: true,
+    };
   });
 };
 
 const createIntegrationDetails = (integration: IntegrationMatch): IntegrationDetails => {
-  const { related, installed, isLoaded } = integration;
+  const { related, found, isLoaded } = integration;
 
   const packageName = related.package;
   const integrationName = related.integration ?? null;
@@ -117,8 +117,7 @@ const createIntegrationDetails = (integration: IntegrationMatch): IntegrationDet
     };
   }
 
-  // We know that the integration is not installed
-  if (installed == null) {
+  if (!found) {
     const integrationTitle = getCapitalizedTitle(packageName, integrationName);
     const targetVersion = getMinimumConcreteVersionMatchingSemver(requiredVersion);
     const targetUrl = buildTargetUrl(packageName, integrationName, targetVersion);
@@ -140,35 +139,34 @@ const createIntegrationDetails = (integration: IntegrationMatch): IntegrationDet
     };
   }
 
-  // We know that the integration is installed
-  {
-    const integrationTitle = installed.integration_title ?? installed.package_title;
-
-    // Version check e.g. installed version `1.2.3` satisfies required version `~1.2.1`
-    const installedVersion = installed.package_version;
-    const isVersionSatisfied = semver.satisfies(installedVersion, requiredVersion);
-    const targetVersion = isVersionSatisfied
+  const integrationTitle = found.integration_title ?? found.package_title;
+  // Version check e.g. installed version `1.2.3` satisfies required version `~1.2.1`
+  const installedVersion = found.installed_package_version ?? '';
+  const isVersionSatisfied = installedVersion
+    ? semver.satisfies(installedVersion, requiredVersion, { includePrerelease: true })
+    : true;
+  const targetVersion =
+    installedVersion && isVersionSatisfied
       ? installedVersion
       : getMinimumConcreteVersionMatchingSemver(requiredVersion);
 
-    const targetUrl = buildTargetUrl(packageName, integrationName, targetVersion);
+  const targetUrl = buildTargetUrl(packageName, integrationName, targetVersion);
 
-    return {
-      packageName,
-      integrationName,
-      integrationTitle,
-      requiredVersion,
-      targetVersion,
-      targetUrl,
-      installationStatus: {
-        isKnown: true,
-        isInstalled: true,
-        isEnabled: installed.is_enabled,
-        isVersionMismatch: !isVersionSatisfied,
-        installedVersion,
-      },
-    };
-  }
+  return {
+    packageName,
+    integrationName,
+    integrationTitle,
+    requiredVersion,
+    targetVersion,
+    targetUrl,
+    installationStatus: {
+      isKnown: true,
+      isInstalled: found.is_installed,
+      isEnabled: found.is_enabled,
+      isVersionMismatch: !isVersionSatisfied,
+      installedVersion,
+    },
+  };
 };
 
 const getCapitalizedTitle = (packageName: string, integrationName: string | null): string => {

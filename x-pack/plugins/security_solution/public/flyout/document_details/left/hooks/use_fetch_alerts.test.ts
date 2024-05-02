@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../services/find_alerts');
@@ -29,11 +28,6 @@ describe('useFetchAlerts', () => {
   });
 
   it('fetches alerts and handles loading state', async () => {
-    const queryClient = new QueryClient();
-    const wrapper = ({ children }: { children: React.ReactChild }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-
     jest
       .mocked(createFindAlerts)
       .mockReturnValue(
@@ -47,7 +41,9 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), { wrapper });
+    const { result, waitFor } = renderHook(() => useFetchAlerts(params), {
+      wrapper: createReactQueryWrapper(),
+    });
 
     expect(result.current.loading).toBe(true);
 
@@ -60,11 +56,6 @@ describe('useFetchAlerts', () => {
   });
 
   it('handles error state', async () => {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: React.ReactChild }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-
     // hide console error due to the line after
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -79,7 +70,9 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), { wrapper });
+    const { result, waitFor } = renderHook(() => useFetchAlerts(params), {
+      wrapper: createReactQueryWrapper(),
+    });
 
     expect(result.current.loading).toBe(true);
 
