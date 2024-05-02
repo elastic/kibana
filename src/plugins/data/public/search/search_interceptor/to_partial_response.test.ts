@@ -143,7 +143,7 @@ describe('toPartialResponseAfterTimeout', () => {
       id: 'FmZBc2NuYlhsU1JxSk5LZXNRczVxdEEed3l6LUVycTVTVGl1LWtDSVdta2VkQToxODUzODUx',
       rawResponse: {
         took: 4414,
-        timed_out: false,
+        timed_out: true,
         terminated_early: false,
         num_reduce_phases: 2,
         _shards: {
