@@ -428,6 +428,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           properties: {},
         },
         secret_references: { properties: { id: { type: 'keyword' } } },
+        overrides: { type: 'flattened', index: false },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
@@ -510,6 +511,16 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           {
             type: 'data_backfill',
             backfillFn: migratePackagePolicyAddAntivirusRegistrationModeToV8140,
+          },
+        ],
+      },
+      '9': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              overrides: { type: 'flattened', index: false },
+            },
           },
         ],
       },

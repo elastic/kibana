@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
 import {
   useSavedSearch,
