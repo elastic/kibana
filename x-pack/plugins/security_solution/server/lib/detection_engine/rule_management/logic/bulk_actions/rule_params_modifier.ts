@@ -78,7 +78,7 @@ const hasInvestigationFields = (
   );
 
 // Check if the investigation fields to be deleted don't exist in the rule
-const hasNotInvestigationFields = (
+const hasNoInvestigationFields = (
   investigationFields: InvestigationFieldsCombined | undefined,
   action: BulkActionEditPayloadInvestigationFields
 ) =>
@@ -100,7 +100,7 @@ const shouldSkipInvestigationFieldsBulkAction = (
   }
 
   if (action.type === BulkActionEditTypeEnum.delete_investigation_fields) {
-    return hasNotInvestigationFields(investigationFields, action);
+    return hasNoInvestigationFields(investigationFields, action);
   }
 
   return false;
