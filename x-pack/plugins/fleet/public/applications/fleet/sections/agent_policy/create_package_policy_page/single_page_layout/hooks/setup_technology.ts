@@ -20,7 +20,8 @@ export const useAgentlessPolicy = () => {
   const isServerless = !!cloud?.isServerlessEnabled;
 
   const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
-  const isAgentlessPolicyId = (id: string) => isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
+  const isAgentlessPolicyId = (id: string | undefined) =>
+    isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
 
   return {
     isAgentlessEnabled,

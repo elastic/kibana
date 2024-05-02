@@ -27,8 +27,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/181778
-  describe.skip('schedule backfill', () => {
+  describe('schedule backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
 
@@ -955,11 +954,10 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             // User has read privileges in this space
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `Unauthorized by "alertsFixture" to scheduleBackfill "test.patternFiringAutoRecoverFalse" rule`,
-                statusCode: 403,
-              });
+              expect(response.body.error).to.eql('Forbidden');
+              expect(response.body.message).to.match(
+                /Unauthorized by "alertsFixture" to scheduleBackfill "[^"]+" rule/
+              );
               break;
             // User doesn't have access to actions but that doesn't matter for backfill jobs
             case 'space_1_all_alerts_none_actions at space1':

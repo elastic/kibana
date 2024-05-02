@@ -120,12 +120,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout for event type documents
    */
-  expandableEventFlyoutEnabled: false,
+  expandableEventFlyoutEnabled: true,
 
   /**
    * Enables expandable flyout in timeline
    */
-  expandableTimelineFlyoutEnabled: false,
+  expandableTimelineFlyoutEnabled: true,
   /*
 
   /**
@@ -260,7 +260,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new modal for the value list items
    */
-  valueListItemsModalEnabled: false,
+  valueListItemsModalEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

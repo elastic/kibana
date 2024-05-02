@@ -19,6 +19,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
@@ -295,7 +296,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
           confirmModalLabels: updatedValidationResult.extraWarning
-            ? CONFIRM_WARNING_MODAL_LABELS
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
             : undefined,
         });
       },
