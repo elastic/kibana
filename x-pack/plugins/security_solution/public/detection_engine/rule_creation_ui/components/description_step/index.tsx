@@ -49,6 +49,7 @@ import {
   buildHighlightedFieldsOverrideDescription,
   buildSetupDescription,
   getQueryLabel,
+  buildIntervalDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -342,6 +343,8 @@ export const getDescriptionItem = (
     return get('isBuildingBlock', data)
       ? [{ title: i18n.BUILDING_BLOCK_LABEL, description: i18n.BUILDING_BLOCK_DESCRIPTION }]
       : [];
+  } else if (['interval', 'from'].includes(field)) {
+    return buildIntervalDescription(label, get(field, data));
   }
 
   const description: string = get(field, data);
