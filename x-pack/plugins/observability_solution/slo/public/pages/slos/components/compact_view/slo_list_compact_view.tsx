@@ -80,7 +80,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const queryClient = useQueryClient();
 
   const { mutate: deleteSlo } = useDeleteSlo();
-  const { mutateAsync: resetSlo } = useResetSlo();
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
@@ -488,6 +488,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           slo={sloToReset}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
     </>

@@ -45,7 +45,7 @@ export function SloListItem({
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
-  const { mutateAsync: resetSlo } = useResetSlo();
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { sloDetailsUrl } = useSloFormattedSummary(slo);
 
   const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
@@ -141,6 +141,7 @@ export function SloListItem({
           slo={slo}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
     </EuiPanel>

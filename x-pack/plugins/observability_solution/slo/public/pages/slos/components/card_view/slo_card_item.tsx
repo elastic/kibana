@@ -91,7 +91,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       setIsAddRuleFlyoutOpen,
     });
 
-  const { mutateAsync: resetSlo } = useResetSlo();
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const handleResetConfirm = async () => {
     await resetSlo({ id: slo.id, name: slo.name });
@@ -178,6 +178,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
           slo={slo}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
 

@@ -57,7 +57,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
 
   const { mutate: deleteSlo } = useDeleteSlo();
-  const { mutateAsync: resetSlo } = useResetSlo();
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: slo ? [slo.id] : undefined,
@@ -86,7 +86,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl } = useSloActions({
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -135,7 +135,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleReset = () => {
-    setResetConfirmationModalOpen(true);
+    if (!!remoteResetUrl) {
+      window.open(remoteResetUrl, '_blank');
+    } else {
+      setResetConfirmationModalOpen(true);
+    }
   };
 
   const handleResetConfirm = async () => {
@@ -338,6 +342,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           slo={slo}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
     </>
