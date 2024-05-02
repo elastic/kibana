@@ -86,6 +86,7 @@
     "@kbn/presentation-publishing",
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons"
+    "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": ["target/**/*"]
 }

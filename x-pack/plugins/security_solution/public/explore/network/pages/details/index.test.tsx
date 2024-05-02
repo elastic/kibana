@@ -8,8 +8,6 @@
 import React from 'react';
 import { Router, useParams } from 'react-router-dom';
 
-import '../../../../common/mock/match_media';
-
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TestProviders } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';

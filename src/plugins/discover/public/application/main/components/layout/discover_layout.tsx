@@ -71,6 +71,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     filterManager,
     history,
     spaces,
+    observabilityAIAssistant,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -131,6 +132,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     columns,
     sort,
   });
+
+  // The assistant is getting the state from the url correctly
+  // expect from the index pattern where we have only the dataview id
+  useEffect(() => {
+    return observabilityAIAssistant?.service.setScreenContext({
+      screenDescription: `The user is looking at the Discover view on the ${
+        isPlainRecord ? 'ES|QL' : 'dataView'
+      } mode. The index pattern is the ${dataView.getIndexPattern()}`,
+    });
+  }, [dataView, isPlainRecord, observabilityAIAssistant?.service]);
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {

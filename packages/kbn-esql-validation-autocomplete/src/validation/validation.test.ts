@@ -2455,6 +2455,58 @@ describe('validation logic', () => {
       }
       testErrorsAndWarnings(`row a = 1 | stats COUNT(*) | sort \`COUNT(*)\``, []);
       testErrorsAndWarnings(`ROW a = 1 | STATS couNt(*) | SORT \`couNt(*)\``, []);
+
+      describe('sorting by expressions', () => {
+        // SORT accepts complex expressions
+        testErrorsAndWarnings(
+          'from a_index | sort abs(numberField) - to_long(stringField) desc nulls first',
+          []
+        );
+
+        // SORT doesn't accept agg or grouping functions
+        for (const definition of [
+          ...statsAggregationFunctionDefinitions,
+          ...groupingFunctionDefinitions,
+        ]) {
+          const {
+            name,
+            signatures: [firstSignature],
+          } = definition;
+          const fieldMapping = getFieldMapping(firstSignature.params);
+          const printedInvocation = getFunctionSignatures(
+            { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+            { withTypes: false }
+          )[0].declaration;
+
+          testErrorsAndWarnings(`from a_index | sort ${printedInvocation}`, [
+            `SORT does not support function ${name}`,
+          ]);
+        }
+
+        // But does accept eval functions
+        for (const definition of evalFunctionsDefinitions) {
+          const {
+            signatures: [firstSignature],
+          } = definition;
+          const fieldMapping = getFieldMapping(firstSignature.params);
+          const printedInvocation = getFunctionSignatures(
+            { ...definition, signatures: [{ ...firstSignature, params: fieldMapping }] },
+            { withTypes: false }
+          )[0].declaration;
+
+          testErrorsAndWarnings(`from a_index | sort ${printedInvocation}`, []);
+        }
+
+        // Expression parts are also validated
+        testErrorsAndWarnings('from a_index | sort sin(stringField)', [
+          'Argument of [sin] must be [number], found value [stringField] type [string]',
+        ]);
+
+        // Expression parts are also validated
+        testErrorsAndWarnings('from a_index | sort numberField + stringField', [
+          'Argument of [+] must be [number], found value [stringField] type [string]',
+        ]);
+      });
     });
 
     describe('enrich', () => {
