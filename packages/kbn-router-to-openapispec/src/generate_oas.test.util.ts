@@ -99,7 +99,7 @@ const getVersionedRouterDefaults = () => ({
             [200]: {
               body: () =>
                 schema.object(
-                  { fooResponse: schema.string() },
+                  { fooResponseWithDescription: schema.string() },
                   { meta: { description: 'fooResponse' } }
                 ),
             },
