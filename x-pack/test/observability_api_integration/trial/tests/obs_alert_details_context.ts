@@ -453,7 +453,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
             );
         });
 
-      await apmSynthtraceClient.index(events);
+      return apmSynthtraceClient.index(events);
     }
 
     function ingestLogs(eventMetadata: {
