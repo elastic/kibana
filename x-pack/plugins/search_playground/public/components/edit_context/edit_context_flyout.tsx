@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -28,15 +28,18 @@ import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../common/doc_links';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface EditContextFlyoutProps {
   onClose: () => void;
 }
 
 export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
+  const usageTracker = useUsageTracker();
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);
@@ -64,13 +67,23 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
     });
+    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
+    usageTracker.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
+  const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
+    setDocSize(Number(e.target.value));
+  };
+
+  useEffect(() => {
+    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
+  }, [usageTracker]);
 
   return (
     <EuiFlyout ownFocus onClose={onClose} size="s">
@@ -130,7 +143,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                     },
                   ]}
                   value={docSize}
-                  onChange={(e) => setDocSize(Number(e.target.value))}
+                  onChange={handleDocSizeChange}
                 />
               </EuiFlexItem>
               <EuiText>
