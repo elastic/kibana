@@ -23,11 +23,16 @@ export interface UseFetchHistoricalSummaryResponse {
 export interface Params {
   sloList: SLOWithSummaryResponse[];
   shouldRefetch?: boolean;
+  range?: {
+    from: string;
+    to: string;
+  };
 }
 
 export function useFetchHistoricalSummary({
   sloList = [],
   shouldRefetch,
+  range,
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
@@ -40,6 +45,7 @@ export function useFetchHistoricalSummary({
     revision: slo.revision,
     objective: slo.objective,
     budgetingMethod: slo.budgetingMethod,
+    range,
   }));
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({

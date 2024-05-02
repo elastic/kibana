@@ -439,7 +439,7 @@ describe('Cookie based SessionStorage', () => {
         await server.preboot(prebootDeps);
         const { server: innerServer } = await server.setup(setupDeps);
 
-        expect(
+        await expect(
           createCookieSessionStorageFactory(logger.get(), innerServer, {
             ...cookieOptions,
             sameSite: 'None',

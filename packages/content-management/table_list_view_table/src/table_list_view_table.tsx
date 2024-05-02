@@ -65,6 +65,7 @@ export interface TableListViewTableProps<
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   urlStateEnabled?: boolean;
+  createdByEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -140,6 +141,9 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
     field: SortColumnField;
     direction: Direction;
   };
+  tableFilter: {
+    createdBy: string[];
+  };
 }
 
 export interface URLState {
@@ -147,6 +151,9 @@ export interface URLState {
   sort?: {
     field: SortColumnField;
     direction: Direction;
+  };
+  filter?: {
+    createdBy?: string[];
   };
 
   [key: string]: unknown;
@@ -157,6 +164,7 @@ interface URLQueryParams {
   title?: string;
   sort?: string;
   sortdir?: string;
+  created_by?: string[];
 
   [key: string]: unknown;
 }
@@ -195,6 +203,16 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   }
 
+  if (sanitizedParams.created_by) {
+    stateFromURL.filter = {
+      createdBy: Array.isArray(sanitizedParams.created_by)
+        ? sanitizedParams.created_by
+        : [sanitizedParams.created_by],
+    };
+  } else {
+    stateFromURL.filter = { createdBy: [] };
+  }
+
   return stateFromURL;
 };
 
@@ -207,6 +225,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
+  filter?: { createdBy?: string[] };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -223,6 +242,10 @@ const urlStateSerializer = (updated: {
   if (typeof updatedQueryParams.s === 'string' && updatedQueryParams.s.trim() === '') {
     updatedQueryParams.s = undefined;
     updatedQueryParams.title = undefined;
+  }
+
+  if (updated.filter?.createdBy) {
+    updatedQueryParams.created_by = updated.filter.createdBy;
   }
 
   return updatedQueryParams;
@@ -264,6 +287,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
+  createdByEnabled = false,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -345,6 +369,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         field: 'attributes.title' as const,
         direction: 'asc',
       },
+      tableFilter: {
+        createdBy: [],
+      },
     }),
     [initialPageSize]
   );
@@ -365,6 +392,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasUpdatedAtMetadata,
     pagination,
     tableSort,
+    tableFilter,
   } = state;
 
   const showFetchError = Boolean(fetchError);
@@ -700,13 +728,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     [updateQuery, buildQueryFromText]
   );
 
-  const updateTableSortAndPagination = useCallback(
+  const updateTableSortFilterAndPagination = useCallback(
     (data: {
       sort?: State<T>['tableSort'];
       page?: {
         pageIndex: number;
         pageSize: number;
       };
+      filter?: Partial<State<T>['tableFilter']>;
     }) => {
       if (data.sort && urlStateEnabled) {
         setUrlState({
@@ -714,6 +743,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             field: data.sort.field === 'attributes.title' ? 'title' : data.sort.field,
             direction: data.sort.direction,
           },
+        });
+      }
+
+      if (data.filter && urlStateEnabled) {
+        setUrlState({
+          filter: data.filter,
         });
       }
 
@@ -729,14 +764,23 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const onSortChange = useCallback(
     (field: SortColumnField, direction: Direction) => {
-      updateTableSortAndPagination({
+      updateTableSortFilterAndPagination({
         sort: {
           field,
           direction,
         },
       });
     },
-    [updateTableSortAndPagination]
+    [updateTableSortFilterAndPagination]
+  );
+
+  const onFilterChange = useCallback(
+    (filter: Partial<State['tableFilter']>) => {
+      updateTableSortFilterAndPagination({
+        filter,
+      });
+    },
+    [updateTableSortFilterAndPagination]
   );
 
   const onTableChange = useCallback(
@@ -770,9 +814,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageSize: criteria.page.size,
       };
 
-      updateTableSortAndPagination(data);
+      updateTableSortFilterAndPagination(data);
     },
-    [updateTableSortAndPagination]
+    [updateTableSortFilterAndPagination]
   );
 
   const deleteSelectedItems = useCallback(async () => {
@@ -911,8 +955,24 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
+    const updateFilterFromURL = (filter?: URLState['filter']) => {
+      if (!filter) {
+        return;
+      }
+
+      dispatch({
+        type: 'onTableChange',
+        data: {
+          filter: {
+            createdBy: filter.createdBy ?? [],
+          },
+        },
+      });
+    };
+
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
+    updateFilterFromURL(urlState.filter);
   }, [urlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
@@ -996,6 +1056,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
+          tableFilter={tableFilter}
           tableItemsRowActions={tableItemsRowActions}
           pagination={pagination}
           selectedIds={selectedIds}
@@ -1007,9 +1068,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           onTableChange={onTableChange}
           onTableSearchChange={onTableSearchChange}
           onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
+          createdByEnabled={createdByEnabled}
         />
 
         {/* Delete modal */}
