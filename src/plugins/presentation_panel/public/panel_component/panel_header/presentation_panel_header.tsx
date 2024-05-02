@@ -12,9 +12,9 @@ import classNames from 'classnames';
 import React from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { PresentationPanelContextMenu } from './presentation_panel_context_menu';
+// import { PresentationPanelContextMenu } from './presentation_panel_context_menu';
 import { PresentationPanelTitle } from './presentation_panel_title';
-import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
+// import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
 export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
   api: ApiType;
