@@ -59,6 +59,8 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
     });
     await savedMap.whenReady();
 
+    // eslint bug, eslint thinks api is never reassigned even though it is
+    // eslint-disable-next-line prefer-const
     let api: MapApi | undefined;
     const getApi = () => api;
     let renderTooltipContent: RenderToolTipContent | undefined;
