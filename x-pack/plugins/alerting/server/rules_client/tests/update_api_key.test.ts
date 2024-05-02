@@ -287,7 +287,7 @@ describe('updateApiKey()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    expect(
+    await expect(
       async () => await rulesClient.updateApiKey({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating API key for rule: could not create API key - no"`
