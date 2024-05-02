@@ -21,3 +21,4 @@ export * from './delete_instance';
 export * from './fetch_historical_summary';
 export * from './put_settings';
 export * from './get_suggestions';
+export * from './get_slo_health';

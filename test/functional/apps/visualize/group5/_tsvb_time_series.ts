@@ -145,7 +145,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(actualCountMin).to.be('3 hours');
         });
 
-        describe('Dark mode', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/182136
+        describe.skip('Dark mode', () => {
           before(async () => {
             await kibanaServer.uiSettings.update({
               'theme:darkMode': true,
