@@ -7,14 +7,18 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { first } from 'rxjs/operators';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, first } from 'rxjs';
 import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 import { MapApi, MapSerializedState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+
+function getLayers(layerList: LayerDescriptor[]) {
+  const basemapLayer = createBasemapLayerDescriptor();
+  return basemapLayer ? [basemapLayer, ...layerList] : layerList;
+}
 
 export interface Props {
   title?: string;
@@ -37,16 +41,13 @@ export function MapRenderer(props: Props) {
   const isMounted = useMountedState();
   const mapApiRef = useRef<MapApi | undefined>(undefined);
   const beforeApiReadyLayerListRef = useRef<LayerDescriptor[] | undefined>(undefined);
-  function getLayers() {
-    const basemapLayer = createBasemapLayerDescriptor();
-    return basemapLayer ? [basemapLayer, ...props.layerList] : props.layerList;
-  }
+
   const initialState = useMemo(() => {
     return {
       rawState: {
         attributes: {
           title: props.title ?? '',
-          layerListJSON: JSON.stringify(getLayers()),
+          layerListJSON: JSON.stringify(getLayers(props.layerList)),
         },
         hidePanelTitles: !Boolean(props.title),
         isLayerTOCOpen: typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
@@ -63,13 +64,12 @@ export function MapRenderer(props: Props) {
   }, []);
 
   useEffect(() => {
-    console.log('layerList update', mapApiRef.current);
     if (mapApiRef.current) {
-      mapApiRef.current.setLayerList(getLayers());
+      mapApiRef.current.setLayerList(getLayers(props.layerList));
     } else {
-      beforeApiReadyLayerListRef.current = getLayers();
+      beforeApiReadyLayerListRef.current = getLayers(props.layerList);
     }
-  }, [mapApiRef.current, props.layerList]);
+  }, [props.layerList]);
 
   const parentApi = useMemo(() => {
     return {

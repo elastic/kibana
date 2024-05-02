@@ -81,11 +81,6 @@ export async function renderApp(
     const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
-    console.log('embeddableId', embeddableId);
-    console.log('originatingApp', originatingApp);
-    console.log('valueInput', valueInput);
-    console.log('originatingPath', originatingPath);
-
     let mapSerializedState: MapSerializedState | undefined;
     if (routeProps.match.params.savedMapId) {
       mapSerializedState = {

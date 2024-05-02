@@ -11,7 +11,11 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { getUnchangingComparator, initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
+import {
+  getUnchangingComparator,
+  initializeTimeRange,
+  initializeTitles,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
@@ -42,7 +46,6 @@ export function getControlledBy(id: string) {
 export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   deserializeState: (state) => {
-    console.log(state);
     return state.rawState
       ? (inject(
           state.rawState as EmbeddableStateWithType,
@@ -146,11 +149,11 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
         ...timeRange.comparators,
         ...title.titleComparators,
         ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-          enhancements: getUnchangingComparator()
+          enhancements: getUnchangingComparator(),
         }),
         ...crossPanelActions.comparators,
         ...reduxSync.comparators,
-        // readonly state
+        // readonly comparators
         attributes: getUnchangingComparator(),
         isSharable: getUnchangingComparator(),
         mapBuffer: getUnchangingComparator(),
