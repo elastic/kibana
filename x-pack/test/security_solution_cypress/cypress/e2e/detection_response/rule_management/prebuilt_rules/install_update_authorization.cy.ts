@@ -66,7 +66,8 @@ const loginPageAsWriteAuthorizedUser = (url: string) => {
 };
 
 // https://github.com/elastic/kibana/issues/179965
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/182485
+describe.skip(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
