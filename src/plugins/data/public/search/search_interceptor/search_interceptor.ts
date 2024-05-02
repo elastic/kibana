@@ -532,9 +532,6 @@ export class SearchInterceptor {
         );
 
         return response$.pipe(
-          tap((res) => {
-            void res;
-          }),
           takeUntil(aborted$),
           catchError((e) => {
             return throwError(
