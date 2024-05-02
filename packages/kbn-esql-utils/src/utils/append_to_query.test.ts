@@ -122,7 +122,7 @@ and \`dest\`=="Crete"`
           '-',
           'string'
         )
-      ).toBe(`from logstash-* | where \`country\` != "GR"`);
+      ).toBe(`from logstash-* | where \`country\`!= "GR"`);
     });
 
     it('appends an and clause in an existing query with where command as the last pipe if the filter preexists but the operator is not the correct one', () => {
