@@ -19,8 +19,6 @@ const findTestUtils = (
   supertest: SuperTest<Test>,
   supertestWithoutAuth: any
 ) => {
-  // Failing: See https://github.com/elastic/kibana/issues/182263
-  // Failing: See https://github.com/elastic/kibana/issues/182284
   describe.skip(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
@@ -653,7 +651,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182263
+  // Failing: See https://github.com/elastic/kibana/issues/182284
+  describe.skip('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
