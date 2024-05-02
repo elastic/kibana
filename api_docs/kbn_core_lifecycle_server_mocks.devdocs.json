@@ -184,7 +184,9 @@
               "IExecutionContext",
               ">; coreUsageData: jest.Mocked<",
               "InternalCoreUsageDataSetup",
-              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }; security: jest.Mocked<",
+              ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: jest.Mocked<",
+              "InternalUserSettingsServiceSetup",
+              ">; security: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-security-server",
                 "scope": "common",
