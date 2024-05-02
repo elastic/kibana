@@ -108,13 +108,7 @@
             "text": "ElasticRequestState"
           },
           ", ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.DataTableRecord",
-            "text": "DataTableRecord"
-          },
+          "DataTableRecord",
           " | null, () => void]"
         ],
         "path": "src/plugins/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
