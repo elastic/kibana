@@ -10,6 +10,7 @@ import { isOfAggregateQueryType, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortArray } from '../../../../utils/sorting';
+import { DiscoverAppState } from '../discover_app_state_container';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
@@ -24,7 +25,7 @@ export function getDataViewAppState(
   modifyColumns: boolean = true,
   sortDirection: string = 'desc',
   query?: Query | AggregateQuery
-) {
+): Partial<DiscoverAppState> {
   let columns = currentColumns || [];
 
   if (modifyColumns) {
@@ -66,7 +67,7 @@ export function getDataViewAppState(
   }
 
   return {
-    index: nextDataView.id,
+    dataSource: nextDataView.id ? { type: 'dataView', dataViewId: nextDataView.id } : undefined,
     columns,
     sort: nextSort,
   };

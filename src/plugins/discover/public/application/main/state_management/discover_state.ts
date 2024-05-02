@@ -313,7 +313,9 @@ export function getDiscoverStateContainer({
     });
 
     internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
-    await appStateContainer.replaceUrlState({ index: newDataView.id });
+    await appStateContainer.replaceUrlState({
+      dataSource: newDataView.id ? { type: 'dataView', dataViewId: newDataView.id } : undefined,
+    });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
     services.urlTracker.setTrackingEnabled(trackingEnabled);
 
@@ -583,7 +585,7 @@ function createUrlGeneratorState({
   const dataView = getSavedSearch().searchSource.getField('index');
   return {
     filters: data.query.filterManager.getFilters(),
-    dataViewId: appState.index,
+    dataViewId: dataView?.id,
     query: appState.query,
     savedSearchId: getSavedSearch().id,
     timeRange: shouldRestoreSearchSession

@@ -97,7 +97,7 @@ const mountComponent = async ({
     .getState()
     .searchSource.getField('index') as DataView;
   stateContainer.appState.update({
-    index: dataView?.id!,
+    dataSource: { type: 'dataView', dataViewId: dataView.id! },
     interval: 'auto',
     hideChart,
     columns: [],

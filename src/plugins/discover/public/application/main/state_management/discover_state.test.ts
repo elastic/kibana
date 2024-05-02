@@ -23,7 +23,7 @@ import {
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverAppStateContainer, DiscoverDataSource } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
@@ -102,7 +102,9 @@ describe('Test discover state', () => {
     stopSync = () => {};
   });
   test('setting app state and syncing to URL', async () => {
-    state.appState.update({ index: 'modified' });
+    state.appState.update({
+      dataSource: { type: 'dataView', dataViewId: 'modified' },
+    });
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
@@ -126,16 +128,22 @@ describe('Test discover state', () => {
   });
 
   test('isAppStateDirty returns  whether the current state has changed', async () => {
-    state.appState.update({ index: 'modified' });
+    state.appState.update({
+      dataSource: { type: 'dataView', dataViewId: 'modified' },
+    });
     expect(state.appState.hasChanged()).toBeTruthy();
     state.appState.resetInitialState();
     expect(state.appState.hasChanged()).toBeFalsy();
   });
 
   test('getPreviousAppState returns the state before the current', async () => {
-    state.appState.update({ index: 'first' });
+    state.appState.update({
+      dataSource: { type: 'dataView', dataViewId: 'first' },
+    });
     const stateA = state.appState.getState();
-    state.appState.update({ index: 'second' });
+    state.appState.update({
+      dataSource: { type: 'dataView', dataViewId: 'second' },
+    });
     expect(state.appState.getPrevious()).toEqual(stateA);
   });
 
@@ -189,7 +197,9 @@ describe('Test discover state with overridden state storage', () => {
   });
 
   test('setting app state and syncing to URL', async () => {
-    state.appState.update({ index: 'modified' });
+    state.appState.update({
+      dataSource: { type: 'dataView', dataViewId: 'modified' },
+    });
 
     await jest.runAllTimersAsync();
 
@@ -263,7 +273,10 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
     customizationContext: mockCustomizationContext,
   });
   discoverStateContainer.appState.update({
-    index: savedSearchMock.searchSource.getField('index')!.id,
+    dataSource: {
+      type: 'dataView',
+      dataViewId: savedSearchMock.searchSource.getField('index')!.id!,
+    },
   });
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
@@ -644,7 +657,9 @@ describe('Test discover state actions', () => {
 
     state.savedSearchState.load = jest.fn().mockReturnValue(savedSearchMockWithTimeField);
     // unsetting the previous index else this is considered as update to the persisted saved search
-    state.appState.set({ index: undefined });
+    state.appState.set({
+      dataSource: undefined,
+    });
     await state.actions.loadSavedSearch({ savedSearchId: 'the-saved-search-id-with-timefield' });
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
       'index-pattern-with-timefield-id'
@@ -711,7 +726,10 @@ describe('Test discover state actions', () => {
     const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
     const { state } = await getState('/', { savedSearch: savedSearchAdHocCopy });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchAdHoc.id });
-    expect(state.appState.getState().index).toBe(adHocDataViewId);
+    expect(
+      (state.appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+        .dataViewId
+    ).toBe(adHocDataViewId);
     expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
   });
 
@@ -747,7 +765,10 @@ describe('Test discover state actions', () => {
 
     // test changed state, fetch should be called once and URL should be updated
     expect(dataState.fetch).toHaveBeenCalledTimes(1);
-    expect(appState.get().index).toBe(dataViewComplexMock.id);
+    expect(
+      (state.appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+        .dataViewId
+    ).toBe(dataViewComplexMock.id);
     expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
     );
@@ -763,7 +784,10 @@ describe('Test discover state actions', () => {
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id);
     });
-    expect(state.appState.get().index).toBe(dataViewComplexMock.id);
+    expect(
+      (state.appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+        .dataViewId
+    ).toBe(dataViewComplexMock.id);
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
     );
@@ -777,7 +801,10 @@ describe('Test discover state actions', () => {
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).toBe(dataViewAdHoc.id);
     });
-    expect(state.appState.get().index).toBe(dataViewAdHoc.id);
+    expect(
+      (state.appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+        .dataViewId
+    ).toBe(dataViewAdHoc.id);
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewAdHoc.id
     );
@@ -838,7 +865,10 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
-    expect(state.appState.getState().index).toBe('ad-hoc-id');
+    expect(
+      (state.appState.getState().dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+        .dataViewId
+    ).toBe('ad-hoc-id');
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });
@@ -925,7 +955,9 @@ describe('Test discover state with embedded mode', () => {
   });
 
   test('setting app state and syncing to URL', async () => {
-    state.appState.update({ index: 'modified' });
+    state.appState.update({
+      dataSource: { type: 'dataView', dataViewId: 'modified' },
+    });
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`

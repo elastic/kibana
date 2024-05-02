@@ -13,6 +13,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import { savedSearchMock, savedSearchMockWithESQL } from '../../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { DiscoverDataSource } from '../discover_app_state_container';
 
 describe('getStateDefaults', () => {
   test('data view with timefield', () => {
@@ -108,7 +109,14 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-    expect(actualForTextBasedWithValidViewMode.index).toBe(undefined);
+    expect(
+      (
+        actualForTextBasedWithValidViewMode.dataSource as Extract<
+          DiscoverDataSource,
+          { type: 'dataView' }
+        >
+      ).dataViewId
+    ).toBe(undefined);
 
     const actualForWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -118,8 +126,9 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
-    expect(actualForWithValidViewMode.index).toBe(
-      savedSearchMock.searchSource.getField('index')?.id
-    );
+    expect(
+      (actualForWithValidViewMode.dataSource as Extract<DiscoverDataSource, { type: 'dataView' }>)
+        .dataViewId
+    ).toBe(savedSearchMock.searchSource.getField('index')?.id);
   });
 });

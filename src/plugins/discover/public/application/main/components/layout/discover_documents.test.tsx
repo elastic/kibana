@@ -39,7 +39,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({ index: dataViewMock.id });
+  stateContainer.appState.update({
+    dataSource: { type: 'dataView', dataViewId: dataViewMock.id! },
+  });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {

@@ -58,11 +58,23 @@ export const loadSavedSearch = async (
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 
   // Loading the saved search or creating a new one
-  let nextSavedSearch = savedSearchId
-    ? await savedSearchContainer.load(savedSearchId)
-    : await savedSearchContainer.new(
-        await getStateDataView(params, { services, appState, internalStateContainer })
-      );
+  let nextSavedSearch: SavedSearch;
+
+  if (savedSearchId) {
+    nextSavedSearch = await savedSearchContainer.load(savedSearchId);
+  } else {
+    const dataViewId =
+      appState?.dataSource?.type === 'dataView' ? appState.dataSource.dataViewId : undefined;
+
+    nextSavedSearch = await savedSearchContainer.new(
+      await getStateDataView(params, {
+        dataViewId,
+        query: appState?.query,
+        services,
+        internalStateContainer,
+      })
+    );
+  }
 
   // Cleaning up the previous state
   services.filterManager.setAppFilters([]);
@@ -86,14 +98,15 @@ export const loadSavedSearch = async (
 
   // Update saved search by a given app state (in URL)
   if (appState) {
-    if (savedSearchId && appState.index) {
+    if (savedSearchId && appState.dataSource?.type === 'dataView') {
       // This is for the case appState is overwriting the loaded saved search data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
       const stateDataView = await getStateDataView(params, {
-        services,
-        appState,
-        internalStateContainer,
+        dataViewId: appState.dataSource.dataViewId,
+        query: appState.query,
         savedSearch: nextSavedSearch,
+        services,
+        internalStateContainer,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
@@ -175,35 +188,39 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
 const getStateDataView = async (
   params: LoadParams,
   {
+    dataViewId,
+    query,
     savedSearch,
-    appState,
     services,
     internalStateContainer,
   }: {
+    dataViewId?: string;
+    query: DiscoverAppState['query'];
     savedSearch?: SavedSearch;
-    appState?: DiscoverAppState;
     services: DiscoverServices;
     internalStateContainer: DiscoverInternalStateContainer;
   }
 ) => {
-  const { dataView, dataViewSpec } = params ?? {};
+  const { dataView, dataViewSpec } = params;
+  const isTextBased = isTextBasedQuery(query);
+
   if (dataView) {
     return dataView;
   }
-  const query = appState?.query;
 
-  if (isTextBasedQuery(query)) {
+  if (isTextBased) {
     return await getDataViewByTextBasedQueryLang(query, dataView, services);
   }
 
   const result = await loadAndResolveDataView(
     {
-      id: appState?.index,
+      id: dataViewId,
       dataViewSpec,
       savedSearch,
-      isTextBasedQuery: isTextBasedQuery(appState?.query),
+      isTextBasedQuery: isTextBased,
     },
     { services, internalStateContainer }
   );
+
   return result.dataView;
 };

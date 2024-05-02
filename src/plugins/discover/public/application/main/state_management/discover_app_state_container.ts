@@ -82,6 +82,11 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
+export type DiscoverDataSource =
+  | { type: 'esql' }
+  | { type: 'dataView'; dataViewId: string }
+  | { type: 'savedSearch'; savedSearchId: string };
+
 export interface DiscoverAppState {
   /**
    * Columns displayed in the table
@@ -99,10 +104,7 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
-  /**
-   * id of the used data view
-   */
-  index?: string;
+  dataSource?: DiscoverDataSource;
   /**
    * Used interval of the histogram
    */
@@ -220,13 +222,21 @@ export const getDiscoverAppStateContainer = ({
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
+
     const { data } = services;
     const dataView = currentSavedSearch.searchSource.getField('index');
+    const appState = appStateContainer.getState();
 
-    if (appStateContainer.getState().index !== dataView?.id) {
+    if (
+      appState.dataSource?.type !== 'dataView' ||
+      appState.dataSource.dataViewId !== dataView?.id
+    ) {
       // used data view is different from the given by url/state which is invalid
-      setState(appStateContainer, { index: dataView?.id });
+      setState(appStateContainer, {
+        dataSource: dataView?.id ? { type: 'dataView', dataViewId: dataView.id } : undefined,
+      });
     }
+
     // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
@@ -244,6 +254,7 @@ export const getDiscoverAppStateContainer = ({
     );
 
     const { start, stop } = startAppStateUrlSync();
+
     // current state need to be pushed to url
     replaceUrlState({}).then(() => start());
 
@@ -291,6 +302,10 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
    * Necessary to take care of legacy links [fieldName,direction]
    */
   sort?: string[][] | [string, string];
+  /**
+   * Legacy data view ID prop
+   */
+  index?: string;
 }
 
 export function getInitialState(
@@ -298,17 +313,17 @@ export function getInitialState(
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
-  const stateStorageURL = stateStorage?.get(APP_STATE_URL_KEY) as AppStateUrl;
+  const appStateFromUrl = stateStorage?.get<AppStateUrl>(APP_STATE_URL_KEY);
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
   });
   return handleSourceColumnState(
-    stateStorageURL === null
+    appStateFromUrl == null
       ? defaultAppState
       : {
           ...defaultAppState,
-          ...cleanupUrlState(stateStorageURL, services.uiSettings),
+          ...cleanupUrlState(appStateFromUrl, services.uiSettings),
         },
     services.uiSettings
   );
@@ -353,7 +368,7 @@ export function isEqualFilters(
 export function isEqualState(
   stateA: DiscoverAppState,
   stateB: DiscoverAppState,
-  exclude: string[] = []
+  exclude: Array<keyof DiscoverAppState> = []
 ) {
   if (!stateA && !stateB) {
     return true;
@@ -361,8 +376,8 @@ export function isEqualState(
     return false;
   }
 
-  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude);
-  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude);
+  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude as string[]);
+  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude as string[]);
 
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }

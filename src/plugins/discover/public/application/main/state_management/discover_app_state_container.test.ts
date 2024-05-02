@@ -40,16 +40,22 @@ describe('Test discover app state container', () => {
   });
 
   test('hasChanged returns whether the current state has changed', async () => {
-    state.set({ index: 'modified' });
+    state.set({
+      dataSource: { type: 'dataView', dataViewId: 'modified' },
+    });
     expect(state.hasChanged()).toBeTruthy();
     state.resetInitialState();
     expect(state.hasChanged()).toBeFalsy();
   });
 
   test('getPrevious returns the state before the current', async () => {
-    state.set({ index: 'first' });
+    state.set({
+      dataSource: { type: 'dataView', dataViewId: 'first' },
+    });
     const stateA = state.getState();
-    state.set({ index: 'second' });
+    state.set({
+      dataSource: { type: 'dataView', dataViewId: 'second' },
+    });
     expect(state.getPrevious()).toEqual(stateA);
   });
 
@@ -219,7 +225,7 @@ describe('Test discover app state container', () => {
     });
     test('allows to exclude variables from comparison', () => {
       expect(
-        isEqualState(initialState, { ...initialState, index: undefined }, ['index'])
+        isEqualState(initialState, { ...initialState, dataSource: undefined }, ['dataSource'])
       ).toBeTruthy();
     });
   });
