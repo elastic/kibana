@@ -425,7 +425,7 @@ describe('migration actions', () => {
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(redStatusResponse.status).toBe('red');
 
-      client.indices.putSettings({
+      void client.indices.putSettings({
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
@@ -574,7 +574,7 @@ describe('migration actions', () => {
 
       let indexGreen = false;
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'clone_red_then_green_index',
           body: {
             // Enable all shard allocation so that the index status goes green
@@ -1844,7 +1844,7 @@ describe('migration actions', () => {
       let indexYellow = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'red_then_yellow_index',
           body: {
             // Renable allocation so that the status becomes yellow
@@ -1897,7 +1897,7 @@ describe('migration actions', () => {
       let indexGreen = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'yellow_then_green_index',
           body: {
             // Set 0 replican so that this index becomes green

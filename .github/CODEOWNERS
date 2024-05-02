@@ -51,7 +51,8 @@ packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
-x-pack/plugins/asset_manager @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/asset_manager @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/assets_data_access @elastic/obs-knowledge-team
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
@@ -555,7 +556,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
-x-pack/plugins/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/cancellable_search @elastic/ml-ui
@@ -1347,8 +1348,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution_ess/ @elastic/security-solution
 /x-pack/plugins/security_solution_serverless/ @elastic/security-solution
 
-# AI Assistant in Security Solution
+# GenAI in Security Solution
 /x-pack/plugins/security_solution/public/assistant @elastic/security-generative-ai
+/x-pack/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 
 # Security Solution cross teams ownership
