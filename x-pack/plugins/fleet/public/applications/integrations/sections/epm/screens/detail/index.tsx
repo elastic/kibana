@@ -32,6 +32,7 @@ import {
   getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
+  packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
@@ -265,6 +266,9 @@ export function Detail() {
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
+
+  // Only show config tab if package has `inputs`
+  const showConfigTab = packageInfo ? packageToPackagePolicyInputs(packageInfo).length > 0 : false;
 
   // Track install status state
   useEffect(() => {
@@ -637,7 +641,7 @@ export function Detail() {
       });
     }
 
-    if (canReadPackageSettings) {
+    if (canReadPackageSettings && showConfigTab) {
       tabs.push({
         id: 'configs',
         name: (
@@ -698,11 +702,12 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
-    numOfDeferredInstallations,
     isInstalled,
     CustomAssets,
     canReadPackageSettings,
+    showConfigTab,
     showCustomTab,
+    numOfDeferredInstallations,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (
