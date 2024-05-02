@@ -462,7 +462,7 @@ export interface RuleAddProps<
    * - The feature needs to be registered using `featuresPluginSetup.registerKibanaFeature()` API during your plugin's setup phase.
    * - The user needs to have permission to access the feature in order to create the rule.
    * */
-  consumer: string;
+  consumer: string[];
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;

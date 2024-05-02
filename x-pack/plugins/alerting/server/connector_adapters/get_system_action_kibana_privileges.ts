@@ -10,7 +10,7 @@ import { ConnectorAdapterRegistry } from './connector_adapter_registry';
 
 interface Args {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
-  rule: { consumer: string };
+  rule: { consumer: string[] };
   systemActions?: RuleSystemAction[];
 }
 
@@ -22,7 +22,7 @@ export const getSystemActionKibanaPrivileges = ({
   const kibanaPrivileges = systemActions
     .filter((action) => connectorAdapterRegistry.has(action.actionTypeId))
     .map((action) => connectorAdapterRegistry.get(action.actionTypeId))
-    .map((adapter) => adapter.getKibanaPrivileges?.({ consumer: rule.consumer }) ?? [])
+    .map((adapter) => adapter.getKibanaPrivileges?.({ consumer: rule.consumer[0] }) ?? []) // this wrong! temporary fix
     .flat();
 
   return Array.from(new Set(kibanaPrivileges));

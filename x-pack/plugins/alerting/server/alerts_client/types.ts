@@ -39,7 +39,7 @@ import type { PublicAlertFactory } from '../alert/create_alert_factory';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
-  consumer: string;
+  consumer: string[];
   executionId: string;
   id: string;
   name: string;
@@ -52,7 +52,7 @@ export interface AlertRuleData {
 
 export interface AlertRule {
   [ALERT_RULE_CATEGORY]: string;
-  [ALERT_RULE_CONSUMER]: string;
+  [ALERT_RULE_CONSUMER]: string[];
   [ALERT_RULE_EXECUTION_UUID]: string;
   [ALERT_RULE_NAME]: string;
   [ALERT_RULE_PARAMETERS]: unknown;

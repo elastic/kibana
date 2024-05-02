@@ -475,7 +475,7 @@ export interface RawRule extends SavedObjectAttributes {
   name: string;
   tags: string[];
   alertTypeId: string; // this cannot be renamed since it is in the saved object
-  consumer: string;
+  consumer: string[];
   legacyId: string | null;
   schedule: IntervalSchedule;
   actions: RawRuleAction[];

@@ -132,7 +132,7 @@ export interface SavedObjectOptions {
 
 export interface ScheduleTaskOptions {
   id: string;
-  consumer: string;
+  consumer: string[];
   ruleTypeId: string;
   schedule: IntervalSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them

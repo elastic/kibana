@@ -37,7 +37,7 @@ export const createRuleDataSchema = schema.object({
   name: schema.string(),
   alertTypeId: schema.string(),
   enabled: schema.boolean({ defaultValue: true }),
-  consumer: schema.string(),
+  consumer: schema.arrayOf(schema.string()),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),

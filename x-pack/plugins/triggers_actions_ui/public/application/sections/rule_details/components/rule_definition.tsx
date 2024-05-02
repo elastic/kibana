@@ -94,7 +94,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
       return ruleTypeRegistry.get(rule.ruleTypeId).description;
     }
     // TODO: Replace this generic description with proper SIEM rule descriptions
-    if (rule.consumer === AlertConsumers.SIEM) {
+    if (rule.consumer.includes(AlertConsumers.SIEM)) {
       return i18n.translate('xpack.triggersActionsUI.ruleDetails.securityDetectionRule', {
         defaultMessage: 'Security detection rule',
       });

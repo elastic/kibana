@@ -162,7 +162,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   name: string;
   tags: string[];
   alertTypeId: string; // this is persisted in the Rule saved object so we would need a migration to change this to ruleTypeId
-  consumer: string;
+  consumer: string[];
   schedule: IntervalSchedule;
   actions: RuleAction[];
   systemActions?: RuleSystemAction[];

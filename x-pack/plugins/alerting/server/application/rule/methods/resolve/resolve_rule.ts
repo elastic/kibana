@@ -87,7 +87,7 @@ Promise<ResolvedSanitizedRule<Params>> {
   }
 
   // format legacy actions for SIEM rules
-  if (result.attributes.consumer === AlertConsumers.SIEM) {
+  if (result.attributes.consumer.includes(AlertConsumers.SIEM)) {
     // @ts-expect-error formatLegacyActions uses common Rule type instead of server; wontfix as this function is deprecated
     const [migratedRule] = await formatLegacyActions([rule], {
       savedObjectsClient: context.unsecuredSavedObjectsClient,

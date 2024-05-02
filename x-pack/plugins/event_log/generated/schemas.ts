@@ -145,7 +145,7 @@ export const EventSchema = schema.maybe(
             uuid: ecsString(),
             rule: schema.maybe(
               schema.object({
-                consumer: ecsString(),
+                consumer: ecsStringMulti(),
                 execution: schema.maybe(
                   schema.object({
                     uuid: ecsString(),

@@ -92,7 +92,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     try {
       const scheduledTask = await scheduleTask(context, {
         id: createdAlert.id,
-        consumer: rawRule.consumer,
+        consumer: Array.isArray(rawRule.consumer) ? rawRule.consumer : [rawRule.consumer],
         ruleTypeId: rawRule.alertTypeId,
         schedule: rawRule.schedule,
         throwOnConflict: true,

@@ -193,7 +193,7 @@ export const ruleResponseSchema = schema.object({
   name: schema.string(),
   tags: schema.arrayOf(schema.string()),
   rule_type_id: schema.string(),
-  consumer: schema.string(),
+  consumer: schema.arrayOf(schema.string()),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
   params: ruleParamsSchema,

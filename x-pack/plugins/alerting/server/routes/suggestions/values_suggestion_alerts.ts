@@ -83,7 +83,7 @@ export function registerAlertsValueSuggestionsRoute(
           );
           authorizedRuleType = await authorization.getAuthorizedRuleTypes(
             AlertingAuthorizationEntity.Alert,
-            VALID_FEATURE_IDS
+            { featureIds: VALID_FEATURE_IDS }
           );
         } catch (error) {
           rulesClient.getAuditLogger()?.log(

@@ -76,7 +76,11 @@ import {
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
+import {
+  hasAllPrivilege,
+  hasAllPrivilegeForSomeConsumer,
+  hasShowActionsCapability,
+} from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
@@ -122,8 +126,9 @@ const authorizedToDisplayRuleType = ({
     // And an array of valid consumers are passed in, we will show it
     // if the rule type has at least one of the consumers as authorized
     if (Array.isArray(validConsumers)) {
-      return validConsumers.some((consumer) => hasAllPrivilege(consumer, ruleType));
+      return hasAllPrivilegeForSomeConsumer(validConsumers, ruleType);
     }
+
     // If no array was passed in, then we will show it if at least one of its
     // authorized consumers allows it to be shown.
     return Object.entries(ruleType.authorizedConsumers).some(([_, privilege]) => {
@@ -149,13 +154,13 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   canShowConsumerSelection?: boolean;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  setConsumer?: (consumer: RuleCreationValidConsumer | null) => void;
+  setConsumer?: (consumer: RuleCreationValidConsumer[] | null) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   hideGrouping?: boolean;
   hideInterval?: boolean;
   connectorFeatureId?: string;
-  selectedConsumer?: RuleCreationValidConsumer | null;
+  selectedConsumer?: RuleCreationValidConsumer[] | null;
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
@@ -263,9 +268,9 @@ export const RuleForm = ({
           })
         )
         .filter((item) =>
-          rule.consumer === ALERTING_FEATURE_ID
+          rule.consumer.includes(ALERTING_FEATURE_ID)
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
+            : rule.consumer.includes(item.ruleType!.producer)
         );
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
@@ -430,7 +435,7 @@ export const RuleForm = ({
     if (ruleTypeModel) {
       const ruleType = ruleTypes.find((rt) => rt.id === ruleTypeModel.id);
       if (ruleType && useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
-        setConsumer(ruleType.producer as RuleCreationValidConsumer);
+        setConsumer([ruleType.producer] as RuleCreationValidConsumer[]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -439,7 +444,7 @@ export const RuleForm = ({
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTING_FEATURE_ID) {
+    if (!rule.consumer.includes(ALERTING_FEATURE_ID)) {
       return [];
     }
 
@@ -602,7 +607,7 @@ export const RuleForm = ({
                   }
 
                   if (useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(item.id)) {
-                    setConsumer(solution as RuleCreationValidConsumer);
+                    setConsumer([solution] as RuleCreationValidConsumer[]);
                   }
                 }}
               />
@@ -674,7 +679,7 @@ export const RuleForm = ({
 
     if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
       // Use selectedConsumer when creating a new rule, existing rule consumer when editing
-      const ruleConsumer = initialSelectedConsumer ? selectedConsumer : rule.consumer;
+      const ruleConsumer = initialSelectedConsumer ? selectedConsumer : rule.consumer[0]; // This is wrong
       return (
         (validConsumers || VALID_CONSUMERS).includes(ruleConsumer as RuleCreationValidConsumer) &&
         hasAlertHasData
@@ -888,22 +893,25 @@ export const RuleForm = ({
               }}
             />
           </EuiFormRow>
+          {shouldShowConsumerSelect && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                data-test-subj="consumerSelectionFormRow"
+                display="rowCompressed"
+              >
+                <RuleFormConsumerSelection
+                  consumers={authorizedConsumers}
+                  onChange={setConsumer}
+                  errors={errors}
+                  selectedConsumers={selectedConsumer}
+                />
+              </EuiFormRow>
+            </>
+          )}
         </EuiAccordion>
       </EuiFlexItem>
-      {shouldShowConsumerSelect && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexItem>
-            <RuleFormConsumerSelection
-              consumers={authorizedConsumers}
-              onChange={setConsumer}
-              errors={errors}
-              selectedConsumer={selectedConsumer}
-              initialSelectedConsumer={initialSelectedConsumer}
-            />
-          </EuiFlexItem>
-        </>
-      )}
       <EuiSpacer size="l" />
       {canShowActions &&
       defaultActionGroupId &&
@@ -929,7 +937,9 @@ export const RuleForm = ({
             featureId={connectorFeatureId}
             producerId={
               MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
-                ? selectedConsumer ?? rule.consumer
+                ? // TODO
+                  // ? selectedConsumer ?? rule.consumer
+                  rule.consumer[0]
                 : selectedRuleType.producer
             }
             hasFieldsForAAD={hasFieldsForAAD}

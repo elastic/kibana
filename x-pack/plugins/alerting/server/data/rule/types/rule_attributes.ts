@@ -152,7 +152,7 @@ export interface RuleAttributes {
   tags: string[];
   enabled: boolean;
   alertTypeId: string;
-  consumer: string;
+  consumer: string[];
   legacyId: string | null;
   schedule: IntervaleScheduleAttributes;
   actions: RuleActionAttributes[];

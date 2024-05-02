@@ -66,7 +66,7 @@ export async function get<Params extends RuleTypeParams = never>(
   );
 
   // format legacy actions for SIEM rules
-  if (result.attributes.consumer === AlertConsumers.SIEM) {
+  if (result.attributes.consumer.includes(AlertConsumers.SIEM)) {
     const [migratedRule] = await formatLegacyActions([rule], {
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       logger: context.logger,

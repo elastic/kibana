@@ -11,6 +11,7 @@ import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
@@ -113,9 +114,8 @@ const RuleAdd = <
     [rule]
   );
   const [selectedConsumer, setSelectedConsumer] = useState<
-    RuleCreationValidConsumer | null | undefined
-  >(selectableConsumer ? initialSelectedConsumer : null);
-
+    RuleCreationValidConsumer[] | null | undefined
+  >(selectableConsumer && validConsumers && validConsumers.length > 0 ? validConsumers : null);
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -236,7 +236,7 @@ const RuleAdd = <
         {
           ...rule,
           ...(selectableConsumer && selectedConsumer !== undefined
-            ? { consumer: selectedConsumer }
+            ? { consumer: selectedConsumer ? selectedConsumer : null }
             : {}),
         } as Rule,
         ruleType,
@@ -255,7 +255,11 @@ const RuleAdd = <
         http,
         rule: {
           ...rule,
-          ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
+          ...(selectableConsumer && selectedConsumer
+            ? {
+                consumer: selectedConsumer.filter((c) => c !== AlertConsumers.OBSERVABILITY),
+              }
+            : {}),
         } as RuleUpdates,
       });
       toasts.addSuccess(

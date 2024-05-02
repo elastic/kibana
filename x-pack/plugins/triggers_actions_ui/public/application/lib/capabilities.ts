@@ -27,21 +27,30 @@ export function hasAllPrivilege(
   ruleConsumer: InitialRule['consumer'],
   ruleType?: RuleType
 ): boolean {
-  return ruleType?.authorizedConsumers[ruleConsumer]?.all ?? false;
+  const consumers = Array.isArray(ruleConsumer) ? ruleConsumer : [ruleConsumer];
+
+  return consumers.every((consumer) => ruleType?.authorizedConsumers[consumer]?.all ?? false);
+}
+
+export function hasAllPrivilegeForSomeConsumer(
+  ruleConsumer: InitialRule['consumer'],
+  ruleType?: RuleType
+): boolean {
+  return ruleConsumer.some((consumer) => ruleType?.authorizedConsumers[consumer]?.all ?? false);
 }
 
 export function hasAllPrivilegeWithProducerCheck(
   ruleConsumer: InitialRule['consumer'],
   ruleType?: RuleType
 ): boolean {
-  if (ruleConsumer === ruleType?.producer) {
+  if (ruleType?.producer && ruleConsumer.includes(ruleType?.producer)) {
     return true;
   }
   return hasAllPrivilege(ruleConsumer, ruleType);
 }
 
 export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
-  return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;
+  return rule.consumer.every((consumer) => ruleType?.authorizedConsumers[consumer]?.read ?? false);
 }
 
 export const hasManageApiKeysCapability = (capabilities: Capabilities) =>
