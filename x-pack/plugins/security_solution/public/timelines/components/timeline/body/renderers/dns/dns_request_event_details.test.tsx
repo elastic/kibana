@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockEndgameDnsRequest } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
