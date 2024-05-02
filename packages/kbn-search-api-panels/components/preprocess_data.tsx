@@ -37,7 +37,7 @@ export const PreprocessDataPanel: React.FC<{
     arrayHandling: string;
   };
 }> = ({ docLinks, images }) => {
-  const color = euiThemeVars.euiColorVis0_behindText;
+  const color = euiThemeVars.euiColorVis1_behindText;
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">
