@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
+            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
