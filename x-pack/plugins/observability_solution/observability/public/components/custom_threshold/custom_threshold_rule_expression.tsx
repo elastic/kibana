@@ -193,10 +193,8 @@ export default function Expressions(props: Props) {
       );
       setRuleParams('criteria', ruleCriteria);
       searchSource?.setParent(undefined).setDataView(newDataView);
-      setRuleParams(
-        'searchConfiguration',
-        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
-      );
+      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+
       setDataView(newDataView);
     },
     [ruleParams.criteria, searchSource, setRuleParams]

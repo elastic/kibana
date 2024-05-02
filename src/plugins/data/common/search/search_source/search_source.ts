@@ -734,7 +734,7 @@ export class SearchSource {
     typeof fld === 'string' ? fld : (fld.field as string);
 
   private getFieldsWithoutSourceFilters(
-    index: DataView | undefined,
+    index: DataViewLazy | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
