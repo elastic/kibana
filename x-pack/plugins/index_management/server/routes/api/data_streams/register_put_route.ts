@@ -10,6 +10,15 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
+/** HTTP Warning headers have the following syntax:
+ * <warn-code> <warn-agent> <warn-text> (where warn-code is a three-digit number)
+ * This function only returns the warn-text if it exists.
+ * */
+export const getEsWarningText = (warning: string): string | null => {
+  const match = warning.match(/\d{3} Elasticsearch-\w+ "(.*)"/);
+  return match ? match[1] : null;
+};
+
 export function registerPutDataRetention({ router, lib: { handleEsError } }: RouteDependencies) {
   const paramsSchema = schema.object({
     name: schema.string(),
@@ -51,7 +60,9 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
           return response.ok({
             body: {
               success: true,
-              ...(headers?.warning ? { warning: headers.warning } : {}),
+              ...(headers?.warning
+                ? { warning: getEsWarningText(headers.warning) ?? headers.warning }
+                : {}),
             },
           });
         }
