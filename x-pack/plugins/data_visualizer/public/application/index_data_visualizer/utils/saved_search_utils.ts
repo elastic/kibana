@@ -147,7 +147,7 @@ export function getEsQueryFromSavedSearch({
     if (savedSearchSource.getField('filter')) {
       // Rehydrate filter from saved search object into filter manager's store
       if (filterManager) {
-        filterManager.setFilters(savedSearchSource.getField('filter') as Filter[]);
+        filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
       }
     }
     const combinedQuery = buildEsQuery(
